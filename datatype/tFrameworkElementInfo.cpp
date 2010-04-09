@@ -1,0 +1,185 @@
+/**
+ * You received this file as part of an advanced experimental
+ * robotics framework prototype ('finroc')
+ *
+ * Copyright (C) 2007-2010 Max Reichardt,
+ *   Robotics Research Lab, University of Kaiserslautern
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+#include "core/datatype/tFrameworkElementInfo.h"
+#include "core/tRuntimeListener.h"
+#include "core/port/tAbstractPort.h"
+
+namespace finroc
+{
+namespace core
+{
+const int8 tFrameworkElementInfo::cPARENT_FLAGS_TO_STORE;
+
+tFrameworkElementInfo::tFrameworkElementInfo() :
+    links(),
+    link_count(0),
+    handle(0),
+    type(NULL),
+    flags(0),
+    strategy(0),
+    min_net_update_time(0),
+    op_code(0)
+{
+}
+
+void tFrameworkElementInfo::Deserialize(tCoreInput* is, tRemoteTypes& type_lookup)
+{
+  Reset();
+  op_code = is->ReadByte();
+
+  // read common info
+  handle = is->ReadInt();
+  flags = is->ReadInt();
+  bool port_only_client = is->ReadBoolean();
+
+  // read links
+  link_count = 0;
+  int8 next = 0;
+  if (op_code == tRuntimeListener::cADD)
+  {
+    while ((next = is->ReadByte()) != 0)
+    {
+      tLinkInfo* li = &(links[link_count]);
+      li->name = is->ReadString();
+      li->extra_flags = next & cPARENT_FLAGS_TO_STORE;
+      if (!port_only_client)
+      {
+        li->parent = is->ReadInt();
+      }
+      else
+      {
+        li->parent = 0;
+      }
+      link_count++;
+    }
+    assert((link_count > 0));
+  }
+
+  // possibly read port specific info
+  if ((flags & tCoreFlags::cIS_PORT) > 0)
+  {
+    type = type_lookup.GetLocalType(is->ReadShort());
+    strategy = is->ReadShort();
+    min_net_update_time = is->ReadShort();
+  }
+}
+
+util::tString tFrameworkElementInfo::GetOpCodeString() const
+{
+  switch (op_code)
+  {
+  case tRuntimeListener::cADD:
+    return "ADD";
+  case tRuntimeListener::cCHANGE:
+    return "CHANGE";
+  case tRuntimeListener::cREMOVE:
+    return "REMOVE";
+  default:
+    return "INVALID OPCODE";
+  }
+}
+
+void tFrameworkElementInfo::Reset()
+{
+  handle = 0;
+  type = NULL;
+  flags = 0;
+  strategy = 0;
+  min_net_update_time = 0;
+  link_count = 0;
+}
+
+void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, tCoreOutput* tp, tFrameworkElementTreeFilter element_filter, util::tStringBuilder& tmp)
+{
+  if (fe->GetFlag(tCoreFlags::cDELETED))
+  {
+    return;
+  }
+
+  tp->WriteByte(op_code_);  // write opcode (see base class)
+
+  {
+    util::tLock lock2(fe->obj_synch);
+
+    // write common info
+    tp->WriteInt(fe->GetHandle());
+    tp->WriteInt(fe->GetAllFlags());
+    int cnt = fe->GetLinkCount();
+    tp->WriteBoolean(element_filter.IsPortOnlyFilter());
+
+    // write links (only when creating element)
+    if (op_code_ == tRuntimeListener::cADD)
+    {
+      if (element_filter.IsPortOnlyFilter())
+      {
+        for (int i = 0; i < cnt; i++)
+        {
+          bool unique = fe->GetQualifiedLink(tmp, i);
+          tp->WriteByte(1 | (unique ? tCoreFlags::cGLOBALLY_UNIQUE_LINK : 0));
+          tp->WriteString(tmp.Substring(1));
+        }
+      }
+      else
+      {
+        for (int i = 0; i < cnt; i++)
+        {
+          // we only serialize parents that target is interested in
+          tFrameworkElement* parent = fe->GetParent(i);
+          if (element_filter.Accept(parent, tmp))
+          {
+            // serialize 1 for another link - ORed with CoreFlags for parent LINK_ROOT and GLOBALLY_UNIQUE
+            tp->WriteByte(1 | (parent->GetAllFlags() & cPARENT_FLAGS_TO_STORE));
+            fe->WriteDescription(tp, i);
+            tp->WriteInt(parent->GetHandle());
+          }
+        }
+      }
+      tp->WriteByte(0);
+    }
+
+    // possibly write port info
+    if (fe->IsPort())
+    {
+      tAbstractPort* port = static_cast<tAbstractPort*>(fe);
+
+      tp->WriteShort(port->GetDataType()->GetUid());
+      tp->WriteShort(port->GetStrategy());
+      tp->WriteShort(port->GetMinNetUpdateInterval());
+    }
+  }
+}
+
+const util::tString tFrameworkElementInfo::ToString() const
+{
+  if (link_count > 0)
+  {
+    return GetOpCodeString() + " " + links[0].name + " (" + handle + ") - parent: " + links[0].parent + " - flags: " + flags;
+  }
+  else
+  {
+    return GetOpCodeString() + " (" + handle + ") - flags: " + flags;
+  }
+}
+
+} // namespace finroc
+} // namespace core
+
