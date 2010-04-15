@@ -1,5 +1,5 @@
 /**
-J * You received this file as part of an advanced experimental
+ * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
  * Copyright (C) 2007-2010 Max Reichardt,
