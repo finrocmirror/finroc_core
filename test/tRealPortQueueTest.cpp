@@ -131,9 +131,13 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   util::tSystem::out.Println("\nAnd now for Concurrency :-)  ...");
 
   // connect to unlimited input
-  //input.disconnectAll();
   output->ConnectToTarget(unlimited_input);
   output->ConnectToTarget(unlimited_input2);
+
+  // remove values from initial push
+  unlimited_input->DequeueSingleAutoLocked();
+  unlimited_input2->DequeueSingleAutoLocked();
+  tThreadLocalCache::GetFast()->ReleaseAllLocks();
 
   // start writer threads
   ::std::tr1::shared_ptr<tRealPortQueueTest> thread1 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(true));
@@ -196,10 +200,10 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
       }
     }
 
-    //      if ((lastPosLimited == e || lastNegLimited == -e) && lastPosUnlimited == e /*&& lastNegUnlimited == -e*()*/) {
-    //        System.out.println("Yeah! Check Completed");
-    //        break;
-    //      }
+    //          if ((lastPosLimited == e || lastNegLimited == -e) && lastPosUnlimited == e /*&& lastNegUnlimited == -e*()*/) {
+    //              System.out.println("Yeah! Check Completed");
+    //              break;
+    //          }
 
     // Dequeue from unlimited queue (fragment-wise)
     //System.out.println("Iteratorion");
