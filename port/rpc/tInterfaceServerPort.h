@@ -61,6 +61,13 @@ public:
     SetCallHandler(ch);
   }
 
+  tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, tDataType* type, tAbstractMethodCallHandler* ch, int custom_flags, int lock_level) :
+      tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags, lock_level),
+      handler(NULL)
+  {
+    SetCallHandler(ch);
+  }
+
   /*!
    * \return Handler that will handle method calls
    */

@@ -163,7 +163,7 @@ public:
   //   * \return Local information list about shared ports
   //   */
   //  public SharedPorts getSharedPorts() {
-  //    return sharedPorts;
+  //      return sharedPorts;
   //  }
 
   /*!

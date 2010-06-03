@@ -20,38 +20,52 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/net/tAbstractPeerTracker.h"
+#include "core/tLockOrderLevels.h"
+#include "core/tRuntimeEnvironment.h"
 
 namespace finroc
 {
 namespace core
 {
 const int8 tAbstractPeerTracker::cDISCOVERED, tAbstractPeerTracker::cREMOVED;
-::std::tr1::shared_ptr<util::tSimpleList<tAbstractPeerTracker*> > tAbstractPeerTracker::instances(new util::tSimpleList<tAbstractPeerTracker*>());
+::std::tr1::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > tAbstractPeerTracker::instances(new util::tSimpleListWithMutex<tAbstractPeerTracker*>(tLockOrderLevels::cINNER_MOST - 1));
 
-tAbstractPeerTracker::tAbstractPeerTracker() :
+tAbstractPeerTracker::tAbstractPeerTracker(int lock_order) :
     instances_lock(instances),
     listeners(),
-    obj_synch()
+    obj_mutex(lock_order)
 {
   {
-    util::tLock lock2(instances->obj_synch);
+    util::tLock lock2(instances);
     instances->Add(this);
+  }
+}
+
+void tAbstractPeerTracker::AddListener(tListener* listener)
+{
+  // make sure: listener list can only be modified, while there aren't any other connection events being processed
+  {
+    util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+    {
+      util::tLock lock3(this);
+      listeners.Add(listener);
+    }
   }
 }
 
 tAbstractPeerTracker::~tAbstractPeerTracker()
 {
   {
-    util::tLock lock2(instances_lock->obj_synch);
+    util::tLock lock2(instances_lock);
     instances_lock->RemoveElem(this);
   }
 }
 
 void tAbstractPeerTracker::RegisterServer(const util::tString& network_name, const util::tString& name, int port)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   {
-    util::tLock lock2(instances->obj_synch);
+    util::tLock lock2(instances);
     for (size_t i = 0u; i < instances->Size(); i++)
     {
       instances->Get(i)->RegisterServerImpl(network_name, name, port);
@@ -59,11 +73,23 @@ void tAbstractPeerTracker::RegisterServer(const util::tString& network_name, con
   }
 }
 
+void tAbstractPeerTracker::RemoveListener(tListener* listener)
+{
+  // make sure: listener list can only be modified, while there aren't any other connection events being processed
+  {
+    util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+    {
+      util::tLock lock3(this);
+      listeners.Remove(listener);
+    }
+  }
+}
+
 void tAbstractPeerTracker::UnregisterServer(const util::tString& network_name, const util::tString& name)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   {
-    util::tLock lock2(instances->obj_synch);
+    util::tLock lock2(instances);
     for (size_t i = 0u; i < instances->Size(); i++)
     {
       instances->Get(i)->UnregisterServerImpl(network_name, name);
@@ -75,11 +101,11 @@ void tAbstractPeerTracker::tTrackerListenerManager::SingleNotify(tAbstractPeerTr
 {
   if (call_id == tAbstractPeerTracker::cDISCOVERED)
   {
-    listener->NodeDiscovered(origin, parameter);
+    listener->NodeDiscovered(*origin, *parameter);
   }
   else
   {
-    listener->NodeRemoved(origin, parameter);
+    listener->NodeRemoved(*origin, *parameter);
   }
 }
 

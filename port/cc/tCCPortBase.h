@@ -26,6 +26,7 @@
 
 #include "core/portdatabase/tDataType.h"
 #include "core/port/tAbstractPort.h"
+#include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/cc/tCCPortDataRef.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/cc/tCCPortQueue.h"
@@ -35,7 +36,6 @@
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/cc/tCCQueueFragment.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
 #include "finroc_core_utils/thread/sThreadUtil.h"
 #include "core/tRuntimeSettings.h"
 
@@ -60,6 +60,7 @@ class tCCPortBase : public tAbstractPort
   friend class tCCPort;
 
 protected:
+  /*implements Callable<PullCall>*/
 
   /*! Edges emerging from this port */
   tAbstractPort::tEdgeList<tCCPortBase*> edges_src;
@@ -67,8 +68,8 @@ protected:
   /*! Edges ending at this port */
   tAbstractPort::tEdgeList<tCCPortBase*> edges_dest;
 
-  /*! default value - invariant: must never be null if used */
-  tCCPortDataRef* default_value;
+  /*! default value - invariant: must never be null if used (must always be copied, too) */
+  tCCInterThreadContainer<>* default_value;
 
   /*!
    * current value (set by main thread) - invariant: must never be null - sinnvoll(?)
@@ -116,98 +117,95 @@ private:
   /*!
    * Set current value to default value
    */
-  inline void ApplyDefaultValue()
-  {
-    Publish(tThreadLocalCache::Get(), default_value->GetContainer());
-  }
+  void ApplyDefaultValue();
 
   // helper for direct member initialization in C++
-  inline static tCCPortDataContainer<>* CreateDefaultValue(tDataType* dt)
+  inline static tCCInterThreadContainer<>* CreateDefaultValue(tDataType* dt)
   {
-    return static_cast<tCCPortDataContainer<>*>(dt->CreateInstance());
+    return static_cast<tCCInterThreadContainer<>*>(dt->CreateInterThreadInstance());
   }
 
   //  protected void receive(@Ptr PortData data, @SizeT int dataRaw, @Ptr CCPortBase origin, @Ptr ThreadLocalCache tli) {
-  //    if (standardAssign) {
-  //      data.getManager().addReadLock();
-  //      tli.setLastWrittenToPort(handle, data);
+  //      if (standardAssign) {
+  //          data.getManager().addReadLock();
+  //          tli.setLastWrittenToPort(handle, data);
   //
-  //      // JavaOnlyBlock
-  //      value = data;
+  //          // JavaOnlyBlock
+  //          value = data;
   //
-  //       value = data_raw;
+  //           value = data_raw;
   //
-  //      changed = true;
-  //      notifyListeners();
-  //    } else {
-  //      nonStandardAssign(data, tli);
-  //    }
-  //
-  //    @Ptr ArrayWrapper<CCPortBase> dests = edgesSrc.getIterable();
-  //    for (int i = 0, n = dests.size(); i < n; i++) {
-  //      @Ptr CCPortBase pb = dests.get(i);
-  //      if (pb != null && (pb.flags | PortFlags.PUSH_STRATEGY) > 0) {
-  //        pb.receive(data, dataRaw, this, tli);
+  //          changed = true;
+  //          notifyListeners();
+  //      } else {
+  //          nonStandardAssign(data, tli);
   //      }
-  //    }
   //
-  //    dests = edgesDest.getIterable();
-  //    for (int i = 0, n = dests.size(); i < n; i++) {
-  //      @Ptr CCPortBase pb = dests.get(i);
-  //      if (pb != null && pb != origin && (pb.flags | PortFlags.PUSH_STRATEGY_REVERSE) > 0) {
-  //        pb.receiveReverse(data, dataRaw, tli);
+  //      @Ptr ArrayWrapper<CCPortBase> dests = edgesSrc.getIterable();
+  //      for (int i = 0, n = dests.size(); i < n; i++) {
+  //          @Ptr CCPortBase pb = dests.get(i);
+  //          if (pb != null && (pb.flags | PortFlags.PUSH_STRATEGY) > 0) {
+  //              pb.receive(data, dataRaw, this, tli);
+  //          }
   //      }
-  //    }
+  //
+  //      dests = edgesDest.getIterable();
+  //      for (int i = 0, n = dests.size(); i < n; i++) {
+  //          @Ptr CCPortBase pb = dests.get(i);
+  //          if (pb != null && pb != origin && (pb.flags | PortFlags.PUSH_STRATEGY_REVERSE) > 0) {
+  //              pb.receiveReverse(data, dataRaw, tli);
+  //          }
+  //      }
   //  }
   //
   //  protected void receiveAsOwner(@Ptr PortData data, @SizeT int dataRaw, @Ptr CCPortBase origin, @Ptr ThreadLocalCache tli) {
-  //    if (standardAssign) {
-  //      data.getManager().addOwnerLock();
-  //      tli.newLastWrittenToPortByOwner(handle, data);
+  //      if (standardAssign) {
+  //          data.getManager().addOwnerLock();
+  //          tli.newLastWrittenToPortByOwner(handle, data);
   //
-  //      // JavaOnlyBlock
-  //      value = data;
+  //          // JavaOnlyBlock
+  //          value = data;
   //
-  //       value = data_raw;
+  //           value = data_raw;
   //
-  //      changed = true;
-  //      notifyListeners();
-  //    } else {
-  //      nonStandardAssign(data, tli);
-  //    }
-  //
-  //    @Ptr ArrayWrapper<CCPortBase> dests = edgesSrc.getIterable();
-  //    for (int i = 0, n = dests.size(); i < n; i++) {
-  //      @Ptr CCPortBase pb = dests.get(i);
-  //      if (pb != null && (pb.flags | PortFlags.PUSH_STRATEGY) > 0) {
-  //        pb.receiveAsOwner(data, dataRaw, this, tli);
+  //          changed = true;
+  //          notifyListeners();
+  //      } else {
+  //          nonStandardAssign(data, tli);
   //      }
-  //    }
   //
-  //    dests = edgesDest.getIterable();
-  //    for (int i = 0, n = dests.size(); i < n; i++) {
-  //      CCPortBase pb = dests.get(i);
-  //      if (pb != null && pb != origin && (pb.flags | PortFlags.PUSH_STRATEGY_REVERSE) > 0) {
-  //        pb.receiveReverse(data, dataRaw, tli);
+  //      @Ptr ArrayWrapper<CCPortBase> dests = edgesSrc.getIterable();
+  //      for (int i = 0, n = dests.size(); i < n; i++) {
+  //          @Ptr CCPortBase pb = dests.get(i);
+  //          if (pb != null && (pb.flags | PortFlags.PUSH_STRATEGY) > 0) {
+  //              pb.receiveAsOwner(data, dataRaw, this, tli);
+  //          }
   //      }
-  //    }
+  //
+  //      dests = edgesDest.getIterable();
+  //      for (int i = 0, n = dests.size(); i < n; i++) {
+  //          CCPortBase pb = dests.get(i);
+  //          if (pb != null && pb != origin && (pb.flags | PortFlags.PUSH_STRATEGY_REVERSE) > 0) {
+  //              pb.receiveReverse(data, dataRaw, tli);
+  //          }
+  //      }
   //  }
   //
   //  private void receiveReverse(@Ptr PortData data, @SizeT int dataRaw, @Ptr ThreadLocalCache tli) {
-  //    if (standardAssign) {
-  //      data.getManager().addReadLock();
-  //      tli.setLastWrittenToPort(handle, data);
+  //      if (standardAssign) {
+  //          data.getManager().addReadLock();
+  //          tli.setLastWrittenToPort(handle, data);
   //
-  //      // JavaOnlyBlock
-  //      value = data;
+  //          // JavaOnlyBlock
+  //          value = data;
   //
-  //       value = data_raw;
+  //           value = data_raw;
   //
-  //      changed = true;
-  //      notifyListeners();
-  //    } else {
-  //      nonStandardAssign(data, tli);
-  //    }
+  //          changed = true;
+  //          notifyListeners();
+  //      } else {
+  //          nonStandardAssign(data, tli);
+  //      }
   //  }
   //
 
@@ -282,25 +280,25 @@ protected:
 
   //  @Override
   //  public TypedObject universalGetAutoLocked() {
-  //    CCPortDataRef val = value;
-  //    CCPortDataContainer<?> valC = val.getContainer();
-  //    if (valC.getOwnerThread() == ThreadUtil.getCurrentThreadId()) { // if same thread: simply add read lock
-  //      valC.addLock();
-  //      return valC;
-  //    }
-  //
-  //    // not the same thread: create auto-locked inter-thread container
-  //    ThreadLocalCache tc = ThreadLocalCache.get();
-  //    CCInterThreadContainer<?> ccitc = tc.getUnusedInterThreadBuffer(getDataType());
-  //    tc.addAutoLock(ccitc);
-  //    for(;;) {
-  //      ccitc.assign(valC.getDataPtr());
-  //      if (val == value) { // still valid??
-  //        return ccitc;
+  //      CCPortDataRef val = value;
+  //      CCPortDataContainer<?> valC = val.getContainer();
+  //      if (valC.getOwnerThread() == ThreadUtil.getCurrentThreadId()) { // if same thread: simply add read lock
+  //          valC.addLock();
+  //          return valC;
   //      }
-  //      val = value;
-  //      valC = val.getContainer();
-  //    }
+  //
+  //      // not the same thread: create auto-locked inter-thread container
+  //      ThreadLocalCache tc = ThreadLocalCache.get();
+  //      CCInterThreadContainer<?> ccitc = tc.getUnusedInterThreadBuffer(getDataType());
+  //      tc.addAutoLock(ccitc);
+  //      for(;;) {
+  //          ccitc.assign(valC.getDataPtr());
+  //          if (val == value) { // still valid??
+  //              return ccitc;
+  //          }
+  //          val = value;
+  //          valC = val.getContainer();
+  //      }
   //  }
 
   /*!
@@ -582,7 +580,7 @@ public:
   //   * \return Pulled locked data
   //   */
   //  public @Const CCPortDataContainer<?> getPullLockedUnsafeRaw(boolean intermediateAssign) {
-  //    return pullValueRaw(intermediateAssign);
+  //      return pullValueRaw(intermediateAssign);
   //  }
 
   /*!
@@ -638,9 +636,9 @@ public:
 
   //  @Override
   //  public void invokeCall(PullCall call) {
-  //    if (pullValueRaw(call, ThreadLocalCache.get())) {
-  //      SynchMethodCallLogic.handleMethodReturn(call);
-  //    }
+  //      if (pullValueRaw(call, ThreadLocalCache.get())) {
+  //          SynchMethodCallLogic.handleMethodReturn(call);
+  //      }
   //  }
   //
   //  /**
@@ -653,59 +651,59 @@ public:
   //   * \return already returning pulled value (in same thread)
   //   */
   //  @Virtual public boolean pullValueRaw(PullCall call, ThreadLocalCache tc) {
-  //    @Ptr ArrayWrapper<CCPortBase> sources = edgesDest.getIterable();
-  //    if (pullRequestHandler != null) {
-  //      call.data = tc.getUnusedInterThreadBuffer(getDataType());
-  //      call.setStatusReturn();
-  //      pullRequestHandler.pullRequest(this, call.data.getDataPtr());
-  //      call.setupThreadLocalCache();
-  //      assign(tc);
-  //    } else {
+  //      @Ptr ArrayWrapper<CCPortBase> sources = edgesDest.getIterable();
+  //      if (pullRequestHandler != null) {
+  //          call.data = tc.getUnusedInterThreadBuffer(getDataType());
+  //          call.setStatusReturn();
+  //          pullRequestHandler.pullRequest(this, call.data.getDataPtr());
+  //          call.setupThreadLocalCache();
+  //          assign(tc);
+  //      } else {
   //
-  //      // continue with next-best connected source port
-  //      for (@SizeT int i = 0, n = sources.size(); i < n; i++) {
-  //        CCPortBase pb = sources.get(i);
-  //        if (pb != null) {
-  //          call.pushCaller(this);
-  //          boolean returning = pb.pullValueRaw(call, tc);
-  //          if (returning) {
-  //            @CppUnused
-  //            int x = call.popCaller(); // we're already returning, so we can remove ourselves from caller stack again
-  //            assert(x == getHandle());
-  //            if (!value.getContainer().contentEquals(call.data.getDataPtr())) { // exploit thread for the calls he made anyway
-  //              call.setupThreadLocalCache();
-  //              assign(tc);
-  //            }
+  //          // continue with next-best connected source port
+  //          for (@SizeT int i = 0, n = sources.size(); i < n; i++) {
+  //              CCPortBase pb = sources.get(i);
+  //              if (pb != null) {
+  //                  call.pushCaller(this);
+  //                  boolean returning = pb.pullValueRaw(call, tc);
+  //                  if (returning) {
+  //                      @CppUnused
+  //                      int x = call.popCaller(); // we're already returning, so we can remove ourselves from caller stack again
+  //                      assert(x == getHandle());
+  //                      if (!value.getContainer().contentEquals(call.data.getDataPtr())) { // exploit thread for the calls he made anyway
+  //                          call.setupThreadLocalCache();
+  //                          assign(tc);
+  //                      }
+  //                  }
+  //                  if (call.getStatus() != AbstractCall.CONNECTION_EXCEPTION) {
+  //                      return returning;
+  //                  }
+  //              }
   //          }
-  //          if (call.getStatus() != AbstractCall.CONNECTION_EXCEPTION) {
-  //            return returning;
-  //          }
-  //        }
+  //
+  //          // no connected source port... pull current value
+  //          call.data = getInInterThreadContainer();
+  //          call.setStatusReturn();
   //      }
-  //
-  //      // no connected source port... pull current value
-  //      call.data = getInInterThreadContainer();
-  //      call.setStatusReturn();
-  //    }
-  //    return true;
+  //      return true;
   //  }
   //
   //  @Override
   //  public void handleCallReturn(AbstractCall call) {
-  //    assert(call.isReturning(true));
+  //      assert(call.isReturning(true));
   //
-  //    PullCall pc = (PullCall)call;
-  //    if (!value.getContainer().contentEquals(pc.data.getDataPtr())) {
-  //      pc.setupThreadLocalCache();
-  //      assign(pc.tc);
-  //    }
+  //      PullCall pc = (PullCall)call;
+  //      if (!value.getContainer().contentEquals(pc.data.getDataPtr())) {
+  //          pc.setupThreadLocalCache();
+  //          assign(pc.tc);
+  //      }
   //
-  //    // continue assignments
-  //    if (pc.callerStackSize() > 0) {
-  //      pc.returnToCaller();
-  //    } else {
-  //      SynchMethodCallLogic.handleMethodReturn(pc);
-  //    }
+  //      // continue assignments
+  //      if (pc.callerStackSize() > 0) {
+  //          pc.returnToCaller();
+  //      } else {
+  //          SynchMethodCallLogic.handleMethodReturn(pc);
+  //      }
   //  }
 
   /*!
@@ -715,6 +713,7 @@ public:
 
   /*!
    * Transfers data ownership to port after a thread has been deleted
+   * (Needs to be called with lock on ThreadLocalCache::infos)
    *
    * \param port_data_container port data container to transfer ownership of
    */

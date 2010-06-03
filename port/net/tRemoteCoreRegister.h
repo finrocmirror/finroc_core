@@ -45,6 +45,9 @@ public:
 
 public:
 
+  // for synchronization on an object of this class
+  mutable util::tMutex obj_mutex;
+
   /*!
    * First and second level block sizes
    * multiplied this must be CoreRegister.MAX_ELEMENTS
@@ -63,7 +66,28 @@ public:
   /*! Two-dimensional array [LEVEL_ONE_BLOCK][LEVEL_TWO_BLOCK] */
   util::tArrayWrapper<util::tArrayWrapper<T>*> elements;
 
+private:
+
+  /*!
+   * Wrapper for simpler java/c++ conversion
+   */
+  inline util::tArrayWrapper<T>* GetLvl2Element(int index)
+  {
+    return elements.Get(index);
+  }
+
+  /*!
+   * Wrapper for simpler java/c++ conversion
+   */
+  inline void SetLvl2Element(int index, util::tArrayWrapper<T>* elem)
+  {
+    elements.Set(index, elem);
+  }
+
+public:
+
   tRemoteCoreRegister() :
+      obj_mutex(),
       elements(cLEVEL_ONE_BLOCK_SIZE)
   {}
 
@@ -82,14 +106,6 @@ public:
   }
 
   /*!
-   * Wrapper for simpler java/c++ conversion
-   */
-  inline util::tArrayWrapper<T>* GetLvl2Element(int index)
-  {
-    return elements.Get(index);
-  }
-
-  /*!
    * \param index handle
    * \param elem Framework to put to that position
    */
@@ -99,14 +115,6 @@ public:
    * \param i Handle of element to remove
    */
   void Remove(int handle);
-
-  /*!
-   * Wrapper for simpler java/c++ conversion
-   */
-  inline void SetLvl2Element(int index, util::tArrayWrapper<T>* elem)
-  {
-    elements.Set(index, elem);
-  }
 
 public:
 

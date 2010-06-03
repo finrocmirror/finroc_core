@@ -31,8 +31,8 @@ tCCPortBase::tCCPortBase(tPortCreationInfo pci) :
     tAbstractPort(pci),
     edges_src(),
     edges_dest(),
-    default_value(CreateDefaultValue(pci.data_type)->GetCurrentRef()),
-    value(default_value),
+    default_value(CreateDefaultValue(pci.data_type)),
+    value(NULL),
     owned_data(NULL),
     standard_assign(!GetFlag(tPortFlags::cNON_STANDARD_ASSIGN) && (!GetFlag(tPortFlags::cHAS_QUEUE))),
     port_index(GetHandle() & tCoreRegister<>::cELEM_INDEX_MASK),
@@ -42,23 +42,42 @@ tCCPortBase::tCCPortBase(tPortCreationInfo pci) :
 {
   assert((pci.data_type->IsCCType()));
   InitLists(&(edges_src), &(edges_dest));
-  default_value->GetContainer()->AddLock();
   if (queue != NULL)
   {
     queue->Init();
   }
   PropagateStrategy(NULL, NULL);  // initialize strategy
+
+  // set initial value to default
+  tThreadLocalCache* tc = tThreadLocalCache::Get();
+  tCCPortDataContainer<>* c = GetUnusedBuffer(tc);
+  c->Assign(((tCCPortData*)default_value->GetDataPtr()));
+  c->AddLock();
+  value = c->GetCurrentRef();
+  tc->last_written_to_port[port_index] = c;
+}
+
+void tCCPortBase::ApplyDefaultValue()
+{
+  //publish(ThreadLocalCache.get(), defaultValue.getContainer());
+  tThreadLocalCache* tc = tThreadLocalCache::GetFast();
+  tCCPortDataContainer<>* c = GetUnusedBuffer(tc);
+  c->Assign(((tCCPortData*)default_value->GetDataPtr()));
+  Publish(tc, c);
 }
 
 tCCPortBase::~tCCPortBase()
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   tThreadLocalCache::Get();  // Initialize ThreadLocalCache - if this has not already happened for GarbageCollector
   tThreadLocalCache::DeleteInfoForPort(port_index);
-  default_value->GetContainer()->PostThreadReleaseLock();  // thread safe, since called deferred - when no one else should access this port anymore
+  default_value->Recycle2();
   if (owned_data != NULL)
   {
-    owned_data->PostThreadReleaseLock();
+    {
+      util::tLock lock3(GetThreadLocalCacheInfosLock());
+      owned_data->PostThreadReleaseLock();
+    }
   }
   // do not release lock on current value - this is done in one of the statements above
 
@@ -66,6 +85,7 @@ tCCPortBase::~tCCPortBase()
   {
     delete queue;
   }
+  ;
 }
 
 void tCCPortBase::DequeueAllRaw(tCCQueueFragment<tCCPortData>& fragment)
@@ -217,27 +237,27 @@ tCCPortDataContainer<>* tCCPortBase::PullValueRaw(bool intermediate_assign)
   // return locked data
   return tc->data;
 
-  //    ThreadLocalCache tc = ThreadLocalCache.getFast();
-  //    PullCall pc = tc.getUnusedPullCall();
-  //    pc.ccPull = true;
+  //      ThreadLocalCache tc = ThreadLocalCache.getFast();
+  //      PullCall pc = tc.getUnusedPullCall();
+  //      pc.ccPull = true;
   //
-  //    //pullValueRaw(pc);
-  //    try {
-  //      pc = SynchMethodCallLogic.<PullCall>performSynchCall(pc, this, callIndex, PULL_TIMEOUT);
-  //      if (pc.tc != null && pc.tc.threadId != ThreadUtil.getCurrentThreadId()) { // reset thread local cache - if it was set by another thread
-  //        pc.tc = null;
+  //      //pullValueRaw(pc);
+  //      try {
+  //          pc = SynchMethodCallLogic.<PullCall>performSynchCall(pc, this, callIndex, PULL_TIMEOUT);
+  //          if (pc.tc != null && pc.tc.threadId != ThreadUtil.getCurrentThreadId()) { // reset thread local cache - if it was set by another thread
+  //              pc.tc = null;
+  //          }
+  //          if (pc.tc == null) { // init new PortDataContainer in thread local cache?
+  //              pc.setupThreadLocalCache();
+  //          }
+  //          CCPortDataContainer<?> result = pc.tc.data;
+  //          result.addLock();
+  //          pc.genericRecycle();
+  //          return result;
+  //      } catch (MethodCallException e) {
+  //          pc.genericRecycle();
+  //          return getLockedUnsafeInContainer();
   //      }
-  //      if (pc.tc == null) { // init new PortDataContainer in thread local cache?
-  //        pc.setupThreadLocalCache();
-  //      }
-  //      CCPortDataContainer<?> result = pc.tc.data;
-  //      result.addLock();
-  //      pc.genericRecycle();
-  //      return result;
-  //    } catch (MethodCallException e) {
-  //      pc.genericRecycle();
-  //      return getLockedUnsafeInContainer();
-  //    }
 }
 
 void tCCPortBase::PullValueRawImpl(tThreadLocalCache* tc, bool intermediate_assign, bool first)
@@ -292,7 +312,6 @@ void tCCPortBase::SetPullRequestHandler(tCCPullRequestHandler* pull_request_hand
 
 void tCCPortBase::TransferDataOwnership(tCCPortDataContainer<>* port_data_container)
 {
-  util::tLock lock1(obj_synch);
   tCCPortDataContainer<>* current = value->GetContainer();
   if (current == port_data_container)    // ownedData is outdated and can be deleted
   {

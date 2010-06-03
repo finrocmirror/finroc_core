@@ -54,18 +54,18 @@ public:
 //   * \param group method's group
 //   */
 //  public CreateExternalConnectionAction(Class<? extends ExternalConnection> c) {
-//    this.c = c;
+//      this.c = c;
 //  }
 //
 //  @Override
 //  public ExternalConnection createModule(Object... params) throws Exception {
-//    return createModule(params[0].toString());
+//      return createModule(params[0].toString());
 //  }
 //
 //  public ExternalConnection createModule(String address) throws Exception {
-//    ExternalConnection m = (ExternalConnection)c.newInstance();
-//    m.connect(address);
-//    return m;
+//      ExternalConnection m = (ExternalConnection)c.newInstance();
+//      m.connect(address);
+//      return m;
 //  }
 //
 //  /**
@@ -74,24 +74,24 @@ public:
 //   * \return Created Connection Module
 //   */
 //  public ExternalConnection createModule() throws Exception {
-//    ExternalConnection m = (ExternalConnection)c.newInstance();
-//    m.connect(null);
-//    return m;
+//      ExternalConnection m = (ExternalConnection)c.newInstance();
+//      m.connect(null);
+//      return m;
 //  }
 //
 //  @Override
 //  public Class<?>[] getParameterTypes() {
-//    return params;
+//      return params;
 //  }
 //
 //  @Override
 //  public String toString() {
-//    return c.getSimpleName();
+//      return c.getSimpleName();
 //  }
 //
 //  @Override
 //  public String getModuleGroup() {
-//    return ExternalConnection.GROUP_NAME;
+//      return ExternalConnection.GROUP_NAME;
 //  }
 
 };

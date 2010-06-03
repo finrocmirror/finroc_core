@@ -56,11 +56,11 @@ public:
   }
 
   //  public void deserializeBase(InputStreamBuffer is) {
-  //    super.deserialize(is);
+  //      super.deserialize(is);
   //  }
   //
   //  @ConstMethod public void serializeBase(@Ref OutputStreamBuffer os) {
-  //    super.serialize(os);
+  //      super.serialize(os);
   //  }
 
   virtual void HandleRecycle()

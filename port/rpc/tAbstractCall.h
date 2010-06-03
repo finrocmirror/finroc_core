@@ -169,152 +169,152 @@ public:
 
   //
   //  void addParamForSending(const PortData* pd) {
-  //    if (pd == NULL) {
-  //      os.writeByte(NULLPARAM);
-  //    }
-  //    os.writeByte(PORTDATA);
-  //    responsibilities.add(pd);
+  //      if (pd == NULL) {
+  //          os.writeByte(NULLPARAM);
+  //      }
+  //      os.writeByte(PORTDATA);
+  //      responsibilities.add(pd);
   //  }
   //
   //  void addParamForSending(const int pd) {
-  //    os.writeByte(INT);
-  //    os.writeInt(pd);
+  //      os.writeByte(INT);
+  //      os.writeInt(pd);
   //  }
   //
   //  void addParamForSending(const int64 pd) {
-  //    os.writeByte(LONG);
-  //    os.writeLong(pd);
+  //      os.writeByte(LONG);
+  //      os.writeLong(pd);
   //  }
   //
   //  void addParamForSending(const float pd) {
-  //    os.writeByte(FLOAT);
-  //    os.writeFloat(pd);
+  //      os.writeByte(FLOAT);
+  //      os.writeFloat(pd);
   //  }
   //
   //  void addParamForSending(const double pd) {
-  //    os.writeByte(DOUBLE);
-  //    os.writeDouble(pd);
+  //      os.writeByte(DOUBLE);
+  //      os.writeDouble(pd);
   //  }
   //
   //  void addParamForSending(const int8 pd) {
-  //    os.writeByte(BYTE);
-  //    os.writeByte(pd);
+  //      os.writeByte(BYTE);
+  //      os.writeByte(pd);
   //  }
   //
   //  void addParamForSending(const short pd) {
-  //    os.writeByte(SHORT);
-  //    os.writeShort(pd);
+  //      os.writeByte(SHORT);
+  //      os.writeShort(pd);
   //  }
   //
   //
   //  template <typename T>
   //  void addParamForSending(CCInterThreadContainer<T>* container) {
-  //    if (container == NULL) {
-  //      os.writeByte(NULLPARAM);
-  //    }
-  //    //assert(container->isInterThreadContainer() && "only interthread container allowed in method calls");
-  //    os.writeByte(CCCONTAINER);
-  //    os.writeObject(container);
-  //    container->recycle2();
+  //      if (container == NULL) {
+  //          os.writeByte(NULLPARAM);
+  //      }
+  //      //assert(container->isInterThreadContainer() && "only interthread container allowed in method calls");
+  //      os.writeByte(CCCONTAINER);
+  //      os.writeObject(container);
+  //      container->recycle2();
   //  }
   //
   //  template <typename T>
   //  void addParamForSending(const T* c) {
-  //    if (c == NULL) {
-  //      os.writeByte(NULLPARAM);
-  //    }
-  //    DataType* dt = DataTypeRegister::getInstance()->getDataType<T>();
-  //    assert(dt != NULL && dt->isCCType());
-  //    os.writeByte(CCDATA);
-  //    os.writeShort(dt->getUid());
-  //    writeParam(c, dt);
+  //      if (c == NULL) {
+  //          os.writeByte(NULLPARAM);
+  //      }
+  //      DataType* dt = DataTypeRegister::getInstance()->getDataType<T>();
+  //      assert(dt != NULL && dt->isCCType());
+  //      os.writeByte(CCDATA);
+  //      os.writeShort(dt->getUid());
+  //      writeParam(c, dt);
   //  }
   //
   //  template <typename T>
   //  void addParamForSending(T c) {
-  //    addParamForSending((const T)c);
+  //      addParamForSending((const T)c);
   //  }
   //
   //  void writeParam(const CoreSerializable* cs, DataType* dt) {
-  //    cs->serialize(os);
+  //      cs->serialize(os);
   //  }
   //
   //  void writeParam(void* cs, DataType* dt) {
-  //    dt->directSerialize(cs, &os);
+  //      dt->directSerialize(cs, &os);
   //  }
   //
   //  void addParamForLocalCall(int paramIndex, const PortData* pd) {
-  //    Parameter* p = &(params[paramIndex]);
-  //    if (pd == NULL) {
-  //      p->type = NULLPARAM;
-  //    }
-  //    p->type = PORTDATA;
-  //    p->value = pd;
+  //      Parameter* p = &(params[paramIndex]);
+  //      if (pd == NULL) {
+  //          p->type = NULLPARAM;
+  //      }
+  //      p->type = PORTDATA;
+  //      p->value = pd;
   //  }
   //
   //  void addParamForLocalCall(int paramIndex, const int pd) {
-  //    Parameter* p = &(params[paramIndex]);
-  //    p->type = INT;
-  //    p->ival = pd;
+  //      Parameter* p = &(params[paramIndex]);
+  //      p->type = INT;
+  //      p->ival = pd;
   //  }
   //
   //  void addParamForLocalCall(int paramIndex, const int64 pd) {
-  //    Parameter* p = &(params[paramIndex]);
-  //    p->type = LONG;
-  //    p->lval = pd;
+  //      Parameter* p = &(params[paramIndex]);
+  //      p->type = LONG;
+  //      p->lval = pd;
   //  }
   //
   //  void addParamForLocalCall(int paramIndex, const float pd) {
-  //    Parameter* p = &(params[paramIndex]);
-  //    p->type = FLOAT;
-  //    p->fval = pd;
+  //      Parameter* p = &(params[paramIndex]);
+  //      p->type = FLOAT;
+  //      p->fval = pd;
   //  }
   //
   //  void addParamForLocalCall(int paramIndex, const double pd) {
-  //    Parameter* p = &(params[paramIndex]);
-  //    p->type = DOUBLE;
-  //    p->dval = pd;
+  //      Parameter* p = &(params[paramIndex]);
+  //      p->type = DOUBLE;
+  //      p->dval = pd;
   //  }
   //
   //  void addParamForLocalCall(int paramIndex, const int8 pd) {
-  //    Parameter* p = &(params[paramIndex]);
-  //    p->type = BYTE;
-  //    p->bval = pd;
+  //      Parameter* p = &(params[paramIndex]);
+  //      p->type = BYTE;
+  //      p->bval = pd;
   //  }
   //
   //  void addParamForLocalCall(int paramIndex, const int16 pd) {
-  //    Parameter* p = &(params[paramIndex]);
-  //    p->type = SHORT;
-  //    p->sval = pd;
+  //      Parameter* p = &(params[paramIndex]);
+  //      p->type = SHORT;
+  //      p->sval = pd;
   //  }
   //
   //  template <typename T>
   //  void addParamForLocalCall(int paramIndex, CCInterThreadContainer<T>* container) {
-  //    Parameter* p = &(params[paramIndex]);
-  //    if (container == NULL) {
-  //      p->type = NULLPARAM;
-  //    }
-  //    //assert(container->isInterThreadContainer() && "only interthread container allowed in method calls");
-  //    p->ccval = container;
+  //      Parameter* p = &(params[paramIndex]);
+  //      if (container == NULL) {
+  //          p->type = NULLPARAM;
+  //      }
+  //      //assert(container->isInterThreadContainer() && "only interthread container allowed in method calls");
+  //      p->ccval = container;
   //  }
   //
   //  template <typename T>
   //  void addParamForLocalCall(int paramIndex, const T* c) {
-  //    Parameter* p = &(params[paramIndex]);
-  //    if (c == NULL) {
-  //      p->type = NULLPARAM;
-  //    }
-  //    DataType* dt = DataTypeRegister::getInstance()->getDataType<T>();
-  //    assert(dt != NULL && dt->isCCType());
-  //    CCInterThreadContainer<T>* cc = (CCInterThreadContainer<T>*)GetInterThreadBuffer(dt);
-  //    cc->assign(c);
-  //    p->type = CCDATA;
-  //    p->ccval = cc;
+  //      Parameter* p = &(params[paramIndex]);
+  //      if (c == NULL) {
+  //          p->type = NULLPARAM;
+  //      }
+  //      DataType* dt = DataTypeRegister::getInstance()->getDataType<T>();
+  //      assert(dt != NULL && dt->isCCType());
+  //      CCInterThreadContainer<T>* cc = (CCInterThreadContainer<T>*)GetInterThreadBuffer(dt);
+  //      cc->assign(c);
+  //      p->type = CCDATA;
+  //      p->ccval = cc;
   //  }
   //
   //  template <typename T>
   //  void addParamForLocalCall(int paramIndex, T c) {
-  //    addParamForLocalCall(paramIndex, (const T)c);
+  //      addParamForLocalCall(paramIndex, (const T)c);
   //  }
   //
 
@@ -401,7 +401,7 @@ public:
   //   * \param callerHandle caller handle
   //   */
   //  public void pushCaller(int callerHandle) {
-  //    callerStack.add(callerHandle);
+  //      callerStack.add(callerHandle);
   //  }
   //
   //  /**
@@ -411,15 +411,15 @@ public:
   //   * \param caller Caller
   //   */
   //  public void pushCaller(FrameworkElement caller) {
-  //    callerStack.add(caller.getHandle());
+  //      callerStack.add(caller.getHandle());
   //  }
   //
   //  /**
-  //    * (Should only be called by network port)
+  //   * (Should only be called by network port)
   //   * \return return current size of caller stack
   //   */
   //  @ConstMethod public @SizeT int callerStackSize() {
-  //    return callerStack.size();
+  //      return callerStack.size();
   //  }
   //
   //  /**
@@ -429,7 +429,7 @@ public:
   //   * \return Caller Handle
   //   */
   //  public int popCaller() {
-  //    return callerStack.removeLast();
+  //      return callerStack.removeLast();
   //  }
   //
   //  /**
@@ -438,86 +438,86 @@ public:
   //   * \return Caller
   //   */
   //  public FrameworkElement popCallerElement() {
-  //    return RuntimeEnvironment.getInstance().getElement(popCaller());
+  //      return RuntimeEnvironment.getInstance().getElement(popCaller());
   //  }
   //
   //  /**
   //   * Pop caller from stack and call its handleCallReturn method
   //   */
   //  public void returnToCaller() {
-  //    FrameworkElement fe = popCallerElement();
-  //    if (fe != null) {
-  //      fe.handleCallReturn(this);
-  //    } else {
-  //       printf("%p ", this);
-  //      System.out.println("warning: lost method call, because caller seems to have been deleted... caller will hopefully timeout(?)");
-  //      //recycle();
-  //    }
+  //      FrameworkElement fe = popCallerElement();
+  //      if (fe != null) {
+  //          fe.handleCallReturn(this);
+  //      } else {
+  //           printf("%p ", this);
+  //          System.out.println("warning: lost method call, because caller seems to have been deleted... caller will hopefully timeout(?)");
+  //          //recycle();
+  //      }
   //  }
 
   virtual void Serialize(tCoreOutput& oos) const;
 
   //
   //  void getParam(int index, const PortData*& pd) {
-  //    Parameter* p = &(params[index]);
-  //    pd = p->value;
-  //    p->clear();
+  //      Parameter* p = &(params[index]);
+  //      pd = p->value;
+  //      p->clear();
   //  }
   //
   //  void getParam(int index, PortData*& pd) {
-  //    Parameter* p = &(params[index]);
-  //    pd = const_cast<PortData*>(p->value); // not entirely clean... but everything else seems a lot of work (what's const and what isn't should be defined in methods)
-  //    p->clear();
+  //      Parameter* p = &(params[index]);
+  //      pd = const_cast<PortData*>(p->value); // not entirely clean... but everything else seems a lot of work (what's const and what isn't should be defined in methods)
+  //      p->clear();
   //  }
   //
   //  void getParam(int index, int& pd) {
-  //    Parameter* p = &(params[index]);
-  //    pd = p->ival;
-  //    p->clear();
+  //      Parameter* p = &(params[index]);
+  //      pd = p->ival;
+  //      p->clear();
   //  }
   //
   //  void getParam(int index, int64& pd) {
-  //    Parameter* p = &(params[index]);
-  //    pd = p->lval;
-  //    p->clear();
+  //      Parameter* p = &(params[index]);
+  //      pd = p->lval;
+  //      p->clear();
   //  }
   //
   //  void getParam(int index, float& pd) {
-  //    Parameter* p = &(params[index]);
-  //    pd = p->fval;
-  //    p->clear();
+  //      Parameter* p = &(params[index]);
+  //      pd = p->fval;
+  //      p->clear();
   //  }
   //
   //  void getParam(int index, double& pd) {
-  //    Parameter* p = &(params[index]);
-  //    pd = p->dval;
-  //    p->clear();
+  //      Parameter* p = &(params[index]);
+  //      pd = p->dval;
+  //      p->clear();
   //  }
   //
   //  void getParam(int index, int8& pd) {
-  //    Parameter* p = &(params[index]);
-  //    pd = p->bval;
-  //    p->clear();
+  //      Parameter* p = &(params[index]);
+  //      pd = p->bval;
+  //      p->clear();
   //  }
   //
   //  void getParam(int index, int16& pd) {
-  //    Parameter* p = &(params[index]);
-  //    pd = p->sval;
-  //    p->clear();
+  //      Parameter* p = &(params[index]);
+  //      pd = p->sval;
+  //      p->clear();
   //  }
   //
   //  template <typename T>
   //  void getParam(int index, CCInterThreadContainer<T>*& container) {
-  //    Parameter* p = &(params[index]);
-  //    container = p->ccval;
-  //    p->clear();
+  //      Parameter* p = &(params[index]);
+  //      container = p->ccval;
+  //      p->clear();
   //  }
   //
   //  template <typename T>
   //  void getParam(int index, T*& c) {
-  //    Parameter* p = &(params[index]);
-  //    c = p->ccval->getDataPtr();
-  //    p->clear();
+  //      Parameter* p = &(params[index]);
+  //      c = p->ccval->getDataPtr();
+  //      p->clear();
   //  }
   //
 

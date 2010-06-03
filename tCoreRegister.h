@@ -57,7 +57,10 @@ private:
   /*! Array with elements */
   util::tArrayWrapper<T> elements;
 
-  /*! Array with current uid for every element index */
+  /*! Marks deleted elements in array below */
+  static const int cDELETE_MARK = 0x40000000;
+
+  /*! Array with current uid for every element index (the second bit from the front is used to mark deleted elements) */
   util::tIntArrayWrapper element_uid;
 
   /*! number of elements in register */
@@ -66,7 +69,7 @@ private:
 public:
 
   // for synchronization on an object of this class
-  mutable util::tMutex obj_synch;
+  mutable util::tMutex obj_mutex;
 
   /*! Maximum number of elements */
   static const int cMAX_ELEMENTS = 0xFFFF;
@@ -114,7 +117,7 @@ public:
   /*!
    * Get element by raw index.
    * Shouldn't be used - normally.
-   * Some framework-internal mechanism need it.
+   * Some framework-internal mechanism (ThreadLocalCache cleanup) needs it.
    *
    * \param index Raw Index of element
    * \return Element
@@ -123,6 +126,16 @@ public:
   {
     return elements.Get(index);
   }
+
+  /*!
+   * Mark specified framework element as (soon completely) deleted
+   *
+   * get() won't return it anymore.
+   * getByRawIndex() , however, will.
+   *
+   * \param handle Handle of element
+   */
+  void MarkDeleted(int handle);
 
   /*!
    * Remove element with specified handle

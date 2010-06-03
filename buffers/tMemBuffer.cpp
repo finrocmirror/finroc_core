@@ -28,14 +28,11 @@ namespace core
 {
 tDataType* const tMemBuffer::cBUFFER_TYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tMemBuffer>());
 
-tMemBuffer::tMemBuffer()
-{
-}
+tMemBuffer::tMemBuffer() {}
 
 tMemBuffer::tMemBuffer(int size) :
     util::tMemoryBuffer(size)
-{
-}
+{}
 
 } // namespace finroc
 } // namespace core

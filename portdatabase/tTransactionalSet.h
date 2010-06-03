@@ -70,7 +70,7 @@ protected:
 public:
 
   // for synchronization on an object of this class
-  mutable util::tMutex obj_synch;
+  mutable util::tMutex obj_mutex;
 
   /*! Frequency of checks if pending commands can be executed */
   int cPENDING_COMMAND_CHECK_INTERVAL;
@@ -92,7 +92,7 @@ protected:
    */
   inline void IncomingAdd(B add)
   {
-    util::tLock lock2(obj_synch);
+    util::tLock lock2(this);
     set.Put(add.GetKey(), add);
   }
 

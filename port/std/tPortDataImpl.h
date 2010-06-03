@@ -87,7 +87,7 @@ public:
 
   /*!
    * \return Manager of data (null for PortData not used in ports)
-    */
+   */
   inline tPortDataManager* GetManager() const
   {
     return manager;
@@ -108,31 +108,31 @@ public:
   //   */
   //  // no extreme optimization necessary, since not called that often...
   //  public void addReadLock() {
-  //    //int counterIndex = (refCounter.get() >> 28) & 0x3;
-  //    int counterIndex = reuseCounter & 0x3;
-  //    int old = refCounter.getAndAdd(refCounterIncrement[counterIndex]);
-  //    assert ((old & refCounterMasks[counterIndex]) != 0) : "Element already reused. Application in undefined state. Element has to be locked prior to calling this method.";
-  //    assert (counterIndex == ((old >> 28) & 0x3)) : "Counter index changed. Application in undefined state. Element has to be locked prior to calling this method.";
-  //    assert (counterIndex != refCounterMasks[counterIndex]) : "Reference counter overflow. Maximum of 127 locks allowed. Consider making a copy somewhere.";
+  //      //int counterIndex = (refCounter.get() >> 28) & 0x3;
+  //      int counterIndex = reuseCounter & 0x3;
+  //      int old = refCounter.getAndAdd(refCounterIncrement[counterIndex]);
+  //      assert ((old & refCounterMasks[counterIndex]) != 0) : "Element already reused. Application in undefined state. Element has to be locked prior to calling this method.";
+  //      assert (counterIndex == ((old >> 28) & 0x3)) : "Counter index changed. Application in undefined state. Element has to be locked prior to calling this method.";
+  //      assert (counterIndex != refCounterMasks[counterIndex]) : "Reference counter overflow. Maximum of 127 locks allowed. Consider making a copy somewhere.";
   //  }
   //
   //  /**
   //   * Release lock from buffer
   //   */
   //  public void releaseLock() {
-  //    int counterIndex = reuseCounter & 0x3;
-  //    int count = refCounter.addAndGet(-refCounterIncrement[counterIndex]);
-  //    assert ((count & refCounterMasks[counterIndex]) != refCounterMasks[counterIndex]) : "More locks released than acquired. Application in undefined state.";
-  //    if ((count & refCounterMasks[counterIndex]) == 0) {
-  //      // reuse object
-  //      PortDataBufferPool owner = this.owner;
-  //      reuseCounter++;
-  //      if (owner != null) {
-  //        owner.enqueue(this);
-  //      } else {
-  //         delete this;
+  //      int counterIndex = reuseCounter & 0x3;
+  //      int count = refCounter.addAndGet(-refCounterIncrement[counterIndex]);
+  //      assert ((count & refCounterMasks[counterIndex]) != refCounterMasks[counterIndex]) : "More locks released than acquired. Application in undefined state.";
+  //      if ((count & refCounterMasks[counterIndex]) == 0) {
+  //          // reuse object
+  //          PortDataBufferPool owner = this.owner;
+  //          reuseCounter++;
+  //          if (owner != null) {
+  //              owner.enqueue(this);
+  //          } else {
+  //               delete this;
+  //          }
   //      }
-  //    }
   //  }
 
   /*!
@@ -152,12 +152,12 @@ public:
    * \return Did lock succeed?
    */
   /*boolean addUserLockIfSystemLock() {
-    int old = refCounter.getAndAdd(USER_LOCK);
-    if ((old & SYSTEM_LOCK_MASK) <= 0) {
-      refCounter.getAndAdd(-USER_LOCK); // remove interference
-      return false;
-    }
-    return true;
+      int old = refCounter.getAndAdd(USER_LOCK);
+      if ((old & SYSTEM_LOCK_MASK) <= 0) {
+          refCounter.getAndAdd(-USER_LOCK); // remove interference
+          return false;
+      }
+      return true;
   }*/
 
   /*!
@@ -166,10 +166,10 @@ public:
    * \return Did lock succeed (or is element already reused) ?
    */
   /*void addSystemReadLock() {
-    int old = refCounter.getAndIncrement();
-    if (old <= 0) {
-      throw new RuntimeException("Element already reused");
-    }
+      int old = refCounter.getAndIncrement();
+      if (old <= 0) {
+          throw new RuntimeException("Element already reused");
+      }
   }*/
 
   /*!

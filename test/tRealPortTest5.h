@@ -34,12 +34,13 @@ namespace core
 class tRealPortTest5 : public util::tUncopyableObject
 {
 private:
+  /*extends CoreThreadBase*/
 
   static const int cNUM_OF_PORTS = 1000;
 
   static const int cCYCLE_TIME = 3;
 
-  static const int cCYCLES = 10000000;
+  static const int cCYCLES = 1000;
 
 public:
 
@@ -69,27 +70,27 @@ public:
 //
 //  public static class TestModule extends Module {
 //
-//    DoublePort p1 = new DoublePort("p1", new PortCreationInfo(PortFlags.OUTPUT_PORT));
-//    DoublePort p2 = new DoublePort("p2", new PortCreationInfo(PortFlags.OUTPUT_PORT));
-//    //IntPort ip = new IntPort(new PortCreationInfo(PortFlags.INPUT_PORT, "ip"));
-//    DoublePort ip = new DoublePort("ip", new PortCreationInfo(PortFlags.INPUT_PORT));
+//      DoublePort p1 = new DoublePort("p1", new PortCreationInfo(PortFlags.OUTPUT_PORT));
+//      DoublePort p2 = new DoublePort("p2", new PortCreationInfo(PortFlags.OUTPUT_PORT));
+//      //IntPort ip = new IntPort(new PortCreationInfo(PortFlags.INPUT_PORT, "ip"));
+//      DoublePort ip = new DoublePort("ip", new PortCreationInfo(PortFlags.INPUT_PORT));
 //
 //
-//    public TestModule(CoreEventThread ct) {
-//      super(true);
-//      setDescription("module");
-//      //setEventThread(ct);
-//      /*p1.setValuesBeforeAreUnused(Long.MAX_VALUE);
-//      p2.setValuesBeforeAreUnused(Long.MAX_VALUE);
-//      ip.setValuesBeforeAreUnused(Long.MAX_VALUE);*/
-//      addChild(p1);
-//      addChild(p2);
-//      addChild(ip);
-//    }
+//      public TestModule(CoreEventThread ct) {
+//          super(true);
+//          setDescription("module");
+//          //setEventThread(ct);
+//          /*p1.setValuesBeforeAreUnused(Long.MAX_VALUE);
+//          p2.setValuesBeforeAreUnused(Long.MAX_VALUE);
+//          ip.setValuesBeforeAreUnused(Long.MAX_VALUE);*/
+//          addChild(p1);
+//          addChild(p2);
+//          addChild(ip);
+//      }
 //
-//    @Override
-//    protected void update() {
-//    }
+//      @Override
+//      protected void update() {
+//      }
 //
 //  }
 

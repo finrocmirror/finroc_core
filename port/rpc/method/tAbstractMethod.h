@@ -137,62 +137,62 @@ public:
 
   //
   //  bool hasLock(const PortData* pd) {
-  //    if (pd == NULL) {
-  //      return true;
-  //    }
-  //    return pd->getManager()->isLocked();
+  //      if (pd == NULL) {
+  //          return true;
+  //      }
+  //      return pd->getManager()->isLocked();
   //  }
   //
   //  bool hasLock(const CCPortData* cpd) {
-  //    if (cpd == NULL) {
+  //      if (cpd == NULL) {
+  //          return true;
+  //      }
   //      return true;
-  //    }
-  //    return true;
   //  }
   //
   //  inline bool hasLock(const int64 cpd) {
-  //    return true;
+  //      return true;
   //  }
   //
   //  inline bool hasLock(const double cpd) {
-  //    return true;
+  //      return true;
   //  }
   //
   //  inline bool hasLock(const int cpd) {
-  //    return true;
+  //      return true;
   //  }
   //
   //  inline bool hasLock(const int16 cpd) {
-  //    return true;
+  //      return true;
   //  }
   //
   //  inline bool hasLock(const int8 cpd) {
-  //    return true;
+  //      return true;
   //  }
   //
   //  inline bool hasLock(const float cpd) {
-  //    return true;
+  //      return true;
   //  }
   //
   //  template <typename T>
   //  bool hasLock(const CCInterThreadContainer<T>* c) {
-  //    if (c == NULL) {
+  //      if (c == NULL) {
+  //          return true;
+  //      }
   //      return true;
-  //    }
-  //    return true;
   //  }
   //
   //  template <typename T>
   //  inline bool hasLock(T t) {
-  //    return hasLock(static_cast<const T>(t));
+  //      return hasLock(static_cast<const T>(t));
   //  }
   //
   //
   //  void cleanup(PortData* pd) {
-  //    if (pd == NULL) {
-  //      return;
-  //    }
-  //    pd->getManager()->releaseLock();
+  //      if (pd == NULL) {
+  //          return;
+  //      }
+  //      pd->getManager()->releaseLock();
   //  }
   //
   //  void cleanup(const CCPortData* pd) {}
@@ -205,15 +205,15 @@ public:
   //
   //  template <typename T>
   //  void cleanup(const CCInterThreadContainer<T>* c) {
-  //    if (c == NULL) {
-  //      return;
-  //    }
-  //    c->recycle2();
+  //      if (c == NULL) {
+  //          return;
+  //      }
+  //      c->recycle2();
   //  }
   //
   //  template <typename T>
   //  inline void cleanup(T t) {
-  //    cleanup(static_cast<const T>(t));
+  //      cleanup(static_cast<const T>(t));
   //  }
   //
 

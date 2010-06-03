@@ -19,53 +19,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
-
-#ifndef CORE__PORT__RPC__TRPCTHREAD_H
-#define CORE__PORT__RPC__TRPCTHREAD_H
-
-#include "finroc_core_utils/thread/tTask.h"
-#include "core/thread/tCoreLoopThreadBase.h"
-#include "finroc_core_utils/container/tReusable.h"
+#include "core/tLockOrderLevels.h"
 
 namespace finroc
 {
 namespace core
 {
-/*!
- * \author Max Reichardt
- *
- * (Helper) thread for remote procedure calls
- */
-class tRPCThread : public tCoreLoopThreadBase, public util::tReusable
-{
-private:
-
-  /*! Task to execute next */
-  util::tTask* volatile next_task;
-
-public:
-
-  tRPCThread();
-
-  /*!
-   * Execute task using this thread
-   *
-   * \param t Task to execute
-   */
-  void ExecuteTask(util::tTask* t);
-
-  virtual void MainLoopCallback();
-
-  virtual void StopThread()
-  {
-    util::tLock lock2(this);
-    monitor.Notify(lock2);
-  }
-
-};
+const int tLockOrderLevels::cRUNTIME_ROOT;
+const int tLockOrderLevels::cLEAF_GROUP;
+const int tLockOrderLevels::cLEAF_PORT_GROUP;
+const int tLockOrderLevels::cPORT;
+const int tLockOrderLevels::cRUNTIME_REGISTER;
+const int tLockOrderLevels::cREMOTE;
+const int tLockOrderLevels::cREMOTE_PORT;
+const int tLockOrderLevels::cREMOTE_LINKING;
+const int tLockOrderLevels::cFIRST;
+const int tLockOrderLevels::cINNER_MOST;
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__RPC__TRPCTHREAD_H

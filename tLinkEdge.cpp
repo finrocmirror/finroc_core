@@ -29,8 +29,7 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, int target_handle) :
     source_link(source_link_),
     target_link(""),
     port_handle(target_handle),
-    next(NULL),
-    obj_synch()
+    next(NULL)
 {
   // this(sourceLink_,"",targetHandle);
   if (source_link.Length() > 0)
@@ -47,8 +46,7 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& tar
     source_link(source_link_),
     target_link(target_link_),
     port_handle(-1),
-    next(NULL),
-    obj_synch()
+    next(NULL)
 {
   // this(sourceLink_,targetLink_,-1);
   if (source_link.Length() > 0)
@@ -65,8 +63,7 @@ tLinkEdge::tLinkEdge(int source_handle, const util::tString& target_link_) :
     source_link(""),
     target_link(target_link_),
     port_handle(source_handle),
-    next(NULL),
-    obj_synch()
+    next(NULL)
 {
   // this("",targetLink_,sourceHandle);
   if (source_link.Length() > 0)
@@ -83,8 +80,7 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& tar
     source_link(source_link_),
     target_link(target_link_),
     port_handle(port_handle_),
-    next(NULL),
-    obj_synch()
+    next(NULL)
 {
   if (source_link.Length() > 0)
   {
@@ -98,34 +94,38 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& tar
 
 tLinkEdge::~tLinkEdge()
 {
-  util::tLock lock1(obj_synch);
-  if (source_link.Length() > 0)
   {
-    tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(source_link, this);
-  }
-  if (target_link.Length() > 0)
-  {
-    tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(target_link, this);
+    util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+    if (source_link.Length() > 0)
+    {
+      tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(source_link, this);
+    }
+    if (target_link.Length() > 0)
+    {
+      tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(target_link, this);
+    }
   }
 }
 
 void tLinkEdge::LinkAdded(tRuntimeEnvironment* re, const util::tString& link, tAbstractPort* port)
 {
-  util::tLock lock1(obj_synch);
-  if (link.Equals(source_link))
   {
-    tAbstractPort* target = target_link.Length() > 0 ? re->GetPort(target_link) : re->GetPort(port_handle);
-    if (target != NULL)
+    util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+    if (link.Equals(source_link))
     {
-      port->ConnectToTarget(target);
+      tAbstractPort* target = target_link.Length() > 0 ? re->GetPort(target_link) : re->GetPort(port_handle);
+      if (target != NULL)
+      {
+        port->ConnectToTarget(target);
+      }
     }
-  }
-  else
-  {
-    tAbstractPort* source = source_link.Length() > 0 ? re->GetPort(source_link) : re->GetPort(port_handle);
-    if (source != NULL)
+    else
     {
-      port->ConnectToSource(source);
+      tAbstractPort* source = source_link.Length() > 0 ? re->GetPort(source_link) : re->GetPort(port_handle);
+      if (source != NULL)
+      {
+        port->ConnectToSource(source);
+      }
     }
   }
 }

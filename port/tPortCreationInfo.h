@@ -75,6 +75,9 @@ public:
   /*! Port name/description */
   util::tString description;
 
+  /*! Lock order */
+  int lock_order;
+
   /*! Default value of port */
   tPortCreationInfo(int flags_);
 
@@ -83,6 +86,8 @@ public:
   tPortCreationInfo(const util::tString& description_, tDataType* data_type_, int flags_);
 
   tPortCreationInfo(const util::tString& description_, tFrameworkElement* parent_, tDataType* data_type_, int flags_);
+
+  tPortCreationInfo(const util::tString& description_, tFrameworkElement* parent_, tDataType* data_type_);
 
   tPortCreationInfo(const util::tString& description_, tFrameworkElement* parent_, int flags_);
 
@@ -124,6 +129,8 @@ public:
   {
     return (flags & flag) > 0;
   }
+
+  tPortCreationInfo LockOrderDerive(int lock_order_);
 
   void SetFlag(int flag, bool value);
 

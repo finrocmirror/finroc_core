@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/cc/tCCPortDataContainer.h"
+#include "core/port/tThreadLocalCache.h"
 
 #include "core/port/cc/tCCPortDataBufferPool.h"
 #include "core/port/tThreadLocalCache.h"
@@ -30,6 +31,7 @@ namespace finroc
 namespace core
 {
 tCCPortDataBufferPool::tCCPortDataBufferPool(tDataType* data_type_, int initial_size) :
+    thread_local_cache_infos(tThreadLocalCache::Get()->GetInfosLock()),
     returned_buffers(),
     inter_threads(new util::tReusablesPool<tCCInterThreadContainer<> >()),
     data_type(data_type_)
@@ -39,6 +41,7 @@ tCCPortDataBufferPool::tCCPortDataBufferPool(tDataType* data_type_, int initial_
     //enqueue(createBuffer());
     Attach(static_cast<tCCPortDataContainer<>*>(data_type_->CreateInstance()), true);
   }
+  assert(thread_local_cache_infos.get() != NULL);
 }
 
 tCCPortDataContainer<>* tCCPortDataBufferPool::CreateBuffer()
@@ -78,6 +81,30 @@ tCCInterThreadContainer<>* tCCPortDataBufferPool::CreateInterThreadBuffer()
   tCCInterThreadContainer<>* pc = static_cast<tCCInterThreadContainer<>*>(data_type->CreateInterThreadInstance());
   inter_threads->Attach(pc, false);
   return pc;
+}
+
+tCCPortDataBufferPool::~tCCPortDataBufferPool()
+{
+  // delete any returned buffers
+  tCCPortQueueElement* pqe = returned_buffers.Dequeue();
+  tCCPortDataContainer<>* pc = NULL;
+  {
+    util::tLock lock2(GetThreadLocalCacheInfosLock());  // for postThreadReleaseLock()
+    while (pqe != NULL)
+    {
+      //pc = static_cast<CCPortDataContainer<>*>(pqe->getElement());
+      pc = static_cast<tCCPortDataContainer<>*>(pqe->GetElement());
+      pqe->Recycle(false);
+      pc->PostThreadReleaseLock();
+      pqe = returned_buffers.Dequeue();
+    }
+  }
+  ;
+}
+
+util::tMutexLockOrder& tCCPortDataBufferPool::GetThreadLocalCacheInfosLock()
+{
+  return static_cast<util::tSimpleListWithMutex<tThreadLocalCache*>*>(thread_local_cache_infos.get())->obj_mutex;
 }
 
 void tCCPortDataBufferPool::ReleaseLock(tCCPortDataContainer<>* pd)

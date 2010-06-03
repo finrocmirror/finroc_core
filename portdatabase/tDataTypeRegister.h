@@ -50,6 +50,7 @@ class tPortInterface;
 class tDataTypeRegister : public util::tUncopyableObject
 {
 private:
+  /*extends FrameworkElement*/
 
   /*! Map with data types [Uid] = Type; size is 128KB (large, but very efficient compared to java.util Maps) */
   ::finroc::util::tArrayWrapper<tDataType*> data_types;
@@ -181,22 +182,22 @@ public:
   //   * \param cl Class
   //   */
   //  private static DataType addClass(Class<?> cl) {
-  //    try {
-  //      if ((PortData.class.isAssignableFrom(cl) || CustomSerialization.class.isAssignableFrom(cl))) {
-  //        Class<PortData> dataClass = (Class<PortData>)cl;
-  //        short suid = getDataTypeUid(dataClass);
-  //        if (dataTypes[suid] != null) {
-  //          throw new RuntimeException("There are two PortData classes with the same Uid " + suid + " (" + cl.getName() + " and " + dataTypes[suid].dataType.getName() + ").");
-  //        }
-  //        dataTypes[suid] = new DataType(dataClass, suid);
+  //      try {
+  //          if ((PortData.class.isAssignableFrom(cl) || CustomSerialization.class.isAssignableFrom(cl))) {
+  //              Class<PortData> dataClass = (Class<PortData>)cl;
+  //              short suid = getDataTypeUid(dataClass);
+  //              if (dataTypes[suid] != null) {
+  //                  throw new RuntimeException("There are two PortData classes with the same Uid " + suid + " (" + cl.getName() + " and " + dataTypes[suid].dataType.getName() + ").");
+  //              }
+  //              dataTypes[suid] = new DataType(dataClass, suid);
   //
-  //        return dataTypes[suid];
+  //              return dataTypes[suid];
+  //          }
+  //          return null;
+  //      } catch (Exception e) {
+  //          e.printStackTrace();
   //      }
   //      return null;
-  //    } catch (Exception e) {
-  //      e.printStackTrace();
-  //    }
-  //    return null;
   //  }
 
   /*!
@@ -271,19 +272,19 @@ public:
    * \return serialVersionUID
    */
 //  private static short getDataTypeUid(Class<? extends PortData> cl) {
-//    if (!Modifier.isAbstract(cl.getModifiers())) {
-//      long uid = ObjectStreamClass.lookup(cl).getSerialVersionUID();  // hopefully this will work in applets
-//      if (uid > Short.MAX_VALUE || uid < 0) {
-//        throw new RuntimeException("The serialVersionUID of PortData classes must lie between 0 and " + Short.MAX_VALUE + " (Class: " + cl.getSimpleName() + ")");
+//      if (!Modifier.isAbstract(cl.getModifiers())) {
+//          long uid = ObjectStreamClass.lookup(cl).getSerialVersionUID();  // hopefully this will work in applets
+//          if (uid > Short.MAX_VALUE || uid < 0) {
+//              throw new RuntimeException("The serialVersionUID of PortData classes must lie between 0 and " + Short.MAX_VALUE + " (Class: " + cl.getSimpleName() + ")");
+//          }
+//          return (short)uid;
+//      } else {
+//          PortData.InterfaceSpec i = cl.getAnnotation(PortData.InterfaceSpec.class);
+//          if (i == null) {
+//              throw new RuntimeException("Interfaces must implement PortData.InterfaceSpec. " + cl.getSimpleName() + " doesn't.");
+//          }
+//          return i.uid();
 //      }
-//      return (short)uid;
-//    } else {
-//      PortData.InterfaceSpec i = cl.getAnnotation(PortData.InterfaceSpec.class);
-//      if (i == null) {
-//        throw new RuntimeException("Interfaces must implement PortData.InterfaceSpec. " + cl.getSimpleName() + " doesn't.");
-//      }
-//      return i.uid();
-//    }
 //  }
 
 };

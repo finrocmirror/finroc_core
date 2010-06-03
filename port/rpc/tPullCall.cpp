@@ -51,47 +51,56 @@ void tPullCall::Deserialize(tCoreInput& is)
 void tPullCall::ExecuteTask()
 {
   assert((port != NULL));
-  if (port->GetPort()->GetDataType()->IsCCType())
   {
-    tCCPortBase* cp = static_cast<tCCPortBase*>(port->GetPort());
-    tCCInterThreadContainer<>* cpd = cp->GetPullInInterthreadContainerRaw(true);
-    RecycleParameters();
+    util::tLock lock2(port->GetPort());
+    if (!port->GetPort()->IsReady())
+    {
+      util::tSystem::out.Println("pull call received for port that will soon be deleted");
+      Recycle();
+    }
 
-    AddParamForSending(cpd);
+    if (port->GetPort()->GetDataType()->IsCCType())
+    {
+      tCCPortBase* cp = static_cast<tCCPortBase*>(port->GetPort());
+      tCCInterThreadContainer<>* cpd = cp->GetPullInInterthreadContainerRaw(true);
+      RecycleParameters();
 
-    SendParametersComplete();
-    SetStatusReturn();
-    port->SendCallReturn(this);
-  }
-  else if (port->GetPort()->GetDataType()->IsStdType())
-  {
-    tPortBase* p = static_cast<tPortBase*>(port->GetPort());
-    const tPortData* pd = p->GetPullLockedUnsafe(true);
-    RecycleParameters();
+      AddParamForSending(cpd);
 
-    AddParamForSending(pd);
+      SendParametersComplete();
+      SetStatusReturn();
+      port->SendCallReturn(this);
+    }
+    else if (port->GetPort()->GetDataType()->IsStdType())
+    {
+      tPortBase* p = static_cast<tPortBase*>(port->GetPort());
+      const tPortData* pd = p->GetPullLockedUnsafe(true);
+      RecycleParameters();
 
-    SendParametersComplete();
-    SetStatusReturn();
-    port->SendCallReturn(this);
-  }
-  else
-  {
-    util::tSystem::out.Println("pull call received for port with invalid data type");
-    Recycle();
+      AddParamForSending(pd);
+
+      SendParametersComplete();
+      SetStatusReturn();
+      port->SendCallReturn(this);
+    }
+    else
+    {
+      util::tSystem::out.Println("pull call received for port with invalid data type");
+      Recycle();
+    }
   }
 }
 
 void tPullCall::Reset()
 {
   RecycleParameters();
-  //    data = null;
-  //    ccData = null;
-  //    info.curRef = null;
-  //    info.curRefCounter = null;
-  //    info.lockEstimate = 5;
-  //    info.setLocks = 1;
-  //    tc = null;
+  //      data = null;
+  //      ccData = null;
+  //      info.curRef = null;
+  //      info.curRefCounter = null;
+  //      info.lockEstimate = 5;
+  //      info.setLocks = 1;
+  //      tc = null;
 }
 
 void tPullCall::Serialize(tCoreOutput& oos) const
@@ -99,9 +108,9 @@ void tPullCall::Serialize(tCoreOutput& oos) const
   ::finroc::core::tAbstractCall::Serialize(oos);
   oos.WriteBoolean(intermediate_assign);
   oos.WriteBoolean(cc_pull);
-  //    if (isReturning(true)) {
-  //      oos.writeObject(ccPull ? (TypedObject)data : (TypedObject)info.curRef.getManager().getData());
-  //    }
+  //      if (isReturning(true)) {
+  //          oos.writeObject(ccPull ? (TypedObject)data : (TypedObject)info.curRef.getManager().getData());
+  //      }
 }
 
 } // namespace finroc

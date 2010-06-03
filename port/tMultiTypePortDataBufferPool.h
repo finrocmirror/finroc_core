@@ -27,6 +27,7 @@
 #include "core/portdatabase/tDataType.h"
 #include "finroc_core_utils/container/tSimpleList.h"
 #include "core/port/std/tPortDataBufferPool.h"
+#include "core/tLockOrderLevels.h"
 #include "core/port/std/tPortDataImpl.h"
 
 namespace finroc
@@ -49,8 +50,8 @@ private:
 
 public:
 
-  // for synchronization on an object of this class
-  mutable util::tMutex obj_synch;
+  /*! Mutex lock order - needs to be locked before AllocationRegister */
+  util::tMutexLockOrder obj_mutex;
 
 private:
 
@@ -64,7 +65,7 @@ public:
 
   tMultiTypePortDataBufferPool() :
       pools(2u),
-      obj_synch()
+      obj_mutex(tLockOrderLevels::cINNER_MOST - 20)
   {}
 
   /*!

@@ -76,7 +76,7 @@ public:
 
   /*@Override
   public short getUid() {
-    return 8; //(short)serialVersionUID;
+      return 8; //(short)serialVersionUID;
   //}*/
 
   // number serialization:
@@ -118,7 +118,7 @@ public:
   //  @InCppFile
   //  @InCpp("NUM_TYPE = DataTypeRegister::getInstance()->getDataTypeEntry<CoreNumber>();")
   //  public static void staticInit() {
-  //    dataType = DataTypeRegister.getInstance().getDataTypeEntry(CoreNumber.class);
+  //      dataType = DataTypeRegister.getInstance().getDataTypeEntry(CoreNumber.class);
   //  }
 
   tCoreNumber() :
@@ -230,6 +230,14 @@ public:
   inline bool IsFloat(float i, tUnit* unit_) const
   {
     return num_type == eFLOAT && fval == i && this->unit == unit_;
+  }
+
+  /*!
+   * \return Is this a double or float number?
+   */
+  inline bool IsFloatingPoint()
+  {
+    return num_type == tCoreNumber::eFLOAT || num_type == tCoreNumber::eDOUBLE;
   }
 
   inline bool IsInt(int i, tUnit* unit_) const

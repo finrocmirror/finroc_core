@@ -42,6 +42,7 @@ tPortDataCreationInfo* tPortDataCreationInfo::Get()
 
 void tPortDataCreationInfo::InitUnitializedObjects()
 {
+  util::tLock lock1(this);
   tPortData* pd;
   while (uninitialized_port_data.Size() > 0)
   {

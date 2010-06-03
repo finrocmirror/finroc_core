@@ -36,7 +36,8 @@ tPortCreationInfo::tPortCreationInfo(int flags_) :
     data_type(NULL),
     parent(NULL),
     manages_ports(false),
-    description("")
+    description(""),
+    lock_order(-1)
 {
 }
 
@@ -50,7 +51,8 @@ tPortCreationInfo::tPortCreationInfo(const util::tString& description_, int flag
     data_type(NULL),
     parent(NULL),
     manages_ports(false),
-    description(description_)
+    description(description_),
+    lock_order(-1)
 {
 }
 
@@ -64,7 +66,8 @@ tPortCreationInfo::tPortCreationInfo(const util::tString& description_, tDataTyp
     data_type(data_type_),
     parent(NULL),
     manages_ports(false),
-    description(description_)
+    description(description_),
+    lock_order(-1)
 {
 }
 
@@ -78,7 +81,23 @@ tPortCreationInfo::tPortCreationInfo(const util::tString& description_, tFramewo
     data_type(data_type_),
     parent(parent_),
     manages_ports(false),
-    description(description_)
+    description(description_),
+    lock_order(-1)
+{
+}
+
+tPortCreationInfo::tPortCreationInfo(const util::tString& description_, tFrameworkElement* parent_, tDataType* data_type_) :
+    send_buffer_size(-1),
+    alt_send_buffer_size(-1),
+    unit(&(tUnit::cNO_UNIT)),
+    max_queue_size(16),
+    flags(0),
+    min_net_update_interval(-1),
+    data_type(data_type_),
+    parent(parent_),
+    manages_ports(false),
+    description(description_),
+    lock_order(-1)
 {
 }
 
@@ -92,7 +111,8 @@ tPortCreationInfo::tPortCreationInfo(const util::tString& description_, tFramewo
     data_type(NULL),
     parent(parent_),
     manages_ports(false),
-    description(description_)
+    description(description_),
+    lock_order(-1)
 {
 }
 
@@ -106,7 +126,8 @@ tPortCreationInfo::tPortCreationInfo(const util::tString& description_, tFramewo
     data_type(NULL),
     parent(parent_),
     manages_ports(false),
-    description(description_)
+    description(description_),
+    lock_order(-1)
 {
 }
 
@@ -120,7 +141,8 @@ tPortCreationInfo::tPortCreationInfo(tDataType* data_type_, int flags_) :
     data_type(data_type_),
     parent(NULL),
     manages_ports(false),
-    description("")
+    description(""),
+    lock_order(-1)
 {
 }
 
@@ -134,7 +156,8 @@ tPortCreationInfo::tPortCreationInfo(tDataType* data_type_, int flags_, bool man
     data_type(data_type_),
     parent(NULL),
     manages_ports(manages_ports_),
-    description("")
+    description(""),
+    lock_order(-1)
 {
 }
 
@@ -148,7 +171,8 @@ tPortCreationInfo::tPortCreationInfo(int flags_, tUnit* unit_) :
     data_type(NULL),
     parent(NULL),
     manages_ports(false),
-    description("")
+    description(""),
+    lock_order(-1)
 {
 }
 
@@ -162,7 +186,8 @@ tPortCreationInfo::tPortCreationInfo(int flags_, bool manages_ports_) :
     data_type(NULL),
     parent(NULL),
     manages_ports(manages_ports_),
-    description("")
+    description(""),
+    lock_order(-1)
 {
 }
 
@@ -176,7 +201,8 @@ tPortCreationInfo::tPortCreationInfo() :
     data_type(NULL),
     parent(NULL),
     manages_ports(false),
-    description("")
+    description(""),
+    lock_order(-1)
 {}
 
 tPortCreationInfo::tPortCreationInfo(const util::tString& description_) :
@@ -189,7 +215,8 @@ tPortCreationInfo::tPortCreationInfo(const util::tString& description_) :
     data_type(NULL),
     parent(NULL),
     manages_ports(false),
-    description(description_)
+    description(description_),
+    lock_order(-1)
 {
 }
 
@@ -203,7 +230,8 @@ tPortCreationInfo::tPortCreationInfo(tFrameworkElement* parent_) :
     data_type(NULL),
     parent(parent_),
     manages_ports(false),
-    description("")
+    description(""),
+    lock_order(-1)
 {
 }
 
@@ -217,7 +245,8 @@ tPortCreationInfo::tPortCreationInfo(tFrameworkElement* parent_, tDataType* dt) 
     data_type(dt),
     parent(parent_),
     manages_ports(false),
-    description("")
+    description(""),
+    lock_order(-1)
 {
 }
 
@@ -231,7 +260,8 @@ tPortCreationInfo::tPortCreationInfo(const util::tString& description_, int flag
     data_type(NULL),
     parent(NULL),
     manages_ports(false),
-    description(description_)
+    description(description_),
+    lock_order(-1)
 {
 }
 
@@ -245,7 +275,8 @@ tPortCreationInfo::tPortCreationInfo(const util::tString& description_, tDataTyp
     data_type(data_type_),
     parent(NULL),
     manages_ports(false),
-    description(description_)
+    description(description_),
+    lock_order(-1)
 {
 }
 
@@ -284,6 +315,13 @@ tPortCreationInfo tPortCreationInfo::Derive(int flags_)
 {
   tPortCreationInfo pci2(*this);
   pci2.flags = flags_;
+  return pci2;
+}
+
+tPortCreationInfo tPortCreationInfo::LockOrderDerive(int lock_order_)
+{
+  tPortCreationInfo pci2(*this);
+  pci2.lock_order = lock_order_;
   return pci2;
 }
 

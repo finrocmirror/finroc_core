@@ -31,15 +31,15 @@ namespace core
 void tSynchMethodCallLogic::HandleMethodReturn(tAbstractCall* call)
 {
   // return value
-  //    ThreadLocalCache tc = ThreadLocalCache.getFast();
-  //    if (tc.getThreadUid() == call.getThreadUid()) { // same thread - uncritical
-  //      @Ptr MethodCallSyncher mcs = tc.getMethodSyncher();
-  //      if (mcs.beforeQuickReturnCheck) { // quick return
-  //        mcs.methodReturn = call;
-  //        return;
+  //      ThreadLocalCache tc = ThreadLocalCache.getFast();
+  //      if (tc.getThreadUid() == call.getThreadUid()) { // same thread - uncritical
+  //          @Ptr MethodCallSyncher mcs = tc.getMethodSyncher();
+  //          if (mcs.beforeQuickReturnCheck) { // quick return
+  //              mcs.methodReturn = call;
+  //              return;
+  //          }
+  //          throw new RuntimeException("This shouldn't happen... thread waiting and returning at the same time... fishy");
   //      }
-  //      throw new RuntimeException("This shouldn't happen... thread waiting and returning at the same time... fishy");
-  //    }
 
   tMethodCallSyncher* mcs = tMethodCallSyncher::Get(call->GetSyncherID());
   mcs->ReturnValue(call);
@@ -50,7 +50,7 @@ tAbstractCall* tSynchMethodCallLogic::PerformSynchCallImpl(tAbstractCall* call, 
   tMethodCallSyncher* mcs = tThreadLocalCache::Get()->GetMethodSyncher();
   tAbstractCall* ret = NULL;
   {
-    util::tLock lock2(mcs->obj_synch);
+    util::tLock lock2(mcs);
     call->SetupSynchCall(mcs);
     mcs->current_method_call_index = call->GetMethodCallIndex();
     assert((mcs->method_return == NULL));

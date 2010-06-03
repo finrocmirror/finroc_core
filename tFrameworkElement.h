@@ -35,16 +35,12 @@ namespace finroc
 {
 namespace core
 {
-class tNumberPort;
 class tRuntimeEnvironment;
-class tAbstractCall;
 
 /*!
  * \author Max Reichardt
  *
  * Base functionality of Ports, PortSets, Modules, Groups and the Runtime.
- *
- * Everything is thread-safe as long as methods are used.
  *
  * When dealing with unknown framework elements - check isReady() to make sure
  * they are fully initialized and not already deleted.
@@ -52,7 +48,12 @@ class tAbstractCall;
  * to remote runtime environments/clients.
  *
  * Framework elements are arranged in a tree.
- * They may be linked/referenced from other parts of the tree
+ * They may be linked/referenced from other parts of the tree.
+ *
+ * Everything is thread-safe as long as methods are used.
+ *
+ * To prevent deleting of framework element while using it over a longer period of time,
+ * lock it - or the complete runtime environment.
  */
 class tFrameworkElement : public util::tUncopyableObject
 {
@@ -135,8 +136,15 @@ public:
   friend class tRuntimeEnvironment;
 private:
 
+  friend class tLock;
+
   /*! Primary link to framework element - the place at which it actually is in FrameworkElement tree - contains description etc. */
   tLink primary;
+
+  /*!
+   * Extra Mutex for changing flags
+   */
+  mutable util::tMutex flag_mutex;
 
 protected:
 
@@ -154,6 +162,11 @@ protected:
   /*! children - may contain null entries (for efficient thread-safe unsynchronized iteration) */
   util::tSafeConcurrentlyIterableList<tLink*> children;
 
+public:
+
+  /*! RuntimeElement as TreeNode (only available if set in RuntimeSettings) */
+  //@JavaOnly private final DefaultMutableTreeNode treeNode;
+
   /*! State Constants */
   //public enum State { CONSTRUCTING, READY, DELETED };
 
@@ -166,13 +179,19 @@ protected:
   /*!
    * Element's handle in local runtime environment
    * ("normal" elements have negative handle, while ports have positive ones)
+   * Now stored in objMutex
    */
-  const int handle;
+  //@Const protected final int handle;
 
-public:
-
-  // for synchronization on an object of this class
-  mutable util::tMutex obj_synch;
+  /*!
+   * Defines lock order in which framework elements can be locked.
+   * Generally the framework element tree is locked from root to leaves.
+   * So children's lock level needs to be larger than their parent's.
+   *
+   * The secondary component is the element's unique handle in local runtime environment.
+   * ("normal" elements have negative handle, while ports have positive ones)
+   */
+  mutable util::tMutexLockOrder obj_mutex;
 
 private:
 
@@ -190,20 +209,42 @@ private:
 
   /*!
    * \return Have all parents (including link parents) been initialized?
+   * (may only be called in runtime-registry-synchronized context)
    */
   bool AllParentsReady();
 
   /*!
    * Initializes element and all child elements that were created by this thread
    * (helper method for init())
-   * (may only be called privately in synchronized context)
+   * (may only be called in runtime-registry-synchronized context)
    */
   void CheckPublish();
 
   /*!
+   * Deletes all children of this framework element.
+   *
+   * (may only be called in runtime-registry-synchronized context)
+   */
+  void DeleteChildren();
+
+  /*!
+   * \return Number of links to this port
+   * (should be called in synchronized context)
+   */
+  size_t GetLinkCountHelper() const;
+
+  /*!
    * same as above, but non-const
+   * (should be called in synchronized context)
    */
   tLink* GetLinkInternal(size_t link_index);
+
+  /*!
+   * Helper for constructor (required for initializer-list in C++)
+   *
+   * \return Primary lock order
+   */
+  static int GetLockOrder(int flags_, tFrameworkElement* parent, int lock_order);
 
   /*!
    * Recursive Helper function for above
@@ -211,7 +252,7 @@ private:
    * \param sb StringBuilder storing result
    * \param l Link to continue with
    * \param abort_at_link_root Abort when an alternative link root is reached?
-     */
+   */
   static void GetNameHelper(util::tStringBuilder& sb, const tLink* l, bool abort_at_link_root);
 
   /*!
@@ -225,6 +266,17 @@ private:
    */
   bool GetQualifiedName(util::tStringBuilder& sb, const tLink* start, bool force_full_link) const;
 
+  /*!
+   * Very efficient implementation of above.
+   * (StringBuilder may be reused)
+   *
+   * \param sb StringBuilder that will store result
+   * \param start Link to start with
+   * \param force_full_link Return full link from root (even if object has shorter globally unique link?)
+   * \return Is this a globally unique link?
+   */
+  bool GetQualifiedNameImpl(util::tStringBuilder& sb, const tLink* start, bool force_full_link) const;
+
   //  /**
   //   * Initialize this framework element and all framework elements in sub tree that were created by this thread
   //   * and weren't initialized already - provided that the parent element already is initialized.
@@ -233,25 +285,25 @@ private:
   //   * Initializing must be done prior to using framework elements - and in order to them being published.
   //   */
   //  public void initIfParentIs() {
-  //    FrameworkElement parent = getParent();
-  //    synchronized(parent.children) {
-  //      if (parent.isReady()) {
-  //        init();
+  //      FrameworkElement parent = getParent();
+  //      synchronized(parent.children) {
+  //          if (parent.isReady()) {
+  //              init();
+  //          }
   //      }
-  //    }
   //  }
 
   /*!
    * Initializes element and all child elements that were created by this thread
    * (helper method for init())
-   * (may only be called privately in synchronized context)
+   * (may only be called in runtime-registry-synchronized context)
    */
   void InitImpl();
 
   /*!
    * \return Is current thread the thread that created this object?
    */
-  inline bool IsCreator()
+  inline bool IsCreator() const
   {
     return util::sThreadUtil::GetCurrentThreadId() == creater_thread_uid;
   }
@@ -262,6 +314,14 @@ private:
    * \param dont_detach Don't detach this link from parent (typically, because parent will clear child list)
    */
   void ManagedDelete(tLink* dont_detach);
+
+  /*!
+   * Helper method for deleting.
+   * For some elements we need to lock runtime registry before locking this element.
+   *
+   * \return Returns runtime registry if this is the case - otherwise this-pointer.
+   */
+  util::tMutexLockOrder& RuntimeLockHelper() const;
 
 protected:
 
@@ -290,8 +350,9 @@ protected:
    * Initializes this runtime element.
    * The tree structure should be established by now (Uid is valid)
    * so final initialization can be made.
-     *
+   *
    * Called before children are initialized
+   * (called in runtime-registry-synchronized context)
    */
   virtual void PostChildInit()
   {
@@ -303,6 +364,7 @@ protected:
    * so final initialization can be made.
    *
    * Called before children are initialized
+   * (called in runtime-registry-synchronized context)
    */
   virtual void PreChildInit()
   {
@@ -314,6 +376,13 @@ protected:
    * The final deletion will be done by the GarbageCollector thread after
    * a few seconds (to ensure no other thread is working on this object
    * any more).
+   *
+   * Is called _BEFORE_ prepareDelete of children
+   *
+   * (is called with lock on this framework element and possibly all of its parent,
+   *  but not runtime-registry. Keep this in mind when cleaning up & joining threads.
+   *  This is btw the place to do that.)
+   *
    */
   virtual void PrepareDelete()
   {
@@ -336,7 +405,7 @@ protected:
   //   */
   //  @InCppFile
   //  @Virtual public void handleCallReturn(AbstractCall pc) {
-  //    throw new RuntimeException("This FrameworkElement cannot handle call returns");
+  //      throw new RuntimeException("This FrameworkElement cannot handle call returns");
   //  }
 
   /*!
@@ -349,16 +418,11 @@ protected:
   void PublishUpdatedInfo(int8 change_type);
 
   /*!
-    * (Needs to be synchronized because change operation is not atomic).
+   * (Needs to be synchronized because change operation is not atomic).
    *
    * \param flag Flag to remove
    */
-  inline void RemoveFlag(int flag)
-  {
-    util::tLock lock2(obj_synch);
-    assert((flag & tCoreFlags::cNON_CONSTANT_FLAGS) != 0);
-    flags &= ~flag;
-  }
+  void RemoveFlag(int flag);
 
   /*!
    * \param flag Flag to set
@@ -371,12 +435,7 @@ protected:
    *
    * \param flag Flag to set
    */
-  inline void SetFlag(int flag)
-  {
-    util::tLock lock2(obj_synch);
-    assert((flag & tCoreFlags::cCONSTANT_FLAGS) == 0);
-    flags |= flag;
-  }
+  void SetFlag(int flag);
 
 public:
 
@@ -384,8 +443,9 @@ public:
    * \param description_ Description of framework element (will be shown in browser etc.) - may not be null
    * \param parent_ Parent of framework element (only use non-initialized parent! otherwise null and addChild() later; meant only for convenience)
    * \param flags_ Any special flags for framework element
+   * \param lock_order_ Custom value for lock order (needs to be larger than parent's) - negative indicates unused.
    */
-  tFrameworkElement(const util::tString& description_ = "", tFrameworkElement* parent_ = NULL, int flags_ = tCoreFlags::cALLOWS_CHILDREN);
+  tFrameworkElement(const util::tString& description_ = "", tFrameworkElement* parent_ = NULL, int flags_ = tCoreFlags::cALLOWS_CHILDREN, int lock_order_ = -1);
 
   /*!
    * Add Child to framework element
@@ -400,6 +460,7 @@ public:
 
   /*!
    * \return Number of children (includes ones that are not initialized yet)
+   * (thread-safe, however, call with runtime registry lock to get exact result when other threads might concurrently add/remove children)
    */
   size_t ChildCount() const;
 
@@ -412,21 +473,13 @@ public:
   }
 
   /*!
-   * Deletes all children of this framework element.
-   */
-  void DeleteChildren();
-
-  /*!
    * Are description of this element and String 'other' identical?
    * (result is identical to getDescription().equals(other); but more efficient in C++)
    *
    * \param other Other String
    * \return Result
    */
-  inline bool DescriptionEquals(const util::tString& other)
-  {
-    return primary.description.Equals(other);
-  }
+  bool DescriptionEquals(const util::tString& other);
 
   /*!
    * \return Returns constant and non-constant flags
@@ -449,7 +502,7 @@ public:
   //   * \return Answer
   //   */
   //  public boolean elementExists(@Const @Ref String name) {
-  //    return getChildElement(name, false) != null;
+  //      return getChildElement(name, false) != null;
   //  }
 
   /*!
@@ -468,6 +521,29 @@ public:
     return children.GetIterable();
   }
 
+  /*!
+   * \return RuntimeElement as TreeNode (only available if set in RuntimeSettings)
+   */
+  /*@JavaOnly public DefaultMutableTreeNode asTreeNode() {
+      return treeNode;
+  }*/
+
+  /*!
+   * \param manages_ports Is RuntimeElement responsible for releasing unused port values?
+   */
+  //@SuppressWarnings("unchecked")
+  //public FrameworkElement(String description, boolean managesPorts, Thread mainThread) {
+  //ownedPorts = managesPorts ? new SafeArrayList<Port<?>>() : null;
+  //mainThread = mainThread == null ? (managesPorts ? Thread.currentThread() : null) : mainThread;
+  //}
+
+  //    /**
+  //     * \return Tree Node representation of this runtime object
+  //     */
+  //    @JavaOnly protected DefaultMutableTreeNode createTreeNode() {
+  //        return new DefaultMutableTreeNode(primary.description);
+  //    }
+
   //! same as below - except that we return a const char* - this way, no memory needs to be allocated
   const char* GetCDescription()
   {
@@ -477,10 +553,7 @@ public:
   /*!
    * \return Name/Description
    */
-  inline const util::tString GetDescription() const
-  {
-    return primary.description.Length() == 0 ? "(anonymous)" : primary.description;
-  }
+  const util::tString GetDescription() const;
 
   /*!
    * Is specified flag set?
@@ -505,53 +578,53 @@ public:
   //  //public Port<?>
   //
   //  protected NumberPort addNumberPort(boolean output, @Const @Ref String description, @CppDefault("CoreNumber::ZERO") @Const @Ref Number defaultValue, @CppDefault("NULL") Unit unit) {
-  //    return addNumberPort(output ? PortFlags.OUTPUT_PORT : PortFlags.INPUT_PORT, description, defaultValue, unit);
+  //      return addNumberPort(output ? PortFlags.OUTPUT_PORT : PortFlags.INPUT_PORT, description, defaultValue, unit);
   //  }
   //
   //  protected NumberPort addNumberPort(int flags, @Const @Ref String description, @CppDefault("CoreNumber::ZERO") @Const @Ref Number defaultValue, @CppDefault("NULL") Unit unit) {
-  //    PortCreationInfo pci = new PortCreationInfo(description, this, flags);
-  //    //PortDataCreationInfo.get().set(DataTypeRegister2.getDataTypeEntry(CoreNumberContainer.class), owner, prototype);
-  //    //pci.defaultValue = new CoreNumberContainer(new CoreNumber2(defaultValue, unit));
-  //    pci.unit = unit;
-  //    //pci.parent = this;
-  //    NumberPort np = new NumberPort(pci);
-  //    np.getDefaultBuffer().setValue(defaultValue, unit != null ? unit : Unit.NO_UNIT);
-  //    //addChild(np);
-  //    return np;
+  //      PortCreationInfo pci = new PortCreationInfo(description, this, flags);
+  //      //PortDataCreationInfo.get().set(DataTypeRegister2.getDataTypeEntry(CoreNumberContainer.class), owner, prototype);
+  //      //pci.defaultValue = new CoreNumberContainer(new CoreNumber2(defaultValue, unit));
+  //      pci.unit = unit;
+  //      //pci.parent = this;
+  //      NumberPort np = new NumberPort(pci);
+  //      np.getDefaultBuffer().setValue(defaultValue, unit != null ? unit : Unit.NO_UNIT);
+  //      //addChild(np);
+  //      return np;
   //  }
   //
   //  ///////////////////// convenience factory methods /////////////////////////
   //  @JavaOnly public NumberPort addNumberInputPort(@Const @Ref String description) {
-  //    return addNumberInputPort(description, CoreNumber.ZERO, Unit.NO_UNIT);
+  //      return addNumberInputPort(description, CoreNumber.ZERO, Unit.NO_UNIT);
   //  }
   //  @JavaOnly public NumberPort addNumberInputPort(@Const @Ref String description, @Const @Ref Number defaultValue) {
-  //    return addNumberInputPort(description, defaultValue, Unit.NO_UNIT);
+  //      return addNumberInputPort(description, defaultValue, Unit.NO_UNIT);
   //  }
   //  @JavaOnly public NumberPort addNumberInputPort(@Const @Ref String description, @Ptr Unit unit) {
-  //    return addNumberInputPort(description, CoreNumber.ZERO, unit);
+  //      return addNumberInputPort(description, CoreNumber.ZERO, unit);
   //  }
   //  public NumberPort addNumberInputPort(@Const @Ref String description, @CppDefault("CoreNumber::ZERO") @Const @Ref Number defaultValue, @CppDefault("NULL") @Ptr Unit unit) {
-  //    return addNumberPort(false, description, defaultValue, unit);
+  //      return addNumberPort(false, description, defaultValue, unit);
   //  }
   //  /*public NumberPort addNumberInputPort(String description, Number defaultValue, Unit unit, double min, double max) {
   //
   //  }*/
   //
   //  @JavaOnly public NumberPort addNumberOutputPort(@Const @Ref String description) {
-  //    return addNumberOutputPort(description, CoreNumber.ZERO, Unit.NO_UNIT);
+  //      return addNumberOutputPort(description, CoreNumber.ZERO, Unit.NO_UNIT);
   //  }
   //  @JavaOnly public NumberPort addNumberOutputPort(@Const @Ref String description, @Const @Ref Number defaultValue) {
-  //    return addNumberOutputPort(description, defaultValue, Unit.NO_UNIT);
+  //      return addNumberOutputPort(description, defaultValue, Unit.NO_UNIT);
   //  }
   //  @JavaOnly public NumberPort addNumberOutputPort(@Const @Ref String description, @Ptr Unit unit) {
-  //    return addNumberOutputPort(description, CoreNumber.ZERO, unit);
+  //      return addNumberOutputPort(description, CoreNumber.ZERO, unit);
   //  }
   //  public NumberPort addNumberOutputPort(@Const @Ref String description, @CppDefault("CoreNumber::ZERO") @Const @Ref Number defaultValue, @CppDefault("NULL") @Ptr Unit unit) {
-  //    return addNumberPort(true, description, defaultValue, unit);
+  //      return addNumberPort(true, description, defaultValue, unit);
   //  }
   //
   //  public NumberPort addNumberProxyPort(boolean output, @Const @Ref String description, @CppDefault("CoreNumber::ZERO") @Const @Ref Number defaultValue, @CppDefault("NULL") @Ptr Unit unit) {
-  //    return addNumberPort(output ? PortFlags.OUTPUT_PROXY : PortFlags.INPUT_PROXY, description, defaultValue, unit);
+  //      return addNumberPort(output ? PortFlags.OUTPUT_PROXY : PortFlags.INPUT_PROXY, description, defaultValue, unit);
   //  }
 
   /*!
@@ -560,19 +633,29 @@ public:
    */
   inline int GetHandle() const
   {
-    return handle;
+    return obj_mutex.GetSecondary();
   }
 
   /*!
    * \param link_index Index of link (0 = primary)
    * \return Link with specified index
+   * (should be called in synchronized context)
    */
   const tLink* GetLink(size_t link_index) const;
 
   /*!
    * \return Number of links to this port
+   * (should be called in synchronized context)
    */
   size_t GetLinkCount() const;
+
+  /*!
+   * \return Order value in which element needs to be locked (higher means later/after)
+   */
+  inline int GetLockOrder() const
+  {
+    return obj_mutex.GetPrimary();
+  }
 
   /*!
    * \return Primary parent framework element
@@ -586,10 +669,7 @@ public:
    * \param link_index Link that is referred to (0 = primary link)
    * \return Parent of framework element using specified link
    */
-  inline tFrameworkElement* GetParent(int link_index) const
-  {
-    return GetLink(link_index)->parent;
-  }
+  tFrameworkElement* GetParent(int link_index) const;
 
   /*!
    * (Use StringBuilder version if efficiency or real-time is an issue)
@@ -611,7 +691,7 @@ public:
    */
   inline bool GetQualifiedLink(util::tStringBuilder& sb) const
   {
-    return GetQualifiedLink(sb, 0u);
+    return GetQualifiedLink(sb, &(primary));
   }
 
   /*!
@@ -672,7 +752,7 @@ public:
    */
   inline void GetQualifiedName(util::tStringBuilder& sb) const
   {
-    GetQualifiedName(sb, 0u);
+    GetQualifiedName(sb, &(primary));
   }
 
   /*!
@@ -700,9 +780,24 @@ public:
   }
 
   /*!
-   * \return RuntimeEnvironment this object belongs to (Null if there's no runtime as parent element)
+   * (for convenience)
+   * \return Registry of the one and only RuntimeEnvironment - Structure changing operations need to be synchronized on this object!
+   * (Only lock runtime for minimal periods of time!)
+   */
+  util::tMutexLockOrder& GetRegistryLock() const;
+
+  /*!
+   * (for convenience)
+   * \return The one and only RuntimeEnvironment
    */
   tRuntimeEnvironment* GetRuntime() const;
+
+  /*!
+   * (for convenience)
+   * \return List with all thread local caches - Some cleanup methods require that this is locked
+   * (Only lock runtime for minimal periods of time!)
+   */
+  util::tMutexLockOrder& GetThreadLocalCacheInfosLock() const;
 
   /*!
    * Initialize this framework element and all framework elements in sub tree that were created by this thread
@@ -731,7 +826,7 @@ public:
   //   * It is only valid as long as the structure and descriptions stay the same.
   //   */
   //  public String getUid() {
-  //    return getUid(false, RuntimeEnvironment.class).toString();
+  //      return getUid(false, RuntimeEnvironment.class).toString();
   //  }
   //
   //  /**
@@ -739,7 +834,7 @@ public:
   //   * In case it is part of a remote runtime environment, the uid in the remote environment is returned.
   //   */
   //  public String getOriginalUid() {
-  //    return getUid(false, core.Runtime.class).toString();
+  //      return getUid(false, core.Runtime.class).toString();
   //  }
   //
   //  /**
@@ -750,67 +845,67 @@ public:
   //   * \return Returns the element's uid, which is the concatenated description of it and all parents.
   //   */
   //  protected StringBuilder getUid(boolean includeSeparator, Class<?> upToParent) {
-  //    StringBuilder temp = null;
-  //    if (upToParent.isAssignableFrom(getClass())) {
-  //      return new StringBuilder();
-  //    } else if (parent == null || upToParent.isAssignableFrom(parent.getClass())) {
-  //      temp = new StringBuilder(description);
-  //    } else {
-  //      temp = parent.getUid(true, upToParent).append(description);
-  //    }
-  //    if (includeSeparator) {
-  //      temp.append(getUidSeparator());
-  //    }
-  //    return temp;
+  //      StringBuilder temp = null;
+  //      if (upToParent.isAssignableFrom(getClass())) {
+  //          return new StringBuilder();
+  //      } else if (parent == null || upToParent.isAssignableFrom(parent.getClass())) {
+  //          temp = new StringBuilder(description);
+  //      } else {
+  //          temp = parent.getUid(true, upToParent).append(description);
+  //      }
+  //      if (includeSeparator) {
+  //          temp.append(getUidSeparator());
+  //      }
+  //      return temp;
   //  }
 
   //  /**
   //   * \return Is RuntimeElement member of remote runtime
   //   */
   //  public boolean isRemote() {
-  //    if (remote >= 0) {
+  //      if (remote >= 0) {
+  //          return remote > 0;
+  //      }
+  //      if (this instanceof core.Runtime) {
+  //          remote = (this instanceof RuntimeEnvironment) ? 0 : 1;
+  //          return remote > 0;
+  //      }
+  //      remote = parent.isRemote() ? 1 : 0;
   //      return remote > 0;
-  //    }
-  //    if (this instanceof core.Runtime) {
-  //      remote = (this instanceof RuntimeEnvironment) ? 0 : 1;
-  //      return remote > 0;
-  //    }
-  //    remote = parent.isRemote() ? 1 : 0;
-  //    return remote > 0;
   //  }
   //
   //  /**
   //   * \return Character Sequence that separates the UID after this class;
   //   */
   //  protected char getUidSeparator() {
-  //    return '.';
+  //      return '.';
   //  }
   //
   //  /**
   //   * \return Returns true when element is deleted
   //   */
   //  public boolean isDeleted() {
-  //    return deleted;
+  //      return deleted;
   //  }
   //
   //  /**
   //   * Get all tasks from children... for thread migration... not a very nice way of doing it... but well
   //   */
   //  protected void collectTasks(List<Task> t) {
-  //    List<FrameworkElement> l = getChildren();
-  //    for (int i = 0; i < l.size(); i++) {
-  //      FrameworkElement child = l.get(i);
-  //      if (child != null) {
-  //        child.collectTasks(t);
+  //      List<FrameworkElement> l = getChildren();
+  //      for (int i = 0; i < l.size(); i++) {
+  //          FrameworkElement child = l.get(i);
+  //          if (child != null) {
+  //              child.collectTasks(t);
+  //          }
   //      }
-  //    }
   //  }
   //
   //  /**
   //   * \return Parent
   //   */
   //  public FrameworkElement getParent() {
-  //    return parent;
+  //      return parent;
   //  }
   //
   //  /**
@@ -818,7 +913,7 @@ public:
   //   * safe unsynchronized iteration. May contain null-entries.
   //   */
   //  public List<FrameworkElement> getChildren() {
-  //    return children.getFastUnmodifiable();
+  //      return children.getFastUnmodifiable();
   //  }
   //
   //  /**
@@ -826,7 +921,7 @@ public:
   //   * \return Child at specified index
   //   */
   //  public FrameworkElement getChildAt(int childIndex) {
-  //    return children.get(childIndex);
+  //      return children.get(childIndex);
   //  }
   //
   //  /**
@@ -838,37 +933,37 @@ public:
   //   * \return Child (null if does not exists)
   //   */
   //  public FrameworkElement getChild(String uid, boolean absolute) {
-  //    if (absolute) {
-  //      String myUid = getUid(true, RuntimeEnvironment.class).toString();
-  //      if (!uid.startsWith(myUid)) {
-  //        return uid.equals(getUid()) ? this : null;
-  //      } else if (uid.length() == myUid.length()) {
-  //        return this;
-  //      }
-  //      uid = uid.substring(myUid.length());  // cut off separator
-  //    }
-  //
-  //    // uid now relative
-  //    List<FrameworkElement> l = getChildren();
-  //    for (int i = 0; i < l.size(); i++) {
-  //      FrameworkElement child = l.get(i);
-  //      if (child == null) {
-  //        continue;
-  //      }
-  //      String childDesc = child.getDescription();
-  //      if (uid.length() < childDesc.length()) {
-  //        continue;
-  //      } else if (uid.length() >= childDesc.length()) {
-  //        if (uid.startsWith(childDesc)) {
-  //          if (uid.length() == childDesc.length()) {
-  //            return child;
-  //          } else if (uid.charAt(childDesc.length()) == child.getUidSeparator()){
-  //            return child.getChild(uid.substring(childDesc.length() + 1), false);
+  //      if (absolute) {
+  //          String myUid = getUid(true, RuntimeEnvironment.class).toString();
+  //          if (!uid.startsWith(myUid)) {
+  //              return uid.equals(getUid()) ? this : null;
+  //          } else if (uid.length() == myUid.length()) {
+  //              return this;
   //          }
-  //        }
+  //          uid = uid.substring(myUid.length());  // cut off separator
   //      }
-  //    }
-  //    return null;
+  //
+  //      // uid now relative
+  //      List<FrameworkElement> l = getChildren();
+  //      for (int i = 0; i < l.size(); i++) {
+  //          FrameworkElement child = l.get(i);
+  //          if (child == null) {
+  //              continue;
+  //          }
+  //          String childDesc = child.getDescription();
+  //          if (uid.length() < childDesc.length()) {
+  //              continue;
+  //          } else if (uid.length() >= childDesc.length()) {
+  //              if (uid.startsWith(childDesc)) {
+  //                  if (uid.length() == childDesc.length()) {
+  //                      return child;
+  //                  } else if (uid.charAt(childDesc.length()) == child.getUidSeparator()){
+  //                      return child.getChild(uid.substring(childDesc.length() + 1), false);
+  //                  }
+  //              }
+  //          }
+  //      }
+  //      return null;
   //  }
   //
   //  /**
@@ -878,9 +973,9 @@ public:
   //   * \return List of children
   //   */
   //  public <T extends FrameworkElement> List<T> getAllChildren(Class<T> childClass) {
-  //    List<T> result = new ArrayList<T>();
-  //    getAllChildrenHelper(result, childClass);
-  //    return result;
+  //      List<T> result = new ArrayList<T>();
+  //      getAllChildrenHelper(result, childClass);
+  //      return result;
   //  }
   //
   //  /**
@@ -891,16 +986,16 @@ public:
   //   */
   //  @SuppressWarnings("unchecked")
   //  private <T extends FrameworkElement> void getAllChildrenHelper(List<T> result, Class<T> childClass) {
-  //    for (int i = 0, n = children.size(); i < n; i++) {
-  //      FrameworkElement child = children.get(i);
-  //      if (child == null) {
-  //        continue;
+  //      for (int i = 0, n = children.size(); i < n; i++) {
+  //          FrameworkElement child = children.get(i);
+  //          if (child == null) {
+  //              continue;
+  //          }
+  //          if (childClass == null || childClass.isAssignableFrom(child.getClass())) {
+  //              result.add((T)child);
+  //          }
+  //          child.getAllChildrenHelper(result, childClass);
   //      }
-  //      if (childClass == null || childClass.isAssignableFrom(child.getClass())) {
-  //        result.add((T)child);
-  //      }
-  //      child.getAllChildrenHelper(result, childClass);
-  //    }
   //  }
   //
   //  /**
@@ -911,7 +1006,7 @@ public:
   //   * \param oos Stream to serialize to.
   //   */
   //  public void serializeUid(CoreOutputStream oos) throws IOException  {
-  //    serializeUid(oos, true);
+  //      serializeUid(oos, true);
   //  }
   //
   //  /**
@@ -921,15 +1016,15 @@ public:
   //   * \param firstCall Object the method was called on?
   //   */
   //  protected void serializeUid(CoreOutputStream oos, boolean firstCall) throws IOException {
-  //    if (parent != null) {
-  //      parent.serializeUid(oos, false);
-  //    }
-  //    oos.write8BitStringPart(description);
-  //    if (firstCall) {
-  //      oos.write8BitString(""); // end string
-  //    } else {
-  //      oos.writeByte(getUidSeparator());
-  //    }
+  //      if (parent != null) {
+  //          parent.serializeUid(oos, false);
+  //      }
+  //      oos.write8BitStringPart(description);
+  //      if (firstCall) {
+  //          oos.write8BitString(""); // end string
+  //      } else {
+  //          oos.writeByte(getUidSeparator());
+  //      }
   //  }
   //
   //  /**
@@ -938,64 +1033,64 @@ public:
   //   * asynchronously getting it should synchronize with this object.
   //   */
   //  public Object getPortManagerSynchInstance() {
-  //    return ownedPorts;
+  //      return ownedPorts;
   //  }
   //
   //  /**
   //   * \return Is RuntimeElement responsible for releasing unused port values?
   //   */
   //  public boolean isPortManager() {
-  //    return ownedPorts != null;
+  //      return ownedPorts != null;
   //  }
   //
   //  /**
   //   * \param p Port that this RuntimeElement owns
   //   */
   //  protected void addOwnedPort(Port<?> p) {
-  //    if (isPortManager()) {
-  //      if (p.isOutputPort()) {
-  //        p.setMainThread(getMainThread());
+  //      if (isPortManager()) {
+  //          if (p.isOutputPort()) {
+  //              p.setMainThread(getMainThread());
+  //          }
+  //          ownedPorts.add(p);
+  //      } else {
+  //          parent.addOwnedPort(p);
   //      }
-  //      ownedPorts.add(p);
-  //    } else {
-  //      parent.addOwnedPort(p);
-  //    }
   //  }
   //
   //  /**
   //   * \param p Port that this RuntimeElement does not own any longer
   //   */
   //  protected void removeOwnedPort(Port<?> p) {
-  //    if (isPortManager()) {
-  //      ownedPorts.remove(p);
-  //    } else {
-  //      parent.removeOwnedPort(p);
-  //    }
+  //      if (isPortManager()) {
+  //          ownedPorts.remove(p);
+  //      } else {
+  //          parent.removeOwnedPort(p);
+  //      }
   //  }
   //
   //  /**
   //   * \return Main Thread. This thread can write to the runtime element's ports without synchronization
   //   */
   //  public Thread getMainThread() {
-  //    return mainThread;
+  //      return mainThread;
   //  }
   //
   //  /**
   //   * \param Main Thread. This thread can write to the runtime element's ports without synchronization
   //   */
   //  public void setMainThread(Thread mainThread) {
-  //    // update main thread of ports
-  //    this.mainThread = mainThread;
-  //    if (isPortManager()) {
-  //      synchronized(ownedPorts) {
-  //        for (int i = 0; i < ownedPorts.size(); i++) {
-  //          PortBase<?> p = ownedPorts.get(i);
-  //          if (p != null && p != this) {
-  //            ownedPorts.get(i).setMainThread(mainThread);
+  //      // update main thread of ports
+  //      this.mainThread = mainThread;
+  //      if (isPortManager()) {
+  //          synchronized(ownedPorts) {
+  //              for (int i = 0; i < ownedPorts.size(); i++) {
+  //                  PortBase<?> p = ownedPorts.get(i);
+  //                  if (p != null && p != this) {
+  //                      ownedPorts.get(i).setMainThread(mainThread);
+  //                  }
+  //              }
   //          }
-  //        }
   //      }
-  //    }
   //  }
 
   /*!
@@ -1039,6 +1134,17 @@ public:
   }
 
   /*!
+   * Can this framework element be locked after the specified one has been locked?
+   *
+   * \param fe Specified other framework element
+   * \return Answer
+   */
+  inline bool LockAfter(const tFrameworkElement* fe) const
+  {
+    return obj_mutex.ValidAfter(fe->obj_mutex);
+  }
+
+  /*!
    * Deletes element and all child elements
    */
   inline void ManagedDelete()
@@ -1071,10 +1177,7 @@ public:
    * \param os OutputStream
    * \param i Link Number (0 is primary link/description)
    */
-  inline void WriteDescription(tCoreOutput* os, int i) const
-  {
-    os->WriteString(GetLink(i)->description);
-  }
+  void WriteDescription(tCoreOutput* os, int i) const;
 
 };
 

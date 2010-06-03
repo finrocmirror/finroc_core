@@ -77,17 +77,17 @@ public:
   }
 
   //  public static void staticStop() {
-  //    if (instance == null) {
-  //      return;
-  //    }
-  //    instance.stopThread();
-  //    try {
-  //      instance.join();
-  //    } catch (InterruptedException e) {
-  //      //e.printStackTrace();
-  //      System.out.println("Exception in StreamCommitThread::staticStop");
-  //    }
-  //    instance = null;
+  //      if (instance == null) {
+  //          return;
+  //      }
+  //      instance.stopThread();
+  //      try {
+  //          instance.join();
+  //      } catch (InterruptedException e) {
+  //          //e.printStackTrace();
+  //          System.out.println("Exception in StreamCommitThread::staticStop");
+  //      }
+  //      instance = null;
   //  }
 
   virtual void StopThread();

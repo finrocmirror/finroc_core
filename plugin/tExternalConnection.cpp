@@ -22,13 +22,14 @@
 #include "core/plugin/tExternalConnection.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/tCoreFlags.h"
+#include "core/tLockOrderLevels.h"
 
 namespace finroc
 {
 namespace core
 {
 tExternalConnection::tExternalConnection(const util::tString& description, const util::tString& default_address) :
-    tFrameworkElement(description, tRuntimeEnvironment::GetInstance(), tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cNETWORK_ELEMENT),
+    tFrameworkElement(description, tRuntimeEnvironment::GetInstance(), tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cNETWORK_ELEMENT, tLockOrderLevels::cLEAF_GROUP),
     last_address(default_address),
     connected(false),
     listener(),
@@ -38,7 +39,7 @@ tExternalConnection::tExternalConnection(const util::tString& description, const
 
 void tExternalConnection::Connect(const util::tString& address)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
 
   ConnectImpl(address, (!first_connect) && address.Equals(last_address));
   PostConnect(address);
@@ -46,7 +47,7 @@ void tExternalConnection::Connect(const util::tString& address)
 
 void tExternalConnection::Disconnect()
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   try
   {
     DisconnectImpl();
@@ -68,7 +69,7 @@ void tExternalConnection::PostConnect(const util::tString& address)
 
 void tExternalConnection::PrepareDelete()
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   try
   {
     Disconnect();

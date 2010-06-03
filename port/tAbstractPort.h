@@ -51,6 +51,11 @@ class tPortData;
  * Convention: Protected Methods do not perform any necessary synchronization
  * concerning calling threads (that they are called only once at the same time)
  * This has to be done by all public methods.
+ *
+ * Methods are all thread-safe. Most setting methods are synchronized on runtime.
+ * Constant methods may return outdated results when element is concurrently changed.
+ * In many cases this (non-blocking) behaviour is intended.
+ * However, to avoid that, synchronize to runtime before calling.
  */
 class tAbstractPort : public tFrameworkElement
 {
@@ -126,6 +131,29 @@ private:
    */
   void ConsiderInitialReversePush(tAbstractPort* target);
 
+  //          if (!acceptsReverseData()) {
+  //              if (strategy > 0 && max <= 0) { // reset INITIAL_PUSH_RECEIVED flag, when we switch to a pull strategy (so that switch to push strategy will cause a push again)
+  //                  setFlag(PortFlags.INITIAL_PUSH_RECEIVED, false);
+  //              } else if (strategy <= 0 && max > 0) { // we should consider an initial push
+  //                  if ((!hasIncomingEdges()) && considerPush) {
+  //                      for (int i = 0, n = it.size(); i < n; i++) {
+  //                          @Ptr AbstractPort port = it.get(i);
+  //                          if (port != null && port.pushStrategy()) {
+  //                              considerInitialPush(port);
+  //                          }
+  //                      }
+  //                  }
+  //              }
+  //          }
+
+  /*!
+   * Forward current strategy to source ports (helper for above - and possibly variations of above)
+   *
+   * \param strategy2 New Strategy of this port
+   * \param push_wanter Port that "wants" an initial push and from whom this call originates - null if there's no port that wants as push
+   */
+  void ForwardStrategy(int16 strategy2, tAbstractPort* push_wanter);
+
   /*!
    * Transforms (possibly relative link) to absolute link
    *
@@ -159,35 +187,13 @@ protected:
   /*!
    * Called whenever a connection to this port was removed
    * (meant to be overridden by subclasses)
+   * (called with runtime-registry lock)
    *
    * \param partner Port at other end of connection
    */
   virtual void ConnectionRemoved(tAbstractPort* partner)
   {
   }
-
-  //      if (!acceptsReverseData()) {
-  //        if (strategy > 0 && max <= 0) { // reset INITIAL_PUSH_RECEIVED flag, when we switch to a pull strategy (so that switch to push strategy will cause a push again)
-  //          setFlag(PortFlags.INITIAL_PUSH_RECEIVED, false);
-  //        } else if (strategy <= 0 && max > 0) { // we should consider an initial push
-  //          if ((!hasIncomingEdges()) && considerPush) {
-  //            for (int i = 0, n = it.size(); i < n; i++) {
-  //              @Ptr AbstractPort port = it.get(i);
-  //              if (port != null && port.pushStrategy()) {
-  //                considerInitialPush(port);
-  //              }
-  //            }
-  //          }
-  //        }
-  //      }
-
-  /*!
-   * Forward current strategy to source ports (helper for above - and possibly variations of above)
-   *
-   * \param strategy2 New Strategy of this port
-   * \param push_wanter Port that "wants" an initial push and from whom this call originates - null if there's no port that wants as push
-   */
-  void ForwardStrategy(int16 strategy2, tAbstractPort* push_wanter);
 
   /*!
    * \return Maximum queue length
@@ -196,6 +202,7 @@ protected:
 
   /*!
    * \return Returns minimum strategy requirement (for this port in isolation) - typically 0 for non-input-ports
+   * (Called in runtime-registry synchronized context only)
    */
   virtual int16 GetStrategyRequirement() const;
 
@@ -223,6 +230,7 @@ protected:
   /*!
    * Called whenever a new connection to this port was established
    * (meant to be overridden by subclasses)
+   * (called with runtime-registry lock)
    *
    * \param partner Port at other end of connection
    */
@@ -259,13 +267,14 @@ protected:
   {
     changed = cCHANGED_INITIAL;
     /*if (parent instanceof PortSet) {
-      ((PortSet)parent).childChanged();
+        ((PortSet)parent).childChanged();
     }*/
   }
 
   /*!
    * Set maximum queue length
    * (only implementation - does not set flags or propagate strategy)
+   * (Called in runtime-registry synchronized context only)
    *
    * \param length Maximum queue length (values <= 1 mean that there is no queue)
    */
@@ -275,7 +284,7 @@ protected:
   //   * \return Has port (ever) been linked?
   //   */
   //  @ConstMethod public boolean isLinked() {
-  //    return linksTo != null;
+  //      return linksTo != null;
   //  }
   //
   //  /**
@@ -285,15 +294,15 @@ protected:
   //   * \return Answer
   //   */
   //  @ConstMethod public boolean isLinked(@Const @Ref String linkName) {
-  //    if (linksTo == null) {
-  //      return false;
-  //    }
-  //    for (@SizeT int i = 0; i < linksTo.size(); i++) {
-  //      if (linksTo.get(i).equals(linkName)) {
-  //        return true;
+  //      if (linksTo == null) {
+  //          return false;
   //      }
-  //    }
-  //    return false;
+  //      for (@SizeT int i = 0; i < linksTo.size(); i++) {
+  //          if (linksTo.get(i).equals(linkName)) {
+  //              return true;
+  //          }
+  //      }
+  //      return false;
   //  }
 
   /*!
@@ -311,15 +320,15 @@ protected:
   //   */
   //  @SuppressWarnings("unchecked")
   //  protected boolean wantsInitialPush() {
-  //    int sources = 0;
-  //    @Ptr ArrayWrapper<AbstractPort> src = edgesDest.getIterable();
-  //    for (int i = 0, n = src.size(); i < n; i++) {
-  //      @Ptr AbstractPort pb = src.get(i);
-  //      if (pb != null && pb.isReady()) {
-  //        sources++;
+  //      int sources = 0;
+  //      @Ptr ArrayWrapper<AbstractPort> src = edgesDest.getIterable();
+  //      for (int i = 0, n = src.size(); i < n; i++) {
+  //          @Ptr AbstractPort pb = src.get(i);
+  //          if (pb != null && pb.isReady()) {
+  //              sources++;
+  //          }
   //      }
-  //    }
-  //    return isReady() && strategy > 0 && sources <= 1;
+  //      return isReady() && strategy > 0 && sources <= 1;
   //  }
 
   template <bool cREVERSE, int8 cCHANGE_CONSTANT>
@@ -333,7 +342,7 @@ protected:
    * Typically it does, unless it has multiple sources or no push strategy itself.
    * (Standard implementation for this)
    */
-  inline bool WantsPush(bool reverse, int8 change_constant)
+  inline bool WantsPush(bool reverse, int8 change_constant) const
   {
     // I think and hope that the compiler is intelligent enough to optimize branches away...
     if (cREVERSE)
@@ -372,7 +381,7 @@ public:
   //   * \return Answer
   //   */
   //  @ConstMethod public boolean isFirstLink(@Const @Ref String link) {
-  //    return linksTo.get(0).equals(link);
+  //      return linksTo.get(0).equals(link);
   //  }
 
   //  /**
@@ -383,7 +392,7 @@ public:
   //   * \return link name
   //   */
   //  @ConstMethod public /*@Const @Ref*/ void getLink(int i, @Ref StringBuilder buffer) {
-  //    getQualifiedLink(buffer, i);
+  //      getQualifiedLink(buffer, i);
   //  }
 
   /*!
@@ -450,7 +459,7 @@ public:
   /*!
    * \return Changed "flag" (has two different values for ordinary and initial data)
    */
-  inline int8 GetChanged()
+  inline int8 GetChanged() const
   {
     return changed;
   }
@@ -458,7 +467,7 @@ public:
   /*!
    * \return Number of connections to this port (incoming and outgoing)
    */
-  inline int GetConnectionCount()
+  inline int GetConnectionCount() const
   {
     return edges_dest->CountElements() + edges_src->CountElements();
   }
@@ -529,14 +538,14 @@ public:
   //   */
   //  @SuppressWarnings("unchecked") @ConstMethod
   //  public boolean hasActiveEdges() {
-  //    @Ptr ArrayWrapper<AbstractPort> it = edgesSrc.getIterable();
-  //    for (int i = 0, n = it.size(); i < n; i++) {
-  //      @Ptr AbstractPort port = it.get(i);
-  //      if (port.getFlag(PortFlags.PUSH_STRATEGY)) {
-  //        return true;
+  //      @Ptr ArrayWrapper<AbstractPort> it = edgesSrc.getIterable();
+  //      for (int i = 0, n = it.size(); i < n; i++) {
+  //          @Ptr AbstractPort port = it.get(i);
+  //          if (port.getFlag(PortFlags.PUSH_STRATEGY)) {
+  //              return true;
+  //          }
   //      }
-  //    }
-  //    return false;
+  //      return false;
   //  }
 
   //  /**
@@ -544,14 +553,14 @@ public:
   //   */
   //  @SuppressWarnings("unchecked") @ConstMethod
   //  public boolean hasActiveEdgesReverse() {
-  //    @Ptr ArrayWrapper<AbstractPort> it = edgesDest.getIterable();
-  //    for (int i = 0, n = it.size(); i < n; i++) {
-  //      @Ptr AbstractPort port = it.get(i);
-  //      if (port != null && port.getFlag(PortFlags.PUSH_STRATEGY_REVERSE)) {
-  //        return true;
+  //      @Ptr ArrayWrapper<AbstractPort> it = edgesDest.getIterable();
+  //      for (int i = 0, n = it.size(); i < n; i++) {
+  //          @Ptr AbstractPort port = it.get(i);
+  //          if (port != null && port.getFlag(PortFlags.PUSH_STRATEGY_REVERSE)) {
+  //              return true;
+  //          }
   //      }
-  //    }
-  //    return false;
+  //      return false;
   //  }
 
   /*!
@@ -587,7 +596,7 @@ public:
   /*!
    * \return Is port connected to output ports that request reverse pushes?
    */
-  bool IsConnectedToReversePushSources();
+  bool IsConnectedToReversePushSources() const;
 
   inline bool IsInputPort() const
   {
@@ -671,7 +680,7 @@ public:
   {
     changed = cCHANGED;
     /*if (parent instanceof PortSet) {
-      ((PortSet)parent).childChanged();
+        ((PortSet)parent).childChanged();
     }*/
   }
 
@@ -684,7 +693,7 @@ public:
   {
     changed = change_constant;
     /*if (parent instanceof PortSet) {
-      ((PortSet)parent).childChanged();
+        ((PortSet)parent).childChanged();
     }*/
   }
 
@@ -705,12 +714,7 @@ public:
    *
    * \param push Push data?
    */
-  inline void SetPushStrategy(bool push)
-  {
-    util::tLock lock2(obj_synch);
-    SetFlag(tPortFlags::cPUSH_STRATEGY, push);
-    PropagateStrategy(NULL, NULL);
-  }
+  void SetPushStrategy(bool push);
 
   /*!
    * Set whether data should be pushed or pulled in reverse direction

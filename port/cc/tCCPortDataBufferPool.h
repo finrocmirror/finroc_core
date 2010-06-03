@@ -48,6 +48,8 @@ class tCCPortDataBufferPool : public util::tReusablesPoolTL<tCCPortDataContainer
 {
 private:
 
+  ::std::tr1::shared_ptr<util::tObject> thread_local_cache_infos;
+
   /*! List/Queue with buffers returned by other threads */
   util::tWonderQueue<tCCPortQueueElement> returned_buffers;
 
@@ -71,12 +73,28 @@ private:
    */
   tCCInterThreadContainer<>* CreateInterThreadBuffer();
 
+  /*!
+   * Helper method for getting lock for above method
+   *
+   * \return Lock
+   */
+  util::tMutexLockOrder& GetThreadLocalCacheInfosLock();
+
+protected:
+
+  virtual ~tCCPortDataBufferPool();
+
 public:
 
   /*!
    * \param data_type Type of buffers in pool
    */
   tCCPortDataBufferPool(tDataType* data_type_, int initial_size);
+
+  virtual void AutoDelete()
+  {
+    ControlledDelete();
+  }
 
   /* (non-Javadoc)
    * @see jc.container.ReusablesPoolTL#controlledDelete()
@@ -121,19 +139,19 @@ public:
   //   * Reclaim any returned PortDataContainers
   //   */
   //  private boolean reclaimReturnedBuffers(ThreadLocalCache tc) {
-  //    ArrayWrapper<CCPortDataContainer<?>> buffer = tc.reclaimBuffer;
-  //    //typically reclaim maximum of 10 buffers to make things more deterministic/predictable
-  //    int n = returnedBuffers.dequeue(buffer, buffer.getCapacity());
-  //    for (int i = 0; i < n; i++) {
-  //      buffer.get(i).releaseLock();
-  //    }
-  //    return n;
+  //      ArrayWrapper<CCPortDataContainer<?>> buffer = tc.reclaimBuffer;
+  //      //typically reclaim maximum of 10 buffers to make things more deterministic/predictable
+  //      int n = returnedBuffers.dequeue(buffer, buffer.getCapacity());
+  //      for (int i = 0; i < n; i++) {
+  //          buffer.get(i).releaseLock();
+  //      }
+  //      return n;
   //  }
 
   //  @Override @NonVirtual
   //  public void enqueue(@Ptr CCPortDataContainer<? extends CCPortData> pd) {
-  //    assert pd.refCounter == 0;
-  //    super.enqueue(pd);
+  //      assert pd.refCounter == 0;
+  //      super.enqueue(pd);
   //  }
 
   /*!
@@ -142,26 +160,6 @@ public:
    * \param pd Port data to release lock of
    */
   void ReleaseLock(tCCPortDataContainer<>* pd);
-
-  virtual void AutoDelete()
-  {
-    ControlledDelete();
-  }
-
-protected:
-  virtual ~tCCPortDataBufferPool()
-  {
-    // delete any returned buffers
-    tCCPortQueueElement* pqe = returned_buffers.Dequeue();
-    tCCPortDataContainer<>* pc = NULL;
-    while (pqe != NULL)
-    {
-      pc = static_cast<tCCPortDataContainer<>*>(pqe->GetElement());
-      pqe->Recycle(false);
-      pc->PostThreadReleaseLock();
-      pqe = returned_buffers.Dequeue();
-    }
-  }
 
 };
 

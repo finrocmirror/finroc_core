@@ -42,21 +42,15 @@ tRuntimeEnvironment::tStaticDeleter::~tStaticDeleter()
   tRuntimeEnvironment::Shutdown();
 }
 
-util::tMutex tRuntimeEnvironment::static_obj_synch;
 ::std::tr1::shared_ptr<tRuntimeEnvironment> tRuntimeEnvironment::instance;
 tRuntimeEnvironment* tRuntimeEnvironment::instance_raw_ptr = NULL;
 bool tRuntimeEnvironment::active = false;
+util::tMutexLockOrder tRuntimeEnvironment::static_class_mutex(tLockOrderLevels::cFIRST);
 
 tRuntimeEnvironment::tRuntimeEnvironment() :
-    tFrameworkElement("Runtime", NULL, tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cIS_RUNTIME),
-    ports(new tCoreRegister<tAbstractPort*>(true)),
-    elements(false),
-    link_edges(NULL),
-    listeners(),
-    temp_buffer(),
+    tFrameworkElement("Runtime", NULL, tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cIS_RUNTIME, tLockOrderLevels::cRUNTIME_ROOT),
+    registry(this),
     creation_time(util::tTime::GetPrecise()),
-    infos_lock(),
-    alternative_link_roots(),
     unrelated(NULL)
 {
   assert(instance == NULL);
@@ -64,12 +58,12 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
   instance_raw_ptr = this;
   active = true;
 
-  //    for (int i = 0; i < RuntimeSettings.NUM_OF_LOOP_THREADS; i++) {
-  //      loopThreads.add(new CoreLoopThread(i, i < RuntimeSettings.SELF_UPDATING_LOOP_THREADS));
-  //    }
-  //    for (int i = 0; i < RuntimeSettings.NUM_OF_EVENT_THREADS; i++) {
-  //      eventThreads.add(new CoreEventThread(i));
-  //    }
+  //      for (int i = 0; i < RuntimeSettings.NUM_OF_LOOP_THREADS; i++) {
+  //          loopThreads.add(new CoreLoopThread(i, i < RuntimeSettings.SELF_UPDATING_LOOP_THREADS));
+  //      }
+  //      for (int i = 0; i < RuntimeSettings.NUM_OF_EVENT_THREADS; i++) {
+  //          eventThreads.add(new CoreEventThread(i));
+  //      }
 
   // init runtime settings
   //settings = new RuntimeSettings();
@@ -81,26 +75,36 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
 
 void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge* edge)
 {
-  util::tLock lock1(obj_synch);
-  tLinkEdge* interested = link_edges.Get(link);
-  if (interested == NULL)
   {
-    // add first edge
-    link_edges.Put(link, edge);
-  }
-  else
-  {
-    // insert edge
-    tLinkEdge* next = interested->GetNext();
-    interested->SetNext(edge);
-    edge->SetNext(next);
-  }
+    util::tLock lock2(registry);
+    tLinkEdge* interested = registry.link_edges.Get(link);
+    if (interested == NULL)
+    {
+      // add first edge
+      registry.link_edges.Put(link, edge);
+    }
+    else
+    {
+      // insert edge
+      tLinkEdge* next = interested->GetNext();
+      interested->SetNext(edge);
+      edge->SetNext(next);
+    }
 
-  // directly notify link edge?
-  tAbstractPort* p = GetPort(link);
-  if (p != NULL)
+    // directly notify link edge?
+    tAbstractPort* p = GetPort(link);
+    if (p != NULL)
+    {
+      edge->LinkAdded(this, link, p);
+    }
+  }
+}
+
+void tRuntimeEnvironment::AddListener(tRuntimeListener* listener)
+{
   {
-    edge->LinkAdded(this, link, p);
+    util::tLock lock2(registry);
+    registry.listeners.Add(listener);
   }
 }
 
@@ -116,7 +120,7 @@ tRuntimeEnvironment* tRuntimeEnvironment::GetInstance()
 
 tAbstractPort* tRuntimeEnvironment::GetPort(int port_handle)
 {
-  tAbstractPort* p = ports->Get(port_handle);
+  tAbstractPort* p = registry.ports->Get(port_handle);
   if (p == NULL)
   {
     return NULL;
@@ -126,46 +130,50 @@ tAbstractPort* tRuntimeEnvironment::GetPort(int port_handle)
 
 tAbstractPort* tRuntimeEnvironment::GetPort(const util::tString& link_name)
 {
-  ::finroc::core::tFrameworkElement* fe = GetChildElement(link_name, false);
-  if (fe == NULL)
   {
-    for (size_t i = 0u; i < alternative_link_roots.Size(); i++)
+    util::tLock lock2(registry);
+
+    ::finroc::core::tFrameworkElement* fe = GetChildElement(link_name, false);
+    if (fe == NULL)
     {
-      ::finroc::core::tFrameworkElement* alt_root = alternative_link_roots.Get(i);
-      fe = alt_root->GetChildElement(link_name, 0, true, alt_root);
-      if (fe != NULL)
+      for (size_t i = 0u; i < registry.alternative_link_roots.Size(); i++)
       {
-        assert(fe->IsPort());
-        return static_cast<tAbstractPort*>(fe);
+        ::finroc::core::tFrameworkElement* alt_root = registry.alternative_link_roots.Get(i);
+        fe = alt_root->GetChildElement(link_name, 0, true, alt_root);
+        if (fe != NULL && !fe->IsDeleted())
+        {
+          assert(fe->IsPort());
+          return static_cast<tAbstractPort*>(fe);
+        }
       }
+      return NULL;
     }
-    return NULL;
+    assert(fe->IsPort());
+    return static_cast<tAbstractPort*>(fe);
   }
-  assert(fe->IsPort());
-  return static_cast<tAbstractPort*>(fe);
 }
 
 tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
 {
-  util::tLock lock1(static_obj_synch);
+  util::tLock lock1(static_class_mutex);
   assert((!ShuttingDown()));
 
   // Finish initializing static members of classes
   tUnit::StaticInit();  // can safely be done first
   tConstant::StaticInit();  // needs to be done after unit
-  //    CoreNumber.staticInit(); // can be after data type register has been created
+  //      CoreNumber.staticInit(); // can be after data type register has been created
   util::tTime::GetInstance();  // (possibly) init timing thread
-  //    MethodCall.staticInit();
-  //    PullCall.staticInit();
-  ::std::tr1::shared_ptr<util::tSimpleList<tThreadLocalCache*> > infos_lock = tThreadLocalCache::StaticInit();  // can safely be done first
+  //      MethodCall.staticInit();
+  //      PullCall.staticInit();
+  ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock = tThreadLocalCache::StaticInit();  // can safely be done first
   tMethodCallSyncher::StaticInit();  // dito
   util::tBoundedQElementContainer::StaticInit();
   util::tChunkedBuffer::StaticInit();
   tStreamCommitThread::StaticInit();
-  //TransactionPacket.staticInit();
-  //TransactionPacket.staticInit();
+  //TransactionPacket.staticInit();  // should be done before any ports/elements are added
 
   new tRuntimeEnvironment(); // should be done before any ports/elements are added
+  instance->registry.infos_lock = infos_lock;
 
   // Start thread - because it needs a thread local cache
   tStreamCommitThread::GetInstance()->Start();
@@ -186,86 +194,132 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   return instance.get();
 }
 
-void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* edge)
+void tRuntimeEnvironment::MarkElementDeleted(tFrameworkElement* fe)
 {
-  util::tLock lock1(obj_synch);
-  tLinkEdge* current = link_edges.Get(link);
-  if (current == edge)
   {
-    if (current->GetNext() == NULL)    // remove entries for this link completely
+    util::tLock lock2(registry);
+    if (fe->IsPort())
     {
-      link_edges.Remove(link);
+      registry.ports->MarkDeleted(fe->GetHandle());
     }
-    else    // remove first element
+    else
     {
-      link_edges.Put(link, current->GetNext());
+      registry.elements.MarkDeleted(fe->GetHandle());
     }
   }
-  else    // remove element out of linked list
+}
+
+void tRuntimeEnvironment::PreElementInit(tFrameworkElement* element)
+{
   {
-    tLinkEdge* prev = current;
-    current = current->GetNext();
-    while (current != NULL)
+    util::tLock lock2(registry);
+    registry.listeners.Notify(element, NULL, tRuntimeListener::cPRE_INIT);
+  }
+}
+
+int tRuntimeEnvironment::RegisterElement(tFrameworkElement* fe)
+{
+  {
+    util::tLock lock2(registry);
+    return fe->IsPort() ? registry.ports->Add(static_cast<tAbstractPort*>(fe)) : registry.elements.Add(fe);
+  }
+}
+
+void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* edge)
+{
+  {
+    util::tLock lock2(registry);
+    tLinkEdge* current = registry.link_edges.Get(link);
+    if (current == edge)
     {
-      if (current == edge)
+      if (current->GetNext() == NULL)    // remove entries for this link completely
       {
-        prev->SetNext(current->GetNext());
-        return;
+        registry.link_edges.Remove(link);
       }
-      prev = current;
-      current = current->GetNext();
+      else    // remove first element
+      {
+        registry.link_edges.Put(link, current->GetNext());
+      }
     }
-    util::tSystem::out.Println(util::tStringBuilder("warning: Could not remove link edge for link: ") + link);
+    else    // remove element out of linked list
+    {
+      tLinkEdge* prev = current;
+      current = current->GetNext();
+      while (current != NULL)
+      {
+        if (current == edge)
+        {
+          prev->SetNext(current->GetNext());
+          return;
+        }
+        prev = current;
+        current = current->GetNext();
+      }
+      util::tSystem::out.Println(util::tStringBuilder("warning: Could not remove link edge for link: ") + link);
+    }
   }
 }
 
 void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tAbstractPort* partner_port)
 {
-  util::tLock lock1(obj_synch);
-  for (tLinkEdge* current = link_edges.Get(link); current != NULL; current = current->GetNext())
   {
-    if (current->GetPortHandle() == partner_port->GetHandle())
+    util::tLock lock2(registry);
+    for (tLinkEdge* current = registry.link_edges.Get(link); current != NULL; current = current->GetNext())
     {
-      delete current;
-      return;
+      if (current->GetPortHandle() == partner_port->GetHandle())
+      {
+        delete current;
+        return;
+      }
     }
+  }
+}
+
+void tRuntimeEnvironment::RemoveListener(tRuntimeListener* listener)
+{
+  {
+    util::tLock lock2(registry);
+    registry.listeners.Remove(listener);
   }
 }
 
 void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement* element)
 {
-  if (!ShuttingDown())
   {
-    if (element->GetFlag(tCoreFlags::cALTERNATE_LINK_ROOT))
+    util::tLock lock2(registry);
+    if (!ShuttingDown())
     {
-      if (change_type == tRuntimeListener::cADD)
+      if (element->GetFlag(tCoreFlags::cALTERNATE_LINK_ROOT))
       {
-        alternative_link_roots.Add(element);
-      }
-      else if (change_type == tRuntimeListener::cREMOVE)
-      {
-        alternative_link_roots.RemoveElem(element);
-      }
-    }
-
-    if (change_type == tRuntimeListener::cADD && element->IsPort())    // check links
-    {
-      tAbstractPort* ap = static_cast<tAbstractPort*>(element);
-      for (size_t i = 0u; i < ap->GetLinkCount(); i++)
-      {
-        ap->GetQualifiedLink(temp_buffer, i);
-        util::tString s = temp_buffer.ToString();
-        tLinkEdge* le = link_edges.Get(s);
-        while (le != NULL)
+        if (change_type == tRuntimeListener::cADD)
         {
-          le->LinkAdded(this, s, ap);
-          le = le->GetNext();
+          registry.alternative_link_roots.Add(element);
+        }
+        else if (change_type == tRuntimeListener::cREMOVE)
+        {
+          registry.alternative_link_roots.RemoveElem(element);
         }
       }
 
-    }
+      if (change_type == tRuntimeListener::cADD && element->IsPort())    // check links
+      {
+        tAbstractPort* ap = static_cast<tAbstractPort*>(element);
+        for (size_t i = 0u; i < ap->GetLinkCount(); i++)
+        {
+          ap->GetQualifiedLink(registry.temp_buffer, i);
+          util::tString s = registry.temp_buffer.ToString();
+          tLinkEdge* le = registry.link_edges.Get(s);
+          while (le != NULL)
+          {
+            le->LinkAdded(this, s, ap);
+            le = le->GetNext();
+          }
+        }
 
-    listeners.Notify(element, NULL, change_type);
+      }
+
+      registry.listeners.Notify(element, NULL, change_type);
+    }
   }
 }
 
@@ -281,14 +335,16 @@ void tRuntimeEnvironment::Shutdown()
 
 void tRuntimeEnvironment::UnregisterElement(tFrameworkElement* fe)
 {
-  util::tLock lock1(obj_synch);
-  if (fe->IsPort())
   {
-    ports->Remove(fe->GetHandle());
-  }
-  else
-  {
-    elements.Remove(fe->GetHandle());
+    util::tLock lock2(registry);
+    if (fe->IsPort())
+    {
+      registry.ports->Remove(fe->GetHandle());
+    }
+    else
+    {
+      registry.elements.Remove(fe->GetHandle());
+    }
   }
 }
 

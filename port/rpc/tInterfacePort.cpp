@@ -27,29 +27,40 @@ namespace finroc
 namespace core
 {
 tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_) :
-    tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, 0)), type_)),
+    tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, 0)), type_, -1)),
     type(type_),
     edges_src(),
     edges_dest(),
     buf_pool((type_ == tInterfacePort::eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
-  // this(new PortCreationInfo(description,parent,dataType,0),type);
+  // this(new PortCreationInfo(description,parent,dataType,0),type,-1);
   InitLists(&(edges_src), &(edges_dest));
 }
 
 tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_, int custom_flags) :
-    tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, custom_flags)), type_)),
+    tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, custom_flags)), type_, -1)),
     type(type_),
     edges_src(),
     edges_dest(),
     buf_pool((type_ == tInterfacePort::eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
-  // this(new PortCreationInfo(description,parent,dataType,customFlags),type);
+  // this(new PortCreationInfo(description,parent,dataType,customFlags),type,-1);
   InitLists(&(edges_src), &(edges_dest));
 }
 
-tInterfacePort::tInterfacePort(tPortCreationInfo pci, tInterfacePort::tType type_) :
-    tAbstractPort(ProcessPci(pci, type_)),
+tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_, int custom_flags, int lock_level) :
+    tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, custom_flags)), type_, lock_level)),
+    type(type_),
+    edges_src(),
+    edges_dest(),
+    buf_pool((type_ == tInterfacePort::eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+{
+  // this(new PortCreationInfo(description,parent,dataType,customFlags),type,lockLevel);
+  InitLists(&(edges_src), &(edges_dest));
+}
+
+tInterfacePort::tInterfacePort(tPortCreationInfo pci, tInterfacePort::tType type_, int lock_level) :
+    tAbstractPort(ProcessPci(pci, type_, lock_level)),
     type(type_),
     edges_src(),
     edges_dest(),
@@ -103,7 +114,7 @@ tPortData* tInterfacePort::GetUnusedBuffer(tDataType* dt)
   return buf_pool->GetUnusedBuffer(dt);
 }
 
-tPortCreationInfo tInterfacePort::ProcessPci(tPortCreationInfo pci, tInterfacePort::tType type_)
+tPortCreationInfo tInterfacePort::ProcessPci(tPortCreationInfo pci, tInterfacePort::tType type_, int lock_level)
 {
   switch (type_)
   {
@@ -117,6 +128,10 @@ tPortCreationInfo tInterfacePort::ProcessPci(tPortCreationInfo pci, tInterfacePo
   case eRouting:
     pci.flags |= tPortFlags::cEMITS_DATA | tPortFlags::cACCEPTS_DATA;
     break;
+  }
+  if (lock_level >= 0)
+  {
+    pci.lock_order = lock_level;
   }
   return pci;
 }

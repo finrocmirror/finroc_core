@@ -125,6 +125,20 @@ public:
   }
 
   /*!
+   * \return Connection quality information (in a scale from 0 (bad) to 1 (good))
+   */
+  virtual float GetConnectionQuality() = 0;
+
+  /*!
+   * \param detailed Return more detailed information?
+   * \return Connection status information for user
+   */
+  virtual util::tString GetStatus(bool detailed)
+  {
+    return GetConnectionAddress();
+  }
+
+  /*!
    * \return Is there currently a connection to another peer
    */
   inline bool IsConnected()
@@ -144,7 +158,7 @@ public:
    */
   inline void Reconnect()
   {
-    util::tLock lock2(obj_synch);
+    util::tLock lock2(this);
     Connect(last_address);
   }
 
@@ -167,10 +181,10 @@ public:
 
 //  protected class ConnectionListenerManager extends WeakRefListenerManager<ConnectionListener> {
 //
-//    @Override
-//    protected void notifyObserver(ConnectionListener observer, Object... param) {
-//      observer.connectionEvent(ExternalConnection.this, (Event)param[0]);
-//    }
+//      @Override
+//      protected void notifyObserver(ConnectionListener observer, Object... param) {
+//          observer.connectionEvent(ExternalConnection.this, (Event)param[0]);
+//      }
 //  }
 
 };

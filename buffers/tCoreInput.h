@@ -25,7 +25,6 @@
 #define CORE__BUFFERS__TCOREINPUT_H
 
 #include "core/portdatabase/tDataType.h"
-#include "finroc_core_utils/stream/tConstSource.h"
 #include "finroc_core_utils/stream/tSource.h"
 #include "core/portdatabase/tTypedObjectImpl.h"
 #include "finroc_core_utils/stream/tInputStreamBuffer.h"
@@ -97,12 +96,12 @@ public:
   //   * \param to Object to read
   //   */
   //  public void readObject(TypedObject to) {
-  //    readSkipOffset();
-  //    if (to == null) {
-  //      throw new RuntimeException("Provided object is null");
-  //    } else {
-  //      to.deserialize(this);
-  //    }
+  //      readSkipOffset();
+  //      if (to == null) {
+  //          throw new RuntimeException("Provided object is null");
+  //      } else {
+  //          to.deserialize(this);
+  //      }
   //  }
 
   /*!

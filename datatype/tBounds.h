@@ -104,8 +104,8 @@ public:
   }
 
   /*!
-  * \return Default value when value is out of bounds
-  */
+   * \return Default value when value is out of bounds
+   */
   inline tCoreNumber* GetOutOfBoundsDefault()
   {
     return &(out_of_bounds_default);

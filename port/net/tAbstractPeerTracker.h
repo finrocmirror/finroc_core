@@ -24,7 +24,7 @@
 #ifndef CORE__PORT__NET__TABSTRACTPEERTRACKER_H
 #define CORE__PORT__NET__TABSTRACTPEERTRACKER_H
 
-#include "finroc_core_utils/container/tSimpleList.h"
+#include "finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "finroc_core_utils/net/tIPSocketAddress.h"
 #include "finroc_core_utils/tListenerManager.h"
 
@@ -60,10 +60,10 @@ private:
   static const int8 cDISCOVERED = 0, cREMOVED = 1;
 
   /*! Peer tracker instances that are used - can be multiple */
-  static ::std::tr1::shared_ptr<util::tSimpleList<tAbstractPeerTracker*> > instances;
+  static ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > instances;
 
   /*! "Lock" to above - for safe deinitialization */
-  ::std::tr1::shared_ptr<util::tSimpleList<tAbstractPeerTracker*> > instances_lock;
+  ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > instances_lock;
 
 protected:
 
@@ -72,15 +72,15 @@ protected:
 
 public:
 
-  // for synchronization on an object of this class
-  mutable util::tMutex obj_synch;
+  /*! Mutex for tracker - order: should be locked after runtime */
+  util::tMutexLockOrder obj_mutex;
 
 protected:
 
   /*!
    * Called by subclass when TCP node has been discovered
    *
-     * \param isa Node's network address
+   * \param isa Node's network address
    * \param name Node's name
    */
   inline void NotifyDiscovered(util::tIPSocketAddress* isa, const util::tString& name)
@@ -89,9 +89,9 @@ protected:
   }
 
   /*!
-   * Called by subclass when TCP node has been discovered
+   * Called by subclass when TCP node has been stopped/removed/deleted
    *
-     * \param isa Node's network address
+   * \param isa Node's network address
    * \param name Node's name
    */
   inline void NotifyRemoved(util::tIPSocketAddress* isa, const util::tString& name)
@@ -122,16 +122,15 @@ protected:
 
 public:
 
-  tAbstractPeerTracker();
+  /*!
+   * \param lock_order Lock order of tracker - should be locked after runtime
+   */
+  tAbstractPeerTracker(int lock_order);
 
   /*!
    * \param listener Listener to add
    */
-  inline void AddListener(tListener& listener)
-  {
-    util::tLock lock2(obj_synch);
-    listeners.Add(&(listener));
-  }
+  void AddListener(tListener* listener);
 
   /*!
    * Delete tracker
@@ -150,11 +149,7 @@ public:
   /*!
    * \param listener Listener to remove
    */
-  inline void RemoveListener(tListener& listener)
-  {
-    util::tLock lock2(obj_synch);
-    listeners.Remove(&(listener));
-  }
+  void RemoveListener(tListener* listener);
 
   /*!
    * Unregister/unpublish server
@@ -179,15 +174,27 @@ public:
      * \param isa Node's network address
      * \param name Node's name
      */
-    virtual void NodeDiscovered(const util::tIPSocketAddress* isa, const util::tString* name) = 0;
+    virtual void NodeDiscovered(const util::tIPSocketAddress& isa, const util::tString& name) = 0;
 
     /*!
-     * Called when TCP node has been deleted
+     * Called when TCP node has been stopped/deleted
      *
      * \param isa Node's network address
      * \param name Node's name
+     * \return Object to post-process without any locks (null if no post-processing necessary)
+     *
+     * (Called with runtime and Peer Tracker lock)
      */
-    virtual void NodeRemoved(const util::tIPSocketAddress* isa, const util::tString* name) = 0;
+    virtual util::tObject* NodeRemoved(const util::tIPSocketAddress& isa, const util::tString& name) = 0;
+
+    /*!
+     * Called when TCP node has been deleted - and object for post-processing has been returned in method above
+     *
+     * \param obj Object to post-process
+     *
+     * (Called without/after runtime and Peer Tracker lock)
+     */
+    virtual void NodeRemovedPostLockProcess(util::tObject* obj) = 0;
 
   };
 

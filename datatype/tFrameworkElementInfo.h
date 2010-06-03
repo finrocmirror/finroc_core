@@ -117,12 +117,12 @@ public:
   //   * \param tp Packet to serialize to
   //   */
   //  public static void serializeDataType(DataType dt, CoreBuffer tp) {
-  //    tp.writeByte(UPDATE_TIME); // write opcode (see base class)
-  //    tp.writeInt(-1);
-  //    tp.writeShort(dt.getUid());
-  //    tp.writeInt(0);
-  //    tp.writeInt(1);
-  //    tp.writeByte((byte)0);
+  //      tp.writeByte(UPDATE_TIME); // write opcode (see base class)
+  //      tp.writeInt(-1);
+  //      tp.writeShort(dt.getUid());
+  //      tp.writeInt(0);
+  //      tp.writeInt(1);
+  //      tp.writeByte((byte)0);
   //  }
 
   /*!
@@ -149,20 +149,20 @@ public:
 
   //  @Override
   //  public Integer getKey() {
-  //    return handle;
+  //      return handle;
   //  }
 
   //  @Override
   //  public void handleChange(CoreByteBuffer buffer) {
-  //    // actually not used... but never mind
-  //    buffer.reset();
-  //    byte command = buffer.readByte();
-  //    int value = buffer.readInt();
-  //    if (command == UPDATE_TIME) {
-  //      minUpdateInterval = (short)value;
-  //    } else if (command == flags) {
-  //      flags = value;
-  //    }
+  //      // actually not used... but never mind
+  //      buffer.reset();
+  //      byte command = buffer.readByte();
+  //      int value = buffer.readInt();
+  //      if (command == UPDATE_TIME) {
+  //          minUpdateInterval = (short)value;
+  //      } else if (command == flags) {
+  //          flags = value;
+  //      }
   //  }
 
   /*!
@@ -187,14 +187,14 @@ public:
   //   * \return List with links for this port
   //   */
   //  @ConstMethod public @Const @Ref SimpleList<String> getLinks() {
-  //    return links;
+  //      return links;
   //  }
 
   //  /**
   //   * \return List with links for this port
   //   */
   //  @ConstMethod public @Const @Ref SimpleList<Integer> getParents() {
-  //    return parents;
+  //      return parents;
   //  }
 
   /*!
@@ -210,7 +210,7 @@ public:
   //   * \return Handle of parent
   //   */
   //  @ConstMethod public int getParentHandle(int index) {
-  //    return (int)(parents.get(index) >> 8);
+  //      return (int)(parents.get(index) >> 8);
   //  }
   //
   //  /**
@@ -218,7 +218,7 @@ public:
   //   * \return Handle of parent
   //   */
   //  @ConstMethod public int getParentFlags(int index) {
-  //    return links
+  //      return links
   //  }
 
   /*!
@@ -253,6 +253,8 @@ public:
    * \param tp Packet to serialize to
    * \param element_filter Element filter for client
    * \param tmp Temporary string buffer
+   *
+   * (call in runtime-registry synchronized context only)
    */
   static void SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, tCoreOutput* tp, tFrameworkElementTreeFilter element_filter, util::tStringBuilder& tmp);
 

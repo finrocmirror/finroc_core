@@ -33,7 +33,7 @@ tTransactionalSet<K, B>::tTransactionalSet(const util::tString& description, boo
     temp_read_key(*static_cast<B*>(bclass->CreateTransactionInstance())),
     pending_commands(2u, 4u),
     last_pending_command_check(0),
-    obj_synch(),
+    obj_mutex(),
     cPENDING_COMMAND_CHECK_INTERVAL(2000),
     cPENDING_COMMAND_TIMEOUT(10000)
 {
@@ -42,7 +42,7 @@ tTransactionalSet<K, B>::tTransactionalSet(const util::tString& description, boo
 template<typename K, typename B>
 void tTransactionalSet<K, B>::Add(B elem)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   elem.op_code = tTransaction::cADD;
   set.Put(elem.GetKey(), elem);
   CommitTransaction(elem);
@@ -164,7 +164,7 @@ const ::finroc::core::tPortData* tTransactionalSet<K, B>::PullRequest(tPortBase*
 template<typename K, typename B>
 void tTransactionalSet<K, B>::Remove(B elem)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   set.Remove(elem.GetKey());
   elem.op_code = tTransaction::cREMOVE;
   CommitData(elem);

@@ -83,6 +83,7 @@ void tNetPort::PropagateStrategyFromTheNet(int16 strategy)
 
 void tNetPort::ReceiveDataFromStream(tCoreInput* ci, int64 timestamp, int8 changed_flag)
 {
+  assert((GetPort()->IsReady()));
   if (wrapped->GetDataType()->IsStdType() || wrapped->GetDataType()->IsTransactionType())
   {
     tStdNetPort* pb = static_cast<tStdNetPort*>(wrapped);
@@ -227,7 +228,7 @@ void tNetPort::tCCNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
 
 void tNetPort::tCCNetPort::PrepareDelete()
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   ::finroc::core::tCCPortBase::RemovePortListenerRaw(outer_class_ptr);
   ::finroc::core::tAbstractPort::PrepareDelete();
   outer_class_ptr->PrepareDelete();
@@ -302,7 +303,7 @@ void tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, void* result_buffer)
 {
   tPullCall* pc = tThreadLocalCache::GetFast()->GetUnusedPullCall();
   pc->SetRemotePortHandle(outer_class_ptr->remote_handle);
-  //      pc.setLocalPortHandle(getHandle());
+  //          pc.setLocalPortHandle(getHandle());
   try
   {
     pc = tSynchMethodCallLogic::PerformSynchCall(pc, this, cPULL_TIMEOUT);
@@ -361,7 +362,7 @@ void tNetPort::tStdNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
 
 void tNetPort::tStdNetPort::PrepareDelete()
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   ::finroc::core::tPortBase::RemovePortListenerRaw(outer_class_ptr);
   ::finroc::core::tAbstractPort::PrepareDelete();
   outer_class_ptr->PrepareDelete();
@@ -408,7 +409,7 @@ const tPortData* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, int8 add_
   assert((add_locks > 0));
   tPullCall* pc = tThreadLocalCache::GetFast()->GetUnusedPullCall();
   pc->SetRemotePortHandle(outer_class_ptr->remote_handle);
-  //      pc.setLocalPortHandle(getHandle());
+  //          pc.setLocalPortHandle(getHandle());
   try
   {
     pc = tSynchMethodCallLogic::PerformSynchCall(pc, this, cPULL_TIMEOUT);

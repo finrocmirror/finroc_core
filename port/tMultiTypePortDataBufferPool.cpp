@@ -27,7 +27,7 @@ namespace core
 {
 tPortData* tMultiTypePortDataBufferPool::PossiblyCreatePool(tDataType* data_type)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
 
   // search for correct pool
   for (size_t i = 0u, n = pools.Size(); i < n; i++)

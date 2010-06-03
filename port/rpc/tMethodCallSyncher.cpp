@@ -25,7 +25,7 @@ namespace finroc
 {
 namespace core
 {
-util::tMutex tMethodCallSyncher::static_obj_synch;
+util::tMutex tMethodCallSyncher::static_class_mutex;
 const size_t tMethodCallSyncher::cMAX_THREADS;
 ::finroc::util::tArrayWrapper<tMethodCallSyncher> tMethodCallSyncher::slots(tMethodCallSyncher::cMAX_THREADS);
 
@@ -41,7 +41,7 @@ int16 tMethodCallSyncher::GetAndUseNextCallIndex()
 
 tMethodCallSyncher* tMethodCallSyncher::GetFreeInstance(tThreadLocalCache* tc)
 {
-  util::tLock lock1(static_obj_synch);
+  util::tLock lock1(static_class_mutex);
   for (size_t i = 0u; i < slots.length; i++)
   {
     if (slots[i].thread_uid == 0)
@@ -58,7 +58,7 @@ tMethodCallSyncher* tMethodCallSyncher::GetFreeInstance(tThreadLocalCache* tc)
 
 void tMethodCallSyncher::Reset()
 {
-  //    beforeQuickReturnCheck = false;
+  //      beforeQuickReturnCheck = false;
   thread_uid = 0;
   thread = NULL;
   method_return = NULL;
@@ -67,7 +67,7 @@ void tMethodCallSyncher::Reset()
 
 void tMethodCallSyncher::ReturnValue(tAbstractCall* mc)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
 
   if (GetThreadUid() != mc->GetThreadUid())
   {

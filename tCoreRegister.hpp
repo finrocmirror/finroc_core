@@ -40,20 +40,23 @@ template<typename T>
 const int tCoreRegister<T>::cUID_SHIFT;
 
 template<typename T>
+const int tCoreRegister<T>::cDELETE_MARK;
+
+template<typename T>
 tCoreRegister<T>::tCoreRegister(bool positive_indices) :
     sign(positive_indices ? 0 : 0x80000000),
     current_element_index(0),
     elements(cMAX_ELEMENTS),
     element_uid(cMAX_ELEMENTS),
     elem_count(0),
-    obj_synch()
+    obj_mutex()
 {
 }
 
 template<typename T>
 int tCoreRegister<T>::Add(const T& elem)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
 
   if (elem_count >= cMAX_ELEMENTS)
   {
@@ -68,6 +71,7 @@ int tCoreRegister<T>::Add(const T& elem)
 
   // get new uid for this slot and update uid table
   int cur_uid = element_uid.Get(current_element_index);
+  assert((cur_uid <= cMAX_UID));
   cur_uid++;
   if (cur_uid >= cMAX_UID)
   {
@@ -107,14 +111,27 @@ void tCoreRegister<T>::IncrementCurElementIndex()
 }
 
 template<typename T>
-void tCoreRegister<T>::Remove(int handle)
+void tCoreRegister<T>::MarkDeleted(int handle)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   int index = handle & cELEM_INDEX_MASK;
   int uid = (handle & cELEM_UID_MASK) >> cUID_SHIFT;
-  if (element_uid.Get(index) == uid)
+  assert((elements.Get(index) != NULL));
+  assert((element_uid.Get(index) == uid));
+  element_uid.Set(index, uid | cDELETE_MARK);
+}
+
+template<typename T>
+void tCoreRegister<T>::Remove(int handle)
+{
+  util::tLock lock1(this);
+  int index = handle & cELEM_INDEX_MASK;
+  int uid = (handle & cELEM_UID_MASK) >> cUID_SHIFT;
+  int clean_cur_uid = element_uid.Get(index) & cMAX_UID;
+  if (clean_cur_uid == uid)
   {
     elements.Set(index, NULL);
+    element_uid.Set(index, clean_cur_uid);
     elem_count--;
   }
   else

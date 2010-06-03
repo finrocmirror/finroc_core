@@ -337,7 +337,7 @@ public:
   //   * \return Thread that owns this buffer
   //   */
   //  @Inline public long getOwnerThread() {
-  //    return ownerThread;
+  //      return ownerThread;
   //  }
 
   //  /**
@@ -346,38 +346,38 @@ public:
   //   * (Should only be called by port directly)
   //   */
   //  @Inline public void releaseOwnerLock() {
-  //    ownerRefCounter--;
-  //    //System.out.println("Release Lock: " + data + " " + ownerRefCounter);
-  //    if (ownerRefCounter == 0) {
-  //      releaseNonOwnerLock();
-  //    }
-  //    assert ownerRefCounter >= 0 : "More locks released than acquired. Application in undefined state.";
+  //      ownerRefCounter--;
+  //      //System.out.println("Release Lock: " + data + " " + ownerRefCounter);
+  //      if (ownerRefCounter == 0) {
+  //          releaseNonOwnerLock();
+  //      }
+  //      assert ownerRefCounter >= 0 : "More locks released than acquired. Application in undefined state.";
   //  }
   //
   //  /**
   //   * Release lock from buffer
   //   */
   //  @Inline public void releaseLock() {
-  //    if (ThreadUtil.getCurrentThreadId() == ownerThread) {
-  //      releaseOwnerLock();
-  //    } else {
-  //      releaseNonOwnerLock();
-  //    }
+  //      if (ThreadUtil.getCurrentThreadId() == ownerThread) {
+  //          releaseOwnerLock();
+  //      } else {
+  //          releaseNonOwnerLock();
+  //      }
   //  }
   //
   //  /**
   //   * Release lock from buffer - atomic add operation
   //   */
   //  @Inline private void releaseNonOwnerLock() {
-  //    int counterIndex = reuseCounter & 0x3;
-  //    int count = refCounter.addAndGet(-refCounterIncrement[counterIndex]);
-  //    assert ((count & refCounterMasks[counterIndex]) != refCounterMasks[counterIndex]) : "More locks released than acquired. Application in undefined state.";
-  //    if ((count & refCounterMasks[counterIndex]) == 0) {
-  //      // reuse object
-  //      //System.out.println("Recycling: " + data + " " + reuseCounter);
-  //      reuseCounter++;
-  //      recycle();
-  //    }
+  //      int counterIndex = reuseCounter & 0x3;
+  //      int count = refCounter.addAndGet(-refCounterIncrement[counterIndex]);
+  //      assert ((count & refCounterMasks[counterIndex]) != refCounterMasks[counterIndex]) : "More locks released than acquired. Application in undefined state.";
+  //      if ((count & refCounterMasks[counterIndex]) == 0) {
+  //          // reuse object
+  //          //System.out.println("Recycling: " + data + " " + reuseCounter);
+  //          reuseCounter++;
+  //          recycle();
+  //      }
   //  }
 
   inline const tPortData* GetData() const
@@ -439,17 +439,17 @@ public:
   //   * \param count number of locks
   //   */
   //  @Inline protected void setLocksAsOwner(int count) {
-  //    int counterIndex = reuseCounter & LOCK_INFO_MASK;
-  //    int counterIndex2 = counterIndex & 0x3;
-  //    refCounter.set((refCounterIncrement[counterIndex2]) | counterIndex);
-  //    ownerRefCounter = count;
+  //      int counterIndex = reuseCounter & LOCK_INFO_MASK;
+  //      int counterIndex2 = counterIndex & 0x3;
+  //      refCounter.set((refCounterIncrement[counterIndex2]) | counterIndex);
+  //      ownerRefCounter = count;
   //  }
   //
   //  // see above
   //  @Inline protected void setLocksAsNonOwner(int count) {
-  //    int counterIndex = reuseCounter & LOCK_INFO_MASK;
-  //    int counterIndex2 = counterIndex & 0x3;
-  //    refCounter.set((refCounterIncrement[counterIndex2] * count) | counterIndex);
+  //      int counterIndex = reuseCounter & LOCK_INFO_MASK;
+  //      int counterIndex2 = counterIndex & 0x3;
+  //      refCounter.set((refCounterIncrement[counterIndex2] * count) | counterIndex);
   //  }
 
   //  /**
@@ -459,29 +459,29 @@ public:
   //   * \param count number of locks
   //   */
   //  @Inline public void setLocks(int count) {
-  //    /*int counterIndex = reuseCounter & LOCK_INFO_MASK;
-  //    int counterIndex2 = counterIndex & 0x3;*/
-  //    int counterIndex2 = reuseCounter & 0x3;
-  //    refCounter.set((refCounterIncrement[counterIndex2] * count) | counterIndex2);
+  //      /*int counterIndex = reuseCounter & LOCK_INFO_MASK;
+  //      int counterIndex2 = counterIndex & 0x3;*/
+  //      int counterIndex2 = reuseCounter & 0x3;
+  //      refCounter.set((refCounterIncrement[counterIndex2] * count) | counterIndex2);
   //  }
 
   //  // see above
   //  @Inline protected @Ptr PortDataManager setLocks(int count) {
-  //    if (ThreadUtil.getCurrentThreadId() == ownerThread) {
-  //      setLocksAsOwner(count);
-  //    } else {
-  //      setLocksAsNonOwner(count);
-  //    }
-  //    return this;
+  //      if (ThreadUtil.getCurrentThreadId() == ownerThread) {
+  //          setLocksAsOwner(count);
+  //      } else {
+  //          setLocksAsNonOwner(count);
+  //      }
+  //      return this;
   //  }
 
   //  /**
   //   * \return Is Buffer currently locked?
   //   */
   //  @Inline public boolean isLocked() {
-  //    int counterIndex = reuseCounter & 0x3;
-  //    int count = refCounter.get();
-  //    return (count & refCounterMasks[counterIndex]) > 0;
+  //      int counterIndex = reuseCounter & 0x3;
+  //      int count = refCounter.get();
+  //      return (count & refCounterMasks[counterIndex]) > 0;
   //  }
   //
   //  /**
@@ -490,19 +490,19 @@ public:
   //   * (usually the case after getting buffer from port)
   //   */
   //  @Inline public void addReadLock() {
-  //    if (ThreadUtil.getCurrentThreadId() == ownerThread) {
-  //      if (ownerRefCounter > 0) {
-  //        ownerRefCounter++;
-  //        return;
-  //      } else {
-  //        ownerRefCounter = 1;
+  //      if (ThreadUtil.getCurrentThreadId() == ownerThread) {
+  //          if (ownerRefCounter > 0) {
+  //              ownerRefCounter++;
+  //              return;
+  //          } else {
+  //              ownerRefCounter = 1;
+  //          }
   //      }
-  //    }
-  //    int counterIndex = reuseCounter & 0x3;
-  //    int old = refCounter.getAndAdd(refCounterIncrement[counterIndex]);
-  //    assert ((old & refCounterMasks[counterIndex]) != 0) : "Element already reused. Application in undefined state. Element has to be locked prior to calling this method.";
-  //    assert (counterIndex == ((old >> 28) & 0x3)) : "Counter index changed. Application in undefined state. Element has to be locked prior to calling this method.";
-  //    assert (counterIndex != refCounterMasks[counterIndex]) : "Reference counter overflow. Maximum of 127 locks allowed. Consider making a copy somewhere.";
+  //      int counterIndex = reuseCounter & 0x3;
+  //      int old = refCounter.getAndAdd(refCounterIncrement[counterIndex]);
+  //      assert ((old & refCounterMasks[counterIndex]) != 0) : "Element already reused. Application in undefined state. Element has to be locked prior to calling this method.";
+  //      assert (counterIndex == ((old >> 28) & 0x3)) : "Counter index changed. Application in undefined state. Element has to be locked prior to calling this method.";
+  //      assert (counterIndex != refCounterMasks[counterIndex]) : "Reference counter overflow. Maximum of 127 locks allowed. Consider making a copy somewhere.";
   //  }
   //
   //  /**
@@ -510,8 +510,8 @@ public:
   //   * Precondition: there's already a owner lock
   //   */
   //  void addOwnerLock() {
-  //    assert ownerRefCounter > 0 : "Element already reused. Application in undefined state. Element has to be locked prior to calling this method.";
-  //    ownerRefCounter++;
+  //      assert ownerRefCounter > 0 : "Element already reused. Application in undefined state. Element has to be locked prior to calling this method.";
+  //      ownerRefCounter++;
   //  }
 
   /*!
@@ -519,18 +519,18 @@ public:
    * (should only be called prior to deletion - by ports)
    */
   /*void releaseAllLocks() {
-    assert refCounter.get() > 0 : "Element already recycled";
-    refCounter.set(0);
-    ownerRefCounter = 0;
+      assert refCounter.get() > 0 : "Element already recycled";
+      refCounter.set(0);
+      ownerRefCounter = 0;
 
-    // reuse object
-    PortDataBufferPool owner = this.owner;
-    reuseCounter++;
-    if (owner != null) {
-      owner.enqueue(this);
-    } else {
-       delete this;
-    }
+      // reuse object
+      PortDataBufferPool owner = this.owner;
+      reuseCounter++;
+      if (owner != null) {
+          owner.enqueue(this);
+      } else {
+           delete this;
+      }
   }*/
 
   /*!

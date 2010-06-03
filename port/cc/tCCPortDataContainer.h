@@ -69,9 +69,6 @@ protected:
 
 public:
 
-  // for synchronization on an object of this class
-  mutable util::tMutex obj_synch;
-
   /*! Number of reference to port data */
   const static size_t cNUMBER_OF_REFERENCES = 8;
 
@@ -201,13 +198,15 @@ public:
 
   /*!
    * (may be called by any thread)
+   * (Needs to be called with lock on ThreadLocalCache::infos)
    * Removes read lock
    */
   void NonOwnerLockRelease(tCCPortDataBufferPool* owner);
 
   /*!
    * (Should only be called by port related classes)
-   * Release method to call after owner thread has terminated
+   * (Needs to be called with lock on ThreadLocalCache::infos)
+   * Release-method to call after owner thread has terminated
    */
   void PostThreadReleaseLock();
 

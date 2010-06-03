@@ -35,6 +35,7 @@
 #include "core/port/std/tPortQueueElement.h"
 #include "core/port/cc/tCCPortQueueElement.h"
 #include "core/buffers/tCoreInput.h"
+#include "finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "finroc_core_utils/container/tSimpleList.h"
 #include "core/port/std/tPortDataImpl.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
@@ -69,11 +70,11 @@ private:
   //  @Struct
   //  public class PortInfo {
   //
-  //    /** Element that was last written to port by this thread */
-  //    @Ptr PortData lastWrittenToPort;
+  //      /** Element that was last written to port by this thread */
+  //      @Ptr PortData lastWrittenToPort;
   //
-  //    /** thread-owned data buffer pool for writing to port */
-  //    @Ptr PortDataBufferPool dataBufferPool;
+  //      /** thread-owned data buffer pool for writing to port */
+  //      @Ptr PortDataBufferPool dataBufferPool;
   //  }
   //
   //  /** Thread local port information - list index is last part of port handle */
@@ -84,10 +85,10 @@ private:
   static util::tFastStaticThreadLocal<tThreadLocalCache, tThreadLocalCache, util::tGarbageCollector::tFunctor> info;
 
   /*! List with all ThreadLocalInfo objects... necessary for cleaning up... is deleted with last thread */
-  static ::std::tr1::shared_ptr<util::tSimpleList<tThreadLocalCache*> > infos;
+  static ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos;
 
   /*! Lock to above - for every cache */
-  ::std::tr1::shared_ptr<util::tSimpleList<tThreadLocalCache*> > infos_lock;
+  ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock;
 
   //new SimpleList<WeakReference<ThreadLocalCache>>(); // = new SimpleList<WeakReference<ThreadLocalInfo>>(RuntimeSettings.MAX_THREADS.get());
 
@@ -236,22 +237,22 @@ public:
   //  // internal methods for universal access in Java and C++
   //  @InCpp("return portInfo[index].lastWrittenToPort;")
   //  @Inline @ConstMethod private PortData getLastWrittenToPortRaw(@SizeT int index) {
-  //    return lastWrittenToPort[index];
+  //      return lastWrittenToPort[index];
   //  }
   //
   //  @InCpp("portInfo[index].lastWrittenToPort = data;")
   //  @Inline private void setLastWrittenToPortRaw(@SizeT int index, @Ptr PortData data) {
-  //    lastWrittenToPort[index] = data;
+  //      lastWrittenToPort[index] = data;
   //  }
   //
   //  @InCpp("return portInfo[index].dataBufferPool;")
   //  @Inline @ConstMethod private @Ptr PortDataBufferPool getPoolRaw(@SizeT int index) {
-  //    return dataBufferPools[index];
+  //      return dataBufferPools[index];
   //  }
   //
   //  @InCpp("portInfo[index].dataBufferPool = data;")
   //  @Inline private void setPoolRaw(@SizeT int index, @Ptr PortDataBufferPool data) {
-  //    dataBufferPools[index] = data;
+  //      dataBufferPools[index] = data;
   //  }
   //
   //
@@ -262,7 +263,7 @@ public:
   //   * \return Data that was last written the port by this thread
   //   */
   //  @Inline @ConstMethod public PortData getLastWrittenToPort(int portHandle) {
-  //    return getLastWrittenToPortRaw(portHandle & CoreRegister.ELEM_INDEX_MASK);
+  //      return getLastWrittenToPortRaw(portHandle & CoreRegister.ELEM_INDEX_MASK);
   //  }
   //
   //  /**
@@ -274,7 +275,7 @@ public:
   //   * \param data Data
   //   */
   //  @Inline public void setLastWrittenToPort(int portHandle, PortData data) {
-  //    setLastWrittenToPortRaw(portHandle & CoreRegister.ELEM_INDEX_MASK, data);
+  //      setLastWrittenToPortRaw(portHandle & CoreRegister.ELEM_INDEX_MASK, data);
   //  }
   //
   //  /**
@@ -289,13 +290,13 @@ public:
   //   * \param data Data
   //   */
   //  @Inline public void newLastWrittenToPortByOwner(int portHandle, PortData data) {
-  //    assert (ThreadUtil.getCurrentThreadId() == data.getManager().getOwnerThread()) : "Thread is not owner";
-  //    int index = portHandle & CoreRegister.ELEM_INDEX_MASK;
-  //    PortData old = getLastWrittenToPortRaw(index);
-  //    if (old != null) {
-  //      old.getManager().releaseOwnerLock();
-  //    }
-  //    setLastWrittenToPort(index, data);
+  //      assert (ThreadUtil.getCurrentThreadId() == data.getManager().getOwnerThread()) : "Thread is not owner";
+  //      int index = portHandle & CoreRegister.ELEM_INDEX_MASK;
+  //      PortData old = getLastWrittenToPortRaw(index);
+  //      if (old != null) {
+  //          old.getManager().releaseOwnerLock();
+  //      }
+  //      setLastWrittenToPort(index, data);
   //  }
   //
   //  /**
@@ -310,32 +311,32 @@ public:
   //   * \param data Data
   //   */
   //  @Inline public void newLastWrittenToPort(int portHandle, PortData data) {
-  //    int index = portHandle & CoreRegister.ELEM_INDEX_MASK;
-  //    PortData old = getLastWrittenToPortRaw(index);
-  //    if (old != null) {
-  //      old.getManager().releaseLock();
-  //    }
-  //    setLastWrittenToPortRaw(index, data);
+  //      int index = portHandle & CoreRegister.ELEM_INDEX_MASK;
+  //      PortData old = getLastWrittenToPortRaw(index);
+  //      if (old != null) {
+  //          old.getManager().releaseLock();
+  //      }
+  //      setLastWrittenToPortRaw(index, data);
   //  }
   //
   //  /**
-  //    * (Should only be called by port implementations)
+  //   * (Should only be called by port implementations)
   //   *
   //   * \param portHandle Handle of Port
   //   * \return Buffer pool for port. May be null, if no data has been written to port yet.
   //   */
   //  @Inline @ConstMethod @Ptr public PortDataBufferPool getBufferPool(int portHandle) {
-  //    return getPoolRaw(portHandle & CoreRegister.ELEM_INDEX_MASK);
+  //      return getPoolRaw(portHandle & CoreRegister.ELEM_INDEX_MASK);
   //  }
   //
   //  /**
-  //    * (Should only be called by port implementations)
+  //   * (Should only be called by port implementations)
   //   *
   //   * \param PortHandle Handle of Port
   //   * \param pool Buffer pool for port.
   //   */
   //  @Inline public void setBufferPool(int portHandle, @Ptr PortDataBufferPool pool) {
-  //    setPoolRaw(portHandle & CoreRegister.ELEM_INDEX_MASK, pool);
+  //      setPoolRaw(portHandle & CoreRegister.ELEM_INDEX_MASK, pool);
   //  }
   //
   /*!
@@ -356,7 +357,7 @@ public:
     if (tli == NULL)
     {
       {
-        util::tLock lock4(infos->obj_synch);
+        util::tLock lock4(infos);
         tli = new tThreadLocalCache();
 
         infos->Add(tli);
@@ -380,6 +381,52 @@ public:
     return info.GetFast();
   }
 
+  //
+  //  /**
+  //   * (Should only be called by garbage collector) - outdated method: now handled in cleanup
+  //   *
+  //   * Check if some threads have stopped. Enqueue their info for deletion.
+  //   *
+  //   * \param handle Port Handle
+  //   */
+  //  /*static void cleanupThreads() {
+  //      synchronized(infos) {
+  //          for (int i = 0, n = infos.size(); i < n; i++) {
+  //              final ThreadLocalInfo tli = infos.get(i);
+  //              if (!tli.thread.isAlive()) {
+  //                  GarbageCollector.deleteDeferred(tli);
+  //                  infos.remove(i);
+  //                  i--;
+  //              }
+  //          }
+  //      }
+  //  }*/
+  //
+
+  //
+  //  /**
+  //   * Cache port management data for specified port data
+  //   *
+  //   * \param data to cache management data for
+  //   */
+  //  @Inline public PortDataManager cachePortData(PortData data) {
+  //      PortDataManager mgr = data.getManager();
+  //      maskIndex = mgr.ownerRefCounter & 0x3;
+  //      counterMask = PortDataManager.refCounterMasks[maskIndex];
+  //      counterIncrement = PortDataManager.refCounterIncrement[maskIndex];
+  //      return mgr;
+  //  }
+
+  /*!
+   * \return Shared Pointer to List with all ThreadLocalInfo objects... necessary for clean cleaning up
+   *
+   * (should only be called by CCPortDataBufferPool)
+   */
+  inline ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > GetInfosLock()
+  {
+    return infos_lock;
+  }
+
   tMethodCallSyncher* GetMethodSyncher();
 
   /*!
@@ -394,21 +441,21 @@ public:
   //   * \param pd return port data from other thread
   //   */
   //  @Inline private void returnPortData(CCPortDataContainer<?> pd) {
-  //    if (pd.getOwnerThread() == ThreadUtil.getCurrentThreadId()) {
-  //      pd.releaseLock();
-  //    } else {
-  //      returnedBuffers.enqueue(pd);
-  //    }
+  //      if (pd.getOwnerThread() == ThreadUtil.getCurrentThreadId()) {
+  //          pd.releaseLock();
+  //      } else {
+  //          returnedBuffers.enqueue(pd);
+  //      }
   //  }
 
   //  void reclaimReturnedBuffers() {
-  //    if (!returnedBuffers.isEmpty()) { // does not need to be synchronized, wa?
-  //      synchronized(returnedBuffers) {
-  //        for (int i = 0, n = returnedBuffers.size(); i < n; i++) {
-  //          returnedBuffers.get(i).releaseLock();
-  //        }
+  //      if (!returnedBuffers.isEmpty()) { // does not need to be synchronized, wa?
+  //          synchronized(returnedBuffers) {
+  //              for (int i = 0, n = returnedBuffers.size(); i < n; i++) {
+  //                  returnedBuffers.get(i).releaseLock();
+  //              }
+  //          }
   //      }
-  //    }
   //  }
 
   inline tCCPortDataContainer<>* GetUnusedBuffer(tDataType* data_type)
@@ -425,10 +472,10 @@ public:
       ccpq_fragments->Attach(pf, false);
       assert((pf->next2.Get()->IsDummy()));
     }
-    //    assert(pf.recycled);
-    //    //System.out.println("dq " + pf.getRegisterIndex());
-    //    assert(pf.next2.get().isDummy());
-    //    pf.recycled = false;
+    //      assert(pf.recycled);
+    //      //System.out.println("dq " + pf.getRegisterIndex());
+    //      assert(pf.next2.get().isDummy());
+    //      pf.recycled = false;
     return pf;
   }
 
@@ -476,7 +523,7 @@ public:
   virtual ~tThreadLocalCache()
   {
     {
-      util::tLock l(infos->obj_synch);
+      util::tLock l(infos);
       tThreadLocalCache* tmp = this; // to cleanly remove const modifier
       infos->RemoveElem(tmp);
     }
@@ -484,43 +531,7 @@ public:
     FinalDelete();
   }
 
-  static ::std::tr1::shared_ptr<util::tSimpleList<tThreadLocalCache*> > StaticInit();
-
-//
-//  /**
-//   * (Should only be called by garbage collector) - outdated method: now handled in cleanup
-//   *
-//   * Check if some threads have stopped. Enqueue their info for deletion.
-//   *
-//   * \param handle Port Handle
-//   */
-//  /*static void cleanupThreads() {
-//    synchronized(infos) {
-//      for (int i = 0, n = infos.size(); i < n; i++) {
-//        final ThreadLocalInfo tli = infos.get(i);
-//        if (!tli.thread.isAlive()) {
-//          GarbageCollector.deleteDeferred(tli);
-//          infos.remove(i);
-//          i--;
-//        }
-//      }
-//    }
-//  }*/
-//
-
-//
-//  /**
-//   * Cache port management data for specified port data
-//   *
-//   * \param data to cache management data for
-//   */
-//  @Inline public PortDataManager cachePortData(PortData data) {
-//    PortDataManager mgr = data.getManager();
-//    maskIndex = mgr.ownerRefCounter & 0x3;
-//    counterMask = PortDataManager.refCounterMasks[maskIndex];
-//    counterIncrement = PortDataManager.refCounterIncrement[maskIndex];
-//    return mgr;
-//  }
+  static ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > StaticInit();
 
 };
 

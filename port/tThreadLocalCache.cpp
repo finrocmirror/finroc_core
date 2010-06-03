@@ -32,7 +32,7 @@ namespace core
 {
 util::tFastStaticThreadLocal<tThreadLocalCache, tThreadLocalCache, util::tGarbageCollector::tFunctor> tThreadLocalCache::info;
 
-::std::tr1::shared_ptr<util::tSimpleList<tThreadLocalCache*> > tThreadLocalCache::infos;
+::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCache::infos;
 util::tAtomicInt tThreadLocalCache::thread_uid_counter(1);
 
 tThreadLocalCache::tThreadLocalCache() :
@@ -108,7 +108,7 @@ void tThreadLocalCache::DeleteInfoForPort(int port_index)
 {
   assert((port_index >= 0 && port_index <= tCoreRegister<>::cMAX_ELEMENTS));
   {
-    util::tLock lock2(infos->obj_synch);
+    util::tLock lock2(infos);
     for (int i = 0, n = infos->Size(); i < n; i++)
     {
       tThreadLocalCache* tli = infos->Get(i);
@@ -121,12 +121,12 @@ void tThreadLocalCache::DeleteInfoForPort(int port_index)
         pd->NonOwnerLockRelease(tli->GetCCPool(pd->GetType()));
       }
 
-      //        // Delete pool
-      //        @Ptr PortDataBufferPool pool = tli.getBufferPool(handle);
-      //        if (pool != null) {
-      //          pool.controlledDelete();
-      //          tli.setBufferPool(handle, null);
-      //        }
+      //              // Delete pool
+      //              @Ptr PortDataBufferPool pool = tli.getBufferPool(handle);
+      //              if (pool != null) {
+      //                  pool.controlledDelete();
+      //                  tli.setBufferPool(handle, null);
+      //              }
     }
   }
 }
@@ -160,30 +160,31 @@ void tThreadLocalCache::FinalDelete()
 
   /*! Transfer ownership of remaining port data to ports */
   {
-    util::tLock lock2(infos->obj_synch);  // big lock - to make sure no ports are deleted at the same time which would result in a mess
+    util::tLock lock2(infos);  // big lock - to make sure no ports are deleted at the same time which would result in a mess (note that CCPortBase desctructor has synchronized operation on infos)
     for (size_t i = 0u; i < last_written_to_port.length; i++)
     {
       if (last_written_to_port[i] != NULL)
       {
+        // this is safe, because we locked runtime (even the case if managedDelete has already been called - because destructor needs runtime lock and unregisters)
         (static_cast<tCCPortBase*>(port_register->GetByRawIndex(i)))->TransferDataOwnership(last_written_to_port[i]);
       }
     }
   }
 
-  //      // Release port data lock - NO!!! - may release last lock on used data... data will be deleted with pool (see below)
-  //      PortData pd = getLastWrittenToPortRaw(i);
-  //      if (pd != null) {
-  //        pd.getManager().releaseOwnerLock();
-  //        setLastWrittenToPort(i, null);
-  //      }
+  //          // Release port data lock - NO!!! - may release last lock on used data... data will be deleted with pool (see below)
+  //          PortData pd = getLastWrittenToPortRaw(i);
+  //          if (pd != null) {
+  //              pd.getManager().releaseOwnerLock();
+  //              setLastWrittenToPort(i, null);
+  //          }
   //
-  //      // Delete pool
-  //      @Ptr PortDataBufferPool pool = getBufferPool(i);
-  //      if (pool != null) {
-  //        pool.controlledDelete();
-  //        setBufferPool(i, null);
+  //          // Delete pool
+  //          @Ptr PortDataBufferPool pool = getBufferPool(i);
+  //          if (pool != null) {
+  //              pool.controlledDelete();
+  //              setBufferPool(i, null);
+  //          }
   //      }
-  //    }
 }
 
 tMethodCallSyncher* tThreadLocalCache::GetMethodSyncher()
@@ -221,9 +222,9 @@ void tThreadLocalCache::ReleaseAllLocks()
   cc_inter_auto_locks.Clear();
 }
 
-::std::tr1::shared_ptr<util::tSimpleList<tThreadLocalCache*> > tThreadLocalCache::StaticInit()
+::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCache::StaticInit()
 {
-  infos.reset(new util::tSimpleList<tThreadLocalCache*>());
+  infos.reset(new util::tSimpleListWithMutex<tThreadLocalCache*>(tLockOrderLevels::cINNER_MOST - 100));
 
   return infos;
 }

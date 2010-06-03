@@ -71,20 +71,20 @@ public:
 
 //  @Override
 //  public PortDataContainer<T> browserGetData(Object locker) {
-//    return singletonValue;
+//      return singletonValue;
 //  }
 //
 //
 //  @Override
 //  public void browserSet(PortDataContainer<T> newValue) {
-//    if (newValue != singletonValue) {
-//      throw new RuntimeException("Cannot change contents of Singleton-Port");
-//    }
+//      if (newValue != singletonValue) {
+//          throw new RuntimeException("Cannot change contents of Singleton-Port");
+//      }
 //  }
 //
 //  @Override
 //  protected PortDataContainer<T> getInternal() {
-//    return singletonValue;
+//      return singletonValue;
 //  }
 
 };

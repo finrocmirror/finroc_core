@@ -21,13 +21,14 @@
  */
 #include "core/port/tEdgeAggregator.h"
 #include "core/tCoreFlags.h"
+#include "core/tLockOrderLevels.h"
 
 namespace finroc
 {
 namespace core
 {
 tEdgeAggregator::tEdgeAggregator(const util::tString& description_, tFrameworkElement* parent_, int flags_) :
-    tFrameworkElement(description_, parent_, flags_ | tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cEDGE_AGGREGATOR),
+    tFrameworkElement(description_, parent_, flags_ | tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cEDGE_AGGREGATOR, parent_ == NULL ? tLockOrderLevels::cLEAF_GROUP : -1),
     emerging_edges(0u, 5u)
 {
 }
@@ -44,7 +45,7 @@ void tEdgeAggregator::EdgeAdded(tAbstractPort* source, tAbstractPort* target)
 
 void tEdgeAggregator::EdgeAdded(tEdgeAggregator* dest)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   tAggregatedEdge* ae = FindAggregatedEdge(dest);
   if (ae != NULL)
   {
@@ -69,7 +70,7 @@ void tEdgeAggregator::EdgeRemoved(tAbstractPort* source, tAbstractPort* target)
 
 void tEdgeAggregator::EdgeRemoved(tEdgeAggregator* dest)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   tAggregatedEdge* ae = FindAggregatedEdge(dest);
   if (ae != NULL)
   {

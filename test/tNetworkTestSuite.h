@@ -103,11 +103,11 @@ public:
 
 public:
 
-  static const bool cCC_TESTS = true, cSTD_TESTS = false;
+  static const bool cCC_TESTS = false, cSTD_TESTS = false;
 
-  static const bool cBB_TESTS = false;
+  static const bool cBB_TESTS = true;
 
-  static const bool cPUSH_TESTS = false, cPULL_PUSH_TESTS = true, cREVERSE_PUSH_TESTS = false, cQ_TESTS = false;
+  static const bool cPUSH_TESTS = false, cPULL_PUSH_TESTS = false, cREVERSE_PUSH_TESTS = false, cQ_TESTS = false;
 
   util::tString blackboard_name, partner_blackboard_name;
 

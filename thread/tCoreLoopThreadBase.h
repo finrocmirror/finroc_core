@@ -76,59 +76,59 @@ public:
 //  protected volatile int hasNoValuesBeforeIteration;
 //
 //  public CoreThread(int index, boolean updatesIterationItself, boolean startThread) {
-//    super(RuntimeSettings.DEFAULT_CYCLE_TIME, RuntimeSettings.WARN_ON_CYCLE_TIME_EXCEED, true);
-//    this.index = index;
-//    this.updatesIterationItself = updatesIterationItself;
-//    setName(getClass().getSimpleName() + " " + index);
-//    hasNoValuesBeforeIteration = BufferTracker.getInstance().getCurIteration();
-//    BufferTracker.getInstance().registerThread(this);
+//      super(RuntimeSettings.DEFAULT_CYCLE_TIME, RuntimeSettings.WARN_ON_CYCLE_TIME_EXCEED, true);
+//      this.index = index;
+//      this.updatesIterationItself = updatesIterationItself;
+//      setName(getClass().getSimpleName() + " " + index);
+//      hasNoValuesBeforeIteration = BufferTracker.getInstance().getCurIteration();
+//      BufferTracker.getInstance().registerThread(this);
 //
-//    if (startThread) {
-//      start();
-//    }
+//      if (startThread) {
+//          start();
+//      }
 //  }
 //
 //  @Override
 //  public void run() {
-//    super.run();
-//    cleanShutdown();
+//      super.run();
+//      cleanShutdown();
 //  }
 //
 //  public void cleanShutdown() {
-//    BufferTracker.getInstance().unregisterThread(this);
+//      BufferTracker.getInstance().unregisterThread(this);
 //  }
 //
 //
 //  @Override
 //  public int locksNoValuesBeforeIteration(int curIteration) {
-//    if (isWaiting()) {
-//      hasNoValuesBeforeIteration = curIteration;
-//      return curIteration;
-//    }
-//    if (updatesIterationItself) {
-//      return hasNoValuesBeforeIteration;
-//    } else {
-//      synchronized(this) {
-//        return curIteration;
+//      if (isWaiting()) {
+//          hasNoValuesBeforeIteration = curIteration;
+//          return curIteration;
 //      }
-//    }
+//      if (updatesIterationItself) {
+//          return hasNoValuesBeforeIteration;
+//      } else {
+//          synchronized(this) {
+//              return curIteration;
+//          }
+//      }
 //  }
 //
 //  /** release all locks */
 //  public void releaseLocks() {
-//    if (updatesIterationItself) {
-//      int iteration = BufferTracker.getInstance().getCurIteration();
-//      if (iteration > hasNoValuesBeforeIteration) {
-//        hasNoValuesBeforeIteration = iteration;
+//      if (updatesIterationItself) {
+//          int iteration = BufferTracker.getInstance().getCurIteration();
+//          if (iteration > hasNoValuesBeforeIteration) {
+//              hasNoValuesBeforeIteration = iteration;
+//          }
 //      }
-//    }
-//    if (currentLocks.size() == 0) {
-//      return;
-//    }
-//    for (FastSet.Record r = currentLocks.head(), end = currentLocks.tail(); (r = r.getNext()) != end;) {
-//      currentLocks.valueOf(r).release(this);
-//    }
-//    currentLocks.clear();
+//      if (currentLocks.size() == 0) {
+//          return;
+//      }
+//      for (FastSet.Record r = currentLocks.head(), end = currentLocks.tail(); (r = r.getNext()) != end;) {
+//          currentLocks.valueOf(r).release(this);
+//      }
+//      currentLocks.clear();
 //  }
 //
 //  /**
@@ -137,18 +137,18 @@ public:
 //   * \param l Object that is locked by this thread
 //   */
 //  public void addLock(Lockable l) {
-//    currentLocks.add(l);
+//      currentLocks.add(l);
 //  }
 //
 //  /**
 //   * \return Thread Index
 //   */
 //  public int getIndex() {
-//    return index;
+//      return index;
 //  }
 //
 //  public boolean updatesIterationItself() {
-//    return updatesIterationItself;
+//      return updatesIterationItself;
 //  }
 
 };

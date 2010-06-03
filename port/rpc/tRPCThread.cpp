@@ -35,7 +35,7 @@ tRPCThread::tRPCThread() :
 
 void tRPCThread::ExecuteTask(util::tTask* t)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
   assert((next_task == NULL));
   next_task = t;
   monitor.NotifyAll(lock1);
@@ -44,7 +44,7 @@ void tRPCThread::ExecuteTask(util::tTask* t)
 void tRPCThread::MainLoopCallback()
 {
   {
-    util::tLock lock2(this->obj_synch);
+    util::tLock lock2(this);
     if (next_task == NULL)
     {
       tRPCThreadPool::GetInstance()->EnqueueThread(this);

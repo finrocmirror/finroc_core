@@ -33,6 +33,7 @@ void tPlugins::FindAndLoadPlugins()
   //TODO do properly
   //TODO do properly
   //TODO do properly
+  //JavaPlugins.loadAllDataTypesInPackage(BehaviourInfo.class);
 
   // plugins.Add(new tMCA2Plugin());
 }

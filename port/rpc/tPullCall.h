@@ -77,15 +77,15 @@ public:
 private:
 
   //  public static void staticInit() {
-  //    // JavaOnlyBlock
-  //    METHOD_TYPE = DataTypeRegister.getInstance().addDataType(MethodCall.class);
+  //      // JavaOnlyBlock
+  //      METHOD_TYPE = DataTypeRegister.getInstance().addDataType(MethodCall.class);
   //
-  //     cMETHOD_TYPE = tDataTypeRegister::GetInstance()->AddDataType<tMethodCall>("MethodCall");
+  //       cMETHOD_TYPE = tDataTypeRegister::GetInstance()->AddDataType<tMethodCall>("MethodCall");
   //  }
   //
   //  @Override @JavaOnly
   //  public DataType getType() {
-  //    return METHOD_TYPE;
+  //      return METHOD_TYPE;
   //  }
 
   /*!
@@ -106,28 +106,28 @@ public:
   //   * \param skipObject Skip Object? (see above)
   //   */
   //  public void possiblyIncompleteDeserialize(@Ref CoreInput is, boolean skipObject) {
-  //    super.deserialize(is);
-  //    intermediateAssign = is.readBoolean();
-  //    ccPull = is.readBoolean();
-  //    if (!skipObject && isReturning(true)) {
-  //      if (ccPull) {
-  //        data = (CCInterThreadContainer<?>)is.readObjectInInterThreadContainer();
-  //      } else {
-  //        PortData tmp = (PortData)is.readObject();
-  //        if (tmp != null) {
-  //          info.curRef = tmp.getCurReference();
-  //          //info.lockEstimate = 5; // just take 5... performance is not critical here
-  //          //info.setLocks = 1; // one for this call
-  //          info.curRefCounter = info.curRef.getRefCounter();
-  //          info.curRefCounter.setLocks((byte)5);
-  //        } else {
-  //          info.curRef = null;
-  //          //info.lockEstimate = 5; // just take 5... performance is not critical here
-  //          //info.setLocks = 1; // one for this call
-  //          info.curRefCounter = null;
-  //        }
+  //      super.deserialize(is);
+  //      intermediateAssign = is.readBoolean();
+  //      ccPull = is.readBoolean();
+  //      if (!skipObject && isReturning(true)) {
+  //          if (ccPull) {
+  //              data = (CCInterThreadContainer<?>)is.readObjectInInterThreadContainer();
+  //          } else {
+  //              PortData tmp = (PortData)is.readObject();
+  //              if (tmp != null) {
+  //                  info.curRef = tmp.getCurReference();
+  //                  //info.lockEstimate = 5; // just take 5... performance is not critical here
+  //                  //info.setLocks = 1; // one for this call
+  //                  info.curRefCounter = info.curRef.getRefCounter();
+  //                  info.curRefCounter.setLocks((byte)5);
+  //              } else {
+  //                  info.curRef = null;
+  //                  //info.lockEstimate = 5; // just take 5... performance is not critical here
+  //                  //info.setLocks = 1; // one for this call
+  //                  info.curRefCounter = null;
+  //              }
+  //          }
   //      }
-  //    }
   //  }
 
   /* (non-Javadoc)
@@ -154,19 +154,19 @@ public:
 
   //  @Override
   //  public void genericRecycle() {
-  //    if (isResponsible()) {
-  //      //System.out.println("Recycling pull call: " + toString());
-  //      if (ccPull) {
-  //        if (data != null) {
-  //          data.recycle2();
-  //        }
-  //      } else if (info.curRef != null) {
-  //        info.setLocks--; // release pull call's lock
-  //        info.releaseObsoleteLocks();
+  //      if (isResponsible()) {
+  //          //System.out.println("Recycling pull call: " + toString());
+  //          if (ccPull) {
+  //              if (data != null) {
+  //                  data.recycle2();
+  //              }
+  //          } else if (info.curRef != null) {
+  //              info.setLocks--; // release pull call's lock
+  //              info.releaseObsoleteLocks();
+  //          }
+  //          reset();
+  //          super.recycle();
   //      }
-  //      reset();
-  //      super.recycle();
-  //    }
   //  }
 
   //  /**
@@ -176,15 +176,15 @@ public:
   //   */
   //  @InCppFile
   //  public void setupThreadLocalCache() {
-  //    if (tc == null) {
-  //      tc = ThreadLocalCache.getFast();
-  //      tc.data = tc.getUnusedBuffer(data.getType());
-  //      tc.data.setRefCounter(0);
-  //      tc.data.assign(data.getDataPtr());
-  //      tc.ref = tc.data.getCurrentRef();
-  //    } else {
-  //      assert(ThreadLocalCache.getFast() == tc) : "Programming error";
-  //    }
+  //      if (tc == null) {
+  //          tc = ThreadLocalCache.getFast();
+  //          tc.data = tc.getUnusedBuffer(data.getType());
+  //          tc.data.setRefCounter(0);
+  //          tc.data.assign(data.getDataPtr());
+  //          tc.ref = tc.data.getCurrentRef();
+  //      } else {
+  //          assert(ThreadLocalCache.getFast() == tc) : "Programming error";
+  //      }
   //  }
 
   virtual const util::tString ToString() const

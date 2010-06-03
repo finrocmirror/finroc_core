@@ -24,6 +24,7 @@
 #ifndef CORE__PORT__RPC__TMETHODCALLSYNCHER_H
 #define CORE__PORT__RPC__TMETHODCALLSYNCHER_H
 
+#include "core/tLockOrderLevels.h"
 #include "core/port/rpc/tAbstractCall.h"
 #include "core/port/tThreadLocalCache.h"
 
@@ -58,14 +59,14 @@ private:
 
 public:
 
-  // for synchronization on an object of this class
-  mutable util::tMutex obj_synch;
-
   // for static synchronization in this class' methods
-  static util::tMutex static_obj_synch;
+  static util::tMutex static_class_mutex;
 
   // for monitor functionality
   mutable util::tMonitor monitor;
+
+  /*! Network writer threads need to be notified afterwards */
+  util::tMutexLockOrder obj_mutex;
 
   //  /** Optimization for method calls handled directly by the same thread - may only be accessed and written by one thread */
   //  boolean beforeQuickReturnCheck = false;
@@ -92,7 +93,7 @@ public:
       index(0),
       thread(NULL),
       thread_uid(0),
-      obj_synch(),
+      obj_mutex(tLockOrderLevels::cINNER_MOST - 300),
       method_return(NULL),
       current_method_call_index(0)
   {}
@@ -144,7 +145,7 @@ public:
    */
   inline void Release()
   {
-    util::tLock lock2(obj_synch);
+    util::tLock lock2(this);
     Reset();
   }
 
@@ -155,11 +156,11 @@ public:
   //   * @throws InterruptedException thrown as soon as return value arrived
   //   */
   //  public void waitForReturnValue(long timeout) throws InterruptedException {
-  //    //System.out.println("Thread " + Thread.currentThread().toString() + " waiting for return value");
-  //    Thread.sleep(timeout);
-  //    synchronized(this) {
-  //      threadWaitingForReturn = false;
-  //    }
+  //      //System.out.println("Thread " + Thread.currentThread().toString() + " waiting for return value");
+  //      Thread.sleep(timeout);
+  //      synchronized(this) {
+  //          threadWaitingForReturn = false;
+  //      }
   //  }
 
   /*!

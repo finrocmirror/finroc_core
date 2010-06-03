@@ -68,17 +68,17 @@ public:
   //
   //  public PortQueueFragment() {
   //
-  //    // initialize array
-  //    for (size_t i = 0; i < CHUNK_SIZE; i++) {
-  //      array[i] = NULL;
-  //    }
+  //      // initialize array
+  //      for (size_t i = 0; i < CHUNK_SIZE; i++) {
+  //          array[i] = NULL;
+  //      }
   //
   //  }
   //
   /*  @Override
-    public void recycle() {
-      super.recycle();
-    }*/
+      public void recycle() {
+          super.recycle();
+      }*/
 
   inline void Recycle(bool recycle_content)
   {

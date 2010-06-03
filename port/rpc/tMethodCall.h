@@ -104,10 +104,10 @@ private:
   //  private long arrivalTime;
 
   //  public static void staticInit() {
-  //    // JavaOnlyBlock
-  //    METHOD_TYPE = DataTypeRegister.getInstance().addDataType(MethodCall.class);
+  //      // JavaOnlyBlock
+  //      METHOD_TYPE = DataTypeRegister.getInstance().addDataType(MethodCall.class);
   //
-  //     cMETHOD_TYPE = tDataTypeRegister::GetInstance()->AddDataType<tMethodCall>("MethodCall");
+  //       cMETHOD_TYPE = tDataTypeRegister::GetInstance()->AddDataType<tMethodCall>("MethodCall");
   //  }
 
   /*! Method that is called */
@@ -171,65 +171,65 @@ public:
   //   * \param ci Input stream
   //   */
   //  public TypedObject readObject(CoreInput ci) {
-  //    TypedObject result = ci.readObjectInInterThreadContainer();
-  //    if (result != null && result.getType().isStdType()) {
-  //      ((PortData)result).getManager().getCurrentRefCounter().setLocks((byte)1);
-  //    }
-  //    return result;
+  //      TypedObject result = ci.readObjectInInterThreadContainer();
+  //      if (result != null && result.getType().isStdType()) {
+  //          ((PortData)result).getManager().getCurrentRefCounter().setLocks((byte)1);
+  //      }
+  //      return result;
   //  }
 
   //  /**
   //   * (for call-handler) don't unlock/recycle parameter 1
   //   */
   //  public void dontRecycleParam1() {
-  //    autoRecycleTParam1 = false;
+  //      autoRecycleTParam1 = false;
   //  }
   //
   //  /**
   //   * (for call-handler) don't unlock/recycle parameter 2
   //   */
   //  public void dontRecycleParam2() {
-  //    autoRecycleTParam2 = false;
+  //      autoRecycleTParam2 = false;
   //  }
   //
   //  /**
   //   * (for return handler) don't recycle return value
   //   */
   //  public void dontRecycleReturnValue() {
-  //    autoRecycleRetVal = false;
+  //      autoRecycleRetVal = false;
   //  }
   //
   //  @Inline void deferCall(boolean logArrivalTime) {
-  //    if (logArrivalTime && (!alreadyDeferred)) {
-  //      setArrivalTime();
-  //    }
-  //    defer = true;
-  //    alreadyDeferred = true;
+  //      if (logArrivalTime && (!alreadyDeferred)) {
+  //          setArrivalTime();
+  //      }
+  //      defer = true;
+  //      alreadyDeferred = true;
   //  }
   //
   //  /**
   //   * Recycle/unlock parameters (provided they are not set not to be recycled)
   //   */
   //  void recycleParams() {
-  //    if (autoRecycleTParam1) {
-  //      recycleParam(tParams[0]);
-  //    }
-  //    tParams[0] = null;
-  //    if (autoRecycleTParam2) {
-  //      recycleParam(tParams[1]);
-  //    }
-  //    tParams[1] = null;
+  //      if (autoRecycleTParam1) {
+  //          recycleParam(tParams[0]);
+  //      }
+  //      tParams[0] = null;
+  //      if (autoRecycleTParam2) {
+  //          recycleParam(tParams[1]);
+  //      }
+  //      tParams[1] = null;
   //  }
   //
   //  private void recycleParam(@Ptr TypedObject p) {
-  //    if (p == null) {
-  //      return;
-  //    }
-  //    if (p.getType().isCCType()) {
-  //      ((CCInterThreadContainer<?>)p).recycle2();
-  //    } else {
-  //      ((PortData)p).getManager().getCurrentRefCounter().releaseLock();
-  //    }
+  //      if (p == null) {
+  //          return;
+  //      }
+  //      if (p.getType().isCCType()) {
+  //          ((CCInterThreadContainer<?>)p).recycle2();
+  //      } else {
+  //          ((PortData)p).getManager().getCurrentRefCounter().releaseLock();
+  //      }
   //  }
   //
   //  /**
@@ -238,133 +238,133 @@ public:
   //   */
   //  @Override
   //  public void genericRecycle() {
-  //    if (isResponsible()) {
-  //      recycleParam(tParams[0]);
-  //      recycleParam(tParams[1]);
-  //      recycleParam(rt);
-  //      tParams[0] = null;
-  //      tParams[1] = null;
-  //      rt = null;
-  //      super.recycle();
-  //    }
+  //      if (isResponsible()) {
+  //          recycleParam(tParams[0]);
+  //          recycleParam(tParams[1]);
+  //          recycleParam(rt);
+  //          tParams[0] = null;
+  //          tParams[1] = null;
+  //          rt = null;
+  //          super.recycle();
+  //      }
   //  }
   //
   //  /**
   //   * Recycle method call and recycle/unlock any objects (provided they are not set not to be recycled)
   //   */
   //  void recycleComplete() {
-  //    recycleParams();
-  //    if (autoRecycleRetVal) {
-  //      recycleParam(rt);
-  //    }
-  //    rt = null;
-  //    super.recycle();
+  //      recycleParams();
+  //      if (autoRecycleRetVal) {
+  //          recycleParam(rt);
+  //      }
+  //      rt = null;
+  //      super.recycle();
   //  }
 
   //  @Inline
   //  protected void setupCall(byte retValueType, byte methodId2, long int1, long int2, long int3, double dbl1, double dbl2, double dbl3, TypedObject obj1, boolean lockedOrCopied1, TypedObject obj2, boolean lockedOrCopied2) {
-  //    // parameters
-  //    methodID = methodId2;
-  //    iCount = (byte)(int1 == 0 ? 0 : (int2 == 0 ? 1 : (int3 == 0 ? 2 : 3)));
-  //    dCount = (byte)(dbl1 == 0 ? 0 : (dbl2 == 0 ? 1 : (dbl3 == 0 ? 2 : 3)));
-  //    tCount = (byte)(obj1 == null ? 0 : (obj2 == null ? 1 : 2));
-  //    iParams[0] = int1;
-  //    iParams[1] = int2;
-  //    iParams[2] = int3;
-  //    dParams[0] = dbl1;
-  //    dParams[1] = dbl2;
-  //    dParams[2] = dbl3;
-  //    setTParam(0, obj1, lockedOrCopied1);
-  //    setTParam(1, obj2, lockedOrCopied2);
+  //      // parameters
+  //      methodID = methodId2;
+  //      iCount = (byte)(int1 == 0 ? 0 : (int2 == 0 ? 1 : (int3 == 0 ? 2 : 3)));
+  //      dCount = (byte)(dbl1 == 0 ? 0 : (dbl2 == 0 ? 1 : (dbl3 == 0 ? 2 : 3)));
+  //      tCount = (byte)(obj1 == null ? 0 : (obj2 == null ? 1 : 2));
+  //      iParams[0] = int1;
+  //      iParams[1] = int2;
+  //      iParams[2] = int3;
+  //      dParams[0] = dbl1;
+  //      dParams[1] = dbl2;
+  //      dParams[2] = dbl3;
+  //      setTParam(0, obj1, lockedOrCopied1);
+  //      setTParam(1, obj2, lockedOrCopied2);
   //
-  //    // return values
-  //    ri = 0;
-  //    rd = 0;
-  //    rt = null;
+  //      // return values
+  //      ri = 0;
+  //      rd = 0;
+  //      rt = null;
   //
-  //    // other stuff
-  //    rType = retValueType;
-  //    arrivalTime = 0;
+  //      // other stuff
+  //      rType = retValueType;
+  //      arrivalTime = 0;
   //  }
   //
   //  private void setTParam(@SizeT int i, @Ptr TypedObject obj, boolean lockedOrCopied) {
-  //    if (obj != null) {
-  //      if (!obj.getType().isCCType()) {
-  //        PortData tmp = (PortData)obj;
-  //        if (!lockedOrCopied) {
-  //          tmp.getCurReference().getRefCounter().setOrAddLock();
-  //        } else {
-  //          assert(tmp.getCurReference().getRefCounter().isLocked());
-  //        }
-  //      } else { // cc type
-  //        @Ptr CCContainerBase cb = (CCContainerBase)obj;
-  //        if (cb.isInterThreadContainer()) {
-  //          @Ptr CCInterThreadContainer<?> ic = (CCInterThreadContainer<?>)cb;
-  //          if (!lockedOrCopied) {
-  //            @Ptr CCInterThreadContainer<?> citc = ThreadLocalCache.get().getUnusedInterThreadBuffer(obj.getType());
-  //            citc.assign(ic.getDataPtr());
-  //            obj = citc;
+  //      if (obj != null) {
+  //          if (!obj.getType().isCCType()) {
+  //              PortData tmp = (PortData)obj;
+  //              if (!lockedOrCopied) {
+  //                  tmp.getCurReference().getRefCounter().setOrAddLock();
+  //              } else {
+  //                  assert(tmp.getCurReference().getRefCounter().isLocked());
+  //              }
+  //          } else { // cc type
+  //              @Ptr CCContainerBase cb = (CCContainerBase)obj;
+  //              if (cb.isInterThreadContainer()) {
+  //                  @Ptr CCInterThreadContainer<?> ic = (CCInterThreadContainer<?>)cb;
+  //                  if (!lockedOrCopied) {
+  //                      @Ptr CCInterThreadContainer<?> citc = ThreadLocalCache.get().getUnusedInterThreadBuffer(obj.getType());
+  //                      citc.assign(ic.getDataPtr());
+  //                      obj = citc;
+  //                  }
+  //              } else {
+  //                  @Ptr CCPortDataContainer<?> ic = (CCPortDataContainer<?>)cb;
+  //                  @Ptr CCInterThreadContainer<?> citc = ThreadLocalCache.get().getUnusedInterThreadBuffer(obj.getType());
+  //                  citc.assign(ic.getDataPtr());
+  //                  obj = citc;
+  //              }
   //          }
-  //        } else {
-  //          @Ptr CCPortDataContainer<?> ic = (CCPortDataContainer<?>)cb;
-  //          @Ptr CCInterThreadContainer<?> citc = ThreadLocalCache.get().getUnusedInterThreadBuffer(obj.getType());
-  //          citc.assign(ic.getDataPtr());
-  //          obj = citc;
-  //        }
   //      }
-  //    }
-  //    tParams[i] = obj;
+  //      tParams[i] = obj;
   //  }
   //
   //  /**
   //   * \return Integer return value
   //   */
   //  protected long getReturnInt() {
-  //    assert(rType == RETURN_INT);
-  //    return ri;
+  //      assert(rType == RETURN_INT);
+  //      return ri;
   //  }
   //
   //  /**
   //   * \return Double return value
   //   */
   //  protected double getReturnDouble() {
-  //    assert(rType == RETURN_DOUBLE);
-  //    return rd;
+  //      assert(rType == RETURN_DOUBLE);
+  //      return rd;
   //  }
   //
   //  /**
   //   * \return Object return value (locked)
   //   */
   //  protected TypedObject getReturnObject() {
-  //    assert(rType == RETURN_OBJ);
-  //    return rt;
+  //      assert(rType == RETURN_OBJ);
+  //      return rt;
   //  }
   //
   //  /**
   //   * \param r Integer return value
   //   */
   //  public void setReturn(int r) {
-  //    assert(rType == RETURN_INT);
-  //    returnValueSet = true;
-  //    ri = r;
+  //      assert(rType == RETURN_INT);
+  //      returnValueSet = true;
+  //      ri = r;
   //  }
   //
   //  /**
   //   * \param r Double return value
   //   */
   //  public void setReturn(double r) {
-  //    assert(rType == RETURN_DOUBLE);
-  //    returnValueSet = true;
-  //    rd = r;
+  //      assert(rType == RETURN_DOUBLE);
+  //      returnValueSet = true;
+  //      rd = r;
   //  }
   //
   //  /**
   //   * Return null value
   //   */
   //  public void setReturnNull() {
-  //    assert(rType == RETURN_OBJ);
-  //    returnValueSet = true;
-  //    rt = null;
+  //      assert(rType == RETURN_OBJ);
+  //      returnValueSet = true;
+  //      rt = null;
   //  }
   //
   //  /**
@@ -372,31 +372,31 @@ public:
   //   * \param locked Has return value already been locked? (so that it can be automatically unlocked by this class)
   //   */
   //  public void setReturn(PortData obj, boolean locked) {
-  //    assert(rType == RETURN_OBJ);
-  //    returnValueSet = true;
-  //    rt = obj;
-  //    if (obj == null) {
-  //      return;
-  //    }
-  //    if (!locked) {
-  //      obj.getCurReference().getRefCounter().setOrAddLock();
-  //    } else {
-  //      assert(obj.getCurReference().getRefCounter().isLocked());
-  //    }
+  //      assert(rType == RETURN_OBJ);
+  //      returnValueSet = true;
+  //      rt = obj;
+  //      if (obj == null) {
+  //          return;
+  //      }
+  //      if (!locked) {
+  //          obj.getCurReference().getRefCounter().setOrAddLock();
+  //      } else {
+  //          assert(obj.getCurReference().getRefCounter().isLocked());
+  //      }
   //  }
   //
   //  /**
   //   * \param obj Object return value (will be copied)
   //   */
   //  public void setReturn(CCPortDataContainer<?> obj) {
-  //    assert(rType == RETURN_OBJ);
-  //    if (obj == null) {
-  //      setReturnNull();
-  //      return;
-  //    }
-  //    CCInterThreadContainer<?> citc = ThreadLocalCache.get().getUnusedInterThreadBuffer(obj.getType());
-  //    citc.assign(obj.getDataPtr());
-  //    setReturn(citc, true);
+  //      assert(rType == RETURN_OBJ);
+  //      if (obj == null) {
+  //          setReturnNull();
+  //          return;
+  //      }
+  //      CCInterThreadContainer<?> citc = ThreadLocalCache.get().getUnusedInterThreadBuffer(obj.getType());
+  //      citc.assign(obj.getDataPtr());
+  //      setReturn(citc, true);
   //  }
   //
   //  /**
@@ -404,19 +404,19 @@ public:
   //   * \param extraCopy Is this already an extra copy that can be recycled automatically?
   //   */
   //  public void setReturn(CCInterThreadContainer<?> obj, boolean extraCopy) {
-  //    assert(rType == RETURN_OBJ);
-  //    returnValueSet = true;
-  //    if (obj == null) {
-  //      rt = null;
-  //      return;
-  //    }
-  //    if (!extraCopy) {
-  //      CCInterThreadContainer<?> citc = ThreadLocalCache.get().getUnusedInterThreadBuffer(obj.getType());
-  //      citc.assign(obj.getDataPtr());
-  //      rt = citc;
-  //    } else {
-  //      rt = obj;
-  //    }
+  //      assert(rType == RETURN_OBJ);
+  //      returnValueSet = true;
+  //      if (obj == null) {
+  //          rt = null;
+  //          return;
+  //      }
+  //      if (!extraCopy) {
+  //          CCInterThreadContainer<?> citc = ThreadLocalCache.get().getUnusedInterThreadBuffer(obj.getType());
+  //          citc.assign(obj.getDataPtr());
+  //          rt = citc;
+  //      } else {
+  //          rt = obj;
+  //      }
   //  }
   //
   //  /**
@@ -426,30 +426,30 @@ public:
   //   * \param deferred Is this a deferred call?
   //   */
   //  @Inline public void call(CallHandler callHandler, boolean deferred) {
-  //    callHandler.handleMethodCall(this, methodID, deferred, iParams[0], iParams[1], iParams[2], dParams[0], dParams[1], dParams[2], tParams[0], tParams[1]);
+  //      callHandler.handleMethodCall(this, methodID, deferred, iParams[0], iParams[1], iParams[2], dParams[0], dParams[1], dParams[2], tParams[0], tParams[1]);
   //  }
   //
   //  /**
   //   * \return the arrivalTime
   //   */
   //  public long getArrivalTime() {
-  //    return arrivalTime;
+  //      return arrivalTime;
   //  }
   //
   //  /**
   //   * \param arrivalTime the arrivalTime to set
   //   */
   //  public void setArrivalTime() {
-  //    if (arrivalTime == 0) {
-  //      arrivalTime = Time.getCoarse();
-  //    }
+  //      if (arrivalTime == 0) {
+  //          arrivalTime = Time.getCoarse();
+  //      }
   //  }
   //
   //  /**
   //   * \param arrivalTime the arrivalTime to set
   //   */
   //  public void setArrivalTime(long time) {
-  //    arrivalTime = time;
+  //      arrivalTime = time;
   //  }
 
   virtual void GenericRecycle()
@@ -459,7 +459,7 @@ public:
 
   //  @Override @JavaOnly
   //  public DataType getType() {
-  //    return METHOD_TYPE;
+  //      return METHOD_TYPE;
   //  }
 
   /*!

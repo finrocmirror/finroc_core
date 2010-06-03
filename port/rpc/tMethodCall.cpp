@@ -54,42 +54,42 @@ void tMethodCall::DeserializeCall(tCoreInput* is, tDataType* dt, bool skip_param
   method = (dt == NULL) ? NULL : dt->GetPortInterface()->GetMethod(b);
   net_timeout = is->ReadInt();
   ::finroc::core::tAbstractCall::DeserializeImpl(is, skip_parameters);
-  //    methodID = is.readByte();
-  //    autoRecycleRetVal = is.readBoolean();
-  //    byte mask = 0;
-  //    switch(status) {
-  //    case SYNCH_CALL:
-  //    case ASYNCH_CALL:
-  //      mask = is.readByte();
-  //      tCount = (byte)((mask >> 6) & 3);
-  //      iCount = (byte)((mask >> 4) & 3);
-  //      dCount = (byte)((mask >> 2) & 3);
-  //      rType = (byte)(mask & 3);
-  //      for (int i = 0; i < tCount; i++) {
-  //        tParams[i] = readObject(is);
+  //      methodID = is.readByte();
+  //      autoRecycleRetVal = is.readBoolean();
+  //      byte mask = 0;
+  //      switch(status) {
+  //      case SYNCH_CALL:
+  //      case ASYNCH_CALL:
+  //          mask = is.readByte();
+  //          tCount = (byte)((mask >> 6) & 3);
+  //          iCount = (byte)((mask >> 4) & 3);
+  //          dCount = (byte)((mask >> 2) & 3);
+  //          rType = (byte)(mask & 3);
+  //          for (int i = 0; i < tCount; i++) {
+  //              tParams[i] = readObject(is);
+  //          }
+  //          for (int i = 0; i < iCount; i++) {
+  //              iParams[i] = is.readLong();
+  //          }
+  //          for (int i = 0; i < dCount; i++) {
+  //              dParams[i] = is.readLong();
+  //          }
+  //          break;
+  //      case ASYNCH_RETURN:
+  //      case SYNCH_RETURN:
+  //          rType = is.readByte();
+  //          assert(rType != NONE);
+  //          ri = is.readLong();
+  //          rd = is.readDouble();
+  //          rt = readObject(is);
+  //          break;
+  //      case CONNECTION_EXCEPTION:
+  //          break;
   //      }
-  //      for (int i = 0; i < iCount; i++) {
-  //        iParams[i] = is.readLong();
-  //      }
-  //      for (int i = 0; i < dCount; i++) {
-  //        dParams[i] = is.readLong();
-  //      }
-  //      break;
-  //    case ASYNCH_RETURN:
-  //    case SYNCH_RETURN:
-  //      rType = is.readByte();
-  //      assert(rType != NONE);
-  //      ri = is.readLong();
-  //      rd = is.readDouble();
-  //      rt = readObject(is);
-  //      break;
-  //    case CONNECTION_EXCEPTION:
-  //      break;
-  //    }
   //
-  //    // reset some values
-  //    arrivalTime = 0;
-  //    alreadyDeferred = false;
+  //      // reset some values
+  //      arrivalTime = 0;
+  //      alreadyDeferred = false;
 }
 
 void tMethodCall::ExecuteTask()
@@ -180,35 +180,35 @@ void tMethodCall::Serialize(tCoreOutput& oos) const
   oos.WriteInt(net_timeout);
   ::finroc::core::tAbstractCall::Serialize(oos);
 
-  //    oos.writeBoolean(autoRecycleRetVal);
-  //    byte mask = 0;
-  //    switch(status) {
-  //    case SYNCH_CALL:
-  //    case ASYNCH_CALL:
-  //      mask = (byte)((tCount << 6) | (iCount << 4) | (dCount << 2) | rType);
-  //      oos.writeByte(mask);
-  //      for (int i = 0; i < tCount; i++) {
-  //        oos.writeObject(tParams[i]);
+  //      oos.writeBoolean(autoRecycleRetVal);
+  //      byte mask = 0;
+  //      switch(status) {
+  //      case SYNCH_CALL:
+  //      case ASYNCH_CALL:
+  //          mask = (byte)((tCount << 6) | (iCount << 4) | (dCount << 2) | rType);
+  //          oos.writeByte(mask);
+  //          for (int i = 0; i < tCount; i++) {
+  //              oos.writeObject(tParams[i]);
+  //          }
+  //          for (int i = 0; i < iCount; i++) {
+  //              oos.writeLong(iParams[i]);
+  //          }
+  //          for (int i = 0; i < dCount; i++) {
+  //              oos.writeDouble(dParams[i]);
+  //          }
+  //          break;
+  //      case ASYNCH_RETURN:
+  //      case SYNCH_RETURN:
+  //          oos.writeByte(rType);
+  //          assert(rType != NONE);
+  //          // TODO optimize
+  //          oos.writeLong(ri);
+  //          oos.writeDouble(rd);
+  //          oos.writeObject(rt);
+  //          break;
+  //      case CONNECTION_EXCEPTION:
+  //          break;
   //      }
-  //      for (int i = 0; i < iCount; i++) {
-  //        oos.writeLong(iParams[i]);
-  //      }
-  //      for (int i = 0; i < dCount; i++) {
-  //        oos.writeDouble(dParams[i]);
-  //      }
-  //      break;
-  //    case ASYNCH_RETURN:
-  //    case SYNCH_RETURN:
-  //      oos.writeByte(rType);
-  //      assert(rType != NONE);
-  //      // TODO optimize
-  //      oos.writeLong(ri);
-  //      oos.writeDouble(rd);
-  //      oos.writeObject(rt);
-  //      break;
-  //    case CONNECTION_EXCEPTION:
-  //      break;
-  //    }
 }
 
 void tMethodCall::SetMethod(tAbstractMethod* m, tDataType* port_interface)

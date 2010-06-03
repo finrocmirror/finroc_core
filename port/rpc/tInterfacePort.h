@@ -71,6 +71,9 @@ protected:
 
 public:
 
+  // for monitor functionality
+  mutable util::tMonitor monitor;
+
   //  /** Does port handle method calls? In this case this points to the class that will handle the method calls */
   //  private CallHandler callHandler;
   //
@@ -83,7 +86,7 @@ public:
 private:
 
   /*! makes adjustment to flags passed through constructor */
-  static tPortCreationInfo ProcessPci(tPortCreationInfo pci, tInterfacePort::tType type_);
+  static tPortCreationInfo ProcessPci(tPortCreationInfo pci, tInterfacePort::tType type_, int lock_level);
 
 protected:
 
@@ -121,7 +124,9 @@ public:
 
   tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_, int custom_flags);
 
-  tInterfacePort(tPortCreationInfo pci, tInterfacePort::tType type_);
+  tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_, int custom_flags, int lock_level);
+
+  tInterfacePort(tPortCreationInfo pci, tInterfacePort::tType type_, int lock_level);
 
   virtual ~tInterfacePort();
 
@@ -152,10 +157,10 @@ public:
   //   * \return Method call result - may be the same as parameter
   //   */
   //  protected void asynchMethodCall(MethodCall mc) {
-  //    mc.setupAsynchCall();
-  //    mc.pushCaller(this);
-  //    mc.alreadyDeferred = false;
-  //    sendMethodCall(mc);
+  //      mc.setupAsynchCall();
+  //      mc.pushCaller(this);
+  //      mc.alreadyDeferred = false;
+  //      sendMethodCall(mc);
   //  }
   //
   //  /**
@@ -164,19 +169,19 @@ public:
   //   * \param mc Method call data
   //   */
   //  @NonVirtual protected void returnValue(MethodCall mc) {
-  //    if (mc.callerStackSize() > 0) {
+  //      if (mc.callerStackSize() > 0) {
   //
-  //      // return value to network port
-  //      mc.returnToCaller();
+  //          // return value to network port
+  //          mc.returnToCaller();
   //
-  //    } else if (mc.getStatus() == MethodCall.SYNCH_RETURN || mc.getStatus() == MethodCall.CONNECTION_EXCEPTION) {
+  //      } else if (mc.getStatus() == MethodCall.SYNCH_RETURN || mc.getStatus() == MethodCall.CONNECTION_EXCEPTION) {
   //
-  //      SynchMethodCallLogic.handleMethodReturn(mc);
+  //          SynchMethodCallLogic.handleMethodReturn(mc);
   //
-  //    } else if (mc.getStatus() == MethodCall.ASYNCH_RETURN) {
+  //      } else if (mc.getStatus() == MethodCall.ASYNCH_RETURN) {
   //
-  //      handleAsynchReturn(mc, false);
-  //    }
+  //          handleAsynchReturn(mc, false);
+  //      }
   //  }
   //
   //  // These methods should typically not be called by subclasses
@@ -188,11 +193,11 @@ public:
   //   */
   //  @Inline
   //  protected void receiveMethodCall(MethodCall mc) {
-  //    if (callHandler != null) {
-  //      handleCall(mc, false);
-  //    } else {
-  //      sendMethodCall(mc);
-  //    }
+  //      if (callHandler != null) {
+  //          handleCall(mc, false);
+  //      } else {
+  //          sendMethodCall(mc);
+  //      }
   //  }
   //
   //  /**
@@ -203,24 +208,24 @@ public:
   //   * \return Was call deferred?
   //   */
   //  protected boolean handleCall(MethodCall mc, boolean deferredCall) {
-  //    mc.autoRecycleTParam1 = true;
-  //    mc.autoRecycleTParam2 = true;
-  //    //mc.curServerPort = this;
-  //    mc.returnValueSet = false;
-  //    mc.defer = false;
-  //    mc.call(callHandler, deferredCall);
-  //    if (!mc.defer) {
-  //      if (mc.rType == MethodCall.NONE) {
-  //        mc.recycleComplete();
-  //        assert(!mc.returnValueSet);
-  //      } else {
-  //        mc.recycleParams();
-  //        assert(mc.returnValueSet);
-  //        mc.setStatus(mc.getStatus() == MethodCall.SYNCH_CALL ? MethodCall.SYNCH_RETURN : MethodCall.ASYNCH_RETURN);
-  //        returnValue(mc);
+  //      mc.autoRecycleTParam1 = true;
+  //      mc.autoRecycleTParam2 = true;
+  //      //mc.curServerPort = this;
+  //      mc.returnValueSet = false;
+  //      mc.defer = false;
+  //      mc.call(callHandler, deferredCall);
+  //      if (!mc.defer) {
+  //          if (mc.rType == MethodCall.NONE) {
+  //              mc.recycleComplete();
+  //              assert(!mc.returnValueSet);
+  //          } else {
+  //              mc.recycleParams();
+  //              assert(mc.returnValueSet);
+  //              mc.setStatus(mc.getStatus() == MethodCall.SYNCH_CALL ? MethodCall.SYNCH_RETURN : MethodCall.ASYNCH_RETURN);
+  //              returnValue(mc);
+  //          }
   //      }
-  //    }
-  //    return mc.defer;
+  //      return mc.defer;
   //  }
   //
   //  /**
@@ -231,16 +236,16 @@ public:
   //   * \return Was call deferred?
   //   */
   //  protected boolean handleAsynchReturn(MethodCall mc, boolean deferredCall) {
-  //    mc.autoRecycleRetVal = true;
-  //    //mc.curServerPort = this;
-  //    mc.defer = false;
-  //    returnHandler.handleMethodReturn(mc, mc.getMethodID(), mc.ri, mc.rd, mc.rt);
-  //    if (mc.defer) {
-  //      assert(mc.returnValueSet == false);
-  //    } else {
-  //      mc.recycleComplete();
-  //    }
-  //    return mc.defer;
+  //      mc.autoRecycleRetVal = true;
+  //      //mc.curServerPort = this;
+  //      mc.defer = false;
+  //      returnHandler.handleMethodReturn(mc, mc.getMethodID(), mc.ri, mc.rd, mc.rt);
+  //      if (mc.defer) {
+  //          assert(mc.returnValueSet == false);
+  //      } else {
+  //          mc.recycleComplete();
+  //      }
+  //      return mc.defer;
   //  }
   //
   //  /**
@@ -249,25 +254,25 @@ public:
   //   * \param mc Method call data
   //   */
   //  @NonVirtual protected void sendMethodCall(MethodCall mc) {
-  //    @Ptr ArrayWrapper<InterfacePort> it = edgesDest.getIterable();
-  //    for (@SizeT int i = 0, n = it.size(); i < n; i++) {
-  //      InterfacePort ip = (InterfacePort)it.get(i);
-  //      if (ip != null) {
-  //        ip.receiveMethodCall(mc);
-  //        return;
+  //      @Ptr ArrayWrapper<InterfacePort> it = edgesDest.getIterable();
+  //      for (@SizeT int i = 0, n = it.size(); i < n; i++) {
+  //          InterfacePort ip = (InterfacePort)it.get(i);
+  //          if (ip != null) {
+  //              ip.receiveMethodCall(mc);
+  //              return;
+  //          }
   //      }
-  //    }
   //
-  //    // return NULL if not connected
-  //    if (mc.getStatus() == MethodCall.SYNCH_CALL) {
-  //      mc.setStatus(MethodCall.CONNECTION_EXCEPTION);
-  //      mc.autoRecycleTParam1 = true;
-  //      mc.autoRecycleTParam2 = true;
-  //      mc.recycleParams();
-  //      returnValue(mc);
-  //    } else {
-  //      mc.genericRecycle();
-  //    }
+  //      // return NULL if not connected
+  //      if (mc.getStatus() == MethodCall.SYNCH_CALL) {
+  //          mc.setStatus(MethodCall.CONNECTION_EXCEPTION);
+  //          mc.autoRecycleTParam1 = true;
+  //          mc.autoRecycleTParam2 = true;
+  //          mc.recycleParams();
+  //          returnValue(mc);
+  //      } else {
+  //          mc.genericRecycle();
+  //      }
   //  }
 
   /*!
@@ -289,13 +294,13 @@ public:
   }
 
   //  protected void setReturnHandler(ReturnHandler rh) {
-  //    assert(returnHandler == null);
-  //    returnHandler = rh;
+  //      assert(returnHandler == null);
+  //      returnHandler = rh;
   //  }
   //
   //  protected void setCallHandler(CallHandler ch) {
-  //    assert(callHandler == null);
-  //    callHandler = ch;
+  //      assert(callHandler == null);
+  //      callHandler = ch;
   //  }
 
   virtual void NotifyDisconnect()    /* don't do anything here... only in network ports */
@@ -304,14 +309,14 @@ public:
 
   //  @Override
   //  public TypedObject universalGetAutoLocked() {
-  //    System.out.println("warning: cannot get current value from interface port");
-  //    return null;
+  //      System.out.println("warning: cannot get current value from interface port");
+  //      return null;
   //  }
 
   //  @Override
   //  public void invokeCall(MethodCall call) {
-  //    call.pushCaller(this);
-  //    sendMethodCall(call);
+  //      call.pushCaller(this);
+  //      sendMethodCall(call);
   //  }
 
   virtual void SetMaxQueueLength(int length)

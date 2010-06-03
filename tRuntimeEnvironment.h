@@ -24,12 +24,14 @@
 #ifndef CORE__TRUNTIMEENVIRONMENT_H
 #define CORE__TRUNTIMEENVIRONMENT_H
 
-#include "core/tCoreRegister.h"
-#include "core/port/tAbstractPort.h"
 #include "core/tFrameworkElement.h"
-#include "finroc_core_utils/container/tConcurrentMap.h"
 #include "core/tRuntimeListener.h"
+#include "core/port/tAbstractPort.h"
+#include "core/tCoreRegister.h"
+#include "finroc_core_utils/container/tConcurrentMap.h"
+#include "finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "finroc_core_utils/container/tSimpleList.h"
+#include "core/tLockOrderLevels.h"
 
 namespace finroc
 {
@@ -45,8 +47,67 @@ class tThreadLocalCache;
  */
 class tRuntimeEnvironment : public tFrameworkElement
 {
+public:
+  /*implements Runtime*/
+
+  /*!
+   * Contains diverse registers/lookup tables of runtime.
+   * They are moved to extra class in order to be separately lockable
+   * (necessary for systematic dead-lock avoidance)
+   */
+  class tRegistry : public util::tObject
+  {
+    friend class tRuntimeEnvironment;
+  private:
+
+    // Outer class RuntimeEnvironment
+    tRuntimeEnvironment* const outer_class_ptr;
+
+    /*! Global register of all ports. Allows accessing ports with simple handle. */
+    ::std::tr1::shared_ptr<tCoreRegister<tAbstractPort*> > ports;
+
+    /*! Global register of all framework elements (except of ports) */
+    tCoreRegister<tFrameworkElement*> elements;
+
+    /*! Edges dealing with linked ports */
+    util::tConcurrentMap<util::tString, tLinkEdge*> link_edges;
+
+    /*! List with runtime listeners */
+    tRuntimeListenerManager listeners;
+
+    /*! Temporary buffer - may be used in synchronized context */
+    util::tStringBuilder temp_buffer;
+
+    /*! Alternative roots for links (usually remote runtime environments mapped into this one) */
+    util::tSimpleList<tFrameworkElement*> alternative_link_roots;
+
+  public:
+
+    /*! Lock to thread local cache list */
+    ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock;
+
+    /*! Mutex */
+    mutable util::tMutexLockOrder obj_mutex;
+
+    tRegistry(tRuntimeEnvironment* const outer_class_ptr_) :
+        outer_class_ptr(outer_class_ptr_),
+        ports(new tCoreRegister<tAbstractPort*>(true)),
+        elements(false),
+        link_edges(NULL),
+        listeners(),
+        temp_buffer(),
+        alternative_link_roots(),
+        infos_lock(),
+        obj_mutex(tLockOrderLevels::cRUNTIME_REGISTER)
+    {}
+
+  };
+
   friend class tLinkEdge;
 private:
+
+  /*! Single final instance of above */
+  tRegistry registry;
 
   //
   //  // Static elements to delete after all elements in runtime environment
@@ -92,6 +153,17 @@ private:
   /*! Raw pointer to above - that also exists during destruction */
   static tRuntimeEnvironment* instance_raw_ptr;
 
+  /*! Timestamp when runtime environment was created */
+  int64 creation_time;
+
+  /*! Is RuntimeEnvironment currently active (and needs to be deleted?) */
+  static bool active;
+
+  /*! Mutex for static methods */
+  static util::tMutexLockOrder static_class_mutex;
+
+public:
+
   /*! Runtime settings */
   //private final RuntimeSettings settings;
 
@@ -99,43 +171,11 @@ private:
   //private final ListenerManager listeners = new ListenerManager();
   //private final Byte ADD = 1, REMOVE = 2;
 
-  /*! Global register of all ports. Allows accessing ports with simple handle. */
-  ::std::tr1::shared_ptr<tCoreRegister<tAbstractPort*> > ports;
-
-  /*! Global register of all framework elements (except of ports) */
-  tCoreRegister< ::finroc::core::tFrameworkElement*> elements;
-
   //  /** Links to framework elements */
   //  private final ConcurrentMap<String, AbstractPort> links = new ConcurrentMap<String, AbstractPort>();
 
-  /*! Edges dealing with linked ports */
-  util::tConcurrentMap<util::tString, tLinkEdge*> link_edges;
-
-  /*! List with runtime listeners */
-  tRuntimeListenerManager listeners;
-
   //  /** True, when Runtime environment is shutting down */
   //  public static boolean shuttingDown = false;
-
-  /*! Temporary buffer - may be used in synchronized context */
-  util::tStringBuilder temp_buffer;
-
-  /*! Timestamp when runtime environment was created */
-  int64 creation_time;
-
-  /*! Is RuntimeEnvironment currently active (and needs to be deleted?) */
-  static bool active;
-
-  /*! Lock to thread local cache list */
-  ::std::tr1::shared_ptr<util::tSimpleList<tThreadLocalCache*> > infos_lock;
-
-  /*! Alternative roots for links (usually remote runtime environments mapped into this one) */
-  util::tSimpleList< ::finroc::core::tFrameworkElement*> alternative_link_roots;
-
-public:
-
-  // for static synchronization in this class' methods
-  static util::tMutex static_obj_synch;
 
   /*! Framework element that contains all framework elements that have no parent specified */
   ::finroc::core::tFrameworkElement* unrelated;
@@ -145,7 +185,7 @@ private:
   //  @SuppressWarnings("unused")
   //  @InCppFile
   //  private void stopStreamThread() {
-  //    StreamCommitThread.staticStop();
+  //      StreamCommitThread.staticStop();
   //  }
 
   //@Init("deleteLastList(new util::SimpleList<finroc::util::Object*>())")
@@ -161,20 +201,20 @@ protected:
   //   * \param linkName Name of link
   //   */
   //  public synchronized void link(AbstractPort port, String linkName) {
-  //    assert(!links.contains(linkName));
-  //    links.put(linkName, port);
+  //      assert(!links.contains(linkName));
+  //      links.put(linkName, port);
   //
-  //    // notify link listeners
+  //      // notify link listeners
   //
-  //    for (@SizeT int i = 0; i < listeners.size(); i++) {
-  //      listeners.get(i).linkAdded(linkName, port);
-  //    }
+  //      for (@SizeT int i = 0; i < listeners.size(); i++) {
+  //          listeners.get(i).linkAdded(linkName, port);
+  //      }
   //
-  //    // notify edges
-  //    LinkEdge interested = linkEdges.getPtr(linkName);
-  //    while(interested != null) {
-  //      interested.linkAdded(this, linkName, port);
-  //    }
+  //      // notify edges
+  //      LinkEdge interested = linkEdges.getPtr(linkName);
+  //      while(interested != null) {
+  //          interested.linkAdded(this, linkName, port);
+  //      }
   //  }
 
   //  /**
@@ -184,12 +224,12 @@ protected:
   //   * \param linkName Name of link
   //   */
   //  public synchronized void removeLink(String linkName) {
-  //    AbstractPort ap = links.remove(linkName);
+  //      AbstractPort ap = links.remove(linkName);
   //
-  //    // notify link listeners
-  //    for (@SizeT int i = 0; i < linkListeners.size(); i++) {
-  //      linkListeners.get(i).linkRemoved(linkName, ap);
-  //    }
+  //      // notify link listeners
+  //      for (@SizeT int i = 0; i < linkListeners.size(); i++) {
+  //          linkListeners.get(i).linkRemoved(linkName, ap);
+  //      }
   //  }
 
   /*!
@@ -225,11 +265,7 @@ public:
    *
    * \param listener Listener to add
    */
-  inline void AddListener(tRuntimeListener* listener)
-  {
-    util::tLock lock2(obj_synch);
-    listeners.Add(listener);
-  }
+  void AddListener(tRuntimeListener* listener);
 
   /*!
    * \return Timestamp when runtime environment was created
@@ -247,7 +283,7 @@ public:
    */
   inline ::finroc::core::tFrameworkElement* GetElement(int handle)
   {
-    ::finroc::core::tFrameworkElement* fe = handle >= 0 ? ports->Get(handle) : elements.Get(handle);
+    ::finroc::core::tFrameworkElement* fe = handle >= 0 ? registry.ports->Get(handle) : registry.elements.Get(handle);
     if (fe == NULL)
     {
       return NULL;
@@ -264,12 +300,12 @@ public:
     DeleteChildren();
     instance_raw_ptr = NULL;
 
-    //    // delete thread local caches mainly
-    //    for (size_t i = 0; i < deleteLastList->size(); i++) {
-    //      delete deleteLastList->get(i);
-    //    }
-    //    deleteLastList->clear();
-    //    deleteLastList._reset();
+    //      // delete thread local caches mainly
+    //      for (size_t i = 0; i < deleteLastList->size(); i++) {
+    //          delete deleteLastList->get(i);
+    //      }
+    //      deleteLastList->clear();
+    //      deleteLastList._reset();
     // stopStreamThread();
     // instance = NULL; will happen automatically
   }
@@ -289,7 +325,7 @@ public:
   //   * \return Port
   //   */
   //  public AbstractPort getPortByRawIndex(int i) {
-  //    return ports.getByRawIndex(i);
+  //      return ports.getByRawIndex(i);
   //  }
 
   /*!
@@ -312,7 +348,15 @@ public:
    */
   inline ::std::tr1::shared_ptr<const tCoreRegister<tAbstractPort*> > GetPorts()
   {
-    return ports;
+    return registry.ports;
+  }
+
+  /*!
+   * \return Lock order of registry
+   */
+  inline const tRegistry* GetRegistryHelper()
+  {
+    return &(registry);
   }
 
   /*!
@@ -324,11 +368,19 @@ public:
    */
   static tRuntimeEnvironment* InitialInit();
 
+  /*!
+   * Mark element as (soon completely) deleted at RuntimeEnvironment
+   * This is done automatically and should not be called by a user.
+   *
+   * \param framework_element Element to mark deleted
+   */
+  void MarkElementDeleted(tFrameworkElement* fe);
+
   //  /**
   //   * \return Iterator to iterate over links
   //   */
   //  public ConcurrentMap<String, AbstractPort>.MapIterator getLinkIterator() {
-  //    return links.getIterator();
+  //      return links.getIterator();
   //  }
 
   //  /**
@@ -336,11 +388,11 @@ public:
   //   */
   //  static void deleteLast(@Ptr Object t) {
   //
-  //    if (instance == NULL || instance->deleteLastList._get() == NULL) {
-  //      delete t;
-  //    } else {
-  //      instance->deleteLastList->add(t);
-  //    }
+  //      if (instance == NULL || instance->deleteLastList._get() == NULL) {
+  //          delete t;
+  //      } else {
+  //          instance->deleteLastList->add(t);
+  //      }
   //
   //  }
 
@@ -349,21 +401,18 @@ public:
    *
    * \param element Framework element that will be initialized soon
    */
-  inline void PreElementInit(tFrameworkElement* element)
-  {
-    listeners.Notify(element, NULL, tRuntimeListener::cPRE_INIT);
-  }
+  void PreElementInit(tFrameworkElement* element);
 
   //  @Override
   //  protected void serializeUid(CoreOutputStream oos, boolean firstCall) throws IOException {
-  //    return;  // do not include Runtime Description in UIDs
+  //      return;  // do not include Runtime Description in UIDs
   //  }
   //
   //  /**
   //   * \return Returns unmodifiable list of Ports.
   //   */
   //  public List<PortContainer> getPorts() {
-  //    return indexedPorts.unmodifiable();
+  //      return indexedPorts.unmodifiable();
   //  }
   //
   //  /**
@@ -371,27 +420,27 @@ public:
   //   * \return Returns PortContainer with specified global index
   //   */
   //  public PortContainer getPort(int index) {
-  //    return indexedPorts.get(index);
+  //      return indexedPorts.get(index);
   //  }
 
   //  /**
   //   * \return Runtime Settings module
   //   */
   //  public RuntimeSettings getSettings() {
-  //    return settings;
+  //      return settings;
   //  }
   //
   //
   //  private class ListenerManager extends WeakRefListenerManager<RuntimeListener> {
   //
-  //    @Override
-  //    protected void notifyObserver(RuntimeListener observer, Object... param) {
-  //      if (param[0] == ADD) {
-  //        observer.portAdded((Port<?>)param[1]);
-  //      } else {
-  //        observer.portRemoved((Port<?>)param[1]);
+  //      @Override
+  //      protected void notifyObserver(RuntimeListener observer, Object... param) {
+  //          if (param[0] == ADD) {
+  //              observer.portAdded((Port<?>)param[1]);
+  //          } else {
+  //              observer.portRemoved((Port<?>)param[1]);
+  //          }
   //      }
-  //    }
   //  }
   //
   //  /**
@@ -399,15 +448,15 @@ public:
   //   * @see core.util.WeakRefListenerManager#addListener(java.util.EventListener)
   //   */
   //  public synchronized void addListener(RuntimeListener l, boolean applyExistingPorts) {
-  //    listeners.addListener(l);
-  //    if (applyExistingPorts) {
-  //      for (int i = 0, n = indexedPorts.size(); i < n; i++) {
-  //        Port<?> p = indexedPorts.get(i).getPort();
-  //        if (p != null) {
-  //          l.portAdded(p);
-  //        }
+  //      listeners.addListener(l);
+  //      if (applyExistingPorts) {
+  //          for (int i = 0, n = indexedPorts.size(); i < n; i++) {
+  //              Port<?> p = indexedPorts.get(i).getPort();
+  //              if (p != null) {
+  //                  l.portAdded(p);
+  //              }
+  //          }
   //      }
-  //    }
   //  }
   //
   //  /**
@@ -415,26 +464,26 @@ public:
   //   * @see core.util.WeakRefListenerManager#removeListener(java.util.EventListener)
   //   */
   //  public synchronized void removeListener(RuntimeListener l) {
-  //    listeners.removeListener(l);
+  //      listeners.removeListener(l);
   //  }
   //
   //  /**
   //   * \return Unmodifiable List with Ports that actually exists - thread-safe for iteration - may contain null entries
   //   */
   //  public List<Port<?>> getExistingPorts() {
-  //    return existingPorts.getFastUnmodifiable();
+  //      return existingPorts.getFastUnmodifiable();
   //  }
   //
   //  /**
   //   * \return the activeModuleCount
   //   */
   //  public int getActiveModuleCount() {
-  //    return activeModuleCount;
+  //      return activeModuleCount;
   //  }
   //
   //  public void resetLoopThreads() {
   //      for (FastMap.Entry<String, ModuleContainer> e = modules.head(), end = modules.tail(); (e = e.getNext()) != end;) {
-  //        e.getValue().setLoopThreadInfo(null);
+  //          e.getValue().setLoopThreadInfo(null);
   //      }
   //  }
 
@@ -445,22 +494,14 @@ public:
    * \param framework_element Element to register
    * \return Handle of Framework element
    */
-  inline int RegisterElement(tFrameworkElement* fe)
-  {
-    util::tLock lock2(obj_synch);
-    return fe->IsPort() ? ports->Add(static_cast<tAbstractPort*>(fe)) : elements.Add(fe);
-  }
+  int RegisterElement(tFrameworkElement* fe);
 
   /*!
    * Remove runtime listener
    *
    * \param listener Listener to remove
    */
-  inline void RemoveListener(tRuntimeListener* listener)
-  {
-    util::tLock lock2(obj_synch);
-    listeners.Remove(listener);
-  }
+  void RemoveListener(tRuntimeListener* listener);
 
   /*!
    * Called whenever a framework element was added/removed or changed

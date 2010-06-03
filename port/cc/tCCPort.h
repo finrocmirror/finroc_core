@@ -124,6 +124,7 @@ public:
   inline T* GetDefaultBuffer()
   {
     assert(((!IsReady())) && "please set default value _before_ initializing port");
+
     return reinterpret_cast<T*>(this->default_value->GetData());
   }
 

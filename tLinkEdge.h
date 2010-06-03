@@ -55,13 +55,6 @@ private:
   /*! Pointer to next edge - for a singly linked list */
   tLinkEdge* next;
 
-public:
-
-  // for synchronization on an object of this class
-  mutable util::tMutex obj_synch;
-
-private:
-
   /*!
    * Creates link edge for two links
    *
@@ -126,6 +119,7 @@ public:
 
   /*!
    * Called by RuntimeEnvironment when link that this object is obviously interested in has been added/created
+   * (must only be called with lock on runtime-registry)
    *
    * \param re RuntimeEnvironment
    * \param link Link that has been added
@@ -151,7 +145,7 @@ public:
 //   * \param port port linked to
 //   */
 //  void linkRemoved(RuntimeEnvironment re, String link, AbstractPort port) {
-//    // do nothing... currently
+//      // do nothing... currently
 //  }
 
 };

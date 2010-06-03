@@ -88,6 +88,7 @@ private:
   tPortInterface* methods;
 
 public:
+  /*implements CoreSerializable*/
 
   /*! The first n entries are reserved for CHEAP_COPYABLE_TYPES */
   static const size_t cMAX_CHEAP_COPYABLE_TYPES = 200u;
@@ -106,12 +107,12 @@ public:
 
   //  @JavaOnly
   //  public DataType(/*short uid,*/ String name, @AutoPtr PortDataFactory factory, boolean ccType/*, SerializationMethod serialization*/) {
-  //    //this.serialization = serialization;
-  //    //dataTypeUid = uid;
-  //    javaClass = null;
-  //    this.factory = factory;
-  //    this.ccType = ccType
-  //    ;
+  //      //this.serialization = serialization;
+  //      //dataTypeUid = uid;
+  //      javaClass = null;
+  //      this.factory = factory;
+  //      this.ccType = ccType
+  //      ;
   //  }
 
   /*!
@@ -175,12 +176,12 @@ public:
 
   //  @Override
   //  public void deserialize(CoreInput is) {
-  //    throw new RuntimeException("Not intended");
+  //      throw new RuntimeException("Not intended");
   //  }
   //
   //  @Override
   //  public void serialize(CoreBuffer os) {
-  //    PortInfo.serializeDataType(this, os);
+  //      PortInfo.serializeDataType(this, os);
   //  }
 
   /*!
@@ -258,10 +259,10 @@ public:
   {}
 
   //  SerializationMethod getSerialization(CoreSerializable* cs) {
-  //    return Custom;
+  //      return Custom;
   //  }
   //  SerializationMethod getSerialization(void* cs) {
-  //    return Memcpy;
+  //      return Memcpy;
   //  }
 
   /*!

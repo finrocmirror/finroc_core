@@ -47,12 +47,12 @@ public:
 
   //  /** Is current thread responsible of recycling object? */
   //  public boolean isResponsible() {
-  //    return ThreadUtil.getCurrentThreadId() == responsibleThread;
+  //      return ThreadUtil.getCurrentThreadId() == responsibleThread;
   //  }
   //
   //  public void recycle() {
-  //    responsibleThread = -1;
-  //    super.recycle();
+  //      responsibleThread = -1;
+  //      super.recycle();
   //  }
 
   /*!

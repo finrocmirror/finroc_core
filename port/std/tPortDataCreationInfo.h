@@ -71,10 +71,14 @@ private:
 
 public:
 
+  // for synchronization on an object of this class
+  mutable util::tMutex obj_mutex;
+
   tPortDataCreationInfo() :
       manager(NULL),
       uninitialized_port_data(),
-      prototype(NULL)
+      prototype(NULL),
+      obj_mutex()
   {}
 
   /*!
@@ -84,6 +88,7 @@ public:
    */
   inline void AddUnitializedObject(tPortData* obj)
   {
+    util::tLock lock2(this);
     uninitialized_port_data.Add(obj);
   }
 

@@ -24,6 +24,7 @@
 #include "core/port/net/tNetPort.h"
 
 #include "core/port/tAbstractPort.h"
+#include "core/tLockOrderLevels.h"
 #include "core/tRuntimeListener.h"
 #include "core/tRuntimeSettings.h"
 #include "core/tCoreFlags.h"
@@ -49,7 +50,7 @@ const int8 tAbstractPort::cNO_CHANGE, tAbstractPort::cCHANGED, tAbstractPort::cC
 const int tAbstractPort::cBULK_N_EXPRESS;
 
 tAbstractPort::tAbstractPort(tPortCreationInfo pci) :
-    tFrameworkElement(pci.description, pci.parent, ProcessFlags(pci)),
+    tFrameworkElement(pci.description, pci.parent, ProcessFlags(pci), pci.lock_order < 0 ? tLockOrderLevels::cPORT : pci.lock_order),
     changed(0),
     edges_src(NULL),
     edges_dest(NULL),
@@ -58,9 +59,9 @@ tAbstractPort::tAbstractPort(tPortCreationInfo pci) :
     data_type(pci.data_type),
     min_net_update_time(pci.min_net_update_interval)
 {
-  //    if (getFlag(PortFlags.IS_SHARED)) {
-  //      createDefaultLink();
-  //    }
+  //      if (getFlag(PortFlags.IS_SHARED)) {
+  //          createDefaultLink();
+  //      }
 }
 
 tNetPort* tAbstractPort::AsNetPort()
@@ -75,37 +76,46 @@ void tAbstractPort::CommitUpdateTimeChange()
     PublishUpdatedInfo(tRuntimeListener::cCHANGE);
   }
   /*if (isShared() && (portSpecific || minNetUpdateTime <= 0)) {
-    RuntimeEnvironment.getInstance().getSettings().getSharedPorts().commitUpdateTimeChange(getIndex(), getMinNetUpdateInterval());
+      RuntimeEnvironment.getInstance().getSettings().getSharedPorts().commitUpdateTimeChange(getIndex(), getMinNetUpdateInterval());
   }*/
 }
 
 void tAbstractPort::ConnectToSource(const util::tString& src_link)
 {
-  util::tLock lock1(obj_synch);
-  if (link_edges == NULL)    // lazy inizialization
   {
-    link_edges = new util::tSimpleList<tLinkEdge*>();
-  }
-  for (size_t i = 0u; i < link_edges->Size(); i++)
-  {
-    if (link_edges->Get(i)->GetSourceLink().Equals(src_link))
+    util::tLock lock2(GetRegistryLock());
+    if (IsDeleted())
     {
       return;
     }
+    if (link_edges == NULL)    // lazy inizialization
+    {
+      link_edges = new util::tSimpleList<tLinkEdge*>();
+    }
+    for (size_t i = 0u; i < link_edges->Size(); i++)
+    {
+      if (link_edges->Get(i)->GetSourceLink().Equals(src_link))
+      {
+        return;
+      }
+    }
+    link_edges->Add(new tLinkEdge(MakeAbsoluteLink(src_link), GetHandle()));
   }
-  link_edges->Add(new tLinkEdge(MakeAbsoluteLink(src_link), GetHandle()));
 }
 
 void tAbstractPort::ConnectToTarget(tAbstractPort* target)
 {
-  util::tLock lock1(obj_synch);
   {
-    util::tLock lock2(target->obj_synch);
+    util::tLock lock2(GetRegistryLock());
+    if (IsDeleted())
+    {
+      return;
+    }
     if (MayConnectTo(target) && (!IsConnectedTo(target)))
     {
       RawConnectToTarget(target);
-      //        strategy = (short)Math.max(0, strategy);
-      //        target.strategy = (short)Math.max(0, target.strategy);
+      //              strategy = (short)Math.max(0, strategy);
+      //              target.strategy = (short)Math.max(0, target.strategy);
       target->PropagateStrategy(NULL, this);
       NewConnection(target);
       target->NewConnection(this);
@@ -122,19 +132,25 @@ void tAbstractPort::ConnectToTarget(tAbstractPort* target)
 
 void tAbstractPort::ConnectToTarget(const util::tString& dest_link)
 {
-  util::tLock lock1(obj_synch);
-  if (link_edges == NULL)    // lazy initialization
   {
-    link_edges = new util::tSimpleList<tLinkEdge*>();
-  }
-  for (size_t i = 0u; i < link_edges->Size(); i++)
-  {
-    if (link_edges->Get(i)->GetTargetLink().Equals(dest_link))
+    util::tLock lock2(GetRegistryLock());
+    if (IsDeleted())
     {
       return;
     }
+    if (link_edges == NULL)    // lazy initialization
+    {
+      link_edges = new util::tSimpleList<tLinkEdge*>();
+    }
+    for (size_t i = 0u; i < link_edges->Size(); i++)
+    {
+      if (link_edges->Get(i)->GetTargetLink().Equals(dest_link))
+      {
+        return;
+      }
+    }
+    link_edges->Add(new tLinkEdge(GetHandle(), MakeAbsoluteLink(dest_link)));
   }
-  link_edges->Add(new tLinkEdge(GetHandle(), MakeAbsoluteLink(dest_link)));
 }
 
 void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
@@ -151,42 +167,38 @@ void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
 
 void tAbstractPort::DisconnectAll()
 {
-  util::tLock lock1(obj_synch);
-
-  // remove link edges
-  if (link_edges != NULL)
   {
-    for (size_t i = 0u; i < link_edges->Size(); i++)
-    {
-      delete link_edges->Get(i);
-    }
-    link_edges->Clear();
-  }
+    util::tLock lock2(GetRegistryLock());
 
-  util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
-  for (int i = 0, n = it->Size(); i < n; i++)
-  {
-    tAbstractPort* target = it->Get(i);
-    if (target == NULL)
+    // remove link edges
+    if (link_edges != NULL)
     {
-      continue;
+      for (size_t i = 0u; i < link_edges->Size(); i++)
+      {
+        delete link_edges->Get(i);
+      }
+      link_edges->Clear();
     }
+
+    util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
+    for (int i = 0, n = it->Size(); i < n; i++)
     {
-      util::tLock lock3(target->obj_synch);
+      tAbstractPort* target = it->Get(i);
+      if (target == NULL)
+      {
+        continue;
+      }
       RemoveInternal(this, target);
     }
-  }
 
-  it = edges_dest->GetIterable();
-  for (int i = 0, n = it->Size(); i < n; i++)
-  {
-    tAbstractPort* target = it->Get(i);
-    if (target == NULL)
+    it = edges_dest->GetIterable();
+    for (int i = 0, n = it->Size(); i < n; i++)
     {
-      continue;
-    }
-    {
-      util::tLock lock3(target->obj_synch);
+      tAbstractPort* target = it->Get(i);
+      if (target == NULL)
+      {
+        continue;
+      }
       RemoveInternal(target, this);
     }
   }
@@ -194,9 +206,8 @@ void tAbstractPort::DisconnectAll()
 
 void tAbstractPort::DisconnectFrom(tAbstractPort* target)
 {
-  util::tLock lock1(obj_synch);
   {
-    util::tLock lock2(target->obj_synch);
+    util::tLock lock2(GetRegistryLock());
     util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
     for (int i = 0, n = it->Size(); i < n; i++)
     {
@@ -335,7 +346,7 @@ bool tAbstractPort::IsConnectedTo(tAbstractPort* target)
   return false;
 }
 
-bool tAbstractPort::IsConnectedToReversePushSources()
+bool tAbstractPort::IsConnectedToReversePushSources() const
 {
   util::tArrayWrapper<tAbstractPort*>* it = edges_dest->GetIterable();
   for (int i = 0, n = it->Size(); i < n; i++)
@@ -374,10 +385,10 @@ bool tAbstractPort::MayConnectTo(tAbstractPort* target)
 
   // Check will be done by data type
   /*if (getFlag(PortFlags.IS_CC_PORT) != target.getFlag(PortFlags.IS_CC_PORT)) {
-    return false;
+      return false;
   }
   if (getFlag(PortFlags.IS_INTERFACE_PORT) != target.getFlag(PortFlags.IS_INTERFACE_PORT)) {
-    return false;
+      return false;
   }*/
 
   if (!data_type->IsConvertibleTo(target->data_type))
@@ -389,15 +400,15 @@ bool tAbstractPort::MayConnectTo(tAbstractPort* target)
 
 void tAbstractPort::PrepareDelete()
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
 
-  //    // remove links
-  //    if (linksTo != null) {
-  //      for (@SizeT int i = 0; i < linksTo.size(); i++) {
-  //        getRuntime().removeLink(linksTo.get(i));
+  //      // remove links
+  //      if (linksTo != null) {
+  //          for (@SizeT int i = 0; i < linksTo.size(); i++) {
+  //              getRuntime().removeLink(linksTo.get(i));
+  //          }
+  //          linksTo.clear();
   //      }
-  //      linksTo.clear();
-  //    }
 
   // disconnect all edges
   DisconnectAll();
@@ -426,82 +437,85 @@ int tAbstractPort::ProcessFlags(const tPortCreationInfo& pci)
 
 bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort* new_connection_partner)
 {
-  util::tLock lock1(obj_synch);
-
-  // step1: determine max queue length (strategy) for this port
-  int16 max = static_cast<int16>(util::tMath::Min(GetStrategyRequirement(), util::tShort::cMAX_VALUE));
-  util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
-  util::tArrayWrapper<tAbstractPort*>* it_prev = edges_dest->GetIterable();
-  for (int i = 0, n = it->Size(); i < n; i++)
   {
-    tAbstractPort* port = it->Get(i);
-    if (port != NULL)
-    {
-      max = static_cast<int16>(util::tMath::Max(max, port->GetStrategy()));
-    }
-  }
+    util::tLock lock2(GetRegistryLock());
 
-  // has max length (strategy) for this port changed? => propagate to sources
-  bool change = (max != strategy);
-
-  // if origin wants a push - and we are a "source" port - provide this push (otherwise - "push wish" should be propagated further)
-  if (push_wanter != NULL)
-  {
-    bool source_port = (strategy >= 1 && max >= 1) || edges_dest->IsEmpty();
-    if (!source_port)
+    // step1: determine max queue length (strategy) for this port
+    int16 max = static_cast<int16>(util::tMath::Min(GetStrategyRequirement(), util::tShort::cMAX_VALUE));
+    util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
+    util::tArrayWrapper<tAbstractPort*>* it_prev = edges_dest->GetIterable();
+    for (int i = 0, n = it->Size(); i < n; i++)
     {
-      bool all_sources_reverse_pushers = true;
-      for (int i = 0, n = it_prev->Size(); i < n; i++)
+      tAbstractPort* port = it->Get(i);
+      if (port != NULL)
       {
-        tAbstractPort* port = it_prev->Get(i);
-        if (port != NULL && port->IsReady() && (!port->ReversePushStrategy()))
+        max = static_cast<int16>(util::tMath::Max(max, port->GetStrategy()));
+      }
+    }
+
+    // has max length (strategy) for this port changed? => propagate to sources
+    bool change = (max != strategy);
+
+    // if origin wants a push - and we are a "source" port - provide this push (otherwise - "push wish" should be propagated further)
+    if (push_wanter != NULL)
+    {
+      bool source_port = (strategy >= 1 && max >= 1) || edges_dest->IsEmpty();
+      if (!source_port)
+      {
+        bool all_sources_reverse_pushers = true;
+        for (int i = 0, n = it_prev->Size(); i < n; i++)
         {
-          all_sources_reverse_pushers = false;
-          break;
+          tAbstractPort* port = it_prev->Get(i);
+          if (port != NULL && port->IsReady() && (!port->ReversePushStrategy()))
+          {
+            all_sources_reverse_pushers = false;
+            break;
+          }
         }
+        source_port = all_sources_reverse_pushers;
       }
-      source_port = all_sources_reverse_pushers;
-    }
-    if (source_port)
-    {
-      if (IsReady() && push_wanter->IsReady())
+      if (source_port)
       {
-        util::tSystem::out.Println(util::tStringBuilder("Performing initial push from ") + GetQualifiedName() + " to " + push_wanter->GetQualifiedName());
-        InitialPushTo(push_wanter, false);
+        if (IsReady() && push_wanter->IsReady())
+        {
+          util::tSystem::out.Println(util::tStringBuilder("Performing initial push from ") + GetQualifiedName() + " to " + push_wanter->GetQualifiedName());
+          InitialPushTo(push_wanter, false);
+        }
+        push_wanter = NULL;
       }
-      push_wanter = NULL;
     }
-  }
 
-  // okay... do we wish to receive a push?
-  // yes if...
-  //  1) we are target of a new connection, have a push strategy, no other sources, and partner is no reverse push source
-  //  2) our strategy changed to push, and exactly one source
-  int other_sources = 0;
-  for (int i = 0, n = it_prev->Size(); i < n; i++)
-  {
-    tAbstractPort* port = it_prev->Get(i);
-    if (port != NULL && port->IsReady() && port != new_connection_partner)
+    // okay... do we wish to receive a push?
+    // yes if...
+    //  1) we are target of a new connection, have a push strategy, no other sources, and partner is no reverse push source
+    //  2) our strategy changed to push, and exactly one source
+    int other_sources = 0;
+    for (int i = 0, n = it_prev->Size(); i < n; i++)
     {
-      other_sources++;
+      tAbstractPort* port = it_prev->Get(i);
+      if (port != NULL && port->IsReady() && port != new_connection_partner)
+      {
+        other_sources++;
+      }
     }
+    bool request_push = ((new_connection_partner != NULL) && (max >= 1) && (other_sources == 0) && (!new_connection_partner->ReversePushStrategy())) || ((max >= 1 && strategy < 1) && (other_sources == 1));
+
+    // register strategy change
+    if (change)
+    {
+      strategy = max;
+    }
+
+    ForwardStrategy(strategy, request_push ? this : NULL);  // forward strategy... do it anyway, since new ports may have been connected
+
+    if (change)    // do this last to ensure that all relevant strategies have been set, before any network updates occur
+    {
+      PublishUpdatedInfo(tRuntimeListener::cCHANGE);
+    }
+
+    return change;
+
   }
-  bool request_push = ((new_connection_partner != NULL) && (max >= 1) && (other_sources == 0) && (!new_connection_partner->ReversePushStrategy())) || ((max >= 1 && strategy < 1) && (other_sources == 1));
-
-  // register strategy change
-  if (change)
-  {
-    strategy = max;
-  }
-
-  ForwardStrategy(strategy, request_push ? this : NULL);  // forward strategy... do it anyway, since new ports may have been connected
-
-  if (change)    // do this last to ensure that all relevant strategies have been set, before any network updates occur
-  {
-    PublishUpdatedInfo(tRuntimeListener::cCHANGE);
-  }
-
-  return change;
 }
 
 void tAbstractPort::RawConnectToTarget(tAbstractPort* target)
@@ -543,55 +557,76 @@ void tAbstractPort::SetMaxQueueLength(int queue_length)
     util::tSystem::out.Println("warning: tried to set queue length on port without queue");
     return;
   }
-  if (queue_length <= 1)
   {
-    RemoveFlag(tPortFlags::cUSES_QUEUE);
-    ClearQueueImpl();
+    util::tLock lock2(GetRegistryLock());
+    if (queue_length <= 1)
+    {
+      RemoveFlag(tPortFlags::cUSES_QUEUE);
+      ClearQueueImpl();
+    }
+    else if (queue_length != GetMaxQueueLengthImpl())
+    {
+      SetMaxQueueLengthImpl(queue_length);
+      SetFlag(tPortFlags::cUSES_QUEUE);  // publishes change
+    }
+    PropagateStrategy(NULL, NULL);
   }
-  else if (queue_length != GetMaxQueueLengthImpl())
-  {
-    SetMaxQueueLengthImpl(queue_length);
-    SetFlag(tPortFlags::cUSES_QUEUE);  // publishes change
-  }
-  PropagateStrategy(NULL, NULL);
 }
 
 void tAbstractPort::SetMinNetUpdateInterval(int interval2)
 {
-  int16 interval = static_cast<int16>(util::tMath::Min(interval2, util::tShort::cMAX_VALUE));
-  if (min_net_update_time != interval)
   {
-    min_net_update_time = interval;
-    CommitUpdateTimeChange();
+    util::tLock lock2(GetRegistryLock());
+    int16 interval = static_cast<int16>(util::tMath::Min(interval2, util::tShort::cMAX_VALUE));
+    if (min_net_update_time != interval)
+    {
+      min_net_update_time = interval;
+      CommitUpdateTimeChange();
+    }
+  }
+}
+
+void tAbstractPort::SetPushStrategy(bool push)
+{
+  {
+    util::tLock lock2(GetRegistryLock());
+    if (push == GetFlag(tPortFlags::cPUSH_STRATEGY))
+    {
+      return;
+    }
+    SetFlag(tPortFlags::cPUSH_STRATEGY, push);
+    PropagateStrategy(NULL, NULL);
   }
 }
 
 void tAbstractPort::SetReversePushStrategy(bool push)
 {
-  util::tLock lock1(obj_synch);
   if (!AcceptsReverseData() || push == GetFlag(tPortFlags::cPUSH_STRATEGY_REVERSE))
   {
     return;
   }
 
-  SetFlag(tPortFlags::cPUSH_STRATEGY_REVERSE, push);
-  if (push && IsReady())    // strategy change
   {
-    util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
-    for (int i = 0, n = it->Size(); i < n; i++)
+    util::tLock lock2(GetRegistryLock());
+    SetFlag(tPortFlags::cPUSH_STRATEGY_REVERSE, push);
+    if (push && IsReady())    // strategy change
     {
-      tAbstractPort* ap = it->Get(i);
-      if (ap != NULL && ap->IsReady())
+      util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
+      for (int i = 0, n = it->Size(); i < n; i++)
       {
-        util::tSystem::out.Println(util::tStringBuilder("Performing initial reverse push from ") + ap->GetQualifiedName() + " to " + GetQualifiedName());
-        ap->InitialPushTo(this, true);
-        break;
+        tAbstractPort* ap = it->Get(i);
+        if (ap != NULL && ap->IsReady())
+        {
+          util::tSystem::out.Println(util::tStringBuilder("Performing initial reverse push from ") + ap->GetQualifiedName() + " to " + GetQualifiedName());
+          ap->InitialPushTo(this, true);
+          break;
+        }
       }
     }
-  }
-  if (IsInitialized())
-  {
-    this->PublishUpdatedInfo(tRuntimeListener::cCHANGE);
+    if (IsInitialized())
+    {
+      this->PublishUpdatedInfo(tRuntimeListener::cCHANGE);
+    }
   }
 }
 

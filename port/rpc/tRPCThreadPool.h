@@ -25,6 +25,7 @@
 #define CORE__PORT__RPC__TRPCTHREADPOOL_H
 
 #include "finroc_core_utils/container/tWonderQueue.h"
+#include "core/tLockOrderLevels.h"
 #include "finroc_core_utils/thread/tTask.h"
 
 #include "core/port/rpc/tRPCThread.h"
@@ -50,8 +51,8 @@ private:
 
 public:
 
-  // for synchronization on an object of this class
-  mutable util::tMutex obj_synch;
+  /*! Lock order: locked before thread list in C++ */
+  util::tMutexLockOrder obj_mutex;
 
 private:
 

@@ -34,7 +34,6 @@ tCCPortDataContainer<T>::tCCPortDataContainer(tDataType* type, util::tObject* ob
     reuse_counter(0u),
     owner_thread(util::sThreadUtil::GetCurrentThreadId()),
     ref_counter(0),
-    obj_synch(),
     port_data(type, object)
 {
   //portData.setContainer(this);
@@ -64,14 +63,11 @@ void tCCPortDataContainer<T>::NonOwnerLockRelease(tCCPortDataBufferPool* owner)
 template<typename T>
 void tCCPortDataContainer<T>::PostThreadReleaseLock()
 {
-  util::tLock lock1(obj_synch);
   ref_counter--;
   assert((ref_counter >= 0));
   if (ref_counter == 0)
   {
-    lock1.unlock();
     delete this;  // my favourite statement :-)
-
   }
 }
 

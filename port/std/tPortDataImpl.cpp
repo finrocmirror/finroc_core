@@ -43,9 +43,9 @@ void tPortData::InitDataType()
     return;  // already set
   }
   type = LookupDataType();
-  //    if (type == null) {
-  //      int i = 4;
-  //    }
+  //      if (type == null) {
+  //          int i = 4;
+  //      }
   assert((type != NULL) && "Unknown Object type");
 }
 

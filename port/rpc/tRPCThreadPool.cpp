@@ -31,13 +31,13 @@ tRPCThreadPool tRPCThreadPool::instance;
 
 tRPCThreadPool::tRPCThreadPool() :
     unused_threads(),
-    obj_synch()
+    obj_mutex(tLockOrderLevels::cINNER_MOST - 100)
 {
 }
 
 void tRPCThreadPool::ExecuteTask(util::tTask* task)
 {
-  util::tLock lock1(obj_synch);
+  util::tLock lock1(this);
 
   tRPCThread* r = NULL;
 

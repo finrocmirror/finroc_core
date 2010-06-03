@@ -44,7 +44,7 @@ tDataTypeRegister::tDataTypeRegister() :
     next_data_type_uid(tDataType::cMAX_CHEAP_COPYABLE_TYPES),
     next_cCData_type_uid(1)
 {
-  //    // TODO init data types
+  //      // TODO init data types
   //
 }
 

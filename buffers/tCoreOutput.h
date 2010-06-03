@@ -67,12 +67,12 @@ public:
 //
 //  @InCpp("return CoreInput(this);") @InCppFile @ConstMethod
 //  public CoreInput getInputStream(boolean reset) {
-//    return (CoreInput)getReadView(reset);
+//      return (CoreInput)getReadView(reset);
 //  }
 //
 //  @JavaOnly
 //  protected InputStreamBuffer createReadView() {
-//    return new CoreInput(this);
+//      return new CoreInput(this);
 //  }
 //
 //  // constructors from super class...

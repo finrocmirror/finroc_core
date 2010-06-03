@@ -72,11 +72,11 @@ public:
   }
 
 //  public void enqueue(PortDataReference pdr) {
-//    CCPortQueueElement pqe = getEmptyContainer2();
-//    assert(pqe.getElement() == null);
-//    assert(!pqe.isDummy());
-//    pqe.setElement(pdr);
-//    super.enqueueDirect(pqe);
+//      CCPortQueueElement pqe = getEmptyContainer2();
+//      assert(pqe.getElement() == null);
+//      assert(!pqe.isDummy());
+//      pqe.setElement(pdr);
+//      super.enqueueDirect(pqe);
 //  }
 
 //  /**
@@ -108,20 +108,20 @@ public:
 //   * write masses of elements to this port at once - this will end in an null pointer exception).
 //   */
 //  public PortQueue(int maxElements, int preAllocate) {
-//    int chunkCount = (maxElements - 1 / PortQueueFragment.SIZE) + 1 + 3 + preAllocate; // (3 is for safety/reservation overhead)
-//    int bits = 32 - Integer.numberOfLeadingZeros(chunkCount - 1);
-//    chunkCount = 1 << bits;
-//    chunks = new PortQueueFragment[chunkCount];
-//    this.preAllocate = Math.min(1, preAllocate);
+//      int chunkCount = (maxElements - 1 / PortQueueFragment.SIZE) + 1 + 3 + preAllocate; // (3 is for safety/reservation overhead)
+//      int bits = 32 - Integer.numberOfLeadingZeros(chunkCount - 1);
+//      chunkCount = 1 << bits;
+//      chunks = new PortQueueFragment[chunkCount];
+//      this.preAllocate = Math.min(1, preAllocate);
 //
-//    // calculate mask
-//    rawChunkMask = ((1 << bits) - 1);
-//    chunkMask = rawChunkMask << PortQueueFragment.BITS;
+//      // calculate mask
+//      rawChunkMask = ((1 << bits) - 1);
+//      chunkMask = rawChunkMask << PortQueueFragment.BITS;
 //
-//    // fill first <preallocate> chunks
-//    for (int i = 0; i < preAllocate; i++) {
-//      chunks[i] = ThreadLocalCache.get().getUnusedPortQueueFragment();
-//    }
+//      // fill first <preallocate> chunks
+//      for (int i = 0; i < preAllocate; i++) {
+//          chunks[i] = ThreadLocalCache.get().getUnusedPortQueueFragment();
+//      }
 //  }
 //
 //  /**
@@ -134,16 +134,16 @@ public:
 //
 //
 //
-//    int index = writeIndex.getAndIncrement(); // the only atomic operation necessary
-//    int chunkIdx = index & chunkMask;
-//    int elemIdx = index & PortQueueFragment.MASK;
-//    if (elemIdx == 0) { // time for allocation?
-//      int idx = (chunkIdx + preAllocate) & rawChunkMask;
-//      assert(chunks[idx] == null);
-//      chunks[idx] = ThreadLocalCache.get().getUnusedPortQueueFragment();
-//    }
-//    assert(chunks[chunkIdx].array[elemIdx] == null);
-//    chunks[chunkIdx].array[elemIdx] = element;
+//      int index = writeIndex.getAndIncrement(); // the only atomic operation necessary
+//      int chunkIdx = index & chunkMask;
+//      int elemIdx = index & PortQueueFragment.MASK;
+//      if (elemIdx == 0) { // time for allocation?
+//          int idx = (chunkIdx + preAllocate) & rawChunkMask;
+//          assert(chunks[idx] == null);
+//          chunks[idx] = ThreadLocalCache.get().getUnusedPortQueueFragment();
+//      }
+//      assert(chunks[chunkIdx].array[elemIdx] == null);
+//      chunks[chunkIdx].array[elemIdx] = element;
 //  }
 //
 //  /**
@@ -154,19 +154,19 @@ public:
 //   */
 //  @SuppressWarnings("unchecked")
 //  public T dequeue() {
-//    int index = readIndex;
-//    int chunkIdx = index & chunkMask;
-//    int elemIdx = index & PortQueueFragment.MASK;
-//    T result = (T)chunks[chunkIdx].array[elemIdx];
-//    if (result != null) {
-//      chunks[chunkIdx].array[elemIdx] = null;
-//      index++;
-//      if (elemIdx == PortQueueFragment.MASK) { // recycle current chunk?
-//        chunks[chunkIdx].recycle();
-//        chunks[chunkIdx] = null;
+//      int index = readIndex;
+//      int chunkIdx = index & chunkMask;
+//      int elemIdx = index & PortQueueFragment.MASK;
+//      T result = (T)chunks[chunkIdx].array[elemIdx];
+//      if (result != null) {
+//          chunks[chunkIdx].array[elemIdx] = null;
+//          index++;
+//          if (elemIdx == PortQueueFragment.MASK) { // recycle current chunk?
+//              chunks[chunkIdx].recycle();
+//              chunks[chunkIdx] = null;
+//          }
 //      }
-//    }
-//    return result;
+//      return result;
 //  }
 
 };
