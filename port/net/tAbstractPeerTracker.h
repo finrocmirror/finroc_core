@@ -72,8 +72,8 @@ protected:
 
 public:
 
-  /*! Mutex for tracker - order: should be locked after runtime */
-  util::tMutexLockOrder obj_mutex;
+  /*! Mutex for tracker */
+  mutable util::tMutexLockOrder obj_mutex;
 
 protected:
 
@@ -123,7 +123,7 @@ protected:
 public:
 
   /*!
-   * \param lock_order Lock order of tracker - should be locked after runtime
+   * \param lock_order Lock order of tracker
    */
   tAbstractPeerTracker(int lock_order);
 

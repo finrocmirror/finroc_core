@@ -63,7 +63,6 @@ tAbstractPeerTracker::~tAbstractPeerTracker()
 
 void tAbstractPeerTracker::RegisterServer(const util::tString& network_name, const util::tString& name, int port)
 {
-  util::tLock lock1(this);
   {
     util::tLock lock2(instances);
     for (size_t i = 0u; i < instances->Size(); i++)
@@ -87,7 +86,6 @@ void tAbstractPeerTracker::RemoveListener(tListener* listener)
 
 void tAbstractPeerTracker::UnregisterServer(const util::tString& network_name, const util::tString& name)
 {
-  util::tLock lock1(this);
   {
     util::tLock lock2(instances);
     for (size_t i = 0u; i < instances->Size(); i++)
