@@ -71,9 +71,6 @@ protected:
 
 public:
 
-  // for monitor functionality
-  mutable util::tMonitor monitor;
-
   //  /** Does port handle method calls? In this case this points to the class that will handle the method calls */
   //  private CallHandler callHandler;
   //
