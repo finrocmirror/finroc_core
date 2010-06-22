@@ -6,40 +6,40 @@
     </sources>
   </finroclibrary>
 
-  <finrocprogram name="testrealports" libs="finroc_core finroc_plugin_blackboard">
+  <testprogram name="testrealports" libs="finroc_core finroc_plugin_blackboard">
     <sources>
       test/tRealPortTest5.cpp
     </sources>
-  </finrocprogram>
+  </testprogram>
   
-  <finrocprogram name="testqueuedports" libs="finroc_core">
+  <testprogram name="testqueuedports" libs="finroc_core">
     <sources>
       test/tRealPortQueueTest.cpp
     </sources>
-  </finrocprogram>
+  </testprogram>
 
-  <finrocprogram name="testtcp2server" libs="finroc_core finroc_plugin_blackboard finroc_plugin_tcp">
+  <testprogram name="testtcp2server" libs="finroc_core finroc_plugin_blackboard finroc_plugin_tcp">
     <sources>
       test/tRealServerTest.cpp
     </sources>
-  </finrocprogram>
+  </testprogram>
 
-  <finrocprogram name="testtcp2client" libs="finroc_core finroc_plugin_blackboard finroc_plugin_tcp">
+  <testprogram name="testtcp2client" libs="finroc_core finroc_plugin_blackboard finroc_plugin_tcp">
     <sources>
       test/tRealClientTest.cpp
     </sources>
-  </finrocprogram>
+  </testprogram>
 
-  <finrocprogram name="test_initial_pushing" libs="finroc_core finroc_plugin_blackboard">
+  <testprogram name="test_initial_pushing" libs="finroc_core finroc_plugin_blackboard">
     <sources>
       test/tInitialPushTest.cpp
     </sources>
-  </finrocprogram>
+  </testprogram>
 
-  <finrocprogram name="test_p2p" libs="finroc_core finroc_plugin_tcp">
+  <testprogram name="test_p2p" libs="finroc_core finroc_plugin_tcp">
     <sources>
       test/tPeer2PeerTest.cpp
     </sources>
-  </finrocprogram>
+  </testprogram>
   
 </targets>
