@@ -206,6 +206,7 @@ void tAbstractPort::DisconnectAll()
 
 void tAbstractPort::DisconnectFrom(tAbstractPort* target)
 {
+  bool found = false;
   {
     util::tLock lock2(GetRegistryLock());
     util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
@@ -214,6 +215,7 @@ void tAbstractPort::DisconnectFrom(tAbstractPort* target)
       if (it->Get(i) == target)
       {
         RemoveInternal(this, target);
+        found = true;
       }
     }
 
@@ -223,10 +225,14 @@ void tAbstractPort::DisconnectFrom(tAbstractPort* target)
       if (it->Get(i) == target)
       {
         RemoveInternal(target, this);
+        found = true;
       }
     }
   }
-  util::tSystem::out.Println("edge not found in AbstractPort::disconnectFrom()");
+  if (!found)
+  {
+    util::tSystem::out.Println("edge not found in AbstractPort::disconnectFrom()");
+  }
   // not found: throw error message?
 }
 

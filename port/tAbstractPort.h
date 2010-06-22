@@ -572,6 +572,14 @@ public:
   }
 
   /*!
+   * \return Does port have any link edges?
+   */
+  inline bool HasLinkEdges()
+  {
+    return link_edges != NULL && link_edges->Size() > 0;
+  }
+
+  /*!
    * \return Does port have outgoing edges?
    */
   inline bool HasOutgoingEdges() const

@@ -573,11 +573,11 @@ void tFrameworkElement::InitImpl()
 
 }
 
-bool tFrameworkElement::IsChildOf(tFrameworkElement* re) const
+bool tFrameworkElement::IsChildOf(tFrameworkElement* re, bool ignore_delete_flag) const
 {
   {
     util::tLock lock2(GetRegistryLock());  // absolutely safe this way
-    if (IsDeleted())
+    if ((!ignore_delete_flag) && IsDeleted())
     {
       return false;
     }
