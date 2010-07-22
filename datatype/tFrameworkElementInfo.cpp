@@ -37,6 +37,7 @@ tFrameworkElementInfo::tFrameworkElementInfo() :
     flags(0),
     strategy(0),
     min_net_update_time(0),
+    connections(),
     op_code(0)
 {
 }
@@ -84,6 +85,15 @@ void tFrameworkElementInfo::Deserialize(tCoreInput* is, tRemoteTypes& type_looku
     type = type_lookup.GetLocalType(is->ReadShort());
     strategy = is->ReadShort();
     min_net_update_time = is->ReadShort();
+
+    if (!port_only_client)
+    {
+      int8 cnt = is->ReadByte();
+      for (int i = 0; i < cnt; i++)
+      {
+        connections.Add(is->ReadInt());
+      }
+    }
   }
 }
 
@@ -110,6 +120,7 @@ void tFrameworkElementInfo::Reset()
   strategy = 0;
   min_net_update_time = 0;
   link_count = 0;
+  connections.Clear();
 }
 
 void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, tCoreOutput* tp, tFrameworkElementTreeFilter element_filter, util::tStringBuilder& tmp)
@@ -165,6 +176,11 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
     tp->WriteShort(port->GetDataType()->GetUid());
     tp->WriteShort(port->GetStrategy());
     tp->WriteShort(port->GetMinNetUpdateInterval());
+
+    if (!element_filter.IsPortOnlyFilter())
+    {
+      port->SerializeOutgoingConnections(tp);
+    }
   }
 }
 

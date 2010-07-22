@@ -71,10 +71,7 @@ tNetPort* tAbstractPort::AsNetPort()
 
 void tAbstractPort::CommitUpdateTimeChange()
 {
-  if (IsInitialized())
-  {
-    PublishUpdatedInfo(tRuntimeListener::cCHANGE);
-  }
+  PublishUpdatedInfo(tRuntimeListener::cCHANGE);
   /*if (isShared() && (portSpecific || minNetUpdateTime <= 0)) {
       RuntimeEnvironment.getInstance().getSettings().getSharedPorts().commitUpdateTimeChange(getIndex(), getMinNetUpdateInterval());
   }*/
@@ -527,6 +524,7 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
 void tAbstractPort::RawConnectToTarget(tAbstractPort* target)
 {
   tEdgeAggregator::EdgeAdded(this, target);
+  PublishUpdatedInfo(tRuntimeListener::cCHANGE);
 
   edges_src->Add(target, false);
   target->edges_dest->Add(this, false);
@@ -536,6 +534,7 @@ void tAbstractPort::RawConnectToTarget(tAbstractPort* target)
 void tAbstractPort::RemoveInternal(tAbstractPort* src, tAbstractPort* dest)
 {
   tEdgeAggregator::EdgeRemoved(src, dest);
+  src->PublishUpdatedInfo(tRuntimeListener::cCHANGE);
 
   dest->edges_dest->Remove(src);
   src->edges_src->Remove(dest);
@@ -554,6 +553,16 @@ void tAbstractPort::RemoveInternal(tAbstractPort* src, tAbstractPort* dest)
 
   dest->PropagateStrategy(NULL, NULL);
   src->PropagateStrategy(NULL, NULL);
+}
+
+void tAbstractPort::SerializeOutgoingConnections(tCoreOutput* co)
+{
+  co->WriteByte(static_cast<int8>(edges_src->Size()));
+  util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
+  for (int i = 0, n = it->Size(); i < n; i++)
+  {
+    co->WriteInt(it->Get(i)->GetHandle());
+  }
 }
 
 void tAbstractPort::SetMaxQueueLength(int queue_length)
@@ -629,10 +638,7 @@ void tAbstractPort::SetReversePushStrategy(bool push)
         }
       }
     }
-    if (IsInitialized())
-    {
-      this->PublishUpdatedInfo(tRuntimeListener::cCHANGE);
-    }
+    this->PublishUpdatedInfo(tRuntimeListener::cCHANGE);
   }
 }
 

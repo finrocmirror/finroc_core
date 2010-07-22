@@ -29,6 +29,7 @@
 #include "core/port/tPortFlags.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/tFrameworkElement.h"
+#include "core/buffers/tCoreOutput.h"
 #include "core/portdatabase/tTypedObjectImpl.h"
 
 #include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
@@ -678,6 +679,14 @@ public:
   {
     return (this->flags & tPortFlags::cPUSH_STRATEGY_REVERSE) > 0;
   }
+
+  /*!
+   * Serializes target handles of all outgoing connection destinations to stream
+   * [byte: number of connections][int handle1]...[int handle n]
+   *
+   * \param co Output Stream
+   */
+  void SerializeOutgoingConnections(tCoreOutput* co);
 
   /*!
    * (relevant for input ports only)

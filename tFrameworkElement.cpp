@@ -739,7 +739,10 @@ void tFrameworkElement::PrintStructure(int indent)
 
 void tFrameworkElement::PublishUpdatedInfo(int8 change_type)
 {
-  tRuntimeEnvironment::GetInstance()->RuntimeChange(change_type, this);
+  if (change_type == tRuntimeListener::cADD || GetFlag(tCoreFlags::cPUBLISHED))
+  {
+    tRuntimeEnvironment::GetInstance()->RuntimeChange(change_type, this);
+  }
 }
 
 void tFrameworkElement::RemoveFlag(int flag)

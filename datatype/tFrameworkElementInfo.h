@@ -25,6 +25,7 @@
 #define CORE__DATATYPE__TFRAMEWORKELEMENTINFO_H
 
 #include "core/portdatabase/tDataType.h"
+#include "finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/port/net/tRemoteTypes.h"
@@ -86,13 +87,16 @@ private:
   /*! Minimum network update interval */
   int16 min_net_update_time;
 
+  /*! Stores outgoing connection destination ports - if this is a port */
+  util::tSimpleList<int> connections;
+
 public:
 
   /*! Op code: ADD CHANGE or DELETE */
   int8 op_code;
 
   /*! Register Data type */
-  static const int8 cPARENT_FLAGS_TO_STORE = tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cALTERNATE_LINK_ROOT;
+  static const int8 cPARENT_FLAGS_TO_STORE = tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cEDGE_AGGREGATOR;
 
 private:
 
@@ -130,6 +134,17 @@ public:
    * \param type_lookup Remote type information to lookup type
    */
   void Deserialize(tCoreInput* is, tRemoteTypes& type_lookup);
+
+  /*!
+   * Get outgoing connection's destination handles
+   *
+   * \param copy_to List to copy result of get operation to
+   */
+  inline void GetConnections(util::tSimpleList<int>& copy_to) const
+  {
+    copy_to.Clear();
+    copy_to.AddAll(connections);
+  }
 
   /*!
    * \return Type of port data
