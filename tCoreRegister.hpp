@@ -60,7 +60,7 @@ int tCoreRegister<T>::Add(const T& elem)
 
   if (elem_count >= cMAX_ELEMENTS)
   {
-    throw util::tRuntimeException("Register full");
+    throw util::tRuntimeException("Register full", __CODE_LOCATION__);
   }
 
   // find free slot
@@ -136,7 +136,7 @@ void tCoreRegister<T>::Remove(int handle)
   }
   else
   {
-    throw util::tRuntimeException("Element removed twice or does not exist");
+    throw util::tRuntimeException("Element removed twice or does not exist", __CODE_LOCATION__);
   }
 }
 

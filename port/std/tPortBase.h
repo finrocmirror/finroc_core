@@ -478,7 +478,7 @@ protected:
    */
   virtual void NonStandardAssign(tPublishCache& pc);
 
-  virtual void PrintStructure(int indent);
+  virtual void PrintStructure(int indent, rrlib::logging::tLogStream& output);
 
   /*!
    * Publish data

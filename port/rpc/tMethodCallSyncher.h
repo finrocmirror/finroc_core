@@ -27,6 +27,7 @@
 #include "core/tLockOrderLevels.h"
 #include "core/port/rpc/tAbstractCall.h"
 #include "core/port/tThreadLocalCache.h"
+#include "finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {
@@ -38,7 +39,7 @@ namespace core
  * Thread local class for forwarding method return values
  * back to calling thread.
  */
-class tMethodCallSyncher : public util::tUncopyableObject
+class tMethodCallSyncher : public util::tLogUser
 {
 private:
 
@@ -67,6 +68,9 @@ public:
 
   /*! Network writer threads need to be notified afterwards */
   util::tMutexLockOrder obj_mutex;
+
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "rpc");
 
   //  /** Optimization for method calls handled directly by the same thread - may only be accessed and written by one thread */
   //  boolean beforeQuickReturnCheck = false;

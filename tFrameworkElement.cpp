@@ -22,7 +22,6 @@
 #include "core/tRuntimeEnvironment.h"
 
 #include "core/tFrameworkElement.h"
-#include "core/tRuntimeSettings.h"
 #include "core/tRuntimeListener.h"
 #include "finroc_core_utils/tGarbageCollector.h"
 
@@ -58,10 +57,7 @@ tFrameworkElement::tFrameworkElement(const util::tString& description_, tFramewo
   //          parent.addChild(primary);
   //      }
 
-  if (tRuntimeSettings::cDISPLAY_CONSTRUCTION_DESTRUCTION->Get())
-  {
-    util::tSystem::out.Println(util::tStringBuilder("Constructing FrameworkElement: ") + GetDescription());
-  }
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "Constructing FrameworkElement");
 }
 
 void tFrameworkElement::AddChild(tLink* child)
@@ -80,7 +76,7 @@ void tFrameworkElement::AddChild(tLink* child)
     assert(((child->GetChild()->IsCreator())) && "may only be called by child creator thread");
     if (IsDeleted() || (child->parent != NULL && child->parent->IsDeleted()) || child->GetChild()->IsDeleted())
     {
-      throw util::tRuntimeException("Child has been deleted or has deleted parent. Thread exit is likely the intended behaviour.");
+      throw util::tRuntimeException("Child has been deleted or has deleted parent. Thread exit is likely the intended behaviour.", __CODE_LOCATION__);
     }
     if (child->parent != NULL)
     {
@@ -154,7 +150,7 @@ void tFrameworkElement::CheckPublish()
     if (!GetFlag(tCoreFlags::cPUBLISHED) && AllParentsReady())
     {
       SetFlag(tCoreFlags::cPUBLISHED);
-      util::tSystem::out.Println(util::tStringBuilder("Publishing ") + GetQualifiedName());
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "Publishing");
       PublishUpdatedInfo(tRuntimeListener::cADD);
     }
 
@@ -192,7 +188,7 @@ size_t tFrameworkElement::ChildCount() const
 tFrameworkElement::~tFrameworkElement()
 {
   assert(((GetFlag(tCoreFlags::cDELETED) || GetFlag(tCoreFlags::cIS_RUNTIME))) && "Frameworkelement was not deleted with managedDelete()");
-  util::tSystem::out.Println(util::tStringBuilder("FrameworkElement destructor: ") + GetDescription());
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "FrameworkElement destructor");
   if (!GetFlag(tCoreFlags::cIS_RUNTIME))
   {
     // synchronizes on runtime - so no elements will be deleted while runtime is locked
@@ -241,6 +237,11 @@ bool tFrameworkElement::DescriptionEquals(const util::tString& other)
       return primary.description.Equals(other);
     }
   }
+}
+
+const char* tFrameworkElement::GetCDescription() const
+{
+  return primary.description.Length() == 0 ? "(anonymous)" : primary.description.GetCString();
 }
 
 tFrameworkElement* tFrameworkElement::GetChild(const util::tString& name) const
@@ -517,7 +518,7 @@ void tFrameworkElement::Init()
     // assert(getFlag(CoreFlags.IS_RUNTIME) || getParent().isReady());
     if (IsDeleted())
     {
-      throw util::tRuntimeException("Cannot initialize deleted element");
+      throw util::tRuntimeException("Cannot initialize deleted element", __CODE_LOCATION__);
     }
 
     InitImpl();
@@ -613,7 +614,7 @@ void tFrameworkElement::Link(tFrameworkElement* parent, const util::tString& lin
     util::tLock lock2(GetRegistryLock());
     if (IsDeleted() || parent->IsDeleted())
     {
-      throw util::tRuntimeException("Element and/or parent has been deleted. Thread exit is likely the intended behaviour.");
+      throw util::tRuntimeException("Element and/or parent has been deleted. Thread exit is likely the intended behaviour.", __CODE_LOCATION__);
     }
 
     tLink* l = new tLink(this);
@@ -639,16 +640,14 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
         return;
       }
 
-      if (tRuntimeSettings::cDISPLAY_CONSTRUCTION_DESTRUCTION->Get())
-      {
-        util::tSystem::out.Println(util::tStringBuilder("FrameworkElement managedDelete: ") + GetQualifiedName());
-      }
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "FrameworkElement managedDelete");
 
       // synchronizes on runtime - so no elements will be deleted while runtime is locked
       {
         util::tLock lock4(GetRegistryLock());
 
-        util::tSystem::out.Println(util::tStringBuilder("Deleting ") + ToString() + " (" + HashCode() + ")");
+        FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "Deleting");
+        //System.out.println("Deleting " + toString() + " (" + hashCode() + ")");
         assert(!GetFlag(tCoreFlags::cDELETED));
         assert(((primary.GetParent() != NULL) | GetFlag(tCoreFlags::cIS_RUNTIME)));
 
@@ -702,7 +701,15 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
   util::tGarbageCollector::DeleteDeferred(this);
 }
 
-void tFrameworkElement::PrintStructure(int indent)
+void tFrameworkElement::PrintStructure(rrlib::logging::tLogLevel ll)
+{
+  rrlib::logging::tLogStream ls = FINROC_LOG_STREAM(ll, log_domain);
+  ls << "" << std::endl;
+  PrintStructure(0, ls);
+  ;
+}
+
+void tFrameworkElement::PrintStructure(int indent, rrlib::logging::tLogStream& output)
 {
   {
     util::tLock lock2(GetRegistryLock());
@@ -710,19 +717,16 @@ void tFrameworkElement::PrintStructure(int indent)
     // print element info
     for (int i = 0; i < indent; i++)
     {
-      util::tSystem::out.Print(" ");
+      output << " ";
     }
 
     if (IsDeleted())
     {
-      util::tSystem::out.Println("deleted FrameworkElement");
+      output << "deleted FrameworkElement" << std::endl;
       return;
     }
 
-    util::tSystem::out.Print(GetDescription());
-    util::tSystem::out.Print(" (");
-    util::tSystem::out.Print(IsReady() ? (GetFlag(tCoreFlags::cPUBLISHED) ? "published" : "ready") : IsDeleted() ? "deleted" : "constructing");
-    util::tSystem::out.Println(")");
+    output << GetCDescription() << " (" << (IsReady() ? (GetFlag(tCoreFlags::cPUBLISHED) ? "published" : "ready") : IsDeleted() ? "deleted" : "constructing") << ")" << std::endl;
 
     // print child element info
     util::tArrayWrapper<tLink*>* iterable = children.GetIterable();
@@ -731,7 +735,7 @@ void tFrameworkElement::PrintStructure(int indent)
       tLink* child = iterable->Get(i);
       if (child != NULL)
       {
-        child->GetChild()->PrintStructure(indent + 2);
+        child->GetChild()->PrintStructure(indent + 2, output);
       }
     }
   }

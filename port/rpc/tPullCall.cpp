@@ -55,7 +55,7 @@ void tPullCall::ExecuteTask()
     util::tLock lock2(port->GetPort());
     if (!port->GetPort()->IsReady())
     {
-      util::tSystem::out.Println("pull call received for port that will soon be deleted");
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain, << "pull call received for port that will soon be deleted");
       Recycle();
     }
 
@@ -85,7 +85,7 @@ void tPullCall::ExecuteTask()
     }
     else
     {
-      util::tSystem::out.Println("pull call received for port with invalid data type");
+      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, << "pull call received for port with invalid data type");
       Recycle();
     }
   }

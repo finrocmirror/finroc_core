@@ -42,6 +42,7 @@
 #include "core/port/tAbstractPort.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/portdatabase/tTypedObjectImpl.h"
+#include "finroc_core_utils/log/tLogUser.h"
 
 #include "core/tRuntimeEnvironment.h"
 
@@ -62,7 +63,7 @@ class tMethodCallSyncher;
  *
  * Obviously, this class is somewhat critical for overall performance.
  */
-class tThreadLocalCache : public util::tUncopyableObject
+class tThreadLocalCache : public util::tLogUser
 {
   friend class tRuntimeEnvironment;
 private:
@@ -117,6 +118,11 @@ private:
   util::tSimpleList<tCCPortDataContainer<>*> cc_auto_locks;
 
   util::tSimpleList<tCCInterThreadContainer<>*> cc_inter_auto_locks;
+
+protected:
+
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "thread_local_cache");
 
 public:
 

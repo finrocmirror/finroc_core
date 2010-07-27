@@ -108,7 +108,7 @@ double tUnit::GetConversionFactor(tUnit* u) const
   {
     return u->factor / factor;
   }
-  throw util::tRuntimeException("Units cannot be converted.");
+  throw util::tRuntimeException("Units cannot be converted.", __CODE_LOCATION__);
 }
 
 void tUnit::StaticInit()

@@ -47,7 +47,7 @@ void tSingletonPort<T>::NonStandardAssign(tPublishCache& pc)
 {
   if (pc.cur_ref->GetData() != singleton_value)
   {
-    throw util::tRuntimeException("Cannot change contents of Singleton-Port");
+    throw util::tRuntimeException("Cannot change contents of Singleton-Port", __CODE_LOCATION__);
   }
 }
 

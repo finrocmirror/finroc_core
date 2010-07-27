@@ -58,6 +58,11 @@ private:
   /*! Is this the first connect ? */
   bool first_connect;
 
+public:
+
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "connections");
+
 protected:
 
   /*!

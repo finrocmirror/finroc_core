@@ -74,6 +74,9 @@ public:
   /*! when received through network and executed in separate thread: Port to call pull on and port to send result back over */
   tNetPort* port;
 
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "rpc");
+
 private:
 
   //  public static void staticInit() {

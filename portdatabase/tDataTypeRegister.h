@@ -26,6 +26,7 @@
 
 #include "core/portdatabase/tDataType.h"
 #include "core/port/std/tPortDataImpl.h"
+#include "finroc_core_utils/log/tLogUser.h"
 
 #include "core/portdatabase/tDataTypeUtil.h"
 #include <map>
@@ -47,7 +48,7 @@ class tPortInterface;
  *
  * Also implements a port set with default update times for every data type.
  */
-class tDataTypeRegister : public util::tUncopyableObject
+class tDataTypeRegister : public util::tLogUser
 {
 private:
   /*extends FrameworkElement*/
@@ -62,6 +63,31 @@ private:
   int16 next_data_type_uid;
 
   int16 next_cCData_type_uid;
+
+  /*! Cached Port creation info for entry ports */
+  //private static final PortCreationInfo entryPortPci = new PortCreationInfo(PortFlags.INPUT_PORT, Unit.ms);
+
+  //  static {
+  //      // init Data Types
+  //      try {
+  ////            for (Class<?> cl : Files.getPackageClasses(DataTypeRegister2.class, "../datatype")) {
+  ////                if (RuntimeSettings.DISPLAY_DATATYPE_INIT) {
+  ////                    System.out.println("Initializing data type: " + cl.getName());
+  ////                }
+  ////                addClass(cl);
+  ////                /*for (Class<?> cl2 : cl.getClasses()) {
+  ////                    addClass(cl2);
+  ////                }*/
+  ////            }
+  //          // temporary
+  //          dataTypes[0] = new DataType((short)0, CoreNumberContainer.class);
+  //      } catch (Exception e) {
+  //          throw new RuntimeException(e);
+  //      }
+  //  }
+
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "data_types");
 
   tDataTypeRegister();
 

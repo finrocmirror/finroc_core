@@ -28,6 +28,7 @@
 #include "core/buffers/tCoreInput.h"
 #include "core/portdatabase/tDataTypeRegister.h"
 #include "core/buffers/tCoreOutput.h"
+#include "finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {
@@ -38,7 +39,7 @@ namespace core
  *
  * This class aggregates information about types used in remote runtime environments.
  */
-class tRemoteTypes : public util::tUncopyableObject
+class tRemoteTypes : public util::tLogUser
 {
   /*! Entry in remote type register */
   class tEntry : public util::tObject
@@ -78,6 +79,9 @@ private:
   int16 global_default;
 
 public:
+
+  /*! Log domain for edges */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "remote_types");
 
   tRemoteTypes();
 

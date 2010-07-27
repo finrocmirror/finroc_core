@@ -182,16 +182,16 @@ void tPortBase::NotifyDisconnect()
   }
 }
 
-void tPortBase::PrintStructure(int indent)
+void tPortBase::PrintStructure(int indent, rrlib::logging::tLogStream& output)
 {
-  ::finroc::core::tFrameworkElement::PrintStructure(indent);
+  ::finroc::core::tFrameworkElement::PrintStructure(indent, output);
   if (buffer_pool != NULL)
   {
-    buffer_pool->PrintStructure(indent + 2);
+    buffer_pool->PrintStructure(indent + 2, output);
   }
   else if (multi_buffer_pool != NULL)
   {
-    multi_buffer_pool->PrintStructure(indent + 2);
+    multi_buffer_pool->PrintStructure(indent + 2, output);
   }
 }
 

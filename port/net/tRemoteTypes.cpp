@@ -38,18 +38,20 @@ void tRemoteTypes::Deserialize(tCoreInput* ci)
   global_default = ci->ReadShort();
   types = new ::finroc::util::tArrayWrapper<tEntry>(ci->ReadShort());
   int16 next = ci->ReadShort();
-  util::tSystem::out.Println("Connection Partner knows types:");
+  rrlib::logging::tLogStream ls = FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain);
+  ls << "Connection Partner knows types:" << std::endl;
   while (next != -1)
   {
     int16 time = ci->ReadShort();
     util::tString name = ci->ReadString();
     tDataType* local = tDataTypeRegister::GetInstance()->GetDataType(name);
-    util::tSystem::out.Println(util::tStringBuilder("- ") + name + " (" + next + ") - " + (local != NULL ? "available here, too" : "not available here"));
+    ls << "- " << name << " (" << next << ") - " << (local != NULL ? "available here, too" : "not available here") << std::endl;
     tEntry e(time, local);
     (*(types))[next] = e;
 
     next = ci->ReadShort();
   }
+  ;
 }
 
 tDataType* tRemoteTypes::GetLocalType(int16 uid)
@@ -58,7 +60,7 @@ tDataType* tRemoteTypes::GetLocalType(int16 uid)
   tEntry e = (*(types))[uid];
   if (e == NULL)
   {
-    util::tSystem::out.Println(util::tStringBuilder("RemoteTypes: Unknown type ") + uid);
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, << util::tStringBuilder("RemoteTypes: Unknown type ") << uid);
     return NULL;
   }
   return e.local_data_type;

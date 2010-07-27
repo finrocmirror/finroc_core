@@ -59,7 +59,19 @@ private:
   /*! Plugin manager instance */
   tPluginManager plugin_manager;
 
+public:
+
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "plugins");
+
+private:
+
   void FindAndLoadPlugins();
+
+  inline static const char* GetLogDescription()
+  {
+    return "Plugins";
+  }
 
 public:
 

@@ -76,7 +76,7 @@ tTypedObject* tCoreInput::ReadObject(bool in_inter_thread_container)
   if (buffer_source == NULL && dt->IsStdType())    // skip object?
   {
     //toSkipTarget();
-    throw util::tRuntimeException(util::tStringBuilder("Buffer source does not support type ") + dt->GetName());
+    throw util::tRuntimeException(util::tStringBuilder("Buffer source does not support type ") + dt->GetName(), __CODE_LOCATION__);
     //return null;
   }
   else

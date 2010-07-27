@@ -26,7 +26,6 @@
 #include "core/port/tAbstractPort.h"
 #include "core/tLockOrderLevels.h"
 #include "core/tRuntimeListener.h"
-#include "core/tRuntimeSettings.h"
 #include "core/tCoreFlags.h"
 
 namespace finroc
@@ -116,10 +115,7 @@ void tAbstractPort::ConnectToTarget(tAbstractPort* target)
       target->PropagateStrategy(NULL, this);
       NewConnection(target);
       target->NewConnection(this);
-      if (tRuntimeSettings::cDISPLAY_EDGE_CREATION->Get())
-      {
-        util::tSystem::out.Println(util::tStringBuilder("creating Edge from ") + GetQualifiedName() + " to " + target->GetQualifiedName());
-      }
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, edge_log, << util::tStringBuilder("creating Edge from ") << GetQualifiedName() << " to " << target->GetQualifiedName());
 
       // check whether we need an initial reverse push
       ConsiderInitialReversePush(target);
@@ -156,7 +152,7 @@ void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
   {
     if (ReversePushStrategy() && edges_src->CountElements() == 1)
     {
-      util::tSystem::out.Println(util::tStringBuilder("Performing initial reverse push from ") + target->GetQualifiedName() + " to " + GetQualifiedName());
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, initial_push_log, << util::tStringBuilder("Performing initial reverse push from ") << target->GetQualifiedName() << " to " << GetQualifiedName());
       target->InitialPushTo(this, true);
     }
   }
@@ -228,7 +224,7 @@ void tAbstractPort::DisconnectFrom(tAbstractPort* target)
   }
   if (!found)
   {
-    util::tSystem::out.Println("edge not found in AbstractPort::disconnectFrom()");
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, edge_log, << "edge not found in AbstractPort::disconnectFrom()");
   }
   // not found: throw error message?
 }
@@ -481,7 +477,7 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
       {
         if (IsReady() && push_wanter->IsReady())
         {
-          util::tSystem::out.Println(util::tStringBuilder("Performing initial push from ") + GetQualifiedName() + " to " + push_wanter->GetQualifiedName());
+          FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, initial_push_log, << util::tStringBuilder("Performing initial push from ") << GetQualifiedName() << " to " << push_wanter->GetQualifiedName());
           InitialPushTo(push_wanter, false);
         }
         push_wanter = NULL;
@@ -569,7 +565,7 @@ void tAbstractPort::SetMaxQueueLength(int queue_length)
 {
   if (!GetFlag(tPortFlags::cHAS_QUEUE))
   {
-    util::tSystem::out.Println("warning: tried to set queue length on port without queue");
+    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, << "warning: tried to set queue length on port without queue - ignoring");
     return;
   }
   {
@@ -632,7 +628,7 @@ void tAbstractPort::SetReversePushStrategy(bool push)
         tAbstractPort* ap = it->Get(i);
         if (ap != NULL && ap->IsReady())
         {
-          util::tSystem::out.Println(util::tStringBuilder("Performing initial reverse push from ") + ap->GetQualifiedName() + " to " + GetQualifiedName());
+          FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, initial_push_log, << util::tStringBuilder("Performing initial reverse push from ") << ap->GetQualifiedName() << " to " << GetQualifiedName());
           ap->InitialPushTo(this, true);
           break;
         }

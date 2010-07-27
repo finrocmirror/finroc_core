@@ -255,7 +255,7 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* e
         prev = current;
         current = current->GetNext();
       }
-      util::tSystem::out.Println(util::tStringBuilder("warning: Could not remove link edge for link: ") + link);
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, << util::tStringBuilder("warning: Could not remove link edge for link: ") << link);
     }
   }
 }

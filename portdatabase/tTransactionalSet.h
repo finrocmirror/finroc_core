@@ -78,6 +78,9 @@ public:
   /*! After this period pending commands will be ignored */
   int cPENDING_COMMAND_TIMEOUT;
 
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "stream_ports");
+
 protected:
 
   /*!

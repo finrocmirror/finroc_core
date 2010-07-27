@@ -92,7 +92,7 @@ public:
    *
    * \param indent Current indentation
    */
-  void PrintStructure(int indent);
+  void PrintStructure(int indent, rrlib::logging::tLogStream& output);
 
   virtual ~tMultiTypePortDataBufferPool()
   {

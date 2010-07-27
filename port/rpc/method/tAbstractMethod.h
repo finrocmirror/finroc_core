@@ -27,6 +27,7 @@
 #include "core/port/rpc/tMethodCall.h"
 #include "core/port/rpc/method/tAbstractAsyncReturnHandler.h"
 #include "core/port/rpc/method/tAbstractMethodCallHandler.h"
+#include "finroc_core_utils/log/tLogUser.h"
 
 #include "core/port/rpc/tParameterUtil.h"
 
@@ -49,7 +50,7 @@ class tInterfaceNetPort;
  * These static instances contain all infos and provide all methods
  * for methods that server supports.
  */
-class tAbstractMethod : public util::tUncopyableObject
+class tAbstractMethod : public util::tLogUser
 {
   friend class tPortInterface;
 private:
@@ -78,6 +79,9 @@ protected:
   tPortInterface* type;
 
 public:
+
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "rpc");
 
   tAbstractMethod(tPortInterface& port_interface, const util::tString& name_, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread_);
 

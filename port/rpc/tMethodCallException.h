@@ -45,19 +45,7 @@ private:
 
 public:
 
-  /*!
-   * \param timeout Timeout exception (or rather connection exception)?
-   */
-  tMethodCallException(tMethodCallException::tType type_) :
-      type(type_)
-  {
-  }
-
-  tMethodCallException(int type2) :
-      type()
-  {
-    this->type = static_cast<tType>(type2);
-  }
+  tMethodCallException(int type_, const char* func = NULL, const char* file = NULL, const int line = -1) : tException("", func, file, line), type(static_cast<tType>(type_)) {}
 
   inline tMethodCallException::tType GetType() const
   {

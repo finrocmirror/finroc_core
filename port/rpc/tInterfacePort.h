@@ -318,7 +318,7 @@ public:
 
   virtual void SetMaxQueueLength(int length)
   {
-    throw util::tRuntimeException("InterfacePorts do not have a queue");
+    throw util::tRuntimeException("InterfacePorts do not have a queue", __CODE_LOCATION__);
   }
 
 };

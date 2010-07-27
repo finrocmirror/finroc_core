@@ -27,6 +27,7 @@
 #include "core/tCoreFlags.h"
 #include "finroc_core_utils/thread/sThreadUtil.h"
 #include "core/buffers/tCoreOutput.h"
+#include "finroc_core_utils/log/tLogUser.h"
 
 #include "core/datatype/tCoreNumber.h"
 #include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
@@ -55,7 +56,7 @@ class tRuntimeEnvironment;
  * To prevent deleting of framework element while using it over a longer period of time,
  * lock it - or the complete runtime environment.
  */
-class tFrameworkElement : public util::tUncopyableObject
+class tFrameworkElement : public util::tLogUser
 {
 public:
 
@@ -192,6 +193,37 @@ public:
    * ("normal" elements have negative handle, while ports have positive ones)
    */
   mutable util::tMutexLockOrder obj_mutex;
+
+  /*! This flag is set to true when the element has been initialized */
+  //private boolean initialized;
+
+  /*! This flag is set to true when element is deleted */
+  //protected volatile boolean deleted;
+
+  /*! Is RuntimeElement member of remote runtime; -1 = unknown, 0 = no, 1 = yes */
+  //private int remote = -1;
+
+  /*!
+   * List with owned ports.
+   *
+   * Methods that want to prevent a current port value (that this RuntimeElement manages)
+   * being outdated and reused while they are
+   * asynchronously getting it should synchronize with this list.
+   * Port methods do this.
+   *
+   * The owner module will synchronize on this list, every time it updates valuesBeforeAreUnused
+   * variable of the ports.
+   */
+  //protected final SafeArrayList<Port<?>> ownedPorts;
+
+  /*! Main Thread. This thread can write to the runtime element's ports without synchronization */
+  //protected Thread mainThread;
+
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "framework_elements");
+
+  /*! Log domain for edges */
+  CREATE_NAMED_LOGGING_DOMAIN(edge_log, "edges");
 
 private:
 
@@ -402,8 +434,9 @@ protected:
    * Helper for above
    *
    * \param indent Current indentation level
+   * \param output Only used in C++ for streaming
    */
-  virtual void PrintStructure(int indent);
+  virtual void PrintStructure(int indent, rrlib::logging::tLogStream& output);
 
   //  /**
   //   * Called whenever an asynchronous call returns.
@@ -500,6 +533,35 @@ public:
   }
 
   /*!
+   * \return RuntimeElement as TreeNode (only available if set in RuntimeSettings)
+   */
+  /*@JavaOnly public DefaultMutableTreeNode asTreeNode() {
+      return treeNode;
+  }*/
+
+  /*!
+   * \param manages_ports Is RuntimeElement responsible for releasing unused port values?
+   */
+  //@SuppressWarnings("unchecked")
+  //public FrameworkElement(String description, boolean managesPorts, Thread mainThread) {
+  //ownedPorts = managesPorts ? new SafeArrayList<Port<?>>() : null;
+  //mainThread = mainThread == null ? (managesPorts ? Thread.currentThread() : null) : mainThread;
+  //}
+
+  //    /**
+  //     * \return Tree Node representation of this runtime object
+  //     */
+  //    @JavaOnly protected DefaultMutableTreeNode createTreeNode() {
+  //        return new DefaultMutableTreeNode(primary.description);
+  //    }
+
+  /*!
+   *  same as below -
+   *  except that we return a const char* in C++ - this way, no memory needs to be allocated
+   */
+  const char* GetCDescription() const;
+
+  /*!
    * \param name Description
    * \return Returns first child with specified description - null if none exists
    */
@@ -529,35 +591,6 @@ public:
   inline const util::tArrayWrapper<tLink*>* GetChildren() const
   {
     return children.GetIterable();
-  }
-
-  /*!
-   * \return RuntimeElement as TreeNode (only available if set in RuntimeSettings)
-   */
-  /*@JavaOnly public DefaultMutableTreeNode asTreeNode() {
-      return treeNode;
-  }*/
-
-  /*!
-   * \param manages_ports Is RuntimeElement responsible for releasing unused port values?
-   */
-  //@SuppressWarnings("unchecked")
-  //public FrameworkElement(String description, boolean managesPorts, Thread mainThread) {
-  //ownedPorts = managesPorts ? new SafeArrayList<Port<?>>() : null;
-  //mainThread = mainThread == null ? (managesPorts ? Thread.currentThread() : null) : mainThread;
-  //}
-
-  //    /**
-  //     * \return Tree Node representation of this runtime object
-  //     */
-  //    @JavaOnly protected DefaultMutableTreeNode createTreeNode() {
-  //        return new DefaultMutableTreeNode(primary.description);
-  //    }
-
-  //! same as below - except that we return a const char* - this way, no memory needs to be allocated
-  const char* GetCDescription()
-  {
-    return primary.description.Length() == 0 ? "(anonymous)" : primary.description.GetCString();
   }
 
   /*!
@@ -665,6 +698,11 @@ public:
   inline int GetLockOrder() const
   {
     return obj_mutex.GetPrimary();
+  }
+
+  inline const tFrameworkElement& GetLogDescription() const
+  {
+    return *this;
   }
 
   /*!
@@ -1170,8 +1208,15 @@ public:
    */
   inline void PrintStructure()
   {
-    PrintStructure(0);
+    PrintStructure(rrlib::logging::eLL_USER);
   }
+
+  /*!
+   * Helper for Debugging: Prints structure below this framework element to log domain
+   *
+   * \param ll Loglevel with which to print
+   */
+  void PrintStructure(rrlib::logging::tLogLevel ll);
 
   /*!
    * \param description New Port description
@@ -1192,7 +1237,47 @@ public:
    */
   void WriteDescription(tCoreOutput* os, int i) const;
 
+  // for efficient streaming of fully-qualified framework element name
+  void StreamQualifiedName(std::ostream& output) const
+  {
+    if (!GetFlag(tCoreFlags::cIS_RUNTIME))
+    {
+      StreamQualifiedParent(output);
+    }
+    output << GetCDescription();
+  }
+
+  void StreamQualifiedParent(std::ostream& output) const
+  {
+    const tFrameworkElement* parent = GetParent();
+    if (parent != NULL && (!parent->GetFlag(tCoreFlags::cIS_RUNTIME)))
+    {
+      parent->StreamQualifiedParent(output);
+      output << parent->GetCDescription();
+      output << "/";
+    }
+  }
+
 };
+
+} // namespace finroc
+} // namespace core
+
+namespace finroc
+{
+namespace core
+{
+inline std::ostream& operator << (std::ostream& output, const tFrameworkElement* lu)
+{
+  lu->StreamQualifiedName(output);
+  output << " (" << ((void*)lu) << ")";
+  return output;
+}
+inline std::ostream& operator << (std::ostream& output, const tFrameworkElement& lu)
+{
+  output << (&lu);
+  return output;
+}
 
 } // namespace finroc
 } // namespace core

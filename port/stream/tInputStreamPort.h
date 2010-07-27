@@ -58,6 +58,13 @@ private:
    */
   tInputPacketProcessor<T>* user;
 
+public:
+
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "stream_ports");
+
+private:
+
   static tPortCreationInfo ProcessPCI(tPortCreationInfo pci, const util::tString& description);
 
 protected:

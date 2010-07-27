@@ -53,7 +53,7 @@ tThreadLocalCache::tThreadLocalCache() :
     thread_id(util::sThreadUtil::GetCurrentThreadId()),
     port_register(tRuntimeEnvironment::GetInstance()->GetPorts())
 {
-  printf("Creating ThreadLocalCache %p %s\n", this, util::tThread::CurrentThread()->GetName().GetCString());
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << util::tStringBuilder("Creating ThreadLocalCache for thread ") << util::tThread::CurrentThread()->GetName());
 }
 
 void tThreadLocalCache::AddAutoLock(tTypedObject* obj)
@@ -133,7 +133,7 @@ void tThreadLocalCache::DeleteInfoForPort(int port_index)
 
 void tThreadLocalCache::FinalDelete()
 {
-  printf("Deleting ThreadLocalCache %p\n", this);
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "Deleting ThreadLocalCache");
 
   /*! Return MethodCallSyncher to pool */
   if (method_syncher != NULL && (!tRuntimeEnvironment::ShuttingDown()))

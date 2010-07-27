@@ -257,6 +257,9 @@ protected:
   /*! incremented every time buffer is reused */
   volatile int reuse_counter;
 
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "port_data");
+
 public:
 
   // static helper variables

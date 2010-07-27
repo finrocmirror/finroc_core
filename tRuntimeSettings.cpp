@@ -38,18 +38,6 @@ tIntSetting* tRuntimeSettings::cNUM_OF_EVENT_THREADS = tRuntimeSettings::inst->A
 tIntSetting* tRuntimeSettings::cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME = tRuntimeSettings::inst->Add("DEFAULT_MINIMUM_NETWORK_UPDATE_TIME", 40, true);
 const int tRuntimeSettings::cEDGE_LIST_DEFAULT_SIZE;
 const int tRuntimeSettings::cEDGE_LIST_SIZE_INCREASE_FACTOR;
-tBoolSetting* tRuntimeSettings::cDISPLAY_MODULE_UPDATES = tRuntimeSettings::inst->Add("DISPLAY_MODULE_UPDATES", false, true);
-tBoolSetting* tRuntimeSettings::cDISPLAY_MCA_MODULE_UPDATES = tRuntimeSettings::inst->Add("DISPLAY_MCA_MODULE_UPDATES", false, true);
-tBoolSetting* tRuntimeSettings::cDISPLAY_MCA_MESSAGES = tRuntimeSettings::inst->Add("DISPLAY_MCA_MESSAGES", true, true);
-tBoolSetting* tRuntimeSettings::cDISPLAY_MCA_BB_MESSAGES = tRuntimeSettings::inst->Add("DISPLAY_MCA_BB_MESSAGES", false, true);
-tBoolSetting* tRuntimeSettings::cDISPLAY_LOOP_TIME = tRuntimeSettings::inst->Add("DISPLAY_LOOP_TIME", false, true);
-tBoolSetting* tRuntimeSettings::cDISPLAY_DATATYPE_INIT = tRuntimeSettings::inst->Add("DISPLAY_DATATYPE_INIT", false, true);
-tBoolSetting* tRuntimeSettings::cDISPLAY_BUFFER_ALLOCATION = tRuntimeSettings::inst->Add("DISPLAY_BUFFER_ALLOCATION", false, true);
-tBoolSetting* tRuntimeSettings::cDISPLAY_INCOMING_PORT_INFO = tRuntimeSettings::inst->Add("DISPLAY_INCOMING_PORT_INFO", false, true);
-tBoolSetting* tRuntimeSettings::cLOG_LOOP_TIMES = tRuntimeSettings::inst->Add("LOG_LOOP_TIMES", false, true);
-tBoolSetting* tRuntimeSettings::cDISPLAY_CONSOLE = tRuntimeSettings::inst->Add("DISPLAY_CONSOLE", false, true);
-tBoolSetting* tRuntimeSettings::cDISPLAY_CONSTRUCTION_DESTRUCTION = tRuntimeSettings::inst->Add("DISPLAY_CONSTRUCTION_DESTRUCTION", true, true);
-tBoolSetting* tRuntimeSettings::cDISPLAY_EDGE_CREATION = tRuntimeSettings::inst->Add("DISPLAY_EDGE_CREATION", false, true);
 tIntSetting* tRuntimeSettings::cSTREAM_THREAD_CYCLE_TIME = tRuntimeSettings::inst->Add("STREAM_THREAD_CYCLE_TIME", 200, true);
 tIntSetting* tRuntimeSettings::running_in_applet = tRuntimeSettings::inst->Add("RUNNING_IN_APPLET", 0, false);
 tIntSetting* tRuntimeSettings::cGARBAGE_COLLECTOR_SAFETY_PERIOD = tRuntimeSettings::inst->Add("GARBAGE_COLLECTOR_SAFETY_PERIOD", 5000, true);

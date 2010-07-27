@@ -59,7 +59,7 @@ void tTransactionalSet<K, B>::CommitTransaction(B transaction)
     }
     catch (const util::tException& e)
     {
-      e.PrintStackTrace();
+      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, << e);
     }
   }
 }
@@ -102,7 +102,7 @@ bool tTransactionalSet<K, B>::ProcessPacket(const tTransactionPacket* buffer)
       defer = IncomingChange(temp_read_key);
       break;
     default:
-      throw util::tRuntimeException("Corrupt Stream");
+      throw util::tRuntimeException("Corrupt Stream", __CODE_LOCATION__);
     }
     if (defer)
     {

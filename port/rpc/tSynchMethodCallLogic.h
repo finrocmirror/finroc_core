@@ -39,6 +39,21 @@ namespace core
  */
 class tSynchMethodCallLogic : public util::tUncopyableObject
 {
+public:
+
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "rpc");
+
+private:
+
+  /*!
+   * \return Description for logging
+   */
+  inline static const char* GetLogDescription()
+  {
+    return "SynchMethodCallLogic";
+  }
+
   /*!
    * (Private Helper method - because we'd need a .hpp otherwise)
    * Perform synchronous call. Thread will wait for return value (until timeout has passed).

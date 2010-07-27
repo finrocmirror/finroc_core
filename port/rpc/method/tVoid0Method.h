@@ -65,7 +65,7 @@ public:
 
   virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall* call, tInterfaceNetPort* net_port, tAbstractAsyncReturnHandler* ret_handler, int net_timeout)
   {
-    throw util::tRuntimeException("Only supported by non-void methods");
+    throw util::tRuntimeException("Only supported by non-void methods", __CODE_LOCATION__);
   }
 
   virtual void ExecuteFromMethodCallObject(tMethodCall* call, tAbstractMethodCallHandler* handler, tAbstractAsyncReturnHandler* ret_handler);

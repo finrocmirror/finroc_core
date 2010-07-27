@@ -106,7 +106,7 @@ void tNetPort::ReceiveDataFromStream(tCoreInput* ci, int64 timestamp, int8 chang
   }
   else    // interface port
   {
-    throw util::tRuntimeException("Method calls are not handled using this mechanism");
+    throw util::tRuntimeException("Method calls are not handled using this mechanism", __CODE_LOCATION__);
   }
 }
 
@@ -190,7 +190,7 @@ void tNetPort::WriteDataToNetwork(tCoreOutput* co, int64 start_time)
   }
   else    // interface port
   {
-    throw util::tRuntimeException("Method calls are not handled using this mechanism");
+    throw util::tRuntimeException("Method calls are not handled using this mechanism", __CODE_LOCATION__);
   }
   co->WriteBoolean(false);
 }

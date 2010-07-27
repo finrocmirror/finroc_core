@@ -65,7 +65,7 @@ private:
   /*!
    * Helper for above
    */
-  void PrintElement(int indent, const tPortDataManager* pdm) const;
+  void PrintElement(int indent, const tPortDataManager* pdm, rrlib::logging::tLogStream& output) const;
 
 protected:
 
@@ -112,8 +112,9 @@ public:
    * Prints info about all elements in pool to console
    *
    * \param indent Indentation
+   * \param output
    */
-  void PrintStructure(int indent) const;
+  void PrintStructure(int indent, rrlib::logging::tLogStream& output) const;
 
 };
 

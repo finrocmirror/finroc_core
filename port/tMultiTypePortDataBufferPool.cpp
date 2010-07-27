@@ -45,16 +45,16 @@ tPortData* tMultiTypePortDataBufferPool::PossiblyCreatePool(tDataType* data_type
   return new_pool->GetUnusedBuffer();
 }
 
-void tMultiTypePortDataBufferPool::PrintStructure(int indent)
+void tMultiTypePortDataBufferPool::PrintStructure(int indent, rrlib::logging::tLogStream& output)
 {
   for (int i = 0; i < indent; i++)
   {
-    util::tSystem::out.Print(" ");
+    output << " ";
   }
-  util::tSystem::out.Println("MultiTypePortDataBufferPool:");
+  output << "MultiTypePortDataBufferPool:" << std::endl;
   for (size_t i = 0u, n = pools.Size(); i < n; i++)
   {
-    pools.Get(i)->PrintStructure(indent + 2);
+    pools.Get(i)->PrintStructure(indent + 2, output);
   }
 }
 

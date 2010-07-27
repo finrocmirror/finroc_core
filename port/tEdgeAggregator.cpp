@@ -81,7 +81,7 @@ void tEdgeAggregator::EdgeRemoved(tEdgeAggregator* dest)
     }
     return;
   }
-  throw util::tRuntimeException("Edge not found - this is inconsistent => programming error");
+  throw util::tRuntimeException("Edge not found - this is inconsistent => programming error", __CODE_LOCATION__);
 }
 
 tAggregatedEdge* tEdgeAggregator::FindAggregatedEdge(tEdgeAggregator* dest)

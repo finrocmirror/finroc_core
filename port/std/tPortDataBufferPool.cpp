@@ -47,31 +47,31 @@ tPortDataManager* tPortDataBufferPool::CreateBuffer()
   return pdm;
 }
 
-void tPortDataBufferPool::PrintElement(int indent, const tPortDataManager* pdm) const
+void tPortDataBufferPool::PrintElement(int indent, const tPortDataManager* pdm, rrlib::logging::tLogStream& output) const
 {
   if (pdm == NULL)
   {
     return;
   }
-  PrintElement(indent, pdm->GetNextInBufferPool());
+  PrintElement(indent, pdm->GetNextInBufferPool(), output);
   for (int i = 0; i < indent; i++)
   {
-    util::tSystem::out.Print(" ");
+    output << " ";
   }
   //System.out.print("PortDataManager (");
   //System.out.print(pdm.getCurrentRefCounter().get());
   //System.out.print(" locks): ");
-  util::tSystem::out.Println(pdm->ToString());
+  output << pdm->ToString() << std::endl;
 }
 
-void tPortDataBufferPool::PrintStructure(int indent) const
+void tPortDataBufferPool::PrintStructure(int indent, rrlib::logging::tLogStream& output) const
 {
   for (int i = 0; i < indent; i++)
   {
-    util::tSystem::out.Print(" ");
+    output << " ";
   }
-  util::tSystem::out.Println(util::tStringBuilder("PortDataBufferPool (") + data_type->GetName() + ")");
-  PrintElement(indent + 2, GetLastCreated());
+  output << util::tStringBuilder("PortDataBufferPool (") + data_type->GetName() + ")" << std::endl;
+  PrintElement(indent + 2, GetLastCreated(), output);
 }
 
 } // namespace finroc

@@ -102,29 +102,16 @@ public:
   static const int cEDGE_LIST_SIZE_INCREASE_FACTOR = 2;
 
   /*! Debug Settings */
-  static tBoolSetting* cDISPLAY_MODULE_UPDATES;
-
-  static tBoolSetting* cDISPLAY_MCA_MODULE_UPDATES;
-
-  static tBoolSetting* cDISPLAY_MCA_MESSAGES;
-
-  static tBoolSetting* cDISPLAY_MCA_BB_MESSAGES;
-
-  static tBoolSetting* cDISPLAY_LOOP_TIME;
-
-  static tBoolSetting* cDISPLAY_DATATYPE_INIT;
-
-  static tBoolSetting* cDISPLAY_BUFFER_ALLOCATION;
-
-  static tBoolSetting* cDISPLAY_INCOMING_PORT_INFO;
-
-  static tBoolSetting* cLOG_LOOP_TIMES;
-
-  static tBoolSetting* cDISPLAY_CONSOLE;
-
-  static tBoolSetting* cDISPLAY_CONSTRUCTION_DESTRUCTION;
-
-  static tBoolSetting* cDISPLAY_EDGE_CREATION;
+  /*public static final BoolSetting DISPLAY_MODULE_UPDATES = inst.add("DISPLAY_MODULE_UPDATES", false, true);
+  public static final BoolSetting DISPLAY_MCA_MODULE_UPDATES = inst.add("DISPLAY_MCA_MODULE_UPDATES", false, true);
+  public static final BoolSetting DISPLAY_MCA_MESSAGES = inst.add("DISPLAY_MCA_MESSAGES", true, true);
+  public static final BoolSetting DISPLAY_MCA_BB_MESSAGES = inst.add("DISPLAY_MCA_BB_MESSAGES", false, true);
+  public static final BoolSetting DISPLAY_LOOP_TIME = inst.add("DISPLAY_LOOP_TIME", false, true);
+  public static final BoolSetting DISPLAY_DATATYPE_INIT = inst.add("DISPLAY_DATATYPE_INIT", false, true);
+  public static final BoolSetting DISPLAY_BUFFER_ALLOCATION = inst.add("DISPLAY_BUFFER_ALLOCATION", false, true);
+  public static final BoolSetting DISPLAY_INCOMING_PORT_INFO = inst.add("DISPLAY_INCOMING_PORT_INFO", false, true);
+  public static final BoolSetting LOG_LOOP_TIMES = inst.add("LOG_LOOP_TIMES", false, true);
+  public static final BoolSetting DISPLAY_CONSOLE = inst.add("DISPLAY_CONSOLE", false, true);*/
 
   /*! Loop time for buffer tracker (in ms) */
   //public static final IntSetting BUFFER_TRACKER_LOOP_TIME = inst.add("BUFFER_TRACKER_LOOP_TIME", 140, true);
@@ -146,6 +133,16 @@ public:
 
   /*! Collect edge statistics ? */
   static const bool cCOLLECT_EDGE_STATISTICS = false;
+
+  /*! Log domain for this class */
+  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "settings");
+
+private:
+
+  inline static const char* GetLogDescription()
+  {
+    return "RuntimeSettings";
+  }
 
 protected:
 

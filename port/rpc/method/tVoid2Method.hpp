@@ -61,7 +61,7 @@ void tVoid2Method<HANDLER, P1, P2>::Call(tInterfaceClientPort* port, P1 p1, P2 p
       //1
       Cleanup(p1);  //2
       Cleanup(p2);
-      throw tMethodCallException(tMethodCallException::eNO_CONNECTION);
+      throw tMethodCallException(tMethodCallException::eNO_CONNECTION, __CODE_LOCATION__);
     }
     if (force_same_thread || (!HandleInExtraThread()))
     {
@@ -82,7 +82,7 @@ void tVoid2Method<HANDLER, P1, P2>::Call(tInterfaceClientPort* port, P1 p1, P2 p
     //1
     Cleanup(p1);  //2
     Cleanup(p2);
-    throw tMethodCallException(tMethodCallException::eNO_CONNECTION);
+    throw tMethodCallException(tMethodCallException::eNO_CONNECTION, __CODE_LOCATION__);
   }
 }
 
@@ -115,7 +115,7 @@ void tVoid2Method<HANDLER, P1, P2>::ExecuteFromMethodCallObject(tMethodCall* cal
   catch (const tMethodCallException& e)
   {
     // don't send anything back
-    e.PrintStackTrace();
+    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, << e);
   }
   call->Recycle();
 }
