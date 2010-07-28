@@ -26,6 +26,7 @@
 
 #include "finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "finroc_core_utils/net/tIPSocketAddress.h"
+#include "finroc_core_utils/log/tLogUser.h"
 #include "finroc_core_utils/tListenerManager.h"
 
 namespace finroc
@@ -38,7 +39,7 @@ namespace core
  * This is the abstract base class for "peer trackers".
  * Peer trackers look for other systems on the network that can be connected to.
  */
-class tAbstractPeerTracker : public util::tUncopyableObject
+class tAbstractPeerTracker : public util::tLogUser
 {
 public:
   class tListener; // inner class forward declaration
