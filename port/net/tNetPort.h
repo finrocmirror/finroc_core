@@ -34,6 +34,7 @@
 #include "core/port/cc/tCCPortData.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/buffers/tCoreOutput.h"
+#include "finroc_core_utils/log/tLogUser.h"
 #include "core/port/std/tPortListener.h"
 #include "core/port/cc/tCCPortListener.h"
 #include "core/port/rpc/tPullCall.h"
@@ -56,7 +57,7 @@ namespace core
  * Port that is used for networking.
  * Uniform wrapper class for Std, CC, and Interface ports.
  */
-class tNetPort : public util::tUncopyableObject, public tPortListener<>, public tCCPortListener<>
+class tNetPort : public util::tLogUser, public tPortListener<>, public tCCPortListener<>
 {
 public:
   class tCCNetPort; // inner class forward declaration
