@@ -51,7 +51,7 @@ void tStreamCommitThread::MainLoopCallback()
 
 void tStreamCommitThread::StopThread()
 {
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain, << "Stopping StreamCommitThread");
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain, "Stopping StreamCommitThread");
   ::finroc::util::tLoopThread::StopThread();
   instance.reset();
 }

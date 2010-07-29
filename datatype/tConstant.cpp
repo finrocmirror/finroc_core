@@ -38,7 +38,7 @@ tConstant::tConstant(const util::tString& name, tCoreNumber value_) :
 {
   if (typeid(*unit) == typeid(tConstant))
   {
-    throw util::tRuntimeException("Constants not allowed as unit", __CODE_LOCATION__);
+    throw util::tRuntimeException("Constants not allowed as unit", CODE_LOCATION_MACRO);
   }
   constants[constant_id] = this;
 }

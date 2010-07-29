@@ -87,7 +87,7 @@ private:
   //  }
 
   /*! Log domain for this class */
-  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "data_types");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "data_types");
 
   tDataTypeRegister();
 

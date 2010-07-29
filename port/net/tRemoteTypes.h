@@ -81,7 +81,7 @@ private:
 public:
 
   /*! Log domain for edges */
-  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "remote_types");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "remote_types");
 
   tRemoteTypes();
 

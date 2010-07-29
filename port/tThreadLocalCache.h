@@ -122,7 +122,7 @@ private:
 protected:
 
   /*! Log domain for this class */
-  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "thread_local_cache");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "thread_local_cache");
 
 public:
 

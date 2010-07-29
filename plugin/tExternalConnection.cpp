@@ -54,7 +54,7 @@ void tExternalConnection::Disconnect()
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, << e);
+    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, e);
 
   }
   FireConnectionEvent(tConnectionListener::cNOT_CONNECTED);
@@ -76,7 +76,7 @@ void tExternalConnection::PrepareDelete()
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, << e);
+    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
   }
   ::finroc::core::tFrameworkElement::PrepareDelete();
 }

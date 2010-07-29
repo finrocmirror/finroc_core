@@ -70,7 +70,7 @@ public:
   util::tMutexLockOrder obj_mutex;
 
   /*! Log domain for this class */
-  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "rpc");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "rpc");
 
   //  /** Optimization for method calls handled directly by the same thread - may only be accessed and written by one thread */
   //  boolean beforeQuickReturnCheck = false;

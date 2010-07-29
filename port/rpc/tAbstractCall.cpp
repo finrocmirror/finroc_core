@@ -81,7 +81,7 @@ void tAbstractCall::DeserializeParamaters()
 {
   if (!deserializable_parameters)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, << "warning: double deserialization of parameters");
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "warning: double deserialization of parameters");
     return;
   }
   deserializable_parameters = false;

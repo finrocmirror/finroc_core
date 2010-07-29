@@ -135,7 +135,7 @@ public:
   static const bool cCOLLECT_EDGE_STATISTICS = false;
 
   /*! Log domain for this class */
-  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "settings");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "settings");
 
 private:
 

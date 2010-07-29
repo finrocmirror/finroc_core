@@ -53,7 +53,7 @@ void tVoid0Method<HANDLER>::Call(tInterfaceClientPort* port, bool force_same_thr
     HANDLER handler = static_cast<HANDLER>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (handler == NULL)
     {
-      throw tMethodCallException(tMethodCallException::eNO_CONNECTION, __CODE_LOCATION__);
+      throw tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO);
     }
     if (force_same_thread || (!HandleInExtraThread()))
     {
@@ -69,7 +69,7 @@ void tVoid0Method<HANDLER>::Call(tInterfaceClientPort* port, bool force_same_thr
   }
   else
   {
-    throw tMethodCallException(tMethodCallException::eNO_CONNECTION, __CODE_LOCATION__);
+    throw tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO);
   }
 }
 
@@ -96,7 +96,7 @@ void tVoid0Method<HANDLER>::ExecuteFromMethodCallObject(tMethodCall* call, const
   catch (const tMethodCallException& e)
   {
     // don't send anything back
-    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, << e);
+    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
   }
   call->Recycle();
 }

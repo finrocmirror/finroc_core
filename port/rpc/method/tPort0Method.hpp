@@ -53,7 +53,7 @@ R tPort0Method<HANDLER, R>::Call(tInterfaceClientPort* port, int net_timeout)
     catch (const tMethodCallException& e)
     {
       // we shouldn't need to recycle anything, since call is responsible for this
-      throw tMethodCallException(e.GetType(), __CODE_LOCATION__);
+      throw tMethodCallException(e.GetType(), CODE_LOCATION_MACRO);
     }
     mc->DeserializeParamaters();
     if (mc->HasException())
@@ -63,7 +63,7 @@ R tPort0Method<HANDLER, R>::Call(tInterfaceClientPort* port, int net_timeout)
       mc->GetParam(0, type);
 
       mc->Recycle();
-      throw tMethodCallException(type, __CODE_LOCATION__);
+      throw tMethodCallException(type, CODE_LOCATION_MACRO);
     }
     else
     {
@@ -82,7 +82,7 @@ R tPort0Method<HANDLER, R>::Call(tInterfaceClientPort* port, int net_timeout)
     HANDLER handler = static_cast<HANDLER>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (handler == NULL)
     {
-      throw tMethodCallException(tMethodCallException::eNO_CONNECTION, __CODE_LOCATION__);
+      throw tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO);
     }
     R ret = handler->HandleCall(this);
     assert((HasLock(ret)));
@@ -90,7 +90,7 @@ R tPort0Method<HANDLER, R>::Call(tInterfaceClientPort* port, int net_timeout)
   }
   else
   {
-    throw tMethodCallException(tMethodCallException::eNO_CONNECTION, __CODE_LOCATION__);
+    throw tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO);
   }
 }
 
@@ -111,7 +111,7 @@ void tPort0Method<HANDLER, R>::CallAsync(const tInterfaceClientPort* port, tAsyn
     HANDLER mhandler = static_cast<HANDLER>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (mhandler == NULL)
     {
-      handler->HandleMethodCallException(this, tMethodCallException(tMethodCallException::eNO_CONNECTION, __CODE_LOCATION__));
+      handler->HandleMethodCallException(this, tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO));
     }
     if (force_same_thread || (!HandleInExtraThread()))
     {
@@ -136,7 +136,7 @@ void tPort0Method<HANDLER, R>::CallAsync(const tInterfaceClientPort* port, tAsyn
   }
   else
   {
-    handler->HandleMethodCallException(this, tMethodCallException(tMethodCallException::eNO_CONNECTION, __CODE_LOCATION__));
+    handler->HandleMethodCallException(this, tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO));
   }
 }
 
@@ -165,7 +165,7 @@ void tPort0Method<HANDLER, R>::ExecuteAsyncNonVoidCallOverTheNet(tMethodCall* mc
 
     mc->Recycle();
 
-    r_handler->HandleMethodCallException(this, tMethodCallException(type, __CODE_LOCATION__));
+    r_handler->HandleMethodCallException(this, tMethodCallException(type, CODE_LOCATION_MACRO));
   }
   else
   {

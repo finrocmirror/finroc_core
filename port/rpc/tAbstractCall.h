@@ -107,7 +107,7 @@ public:
   static const int8 cNONE = 0, cSYNCH_CALL = 1, cASYNCH_CALL = 2, cSYNCH_RETURN = 3, cASYNCH_RETURN = 4, cCONNECTION_EXCEPTION = 5;
 
   /*! Log domain for this class */
-  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "rpc");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "rpc");
 
 protected:
 

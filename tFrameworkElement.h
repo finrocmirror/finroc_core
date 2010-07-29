@@ -220,10 +220,10 @@ public:
   //protected Thread mainThread;
 
   /*! Log domain for this class */
-  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "framework_elements");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "framework_elements");
 
   /*! Log domain for edges */
-  CREATE_NAMED_LOGGING_DOMAIN(edge_log, "edges");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(edge_log, "edges");
 
 private:
 

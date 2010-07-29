@@ -258,7 +258,7 @@ protected:
   volatile int reuse_counter;
 
   /*! Log domain for this class */
-  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "port_data");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "port_data");
 
 public:
 

@@ -53,7 +53,7 @@ tMethodCallSyncher* tMethodCallSyncher::GetFreeInstance(tThreadLocalCache* tc)
       return mcs;
     }
   }
-  throw util::tRuntimeException("Number of threads maxed out", __CODE_LOCATION__);
+  throw util::tRuntimeException("Number of threads maxed out", CODE_LOCATION_MACRO);
 }
 
 void tMethodCallSyncher::Reset()

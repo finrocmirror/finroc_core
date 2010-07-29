@@ -123,7 +123,7 @@ public:
   static const int8 cNO_CHANGE = 0, cCHANGED = 1, cCHANGED_INITIAL = 2;
 
   /*! Log domain for initial pushing */
-  CREATE_NAMED_LOGGING_DOMAIN(initial_push_log, "initial_pushes");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(initial_push_log, "initial_pushes");
 
 private:
 
@@ -524,7 +524,7 @@ public:
    */
   virtual tPortData* GetUnusedBuffer(tDataType* dt)
   {
-    throw util::tRuntimeException("Unsupported", __CODE_LOCATION__);
+    throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
   }
 
   /*!

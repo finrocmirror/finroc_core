@@ -60,7 +60,7 @@ tDataType* tRemoteTypes::GetLocalType(int16 uid)
   tEntry e = (*(types))[uid];
   if (e == NULL)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, << util::tStringBuilder("RemoteTypes: Unknown type ") << uid);
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, util::tStringBuilder("RemoteTypes: Unknown type "), uid);
     return NULL;
   }
   return e.local_data_type;

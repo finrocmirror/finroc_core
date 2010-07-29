@@ -57,7 +57,7 @@ tFrameworkElement::tFrameworkElement(const util::tString& description_, tFramewo
   //          parent.addChild(primary);
   //      }
 
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "Constructing FrameworkElement");
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Constructing FrameworkElement");
 }
 
 void tFrameworkElement::AddChild(tLink* child)
@@ -76,7 +76,7 @@ void tFrameworkElement::AddChild(tLink* child)
     assert(((child->GetChild()->IsCreator())) && "may only be called by child creator thread");
     if (IsDeleted() || (child->parent != NULL && child->parent->IsDeleted()) || child->GetChild()->IsDeleted())
     {
-      throw util::tRuntimeException("Child has been deleted or has deleted parent. Thread exit is likely the intended behaviour.", __CODE_LOCATION__);
+      throw util::tRuntimeException("Child has been deleted or has deleted parent. Thread exit is likely the intended behaviour.", CODE_LOCATION_MACRO);
     }
     if (child->parent != NULL)
     {
@@ -150,7 +150,7 @@ void tFrameworkElement::CheckPublish()
     if (!GetFlag(tCoreFlags::cPUBLISHED) && AllParentsReady())
     {
       SetFlag(tCoreFlags::cPUBLISHED);
-      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "Publishing");
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Publishing");
       PublishUpdatedInfo(tRuntimeListener::cADD);
     }
 
@@ -188,7 +188,7 @@ size_t tFrameworkElement::ChildCount() const
 tFrameworkElement::~tFrameworkElement()
 {
   assert(((GetFlag(tCoreFlags::cDELETED) || GetFlag(tCoreFlags::cIS_RUNTIME))) && "Frameworkelement was not deleted with managedDelete()");
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "FrameworkElement destructor");
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "FrameworkElement destructor");
   if (!GetFlag(tCoreFlags::cIS_RUNTIME))
   {
     // synchronizes on runtime - so no elements will be deleted while runtime is locked
@@ -518,7 +518,7 @@ void tFrameworkElement::Init()
     // assert(getFlag(CoreFlags.IS_RUNTIME) || getParent().isReady());
     if (IsDeleted())
     {
-      throw util::tRuntimeException("Cannot initialize deleted element", __CODE_LOCATION__);
+      throw util::tRuntimeException("Cannot initialize deleted element", CODE_LOCATION_MACRO);
     }
 
     InitImpl();
@@ -614,7 +614,7 @@ void tFrameworkElement::Link(tFrameworkElement* parent, const util::tString& lin
     util::tLock lock2(GetRegistryLock());
     if (IsDeleted() || parent->IsDeleted())
     {
-      throw util::tRuntimeException("Element and/or parent has been deleted. Thread exit is likely the intended behaviour.", __CODE_LOCATION__);
+      throw util::tRuntimeException("Element and/or parent has been deleted. Thread exit is likely the intended behaviour.", CODE_LOCATION_MACRO);
     }
 
     tLink* l = new tLink(this);
@@ -640,13 +640,13 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
         return;
       }
 
-      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "FrameworkElement managedDelete");
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "FrameworkElement managedDelete");
 
       // synchronizes on runtime - so no elements will be deleted while runtime is locked
       {
         util::tLock lock4(GetRegistryLock());
 
-        FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "Deleting");
+        FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Deleting");
         //System.out.println("Deleting " + toString() + " (" + hashCode() + ")");
         assert(!GetFlag(tCoreFlags::cDELETED));
         assert(((primary.GetParent() != NULL) | GetFlag(tCoreFlags::cIS_RUNTIME)));

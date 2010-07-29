@@ -111,7 +111,7 @@ public:
 
   virtual void Deserialize(tCoreInput& is)
   {
-    throw util::tRuntimeException("Deserialization not meant to be done", __CODE_LOCATION__);
+    throw util::tRuntimeException("Deserialization not meant to be done", CODE_LOCATION_MACRO);
   }
 
   /*!
@@ -124,7 +124,7 @@ public:
 
   virtual void Serialize(tCoreOutput& os) const
   {
-    throw util::tRuntimeException("Serialization not meant to be done", __CODE_LOCATION__);
+    throw util::tRuntimeException("Serialization not meant to be done", CODE_LOCATION_MACRO);
   }
 
   virtual void StreamThreadCallback(int64 time)

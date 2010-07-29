@@ -61,7 +61,7 @@ private:
 public:
 
   /*! Log domain for this class */
-  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "connections");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "connections");
 
 protected:
 

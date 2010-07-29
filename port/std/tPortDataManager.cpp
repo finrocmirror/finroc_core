@@ -33,7 +33,7 @@ size_t tPortDataManager::cREF_COUNTERS_OFFSET = ((char*)&(tPortDataManager::cPRO
 tPortDataManager::~tPortDataManager()
 {
   delete data;
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "Deleting Manager");
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Deleting Manager");
 }
 
 const size_t tPortDataManager::cNUMBER_OF_REFERENCES;
@@ -59,7 +59,7 @@ tPortDataManager::tPortDataManager(tDataType* dt, const tPortData* port_data) :
 
   data = (tPortData*)dt->CreateInstance();
 
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, << "Creating PortDataManager");
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating PortDataManager");
 
   pdci->Reset();
   pdci->InitUnitializedObjects();

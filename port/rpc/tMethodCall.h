@@ -149,7 +149,7 @@ public:
 
   virtual void Deserialize(tCoreInput& is)
   {
-    throw util::tRuntimeException("Call deserializeCall instead, please!", __CODE_LOCATION__);
+    throw util::tRuntimeException("Call deserializeCall instead, please!", CODE_LOCATION_MACRO);
   }
 
   /*!

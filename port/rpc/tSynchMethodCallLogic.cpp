@@ -61,7 +61,7 @@ tAbstractCall* tSynchMethodCallLogic::PerformSynchCallImpl(tAbstractCall* call, 
     }
     catch (const util::tInterruptedException& e)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, << "Synch method call interrupted... this shouldn't happen... usually");
+      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Synch method call interrupted... this shouldn't happen... usually");
     }
 
     // reset stuff for next call
@@ -72,7 +72,7 @@ tAbstractCall* tSynchMethodCallLogic::PerformSynchCallImpl(tAbstractCall* call, 
     if (ret == NULL)
     {
       // (recycling is job of receiver)
-      throw tMethodCallException(tMethodCallException::eTIMEOUT, __CODE_LOCATION__);
+      throw tMethodCallException(tMethodCallException::eTIMEOUT, CODE_LOCATION_MACRO);
     }
   }
   return ret;

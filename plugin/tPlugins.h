@@ -62,7 +62,7 @@ private:
 public:
 
   /*! Log domain for this class */
-  CREATE_NAMED_LOGGING_DOMAIN(log_domain, "plugins");
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "plugins");
 
 private:
 
