@@ -35,6 +35,7 @@ tPortDataManager::~tPortDataManager()
   delete data;
   FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Deleting Manager");
 }
+rrlib::logging::tLogDomainSharedPointer init_domain_dummy = tPortDataManager::log_domain();
 
 const size_t tPortDataManager::cNUMBER_OF_REFERENCES;
 const size_t tPortDataManager::cREF_INDEX_MASK;

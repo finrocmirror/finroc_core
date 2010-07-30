@@ -257,9 +257,6 @@ protected:
   /*! incremented every time buffer is reused */
   volatile int reuse_counter;
 
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "port_data");
-
 public:
 
   // static helper variables
@@ -283,6 +280,9 @@ public:
 
   /*! Mask for selection of current reference */
   static const size_t cREF_INDEX_MASK = cNUMBER_OF_REFERENCES - 1u;
+
+  /*! Log domain for this class */
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "port_data");
 
 protected:
 
