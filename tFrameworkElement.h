@@ -27,7 +27,7 @@
 #include "core/tCoreFlags.h"
 #include "finroc_core_utils/thread/sThreadUtil.h"
 #include "core/buffers/tCoreOutput.h"
-#include "finroc_core_utils/log/tLogUser.h"
+#include "core/tAnnotatable.h"
 
 #include "core/datatype/tCoreNumber.h"
 #include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
@@ -56,7 +56,7 @@ class tRuntimeEnvironment;
  * To prevent deleting of framework element while using it over a longer period of time,
  * lock it - or the complete runtime environment.
  */
-class tFrameworkElement : public util::tLogUser
+class tFrameworkElement : public tAnnotatable
 {
 public:
 

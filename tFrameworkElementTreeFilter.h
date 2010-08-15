@@ -87,6 +87,15 @@ public:
   virtual void Deserialize(tCoreInput& is);
 
   /*!
+   * \return Is this a filter that accepts all framework elements?
+   * (e.g. the finstruct one is)
+   */
+  inline bool IsAcceptAllFilter() const
+  {
+    return (relevant_flags & (~tCoreFlags::cSTATUS_FLAGS)) == 0;
+  }
+
+  /*!
    * \return Is this a filter that only lets ports through?
    */
   inline bool IsPortOnlyFilter() const

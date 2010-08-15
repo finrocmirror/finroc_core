@@ -27,6 +27,7 @@
 #include "core/portdatabase/tDataType.h"
 #include "finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
+#include "core/port/tEdgeAggregator.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/port/net/tRemoteTypes.h"
 #include "core/tFrameworkElement.h"
@@ -90,13 +91,20 @@ private:
   /*! Stores outgoing connection destination ports - if this is a port */
   util::tSimpleList<int> connections;
 
+  /*! Register Data type */
+  //@ConstPtr
+  //public final static DataType TYPE = DataTypeRegister.getInstance().getDataType(FrameworkElementInfo.class);
+
+  /*! mask for non-ports and non-edge-aggregators */
+  static const int cPARENT_FLAGS_TO_STORE = tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cEDGE_AGGREGATOR;
+
+  /*! mask for non-ports and non-edge-aggregators */
+  static const int cEDGE_AGG_PARENT_FLAGS_TO_STORE = cPARENT_FLAGS_TO_STORE | tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS;
+
 public:
 
   /*! Op code: ADD CHANGE or DELETE */
   int8 op_code;
-
-  /*! Register Data type */
-  static const int8 cPARENT_FLAGS_TO_STORE = tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cEDGE_AGGREGATOR;
 
 private:
 
@@ -134,6 +142,12 @@ public:
    * \param type_lookup Remote type information to lookup type
    */
   void Deserialize(tCoreInput* is, tRemoteTypes& type_lookup);
+
+  /*!
+   * \param extra_flags all flags
+   * \return Flags relevant for a remote parent framework element
+   */
+  static int FilterParentFlags(int extra_flags);
 
   /*!
    * Get outgoing connection's destination handles

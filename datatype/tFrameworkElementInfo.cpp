@@ -27,7 +27,8 @@ namespace finroc
 {
 namespace core
 {
-const int8 tFrameworkElementInfo::cPARENT_FLAGS_TO_STORE;
+const int tFrameworkElementInfo::cPARENT_FLAGS_TO_STORE;
+const int tFrameworkElementInfo::cEDGE_AGG_PARENT_FLAGS_TO_STORE;
 
 tFrameworkElementInfo::tFrameworkElementInfo() :
     links(),
@@ -64,8 +65,12 @@ void tFrameworkElementInfo::Deserialize(tCoreInput* is, tRemoteTypes& type_looku
     while ((next = is->ReadByte()) != 0)
     {
       tLinkInfo* li = &(links[link_count]);
-      li->name = is->ReadString();
       li->extra_flags = next & cPARENT_FLAGS_TO_STORE;
+      if ((li->extra_flags & tCoreFlags::cEDGE_AGGREGATOR) > 0)
+      {
+        li->extra_flags |= ((static_cast<int>(is->ReadByte())) << 8);
+      }
+      li->name = is->ReadString();
       if (!port_only_client)
       {
         li->parent = is->ReadInt();
@@ -97,6 +102,15 @@ void tFrameworkElementInfo::Deserialize(tCoreInput* is, tRemoteTypes& type_looku
   }
 }
 
+int tFrameworkElementInfo::FilterParentFlags(int extra_flags)
+{
+  if ((extra_flags & tCoreFlags::cEDGE_AGGREGATOR) != 0)
+  {
+    return extra_flags & cEDGE_AGG_PARENT_FLAGS_TO_STORE;
+  }
+  return extra_flags & cPARENT_FLAGS_TO_STORE;
+}
+
 util::tString tFrameworkElementInfo::GetOpCodeString() const
 {
   switch (op_code)
@@ -107,6 +121,8 @@ util::tString tFrameworkElementInfo::GetOpCodeString() const
     return "CHANGE";
   case tRuntimeListener::cREMOVE:
     return "REMOVE";
+  case tRuntimeListener::cEDGE_CHANGE:
+    return "EDGE_CHANGE";
   default:
     return "INVALID OPCODE";
   }
@@ -160,6 +176,10 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
         {
           // serialize 1 for another link - ORed with CoreFlags for parent LINK_ROOT and GLOBALLY_UNIQUE
           tp->WriteByte(1 | (parent->GetAllFlags() & cPARENT_FLAGS_TO_STORE));
+          if (parent->GetFlag(tCoreFlags::cEDGE_AGGREGATOR))
+          {
+            tp->WriteByte((parent->GetAllFlags() & tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS) >> 8);
+          }
           fe->WriteDescription(tp, i);
           tp->WriteInt(parent->GetHandle());
         }
@@ -177,9 +197,13 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
     tp->WriteShort(port->GetStrategy());
     tp->WriteShort(port->GetMinNetUpdateInterval());
 
-    if (!element_filter.IsPortOnlyFilter())
+    if (element_filter.IsAcceptAllFilter())
     {
       port->SerializeOutgoingConnections(tp);
+    }
+    else if (!element_filter.IsPortOnlyFilter())
+    {
+      tp->WriteByte(0);
     }
   }
 }

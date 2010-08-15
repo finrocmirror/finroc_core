@@ -25,7 +25,7 @@
 #define CORE__PORTDATABASE__TDATATYPEREGISTER_H
 
 #include "core/portdatabase/tDataType.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/portdatabase/tTypedObjectImpl.h"
 #include "finroc_core_utils/log/tLogUser.h"
 
 #include "core/portdatabase/tDataTypeUtil.h"
@@ -269,7 +269,7 @@ public:
    * \param port_data Object whose data type pointer to look up
    * \return Data type
    */
-  inline tDataType* LookupDataType(tPortData* port_data)
+  inline tDataType* LookupDataType(tTypedObject* port_data)
   {
     return initial_lookup[typeid(*port_data).name()];
   }

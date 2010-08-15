@@ -24,6 +24,7 @@
 #ifndef CORE__PORT__TEDGEAGGREGATOR_H
 #define CORE__PORT__TEDGEAGGREGATOR_H
 
+#include "core/tCoreFlags.h"
 #include "core/port/tAggregatedEdge.h"
 #include "core/tFrameworkElement.h"
 #include "core/port/tAbstractPort.h"
@@ -49,6 +50,22 @@ private:
 
   /*! List of emerging aggregated edges */
   util::tSafeConcurrentlyIterableList<tAggregatedEdge*, 5, true> emerging_edges;
+
+public:
+
+  /*! Is this edge aggregator an interface of its parent (one of possibly many) */
+  static const int cIS_INTERFACE = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG;
+
+  /*! Hint for displaying in finstruct: Is this sensor data only? */
+  static const int cSENSOR_DATA = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG << 1;
+
+  /*! Hint for displaying in finstruct: Is this controller data only? */
+  static const int cCONTROLLER_DATA = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG << 2;
+
+  /*! All flags introduced by edge aggregator class */
+  static const int cALL_EDGE_AGGREGATOR_FLAGS = cIS_INTERFACE | cSENSOR_DATA | cCONTROLLER_DATA;
+
+private:
 
   /*!
    * Called when edge has been added that is relevant for this element

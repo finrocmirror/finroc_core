@@ -39,7 +39,15 @@ class tCreateExternalConnectionAction : public util::tInterface
 {
 public:
 
+  /*! Does connection transfer info about remote edges? */
+  static const int cREMOTE_EDGE_INFO = 1 << 0;
+
   virtual tExternalConnection* CreateExternalConnection() = 0;
+
+  /*!
+   * \return Connection properties/capabilities (see flags above)
+   */
+  virtual int GetFlags() = 0;
 
   virtual const util::tString ToString() const = 0;
 

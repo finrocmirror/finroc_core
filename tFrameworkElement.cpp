@@ -187,6 +187,7 @@ size_t tFrameworkElement::ChildCount() const
 
 tFrameworkElement::~tFrameworkElement()
 {
+  ;
   assert(((GetFlag(tCoreFlags::cDELETED) || GetFlag(tCoreFlags::cIS_RUNTIME))) && "Frameworkelement was not deleted with managedDelete()");
   FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "FrameworkElement destructor");
   if (!GetFlag(tCoreFlags::cIS_RUNTIME))

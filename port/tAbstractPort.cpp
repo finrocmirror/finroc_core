@@ -520,7 +520,7 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
 void tAbstractPort::RawConnectToTarget(tAbstractPort* target)
 {
   tEdgeAggregator::EdgeAdded(this, target);
-  PublishUpdatedInfo(tRuntimeListener::cCHANGE);
+  PublishUpdatedInfo(tRuntimeListener::cEDGE_CHANGE);
 
   edges_src->Add(target, false);
   target->edges_dest->Add(this, false);
@@ -530,7 +530,7 @@ void tAbstractPort::RawConnectToTarget(tAbstractPort* target)
 void tAbstractPort::RemoveInternal(tAbstractPort* src, tAbstractPort* dest)
 {
   tEdgeAggregator::EdgeRemoved(src, dest);
-  src->PublishUpdatedInfo(tRuntimeListener::cCHANGE);
+  src->PublishUpdatedInfo(tRuntimeListener::cEDGE_CHANGE);
 
   dest->edges_dest->Remove(src);
   src->edges_src->Remove(dest);

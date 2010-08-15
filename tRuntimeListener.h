@@ -42,8 +42,8 @@ class tRuntimeListener : public util::tInterface
 {
 public:
 
-  /*! Constants for Change type (element added, element changed, element removed) */
-  static const int8 cADD = 1, cCHANGE = 2, cREMOVE = 3;
+  /*! Constants for Change type (element added, element changed, element removed, edges changed) */
+  static const int8 cADD = 1, cCHANGE = 2, cREMOVE = 3, cEDGE_CHANGE = 4;
 
   /*! Call ID before framework element is initialized */
   static const int8 cPRE_INIT = -1;

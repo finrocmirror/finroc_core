@@ -41,6 +41,8 @@ private:
   /*! Handler that will handle method calls */
   tAbstractMethodCallHandler* handler;
 
+protected:
+
   inline void SetCallHandler(tAbstractMethodCallHandler* handler_)
   {
     this->handler = handler_;

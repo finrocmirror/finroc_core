@@ -25,6 +25,7 @@
 #define CORE__PORT__TAGGREGATEDEDGE_H
 
 #include "finroc_core_utils/tTime.h"
+#include "core/tAnnotatable.h"
 
 namespace finroc
 {
@@ -40,7 +41,7 @@ class tEdgeAggregator;
  *
  * The start EdgeAggregator owns objects of this type.
  */
-class tAggregatedEdge : public util::tUncopyableObject
+class tAggregatedEdge : public tAnnotatable
 {
 public:
 

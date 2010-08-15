@@ -662,6 +662,12 @@ public:
 
   };
 
+  /*!
+   * \return Sources of remote edges
+   */
+  //@JavaOnly
+  //public abstract List<FrameworkElement> getRemoteEdgeSources();
+
 };
 
 } // namespace finroc

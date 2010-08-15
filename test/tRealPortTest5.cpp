@@ -49,6 +49,8 @@ void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 {
   // set up
   //RuntimeEnvironment.initialInit(/*new ByteArrayInputStream(new byte[0])*/);
+  //rrlib::logging::tLogDomainRegistry::GetInstance()->ConfigureFromFile("/home/max/rrlab/finroc/etc/log.xml");
+
   re = tRuntimeEnvironment::GetInstance();
   output = new tNumberPort("test1", true);
   input = new tNumberPort("test2", false);

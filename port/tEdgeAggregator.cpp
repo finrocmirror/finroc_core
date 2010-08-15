@@ -20,13 +20,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/tEdgeAggregator.h"
-#include "core/tCoreFlags.h"
 #include "core/tLockOrderLevels.h"
 
 namespace finroc
 {
 namespace core
 {
+const int tEdgeAggregator::cIS_INTERFACE;
+const int tEdgeAggregator::cSENSOR_DATA;
+const int tEdgeAggregator::cCONTROLLER_DATA;
+const int tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS;
+
 tEdgeAggregator::tEdgeAggregator(const util::tString& description_, tFrameworkElement* parent_, int flags_) :
     tFrameworkElement(description_, parent_, flags_ | tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cEDGE_AGGREGATOR, parent_ == NULL ? tLockOrderLevels::cLEAF_GROUP : -1),
     emerging_edges(0u, 5u)
@@ -78,6 +82,7 @@ void tEdgeAggregator::EdgeRemoved(tEdgeAggregator* dest)
     if (ae->edge_count == 0)
     {
       emerging_edges.Remove(ae);
+      delete ae;
     }
     return;
   }
