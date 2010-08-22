@@ -54,10 +54,14 @@ public:
    */
   void Append(tFinrocAnnotation* ann);
 
+  virtual ~tFinrocAnnotation()
+  {
+  }
+
   /*!
    * initialize data type
    */
-  void InitDataType();
+  virtual void InitDataType();
 
 };
 
