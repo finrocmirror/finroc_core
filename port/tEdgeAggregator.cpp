@@ -108,7 +108,7 @@ tEdgeAggregator* tEdgeAggregator::GetAggregator(tAbstractPort* source)
   ::finroc::core::tFrameworkElement* current = source->GetParent();
   while (current != NULL)
   {
-    if (current->GetFlag(tCoreFlags::cEDGE_AGGREGATOR))
+    if (current->GetFlag(tCoreFlags::cEDGE_AGGREGATOR) && (!current->GetFlag(tCoreFlags::cNETWORK_ELEMENT)))
     {
       return static_cast<tEdgeAggregator*>(current);
     }
