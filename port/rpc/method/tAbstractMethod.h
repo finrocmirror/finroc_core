@@ -70,7 +70,7 @@ private:
 protected:
 
   /*! Name for unused parameters */
-  static util::tString cNO_PARAM;
+  static const char* cNO_PARAM;
 
   /*! Id of method - set by PortInterface class */
   int8 method_id;

@@ -26,6 +26,7 @@
 
 #include "core/port/tAbstractPort.h"
 #include "core/port/tPortCreationInfo.h"
+#include "core/admin/tAdminClient.h"
 #include "core/port/rpc/tAbstractCall.h"
 #include "core/port/rpc/tSynchMethodCallLogic.h"
 #include "core/port/std/tPortBase.h"
@@ -75,6 +76,9 @@ protected:
   /*! TCPServerConnection or RemoteServer instance that this port belongs to */
   ::finroc::util::tObject* belongs_to;
 
+  /*! Handle of Remote port */
+  int remote_handle;
+
 public:
 
   /*! Default timeout for pulling data over the net */
@@ -82,9 +86,6 @@ public:
 
   /*! Last time the value was updated (used to make sure that minimum update interval is kept) */
   int64 last_update;
-
-  /*! Handle of Remote port */
-  int remote_handle;
 
 protected:
 
@@ -157,6 +158,11 @@ protected:
 public:
 
   tNetPort(tPortCreationInfo pci, util::tObject* belongs_to_);
+
+  /*!
+   * \return Returns admin interface for this element - or null if there's no such interface
+   */
+  virtual tAdminClient* GetAdminInterface() = 0;
 
   /*!
    * \return TCPServerConnection or RemoteServer instance that this port belongs to

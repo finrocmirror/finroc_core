@@ -36,8 +36,8 @@ const int tNetPort::cPULL_TIMEOUT;
 tNetPort::tNetPort(tPortCreationInfo pci, util::tObject* belongs_to_) :
     wrapped(NULL),
     belongs_to(belongs_to_),
-    last_update(util::tLong::cMIN_VALUE),
-    remote_handle(0)
+    remote_handle(0),
+    last_update(util::tLong::cMIN_VALUE)
 {
   // keep most these flags
   int f = pci.flags & (tPortFlags::cACCEPTS_DATA | tPortFlags::cMAY_ACCEPT_REVERSE_DATA | tPortFlags::cIS_OUTPUT_PORT | tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT | tPortFlags::cNON_STANDARD_ASSIGN | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cGLOBALLY_UNIQUE_LINK);

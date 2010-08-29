@@ -27,7 +27,7 @@ namespace finroc
 {
 namespace core
 {
-util::tString tAbstractMethod::cNO_PARAM = "NO_PARAMETER";
+const char* tAbstractMethod::cNO_PARAM = "NO_PARAMETER";
 
 tAbstractMethod::tAbstractMethod(tPortInterface& port_interface, const util::tString& name_, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread_) :
     name(name_),
@@ -37,15 +37,17 @@ tAbstractMethod::tAbstractMethod(tPortInterface& port_interface, const util::tSt
     method_id(0),
     type(NULL)
 {
+  static util::tString no_param(cNO_PARAM);
   parameter_names[0] = p1_name;
   parameter_names[1] = p2_name;
   parameter_names[2] = p3_name;
   parameter_names[3] = p4_name;
   for (int i = 0; i < 4; i++)
   {
-    if (parameter_names[i].Equals(cNO_PARAM))
+    if (parameter_names[i].Equals(no_param))
     {
       parameter_count = i;
+      break;
     }
   }
   port_interface.AddMethod(this);

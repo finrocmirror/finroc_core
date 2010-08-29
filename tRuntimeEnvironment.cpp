@@ -30,6 +30,7 @@
 #include "finroc_core_utils/container/tBoundedQElementContainer.h"
 #include "finroc_core_utils/stream/tChunkedBuffer.h"
 #include "core/port/stream/tStreamCommitThread.h"
+#include "core/admin/tAdminServer.h"
 #include "core/tRuntimeSettings.h"
 #include "core/plugin/tPlugins.h"
 
@@ -180,6 +181,8 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
 
   // add uninitialized child
   instance->unrelated = new ::finroc::core::tFrameworkElement("Unrelated", instance.get());
+  __attribute__((unused))
+  tAdminServer* as = new tAdminServer();
   ::finroc::core::tFrameworkElement::InitAll();
 
   //ConfigFile.init(conffile);
