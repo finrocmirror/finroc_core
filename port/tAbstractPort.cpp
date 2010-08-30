@@ -553,11 +553,23 @@ void tAbstractPort::RemoveInternal(tAbstractPort* src, tAbstractPort* dest)
 
 void tAbstractPort::SerializeOutgoingConnections(tCoreOutput* co)
 {
-  co->WriteByte(static_cast<int8>(edges_src->Size()));
   util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
+  int8 count = 0;
   for (int i = 0, n = it->Size(); i < n; i++)
   {
-    co->WriteInt(it->Get(i)->GetHandle());
+    if (it->Get(i) != NULL)
+    {
+      count++;
+    }
+  }
+  co->WriteByte(count);
+  for (int i = 0, n = it->Size(); i < n; i++)
+  {
+    tAbstractPort* as = it->Get(i);
+    if (as != NULL)
+    {
+      co->WriteInt(as->GetHandle());
+    }
   }
 }
 
