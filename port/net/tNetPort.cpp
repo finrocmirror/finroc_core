@@ -40,7 +40,7 @@ tNetPort::tNetPort(tPortCreationInfo pci, util::tObject* belongs_to_) :
     last_update(util::tLong::cMIN_VALUE)
 {
   // keep most these flags
-  int f = pci.flags & (tPortFlags::cACCEPTS_DATA | tPortFlags::cMAY_ACCEPT_REVERSE_DATA | tPortFlags::cIS_OUTPUT_PORT | tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT | tPortFlags::cNON_STANDARD_ASSIGN | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cGLOBALLY_UNIQUE_LINK);
+  int f = pci.flags & (tPortFlags::cACCEPTS_DATA | tPortFlags::cEMITS_DATA | tPortFlags::cMAY_ACCEPT_REVERSE_DATA | tPortFlags::cIS_OUTPUT_PORT | tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT | tPortFlags::cNON_STANDARD_ASSIGN | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cGLOBALLY_UNIQUE_LINK);
 
   // set either emit or accept data
   f |= ((f & tPortFlags::cIS_OUTPUT_PORT) > 0) ? tPortFlags::cEMITS_DATA : tPortFlags::cACCEPTS_DATA;
