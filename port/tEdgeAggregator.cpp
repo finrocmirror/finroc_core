@@ -82,7 +82,7 @@ void tEdgeAggregator::EdgeRemoved(tEdgeAggregator* dest)
     if (ae->edge_count == 0)
     {
       emerging_edges.Remove(ae);
-      delete ae;
+      //ae.delete(); // obsolete: already deleted by command above
     }
     return;
   }
