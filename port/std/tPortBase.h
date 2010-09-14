@@ -700,7 +700,7 @@ public:
    * It should not be modified thereafter.
    * Should only be called on output ports
    *
-   * \param cnc Data buffer acquired from a port using getUnusedBuffer
+   * \param cnc Data buffer acquired from a port using getUnusedBuffer (or locked data received from another port)
    */
   inline void Publish(tPortData* data)
   {

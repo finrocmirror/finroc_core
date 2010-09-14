@@ -25,6 +25,8 @@
 #define CORE__ADMIN__TADMINCLIENT_H
 
 #include "core/tFrameworkElement.h"
+#include "core/port/cc/tCCInterThreadContainer.h"
+#include "core/port/std/tPortDataImpl.h"
 #include "core/port/rpc/tInterfaceClientPort.h"
 
 namespace finroc
@@ -66,6 +68,22 @@ public:
    * \param np1 Port1
    */
   void DisconnectAll(tNetPort* np1);
+
+  /*!
+   * Sets value of remote port
+   *
+   * \param np network port of remote port
+   * \param container Data to assign to remote port
+   */
+  void SetRemotePortValue(tNetPort* np, tCCInterThreadContainer<>* container);
+
+  /*!
+   * Sets value of remote port
+   *
+   * \param np network port of remote port
+   * \param port_data Data to assign to remote port
+   */
+  void SetRemotePortValue(tNetPort* np, tPortData* port_data);
 
 };
 

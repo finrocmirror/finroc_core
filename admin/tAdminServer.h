@@ -28,6 +28,9 @@
 #include "core/port/rpc/method/tPortInterface.h"
 #include "core/port/rpc/method/tVoid2Method.h"
 #include "core/port/rpc/method/tVoid1Method.h"
+#include "core/port/rpc/method/tVoid3Method.h"
+#include "core/port/cc/tCCInterThreadContainer.h"
+#include "core/port/std/tPortDataImpl.h"
 #include "core/port/rpc/method/tAbstractMethod.h"
 #include "core/port/rpc/tInterfaceServerPort.h"
 #include "core/port/rpc/method/tAbstractMethodCallHandler.h"
@@ -57,6 +60,9 @@ public:
   /*! Disconnect All */
   static tVoid1Method<tAdminServer*, int> cDISCONNECT_ALL;
 
+  /*! Set a port's value */
+  static tVoid3Method<tAdminServer*, int, tCCInterThreadContainer<>*, tPortData*> cSET_PORT_VALUE;
+
   /*! Data Type of method calls to this port */
   static tDataType* cDATA_TYPE;
 
@@ -71,6 +77,8 @@ public:
   void HandleVoidCall(const tAbstractMethod* method, int p1, int p2);
 
   void HandleVoidCall(const tAbstractMethod* method, int p1);
+
+  void HandleVoidCall(const tAbstractMethod* method, int port_handle, tCCInterThreadContainer<>* cc_data, tPortData* port_data);
 
 };
 

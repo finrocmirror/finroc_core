@@ -150,7 +150,7 @@ public:
 
     /*!
      * Set or add locks - depending on whether the buffer is already used.
-     * Possibly unset unused flag.
+     * Possibly clears unused flag.
      * Used buffer already needs to be locked.
      *
      * \param count Number of locks to set or add

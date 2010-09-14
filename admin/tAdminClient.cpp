@@ -85,6 +85,40 @@ void tAdminClient::DisconnectAll(tNetPort* np1)
   FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Disconnecting remote port failed");
 }
 
+void tAdminClient::SetRemotePortValue(tNetPort* np, tCCInterThreadContainer<>* container)
+{
+  if (np != NULL && np->GetAdminInterface() == this)
+  {
+    try
+    {
+      tAdminServer::cSET_PORT_VALUE.Call(this, np->GetRemoteHandle(), container, NULL, false);
+      return;
+    }
+    catch (const tMethodCallException& e)
+    {
+      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, e);
+    }
+  }
+  FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Setting value of remote port failed");
+}
+
+void tAdminClient::SetRemotePortValue(tNetPort* np, tPortData* port_data)
+{
+  if (np != NULL && np->GetAdminInterface() == this)
+  {
+    try
+    {
+      tAdminServer::cSET_PORT_VALUE.Call(this, np->GetRemoteHandle(), NULL, port_data, false);
+      return;
+    }
+    catch (const tMethodCallException& e)
+    {
+      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, e);
+    }
+  }
+  FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Setting value of remote port failed");
+}
+
 } // namespace finroc
 } // namespace core
 
