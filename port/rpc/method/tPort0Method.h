@@ -25,19 +25,20 @@
 #ifndef CORE__PORT__RPC__METHOD__TPORT0METHOD_H
 #define CORE__PORT__RPC__METHOD__TPORT0METHOD_H
 
-#include "core/port/rpc/method/tPortInterface.h"
-#include "core/port/rpc/tInterfaceClientPort.h"
 #include "core/port/rpc/method/tAsyncReturnHandler.h"
-#include "core/port/rpc/tMethodCall.h"
-#include "core/port/rpc/tInterfaceNetPort.h"
-#include "core/port/rpc/method/tAbstractAsyncReturnHandler.h"
-#include "core/port/rpc/method/tAbstractMethodCallHandler.h"
 #include "core/port/rpc/method/tAbstractMethod.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPortInterface;
+class tInterfaceClientPort;
+class tMethodCall;
+class tInterfaceNetPort;
+class tAbstractAsyncReturnHandler;
+class tAbstractMethodCallHandler;
+
 /*!
  * \author Max Reichardt
  *

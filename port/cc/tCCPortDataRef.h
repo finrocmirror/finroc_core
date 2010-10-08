@@ -25,7 +25,6 @@
 #define CORE__PORT__CC__TCCPORTDATAREF_H
 
 #include "core/port/cc/tCCPortDataContainer.h"
-#include "core/port/cc/tCCPortData.h"
 
 #include "core/port/tCombinedPointer.h"
 
@@ -33,6 +32,8 @@ namespace finroc
 {
 namespace core
 {
+class tCCPortData;
+
 /*!
  * References to cheap copy port data.
  *

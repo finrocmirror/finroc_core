@@ -24,14 +24,15 @@
 #ifndef CORE__TANNOTATABLE_H
 #define CORE__TANNOTATABLE_H
 
-#include "core/portdatabase/tDataType.h"
-#include "core/tFinrocAnnotation.h"
 #include "finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {
 namespace core
 {
+class tFinrocAnnotation;
+class tDataType;
+
 /*!
  * \author Max Reichardt
  *

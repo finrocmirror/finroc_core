@@ -30,6 +30,8 @@ namespace finroc
 {
 namespace core
 {
+class tAnnotatable;
+
 /*!
  * \author Max Reichardt
  *
@@ -44,8 +46,12 @@ public:
   /*! Next framework element annotation - used to build linked list - null if no more annotations */
   tFinrocAnnotation* next_annotation;
 
+  /*! Object that is annotated - null if annotation is not attached to an object yet */
+  tAnnotatable* annotated;
+
   tFinrocAnnotation() :
-      next_annotation(NULL)
+      next_annotation(NULL),
+      annotated(NULL)
   {}
 
   /*!
@@ -59,9 +65,17 @@ public:
   }
 
   /*!
+   * \return Object that is annotated - null if annotation is not attached to an object yet
+   */
+  inline tAnnotatable* GetAnnotated()
+  {
+    return annotated;
+  }
+
+  /*!
    * initialize data type
    */
-  virtual void InitDataType();
+  void InitDataType();
 
 };
 

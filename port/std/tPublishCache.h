@@ -24,13 +24,14 @@
 #ifndef CORE__PORT__STD__TPUBLISHCACHE_H
 #define CORE__PORT__STD__TPUBLISHCACHE_H
 
-#include "core/port/std/tPortDataReference.h"
 #include "core/port/std/tPortDataManager.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPortDataReference;
+
 /*!
  * \author Max Reichardt
  *

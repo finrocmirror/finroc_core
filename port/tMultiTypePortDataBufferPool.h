@@ -24,16 +24,17 @@
 #ifndef CORE__PORT__TMULTITYPEPORTDATABUFFERPOOL_H
 #define CORE__PORT__TMULTITYPEPORTDATABUFFERPOOL_H
 
-#include "core/portdatabase/tDataType.h"
 #include "finroc_core_utils/container/tSimpleList.h"
-#include "core/port/std/tPortDataBufferPool.h"
 #include "core/tLockOrderLevels.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortDataBufferPool.h"
 
 namespace finroc
 {
 namespace core
 {
+class tDataType;
+class tPortData;
+
 /*!
  * \author Max Reichardt
  *

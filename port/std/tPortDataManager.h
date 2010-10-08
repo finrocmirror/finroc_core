@@ -24,7 +24,6 @@
 #ifndef CORE__PORT__STD__TPORTDATAMANAGER_H
 #define CORE__PORT__STD__TPORTDATAMANAGER_H
 
-#include "core/portdatabase/tDataType.h"
 #include "finroc_core_utils/container/tReusable.h"
 
 #include "core/port/tCombinedPointer.h"
@@ -34,6 +33,7 @@ namespace finroc
 namespace core
 {
 class tPortData;
+class tDataType;
 
 /*!
  * \author Max Reichardt
@@ -226,7 +226,10 @@ private:
   // PortDataManager prototype to obtain above offset
   static tPortDataManager cPROTOTYPE;
 
-  tPortDataManager() {} // dummy constructor for prototype
+  tPortDataManager()
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating PROTOTYPE");
+  } // dummy constructor for prototype
 
   /*! Pointer to actual PortData (outermost buffer) */
   tPortData* data;

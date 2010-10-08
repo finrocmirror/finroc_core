@@ -24,13 +24,13 @@
 #ifndef CORE__PORT__TPORTCREATIONINFO_H
 #define CORE__PORT__TPORTCREATIONINFO_H
 
-#include "core/portdatabase/tDataType.h"
 #include "core/datatype/tUnit.h"
 
 namespace finroc
 {
 namespace core
 {
+class tDataType;
 class tFrameworkElement;
 
 /*!

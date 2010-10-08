@@ -26,8 +26,6 @@
 
 #include "core/port/stream/tTransactionPacket.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/std/tPullRequestHandler.h"
-#include "core/portdatabase/tCoreSerializable.h"
 #include "core/port/stream/tStreamCommitThread.h"
 #include "core/port/std/tPort.h"
 
@@ -35,6 +33,9 @@ namespace finroc
 {
 namespace core
 {
+class tPullRequestHandler;
+class tCoreSerializable;
+
 /*!
  * \author Max Reichardt
  *

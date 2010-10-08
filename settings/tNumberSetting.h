@@ -89,7 +89,7 @@ public:
 
   virtual void PortChanged(tCCPortBase* origin, const tCoreNumber* value)
   {
-    current_value = value->TValue<T>();
+    current_value = value->Value<T>();
   }
 
   tNumberPort* GetPort()

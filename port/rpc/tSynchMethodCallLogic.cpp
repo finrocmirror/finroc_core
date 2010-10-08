@@ -21,6 +21,7 @@
  */
 #include "core/port/rpc/tSynchMethodCallLogic.h"
 #include "core/port/rpc/tMethodCallSyncher.h"
+#include "core/port/rpc/tAbstractCall.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/rpc/tMethodCallException.h"
 

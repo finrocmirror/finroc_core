@@ -1,10 +1,16 @@
 <targets>
 
   <finroclibrary name="core" libs="rrlib_finroc_core_utils">
-    <sources exclude="test/**">
+    <sources exclude="test/** finstructable/pFinstructed.cpp">
       **.cpp
     </sources>
   </finroclibrary>
+
+  <finrocprogram name="finstructed" libs="finroc_core finroc_plugin_blackboard finroc_plugin_tcp finroc_structure_elements">
+    <sources>
+      finstructable/pFinstructed.cpp
+    </sources>
+  </finrocprogram>
 
   <testprogram name="realports" libs="finroc_core finroc_plugin_blackboard">
     <sources>

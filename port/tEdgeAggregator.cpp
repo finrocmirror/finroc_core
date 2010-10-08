@@ -21,6 +21,7 @@
  */
 #include "core/port/tEdgeAggregator.h"
 #include "core/tLockOrderLevels.h"
+#include "core/port/tAbstractPort.h"
 
 namespace finroc
 {
@@ -43,6 +44,7 @@ void tEdgeAggregator::EdgeAdded(tAbstractPort* source, tAbstractPort* target)
   tEdgeAggregator* dest = GetAggregator(target);
   if (src != NULL && dest != NULL)
   {
+    //System.out.println("edgeAdded: " + src.getQualifiedName() + "->" + dest.getQualifiedName() + " (because of " + source.getQualifiedName() + "->" + target.getQualifiedName() + ")");
     src->EdgeAdded(dest);
   }
 }
@@ -59,6 +61,7 @@ void tEdgeAggregator::EdgeAdded(tEdgeAggregator* dest)
 
   // not found
   ae = new tAggregatedEdge(this, dest);
+  ae->edge_count = 1u;
   emerging_edges.Add(ae, false);
 }
 
@@ -68,6 +71,7 @@ void tEdgeAggregator::EdgeRemoved(tAbstractPort* source, tAbstractPort* target)
   tEdgeAggregator* dest = GetAggregator(target);
   if (src != NULL && dest != NULL)
   {
+    //System.out.println("edgeRemoved: " + src.getQualifiedName() + "->" + dest.getQualifiedName() + " (because of " + source.getQualifiedName() + "->" + target.getQualifiedName() + ")");
     src->EdgeRemoved(dest);
   }
 }
@@ -81,6 +85,7 @@ void tEdgeAggregator::EdgeRemoved(tEdgeAggregator* dest)
     ae->edge_count--;
     if (ae->edge_count == 0)
     {
+      //System.out.println("deleting edge");
       emerging_edges.Remove(ae);
       //ae.delete(); // obsolete: already deleted by command above
     }

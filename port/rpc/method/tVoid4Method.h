@@ -24,18 +24,19 @@
 #ifndef CORE__PORT__RPC__METHOD__TVOID4METHOD_H
 #define CORE__PORT__RPC__METHOD__TVOID4METHOD_H
 
-#include "core/port/rpc/method/tPortInterface.h"
-#include "core/port/rpc/tInterfaceClientPort.h"
-#include "core/port/rpc/tMethodCall.h"
-#include "core/port/rpc/tInterfaceNetPort.h"
-#include "core/port/rpc/method/tAbstractAsyncReturnHandler.h"
-#include "core/port/rpc/method/tAbstractMethodCallHandler.h"
 #include "core/port/rpc/method/tAbstractMethod.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPortInterface;
+class tInterfaceClientPort;
+class tMethodCall;
+class tInterfaceNetPort;
+class tAbstractAsyncReturnHandler;
+class tAbstractMethodCallHandler;
+
 template<typename HANDLER, typename P1, typename P2, typename P3, typename P4>
 class tVoid4Method : public tAbstractVoidMethod
 {

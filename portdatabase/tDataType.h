@@ -24,11 +24,15 @@
 #ifndef CORE__PORTDATABASE__TDATATYPE_H
 #define CORE__PORTDATABASE__TDATATYPE_H
 
+#include "finroc_core_utils/stream/tOutputStreamBuffer.h"
+#include "core/port/std/tCCDataList.h"
+#include "core/port/std/tPortDataList.h"
+#include "core/portdatabase/tListTypeFactory.h"
 #include "core/portdatabase/tPortDataFactory.h"
 #include "core/portdatabase/tTypedObjectImpl.h"
 
 #include "core/portdatabase/tDataTypeUtil.h"
-#include "finroc_core_utils/stream/tOutputStreamBuffer.h"
+#include <boost/type_traits/is_base_of.hpp>
 
 namespace finroc
 {
@@ -47,7 +51,7 @@ class tDataType : public util::tUncopyableObject
 {
 public:
 
-  enum tType { eSTD, eCC, eMETHOD, eTRANSACTION };
+  enum tType { eSTD, eCC, eMETHOD, eTRANSACTION, eSTD_LIST, eCC_LIST };
 
   friend class tDataTypeRegister;
 private:
@@ -80,6 +84,12 @@ private:
 
   /*! Related data type - custom info for special purposes (template parameters, related method calls) */
   tDataType* related_type;
+
+  /*! List type of this data type (STD and CC types only) */
+  tDataType* list_type;
+
+  /*! Element type of this type (STD_LIST and CC_LIST types only) */
+  tDataType* element_type;
 
   /*! An integer to store some custom data in */
   int custom_int;
@@ -120,7 +130,15 @@ public:
    */
   inline tTypedObject* CreateInstance()
   {
-    return factory->Create(this, false);
+    if (IsListType())
+    {
+      assert((element_type != NULL));
+      return factory->Create(element_type, false);
+    }
+    else
+    {
+      return factory->Create(this, false);
+    }
   }
 
   /*!
@@ -156,6 +174,22 @@ public:
   inline int GetCustomInt()
   {
     return custom_int;
+  }
+
+  /*!
+   * \return Element type (in list types)
+   */
+  inline tDataType* GetElementType()
+  {
+    return element_type;
+  }
+
+  /*!
+   * \return List type (for standard and cc types)
+   */
+  inline tDataType* GetListType()
+  {
+    return list_type;
   }
 
   /*!
@@ -216,10 +250,20 @@ public:
     return eSTD;
   }
 
+  template <typename T, bool cSTD>
+  struct tListHelper
+  {
+    typedef tCCDataList<T> tListType;
+  };
+
+  template <typename T>
+  struct tListHelper<T, true>
+  {
+    typedef tPortDataList<T> tListType;
+  };
+
   template <typename T>
   tDataType(T* dummy, util::tString name_, tPortDataFactory* factory_) :
-      //ccType(DataTypeUtil::getCCType(dummy)),
-      //transactionType(DataTypeUtil::getTransactionType(dummy)),
       data_type_uid(-1),
       type(GetDataTypeType(dummy)),
       //serializationMethod(getSerialization(dummy)),
@@ -228,6 +272,8 @@ public:
       factory(factory_),
       name(name_),
       related_type(NULL),
+      list_type(NULL),
+      element_type(NULL),
       custom_int(0),
       methods(NULL),
       virtual_offset(tDataTypeUtil::HasVTable(dummy) ? sizeof(void*) : 0),
@@ -238,12 +284,15 @@ public:
       //customSerializationOffset(serializationMethod == Custom ? ((char*)static_cast<util::CustomSerialization>(dummy)) - ((char*)dummy) : -700000000)
   {
     tDataTypeLookup<T>::type = this;
+
+    if (type == eCC || type == eSTD)
+    {
+      list_type = new tDataType(dummy, name_ + " List", this);
+    }
   }
 
   // for "virtual"/method call data types
   tDataType(util::tString name_, tPortInterface* methods_) :
-      //ccType(false),
-      //transactionType(false),
       data_type_uid(-1),
       type(eMETHOD),
       rtti_name(NULL),
@@ -251,12 +300,35 @@ public:
       factory(NULL),
       name(name_),
       related_type(NULL),
+      list_type(NULL),
+      element_type(NULL),
       custom_int(0),
       methods(methods_),
       virtual_offset(0),
       sizeof_(0),
       memcpy_size(0)
   {}
+
+  // for list types
+  template <typename T>
+  tDataType(T* dummy, util::tString name_, tDataType* el_type) :
+      data_type_uid(-1),
+      type(eMETHOD),
+      rtti_name(NULL),
+      update_time(-1),
+      factory(new tListTypeFactory<typename tListHelper<T, boost::is_base_of<tPortData, T>::value >::tListType>()),
+      name(name_),
+      related_type(NULL),
+      list_type(NULL),
+      element_type(el_type),
+      custom_int(0),
+      methods(NULL),
+      virtual_offset(0),
+      sizeof_(0),
+      memcpy_size(0)
+  {
+    tDataTypeLookup<typename tListHelper<T, boost::is_base_of<tPortData, T>::value >::tListType>::type = this;
+  }
 
   //  SerializationMethod getSerialization(CoreSerializable* cs) {
   //      return Custom;
@@ -301,6 +373,14 @@ public:
   }
 
   /*!
+   * \return Is this a list type?
+   */
+  inline bool IsListType()
+  {
+    return type == tDataType::eCC_LIST || type == tDataType::eSTD_LIST;
+  }
+
+  /*!
    * \return Is this a method/interface type
    */
   inline bool IsMethodType() const
@@ -313,7 +393,7 @@ public:
    */
   inline bool IsStdType() const
   {
-    return type == tDataType::eSTD;
+    return type == tDataType::eSTD || type == tDataType::eCC_LIST || type == tDataType::eSTD_LIST;
   }
 
   /*!

@@ -24,7 +24,6 @@
 #ifndef CORE__PORT__STD__TPORTQUEUE_H
 #define CORE__PORT__STD__TPORTQUEUE_H
 
-#include "core/port/std/tPortDataReference.h"
 #include "core/port/std/tPortQueueElement.h"
 #include "core/port/tThreadLocalCache.h"
 #include "finroc_core_utils/container/tWonderQueueBounded.h"
@@ -33,6 +32,8 @@ namespace finroc
 {
 namespace core
 {
+class tPortDataReference;
+
 /*!
  * \author Max Reichardt
  *

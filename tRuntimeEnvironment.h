@@ -24,11 +24,10 @@
 #ifndef CORE__TRUNTIMEENVIRONMENT_H
 #define CORE__TRUNTIMEENVIRONMENT_H
 
-#include "core/tFrameworkElement.h"
-#include "core/tRuntimeListener.h"
-#include "core/port/tAbstractPort.h"
 #include "core/tCoreRegister.h"
+#include "core/tFrameworkElement.h"
 #include "finroc_core_utils/container/tConcurrentMap.h"
+#include "core/tRuntimeListener.h"
 #include "finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "finroc_core_utils/container/tSimpleList.h"
 #include "core/tLockOrderLevels.h"
@@ -37,8 +36,9 @@ namespace finroc
 {
 namespace core
 {
-class tLinkEdge;
 class tThreadLocalCache;
+class tLinkEdge;
+class tAbstractPort;
 
 /*!
  * \author Max Reichardt
@@ -250,14 +250,6 @@ protected:
    */
   void RemoveLinkEdge(const util::tString& link, tLinkEdge* edge);
 
-  /*!
-   * Remove linked edges from specified link to specified partner port
-   *
-   * \param link Link
-   * \param partner_port connected port
-   */
-  void RemoveLinkEdge(const util::tString& link, tAbstractPort* partner_port);
-
 public:
 
   /*!
@@ -281,15 +273,7 @@ public:
    * \param handle Handle of framework element
    * \return Pointer to framework element - or null if it has been deleted
    */
-  inline ::finroc::core::tFrameworkElement* GetElement(int handle)
-  {
-    ::finroc::core::tFrameworkElement* fe = handle >= 0 ? registry.ports->Get(handle) : registry.elements.Get(handle);
-    if (fe == NULL)
-    {
-      return NULL;
-    }
-    return fe->IsReady() ? fe : NULL;
-  }
+  ::finroc::core::tFrameworkElement* GetElement(int handle);
 
   virtual ~tRuntimeEnvironment()
   {
@@ -495,6 +479,14 @@ public:
    * \return Handle of Framework element
    */
   int RegisterElement(tFrameworkElement* fe);
+
+  /*!
+   * Remove linked edges from specified link to specified partner port
+   *
+   * \param link Link
+   * \param partner_port connected port
+   */
+  void RemoveLinkEdge(const util::tString& link, tAbstractPort* partner_port);
 
   /*!
    * Remove runtime listener

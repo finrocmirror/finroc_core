@@ -21,6 +21,7 @@
  */
 #include "core/port/stream/tTransactionPacket.h"
 #include "core/portdatabase/tDataTypeRegister.h"
+#include "core/buffers/tCoreInput.h"
 
 namespace finroc
 {

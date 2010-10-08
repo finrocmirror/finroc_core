@@ -24,14 +24,15 @@
 #ifndef CORE__PLUGIN__TPLUGINMANAGER_H
 #define CORE__PLUGIN__TPLUGINMANAGER_H
 
-#include "core/portdatabase/tDataType.h"
 #include "core/portdatabase/tDataTypeRegister.h"
-#include "core/port/rpc/method/tPortInterface.h"
 
 namespace finroc
 {
 namespace core
 {
+class tDataType;
+class tPortInterface;
+
 /*!
  * \author Max Reichardt
  *

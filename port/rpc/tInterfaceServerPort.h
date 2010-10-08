@@ -24,15 +24,15 @@
 #ifndef CORE__PORT__RPC__TINTERFACESERVERPORT_H
 #define CORE__PORT__RPC__TINTERFACESERVERPORT_H
 
-#include "core/portdatabase/tDataType.h"
-#include "core/port/rpc/method/tAbstractMethodCallHandler.h"
-#include "core/tFrameworkElement.h"
 #include "core/port/rpc/tInterfacePort.h"
 
 namespace finroc
 {
 namespace core
 {
+class tAbstractMethodCallHandler;
+class tDataType;
+
 /*! Base class for server implementation of interface */
 class tInterfaceServerPort : public tInterfacePort
 {

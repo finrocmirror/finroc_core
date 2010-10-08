@@ -24,7 +24,7 @@
 #ifndef CORE__PORTDATABASE__TTYPEDOBJECTIMPL_H
 #define CORE__PORTDATABASE__TTYPEDOBJECTIMPL_H
 
-#include "core/portdatabase/tCoreSerializable.h"
+#include "core/portdatabase/tCoreSerializableImpl.h"
 
 namespace finroc
 {
@@ -51,9 +51,20 @@ protected:
 
 public:
 
+  /*! Log domain for serialization */
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "serialization");
+
   tTypedObject() :
       type(NULL)
   {}
+
+  /*!
+   * \return Log description (default implementation is "<class name> (<pointer>)"
+   */
+  inline const tTypedObject& GetLogDescription() const
+  {
+    return *this;
+  }
 
   /*!
    * \return Type of object
@@ -64,6 +75,24 @@ public:
   }
 
 };
+
+} // namespace finroc
+} // namespace core
+
+namespace finroc
+{
+namespace core
+{
+inline std::ostream& operator << (std::ostream& output, const tTypedObject* lu)
+{
+  output << typeid(*lu).name() << " (" << ((void*)lu) << ")";
+  return output;
+}
+inline std::ostream& operator << (std::ostream& output, const tTypedObject& lu)
+{
+  output << (&lu);
+  return output;
+}
 
 } // namespace finroc
 } // namespace core

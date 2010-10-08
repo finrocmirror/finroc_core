@@ -24,6 +24,8 @@
 #ifndef CORE__PLUGIN__TCREATEEXTERNALCONNECTIONACTION_H
 #define CORE__PLUGIN__TCREATEEXTERNALCONNECTIONACTION_H
 
+#include "core/plugin/tCreateModuleAction.h"
+
 namespace finroc
 {
 namespace core
@@ -35,21 +37,22 @@ class tExternalConnection;
  *
  * Class to create Module using empty standard constructor
  */
-class tCreateExternalConnectionAction : public util::tInterface
+class tCreateExternalConnectionAction : public tCreateModuleAction
 {
 public:
 
   /*! Does connection transfer info about remote edges? */
   static const int cREMOTE_EDGE_INFO = 1 << 0;
 
-  virtual tExternalConnection* CreateExternalConnection() = 0;
+  /*!
+   * \return Created Action
+   */
+  virtual tExternalConnection* CreateExternalConnection() const = 0;
 
   /*!
    * \return Connection properties/capabilities (see flags above)
    */
-  virtual int GetFlags() = 0;
-
-  virtual const util::tString ToString() const = 0;
+  virtual int GetFlags() const = 0;
 
 //  /** Constructor to invoke */
 //  private Class<? extends ExternalConnection> c;

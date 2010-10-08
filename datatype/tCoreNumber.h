@@ -25,25 +25,23 @@
 #define CORE__DATATYPE__TCORENUMBER_H
 
 #include "core/datatype/tUnit.h"
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
-#include "core/portdatabase/tExpressData.h"
-#include "core/portdatabase/tCopyable.h"
 #include "core/portdatabase/tTypedObjectImpl.h"
 
 namespace finroc
 {
 namespace core
 {
-class tConstant;
 class tDataType;
+class tCoreInput;
+class tConstant;
+class tCoreOutput;
 
 /*!
  * \author Max Reichardt
  *
  * This class stores numbers (with units) of different types.
  */
-class tCoreNumber : public util::tNumber, public tExpressData, public tCopyable<tCoreNumber>, public tTypedObject
+class tCoreNumber : public tTypedObject, public util::tUncopyableObject
 {
 public:
 
@@ -72,7 +70,7 @@ public:
   static tCoreNumber cZERO;
 
   /*! Register Data type */
-  static tDataType* const cNUM_TYPE;
+  static tDataType* const cTYPE;
 
   /*@Override
   public short getUid() {
@@ -110,23 +108,17 @@ public:
   tCoreNumber(const tCoreNumber& from)
   {
     unit = from.unit;
-    type = from.type;
+    num_type = from.num_type;
     lval = from.lval; // will copy any type of value
-    type = cNUM_TYPE;
+    type = cTYPE;
   }
-
-  //  @InCppFile
-  //  @InCpp("NUM_TYPE = DataTypeRegister::getInstance()->getDataTypeEntry<CoreNumber>();")
-  //  public static void staticInit() {
-  //      dataType = DataTypeRegister.getInstance().getDataTypeEntry(CoreNumber.class);
-  //  }
 
   tCoreNumber() :
       lval(0),
       num_type(),
       unit(&tUnit::cNO_UNIT)
   {
-    type = cNUM_TYPE;
+    type = cTYPE;
   }
 
   tCoreNumber(int value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
@@ -134,7 +126,7 @@ public:
       num_type(eINT),
       unit(unit_)
   {
-    type = cNUM_TYPE;
+    type = cTYPE;
   }
 
   tCoreNumber(int64 value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
@@ -142,7 +134,7 @@ public:
       num_type(eLONG),
       unit(unit_)
   {
-    type = cNUM_TYPE;
+    type = cTYPE;
   }
 
   tCoreNumber(double value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
@@ -150,7 +142,7 @@ public:
       num_type(eDOUBLE),
       unit(unit_)
   {
-    type = cNUM_TYPE;
+    type = cTYPE;
   }
 
   tCoreNumber(float value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
@@ -158,14 +150,14 @@ public:
       num_type(eFLOAT),
       unit(unit_)
   {
-    type = cNUM_TYPE;
+    type = cTYPE;
   }
 
   tCoreNumber(const util::tNumber& value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
       num_type(),
       unit(NULL)
   {
-    type = cNUM_TYPE;
+    type = cTYPE;
     SetValue(value_, unit_);
   }
 
@@ -173,8 +165,11 @@ public:
 
   virtual void Deserialize(tCoreInput& ois);
 
+  virtual void Deserialize(const util::tString& s);
+
+  // returns raw numeric value
   template <typename T>
-  T TValue() const
+  T Value() const
   {
     switch (num_type)
     {
@@ -187,7 +182,7 @@ public:
     case eFLOAT:
       return static_cast<T>(fval);
     case eCONSTANT:
-      return static_cast<T>(unit->GetValue());
+      return static_cast<T>(unit->GetValue().Value<T>());
     default:
       assert(false);
       return 0;
@@ -196,20 +191,20 @@ public:
 
   inline virtual double DoubleValue() const
   {
-    return TValue<double>();
+    return Value<double>();
   }
 
   virtual bool Equals(const util::tObject& other) const;
 
   inline virtual float FloatValue() const
   {
-    return TValue<float>();
+    return Value<float>();
   }
 
   inline static tDataType* GetDataType()
   {
-    assert((cNUM_TYPE != NULL));
-    return cNUM_TYPE;
+    assert((cTYPE != NULL));
+    return cTYPE;
   }
 
   /*!
@@ -219,7 +214,7 @@ public:
 
   inline virtual int IntValue() const
   {
-    return TValue<int>();
+    return Value<int>();
   }
 
   inline bool IsDouble(double i, tUnit* unit_) const
@@ -252,10 +247,26 @@ public:
 
   inline virtual int64 LongValue() const
   {
-    return TValue<int64>();
+    return Value<int64>();
   }
 
   virtual void Serialize(tCoreOutput& oos) const;
+
+  virtual util::tString Serialize() const
+  {
+    return ToString();
+  }
+
+  /*!
+   * Changes unit
+   *
+   * \param unit2 new unit
+   */
+  inline void SetUnit(tUnit* unit2)
+  {
+    assert((unit2 != NULL));
+    unit = unit2;
+  }
 
   // All kinds of variations of setters
   inline void SetValue(int value_)

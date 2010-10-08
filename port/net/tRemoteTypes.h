@@ -20,20 +20,21 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "finroc_core_utils/tJCBase.h"
+#include "core/portdatabase/tDataType.h"
 
 #ifndef CORE__PORT__NET__TREMOTETYPES_H
 #define CORE__PORT__NET__TREMOTETYPES_H
 
-#include "core/portdatabase/tDataType.h"
-#include "core/buffers/tCoreInput.h"
-#include "core/portdatabase/tDataTypeRegister.h"
-#include "core/buffers/tCoreOutput.h"
 #include "finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {
 namespace core
 {
+class tCoreInput;
+class tDataTypeRegister;
+class tCoreOutput;
+
 /*!
  * \author Max Reichardt
  *

@@ -37,12 +37,28 @@ class tCppStdFactory : public tPortDataFactory
 public:
   virtual tTypedObject* Create(tDataType* data_type, bool itc)
   {
-    return data_type->IsCCType() ?
-           (itc ? static_cast<tTypedObject*>(new tCCInterThreadContainer<T>(data_type)) : static_cast<tTypedObject*>(new tCCPortDataContainer<T>(data_type)))
-               : static_cast<tTypedObject*>(new T());
+    return static_cast<tTypedObject*>(new T());
   }
 };
 
+template <typename T>
+class tCppCCFactory : public tPortDataFactory
+{
+public:
+  virtual tTypedObject* Create(tDataType* data_type, bool itc)
+  {
+    return (itc ? static_cast<tTypedObject*>(new tCCInterThreadContainer<T>(data_type)) : static_cast<tTypedObject*>(new tCCPortDataContainer<T>(data_type)));
+  }
+};
+
+class tNullFactory : public tPortDataFactory
+{
+public:
+  virtual tTypedObject* Create(tDataType* data_type, bool itc)
+  {
+    return NULL;
+  }
+};
 
 } // namespace finroc
 } // namespace core

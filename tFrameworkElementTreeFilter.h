@@ -25,16 +25,17 @@
 #define CORE__TFRAMEWORKELEMENTTREEFILTER_H
 
 #include "finroc_core_utils/container/tSimpleList.h"
-#include "core/tFrameworkElement.h"
-#include "core/buffers/tCoreInput.h"
 #include "core/tCoreFlags.h"
-#include "core/buffers/tCoreOutput.h"
-#include "core/portdatabase/tCoreSerializable.h"
+#include "core/tFrameworkElement.h"
+#include "core/portdatabase/tCoreSerializableImpl.h"
 
 namespace finroc
 {
 namespace core
 {
+class tCoreInput;
+class tCoreOutput;
+
 /*!
  * \author Max Reichardt
  *
@@ -42,7 +43,7 @@ namespace core
  *
  * Can be used to efficiently traverse trees of framework elements.
  */
-class tFrameworkElementTreeFilter : public util::tObject, public tCoreSerializable
+class tFrameworkElementTreeFilter : public tCoreSerializable
 {
 public:
   class tCallback; // inner class forward declaration

@@ -25,14 +25,15 @@
 #define CORE__PORT__RPC__TMETHODCALLSYNCHER_H
 
 #include "core/tLockOrderLevels.h"
-#include "core/port/rpc/tAbstractCall.h"
-#include "core/port/tThreadLocalCache.h"
 #include "finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {
 namespace core
 {
+class tAbstractCall;
+class tThreadLocalCache;
+
 /*!
  * \author Max Reichardt
  *

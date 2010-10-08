@@ -24,17 +24,19 @@
 #ifndef CORE__TRUNTIMESETTINGS_H
 #define CORE__TRUNTIMESETTINGS_H
 
-#include "core/portdatabase/tDataType.h"
-#include "core/settings/tSetting.h"
 #include "core/port/net/tUpdateTimeChangeListener.h"
 #include "core/datatype/tCoreNumber.h"
 #include "core/settings/tSettings.h"
 #include "core/port/cc/tCCPortListener.h"
 
+#include "core/settings/tNumberSetting.h"
+
 namespace finroc
 {
 namespace core
 {
+class tSetting;
+class tDataType;
 class tCCPortBase;
 
 /*!

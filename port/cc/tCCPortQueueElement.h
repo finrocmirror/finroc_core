@@ -24,8 +24,8 @@
 #ifndef CORE__PORT__CC__TCCPORTQUEUEELEMENT_H
 #define CORE__PORT__CC__TCCPORTQUEUEELEMENT_H
 
-#include "core/port/cc/tCCInterThreadContainer.h"
 #include "finroc_core_utils/container/tBoundedQElementContainer.h"
+#include "core/port/cc/tCCInterThreadContainer.h"
 
 namespace finroc
 {

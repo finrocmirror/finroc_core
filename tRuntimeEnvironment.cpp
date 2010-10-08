@@ -19,13 +19,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/tLinkEdge.h"
-
 #include "core/tRuntimeEnvironment.h"
 #include "core/tCoreFlags.h"
 #include "finroc_core_utils/tTime.h"
+#include "core/tLinkEdge.h"
+#include "core/port/tAbstractPort.h"
+#include "core/portdatabase/sSerializationHelper.h"
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tConstant.h"
+#include "core/port/tThreadLocalCache.h"
 #include "core/port/rpc/tMethodCallSyncher.h"
 #include "finroc_core_utils/container/tBoundedQElementContainer.h"
 #include "finroc_core_utils/stream/tChunkedBuffer.h"
@@ -33,6 +35,7 @@
 #include "core/admin/tAdminServer.h"
 #include "core/tRuntimeSettings.h"
 #include "core/plugin/tPlugins.h"
+#include "finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {
@@ -109,6 +112,16 @@ void tRuntimeEnvironment::AddListener(tRuntimeListener* listener)
   }
 }
 
+::finroc::core::tFrameworkElement* tRuntimeEnvironment::GetElement(int handle)
+{
+  ::finroc::core::tFrameworkElement* fe = handle >= 0 ? registry.ports->Get(handle) : registry.elements.Get(handle);
+  if (fe == NULL)
+  {
+    return NULL;
+  }
+  return fe->IsReady() ? fe : NULL;
+}
+
 tRuntimeEnvironment* tRuntimeEnvironment::GetInstance()
 {
   if (instance_raw_ptr == NULL)
@@ -160,6 +173,7 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   assert((!ShuttingDown()));
 
   // Finish initializing static members of classes
+  sSerializationHelper::StaticInit();  // can safely be done first
   tUnit::StaticInit();  // can safely be done first
   tConstant::StaticInit();  // needs to be done after unit
   //      CoreNumber.staticInit(); // can be after data type register has been created
@@ -184,6 +198,9 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   __attribute__((unused))
   tAdminServer* as = new tAdminServer();
   ::finroc::core::tFrameworkElement::InitAll();
+
+  // init thread-local-cache for main thread */
+  tThreadLocalCache::Get();
 
   //ConfigFile.init(conffile);
   tRuntimeSettings::StaticInit();  // can be done now... or last
@@ -258,7 +275,7 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* e
         prev = current;
         current = current->GetNext();
       }
-      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, util::tStringBuilder("warning: Could not remove link edge for link: "), link);
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "warning: Could not remove link edge for link: ", link);
     }
   }
 }

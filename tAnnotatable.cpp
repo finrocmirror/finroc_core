@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/tAnnotatable.h"
+#include "core/tFinrocAnnotation.h"
 
 namespace finroc
 {
@@ -32,6 +33,8 @@ void tAnnotatable::AddAnnotation(tFinrocAnnotation* ann)
   {
     ann->InitDataType();
   }
+  assert(((ann->annotated == NULL)) && "Already used as annotation in other object. Not allowed (double deleteting etc.)");
+  ann->annotated = this;
   if (first_annotation == NULL)
   {
     first_annotation = ann;

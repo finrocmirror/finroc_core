@@ -24,15 +24,17 @@
 #ifndef CORE__PORT__STD__TPORTDATABUFFERPOOL_H
 #define CORE__PORT__STD__TPORTDATABUFFERPOOL_H
 
-#include "core/portdatabase/tDataType.h"
 #include "core/port/std/tPortDataManager.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "finroc_core_utils/container/tAbstractReusablesPool.h"
 #include "finroc_core_utils/container/tReusablesPoolCR.h"
 
 namespace finroc
 {
 namespace core
 {
+class tDataType;
+class tPortData;
+
 /*!
  * \author Max Reichardt
  *

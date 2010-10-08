@@ -20,10 +20,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tInterfacePort.h"
+#include "core/port/rpc/tInterfaceClientPort.h"
+#include "core/port/rpc/tMethodCall.h"
 #include "core/port/tThreadLocalCache.h"
+#include "core/port/rpc/tInterfaceNetPort.h"
 #include "core/port/rpc/tInterfaceServerPort.h"
 #include "core/port/rpc/tMethodCallException.h"
 #include "core/port/rpc/tRPCThreadPool.h"
+#include "finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {

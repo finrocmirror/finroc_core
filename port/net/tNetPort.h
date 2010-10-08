@@ -24,26 +24,21 @@
 #ifndef CORE__PORT__NET__TNETPORT_H
 #define CORE__PORT__NET__TNETPORT_H
 
-#include "core/port/tAbstractPort.h"
+#include "core/port/rpc/tPullCall.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/admin/tAdminClient.h"
-#include "core/port/rpc/tAbstractCall.h"
 #include "core/port/rpc/tSynchMethodCallLogic.h"
-#include "core/port/std/tPortBase.h"
-#include "core/port/std/tPortDataImpl.h"
-#include "core/port/cc/tCCPortBase.h"
-#include "core/port/cc/tCCPortData.h"
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
+#include "core/port/tAbstractPort.h"
 #include "finroc_core_utils/log/tLogUser.h"
 #include "core/port/std/tPortListener.h"
 #include "core/port/cc/tCCPortListener.h"
-#include "core/port/rpc/tPullCall.h"
 #include "core/port/cc/tCCPortDataContainer.h"
+#include "core/tFrameworkElement.h"
 #include "core/tCoreFlags.h"
+#include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCPullRequestHandler.h"
 #include "core/port/rpc/tCallable.h"
 #include "core/port/tPortFlags.h"
+#include "core/port/std/tPortBase.h"
 #include "core/port/std/tPullRequestHandler.h"
 #include "core/port/rpc/tMethodCall.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
@@ -52,6 +47,12 @@ namespace finroc
 {
 namespace core
 {
+class tAbstractCall;
+class tPortData;
+class tCCPortData;
+class tCoreInput;
+class tCoreOutput;
+
 /*!
  * \author Max Reichardt
  *
@@ -158,11 +159,6 @@ protected:
 public:
 
   tNetPort(tPortCreationInfo pci, util::tObject* belongs_to_);
-
-  /*!
-   * \return Returns admin interface for this element - or null if there's no such interface
-   */
-  virtual tAdminClient* GetAdminInterface() = 0;
 
   /*!
    * \return TCPServerConnection or RemoteServer instance that this port belongs to

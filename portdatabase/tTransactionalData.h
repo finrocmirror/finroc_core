@@ -24,18 +24,13 @@
 #ifndef CORE__PORTDATABASE__TTRANSACTIONALDATA_H
 #define CORE__PORTDATABASE__TTRANSACTIONALDATA_H
 
-#include "core/portdatabase/tDataType.h"
 #include "core/port/stream/tOutputTransactionStreamPort.h"
 #include "core/port/stream/tSingletonPort.h"
-#include "core/buffers/tCoreInput.h"
-#include "core/tFrameworkElement.h"
-#include "core/port/tAbstractPort.h"
-#include "core/buffers/tCoreOutput.h"
 #include "core/port/std/tPortDataImpl.h"
 #include "core/port/stream/tInputPacketProcessor.h"
-#include "core/port/stream/tTransactionPacket.h"
 #include "core/port/stream/tStreamCommitThread.h"
 #include "core/port/std/tPullRequestHandler.h"
+#include "core/tFrameworkElement.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/stream/tInputTransactionStreamPort.h"
 
@@ -43,6 +38,12 @@ namespace finroc
 {
 namespace core
 {
+class tDataType;
+class tCoreInput;
+class tAbstractPort;
+class tCoreOutput;
+class tTransactionPacket;
+
 /*!
  * \author Max Reichardt
  *

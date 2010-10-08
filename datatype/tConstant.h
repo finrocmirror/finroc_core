@@ -94,7 +94,7 @@ public:
     return constant_id;
   }
 
-  virtual const util::tNumber& GetValue() const
+  virtual const tCoreNumber& GetValue() const
   {
     return value;
   }

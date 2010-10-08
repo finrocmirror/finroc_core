@@ -28,6 +28,7 @@
 #include "core/plugin/tPlugin.h"
 #include "core/plugin/tCreateExternalConnectionAction.h"
 #include "core/plugin/tPluginManager.h"
+#include "core/plugin/tCreateModuleAction.h"
 
 namespace finroc
 {
@@ -41,14 +42,6 @@ namespace core
 class tPlugins : public util::tUncopyableObject
 {
 private:
-  /*implements HTTPResource*/
-
-  //  /** relative path of packages that contain Widgets and Interfaces */
-  //  private static final Class<?> GUI_ROOT_CLASS = JMCAGUI.class;
-  //  private static final String WIDGETPACKAGENAME = "widgets";
-  //
-  /*! Plugins singleton instance */
-  static ::std::tr1::shared_ptr<tPlugins> instance;
 
   /*! All Plugins that are currently available */
   util::tSimpleList< ::std::tr1::shared_ptr<tPlugin> > plugins;
@@ -82,6 +75,18 @@ public:
   {}
 
   /*!
+   * Add Module Type
+   * (objects won't be deleted by this class)
+   *
+   * \param cma CreateModuleAction to add
+   */
+  inline void AddModuleType(tCreateModuleAction* cma)
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain, "Adding module type: ", cma->GetName(), " (", cma->GetModuleGroup(), ")");
+    GetModuleTypes().Add(cma);
+  }
+
+  /*!
    * (possibly manually) add plugin
    *
    * \param p Plugin to add
@@ -105,8 +110,17 @@ public:
    */
   inline static tPlugins* GetInstance()
   {
-    assert((instance != NULL));
-    return instance.get();
+    static tPlugins instance;
+    return &instance;
+  }
+
+  /*!
+   * \return List with modules that can be instantiated in this runtime using the standard mechanism
+   */
+  inline util::tSimpleList<tCreateModuleAction*>& GetModuleTypes()
+  {
+    static util::tSimpleList<tCreateModuleAction*> module_types;
+    return module_types;
   }
 
   /*!
@@ -123,11 +137,7 @@ public:
    * \param action Action to be registered
    * \return Action to be registered (same as above)
    */
-  inline ::std::tr1::shared_ptr<tCreateExternalConnectionAction> RegisterExternalConnection(::std::tr1::shared_ptr<tCreateExternalConnectionAction> action)
-  {
-    external_connections.Add(action);
-    return action;
-  }
+  ::std::tr1::shared_ptr<tCreateExternalConnectionAction> RegisterExternalConnection(::std::tr1::shared_ptr<tCreateExternalConnectionAction> action);
 
   //
   //  /** PluginsListener */
@@ -183,8 +193,8 @@ public:
    */
   inline static void StaticInit()
   {
-    instance = ::std::tr1::shared_ptr<tPlugins>(new tPlugins());
-    instance->FindAndLoadPlugins();
+    tPlugins* p = GetInstance();
+    p->FindAndLoadPlugins();
   }
 
 //

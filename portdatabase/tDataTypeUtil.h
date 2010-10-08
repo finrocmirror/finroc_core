@@ -72,6 +72,7 @@ public:
     return true;
   }
 
+  // Helper methods for determining whether a type is a transaction type
   static bool GetTransactionType(tTransaction* x)
   {
     return true;

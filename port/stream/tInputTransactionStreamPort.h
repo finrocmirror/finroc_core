@@ -26,13 +26,14 @@
 
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/stream/tInputPacketProcessor.h"
-#include "core/port/stream/tTransactionPacket.h"
 #include "core/port/stream/tInputStreamPort.h"
 
 namespace finroc
 {
 namespace core
 {
+class tTransactionPacket;
+
 /*!
  * \author Max Reichardt
  *

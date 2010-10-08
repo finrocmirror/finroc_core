@@ -22,6 +22,8 @@
 #include "core/port/rpc/tRPCThreadPool.h"
 
 #include "core/port/rpc/tRPCThread.h"
+#include "finroc_core_utils/thread/tLoopThread.h"
+#include "finroc_core_utils/thread/tTask.h"
 
 namespace finroc
 {

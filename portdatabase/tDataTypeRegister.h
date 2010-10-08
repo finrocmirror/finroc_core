@@ -20,12 +20,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "finroc_core_utils/tJCBase.h"
+#include "core/portdatabase/tDataType.h"
 
 #ifndef CORE__PORTDATABASE__TDATATYPEREGISTER_H
 #define CORE__PORTDATABASE__TDATATYPEREGISTER_H
 
-#include "core/portdatabase/tDataType.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/tFinrocAnnotation.h"
 #include "finroc_core_utils/log/tLogUser.h"
 
 #include "core/portdatabase/tDataTypeUtil.h"
@@ -37,8 +37,8 @@ namespace finroc
 {
 namespace core
 {
-class tPortData;
 class tPortInterface;
+class tTypedObject;
 
 /*!
  * \author Max Reichardt
@@ -118,14 +118,28 @@ public:
     return AddDataType(new tDataType(name, methods));
   }
 
+  template <typename T, bool cTRANSACTION, bool cSTD, bool cANN>
+  class tFactoryHelper : public tCppCCFactory<T> {};
+
+  template <typename T>
+  class tFactoryHelper<T, false, false, true> : public tNullFactory {};
+
+  template <typename T, bool cANN>
+  class tFactoryHelper<T, false, true, cANN> : public tCppStdFactory<T> {};
+
+  template <typename T, bool cSTD, bool cANN>
+  class tFactoryHelper<T, true, cSTD, cANN> : public tTransactionTypeFactory<T> {};
+
+  template <typename T>
+  class tFactory : public tFactoryHelper<T, boost::is_base_of<tTransaction, T>::value, boost::is_base_of<tPortData, T>::value, boost::is_base_of<tFinrocAnnotation, T>::value> {};
+
   template <typename T>
   tDataType* GetDataType(const util::tString& name)
   {
     tDataType* dt = tDataTypeLookup<T>::type;
     if (dt == NULL)
     {
-      bool transaction = tDataTypeUtil::GetTransactionType((T*)1000);
-      dt = AddDataType(new tDataType((T*)1000, name, transaction ? (tPortDataFactory*)new tTransactionTypeFactory<T>() : (tPortDataFactory*)new tCppStdFactory<T>()));
+      dt = AddDataType(new tDataType((T*)1000, name, new tFactory<T>()));
     }
     return dt;
   }

@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/std/tPortDataImpl.h"
-
+#include "core/portdatabase/tDataType.h"
 #include "core/port/std/tPortDataManager.h"
+#include "core/port/std/tPortDataImpl.h"
 #include "core/port/std/tPortDataCreationInfo.h"
+#include "finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {
@@ -30,10 +31,18 @@ namespace core
 {
 tPortDataManager tPortDataManager::cPROTOTYPE;
 size_t tPortDataManager::cREF_COUNTERS_OFFSET = ((char*)&(tPortDataManager::cPROTOTYPE.ref_counters[0])) - ((char*)&(tPortDataManager::cPROTOTYPE));
+
 tPortDataManager::~tPortDataManager()
 {
+  if (data != NULL)
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Deleting Manager - data:", data);
+  }
+  else
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Deleting Manager - data: null");
+  }
   delete data;
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Deleting Manager");
 }
 rrlib::logging::tLogDomainSharedPointer init_domain_dummy = tPortDataManager::log_domain();
 
@@ -60,7 +69,7 @@ tPortDataManager::tPortDataManager(tDataType* dt, const tPortData* port_data) :
 
   data = (tPortData*)dt->CreateInstance();
 
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating PortDataManager");
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating PortDataManager - data: ", (*data));
 
   pdci->Reset();
   pdci->InitUnitializedObjects();

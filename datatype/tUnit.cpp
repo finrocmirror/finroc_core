@@ -19,8 +19,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/datatype/tUnit.h"
 #include "core/datatype/tCoreNumber.h"
+
+#include "core/datatype/tUnit.h"
 
 namespace finroc
 {
@@ -62,7 +63,6 @@ util::tSimpleList<tUnit*> tUnit::frequency;
 tUnit tUnit::cHz(tUnit::frequency, "Hz", 1);
 util::tSimpleList<tUnit*> tUnit::screen;
 tUnit tUnit::cPixel(tUnit::screen, "Pixel", 1);
-::std::auto_ptr<util::tNumber> tUnit::default_value(new tCoreNumber(util::tDouble::cNaN));
 
 tUnit::tUnit(util::tSimpleList<tUnit*>& group_, const util::tString& description_, double factor_) :
     factor(factor_),
@@ -109,6 +109,25 @@ double tUnit::GetConversionFactor(tUnit* u) const
     return u->factor / factor;
   }
   throw util::tRuntimeException("Units cannot be converted.", CODE_LOCATION_MACRO);
+}
+
+tUnit* tUnit::GetUnit(const util::tString& unit_string)
+{
+  for (size_t i = 0u; i < uid_lookup_table_temp.Size(); i++)
+  {
+    tUnit* u = uid_lookup_table_temp.Get(i);
+    if (u->description.Equals(unit_string))
+    {
+      return u;
+    }
+  }
+  return &(cNO_UNIT);
+}
+
+const tCoreNumber& tUnit::GetValue() const
+{
+  static tCoreNumber default_value(util::tDouble::cNaN);
+  return default_value;
 }
 
 void tUnit::StaticInit()

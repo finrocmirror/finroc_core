@@ -24,20 +24,21 @@
 #ifndef CORE__DATATYPE__TFRAMEWORKELEMENTINFO_H
 #define CORE__DATATYPE__TFRAMEWORKELEMENTINFO_H
 
-#include "core/portdatabase/tDataType.h"
 #include "finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tEdgeAggregator.h"
-#include "core/buffers/tCoreInput.h"
-#include "core/port/net/tRemoteTypes.h"
-#include "core/tFrameworkElement.h"
-#include "core/buffers/tCoreOutput.h"
 #include "core/tFrameworkElementTreeFilter.h"
 
 namespace finroc
 {
 namespace core
 {
+class tDataType;
+class tCoreInput;
+class tRemoteTypes;
+class tFrameworkElement;
+class tCoreOutput;
+
 /*!
  * \author Max Reichardt
  *
@@ -96,7 +97,7 @@ private:
   //public final static DataType TYPE = DataTypeRegister.getInstance().getDataType(FrameworkElementInfo.class);
 
   /*! mask for non-ports and non-edge-aggregators */
-  static const int cPARENT_FLAGS_TO_STORE = tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cEDGE_AGGREGATOR;
+  static const int cPARENT_FLAGS_TO_STORE = tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cEDGE_AGGREGATOR | tCoreFlags::cFINSTRUCTABLE_GROUP;
 
   /*! mask for non-ports and non-edge-aggregators */
   static const int cEDGE_AGG_PARENT_FLAGS_TO_STORE = cPARENT_FLAGS_TO_STORE | tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS;

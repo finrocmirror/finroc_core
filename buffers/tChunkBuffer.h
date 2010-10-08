@@ -24,7 +24,6 @@
 #ifndef CORE__BUFFERS__TCHUNKBUFFER_H
 #define CORE__BUFFERS__TCHUNKBUFFER_H
 
-#include "core/portdatabase/tDataType.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/buffers/tCoreOutput.h"
 #include "finroc_core_utils/stream/tChunkedBuffer.h"
@@ -34,6 +33,8 @@ namespace finroc
 {
 namespace core
 {
+class tDataType;
+
 /*!
  * \author Max Reichardt
  *
@@ -54,14 +55,6 @@ public:
   {
     ::finroc::util::tChunkedBuffer::Deserialize(is);
   }
-
-  //  public void deserializeBase(InputStreamBuffer is) {
-  //      super.deserialize(is);
-  //  }
-  //
-  //  @ConstMethod public void serializeBase(@Ref OutputStreamBuffer os) {
-  //      super.serialize(os);
-  //  }
 
   virtual void HandleRecycle()
   {

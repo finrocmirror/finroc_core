@@ -24,13 +24,13 @@
 #ifndef CORE__PORT__CC__TNUMBERPORT_H
 #define CORE__PORT__CC__TNUMBERPORT_H
 
-#include "core/datatype/tUnit.h"
 #include "core/port/tPortCreationInfo.h"
+#include "core/datatype/tUnit.h"
 #include "core/port/tPortFlags.h"
 #include "core/datatype/tCoreNumber.h"
+#include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/cc/tCCPortDataRef.h"
 #include "core/port/tThreadLocalCache.h"
-#include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/cc/tCCPort.h"
 
 namespace finroc
@@ -79,7 +79,7 @@ public:
       {
         tCCPortDataRef* val = value;
         tCoreNumber* cn = (tCoreNumber*)(val->GetData());
-        T d = cn->TValue<T>();
+        T d = cn->Value<T>();
         if (val == value)
         {
           return d;
@@ -89,7 +89,7 @@ public:
     else
     {
       tCCPortDataContainer<tCoreNumber>* dc = (tCCPortDataContainer<tCoreNumber>*)PullValueRaw();
-      T result = dc->GetData()->TValue<T>();
+      T result = dc->GetData()->Value<T>();
       dc->ReleaseLock();
       return result;
     }
@@ -109,6 +109,14 @@ public:
   inline int GetIntRaw()
   {
     return GetRaw<int>();
+  }
+
+  /*!
+   * \return Unit of port
+   */
+  inline tUnit* GetUnit()
+  {
+    return unit;
   }
 
   /*!

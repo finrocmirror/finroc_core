@@ -24,17 +24,17 @@
 #ifndef CORE__PORT__TEDGEAGGREGATOR_H
 #define CORE__PORT__TEDGEAGGREGATOR_H
 
-#include "core/tCoreFlags.h"
-#include "core/port/tAggregatedEdge.h"
-#include "core/tFrameworkElement.h"
-#include "core/port/tAbstractPort.h"
-
 #include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
+#include "core/port/tAggregatedEdge.h"
+#include "core/tCoreFlags.h"
+#include "core/tFrameworkElement.h"
 
 namespace finroc
 {
 namespace core
 {
+class tAbstractPort;
+
 /*!
  * \author Max Reichardt
  *

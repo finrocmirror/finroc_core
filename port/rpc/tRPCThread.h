@@ -24,9 +24,16 @@
 #ifndef CORE__PORT__RPC__TRPCTHREAD_H
 #define CORE__PORT__RPC__TRPCTHREAD_H
 
-#include "finroc_core_utils/thread/tTask.h"
 #include "core/thread/tCoreLoopThreadBase.h"
 #include "finroc_core_utils/container/tReusable.h"
+
+namespace finroc
+{
+namespace util
+{
+class tTask;
+} // namespace finroc
+} // namespace util
 
 namespace finroc
 {

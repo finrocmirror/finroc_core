@@ -24,15 +24,15 @@
 #ifndef CORE__PORT__STD__TPORTDATAIMPL_H
 #define CORE__PORT__STD__TPORTDATAIMPL_H
 
-#include "core/portdatabase/tDataType.h"
-#include "core/port/std/tPortDataManager.h"
 #include "core/portdatabase/tTypedObjectImpl.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPortDataManager;
 class tPortDataReference;
+class tDataType;
 
 /*!
  * \author Max Reichardt
@@ -53,13 +53,6 @@ private:
   /*! Manager of data */
   tPortDataManager* manager;
 
-protected:
-
-  /*!
-   * \return lookup object's data type - may be overriden by subclass
-   */
-  virtual tDataType* LookupDataType();
-
 public:
 
   /*! Port to whose PortDataContainerPool this buffer belongs - automatically counts as initial user */
@@ -77,6 +70,18 @@ public:
 
   /*! Constant to AND refCounter with to determine whether there's a system lock */
   //private final static int SYSTEM_LOCK_MASK = 0xFFFF;
+
+  /*! Log domain for serialization */
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "serialization");
+
+protected:
+
+  /*!
+   * \return lookup object's data type - may be overriden by subclass
+   */
+  virtual tDataType* LookupDataType();
+
+public:
 
   /*!
    * Constructor as base class

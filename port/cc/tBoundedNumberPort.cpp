@@ -22,7 +22,11 @@
 #include "core/port/cc/tBoundedNumberPort.h"
 #include "core/datatype/tCoreNumber.h"
 #include "core/port/cc/tCCPortDataContainer.h"
+#include "core/port/cc/tCCPortDataRef.h"
+#include "core/port/tThreadLocalCache.h"
 #include "core/port/cc/tCCPortData.h"
+#include "finroc_core_utils/log/tLogUser.h"
+#include "core/port/cc/tCCPortBase.h"
 
 namespace finroc
 {
@@ -55,13 +59,35 @@ void tBoundedNumberPort::NonStandardAssign(tThreadLocalCache* tc)
     }
     else if (bounds.ApplyDefault())
     {
-      tc->data = tc->GetUnusedBuffer(tCoreNumber::cNUM_TYPE);
+      tc->data = tc->GetUnusedBuffer(tCoreNumber::cTYPE);
       tc->ref = tc->data->GetCurrentRef();
       tc->data->Assign(reinterpret_cast<tCCPortData*>(bounds.GetOutOfBoundsDefault()));
       tc->data->SetRefCounter(0);  // locks will be added during assign
     }
   }
   //super.assign(tc); done anyway
+}
+
+void tBoundedNumberPort::SetBounds(const tBounds& bounds2)
+{
+  bounds.Set(bounds2);
+  double val = GetDoubleRaw();
+  if (!bounds.InBounds(val))
+  {
+    if (bounds.Discard())
+    {
+      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Cannot discard value - applying default");
+      ApplyDefaultValue();
+    }
+    else if (bounds.AdjustToRange())
+    {
+      ::finroc::core::tNumberPort::Publish(bounds.ToBounds(val));
+    }
+    else if (bounds.ApplyDefault())
+    {
+      ApplyDefaultValue();
+    }
+  }
 }
 
 } // namespace finroc

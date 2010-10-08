@@ -26,21 +26,29 @@
 
 #include "core/portdatabase/tTypedObjectContainer.h"
 #include "finroc_core_utils/thread/sThreadUtil.h"
-#include "core/port/cc/tCCPortData.h"
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
 #include "finroc_core_utils/container/tReusableTL.h"
 #include "core/port/cc/tCCContainerBase.h"
 
 #include "core/port/tCombinedPointer.h"
+
+namespace rrlib
+{
+namespace xml2
+{
+class tXMLNode;
+} // namespace rrlib
+} // namespace xml2
 
 namespace finroc
 {
 namespace core
 {
 class tDataType;
+class tCCPortData;
+class tCoreInput;
 class tCCPortDataRef;
 class tCCPortDataBufferPool;
+class tCoreOutput;
 
 /*!
  * \author Max Reichardt
@@ -131,6 +139,16 @@ public:
   virtual void Deserialize(tCoreInput& is)
   {
     port_data.Deserialize(is);
+  }
+
+  virtual void Deserialize(const util::tString& s)
+  {
+    port_data.Deserialize(s);
+  }
+
+  virtual void Deserialize(const rrlib::xml2::tXMLNode& node)
+  {
+    port_data.Deserialize(node);
   }
 
   /*!
@@ -240,6 +258,16 @@ public:
   virtual void Serialize(tCoreOutput& os) const
   {
     port_data.Serialize(os);
+  }
+
+  virtual util::tString Serialize() const
+  {
+    return port_data.Serialize();
+  }
+
+  virtual void Serialize(rrlib::xml2::tXMLNode& node) const
+  {
+    port_data.Serialize(node);
   }
 
   /*!

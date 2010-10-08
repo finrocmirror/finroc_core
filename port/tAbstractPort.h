@@ -24,25 +24,23 @@
 #ifndef CORE__PORT__TABSTRACTPORT_H
 #define CORE__PORT__TABSTRACTPORT_H
 
-#include "core/portdatabase/tDataType.h"
+#include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
+#include "core/tRuntimeSettings.h"
 #include "finroc_core_utils/container/tSimpleList.h"
 #include "core/port/tPortFlags.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/tFrameworkElement.h"
-#include "core/buffers/tCoreOutput.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
-
-#include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
-#include "core/tRuntimeSettings.h"
 
 namespace finroc
 {
 namespace core
 {
+class tDataType;
 class tLinkEdge;
-class tEdgeAggregator;
 class tNetPort;
 class tPortData;
+class tCoreOutput;
+class tTypedObject;
 
 /*!
  * \author Max Reichardt
@@ -448,9 +446,27 @@ public:
   /*!
    * disconnects all edges
    */
-  void DisconnectAll();
+  inline void DisconnectAll()
+  {
+    DisconnectAll(true, true);
+  }
+
+  /*!
+   * disconnects all edges
+   *
+   * \param incoming disconnect incoming edges?
+   * \param outgoing disconnect outgoing edges?
+   */
+  void DisconnectAll(bool incoming, bool outgoing);
 
   void DisconnectFrom(tAbstractPort* target);
+
+  /*!
+   * Disconnect from port with specified link (removes link edges
+   *
+   * \param link Qualified link of connection partner
+   */
+  void DisconnectFrom(const util::tString& link);
 
   /*!
    * Find network port connected to this port that belongs to specified framework element
@@ -459,6 +475,14 @@ public:
    * \return Network port if it could be found - otherwise null
    */
   tNetPort* FindNetPort(util::tObject* belongs_to) const;
+
+  /*!
+   * Publish current data in the specified other port
+   * (in a safe way)
+   *
+   * \param destination other port
+   */
+  virtual void ForwardData(tAbstractPort* other) = 0;
 
   /*!
    * \return Changed "flag" (has two different values for ordinary and initial data)
@@ -477,11 +501,36 @@ public:
   }
 
   /*!
+   * Get all ports that this port is connected to
+   *
+   * \param result List to write results to
+   * \param outgoing_edges Consider outgoing edges
+   * \param incoming_edges Consider incoming edges
+   */
+  void GetConnectionPartners(util::tSimpleList<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges);
+
+  /*!
    * \return Type of port data
    */
   inline tDataType* GetDataType() const
   {
     return data_type;
+  }
+
+  /*!
+   * \return Number of connections to this port (incoming and outgoing)
+   */
+  inline int GetIncomingConnectionCount() const
+  {
+    return edges_dest->CountElements();
+  }
+
+  /*!
+   * \return List with all link edges (must not be modified)
+   */
+  inline util::tSimpleList<tLinkEdge*>* GetLinkEdges()
+  {
+    return link_edges;
   }
 
   //  /**
@@ -505,6 +554,14 @@ public:
    * \return result - -1 if no port has specific setting
    */
   int16 GetMinNetworkUpdateIntervalForSubscription() const;
+
+  /*!
+   * \return Number of connections to this port (incoming and outgoing)
+   */
+  inline int GetOutgoingConnectionCount() const
+  {
+    return edges_src->CountElements();
+  }
 
   /*!
    * \return Strategy to use, when this port is target
@@ -620,6 +677,14 @@ public:
   inline bool IsOutputPort() const
   {
     return GetFlag(tPortFlags::cOUTPUT_PORT);
+  }
+
+  /*!
+   * \return Is this port volatile (meaning that it's not always there and connections to it should preferably be links)?
+   */
+  inline bool IsVolatile()
+  {
+    return GetFlag(tPortFlags::cIS_VOLATILE);
   }
 
   /*!

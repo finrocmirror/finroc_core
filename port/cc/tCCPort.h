@@ -24,21 +24,22 @@
 #ifndef CORE__PORT__CC__TCCPORT_H
 #define CORE__PORT__CC__TCCPORT_H
 
+#include "core/portdatabase/tDataTypeRegister.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/cc/tCCPortListener.h"
+#include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCQueueFragment.h"
-#include "core/port/cc/tCCPortData.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
+#include "core/tFrameworkElement.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/tThreadLocalCache.h"
-#include "core/port/cc/tCCPortBase.h"
-
-#include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
+class tCCPortData;
+
 /*!
  * \author Max Reichardt
  *

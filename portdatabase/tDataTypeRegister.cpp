@@ -58,6 +58,13 @@ tDataType* tDataTypeRegister::AddDataType(tDataType* dt)
 
   initial_lookup[dt->rtti_name] = dt;
   assert(initial_lookup[dt->rtti_name] == dt);
+
+  // uid for list type?
+  if (dt->GetListType() != NULL)
+  {
+    AddDataType(dt->GetListType());
+  }
+
   return dt;
 }
 

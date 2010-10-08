@@ -27,19 +27,22 @@ namespace core
 {
 const int tCoreFlags::cCONSTANT_FLAGS;
 const int tCoreFlags::cNON_CONSTANT_FLAGS;
-const int tCoreFlags::cALLOWS_CHILDREN;
-const int tCoreFlags::cIS_RUNTIME;
 const int tCoreFlags::cIS_PORT;
-const int tCoreFlags::cAUTO_RENAME;
+const int tCoreFlags::cGLOBALLY_UNIQUE_LINK;
+const int tCoreFlags::cFINSTRUCTABLE_GROUP;
+const int tCoreFlags::cIS_RUNTIME;
 const int tCoreFlags::cEDGE_AGGREGATOR;
 const int tCoreFlags::cALTERNATE_LINK_ROOT;
-const int tCoreFlags::cGLOBALLY_UNIQUE_LINK;
 const int tCoreFlags::cNETWORK_ELEMENT;
+const int tCoreFlags::cALLOWS_CHILDREN;
 const int tCoreFlags::cSHARED;
+const int tCoreFlags::cFIRST_PORT_FLAG;
+const int tCoreFlags::cAUTO_RENAME;
 const int tCoreFlags::cFIRST_CUSTOM_CONST_FLAG;
 const int tCoreFlags::cREADY;
 const int tCoreFlags::cPUBLISHED;
 const int tCoreFlags::cDELETED;
+const int tCoreFlags::cFINSTRUCTED;
 const int tCoreFlags::cFIRST_CUSTOM_NON_CONST_FLAG;
 const int tCoreFlags::cSTATUS_FLAGS;
 

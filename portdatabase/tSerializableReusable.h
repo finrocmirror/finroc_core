@@ -25,7 +25,7 @@
 #define CORE__PORTDATABASE__TSERIALIZABLEREUSABLE_H
 
 #include "finroc_core_utils/container/tReusable.h"
-#include "core/portdatabase/tCoreSerializable.h"
+#include "core/portdatabase/tCoreSerializableImpl.h"
 
 namespace finroc
 {

@@ -19,10 +19,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "core/portdatabase/tDataType.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/tThreadLocalCache.h"
 
 #include "core/port/cc/tCCPortDataBufferPool.h"
+#include "core/port/cc/tCCPortQueueElement.h"
 #include "core/port/tThreadLocalCache.h"
 #include "finroc_core_utils/container/tAbstractReusable.h"
 

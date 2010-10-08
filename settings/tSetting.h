@@ -28,8 +28,8 @@ namespace finroc
 {
 namespace core
 {
-class tFrameworkElement;
 class tAbstractPort;
+class tFrameworkElement;
 
 /*!
  * \author Max Reichardt

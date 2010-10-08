@@ -19,12 +19,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "core/portdatabase/tDataType.h"
 #include "core/port/net/tNetPort.h"
+#include "core/buffers/tCoreInput.h"
+#include "core/port/std/tPortDataImpl.h"
+#include "core/buffers/tCoreOutput.h"
+#include "core/port/std/tPortDataManager.h"
 #include "core/port/std/tPortQueueFragment.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/std/tPortDataReference.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/cc/tCCQueueFragment.h"
+#include "core/port/cc/tCCPortData.h"
 #include "core/port/rpc/tMethodCallException.h"
 
 namespace finroc
@@ -40,11 +46,11 @@ tNetPort::tNetPort(tPortCreationInfo pci, util::tObject* belongs_to_) :
     last_update(util::tLong::cMIN_VALUE)
 {
   // keep most these flags
-  int f = pci.flags & (tPortFlags::cACCEPTS_DATA | tPortFlags::cEMITS_DATA | tPortFlags::cMAY_ACCEPT_REVERSE_DATA | tPortFlags::cIS_OUTPUT_PORT | tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT | tPortFlags::cNON_STANDARD_ASSIGN | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cGLOBALLY_UNIQUE_LINK);
+  int f = pci.flags & (tPortFlags::cACCEPTS_DATA | tPortFlags::cEMITS_DATA | tPortFlags::cMAY_ACCEPT_REVERSE_DATA | tPortFlags::cIS_OUTPUT_PORT | tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT | tPortFlags::cNON_STANDARD_ASSIGN | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cFINSTRUCTED);
 
   // set either emit or accept data
   f |= ((f & tPortFlags::cIS_OUTPUT_PORT) > 0) ? tPortFlags::cEMITS_DATA : tPortFlags::cACCEPTS_DATA;
-  f |= tCoreFlags::cNETWORK_ELEMENT;
+  f |= tCoreFlags::cNETWORK_ELEMENT | tPortFlags::cIS_VOLATILE;
   if ((f & tPortFlags::cIS_OUTPUT_PORT) == 0)    // we always have a queue with (remote) input ports - to be able to switch
   {
     f |= tPortFlags::cHAS_QUEUE;

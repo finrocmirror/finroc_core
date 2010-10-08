@@ -20,18 +20,19 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "finroc_core_utils/tJCBase.h"
+#include "core/portdatabase/tDataType.h"
 
 #ifndef CORE__PORT__RPC__METHOD__TPORTINTERFACE_H
 #define CORE__PORT__RPC__METHOD__TPORTINTERFACE_H
 
-#include "core/portdatabase/tDataType.h"
 #include "finroc_core_utils/container/tSimpleList.h"
-#include "core/port/rpc/method/tAbstractMethod.h"
 
 namespace finroc
 {
 namespace core
 {
+class tAbstractMethod;
+
 /*!
  * \author Max Reichardt
  *

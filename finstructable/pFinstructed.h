@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2010 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -21,42 +21,31 @@
  */
 #include "finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORTDATABASE__TCORESERIALIZABLE_H
-#define CORE__PORTDATABASE__TCORESERIALIZABLE_H
+#ifndef CORE__FINSTRUCTABLE__TFINSTRUCTED_H
+#define CORE__FINSTRUCTABLE__TFINSTRUCTED_H
 
 namespace finroc
 {
 namespace core
 {
-class tCoreOutput;
-class tCoreInput;
-
 /*!
  * \author Max Reichardt
  *
- * Classes that can be cleanly serialized and deserialized to and from
- * CoreIntputStream and OtutputStreams.
+ * Executable for applications created completely with finstruct
+ *
+ * TODO: Command line parameters are finstructed-Group-XML, attribute tree, and port for Admin Server
  */
-class tCoreSerializable : public util::tInterface
+class pFinstructed : public util::tUncopyableObject
 {
 public:
 
-  /*!
-   * Deserialize object. Object has to already exists.
-   * Should be suited for reusing old objects.
-   *
-   * \param read_view Stream to deserialize from
-   */
-  virtual void Deserialize(tCoreInput& is) = 0;
+  pFinstructed() {}
 
-  /*!
-   * \param oos Stream to serialize object to
-   */
-  virtual void Serialize(tCoreOutput& os) const = 0;
+  static void Main(::finroc::util::tArrayWrapper<util::tString>& args);
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORTDATABASE__TCORESERIALIZABLE_H
+#endif // CORE__FINSTRUCTABLE__TFINSTRUCTED_H

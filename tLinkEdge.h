@@ -24,13 +24,13 @@
 #ifndef CORE__TLINKEDGE_H
 #define CORE__TLINKEDGE_H
 
-#include "core/tRuntimeEnvironment.h"
-#include "core/port/tAbstractPort.h"
-
 namespace finroc
 {
 namespace core
 {
+class tRuntimeEnvironment;
+class tAbstractPort;
+
 /*!
  * \author Max Reichardt
  *
@@ -49,7 +49,7 @@ private:
    */
   util::tString source_link, target_link;
 
-  /*! If one link in null - this contains handle of partner port */
+  /*! If one link is null - this contains handle of partner port */
   int port_handle;
 
   /*! Pointer to next edge - for a singly linked list */

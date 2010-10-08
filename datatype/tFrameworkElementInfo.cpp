@@ -19,8 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "core/portdatabase/tDataType.h"
 #include "core/datatype/tFrameworkElementInfo.h"
+#include "core/buffers/tCoreInput.h"
 #include "core/tRuntimeListener.h"
+#include "core/port/net/tRemoteTypes.h"
+#include "core/buffers/tCoreOutput.h"
+#include "core/tFrameworkElement.h"
 #include "core/port/tAbstractPort.h"
 
 namespace finroc

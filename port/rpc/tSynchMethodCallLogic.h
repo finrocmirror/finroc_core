@@ -24,13 +24,14 @@
 #ifndef CORE__PORT__RPC__TSYNCHMETHODCALLLOGIC_H
 #define CORE__PORT__RPC__TSYNCHMETHODCALLLOGIC_H
 
-#include "core/port/rpc/tAbstractCall.h"
 #include "core/port/rpc/tCallable.h"
 
 namespace finroc
 {
 namespace core
 {
+class tAbstractCall;
+
 /*!
  * \author Max Reichardt
  *

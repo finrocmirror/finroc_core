@@ -25,9 +25,9 @@
 #define CORE__PORT__NET__TABSTRACTPEERTRACKER_H
 
 #include "finroc_core_utils/container/tSimpleListWithMutex.h"
-#include "finroc_core_utils/net/tIPSocketAddress.h"
 #include "finroc_core_utils/log/tLogUser.h"
 #include "finroc_core_utils/tListenerManager.h"
+#include "finroc_core_utils/net/tIPSocketAddress.h"
 
 namespace finroc
 {

@@ -20,22 +20,30 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "finroc_core_utils/tJCBase.h"
+#include "core/portdatabase/tDataType.h"
 
 #ifndef CORE__PORT__CC__TCCINTERTHREADCONTAINER_H
 #define CORE__PORT__CC__TCCINTERTHREADCONTAINER_H
 
-#include "core/portdatabase/tTypedObjectContainer.h"
 #include "core/port/cc/tCCPortData.h"
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
+#include "core/portdatabase/tTypedObjectContainer.h"
 #include "finroc_core_utils/container/tReusable.h"
 #include "core/port/cc/tCCContainerBase.h"
+
+namespace rrlib
+{
+namespace xml2
+{
+class tXMLNode;
+} // namespace rrlib
+} // namespace xml2
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
+class tCoreInput;
+class tCoreOutput;
 
 /*!
  * \author Max Reichardt
@@ -89,6 +97,16 @@ public:
     port_data.Deserialize(is);
   }
 
+  virtual void Deserialize(const util::tString& s)
+  {
+    port_data.Deserialize(s);
+  }
+
+  virtual void Deserialize(const rrlib::xml2::tXMLNode& node)
+  {
+    port_data.Deserialize(node);
+  }
+
   /*!
    * \return Actual data
    */
@@ -139,6 +157,16 @@ public:
   virtual void Serialize(tCoreOutput& os) const
   {
     port_data.Serialize(os);
+  }
+
+  virtual util::tString Serialize() const
+  {
+    return port_data.Serialize();
+  }
+
+  virtual void Serialize(rrlib::xml2::tXMLNode& node) const
+  {
+    port_data.Serialize(node);
   }
 
   virtual const util::tString ToString() const

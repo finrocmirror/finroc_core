@@ -24,19 +24,19 @@
 #ifndef CORE__TFRAMEWORKELEMENT_H
 #define CORE__TFRAMEWORKELEMENT_H
 
+#include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/tCoreFlags.h"
 #include "finroc_core_utils/thread/sThreadUtil.h"
-#include "core/buffers/tCoreOutput.h"
+#include "core/port/tThreadLocalCache.h"
 #include "core/tAnnotatable.h"
-
-#include "core/datatype/tCoreNumber.h"
-#include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 
 namespace finroc
 {
 namespace core
 {
 class tRuntimeEnvironment;
+class tCreateModuleAction;
+class tCoreOutput;
 
 /*!
  * \author Max Reichardt
@@ -720,6 +720,14 @@ public:
   tFrameworkElement* GetParent(int link_index) const;
 
   /*!
+   * Returns first parent that has the specified flags
+   *
+   * \param flags Flags to look for
+   * \return Parent or null
+   */
+  tFrameworkElement* GetParentWithFlags(int flags_);
+
+  /*!
    * (Use StringBuilder version if efficiency or real-time is an issue)
    * \return Qualified link to this element (may be shorter than qualified name, if object has a globally unique link)
    */
@@ -1219,10 +1227,34 @@ public:
   void PrintStructure(rrlib::logging::tLogLevel ll);
 
   /*!
+   * Releases all automatically acquired locks
+   */
+  inline void ReleaseAutoLocks()
+  {
+    tThreadLocalCache::GetFast()->ReleaseAllLocks();
+  }
+
+  /*!
    * \param description New Port description
    * (only valid/possible before, element is initialized)
    */
   void SetDescription(const util::tString& description);
+
+  /*!
+   * Mark element as finstructed
+   * (should only be called by AdminServer and CreateModuleActions)
+   *
+   * \param create_action Action with which framework element was created
+   */
+  void SetFinstructed(tCreateModuleAction* create_action);
+
+  /*!
+   * Called whenever a structure parameter on this framework element changed
+   * (can be overridden to handle this event)
+   */
+  virtual void StructureParametersChanged()
+  {
+  }
 
   virtual const util::tString ToString() const
   {

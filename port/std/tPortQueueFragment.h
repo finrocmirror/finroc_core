@@ -25,14 +25,15 @@
 #define CORE__PORT__STD__TPORTQUEUEFRAGMENT_H
 
 #include "core/port/tThreadLocalCache.h"
-#include "finroc_core_utils/container/tQueueFragment.h"
 #include "core/port/std/tPortDataReference.h"
-#include "core/port/std/tPortQueueElement.h"
+#include "finroc_core_utils/container/tQueueFragment.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPortQueueElement;
+
 /*!
  * \author Max Reichardt
  *

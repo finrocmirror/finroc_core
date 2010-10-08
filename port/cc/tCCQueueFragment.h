@@ -27,12 +27,13 @@
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/tThreadLocalCache.h"
 #include "finroc_core_utils/container/tQueueFragment.h"
-#include "core/port/cc/tCCPortQueueElement.h"
 
 namespace finroc
 {
 namespace core
 {
+class tCCPortQueueElement;
+
 /*!
  * \author Max Reichardt
  *

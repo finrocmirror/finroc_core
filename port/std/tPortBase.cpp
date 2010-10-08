@@ -19,8 +19,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "core/portdatabase/tDataType.h"
 #include "core/port/std/tPortBase.h"
-#include "core/port/std/tPortDataManager.h"
+#include "core/port/std/tPortDataBufferPool.h"
+#include "core/port/std/tPullRequestHandler.h"
 
 namespace finroc
 {
@@ -113,6 +115,13 @@ tPortData* tPortBase::DequeueSingleUnsafeRaw()
   assert((queue != NULL));
   tPortDataReference* pd = queue->Dequeue();
   return pd != NULL ? pd->GetData() : NULL;
+}
+
+void tPortBase::ForwardData(tAbstractPort* other)
+{
+  assert((other->GetDataType()->IsStdType()));
+  (static_cast<tPortBase*>(other))->Publish(GetAutoLockedRaw());
+  ReleaseAutoLocks();
 }
 
 tPortData* tPortBase::GetUnusedBufferRaw()

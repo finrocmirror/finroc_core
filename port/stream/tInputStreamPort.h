@@ -27,13 +27,14 @@
 #include "core/port/std/tPortQueueFragment.h"
 #include "core/port/stream/tInputPacketProcessor.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/std/tPublishCache.h"
 #include "core/port/std/tPort.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPublishCache;
+
 /*!
  * \author Max Reichardt
  *

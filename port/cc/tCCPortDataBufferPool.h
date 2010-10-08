@@ -24,9 +24,7 @@
 #ifndef CORE__PORT__CC__TCCPORTDATABUFFERPOOL_H
 #define CORE__PORT__CC__TCCPORTDATABUFFERPOOL_H
 
-#include "core/portdatabase/tDataType.h"
 #include "finroc_core_utils/container/tWonderQueue.h"
-#include "core/port/cc/tCCPortQueueElement.h"
 #include "finroc_core_utils/container/tReusablesPool.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/cc/tCCPortDataContainer.h"
@@ -36,6 +34,9 @@ namespace finroc
 {
 namespace core
 {
+class tDataType;
+class tCCPortQueueElement;
+
 /*!
  * \author Max Reichardt
  *

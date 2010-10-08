@@ -19,18 +19,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataTypeRegister.h"
-#include "core/datatype/tConstant.h"
-
 #include "core/datatype/tCoreNumber.h"
 #include "core/portdatabase/tDataTypeRegister.h"
+#include "core/buffers/tCoreInput.h"
+#include "core/datatype/tConstant.h"
+#include "core/buffers/tCoreOutput.h"
 
 namespace finroc
 {
 namespace core
 {
 tCoreNumber tCoreNumber::cZERO(0);
-tDataType* const tCoreNumber::cNUM_TYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>());
+tDataType* const tCoreNumber::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>());
 const int8 tCoreNumber::cINT64, tCoreNumber::cINT32, tCoreNumber::cINT16, tCoreNumber::cFLOAT64, tCoreNumber::cFLOAT32, tCoreNumber::cCONST, tCoreNumber::cMIN_BARRIER;
 
 void tCoreNumber::CopyFrom(const tCoreNumber& source)
@@ -72,6 +72,60 @@ void tCoreNumber::Deserialize(tCoreInput& ois)
     break;
   }
   unit = has_unit ? tUnit::GetUnit(ois.ReadByte()) : &(tUnit::cNO_UNIT);
+}
+
+void tCoreNumber::Deserialize(const util::tString& s)
+{
+  // scan for unit
+  util::tString num = s;
+  for (size_t i = 0u; i < s.Length(); i++)
+  {
+    char c = s.CharAt(i);
+    if (util::tCharacter::IsLetter(c))
+    {
+      if ((c == 'e' || c == 'E') && (s.Length() > i + 1) && (c == '-' || util::tCharacter::IsDigit(s.CharAt(i + 1))))
+      {
+        continue;  // exponent in decimal notation
+      }
+      num = s.Substring(0, i);
+      util::tString unit_string = s.Substring(i);
+      unit = tUnit::GetUnit(unit_string);
+      break;
+    }
+  }
+  if (num.Contains(".") || num.Contains("e") || num.Contains("E"))
+  {
+    try
+    {
+      SetValue(util::tDouble::ParseDouble(num), unit);
+    }
+    catch (const util::tException& e)
+    {
+      SetValue(0);
+      throw util::tException(e);
+    }
+  }
+  else
+  {
+    num_type = tCoreNumber::eLONG;
+    try
+    {
+      int64 l = util::tLong::ParseLong(num);
+      if (l > (static_cast<int64>(util::tInteger::cMIN_VALUE)) && l < (static_cast<int64>(util::tInteger::cMAX_VALUE)))
+      {
+        SetValue(static_cast<int>(l), unit);
+      }
+      else
+      {
+        SetValue(l, unit);
+      }
+    }
+    catch (const util::tException& e)
+    {
+      SetValue(0);
+      throw util::tException(e);
+    }
+  }
 }
 
 bool tCoreNumber::Equals(const util::tObject& other) const

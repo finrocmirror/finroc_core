@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2010 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -19,25 +19,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tSerializationHelper.h"
-#include "core/portdatabase/tDataType.h"
+#include "core/finstructable/tGroup.h"
+#include "core/tAnnotatable.h"
+#include "core/parameter/tStructureParameterList.h"
 
 namespace finroc
 {
 namespace core
 {
+tStandardCreateModuleAction<tGroup> tGroup::cCREATE_ACTION("core", "Group", util::tTypedClass<tGroup>());
 
-void tSerializationHelper::Serialize2(tCoreOutput& os, const void* const port_data2, tDataType* type)
+tGroup::tGroup(const util::tString& description, tFrameworkElement* parent) :
+    tEdgeAggregator(description, parent, 0),
+    ports(new tStructureParameter<tPortCreationList>("Ports", tPortCreationList::cTYPE))
 {
-  os.Write(((char*)port_data2) + type->virtual_offset, type->sizeof_ - type->virtual_offset);
+  AddAnnotation(new tStructureParameterList(ports));
+  ports->GetValue()->InitialSetup(this, 0, true);
 }
-
-void tSerializationHelper::Deserialize2(tCoreInput& is, void* port_data2, tDataType* type)
-{
-  is.ReadFully(((char*)port_data2) + type->virtual_offset, type->sizeof_ - type->virtual_offset);
-}
-
-
 
 } // namespace finroc
 } // namespace core

@@ -30,6 +30,8 @@ namespace finroc
 {
 namespace core
 {
+class tCoreNumber;
+
 /*!
  * \author Max Reichardt
  *
@@ -92,9 +94,6 @@ private:
 
   /*! Screen Units */
   static util::tSimpleList<tUnit*> screen;
-
-  /*! Default value for units */
-  static ::std::auto_ptr<util::tNumber> default_value;
 
 public:
 
@@ -242,12 +241,15 @@ public:
   }
 
   /*!
+   * \param unit_string (Unique) Name of unit
+   * \return Unit - NO_UNIT if unit name could not be found
+   */
+  static tUnit* GetUnit(const util::tString& unit_string);
+
+  /*!
    * \return Value of constant - Double.NaN for normal units
    */
-  virtual const util::tNumber& GetValue() const
-  {
-    return *default_value;
-  }
+  virtual const tCoreNumber& GetValue() const;
 
   /*!
    * \return Is this class a constant ?

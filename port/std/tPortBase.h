@@ -24,28 +24,30 @@
 #ifndef CORE__PORT__STD__TPORTBASE_H
 #define CORE__PORT__STD__TPORTBASE_H
 
-#include "core/portdatabase/tDataType.h"
+#include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/port/tAbstractPort.h"
-#include "core/port/std/tPortDataImpl.h"
-#include "core/port/std/tPortDataReference.h"
-#include "core/port/std/tPortDataBufferPool.h"
-#include "core/port/tMultiTypePortDataBufferPool.h"
 #include "core/port/std/tPortQueue.h"
-#include "core/port/std/tPullRequestHandler.h"
 #include "core/port/std/tPortListener.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/std/tPublishCache.h"
+#include "core/port/std/tPortDataManager.h"
+#include "core/port/std/tPortDataReference.h"
 #include "core/port/std/tPortQueueFragment.h"
 #include "core/port/tThreadLocalCache.h"
+#include "core/tFrameworkElement.h"
+#include "core/port/tMultiTypePortDataBufferPool.h"
 #include "core/port/tPortFlags.h"
+#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPublishCache.h"
 #include "core/tRuntimeSettings.h"
-
-#include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 
 namespace finroc
 {
 namespace core
 {
+class tDataType;
+class tPortDataBufferPool;
+class tPullRequestHandler;
+
 /*!
  * \author Max Reichardt
  *
@@ -85,7 +87,7 @@ protected:
   /*! Pool with reusable buffers that are published to this port... by any thread */
   tPortDataBufferPool* buffer_pool;
 
-  /*! Pool with different types of reusable buffers that are published to this port... by any thread - either of these pointers in null*/
+  /*! Pool with different types of reusable buffers that are published to this port... by any thread - either of these pointers in null */
   tMultiTypePortDataBufferPool* multi_buffer_pool;
 
   /*!
@@ -272,7 +274,7 @@ private:
    * \param reverse Publish in reverse direction? (typical is forward)
    * \param changed_constant changedConstant to use
    */
-  inline void PublishImpl(tPortData* data, bool reverse, int8 changed_constant)
+  inline void PublishImpl(const tPortData* data, bool reverse, int8 changed_constant)
   {
     assert((data->GetType() != NULL) && "Port data type not initialized");
     assert((data->GetManager() != NULL) && "Only port data obtained from a port can be sent");
@@ -487,7 +489,7 @@ protected:
    * \param reverse Value received in reverse direction?
    * \param changed_constant changedConstant to use
    */
-  inline void Publish(tPortData* data, bool reverse, int8 changed_constant)
+  inline void Publish(const tPortData* data, bool reverse, int8 changed_constant)
   {
     if (!reverse)
     {
@@ -627,6 +629,8 @@ public:
    */
   tPortData* DequeueSingleUnsafeRaw();
 
+  virtual void ForwardData(tAbstractPort* other);
+
   /*!
    * \return current auto-locked Port data (unlock with getThreadLocalCache.releaseAllLocks())
    */
@@ -702,7 +706,7 @@ public:
    *
    * \param cnc Data buffer acquired from a port using getUnusedBuffer (or locked data received from another port)
    */
-  inline void Publish(tPortData* data)
+  inline void Publish(const tPortData* data)
   {
     PublishImpl<false, cCHANGED>(data, false, cCHANGED);
   }

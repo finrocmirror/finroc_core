@@ -24,17 +24,18 @@
 #ifndef CORE__PORT__STREAM__TTRANSACTIONPACKET_H
 #define CORE__PORT__STREAM__TTRANSACTIONPACKET_H
 
-#include "core/portdatabase/tDataType.h"
 #include "core/buffers/tCoreOutput.h"
-#include "core/portdatabase/tCoreSerializable.h"
+#include "core/portdatabase/tCoreSerializableImpl.h"
 #include "core/port/stream/tTransaction.h"
-#include "core/buffers/tCoreInput.h"
 #include "core/buffers/tChunkBuffer.h"
 
 namespace finroc
 {
 namespace core
 {
+class tDataType;
+class tCoreInput;
+
 /*!
  * \author Max Reichardt
  *

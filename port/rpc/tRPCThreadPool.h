@@ -24,11 +24,17 @@
 #ifndef CORE__PORT__RPC__TRPCTHREADPOOL_H
 #define CORE__PORT__RPC__TRPCTHREADPOOL_H
 
+#include "core/port/rpc/tRPCThread.h"
 #include "finroc_core_utils/container/tWonderQueue.h"
 #include "core/tLockOrderLevels.h"
-#include "finroc_core_utils/thread/tTask.h"
 
-#include "core/port/rpc/tRPCThread.h"
+namespace finroc
+{
+namespace util
+{
+class tTask;
+} // namespace finroc
+} // namespace util
 
 namespace finroc
 {

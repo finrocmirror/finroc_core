@@ -24,9 +24,8 @@
 #ifndef CORE__PORT__CC__TCCPORTLISTENER_H
 #define CORE__PORT__CC__TCCPORTLISTENER_H
 
-#include "finroc_core_utils/tListenerManager.h"
-
 #include "core/port/cc/tCCPortData.h"
+#include "finroc_core_utils/tListenerManager.h"
 
 namespace finroc
 {

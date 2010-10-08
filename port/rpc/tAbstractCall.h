@@ -24,24 +24,24 @@
 #ifndef CORE__PORT__RPC__TABSTRACTCALL_H
 #define CORE__PORT__RPC__TABSTRACTCALL_H
 
-#include "core/portdatabase/tDataType.h"
+#include "core/port/rpc/tMethodCallException.h"
+#include "core/portdatabase/tDataTypeRegister.h"
 #include "finroc_core_utils/stream/tMemoryBuffer.h"
 #include "core/port/rpc/tCallParameter.h"
 #include "core/buffers/tCoreOutput.h"
 #include "core/buffers/tCoreInput.h"
 #include "finroc_core_utils/container/tSimpleList.h"
-#include "core/port/std/tPortDataImpl.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/portdatabase/tSerializableReusable.h"
 
-#include "core/port/rpc/tMethodCallException.h"
-#include "core/portdatabase/tDataTypeRegister.h"
 #include "core/port/rpc/tParameterUtil.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPortData;
+class tDataType;
 class tMethodCallSyncher;
 
 /*!

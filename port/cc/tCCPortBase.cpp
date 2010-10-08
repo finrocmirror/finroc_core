@@ -22,6 +22,8 @@
 #include "core/port/cc/tCCPortBase.h"
 #include "core/tCoreRegister.h"
 #include "core/port/tPortFlags.h"
+#include "core/port/cc/tCCPortData.h"
+#include "core/port/cc/tCCPullRequestHandler.h"
 
 namespace finroc
 {
@@ -97,6 +99,14 @@ tCCInterThreadContainer<>* tCCPortBase::DequeueSingleUnsafeRaw()
 {
   assert((queue != NULL));
   return queue->Dequeue();
+}
+
+void tCCPortBase::ForwardData(tAbstractPort* other)
+{
+  assert((other->GetDataType()->IsCCType()));
+  tCCPortDataContainer<>* c = GetLockedUnsafeInContainer();
+  (static_cast<tCCPortBase*>(other))->Publish(c);
+  c->ReleaseLock();
 }
 
 tCCInterThreadContainer<>* tCCPortBase::GetInInterThreadContainer()

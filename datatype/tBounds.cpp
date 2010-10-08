@@ -20,11 +20,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tBounds.h"
+#include "core/portdatabase/tDataTypeRegister.h"
+#include "core/datatype/tCoreString.h"
+#include "core/buffers/tCoreInput.h"
+#include "core/buffers/tCoreOutput.h"
 
 namespace finroc
 {
 namespace core
 {
+tDataType* tBounds::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>());
+
 tBounds::tBounds() :
     min(0),
     max(0),
@@ -57,6 +63,32 @@ tBounds::tBounds(double min_, double max_, tConstant* out_of_bounds_default_) :
     out_of_bounds_default()
 {
   this->out_of_bounds_default.SetValue(out_of_bounds_default_);
+}
+
+void tBounds::Deserialize(tCoreInput& is)
+{
+  min = is.ReadInt();
+  max = is.ReadInt();
+
+  action = static_cast<tOutOfBoundsAction>(is.ReadInt());
+
+  out_of_bounds_default.Deserialize(is);
+}
+
+void tBounds::Serialize(tCoreOutput& os) const
+{
+  os.WriteDouble(min);
+  os.WriteDouble(max);
+  os.WriteInt(action);
+  out_of_bounds_default.Serialize(os);
+}
+
+void tBounds::Set(const tBounds& new_bounds)
+{
+  action = new_bounds.action;
+  max = new_bounds.max;
+  min = new_bounds.min;
+  out_of_bounds_default.SetValue(new_bounds.out_of_bounds_default);
 }
 
 double tBounds::ToBounds(double val)

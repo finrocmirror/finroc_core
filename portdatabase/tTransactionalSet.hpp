@@ -19,8 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "core/portdatabase/tDataType.h"
+#include "finroc_core_utils/log/tLogUser.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/port/tThreadLocalCache.h"
+#include "core/port/std/tPortDataImpl.h"
+#include "core/port/stream/tTransactionPacket.h"
+#include "core/port/stream/tOutputTransactionStreamPort.h"
+#include "core/port/std/tPortDataManager.h"
 
 namespace finroc
 {

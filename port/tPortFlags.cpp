@@ -35,6 +35,7 @@ const int tPortFlags::cIS_BULK_PORT;
 const int tPortFlags::cSPECIAL_REUSE_QUEUE;
 const int tPortFlags::cNON_STANDARD_ASSIGN;
 const int tPortFlags::cIS_EXPRESS_PORT;
+const int tPortFlags::cIS_VOLATILE;
 const int tPortFlags::cFIRST_CUSTOM_PORT_FLAG;
 const int tPortFlags::cUSES_QUEUE;
 const int tPortFlags::cDEFAULT_ON_DISCONNECT;

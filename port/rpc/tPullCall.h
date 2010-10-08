@@ -24,8 +24,6 @@
 #ifndef CORE__PORT__RPC__TPULLCALL_H
 #define CORE__PORT__RPC__TPULLCALL_H
 
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
 #include "core/port/rpc/tAbstractCall.h"
 #include "finroc_core_utils/thread/tTask.h"
 
@@ -33,8 +31,9 @@ namespace finroc
 {
 namespace core
 {
-class tThreadLocalCache;
 class tNetPort;
+class tCoreInput;
+class tCoreOutput;
 
 /*!
  * \author Max Reichardt

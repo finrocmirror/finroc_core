@@ -24,11 +24,7 @@
 #ifndef CORE__PORTDATABASE__TTRANSACTIONALSET_H
 #define CORE__PORTDATABASE__TTRANSACTIONALSET_H
 
-#include "core/portdatabase/tDataType.h"
 #include "finroc_core_utils/container/tConcurrentMap.h"
-#include "core/port/stream/tTransactionPacket.h"
-#include "core/port/std/tPortBase.h"
-#include "core/port/std/tPortDataImpl.h"
 #include "core/portdatabase/tTransactionalData.h"
 #include "core/port/stream/tTransaction.h"
 
@@ -36,6 +32,10 @@ namespace finroc
 {
 namespace core
 {
+class tDataType;
+class tTransactionPacket;
+class tPortBase;
+
 /*!
  * \author Max Reichardt
  *

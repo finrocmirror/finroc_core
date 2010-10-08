@@ -20,20 +20,19 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "finroc_core_utils/tJCBase.h"
+#include "core/portdatabase/tDataType.h"
 
 #ifndef CORE__BUFFERS__TCOREOUTPUT_H
 #define CORE__BUFFERS__TCOREOUTPUT_H
 
-#include "core/portdatabase/tDataType.h"
 #include "finroc_core_utils/stream/tSink.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
 #include "finroc_core_utils/stream/tOutputStreamBuffer.h"
 
 namespace finroc
 {
 namespace core
 {
-class tCoreInput;
+class tTypedObject;
 
 /*!
  * \author Max Reichardt
@@ -62,20 +61,6 @@ public:
   {
     WriteShort(data_type == NULL ? -1 : data_type->GetUid());
   }
-
-//   tCoreInput GetInputStream(bool reset);
-//
-//  @InCpp("return CoreInput(this);") @InCppFile @ConstMethod
-//  public CoreInput getInputStream(boolean reset) {
-//      return (CoreInput)getReadView(reset);
-//  }
-//
-//  @JavaOnly
-//  protected InputStreamBuffer createReadView() {
-//      return new CoreInput(this);
-//  }
-//
-//  // constructors from super class...
 
 };
 

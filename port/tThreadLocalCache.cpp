@@ -19,12 +19,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/rpc/tMethodCallSyncher.h"
-
 #include "core/port/tThreadLocalCache.h"
+#include "core/tRuntimeEnvironment.h"
 #include "finroc_core_utils/thread/sThreadUtil.h"
+#include "core/portdatabase/tTypedObjectImpl.h"
 #include "core/port/cc/tCCContainerBase.h"
+#include "core/port/std/tPortDataImpl.h"
+#include "core/port/rpc/tMethodCallSyncher.h"
 #include "core/port/cc/tCCPortBase.h"
+#include "core/port/tAbstractPort.h"
+#include "core/port/std/tPortDataManager.h"
+#include "core/port/std/tPortDataReference.h"
 
 namespace finroc
 {
@@ -53,7 +58,7 @@ tThreadLocalCache::tThreadLocalCache() :
     thread_id(util::sThreadUtil::GetCurrentThreadId()),
     port_register(tRuntimeEnvironment::GetInstance()->GetPorts())
 {
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, util::tStringBuilder("Creating ThreadLocalCache for thread "), util::tThread::CurrentThread()->GetName());
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating ThreadLocalCache for thread ", util::tThread::CurrentThread()->GetName());
 }
 
 void tThreadLocalCache::AddAutoLock(tTypedObject* obj)

@@ -25,15 +25,17 @@
 #define CORE__SETTINGS__TSETTINGS_H
 
 #include "finroc_core_utils/container/tSimpleList.h"
-#include "core/settings/tSetting.h"
-#include "core/datatype/tUnit.h"
 #include "core/datatype/tBounds.h"
+
+#include "core/settings/tNumberSetting.h"
 
 namespace finroc
 {
 namespace core
 {
 class tFrameworkElement;
+class tSetting;
+class tUnit;
 
 /*!
  * \author Max Reichardt

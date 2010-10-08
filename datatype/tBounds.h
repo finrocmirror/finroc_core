@@ -25,19 +25,24 @@
 #define CORE__DATATYPE__TBOUNDS_H
 
 #include "core/datatype/tCoreNumber.h"
-#include "core/datatype/tConstant.h"
+#include "core/portdatabase/tCoreSerializableImpl.h"
 
 namespace finroc
 {
 namespace core
 {
+class tDataType;
+class tConstant;
+class tCoreInput;
+class tCoreOutput;
+
 /*!
  * \author Max Reichardt
  *
  * Information about bounds used, for instance, in bounded port or numerical setting
  * (Not meant to be used as port data)
  */
-class tBounds : public util::tObject
+class tBounds : public tCoreSerializable
 {
 public:
 
@@ -54,6 +59,9 @@ private:
   tCoreNumber out_of_bounds_default;
 
 public:
+
+  /*! Data Type */
+  static tDataType* cTYPE;
 
   /*! dummy constructor for no bounds */
   tBounds();
@@ -95,6 +103,8 @@ public:
     return action == tBounds::eAPPLY_DEFAULT;
   }
 
+  virtual void Deserialize(tCoreInput& is);
+
   /*!
    * \return Discard values which are out of bounds?
    */
@@ -111,6 +121,11 @@ public:
     return &(out_of_bounds_default);
   }
 
+  inline tDataType* GetType()
+  {
+    return cTYPE;
+  }
+
   /*!
    * Does value lie within bounds ?
    *
@@ -121,6 +136,15 @@ public:
   {
     return val >= min && val <= max;
   }
+
+  virtual void Serialize(tCoreOutput& os) const;
+
+  /*!
+   * Sets bounds to new value
+   *
+   * \param new_bounds new value
+   */
+  void Set(const tBounds& new_bounds);
 
   /*!
    * \param val Value to adjust to range

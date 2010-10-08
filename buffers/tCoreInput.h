@@ -24,9 +24,7 @@
 #ifndef CORE__BUFFERS__TCOREINPUT_H
 #define CORE__BUFFERS__TCOREINPUT_H
 
-#include "core/portdatabase/tDataType.h"
 #include "finroc_core_utils/stream/tSource.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
 #include "finroc_core_utils/stream/tInputStreamBuffer.h"
 
 namespace finroc
@@ -35,6 +33,8 @@ namespace core
 {
 class tAbstractPort;
 class tRemoteTypes;
+class tTypedObject;
+class tDataType;
 
 /*!
  * \author Max Reichardt

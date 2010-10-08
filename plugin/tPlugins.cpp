@@ -25,10 +25,9 @@ namespace finroc
 {
 namespace core
 {
-::std::tr1::shared_ptr<tPlugins> tPlugins::instance;
-
 void tPlugins::FindAndLoadPlugins()
 {
+  //TODO do properly
   //TODO do properly
   //TODO do properly
   //TODO do properly
@@ -36,6 +35,13 @@ void tPlugins::FindAndLoadPlugins()
   //JavaPlugins.loadAllDataTypesInPackage(BehaviourInfo.class);
 
   // plugins.Add(new tMCA2Plugin());
+}
+
+::std::tr1::shared_ptr<tCreateExternalConnectionAction> tPlugins::RegisterExternalConnection(::std::tr1::shared_ptr<tCreateExternalConnectionAction> action)
+{
+  external_connections.Add(action);
+  GetModuleTypes().Add(action.get());
+  return action;
 }
 
 } // namespace finroc

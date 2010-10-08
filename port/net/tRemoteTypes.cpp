@@ -20,6 +20,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/net/tRemoteTypes.h"
+#include "core/buffers/tCoreInput.h"
+#include "core/portdatabase/tDataTypeRegister.h"
+#include "core/buffers/tCoreOutput.h"
+#include "core/settings/tSetting.h"
 #include "core/tRuntimeSettings.h"
 
 namespace finroc
@@ -60,7 +64,7 @@ tDataType* tRemoteTypes::GetLocalType(int16 uid)
   tEntry e = (*(types))[uid];
   if (e == NULL)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, util::tStringBuilder("RemoteTypes: Unknown type "), uid);
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "RemoteTypes: Unknown type ", uid);
     return NULL;
   }
   return e.local_data_type;

@@ -20,6 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/tPortFlags.h"
+#include "core/port/stream/tTransactionPacket.h"
+#include "core/port/std/tPortDataManager.h"
 
 namespace finroc
 {

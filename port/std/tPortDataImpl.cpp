@@ -46,6 +46,7 @@ void tPortData::InitDataType()
   //      if (type == null) {
   //          int i = 4;
   //      }
+  //      System.out.println(type);
   assert((type != NULL) && "Unknown Object type");
 }
 

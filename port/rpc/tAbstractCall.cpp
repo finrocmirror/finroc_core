@@ -19,10 +19,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/rpc/tMethodCallSyncher.h"
-
 #include "core/port/rpc/tAbstractCall.h"
+#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortDataManager.h"
+#include "finroc_core_utils/log/tLogUser.h"
 #include "core/port/tThreadLocalCache.h"
+#include "core/port/rpc/tMethodCallSyncher.h"
 
 namespace finroc
 {
@@ -30,10 +32,10 @@ namespace core
 {
 const int8 tAbstractCall::cNONE, tAbstractCall::cSYNCH_CALL, tAbstractCall::cASYNCH_CALL, tAbstractCall::cSYNCH_RETURN, tAbstractCall::cASYNCH_RETURN, tAbstractCall::cCONNECTION_EXCEPTION;
 
-const util::tString tempConstArray_0[6] = {"NONE", "SYNCH_CALL", "ASYNCH_CALL", "SYNCH_RETURN", "ASYNCH_RETURN"
+const util::tString const_array_tAbstractCall_0[6] = {"NONE", "SYNCH_CALL", "ASYNCH_CALL", "SYNCH_RETURN", "ASYNCH_RETURN"
     , "CONNECTION_EXCEPTION"
-                                          };
-::finroc::util::tArrayWrapper<util::tString> tAbstractCall::cSTATUS_STRINGS(tempConstArray_0, 6);
+                                                     };
+::finroc::util::tArrayWrapper<util::tString> tAbstractCall::cSTATUS_STRINGS(const_array_tAbstractCall_0, 6);
 const size_t tAbstractCall::cMAX_PARAMS;
 
 tAbstractCall::tAbstractCall() :

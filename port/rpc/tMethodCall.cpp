@@ -19,10 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/rpc/tInterfaceNetPort.h"
-#include "core/port/rpc/method/tPortInterface.h"
-
+#include "core/portdatabase/tDataType.h"
 #include "core/port/rpc/tMethodCall.h"
+#include "core/buffers/tCoreInput.h"
+#include "core/port/rpc/method/tPortInterface.h"
+#include "core/port/rpc/tInterfaceNetPort.h"
+#include "core/port/rpc/method/tAbstractMethod.h"
+#include "core/buffers/tCoreOutput.h"
 
 namespace finroc
 {

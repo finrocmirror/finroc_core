@@ -25,6 +25,7 @@
 #define CORE__TCHILDITERATOR_H
 
 #include "core/tFrameworkElement.h"
+#include "core/port/tAbstractPort.h"
 #include "core/tCoreFlags.h"
 
 namespace finroc
@@ -59,11 +60,11 @@ private:
 protected:
 
   /*! FrameworkElement that is currently iterated over */
-  tFrameworkElement* cur_parent;
+  const tFrameworkElement* cur_parent;
 
 public:
 
-  tChildIterator(tFrameworkElement* parent) :
+  tChildIterator(const tFrameworkElement* parent) :
       next_elem(NULL),
       last(NULL),
       flags(0),
@@ -77,7 +78,7 @@ public:
    * \param parent Framework element over whose child to iterate
    * \param flags Flags that children must have in order to be considered
    */
-  tChildIterator(tFrameworkElement* parent, int flags_) :
+  tChildIterator(const tFrameworkElement* parent, int flags_) :
       next_elem(NULL),
       last(NULL),
       flags(0),
@@ -92,7 +93,7 @@ public:
    * \param flags Relevant flags
    * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
    */
-  tChildIterator(tFrameworkElement* parent, int flags_, int result_) :
+  tChildIterator(const tFrameworkElement* parent, int flags_, int result_) :
       next_elem(NULL),
       last(NULL),
       flags(0),
@@ -108,7 +109,7 @@ public:
    * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
    * \param include_non_ready Include children that are not fully initialized yet?
    */
-  tChildIterator(tFrameworkElement* parent, int flags_, int result_, bool include_non_ready) :
+  tChildIterator(const tFrameworkElement* parent, int flags_, int result_, bool include_non_ready) :
       next_elem(NULL),
       last(NULL),
       flags(0),
@@ -138,6 +139,25 @@ public:
   }
 
   /*!
+   * \return Next child that is a port - or null if there are no more children left
+   */
+  inline tAbstractPort* NextPort()
+  {
+    while (true)
+    {
+      tFrameworkElement* result = Next();
+      if (result == NULL)
+      {
+        return NULL;
+      }
+      if (result->IsPort())
+      {
+        return static_cast<tAbstractPort*>(result);
+      }
+    }
+  }
+
+  /*!
    * Use iterator again on same framework element
    */
   inline void Reset()
@@ -151,7 +171,7 @@ public:
    *
    * \param parent Framework element over whose child to iterate
    */
-  inline void Reset(tFrameworkElement* parent)
+  inline void Reset(const tFrameworkElement* parent)
   {
     Reset(parent, 0, 0);
   }
@@ -163,7 +183,7 @@ public:
    * \param parent Framework element over whose child to iterate
    * \param flags Flags that children must have in order to be considered
    */
-  inline void Reset(tFrameworkElement* parent, int flags_)
+  inline void Reset(const tFrameworkElement* parent, int flags_)
   {
     Reset(parent, flags_, flags_);
   }
@@ -176,7 +196,7 @@ public:
    * \param flags Relevant flags
    * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
    */
-  inline void Reset(tFrameworkElement* parent, int flags_, int result_)
+  inline void Reset(const tFrameworkElement* parent, int flags_, int result_)
   {
     Reset(parent, flags_, result_, false);
   }
@@ -190,8 +210,9 @@ public:
    * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
    * \param include_non_ready Include children that are not fully initialized yet?
    */
-  inline void Reset(tFrameworkElement* parent, int flags_, int result_, bool include_non_ready)
+  inline void Reset(const tFrameworkElement* parent, int flags_, int result_, bool include_non_ready)
   {
+    assert((parent != NULL));
     this->flags = flags_ | tCoreFlags::cDELETED;
     this->result = result_;
     if (!include_non_ready)

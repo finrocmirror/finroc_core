@@ -42,28 +42,28 @@ public:
   // Constant flags
 
   /*! Does Port have a queue for storing incoming data? */
-  static const int cHAS_QUEUE = cFIRST_CUSTOM_CONST_FLAG;
+  static const int cHAS_QUEUE = cFIRST_PORT_FLAG;
 
   /*! Push data immediately after port creation... mostly makes sense for singleton ports */
-  static const int cPUSH_DATA_IMMEDIATELY = cFIRST_CUSTOM_CONST_FLAG << 1;
+  static const int cPUSH_DATA_IMMEDIATELY = cFIRST_PORT_FLAG << 1;
 
   /*! Does the flag ACCEPTS_REVERSE_DATA may change at runtime? */
-  static const int cMAY_ACCEPT_REVERSE_DATA = cFIRST_CUSTOM_CONST_FLAG << 2;
+  static const int cMAY_ACCEPT_REVERSE_DATA = cFIRST_PORT_FLAG << 2;
 
   /*! Does port accept incoming data? - fixed */
-  static const int cACCEPTS_DATA = cFIRST_CUSTOM_CONST_FLAG << 3;
+  static const int cACCEPTS_DATA = cFIRST_PORT_FLAG << 3;
 
   /*! Does port emit data (normal direction)? - fixed */
-  static const int cEMITS_DATA = cFIRST_CUSTOM_CONST_FLAG << 4;
+  static const int cEMITS_DATA = cFIRST_PORT_FLAG << 4;
 
   /*! From it's general characteristics... is port input or output port? (for proxies from the outside group view) - fixed */
-  static const int cIS_OUTPUT_PORT = cFIRST_CUSTOM_CONST_FLAG << 5;
+  static const int cIS_OUTPUT_PORT = cFIRST_PORT_FLAG << 5;
 
   /*! Transport data for this port through the network with low priority */
-  static const int cIS_BULK_PORT = cFIRST_CUSTOM_CONST_FLAG << 6;
+  static const int cIS_BULK_PORT = cFIRST_PORT_FLAG << 6;
 
   /*! Does port have special ReuseQueue? - fixed, set (not unset!) automatically */
-  static const int cSPECIAL_REUSE_QUEUE = cFIRST_CUSTOM_CONST_FLAG << 7;
+  static const int cSPECIAL_REUSE_QUEUE = cFIRST_PORT_FLAG << 7;
 
   /*!
    * Are port value assigned to ports in a non-standard way?... In this case
@@ -71,7 +71,7 @@ public:
    * instead of standardAssign.
    * Fixed, set automatically by port classes
    */
-  static const int cNON_STANDARD_ASSIGN = cFIRST_CUSTOM_CONST_FLAG << 8;
+  static const int cNON_STANDARD_ASSIGN = cFIRST_PORT_FLAG << 8;
 
   /*! Does port contain "cheap-copy" data? */
   //public static final int IS_CC_PORT = FIRST_CUSTOM_FLAG << 10;
@@ -80,13 +80,16 @@ public:
   //public static final int IS_INTERFACE_PORT = FIRST_CUSTOM_FLAG << 11;
 
   //  /** Should port have global link (the same in every Runtime - without origin server prefix) */
-  //  public static final int GLOBAL_LINK = FIRST_CUSTOM_CONST_FLAG << 9;
+  //  public static final int GLOBAL_LINK = FIRST_PORT_FLAG << 9;
 
   /*! Transport data for this port through the network with high priority */
-  static const int cIS_EXPRESS_PORT = cFIRST_CUSTOM_CONST_FLAG << 9;
+  static const int cIS_EXPRESS_PORT = cFIRST_PORT_FLAG << 9;
+
+  /*! Is this port volatile (meaning that it's not always there and connections to it should preferably be links) */
+  static const int cIS_VOLATILE = cFIRST_PORT_FLAG << 10;
 
   /*! First custom flag for special port types */
-  static const int cFIRST_CUSTOM_PORT_FLAG = cFIRST_CUSTOM_CONST_FLAG << 10;
+  static const int cFIRST_CUSTOM_PORT_FLAG = cFIRST_PORT_FLAG << 11;
 
   // Non-constant flags
 

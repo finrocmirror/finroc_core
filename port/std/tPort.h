@@ -24,18 +24,18 @@
 #ifndef CORE__PORT__STD__TPORT_H
 #define CORE__PORT__STD__TPORT_H
 
+#include "core/portdatabase/tDataTypeRegister.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/std/tPortListener.h"
 #include "core/port/std/tPortQueueFragment.h"
-#include "core/port/std/tPortDataImpl.h"
 #include "core/port/std/tPortBase.h"
-
-#include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPortData;
+
 /*!
  * \author Max Reichardt
  *

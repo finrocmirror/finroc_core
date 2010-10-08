@@ -19,11 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/tRuntimeEnvironment.h"
-
 #include "core/tFrameworkElement.h"
+#include "core/tRuntimeEnvironment.h"
+#include "finroc_core_utils/log/tLogUser.h"
 #include "core/tRuntimeListener.h"
 #include "finroc_core_utils/tGarbageCollector.h"
+#include "core/parameter/tStructureParameterList.h"
+#include "core/buffers/tCoreOutput.h"
 
 namespace finroc
 {
@@ -95,7 +97,7 @@ void tFrameworkElement::AddChild(tLink* child)
     }
 
     // Check if child with same name already exists and possibly rename (?)
-    if (GetFlag(tCoreFlags::cAUTO_RENAME))
+    if (GetFlag(tCoreFlags::cAUTO_RENAME) && (!GetFlag(tCoreFlags::cIS_PORT)))
     {
       util::tString child_desc = child->GetDescription();
       int postfix_index = 1;
@@ -454,6 +456,32 @@ tFrameworkElement* tFrameworkElement::GetParent(int link_index) const
   }
 }
 
+tFrameworkElement* tFrameworkElement::GetParentWithFlags(int flags_)
+{
+  if (primary.parent == NULL)
+  {
+    return NULL;
+  }
+  {
+    util::tLock lock2(GetRegistryLock());  // not really necessary after element has been initialized
+    if (IsDeleted())
+    {
+      return NULL;
+    }
+
+    tFrameworkElement* result = primary.parent;
+    while (!((result->GetAllFlags() & flags_) == flags_))
+    {
+      result = result->primary.parent;
+      if (result == NULL || result->IsDeleted())
+      {
+        break;
+      }
+    }
+    return result;
+  }
+}
+
 bool tFrameworkElement::GetQualifiedName(util::tStringBuilder& sb, const tLink* start, bool force_full_link) const
 {
   if (IsReady())
@@ -778,6 +806,14 @@ void tFrameworkElement::SetDescription(const util::tString& description)
     assert((IsCreator()));
     primary.description = description;
   }
+}
+
+void tFrameworkElement::SetFinstructed(tCreateModuleAction* create_action)
+{
+  assert((!GetFlag(tCoreFlags::cFINSTRUCTED)));
+  tStructureParameterList* list = tStructureParameterList::GetOrCreate(this);
+  list->SetCreateAction(create_action);
+  SetFlag(tCoreFlags::cFINSTRUCTED);
 }
 
 void tFrameworkElement::SetFlag(int flag, bool value)

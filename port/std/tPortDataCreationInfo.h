@@ -24,13 +24,13 @@
 #ifndef CORE__PORT__STD__TPORTDATACREATIONINFO_H
 #define CORE__PORT__STD__TPORTDATACREATIONINFO_H
 
-#include "core/port/std/tPortDataManager.h"
 #include "finroc_core_utils/container/tSimpleList.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPortDataManager;
 class tPortData;
 
 /*!

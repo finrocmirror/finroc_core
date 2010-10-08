@@ -24,7 +24,6 @@
 #ifndef CORE__PORT__CC__TCCPORTQUEUE_H
 #define CORE__PORT__CC__TCCPORTQUEUE_H
 
-#include "core/port/cc/tCCPortQueueElement.h"
 #include "core/port/tThreadLocalCache.h"
 #include "finroc_core_utils/container/tWonderQueueBounded.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
@@ -33,6 +32,8 @@ namespace finroc
 {
 namespace core
 {
+class tCCPortQueueElement;
+
 /*!
  * \author Max Reichardt
  *

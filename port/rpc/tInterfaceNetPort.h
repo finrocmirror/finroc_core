@@ -25,14 +25,15 @@
 #define CORE__PORT__RPC__TINTERFACENETPORT_H
 
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/rpc/tMethodCall.h"
-#include "core/port/rpc/method/tAbstractMethodCallHandler.h"
 #include "core/port/rpc/tInterfacePort.h"
 
 namespace finroc
 {
 namespace core
 {
+class tMethodCall;
+class tAbstractMethodCallHandler;
+
 /*!
  * \author Max Reichardt
  *

@@ -26,7 +26,6 @@
 
 #include "core/datatype/tBounds.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/tThreadLocalCache.h"
 #include "core/port/tPortFlags.h"
 #include "core/port/cc/tNumberPort.h"
 
@@ -34,6 +33,8 @@ namespace finroc
 {
 namespace core
 {
+class tThreadLocalCache;
+
 /*!
  * \author Max Reichardt
  *
@@ -68,6 +69,22 @@ public:
    * \param action Action to perform when index is out of bounds
    */
   tBoundedNumberPort(tPortCreationInfo pci, tBounds b);
+
+  /*!
+   * \return the bounds of this port
+   */
+  inline tBounds GetBounds()
+  {
+    return bounds;
+  }
+
+  /*!
+   * Set Bounds
+   * (This is not thread-safe and must only be done in "pause mode")
+   *
+   * \param bounds2 new Bounds for this port
+   */
+  void SetBounds(const tBounds& bounds2);
 
 };
 

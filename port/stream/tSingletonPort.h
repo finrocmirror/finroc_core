@@ -25,13 +25,14 @@
 #define CORE__PORT__STREAM__TSINGLETONPORT_H
 
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/std/tPublishCache.h"
 #include "core/port/std/tPort.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPublishCache;
+
 /*!
  * \author Max Reichardt
  *

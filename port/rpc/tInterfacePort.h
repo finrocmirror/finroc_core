@@ -20,25 +20,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "finroc_core_utils/tJCBase.h"
+#include "core/portdatabase/tDataType.h"
 
 #ifndef CORE__PORT__RPC__TINTERFACEPORT_H
 #define CORE__PORT__RPC__TINTERFACEPORT_H
 
-#include "core/portdatabase/tDataType.h"
 #include "core/port/tAbstractPort.h"
-#include "core/port/tMultiTypePortDataBufferPool.h"
-#include "core/tFrameworkElement.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/std/tPortDataImpl.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/tThreadLocalCache.h"
-
-#include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 
 namespace finroc
 {
 namespace core
 {
+class tMultiTypePortDataBufferPool;
+class tPortData;
+
 /*!
  * \author Max Reichardt
  *
@@ -126,6 +124,11 @@ public:
   tInterfacePort(tPortCreationInfo pci, tInterfacePort::tType type_, int lock_level);
 
   virtual ~tInterfacePort();
+
+  virtual void ForwardData(tAbstractPort* other)
+  {
+    // do nothing in interface port
+  }
 
   /*!
    * (Usually called on client ports)

@@ -20,31 +20,32 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "finroc_core_utils/tJCBase.h"
+#include "core/portdatabase/tDataType.h"
 
 #ifndef CORE__PORT__CC__TCCPORTBASE_H
 #define CORE__PORT__CC__TCCPORTBASE_H
 
-#include "core/portdatabase/tDataType.h"
+#include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/port/tAbstractPort.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
-#include "core/port/cc/tCCPortDataRef.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/cc/tCCPortQueue.h"
-#include "core/port/cc/tCCPortData.h"
 #include "core/port/cc/tCCPortListener.h"
-#include "core/port/cc/tCCPullRequestHandler.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/tThreadLocalCache.h"
 #include "core/port/cc/tCCQueueFragment.h"
+#include "core/port/tThreadLocalCache.h"
+#include "core/port/cc/tCCPortDataRef.h"
 #include "finroc_core_utils/thread/sThreadUtil.h"
+#include "core/tFrameworkElement.h"
 #include "core/tRuntimeSettings.h"
-
-#include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 
 namespace finroc
 {
 namespace core
 {
+class tCCPortData;
+class tCCPullRequestHandler;
+
 /*!
  * \author Max Reichardt
  *
@@ -113,11 +114,6 @@ protected:
   tCCPullRequestHandler* pull_request_handler;
 
 private:
-
-  /*!
-   * Set current value to default value
-   */
-  void ApplyDefaultValue();
 
   // helper for direct member initialization in C++
   inline static tCCInterThreadContainer<>* CreateDefaultValue(tDataType* dt)
@@ -272,6 +268,11 @@ private:
   }
 
 protected:
+
+  /*!
+   * Set current value to default value
+   */
+  void ApplyDefaultValue();
 
   virtual void ClearQueueImpl()
   {
@@ -537,6 +538,8 @@ public:
    * \return Dequeued first/oldest element in queue
    */
   tCCInterThreadContainer<>* DequeueSingleUnsafeRaw();
+
+  virtual void ForwardData(tAbstractPort* other);
 
   /*!
    * \return Current data with auto-lock (can only be unlocked with ThreadLocalCache auto-unlock)

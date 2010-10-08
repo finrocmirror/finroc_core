@@ -24,9 +24,6 @@
 #ifndef CORE__PORT__RPC__METHOD__TABSTRACTMETHOD_H
 #define CORE__PORT__RPC__METHOD__TABSTRACTMETHOD_H
 
-#include "core/port/rpc/tMethodCall.h"
-#include "core/port/rpc/method/tAbstractAsyncReturnHandler.h"
-#include "core/port/rpc/method/tAbstractMethodCallHandler.h"
 #include "finroc_core_utils/log/tLogUser.h"
 
 #include "core/port/rpc/tParameterUtil.h"
@@ -36,7 +33,10 @@ namespace finroc
 namespace core
 {
 class tPortInterface;
+class tMethodCall;
 class tInterfaceNetPort;
+class tAbstractAsyncReturnHandler;
+class tAbstractMethodCallHandler;
 
 /*!
  * \author Max Reichardt

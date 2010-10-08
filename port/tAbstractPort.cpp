@@ -19,14 +19,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/tLinkEdge.h"
-#include "core/port/tEdgeAggregator.h"
-#include "core/port/net/tNetPort.h"
-
+#include "core/portdatabase/tDataType.h"
 #include "core/port/tAbstractPort.h"
 #include "core/tLockOrderLevels.h"
 #include "core/tRuntimeListener.h"
+#include "core/tLinkEdge.h"
+#include "finroc_core_utils/log/tLogUser.h"
+#include "core/tRuntimeEnvironment.h"
 #include "core/tCoreFlags.h"
+#include "core/port/net/tNetPort.h"
+#include "core/port/tEdgeAggregator.h"
+#include "core/buffers/tCoreOutput.h"
 
 namespace finroc
 {
@@ -115,7 +118,7 @@ void tAbstractPort::ConnectToTarget(tAbstractPort* target)
       target->PropagateStrategy(NULL, this);
       NewConnection(target);
       target->NewConnection(this);
-      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, edge_log, util::tStringBuilder("creating Edge from "), GetQualifiedName(), " to ", target->GetQualifiedName());
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, edge_log, "creating Edge from ", GetQualifiedName(), " to ", target->GetQualifiedName());
 
       // check whether we need an initial reverse push
       ConsiderInitialReversePush(target);
@@ -152,13 +155,13 @@ void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
   {
     if (ReversePushStrategy() && edges_src->CountElements() == 1)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, initial_push_log, util::tStringBuilder("Performing initial reverse push from "), target->GetQualifiedName(), " to ", GetQualifiedName());
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, initial_push_log, "Performing initial reverse push from ", target->GetQualifiedName(), " to ", GetQualifiedName());
       target->InitialPushTo(this, true);
     }
   }
 }
 
-void tAbstractPort::DisconnectAll()
+void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
 {
   {
     util::tLock lock2(GetRegistryLock());
@@ -168,31 +171,43 @@ void tAbstractPort::DisconnectAll()
     {
       for (size_t i = 0u; i < link_edges->Size(); i++)
       {
-        delete link_edges->Get(i);
+        tLinkEdge* le = link_edges->Get(i);
+        if ((incoming && le->GetSourceLink().Length() > 0) || (outgoing && le->GetTargetLink().Length() > 0))
+        {
+          link_edges->Remove(i);
+          delete le;
+          i--;
+        }
       }
-      link_edges->Clear();
     }
+    assert(((!incoming) || (!outgoing) || (link_edges == NULL) || (link_edges->Size() == 0)));
 
     util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
-    for (int i = 0, n = it->Size(); i < n; i++)
+    if (outgoing)
     {
-      tAbstractPort* target = it->Get(i);
-      if (target == NULL)
+      for (int i = 0, n = it->Size(); i < n; i++)
       {
-        continue;
+        tAbstractPort* target = it->Get(i);
+        if (target == NULL)
+        {
+          continue;
+        }
+        RemoveInternal(this, target);
       }
-      RemoveInternal(this, target);
     }
 
-    it = edges_dest->GetIterable();
-    for (int i = 0, n = it->Size(); i < n; i++)
+    if (incoming)
     {
-      tAbstractPort* target = it->Get(i);
-      if (target == NULL)
+      it = edges_dest->GetIterable();
+      for (int i = 0, n = it->Size(); i < n; i++)
       {
-        continue;
+        tAbstractPort* target = it->Get(i);
+        if (target == NULL)
+        {
+          continue;
+        }
+        RemoveInternal(target, this);
       }
-      RemoveInternal(target, this);
     }
   }
 }
@@ -229,6 +244,27 @@ void tAbstractPort::DisconnectFrom(tAbstractPort* target)
   // not found: throw error message?
 }
 
+void tAbstractPort::DisconnectFrom(const util::tString& link)
+{
+  {
+    util::tLock lock2(GetRegistryLock());
+    for (size_t i = 0u; i < link_edges->Size(); i++)
+    {
+      tLinkEdge* le = link_edges->Get(i);
+      if (le->GetSourceLink().Equals(link) || le->GetTargetLink().Equals(link))
+      {
+        delete le;
+      }
+    }
+
+    tAbstractPort* ap = GetRuntime()->GetPort(link);
+    if (ap != NULL)
+    {
+      DisconnectFrom(this);
+    }
+  }
+}
+
 tNetPort* tAbstractPort::FindNetPort(util::tObject* belongs_to) const
 {
   if (belongs_to == NULL)
@@ -260,6 +296,40 @@ void tAbstractPort::ForwardStrategy(int16 strategy2, tAbstractPort* push_wanter)
     if (port != NULL && (push_wanter != NULL || port->GetStrategy() != strategy2))
     {
       port->PropagateStrategy(push_wanter, NULL);
+    }
+  }
+}
+
+void tAbstractPort::GetConnectionPartners(util::tSimpleList<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges)
+{
+  result.Clear();
+  util::tArrayWrapper<tAbstractPort*>* it = NULL;
+
+  if (outgoing_edges)
+  {
+    it = edges_src->GetIterable();
+    for (int i = 0, n = it->Size(); i < n; i++)
+    {
+      tAbstractPort* target = it->Get(i);
+      if (target == NULL)
+      {
+        continue;
+      }
+      result.Add(target);
+    }
+  }
+
+  if (incoming_edges)
+  {
+    it = edges_dest->GetIterable();
+    for (int i = 0, n = it->Size(); i < n; i++)
+    {
+      tAbstractPort* target = it->Get(i);
+      if (target == NULL)
+      {
+        continue;
+      }
+      result.Add(target);
     }
   }
 }
@@ -477,7 +547,7 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
       {
         if (IsReady() && push_wanter->IsReady())
         {
-          FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, initial_push_log, util::tStringBuilder("Performing initial push from "), GetQualifiedName(), " to ", push_wanter->GetQualifiedName());
+          FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, initial_push_log, "Performing initial push from ", GetQualifiedName(), " to ", push_wanter->GetQualifiedName());
           InitialPushTo(push_wanter, false);
         }
         push_wanter = NULL;
@@ -640,7 +710,7 @@ void tAbstractPort::SetReversePushStrategy(bool push)
         tAbstractPort* ap = it->Get(i);
         if (ap != NULL && ap->IsReady())
         {
-          FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, initial_push_log, util::tStringBuilder("Performing initial reverse push from "), ap->GetQualifiedName(), " to ", GetQualifiedName());
+          FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, initial_push_log, "Performing initial reverse push from ", ap->GetQualifiedName(), " to ", GetQualifiedName());
           ap->InitialPushTo(this, true);
           break;
         }
