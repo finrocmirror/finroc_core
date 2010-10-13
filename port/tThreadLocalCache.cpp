@@ -21,7 +21,7 @@
  */
 #include "core/port/tThreadLocalCache.h"
 #include "core/tRuntimeEnvironment.h"
-#include "finroc_core_utils/thread/sThreadUtil.h"
+#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "core/portdatabase/tTypedObjectImpl.h"
 #include "core/port/cc/tCCContainerBase.h"
 #include "core/port/std/tPortDataImpl.h"

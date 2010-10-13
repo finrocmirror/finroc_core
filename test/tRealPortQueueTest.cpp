@@ -27,7 +27,7 @@
 #include "core/tFrameworkElement.h"
 #include "core/datatype/tCoreNumber.h"
 #include "core/port/cc/tCCQueueFragment.h"
-#include "finroc_core_utils/thread/sThreadUtil.h"
+#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 
 namespace finroc

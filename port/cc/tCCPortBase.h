@@ -19,13 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 #include "core/portdatabase/tDataType.h"
 
 #ifndef CORE__PORT__CC__TCCPORTBASE_H
 #define CORE__PORT__CC__TCCPORTBASE_H
 
-#include "finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
+#include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/port/tAbstractPort.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/cc/tCCPortDataContainer.h"
@@ -35,7 +35,7 @@
 #include "core/port/cc/tCCQueueFragment.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/cc/tCCPortDataRef.h"
-#include "finroc_core_utils/thread/sThreadUtil.h"
+#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeSettings.h"
 

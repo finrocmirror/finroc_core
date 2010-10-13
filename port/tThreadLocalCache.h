@@ -19,27 +19,27 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 #include "core/portdatabase/tDataType.h"
 
 #ifndef CORE__PORT__TTHREADLOCALCACHE_H
 #define CORE__PORT__TTHREADLOCALCACHE_H
 
-#include "finroc_core_utils/tGarbageCollector.h"
+#include "rrlib/finroc_core_utils/tGarbageCollector.h"
 #include "core/port/rpc/tMethodCall.h"
 #include "core/port/rpc/tPullCall.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/tCoreRegister.h"
 #include "core/port/cc/tCCPortDataBufferPool.h"
-#include "finroc_core_utils/container/tReusablesPool.h"
+#include "rrlib/finroc_core_utils/container/tReusablesPool.h"
 #include "core/buffers/tCoreInput.h"
-#include "finroc_core_utils/container/tSimpleListWithMutex.h"
-#include "finroc_core_utils/container/tSimpleList.h"
+#include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
+#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/cc/tCCPortQueueElement.h"
-#include "finroc_core_utils/container/tBoundedQElementContainer.h"
+#include "rrlib/finroc_core_utils/container/tBoundedQElementContainer.h"
 #include "core/port/std/tPortQueueElement.h"
-#include "finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {

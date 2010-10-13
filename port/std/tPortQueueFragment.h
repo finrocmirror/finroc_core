@@ -19,14 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 
 #ifndef CORE__PORT__STD__TPORTQUEUEFRAGMENT_H
 #define CORE__PORT__STD__TPORTQUEUEFRAGMENT_H
 
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/std/tPortDataReference.h"
-#include "finroc_core_utils/container/tQueueFragment.h"
+#include "rrlib/finroc_core_utils/container/tQueueFragment.h"
 
 namespace finroc
 {

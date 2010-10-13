@@ -27,7 +27,7 @@
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
 #include "core/tCoreFlags.h"
-#include "tcp/tTCPPeer.h"
+#include "plugins/tcp/tTCPPeer.h"
 
 namespace finroc
 {

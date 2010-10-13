@@ -21,7 +21,7 @@
  */
 #include "core/tRuntimeEnvironment.h"
 #include "core/tCoreFlags.h"
-#include "finroc_core_utils/tTime.h"
+#include "rrlib/finroc_core_utils/tTime.h"
 #include "core/tLinkEdge.h"
 #include "core/port/tAbstractPort.h"
 #include "core/portdatabase/sSerializationHelper.h"
@@ -29,13 +29,13 @@
 #include "core/datatype/tConstant.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/rpc/tMethodCallSyncher.h"
-#include "finroc_core_utils/container/tBoundedQElementContainer.h"
-#include "finroc_core_utils/stream/tChunkedBuffer.h"
+#include "rrlib/finroc_core_utils/container/tBoundedQElementContainer.h"
+#include "rrlib/finroc_core_utils/stream/tChunkedBuffer.h"
 #include "core/port/stream/tStreamCommitThread.h"
 #include "core/admin/tAdminServer.h"
 #include "core/tRuntimeSettings.h"
 #include "core/plugin/tPlugins.h"
-#include "finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {

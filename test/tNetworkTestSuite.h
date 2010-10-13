@@ -19,27 +19,27 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 
 #ifndef CORE__TEST__TNETWORKTESTSUITE_H
 #define CORE__TEST__TNETWORKTESTSUITE_H
 
 #include "core/portdatabase/tDataType.h"
 #include "core/port/cc/tNumberPort.h"
-#include "blackboard/tRawBlackboardClient.h"
-#include "blackboard/tBlackboardServer.h"
-#include "blackboard/tSingleBufferedBlackboardServer.h"
+#include "plugins/blackboard/tRawBlackboardClient.h"
+#include "plugins/blackboard/tBlackboardServer.h"
+#include "plugins/blackboard/tSingleBufferedBlackboardServer.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
 #include "core/portdatabase/tDataTypeRegister.h"
 #include "core/buffers/tMemBuffer.h"
-#include "blackboard/tBlackboardManager.h"
-#include "finroc_core_utils/stream/tInputStreamBuffer.h"
-#include "finroc_core_utils/stream/tOutputStreamBuffer.h"
+#include "plugins/blackboard/tBlackboardManager.h"
+#include "rrlib/finroc_core_utils/stream/tInputStreamBuffer.h"
+#include "rrlib/finroc_core_utils/stream/tOutputStreamBuffer.h"
 #include "core/datatype/tCoreNumber.h"
-#include "blackboard/tBlackboardBuffer.h"
+#include "plugins/blackboard/tBlackboardBuffer.h"
 #include "core/port/std/tPort.h"
 
 namespace finroc

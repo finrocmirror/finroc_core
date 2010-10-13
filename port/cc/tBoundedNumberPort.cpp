@@ -25,7 +25,7 @@
 #include "core/port/cc/tCCPortDataRef.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/cc/tCCPortData.h"
-#include "finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/port/cc/tCCPortBase.h"
 
 namespace finroc

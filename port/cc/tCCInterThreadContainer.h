@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 #include "core/portdatabase/tDataType.h"
 
 #ifndef CORE__PORT__CC__TCCINTERTHREADCONTAINER_H
@@ -27,7 +27,7 @@
 
 #include "core/port/cc/tCCPortData.h"
 #include "core/portdatabase/tTypedObjectContainer.h"
-#include "finroc_core_utils/container/tReusable.h"
+#include "rrlib/finroc_core_utils/container/tReusable.h"
 #include "core/port/cc/tCCContainerBase.h"
 
 namespace rrlib

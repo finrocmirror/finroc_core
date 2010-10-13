@@ -21,8 +21,8 @@
  */
 #include "core/test/tBasicRealtimeTest.h"
 #include "core/tRuntimeEnvironment.h"
-#include "finroc_core_utils/thread/sThreadUtil.h"
-#include "finroc_core_utils/tTime.h"
+#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
+#include "rrlib/finroc_core_utils/tTime.h"
 
 namespace finroc
 {

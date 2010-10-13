@@ -22,7 +22,7 @@
 #ifndef CORE__SETTINGS__TNUMBERSETTING_H
 #define CORE__SETTINGS__TNUMBERSETTING_H
 
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 #include "core/settings/tSetting.h"
 #include "core/port/cc/tCCPortListener.h"
 #include "core/port/tPortCreationInfo.h"

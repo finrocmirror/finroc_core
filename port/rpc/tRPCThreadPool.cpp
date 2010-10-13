@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tRPCThreadPool.h"
-#include "finroc_core_utils/thread/sThreadUtil.h"
+#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 
 namespace finroc
 {

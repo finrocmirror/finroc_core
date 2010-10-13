@@ -21,7 +21,7 @@
  */
 #include "core/finstructable/pFinstructed.h"
 #include "core/tRuntimeEnvironment.h"
-#include "tcp/tTCPServer.h"
+#include "plugins/tcp/tTCPServer.h"
 #include "core/finstructable/tFinstructableGroup.h"
 
 namespace finroc
@@ -32,7 +32,7 @@ void pFinstructed::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 {
   tRuntimeEnvironment* re = tRuntimeEnvironment::GetInstance();
   tcp::tTCPServer* server = new tcp::tTCPServer(4444, true, NULL);
-  server->Init();   // TODO: remove
+  server->Init();  // TODO: remove
 
   tFinstructableGroup* fg = new tFinstructableGroup("finstructed", re, "etc/finstructed_test.xml");
   fg->Init();

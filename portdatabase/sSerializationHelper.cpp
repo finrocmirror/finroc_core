@@ -21,7 +21,7 @@
  */
 #include "core/portdatabase/tDataType.h"
 #include "core/portdatabase/sSerializationHelper.h"
-#include "finroc_core_utils/stream/tChunkedBuffer.h"
+#include "rrlib/finroc_core_utils/stream/tChunkedBuffer.h"
 #include "core/buffers/tCoreOutput.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/portdatabase/tDataTypeRegister.h"

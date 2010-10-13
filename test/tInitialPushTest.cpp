@@ -22,7 +22,7 @@
 #include "core/test/tInitialPushTest.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/std/tPort.h"
-#include "blackboard/tBlackboardBuffer.h"
+#include "plugins/blackboard/tBlackboardBuffer.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
 #include "core/tFrameworkElement.h"

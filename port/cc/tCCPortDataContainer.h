@@ -19,14 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 
 #ifndef CORE__PORT__CC__TCCPORTDATACONTAINER_H
 #define CORE__PORT__CC__TCCPORTDATACONTAINER_H
 
 #include "core/portdatabase/tTypedObjectContainer.h"
-#include "finroc_core_utils/thread/sThreadUtil.h"
-#include "finroc_core_utils/container/tReusableTL.h"
+#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
+#include "rrlib/finroc_core_utils/container/tReusableTL.h"
 #include "core/port/cc/tCCContainerBase.h"
 
 #include "core/port/tCombinedPointer.h"

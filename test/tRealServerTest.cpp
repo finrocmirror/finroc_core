@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/test/tRealServerTest.h"
-#include "tcp/tTCPServer.h"
+#include "plugins/tcp/tTCPServer.h"
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeEnvironment.h"
 

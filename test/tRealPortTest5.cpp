@@ -19,20 +19,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "blackboard/tBlackboardPlugin.h"
+#include "plugins/blackboard/tBlackboardPlugin.h"
 #include "core/plugin/tPlugins.h"
 
 #include "core/test/tRealPortTest5.h"
 #include "core/tFrameworkElement.h"
-#include "blackboard/tBlackboardManager.h"
+#include "plugins/blackboard/tBlackboardManager.h"
 #include "core/port/std/tPort.h"
-#include "blackboard/tBlackboardBuffer.h"
+#include "plugins/blackboard/tBlackboardBuffer.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
 #include "core/buffers/tCoreOutput.h"
 #include "core/buffers/tCoreInput.h"
-#include "blackboard/tBlackboardServer.h"
-#include "blackboard/tRawBlackboardClient.h"
+#include "plugins/blackboard/tBlackboardServer.h"
+#include "plugins/blackboard/tRawBlackboardClient.h"
 #include "core/port/rpc/tMethodCallException.h"
 
 namespace finroc

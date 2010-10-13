@@ -22,7 +22,7 @@
 #include "core/port/stream/tStreamCommitThread.h"
 #include "core/settings/tSetting.h"
 #include "core/tRuntimeSettings.h"
-#include "finroc_core_utils/thread/tLoopThread.h"
+#include "rrlib/finroc_core_utils/thread/tLoopThread.h"
 
 namespace finroc
 {

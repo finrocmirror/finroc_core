@@ -24,7 +24,7 @@
 #include "core/tLockOrderLevels.h"
 #include "core/tRuntimeListener.h"
 #include "core/tLinkEdge.h"
-#include "finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/tCoreFlags.h"
 #include "core/port/net/tNetPort.h"

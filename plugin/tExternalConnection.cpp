@@ -24,7 +24,7 @@
 #include "core/tCoreFlags.h"
 #include "core/tLockOrderLevels.h"
 #include "core/parameter/tStructureParameterList.h"
-#include "finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {

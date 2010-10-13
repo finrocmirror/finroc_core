@@ -19,17 +19,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 
 #ifndef CORE__TRUNTIMEENVIRONMENT_H
 #define CORE__TRUNTIMEENVIRONMENT_H
 
 #include "core/tCoreRegister.h"
 #include "core/tFrameworkElement.h"
-#include "finroc_core_utils/container/tConcurrentMap.h"
+#include "rrlib/finroc_core_utils/container/tConcurrentMap.h"
 #include "core/tRuntimeListener.h"
-#include "finroc_core_utils/container/tSimpleListWithMutex.h"
-#include "finroc_core_utils/container/tSimpleList.h"
+#include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
+#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tLockOrderLevels.h"
 
 namespace finroc

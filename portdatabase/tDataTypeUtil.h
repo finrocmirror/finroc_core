@@ -22,7 +22,7 @@
 #ifndef CORE__PORTDATABASE__TDATATYPEUTIL_H
 #define CORE__PORTDATABASE__TDATATYPEUTIL_H
 
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 #include <boost/type_traits/has_virtual_destructor.hpp>
 
 namespace finroc
@@ -93,7 +93,7 @@ public:
 } // namespace finroc
 } // namespace core
 
-#include "tDataTypeUtil.hpp"
+#include "core/portdatabase/tDataTypeUtil.hpp"
 
 
 #endif // CORE__PORTDATABASE__TDATATYPEUTIL_H

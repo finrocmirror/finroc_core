@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 
 #ifndef CORE__PORT__NET__TNETPORT_H
 #define CORE__PORT__NET__TNETPORT_H
@@ -28,7 +28,7 @@
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/rpc/tSynchMethodCallLogic.h"
 #include "core/port/tAbstractPort.h"
-#include "finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/port/std/tPortListener.h"
 #include "core/port/cc/tCCPortListener.h"
 #include "core/port/cc/tCCPortDataContainer.h"

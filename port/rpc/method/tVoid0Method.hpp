@@ -28,7 +28,7 @@
 #include "core/port/rpc/tInterfaceServerPort.h"
 #include "core/port/rpc/tMethodCallException.h"
 #include "core/port/rpc/tRPCThreadPool.h"
-#include "finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {

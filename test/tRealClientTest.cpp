@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/test/tRealClientTest.h"
-#include "tcp/tTCPPeer.h"
-#include "tcp/tTCP.h"
+#include "plugins/tcp/tTCPPeer.h"
+#include "plugins/tcp/tTCP.h"
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeEnvironment.h"
 

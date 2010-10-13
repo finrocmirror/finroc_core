@@ -26,7 +26,7 @@
 #include "core/port/cc/tCCPortDataBufferPool.h"
 #include "core/port/cc/tCCPortQueueElement.h"
 #include "core/port/tThreadLocalCache.h"
-#include "finroc_core_utils/container/tAbstractReusable.h"
+#include "rrlib/finroc_core_utils/container/tAbstractReusable.h"
 
 namespace finroc
 {

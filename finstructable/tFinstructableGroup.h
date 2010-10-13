@@ -19,13 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 
 #ifndef CORE__FINSTRUCTABLE__TFINSTRUCTABLEGROUP_H
 #define CORE__FINSTRUCTABLE__TFINSTRUCTABLEGROUP_H
 
 #include "core/parameter/tStringStructureParameter.h"
-#include "finroc_core_utils/container/tSimpleList.h"
+#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/tFrameworkElement.h"
 #include "core/tFrameworkElementTreeFilter.h"

@@ -21,9 +21,9 @@
  */
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeEnvironment.h"
-#include "finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tRuntimeListener.h"
-#include "finroc_core_utils/tGarbageCollector.h"
+#include "rrlib/finroc_core_utils/tGarbageCollector.h"
 #include "core/parameter/tStructureParameterList.h"
 #include "core/buffers/tCoreOutput.h"
 

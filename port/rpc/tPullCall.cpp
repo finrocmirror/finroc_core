@@ -24,7 +24,7 @@
 #include "core/buffers/tCoreInput.h"
 #include "core/port/net/tNetPort.h"
 #include "core/port/tAbstractPort.h"
-#include "finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/std/tPortBase.h"
