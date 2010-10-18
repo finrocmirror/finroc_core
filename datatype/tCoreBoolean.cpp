@@ -27,6 +27,18 @@ namespace finroc
 namespace core
 {
 tDataType* tCoreBoolean::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreBoolean>());
+const tCoreBoolean tCoreBoolean::cTRUE(true), tCoreBoolean::cFALSE(false);
+
+tCoreBoolean::tCoreBoolean() :
+    value(false)
+{
+}
+
+tCoreBoolean::tCoreBoolean(bool value_) :
+    value(value_)
+{
+  // this();
+}
 
 } // namespace finroc
 } // namespace core

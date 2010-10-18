@@ -51,9 +51,12 @@ public:
   /*! Data Type */
   static tDataType* cTYPE;
 
-  tCoreBoolean() :
-      value(false)
-  {}
+  /*! Instances for True and false */
+  static const tCoreBoolean cTRUE, cFALSE;
+
+  tCoreBoolean();
+
+  tCoreBoolean(bool value_);
 
   virtual void Assign(tCCPortData* other)
   {
@@ -68,6 +71,19 @@ public:
   virtual void Deserialize(const util::tString& s)
   {
     value = s.Trim().ToLowerCase().Equals("true");
+  }
+
+  /*!
+   * \return Current value
+   */
+  inline bool Get() const
+  {
+    return value;
+  }
+
+  inline static const tCoreBoolean* GetInstance(bool value_)
+  {
+    return value_ ? &(cTRUE) : &(cFALSE);
   }
 
   inline tDataType* GetType()

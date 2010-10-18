@@ -30,16 +30,12 @@ namespace finroc
 namespace core
 {
 tRuntimeSettings* tRuntimeSettings::inst = GetInstance();
-const bool tRuntimeSettings::cCPP_CORE;
 tBoolSetting* tRuntimeSettings::cWARN_ON_CYCLE_TIME_EXCEED = tRuntimeSettings::inst->Add("WARN_ON_CYCLE_TIME_EXCEED", true, true);
 tLongSetting* tRuntimeSettings::cDEFAULT_CYCLE_TIME = tRuntimeSettings::inst->Add("DEFAULT_CYCLE_TIME", 50LL, true);
-tIntSetting* tRuntimeSettings::cNUM_OF_LOOP_THREADS = tRuntimeSettings::inst->Add("NUM_OF_LOOP_THREADS", 8, false);
-tIntSetting* tRuntimeSettings::cNUM_OF_EVENT_THREADS = tRuntimeSettings::inst->Add("NUM_OF_EVENT_THREADS", 2, false);
 tIntSetting* tRuntimeSettings::cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME = tRuntimeSettings::inst->Add("DEFAULT_MINIMUM_NETWORK_UPDATE_TIME", 40, true);
 const int tRuntimeSettings::cEDGE_LIST_DEFAULT_SIZE;
 const int tRuntimeSettings::cEDGE_LIST_SIZE_INCREASE_FACTOR;
 tIntSetting* tRuntimeSettings::cSTREAM_THREAD_CYCLE_TIME = tRuntimeSettings::inst->Add("STREAM_THREAD_CYCLE_TIME", 200, true);
-tIntSetting* tRuntimeSettings::running_in_applet = tRuntimeSettings::inst->Add("RUNNING_IN_APPLET", 0, false);
 tIntSetting* tRuntimeSettings::cGARBAGE_COLLECTOR_SAFETY_PERIOD = tRuntimeSettings::inst->Add("GARBAGE_COLLECTOR_SAFETY_PERIOD", 5000, true);
 const bool tRuntimeSettings::cCOLLECT_EDGE_STATISTICS;
 

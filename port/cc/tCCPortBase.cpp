@@ -68,6 +68,22 @@ void tCCPortBase::ApplyDefaultValue()
   Publish(tc, c);
 }
 
+void tCCPortBase::BrowserPublish(tCCPortDataContainer<>* buffer)
+{
+  assert((buffer->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId()));
+  tThreadLocalCache* tc = tThreadLocalCache::Get();
+
+  PublishImpl<false, cCHANGED, true>(tc, buffer);
+}
+
+bool tCCPortBase::ContainsDefaultValue()
+{
+  tCCInterThreadContainer<>* c = GetInInterThreadContainer();
+  bool result = c->GetType() == default_value->GetType() && c->ContentEquals(((tCCPortData*)default_value->GetDataPtr()));
+  c->Recycle2();
+  return result;
+}
+
 tCCPortBase::~tCCPortBase()
 {
   util::tLock lock1(this);

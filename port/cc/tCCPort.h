@@ -159,6 +159,17 @@ public:
     RemovePortListenerRaw(reinterpret_cast<tCCPortListener<>*>(listener));
   }
 
+  /*!
+   * Set default value
+   * This must be done before the port is used/initialized.
+   *
+   * \param t new default
+   */
+  inline void SetDefault(const T& t)
+  {
+    this->default_value->Assign(&(t));
+  }
+
 };
 
 } // namespace finroc

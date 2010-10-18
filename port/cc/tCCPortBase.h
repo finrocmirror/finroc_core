@@ -210,7 +210,7 @@ private:
     port_listener.Notify(this, ((tCCPortData*)tc->data->GetDataPtr()));
   }
 
-  template <bool cREVERSE, int8 cCHANGE_CONSTANT>
+  template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cINFORM_LISTENERS>
   /*!
    * Publish data
    *
@@ -218,11 +218,12 @@ private:
    * \param data Data to publish
    * \param reverse Value received in reverse direction?
    * \param changed_constant changedConstant to use
+   * \param inform_listeners Inform this port's listeners on change? (usually only when value comes from browser)
    */
-  inline void PublishImpl(tThreadLocalCache* tc, tCCPortDataContainer<>* data, bool reverse, int8 changed_constant)
+  inline void PublishImpl(tThreadLocalCache* tc, tCCPortDataContainer<>* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
   {
     assert((data->GetType() != NULL) && "Port data type not initialized");
-    assert((IsInitialized()) && "Port not initialized");
+    assert((IsInitialized() || cINFORM_LISTENERS) && "Port not initialized");
 
     util::tArrayWrapper<tCCPortBase*>* dests = cREVERSE ? edges_dest.GetIterable() : edges_src.GetIterable();
 
@@ -230,6 +231,12 @@ private:
     tc->data = data;
     tc->ref = data->GetCurrentRef();
     Assign(tc);
+
+    // inform listeners?
+    if (cINFORM_LISTENERS)
+    {
+      NotifyListeners(tc);
+    }
 
     // later optimization (?) - unroll loops for common short cases
     for (size_t i = 0u; i < dests->Size(); i++)
@@ -344,7 +351,7 @@ protected:
    */
   inline void Publish(tThreadLocalCache* tc, tCCPortDataContainer<>* data)
   {
-    PublishImpl<false, cCHANGED>(tc, data, false, cCHANGED);
+    PublishImpl<false, cCHANGED, false>(tc, data);
   }
 
   /*!
@@ -361,22 +368,22 @@ protected:
     {
       if (changed_constant == cCHANGED)
       {
-        PublishImpl<false, cCHANGED>(tc, data, false, cCHANGED);
+        PublishImpl<false, cCHANGED, false>(tc, data);
       }
       else
       {
-        PublishImpl<false, cCHANGED_INITIAL>(tc, data, false, cCHANGED_INITIAL);
+        PublishImpl<false, cCHANGED_INITIAL, false>(tc, data);
       }
     }
     else
     {
       if (changed_constant == cCHANGED)
       {
-        PublishImpl<true, cCHANGED>(tc, data, true, cCHANGED);
+        PublishImpl<true, cCHANGED, false>(tc, data);
       }
       else
       {
-        PublishImpl<true, cCHANGED_INITIAL>(tc, data, true, cCHANGED_INITIAL);
+        PublishImpl<true, cCHANGED_INITIAL, false>(tc, data);
       }
     }
 
@@ -496,6 +503,19 @@ public:
     tc->last_written_to_port[port_index] = tc->data;
     value = tc->ref;
   }
+
+  /*!
+   * Publish buffer through port
+   * (not in normal operation, but from browser; difference: listeners on this port will be notified)
+   *
+   * \param buffer Buffer with data (must be owned by current thread)
+   */
+  void BrowserPublish(tCCPortDataContainer<>* buffer);
+
+  /*!
+   * \return Does port contain default value?
+   */
+  bool ContainsDefaultValue();
 
   virtual ~tCCPortBase();
 

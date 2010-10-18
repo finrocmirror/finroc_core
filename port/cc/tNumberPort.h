@@ -147,7 +147,8 @@ public:
    */
   inline void Publish(int d)
   {
-    if (this->value->GetContainer()->IsOwnerThread() && (reinterpret_cast<tCoreNumber*>(this->value->GetData()))->IsInt(d, unit))
+    tCCPortDataRef* value = this->value;
+    if (value->GetContainer()->IsOwnerThread() && (reinterpret_cast<tCoreNumber*>(value->GetData()))->IsInt(d, unit))
     {
       return;
     }

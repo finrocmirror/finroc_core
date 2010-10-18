@@ -60,21 +60,6 @@ private:
 
 public:
 
-  /*!
-   * This is turned to #ifdefs in C++
-   * Perform checks on buffer usage and report unsafeties.
-   * If no such unsafeties are reported when running an application,
-   * this flag may be turned off in release mode to gain performance.
-   */
-  //public static final boolean CORE_DEBUG_CHECKS = false; // Replaced by asserts
-
-  /*!
-   * There's a Java and C++ version of this framework. Java modules can
-   * be used in both. This flag indicates, whether the Java modules are
-   * used together with a C++ core.
-   */
-  static const bool cCPP_CORE = false;
-
   /*! Display warning, if loop times of CoreLoopThreads are exceeded? */
   static tBoolSetting* cWARN_ON_CYCLE_TIME_EXCEED;
 
@@ -85,13 +70,13 @@ public:
   //public static final IntSetting MAX_THREADS = inst.add("MAX_THREADS", 256, false); // only required during initialization
 
   /*! Default number of loop threads */
-  static tIntSetting* cNUM_OF_LOOP_THREADS;
+  //public static final IntSetting NUM_OF_LOOP_THREADS = inst.add("NUM_OF_LOOP_THREADS", 8, false);
 
   /*! Default number of self updating loop threads */
   //public static final IntSetting SELF_UPDATING_LOOP_THREADS = inst.add("SELF_UPDATING_LOOP_THREADS", 8, false);
 
   /*! Default number of event threads */
-  static tIntSetting* cNUM_OF_EVENT_THREADS;
+  //public static final IntSetting NUM_OF_EVENT_THREADS = inst.add("NUM_OF_EVENT_THREADS", 2, false);
 
   /*! Maximum queue size for reference queues in ports */
   //public static final int MAX_PORT_REFERENCE_QUEUE_SIZE = getInt("MAX_PORT_REFERENCE_QUEUE_SIZE", Integer.MAX_VALUE);
@@ -121,8 +106,11 @@ public:
   /*! Cycle time for stream thread */
   static tIntSetting* cSTREAM_THREAD_CYCLE_TIME;
 
+  /*! Create tree node for every RuntimeElement class? (needed for tree view as in GUI) */
+  //@JavaOnly public static final BoolSetting CREATE_TREE_NODES_FOR_RUNTIME_ELEMENTS = inst.add("CREATE_TREE_NODES_FOR_RUNTIME_ELEMENTS", false, false);
+
   /*! > 0 if Runtime is instantiated in Java Applet - contains bit size of server CPU */
-  static tIntSetting* running_in_applet;
+  //public static final IntSetting runningInApplet = inst.add("RUNNING_IN_APPLET", 0, false);
 
   /*!
    * Period in ms after which garbage collector will delete objects... any threads

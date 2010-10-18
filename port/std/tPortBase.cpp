@@ -59,11 +59,16 @@ tPortBase::tPortBase(tPortCreationInfo pci) :
 void tPortBase::AddLock(tPublishCache& pc)
 {
   pc.set_locks++;
-  if (pc.set_locks > pc.lock_estimate)
+  if (pc.set_locks >= pc.lock_estimate)    // make lockEstimate bigger than setLocks to make notifyListeners() safe
   {
-    pc.lock_estimate = pc.set_locks;
+    pc.lock_estimate++;
     pc.cur_ref_counter->AddLock();
   }
+}
+
+void tPortBase::BrowserPublish(const tPortData* data)
+{
+  PublishImpl<false, cCHANGED, true>(data);
 }
 
 tPortData* tPortBase::CreateDefaultValue(tDataType* dt)

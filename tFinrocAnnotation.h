@@ -31,11 +31,16 @@ namespace finroc
 namespace core
 {
 class tAnnotatable;
+class tCoreInput;
+class tCoreOutput;
 
 /*!
  * \author Max Reichardt
  *
- * Base class for all finroc element annotations
+ * Base class for all finroc element annotations.
+ *
+ * If annotation should be available over the net (e.g. in finstruct),
+ * the serialization methods need to be overridden.
  */
 class tFinrocAnnotation : public tTypedObject
 {
@@ -64,6 +69,11 @@ public:
   {
   }
 
+  virtual void Deserialize(tCoreInput& is)
+  {
+    throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
+  }
+
   /*!
    * \return Object that is annotated - null if annotation is not attached to an object yet
    */
@@ -76,6 +86,11 @@ public:
    * initialize data type
    */
   void InitDataType();
+
+  virtual void Serialize(tCoreOutput& os) const
+  {
+    throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
+  }
 
 };
 

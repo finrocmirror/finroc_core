@@ -262,7 +262,7 @@ private:
   /*! makes adjustment to flags passed through constructor */
   static tPortCreationInfo& ProcessPci(tPortCreationInfo& pci);
 
-  template <bool cREVERSE, int8 cCHANGE_CONSTANT>
+  template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cINFORM_LISTENERS>
   /*!
    * (only for use by port classes)
    *
@@ -273,25 +273,32 @@ private:
    * \param cnc Data buffer acquired from a port using getUnusedBuffer
    * \param reverse Publish in reverse direction? (typical is forward)
    * \param changed_constant changedConstant to use
+   * \param inform_listeners Inform this port's listeners on change? (usually only when value comes from browser)
    */
-  inline void PublishImpl(const tPortData* data, bool reverse, int8 changed_constant)
+  inline void PublishImpl(const tPortData* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
   {
     assert((data->GetType() != NULL) && "Port data type not initialized");
     assert((data->GetManager() != NULL) && "Only port data obtained from a port can be sent");
-    assert(IsInitialized());
+    assert(IsInitialized() || cINFORM_LISTENERS);
 
     // assign
     util::tArrayWrapper<tPortBase*>* dests = cREVERSE ? edges_dest.GetIterable() : edges_src.GetIterable();
 
     tPublishCache pc;
 
-    pc.lock_estimate = 1 + dests->Size();
+    pc.lock_estimate = 2 + dests->Size();  // 2 to make things safe with respect to listeners
     pc.set_locks = 0;  // this port
     pc.cur_ref = data->GetCurReference();
     pc.cur_ref_counter = pc.cur_ref->GetRefCounter();
     pc.cur_ref_counter->SetOrAddLocks(static_cast<int8>(pc.lock_estimate));
     assert((pc.cur_ref->IsLocked()));
     Assign(pc);
+
+    // inform listeners?
+    if (cINFORM_LISTENERS)
+    {
+      NotifyListeners(&(pc));
+    }
 
     // later optimization (?) - unroll loops for common short cases
     for (size_t i = 0u; i < dests->Size(); i++)
@@ -495,22 +502,22 @@ protected:
     {
       if (changed_constant == cCHANGED)
       {
-        PublishImpl<false, cCHANGED>(data, false, cCHANGED);
+        PublishImpl<false, cCHANGED, false>(data);
       }
       else
       {
-        PublishImpl<false, cCHANGED_INITIAL>(data, false, cCHANGED_INITIAL);
+        PublishImpl<false, cCHANGED_INITIAL, false>(data);
       }
     }
     else
     {
       if (changed_constant == cCHANGED)
       {
-        PublishImpl<true, cCHANGED>(data, true, cCHANGED);
+        PublishImpl<true, cCHANGED, false>(data);
       }
       else
       {
-        PublishImpl<true, cCHANGED_INITIAL>(data, true, cCHANGED_INITIAL);
+        PublishImpl<true, cCHANGED_INITIAL, false>(data);
       }
     }
 
@@ -594,6 +601,22 @@ public:
   inline void AddPortListenerRaw(tPortListener<>* listener)
   {
     port_listener.Add(listener);
+  }
+
+  /*!
+   * Publish buffer through port
+   * (not in normal operation, but from browser; difference: listeners on this port will be notified)
+   *
+   * \param buffer Buffer with data (must be owned by current thread)
+   */
+  void BrowserPublish(const tPortData* data);
+
+  /*!
+   * \return Does port contain default value?
+   */
+  inline bool ContainsDefaultValue()
+  {
+    return value.Get()->GetData() == default_value;
   }
 
   virtual ~tPortBase();
@@ -708,7 +731,7 @@ public:
    */
   inline void Publish(const tPortData* data)
   {
-    PublishImpl<false, cCHANGED>(data, false, cCHANGED);
+    PublishImpl<false, cCHANGED, false>(data);
   }
 
   /*!
