@@ -24,7 +24,6 @@
 #ifndef CORE__PORT__STREAM__TTRANSACTION_H
 #define CORE__PORT__STREAM__TTRANSACTION_H
 
-#include "core/tRuntimeListener.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/buffers/tCoreOutput.h"
 #include "core/portdatabase/tTypedObjectImpl.h"
@@ -50,7 +49,7 @@ class tTransaction : public tTypedObject
 public:
 
   /*! Some basic opcodes */
-  static const int8 cADD = tRuntimeListener::cADD, cCHANGE = tRuntimeListener::cCHANGE, cREMOVE = tRuntimeListener::cREMOVE;
+  static const int8 cADD = 1, cCHANGE = 2, cREMOVE = 3;
 
   /*! Op code of transaction */
   int8 op_code;

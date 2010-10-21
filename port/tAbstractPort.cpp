@@ -594,7 +594,7 @@ void tAbstractPort::RawConnectToTarget(tAbstractPort* target)
   edges_src->Add(target, false);
   target->edges_dest->Add(this, false);
 
-  PublishUpdatedInfo(tRuntimeListener::cEDGE_CHANGE);
+  PublishUpdatedEdgeInfo(tRuntimeListener::cADD, target);
 }
 
 void tAbstractPort::RemoveInternal(tAbstractPort* src, tAbstractPort* dest)
@@ -616,7 +616,7 @@ void tAbstractPort::RemoveInternal(tAbstractPort* src, tAbstractPort* dest)
     dest->strategy = -1;
   }
 
-  src->PublishUpdatedInfo(tRuntimeListener::cEDGE_CHANGE);
+  src->PublishUpdatedEdgeInfo(tRuntimeListener::cADD, dest);
   dest->PropagateStrategy(NULL, NULL);
   src->PropagateStrategy(NULL, NULL);
 }

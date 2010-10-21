@@ -101,6 +101,14 @@ public:
     return value ? "true" : "false";
   }
 
+  /*!
+   * \param new_value New Value
+   */
+  inline void Set(bool new_value)
+  {
+    value = new_value;
+  }
+
 };
 
 } // namespace finroc

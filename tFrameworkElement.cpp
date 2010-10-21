@@ -770,11 +770,19 @@ void tFrameworkElement::PrintStructure(int indent, rrlib::logging::tLogStream& o
   }
 }
 
+void tFrameworkElement::PublishUpdatedEdgeInfo(int8 change_type, tAbstractPort* target)
+{
+  if (GetFlag(tCoreFlags::cPUBLISHED))
+  {
+    tRuntimeEnvironment::GetInstance()->RuntimeChange(change_type, this, target);
+  }
+}
+
 void tFrameworkElement::PublishUpdatedInfo(int8 change_type)
 {
   if (change_type == tRuntimeListener::cADD || GetFlag(tCoreFlags::cPUBLISHED))
   {
-    tRuntimeEnvironment::GetInstance()->RuntimeChange(change_type, this);
+    tRuntimeEnvironment::GetInstance()->RuntimeChange(change_type, this, NULL);
   }
 }
 

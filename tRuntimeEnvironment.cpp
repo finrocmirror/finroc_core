@@ -303,7 +303,7 @@ void tRuntimeEnvironment::RemoveListener(tRuntimeListener* listener)
   }
 }
 
-void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement* element)
+void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement* element, tAbstractPort* edge_target)
 {
   {
     util::tLock lock2(registry);

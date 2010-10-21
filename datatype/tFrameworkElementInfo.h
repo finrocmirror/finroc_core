@@ -24,6 +24,7 @@
 #ifndef CORE__DATATYPE__TFRAMEWORKELEMENTINFO_H
 #define CORE__DATATYPE__TFRAMEWORKELEMENTINFO_H
 
+#include "core/tRuntimeListener.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tEdgeAggregator.h"
@@ -103,6 +104,9 @@ private:
   static const int cEDGE_AGG_PARENT_FLAGS_TO_STORE = cPARENT_FLAGS_TO_STORE | tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS;
 
 public:
+
+  /*! EDGE_CHANGE Opcode */
+  static const int8 cEDGE_CHANGE = tRuntimeListener::cREMOVE + 1;
 
   /*! Op code: ADD CHANGE or DELETE */
   int8 op_code;

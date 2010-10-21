@@ -22,7 +22,6 @@
 #include "core/portdatabase/tDataType.h"
 #include "core/datatype/tFrameworkElementInfo.h"
 #include "core/buffers/tCoreInput.h"
-#include "core/tRuntimeListener.h"
 #include "core/port/net/tRemoteTypes.h"
 #include "core/buffers/tCoreOutput.h"
 #include "core/tFrameworkElement.h"
@@ -32,6 +31,7 @@ namespace finroc
 {
 namespace core
 {
+const int8 tFrameworkElementInfo::cEDGE_CHANGE;
 const int tFrameworkElementInfo::cPARENT_FLAGS_TO_STORE;
 const int tFrameworkElementInfo::cEDGE_AGG_PARENT_FLAGS_TO_STORE;
 
@@ -126,7 +126,7 @@ util::tString tFrameworkElementInfo::GetOpCodeString() const
     return "CHANGE";
   case tRuntimeListener::cREMOVE:
     return "REMOVE";
-  case tRuntimeListener::cEDGE_CHANGE:
+  case cEDGE_CHANGE:
     return "EDGE_CHANGE";
   default:
     return "INVALID OPCODE";

@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2010 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -19,24 +19,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/datatype/tCoreBoolean.h"
+#include "core/thread/tPeriodicFrameworkElementTask.h"
 #include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tCoreBoolean::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreBoolean>());
-const tCoreBoolean tCoreBoolean::cTRUE(true), tCoreBoolean::cFALSE(false);
+tDataType* tPeriodicFrameworkElementTask::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tPeriodicFrameworkElementTask>());
 
-tCoreBoolean::tCoreBoolean() :
-    value(false)
-{}
-
-tCoreBoolean::tCoreBoolean(bool value_) :
-    value(value_)
+tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, util::tTask* task_) :
+    task(task_),
+    incoming(incoming_ports),
+    outgoing(outgoing_ports),
+    previous_tasks(),
+    next_tasks()
 {
-  // this();
 }
 
 } // namespace finroc

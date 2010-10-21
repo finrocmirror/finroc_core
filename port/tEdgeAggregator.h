@@ -117,6 +117,14 @@ public:
   tAggregatedEdge* FindAggregatedEdge(tEdgeAggregator* dest);
 
   /*!
+   * \return Array with emerging edges. Can be iterated over concurrently.
+   */
+  inline util::tArrayWrapper<tAggregatedEdge*>* GetEmergingEdges()
+  {
+    return emerging_edges.GetIterable();
+  }
+
+  /*!
    * Update Edge Statistics: Called every time when data has been published
    *
    * \param source Source port

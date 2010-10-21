@@ -500,11 +500,12 @@ public:
    *
    * \param change_type Type of change (see Constants in Transaction class)
    * \param element FrameworkElement that changed
+   * \param edge_target Target of edge, in case of EDGE_CHANGE
    *
    * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
    * (should only be called by FrameworkElement class)
    */
-  void RuntimeChange(int8 change_type, tFrameworkElement* element);
+  void RuntimeChange(int8 change_type, tFrameworkElement* element, tAbstractPort* edge_target);
 
   /*!
    * Using only the basic constructs from this framework - things should shutdown

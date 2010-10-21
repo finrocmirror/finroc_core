@@ -24,6 +24,7 @@
 #ifndef CORE__PORT__STREAM__TSTREAMCOMMITTHREAD_H
 #define CORE__PORT__STREAM__TSTREAMCOMMITTHREAD_H
 
+#include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "core/thread/tCoreLoopThreadBase.h"
 

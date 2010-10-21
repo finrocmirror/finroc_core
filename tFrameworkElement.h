@@ -35,6 +35,7 @@ namespace finroc
 namespace core
 {
 class tRuntimeEnvironment;
+class tAbstractPort;
 class tCreateModuleAction;
 class tCoreOutput;
 
@@ -450,6 +451,16 @@ protected:
   //  @Virtual public void handleCallReturn(AbstractCall pc) {
   //      throw new RuntimeException("This FrameworkElement cannot handle call returns");
   //  }
+
+  /*!
+   * Publish updated edge information
+   *
+   * \param change_type Type of change (see Constants in RuntimeListener class)
+   * \param target Target of edge (this is source)
+   *
+   * (should only be called by AbstractPort class)
+   */
+  void PublishUpdatedEdgeInfo(int8 change_type, tAbstractPort* target);
 
   /*!
    * Publish updated port information

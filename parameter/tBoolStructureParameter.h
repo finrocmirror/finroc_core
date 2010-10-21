@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2010 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -19,26 +19,53 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "rrlib/finroc_core_utils/tJCBase.h"
+
+#ifndef CORE__PARAMETER__TBOOLSTRUCTUREPARAMETER_H
+#define CORE__PARAMETER__TBOOLSTRUCTUREPARAMETER_H
+
+#include "core/datatype/tCoreNumber.h"
 #include "core/datatype/tCoreBoolean.h"
-#include "core/portdatabase/tDataTypeRegister.h"
+#include "core/parameter/tStructureParameter.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tCoreBoolean::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreBoolean>());
-const tCoreBoolean tCoreBoolean::cTRUE(true), tCoreBoolean::cFALSE(false);
-
-tCoreBoolean::tCoreBoolean() :
-    value(false)
-{}
-
-tCoreBoolean::tCoreBoolean(bool value_) :
-    value(value_)
+/*!
+ * \author Max Reichardt
+ *
+ * Boolean Structure parameter.
+ */
+class tBoolStructureParameter : public tStructureParameter<tCoreBoolean>
 {
-  // this();
-}
+public:
+
+  tBoolStructureParameter(const util::tString& name, bool default_value) :
+      tStructureParameter<tCoreBoolean>(name, tCoreNumber::cTYPE)
+  {
+    Set(default_value);
+  }
+
+  /*!
+   * \return Current value
+   */
+  inline bool Get()
+  {
+    return ::finroc::core::tStructureParameter<tCoreBoolean>::GetValue()->Get();
+  }
+
+  /*!
+   * \param new_value New Value
+   */
+  inline void Set(bool new_value)
+  {
+    ::finroc::core::tStructureParameter<tCoreBoolean>::GetValue()->Set(new_value);
+  }
+
+};
 
 } // namespace finroc
 } // namespace core
 
+#endif // CORE__PARAMETER__TBOOLSTRUCTUREPARAMETER_H
