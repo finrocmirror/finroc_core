@@ -24,8 +24,9 @@
 #include "rrlib/finroc_core_utils/sFiles.h"
 #include "rrlib/xml2_wrapper/tXML2WrapperException.h"
 #include "core/portdatabase/tTypedObjectImpl.h"
-#include "core/tFrameworkElement.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
+#include "core/tFrameworkElement.h"
+#include "core/tFrameworkElementTreeFilter.h"
 #include "core/tCoreFlags.h"
 #include "core/parameter/tParameterInfo.h"
 
@@ -41,7 +42,6 @@ util::tString tConfigFile::cXML_LEAF_NAME = "value";
 tConfigFile::tConfigFile(const util::tString& filename_) :
     wrapped(),
     filename(filename_),
-    loading_parameters(false),
     temp_buffer()
 {
   if (util::sFiles::Exists(filename_))
@@ -62,21 +62,6 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
     wrapped = rrlib::xml2::tXMLDocument();
     wrapped.AddRootNode(cXML_BRANCH_NAME);
   }
-}
-
-tConfigFile* tConfigFile::Find(tFrameworkElement* element)
-{
-  tConfigFile* cf = static_cast<tConfigFile*>(element->GetAnnotation(cTYPE));
-  if (cf != NULL)
-  {
-    return cf;
-  }
-  tFrameworkElement* parent = element->GetParent();
-  if (parent != NULL)
-  {
-    return Find(parent);
-  }
-  return NULL;
 }
 
 rrlib::xml2::tXMLNode tConfigFile::GetEntry(const util::tString& entry, bool create)
@@ -194,9 +179,8 @@ void tConfigFile::LoadParameterValues()
   assert((ann != NULL));
   {
     util::tLock lock2(ann->GetRegistryLock());  // nothing should change while we're doing this
-    loading_parameters = true;
     tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
-    fet.TraverseElementTree(ann, this, temp_buffer);
+    fet.TraverseElementTree(ann, this, true, temp_buffer);
   }
 }
 
@@ -207,16 +191,15 @@ void tConfigFile::SaveFile()
   assert((ann != NULL));
   {
     util::tLock lock2(ann->GetRegistryLock());  // nothing should change while we're doing this
-    loading_parameters = false;
     tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
-    fet.TraverseElementTree(ann, this, temp_buffer);
+    fet.TraverseElementTree(ann, this, false, temp_buffer);
   }
 
   // write new tree to file
   wrapped.WriteToFile(filename);
 }
 
-void tConfigFile::TreeFilterCallback(tFrameworkElement* fe)
+void tConfigFile::TreeFilterCallback(tFrameworkElement* fe, bool loading_parameters)
 {
   if (Find(fe) == this)    // Does element belong to this configuration file?
   {

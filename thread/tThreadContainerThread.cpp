@@ -9,6 +9,7 @@
 #include "core/port/tAggregatedEdge.h"
 #include "core/tFinrocAnnotation.h"
 #include "core/tChildIterator.h"
+#include "core/thread/tExecutionControl.h"
 
 namespace finroc
 {
@@ -37,7 +38,7 @@ void tThreadContainerThread::MainLoopCallback()
 
       // find tasks
       tasks.Clear();
-      filter.TraverseElementTree(this->thread_container, this, tmp);
+      filter.TraverseElementTree(this->thread_container, this, NULL, tmp);
 
       // create task graph
       for (size_t i = 0u; i < tasks.Size(); i++)
@@ -213,8 +214,12 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
   trace.Remove(trace.Size() - 1);
 }
 
-void tThreadContainerThread::TreeFilterCallback(tFrameworkElement* fe)
+void tThreadContainerThread::TreeFilterCallback(tFrameworkElement* fe, bool unused)
 {
+  if (tExecutionControl::Find(fe)->GetAnnotated() != thread_container)    // don't handle elements in nested thread containers
+  {
+    return;
+  }
   tFinrocAnnotation* ann = fe->GetAnnotation(tPeriodicFrameworkElementTask::cTYPE);
   if (ann != NULL)
   {

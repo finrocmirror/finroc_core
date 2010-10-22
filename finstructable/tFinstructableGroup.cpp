@@ -32,6 +32,7 @@
 #include "core/plugin/tPlugins.h"
 #include "rrlib/xml2_wrapper/tXML2WrapperException.h"
 #include "rrlib/xml2_wrapper/tXMLDocument.h"
+#include "core/tFrameworkElementTreeFilter.h"
 #include "core/tChildIterator.h"
 #include "core/datatype/tCoreString.h"
 #include "rrlib/finroc_core_utils/sFiles.h"
@@ -47,7 +48,6 @@ tFinstructableGroup::tFinstructableGroup(const util::tString& name, tFrameworkEl
     tFrameworkElement(name, parent, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
     xml_file(new tStringStructureParameter("XML file", "")),
     current_xml_file(""),
-    root_tmp(NULL),
     connect_tmp(),
     link_tmp("")
 {
@@ -58,7 +58,6 @@ tFinstructableGroup::tFinstructableGroup(const util::tString& name, tFrameworkEl
     tFrameworkElement(name, parent, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
     xml_file(new tStringStructureParameter("XML file", "")),
     current_xml_file(""),
-    root_tmp(NULL),
     connect_tmp(),
     link_tmp("")
 {
@@ -301,12 +300,9 @@ void tFinstructableGroup::SaveXml()
       SerializeChildren(root, this);
 
       // serialize edges
-      root_tmp = &(root);
       link_tmp = GetQualifiedName() + "/";
       tFrameworkElementTreeFilter filter(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
-      util::tStringBuilder sb;
-      filter.TraverseElementTree(this, this, sb);
-      root_tmp = NULL;
+      filter.TraverseElementTree(this, this, root);
       doc.WriteToFile(current_xml_file);
       FINROC_LOG_STREAM(rrlib::logging::eLL_USER, log_domain, "Saving successful");
     }
@@ -362,7 +358,7 @@ void tFinstructableGroup::StructureParametersChanged()
   }
 }
 
-void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe)
+void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode& root)
 {
   assert((fe->IsPort()));
   tAbstractPort* ap = static_cast<tAbstractPort*>(fe);
@@ -398,7 +394,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe)
     }
 
     // save edge
-    rrlib::xml2::tXMLNode edge = root_tmp->AddChildNode("edge");
+    rrlib::xml2::tXMLNode edge = root.AddChildNode("edge");
     edge.SetAttribute("src", GetEdgeLink(ap));
     edge.SetAttribute("dest", GetEdgeLink(ap2));
   }
@@ -412,14 +408,14 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe)
       if (le->GetSourceLink().Length() > 0)
       {
         // save edge
-        rrlib::xml2::tXMLNode edge = root_tmp->AddChildNode("edge");
+        rrlib::xml2::tXMLNode edge = root.AddChildNode("edge");
         edge.SetAttribute("src", GetEdgeLink(le->GetSourceLink()));
         edge.SetAttribute("dest", GetEdgeLink(ap));
       }
       else
       {
         // save edge
-        rrlib::xml2::tXMLNode edge = root_tmp->AddChildNode("edge");
+        rrlib::xml2::tXMLNode edge = root.AddChildNode("edge");
         edge.SetAttribute("src", GetEdgeLink(ap));
         edge.SetAttribute("dest", GetEdgeLink(le->GetTargetLink()));
       }

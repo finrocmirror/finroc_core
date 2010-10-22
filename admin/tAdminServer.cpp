@@ -37,6 +37,7 @@
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/tFinrocAnnotation.h"
+#include "core/thread/tExecutionControl.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/tThreadLocalCache.h"
@@ -60,6 +61,9 @@ tVoid1Method<tAdminServer*, int> tAdminServer::cSAVE_FINSTRUCTABLE_GROUP(tAdminS
 tPort2Method<tAdminServer*, tMemBuffer*, int, tCoreString*> tAdminServer::cGET_ANNOTATION(tAdminServer::cMETHODS, "Get Annotation", "handle", "annotation type", false);
 tVoid4Method<tAdminServer*, int, tCoreString*, int, tMemBuffer*> tAdminServer::cSET_ANNOTATION(tAdminServer::cMETHODS, "Set Annotation", "handle", "dummy", "dummy", "annotation", false);
 tVoid1Method<tAdminServer*, int> tAdminServer::cDELETE_ELEMENT(tAdminServer::cMETHODS, "Delete Framework element", "handle", false);
+tVoid0Method<tAdminServer*> tAdminServer::cSTART_EXECUTION(tAdminServer::cMETHODS, "Start execution", false);
+tVoid0Method<tAdminServer*> tAdminServer::cPAUSE_EXECUTION(tAdminServer::cMETHODS, "Pause execution", false);
+tPort1Method<tAdminServer*, int, int> tAdminServer::cIS_RUNNING(tAdminServer::cMETHODS, "Is Framework element running", "handle", false);
 tDataType* tAdminServer::cDATA_TYPE = tDataTypeRegister::GetInstance()->AddMethodDataType("Administration method calls", &(tAdminServer::cMETHODS));
 util::tString tAdminServer::cPORT_NAME = "Administration";
 util::tString tAdminServer::cQUALIFIED_PORT_NAME = "Unrelated/Administration";
@@ -141,6 +145,22 @@ tMemBuffer* tAdminServer::HandleCall(const tAbstractMethod* method, int handle, 
     buf->GetManager()->GetCurrentRefCounter()->SetOrAddLocks(static_cast<int8>(1));
     return buf;
   }
+}
+
+int tAdminServer::HandleCall(const tAbstractMethod* method, int handle)
+{
+  assert((method == &(cIS_RUNNING)));
+  ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
+  if (fe != NULL && (fe->IsReady()))
+  {
+    tExecutionControl* ec = tExecutionControl::Find(fe);
+    if (ec == NULL)
+    {
+      return 0;
+    }
+    return ec->IsRunning() ? 1 : 0;
+  }
+  return -1;
 }
 
 void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int p1, int p2)
@@ -386,6 +406,20 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int handle)
   {
     FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Could not save finstructable group, because it does not appear to be available.");
   }
+}
+
+void tAdminServer::HandleVoidCall(const tAbstractMethod* method)
+{
+  assert((method == &(cSTART_EXECUTION) || method == &(cPAUSE_EXECUTION)));
+  if (method == &(cSTART_EXECUTION))
+  {
+    GetRuntime()->StartExecution();
+  }
+  else if (method == &(cPAUSE_EXECUTION))
+  {
+    GetRuntime()->StopExecution();
+  }
+
 }
 
 } // namespace finroc

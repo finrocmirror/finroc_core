@@ -24,13 +24,14 @@
 #ifndef CORE__THREAD__TCORELOOPTHREADBASE_H
 #define CORE__THREAD__TCORELOOPTHREADBASE_H
 
-#include "core/port/tThreadLocalCache.h"
 #include "rrlib/finroc_core_utils/thread/tLoopThread.h"
 
 namespace finroc
 {
 namespace core
 {
+class tThreadLocalCache;
+
 /*!
  * \author Max Reichardt
  *

@@ -527,6 +527,213 @@ public:
   }
 
   /*!
+   * Get Port container. Create if not yet existent.
+   *
+   * \param uid Port UID
+   * \return Port container
+   */
+  /*public PortContainer getPort(String uid) {
+      PortContainer result = ports.get(uid);
+      if (result == null) {
+          synchronized (ports) {  // make port container creation thread-safe - only part in code that modifies ports and indexedPorts
+              result = ports.get(uid);
+              if (result == null) {
+                  result = new PortContainer(getModule(Module.getModulePartOfUID(uid)), uid);
+                  ports.put(uid, result);
+                  indexedPorts.add(result.getIndex(), result); // result.getIndex() should always be last index
+              }
+          }
+      }
+      return result;
+  }*/
+
+  //  /**
+  //   * Adds edge
+  //   *
+  //   * \param sourceUid UID of source port
+  //   * \param destUid UID of destination port
+  //   * \return added edge
+  //   */
+  //  public Edge addEdge(String sourceUid, String destUid) {
+  //      Edge e = new Edge(sourceUid, destUid);
+  //      addEdge(e);
+  //      return e;
+  //  }
+
+  /*!
+   * Add edge.
+   *
+   * \param e Edge
+   */
+  //  public void addEdge(Edge e) {
+  //      synchronized(edges) {
+  //          edges.add(e);
+  //          e.register(getPort(e.getSourceUID()), getPort(e.getDestinationUID()));
+  //      }
+  //      reschedule();
+  //
+  //  }
+  //
+  //  /**
+  //   * remove Edge
+  //   *
+  //   * \param e Edge
+  //   */
+  //  public void removeEdge(Edge e) {
+  //      synchronized(edges) {
+  //          edges.remove(e);
+  //          e.unregister(edges);
+  //      }
+  //      reschedule();
+  //  }
+  //
+  //  /**
+  //   * Add flexbible edge.
+  //   *
+  //   * \param e Edge
+  //   */
+  //  public synchronized void addFlexEdge(FlexEdge e) {
+  //      flexEdges.add(e);
+  //      addListener(e, true);
+  //  }
+  //
+  //  /**
+  //   * remove flexible Edge
+  //   *
+  //   * \param e Edge
+  //   */
+  //  public synchronized void removeFlexEdge(FlexEdge e) {
+  //      removeListener(e);
+  //      flexEdges.remove(e);
+  //      e.delete();
+  //  }
+  //
+  //  /**
+  //   * Called by ports when they are initialized.
+  //   * Attaches them to PortContainer
+  //   *
+  //   * \param port Port to register
+  //   * \return PortContainer to which this port was attached
+  //   */
+  //  public synchronized <T extends PortData> PortContainer registerPort(Port<T> port) {
+  //      PortContainer pc = getPort(port.getUid());
+  //      port.setIndex(pc.getIndex());
+  //      pc.setPort(port);
+  //      if (port.isShared()) {
+  //          settings.sharedPorts.add(new PortInfo(pc));
+  //      }
+  //      existingPorts.add(port);
+  //      listeners.fireEvent(ADD, port);
+  //      reschedule();
+  //      return pc;
+  //  }
+  //
+  //  /**
+  //   * Called by ports when they are deleted.
+  //   * Detaches them from PortContainer
+  //   *
+  //   * \param port Port to unregister
+  //   */
+  //  public void unregisterPort(Port<?> port) {
+  //      listeners.fireEvent(REMOVE, port);
+  //      existingPorts.remove(port);
+  //      PortContainer pc = getPort(port.getUid());
+  //      if (pc.getPort() == port) {
+  //          pc.setPort(null);
+  //          if (port.isShared()) {
+  //              settings.sharedPorts.remove(port.getIndex());
+  //          }
+  //      }
+  //      reschedule();
+  //  }
+
+  //  /**
+  //   * \param index Index
+  //   * \return Loop Thread with specified index
+  //   */
+  //  public @Ref CoreLoopThread getLoopThread(int index) {
+  //      return loopThreads.get(index);
+  //  }
+  //
+  //  /**
+  //   * \param index Index
+  //   * \return Loop Thread with specified index
+  //   */
+  //  public @Ref CoreEventThread getEventThread(int index) {
+  //      return eventThreads.get(index);
+  //  }
+
+  //  /**
+  //   * Called by modules when they are initialized.
+  //   * Attaches them to ModuleContainer
+  //   *
+  //   * \param port Module to register
+  //   */
+  //  public void registerModule(Module module) {
+  //      ModuleContainer mc = getModule(module.getUid());
+  //      mc.setModule(module);
+  //      activeModuleCount++;
+  //      reschedule();
+  //  }
+  //
+  //  /**
+  //   * Get Module container. Create if not yet existent.
+  //   *
+  //   * \param uid Module UID
+  //   * \return Module container
+  //   */
+  //  public ModuleContainer getModule(String uid) {
+  //      ModuleContainer result = modules.get(uid);
+  //      if (result == null) {
+  //          synchronized (modules) {  // make port container creation thread-safe
+  //              result = modules.get(uid);
+  //              if (result == null) {
+  //                  result = new ModuleContainer(uid);
+  //                  modules.put(uid, result);
+  //              }
+  //          }
+  //      }
+  //      return result;
+  //  }
+  //
+  //  /**
+  //   * Called by modules when they are deleted.
+  //   * Detaches them from ModuleContainer
+  //   *
+  //   * \param port Module to unregister
+  //   */
+  //  public void unregisterModule(Module module) {
+  //      ModuleContainer mc = getModule(module.getUid());
+  //      if (mc.getModule() == module) {
+  //          mc.setModule(null);
+  //          activeModuleCount--;
+  //      }
+  //      reschedule();
+  //  }
+
+  //  /**
+  //   * Set reschedule flags for all loop threads
+  //   */
+  //  public void reschedule() {
+  //      for (int i = 0; i < loopThreads.size(); i++) {
+  //          loopThreads.get(i).setRescheduleFlag();
+  //      }
+  //  }
+  //
+
+  /*!
+   * Start executing all Modules and Thread Containers in runtime
+   */
+  void StartExecution();
+
+  /*!
+   * Stop executing all Modules and Thread Containers in runtime
+   */
+  void StopExecution();
+
+  void TreeFilterCallback(tFrameworkElement* fe, bool start);
+
+  /*!
    * Unregister framework element at RuntimeEnvironment.
    * This is done automatically and should not be called by a user.
    *

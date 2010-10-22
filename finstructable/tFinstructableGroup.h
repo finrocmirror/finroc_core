@@ -28,7 +28,6 @@
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/tFrameworkElement.h"
-#include "core/tFrameworkElementTreeFilter.h"
 
 namespace rrlib
 {
@@ -55,7 +54,7 @@ class tStructureParameterList;
  * XML file.
  * Changes made using finstruct can be saved back to these files.
  */
-class tFinstructableGroup : public tFrameworkElement, public tFrameworkElementTreeFilter::tCallback
+class tFinstructableGroup : public tFrameworkElement
 {
 private:
 
@@ -64,9 +63,6 @@ private:
 
   /*! contains name of XML that is currently used (variable is used to detect changes to xmlFile parameter) */
   util::tString current_xml_file;
-
-  /*! Temporary variable for save operation: XML root node */
-  rrlib::xml2::tXMLNode* root_tmp;
 
   /*! Temporary variable for save operation: List to store connected ports in */
   util::tSimpleList<tAbstractPort*> connect_tmp;
@@ -167,7 +163,7 @@ public:
 
   virtual void StructureParametersChanged();
 
-  void TreeFilterCallback(tFrameworkElement* fe);
+  void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode& root);
 
 };
 

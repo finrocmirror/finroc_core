@@ -32,6 +32,8 @@
 #include "core/port/rpc/method/tVoid4Method.h"
 #include "core/port/rpc/method/tVoid1Method.h"
 #include "core/port/rpc/method/tPort2Method.h"
+#include "core/port/rpc/method/tVoid0Method.h"
+#include "core/port/rpc/method/tPort1Method.h"
 #include "core/port/rpc/tInterfaceServerPort.h"
 #include "core/port/rpc/method/tAbstractMethodCallHandler.h"
 
@@ -87,6 +89,15 @@ public:
   /*! Delete element */
   static tVoid1Method<tAdminServer*, int> cDELETE_ELEMENT;
 
+  /*! Start/Resume application execution */
+  static tVoid0Method<tAdminServer*> cSTART_EXECUTION;
+
+  /*! Stop/Pause application execution */
+  static tVoid0Method<tAdminServer*> cPAUSE_EXECUTION;
+
+  /*! Is framework element with specified handle currently executing? */
+  static tPort1Method<tAdminServer*, int, int> cIS_RUNNING;
+
   /*! Data Type of method calls to this port */
   static tDataType* cDATA_TYPE;
 
@@ -114,6 +125,8 @@ public:
 
   tMemBuffer* HandleCall(const tAbstractMethod* method, int handle, tCoreString* type);
 
+  int HandleCall(const tAbstractMethod* method, int handle);
+
   void HandleVoidCall(const tAbstractMethod* method, int p1, int p2);
 
   void HandleVoidCall(const tAbstractMethod* method, int port_handle, tCCInterThreadContainer<>* cc_data, tPortData* port_data);
@@ -121,6 +134,8 @@ public:
   void HandleVoidCall(const tAbstractMethod* method, int cma_index, tCoreString* name, int parent_handle, tMemBuffer* params_buffer);
 
   void HandleVoidCall(const tAbstractMethod* method, int handle);
+
+  void HandleVoidCall(const tAbstractMethod* method);
 
 };
 

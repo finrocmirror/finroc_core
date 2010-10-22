@@ -36,6 +36,8 @@
 #include "core/tRuntimeSettings.h"
 #include "core/plugin/tPlugins.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "core/tFrameworkElementTreeFilter.h"
+#include "core/thread/tExecutionControl.h"
 
 namespace finroc
 {
@@ -351,6 +353,41 @@ void tRuntimeEnvironment::Shutdown()
     instance.reset();
   }
 
+}
+
+void tRuntimeEnvironment::StartExecution()
+{
+  {
+    util::tLock lock2(registry);
+    tFrameworkElementTreeFilter fet;
+    fet.TraverseElementTree(this, this, true);
+  }
+}
+
+void tRuntimeEnvironment::StopExecution()
+{
+  {
+    util::tLock lock2(registry);
+    tFrameworkElementTreeFilter fet;
+    fet.TraverseElementTree(this, this, false);
+  }
+}
+
+void tRuntimeEnvironment::TreeFilterCallback(tFrameworkElement* fe, bool start)
+{
+  // callback from startExecution() or stopExecution()
+  tExecutionControl* ec = static_cast<tExecutionControl*>(fe->GetAnnotation(tExecutionControl::cTYPE));
+  if (ec != NULL)
+  {
+    if (start)
+    {
+      ec->Start();
+    }
+    else
+    {
+      ec->Pause();
+    }
+  }
 }
 
 void tRuntimeEnvironment::UnregisterElement(tFrameworkElement* fe)

@@ -30,6 +30,7 @@
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/thread/tThreadContainerThread.h"
 #include "core/finstructable/tGroup.h"
+#include "core/thread/tStartAndPausable.h"
 
 namespace finroc
 {
@@ -41,7 +42,7 @@ namespace core
  * Contains thread that executes OrderedPeriodicTasks of all children.
  * Execution in performed in the order of the graph.
  */
-class tThreadContainer : public tGroup
+class tThreadContainer : public tGroup, public tStartAndPausable
 {
 private:
 
@@ -60,6 +61,11 @@ private:
   /*! Thread - while program is running - in pause mode null */
   ::std::tr1::shared_ptr<tThreadContainerThread> thread;
 
+  /*!
+   * Stop thread in thread container (does not block - call join thread to block until thread has terminated)
+   */
+  void StopThread();
+
 public:
 
   /*!
@@ -70,20 +76,20 @@ public:
 
   virtual ~tThreadContainer();
 
+  virtual bool IsExecuting();
+
   /*!
    * Block until thread has stopped
    */
   void JoinThread();
 
-  /*!
-   * Start thread in thread container
-   */
-  void StartThread();
+  virtual void PauseExecution()
+  {
+    StopThread();
+    JoinThread();
+  }
 
-  /*!
-   * Stop thread in thread container (does not block - call join thread to block until thread has terminated)
-   */
-  void StopThread();
+  virtual void StartExecution();
 
 };
 

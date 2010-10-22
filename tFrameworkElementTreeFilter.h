@@ -45,8 +45,6 @@ class tCoreOutput;
  */
 class tFrameworkElementTreeFilter : public tCoreSerializable
 {
-public:
-  class tCallback; // inner class forward declaration
 private:
 
   /*! Framework element's flags that are relevant */
@@ -109,18 +107,36 @@ public:
   /*!
    * Traverse (part of) element tree.
    * Only follows primary links (no links - this way, we don't have duplicates)
+   * (creates temporary StringBuilder => might not be suitable for real-time)
    *
    * \param <T> Type of callback class
    * \param root Root element of tree
-   * \param callback Callback class instance
+   * \param callback Callback class instance (needs to have method 'TreeFilterCallback(tFrameworkElement* fe, P customParam)')
+   * \param custom_param Custom parameter
+   */
+  template <typename T, typename P>
+  inline void TraverseElementTree(tFrameworkElement* root, T* callback, P custom_param) const
+  {
+    util::tStringBuilder sb;
+    TraverseElementTree(root, callback, custom_param, sb);
+  }
+
+  /*!
+   * Traverse (part of) element tree.
+   * Only follows primary links (no links - this way, we don't have duplicates)
+   *
+   * \param <T> Type of callback class
+   * \param root Root element of tree
+   * \param callback Callback class instance (needs to have method 'TreeFilterCallback(tFrameworkElement* fe, P customParam)')
+   * \param custom_param Custom parameter
    * \param tmp Temporary StringBuilder buffer
    */
-  template <typename T>
-  inline void TraverseElementTree(tFrameworkElement* root, T* callback, util::tStringBuilder& tmp) const
+  template <typename T, typename P>
+  inline void TraverseElementTree(tFrameworkElement* root, T* callback, P custom_param, util::tStringBuilder& tmp) const
   {
     if (Accept(root, tmp))
     {
-      callback->TreeFilterCallback(root);
+      callback->TreeFilterCallback(root, custom_param);
     }
     const util::tArrayWrapper<tFrameworkElement::tLink*>* children = root->GetChildren();
     for (int i = 0, n = children->Size(); i < n; i++)
@@ -128,31 +144,10 @@ public:
       tFrameworkElement::tLink* link = children->Get(i);
       if (link != NULL && link->GetChild() != NULL && link->IsPrimaryLink())
       {
-        TraverseElementTree(link->GetChild(), callback, tmp);
+        TraverseElementTree(link->GetChild(), callback, custom_param, tmp);
       }
     }
   }
-
-public:
-
-  /*!
-   * Classes that use FrameworkElementTreeFilter for traversing trees, should implement this interface.
-   *
-   * \author Max Reichardt
-   */
-  class tCallback : public util::tInterface
-  {
-  public:
-
-    /*!
-     * When traversing trees, called for every framework element that matches criteria
-     * (Method is non-virtual for efficiency reasons)
-     *
-     * \param fe Framework element that is currently being visited
-     */
-    virtual void TreeFilterCallback(tFrameworkElement* fe) = 0;
-
-  };
 
 };
 

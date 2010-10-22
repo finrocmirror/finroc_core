@@ -21,6 +21,8 @@
  */
 #include "core/thread/tThreadContainer.h"
 #include "core/parameter/tStructureParameterList.h"
+#include "core/tAnnotatable.h"
+#include "core/thread/tExecutionControl.h"
 #include "core/tFrameworkElement.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 
@@ -38,11 +40,11 @@ tThreadContainer::tThreadContainer(const util::tString& description, tFrameworkE
     thread()
 {
   tStructureParameterList::GetOrCreate(this)->Add(rt_thread);
+  AddAnnotation(new tExecutionControl(*this));
 }
 
 tThreadContainer::~tThreadContainer()
 {
-  util::tLock lock1(this);
   if (thread != NULL)
   {
     StopThread();
@@ -51,9 +53,18 @@ tThreadContainer::~tThreadContainer()
   ;
 }
 
+bool tThreadContainer::IsExecuting()
+{
+  ::std::tr1::shared_ptr<tThreadContainerThread> t = thread;
+  if (t != NULL)
+  {
+    return t->IsRunning();
+  }
+  return false;
+}
+
 void tThreadContainer::JoinThread()
 {
-  util::tLock lock1(this);
   if (thread != NULL)
   {
     try
@@ -68,9 +79,8 @@ void tThreadContainer::JoinThread()
   }
 }
 
-void tThreadContainer::StartThread()
+void tThreadContainer::StartExecution()
 {
-  util::tLock lock1(this);
   assert((thread == NULL));
   thread = util::sThreadUtil::GetThreadSharedPtr(new tThreadContainerThread(this, cycle_time->Get(), warn_on_cycle_time_exceed->Get()));
   if (rt_thread->Get())
@@ -81,7 +91,6 @@ void tThreadContainer::StartThread()
 
 void tThreadContainer::StopThread()
 {
-  util::tLock lock1(this);
   if (thread != NULL)
   {
     thread->StopThread();

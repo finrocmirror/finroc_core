@@ -19,49 +19,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/tFinrocAnnotation.h"
-#include "core/tFrameworkElement.h"
+#include "core/thread/tExecutionControl.h"
 #include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
-void tFinrocAnnotation::Append(tFinrocAnnotation* ann)
-{
-  if (next_annotation == NULL)
-  {
-    next_annotation = ann;
-  }
-  else
-  {
-    next_annotation->Append(ann);
-  }
-}
+tDataType* tExecutionControl::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tExecutionControl>());
 
-tFinrocAnnotation* tFinrocAnnotation::FindParentWithAnnotation(tFrameworkElement* fe, tDataType* type)
+tExecutionControl::tExecutionControl(tStartAndPausable& implementation_) :
+    implementation(&(implementation_))
 {
-  tFinrocAnnotation* ann = fe->GetAnnotation(type);
-  if (ann != NULL)
-  {
-    return ann;
-  }
-  tFrameworkElement* parent = fe->GetParent();
-  if (parent != NULL)
-  {
-    return FindParentWithAnnotation(parent, type);
-  }
-  return NULL;
-}
-
-void tFinrocAnnotation::InitDataType()
-{
-  if (this->type != NULL)
-  {
-    return;  // already set
-  }
-  this->type = tDataTypeRegister::GetInstance()->LookupDataType(this);
-  assert((this->type != NULL) && "Unknown Object type");
 }
 
 } // namespace finroc

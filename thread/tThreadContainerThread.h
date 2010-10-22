@@ -21,7 +21,7 @@ class tPeriodicFrameworkElementTask;
 class tAbstractPort;
 
 /*! ThreadContainer thread class */
-class tThreadContainerThread : public tCoreLoopThreadBase, public tRuntimeListener, public tFrameworkElementTreeFilter::tCallback
+class tThreadContainerThread : public tCoreLoopThreadBase, public tRuntimeListener
 {
 private:
 
@@ -87,7 +87,7 @@ public:
 
   virtual void StopThread();
 
-  void TreeFilterCallback(tFrameworkElement* fe);
+  void TreeFilterCallback(tFrameworkElement* fe, bool unused);
 
 };
 

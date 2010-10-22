@@ -32,6 +32,8 @@ namespace core
 {
 class tAnnotatable;
 class tCoreInput;
+class tFrameworkElement;
+class tDataType;
 class tCoreOutput;
 
 /*!
@@ -53,6 +55,19 @@ public:
 
   /*! Object that is annotated - null if annotation is not attached to an object yet */
   tAnnotatable* annotated;
+
+protected:
+
+  /*!
+   * Searches for parent with annotation of specified type
+   *
+   * \param fe Framework element to start searching at
+   * \param type Data Type
+   * \return Annotation of first parent that has one - or null
+   */
+  static tFinrocAnnotation* FindParentWithAnnotation(tFrameworkElement* fe, tDataType* type);
+
+public:
 
   tFinrocAnnotation() :
       next_annotation(NULL),

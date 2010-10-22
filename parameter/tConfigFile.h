@@ -25,9 +25,8 @@
 #define CORE__PARAMETER__TCONFIGFILE_H
 
 #include "rrlib/xml2_wrapper/tXMLDocument.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "core/tFinrocAnnotation.h"
-#include "core/tFrameworkElementTreeFilter.h"
+#include "rrlib/xml2_wrapper/tXMLNode.h"
 
 namespace finroc
 {
@@ -41,7 +40,7 @@ class tFrameworkElement;
  *
  * Configuration File. Is a tree of nodes with values as leafs
  */
-class tConfigFile : public tFinrocAnnotation, public tFrameworkElementTreeFilter::tCallback
+class tConfigFile : public tFinrocAnnotation
 {
 private:
 
@@ -50,9 +49,6 @@ private:
 
   /*! File name of configuration file */
   util::tString filename;
-
-  /*! Used to tell FrameworkElementTreeFilter.Callback whether we're currently loading or saving parameters */
-  bool loading_parameters;
 
   /*! Separator entries are divided with */
   static util::tString cSEPARATOR;
@@ -89,7 +85,10 @@ public:
    * \param element Element
    * \return ConfigFile - or null if none could be found
    */
-  static tConfigFile* Find(tFrameworkElement* element);
+  inline static tConfigFile* Find(tFrameworkElement* element)
+  {
+    return static_cast<tConfigFile*>(FindParentWithAnnotation(element, cTYPE));
+  }
 
   // TODO: reduce code duplication in hasEntry() and getEntry()
 
@@ -120,7 +119,7 @@ public:
    */
   void SaveFile();
 
-  void TreeFilterCallback(tFrameworkElement* fe);
+  void TreeFilterCallback(tFrameworkElement* fe, bool loading_parameters);
 
 };
 

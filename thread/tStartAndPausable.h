@@ -19,51 +19,42 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/tFinrocAnnotation.h"
-#include "core/tFrameworkElement.h"
-#include "core/portdatabase/tDataTypeRegister.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
+
+#ifndef CORE__THREAD__TSTARTANDPAUSABLE_H
+#define CORE__THREAD__TSTARTANDPAUSABLE_H
 
 namespace finroc
 {
 namespace core
 {
-void tFinrocAnnotation::Append(tFinrocAnnotation* ann)
+/*!
+ * \author Max Reichardt
+ *
+ * Interface for objects whose execution can be started and stopped
+ */
+class tStartAndPausable : public util::tInterface
 {
-  if (next_annotation == NULL)
-  {
-    next_annotation = ann;
-  }
-  else
-  {
-    next_annotation->Append(ann);
-  }
-}
+public:
 
-tFinrocAnnotation* tFinrocAnnotation::FindParentWithAnnotation(tFrameworkElement* fe, tDataType* type)
-{
-  tFinrocAnnotation* ann = fe->GetAnnotation(type);
-  if (ann != NULL)
-  {
-    return ann;
-  }
-  tFrameworkElement* parent = fe->GetParent();
-  if (parent != NULL)
-  {
-    return FindParentWithAnnotation(parent, type);
-  }
-  return NULL;
-}
+  /*!
+   * \return Whether element currently executing
+   */
+  virtual bool IsExecuting() = 0;
 
-void tFinrocAnnotation::InitDataType()
-{
-  if (this->type != NULL)
-  {
-    return;  // already set
-  }
-  this->type = tDataTypeRegister::GetInstance()->LookupDataType(this);
-  assert((this->type != NULL) && "Unknown Object type");
-}
+  /*!
+   * Stops execution
+   */
+  virtual void PauseExecution() = 0;
+
+  /*!
+   * Starts execution
+   */
+  virtual void StartExecution() = 0;
+
+};
 
 } // namespace finroc
 } // namespace core
 
+#endif // CORE__THREAD__TSTARTANDPAUSABLE_H
