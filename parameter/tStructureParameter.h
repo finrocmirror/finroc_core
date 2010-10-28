@@ -24,6 +24,7 @@
 #ifndef CORE__PARAMETER__TSTRUCTUREPARAMETER_H
 #define CORE__PARAMETER__TSTRUCTUREPARAMETER_H
 
+#include "core/portdatabase/tDataTypeRegister.h"
 #include "core/parameter/tStructureParameterBase.h"
 
 namespace finroc
@@ -71,14 +72,24 @@ public:
 
   typedef tStructureParameterBufferHelper<T, boost::is_base_of<tPortData, T>::value> tHelper;
 
+  tStructureParameter(const util::tString& name) :
+      tStructureParameterBase(name, tDataTypeRegister::GetInstance()->GetDataType<T>(), false)
+  {}
+
   /*!
    * \param name Name of parameter
    * \param type DataType of parameter
-   * \param const_parameter Constant parameter (usually the case, with constructor parameters)
-   * \param constructor_prototype Is this a CreteModuleActionPrototype (no buffer will be allocated)
+   * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
+   */
+  tStructureParameter(const util::tString& name, tDataType* type, bool constructor_prototype);
+
+  /*!
+   * \param name Name of parameter
+   * \param type DataType of parameter
+   * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
    * \param default_value Default value
    */
-  tStructureParameter(const util::tString& name, tDataType* type, bool const_parameter, bool constructor_prototype, const util::tString& default_value);
+  tStructureParameter(const util::tString& name, tDataType* type, bool constructor_prototype, const util::tString& default_value);
 
   /*!
    * Typical constructor for modules with empty constructor
@@ -96,6 +107,11 @@ public:
    */
   tStructureParameter(const util::tString& name, tDataType* type);
 
+  virtual ::finroc::core::tStructureParameterBase* DeepCopy()
+  {
+    return new tStructureParameter<T>(GetName(), GetType(), false, "");
+  }
+
   /*!
    * \return Current parameter value (without lock)
    * (without additional locks value is deleted, when parameter is - which doesn't happen while a module is running)
@@ -104,6 +120,19 @@ public:
   {
     return tHelper::Get(value, cc_value);
   }
+
+  /*!
+   * Interprets/returns value in other (cloned) list
+   *
+   * \param list other list
+   * \return Value in other list
+   */
+  /*@SuppressWarnings("unchecked")
+  public T interpret(StructureParameterList list) {
+      StructureParameter<T> param = (StructureParameter<T>)list.get(listIndex);
+      assert(param.getType() == getType());
+      return param.getValue();
+  }*/
 
 };
 

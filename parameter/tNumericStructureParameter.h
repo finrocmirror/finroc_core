@@ -26,6 +26,7 @@
 
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tBounds.h"
+#include "core/parameter/tStructureParameterBase.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/datatype/tCoreNumber.h"
 #include "core/parameter/tStructureParameter.h"
@@ -70,9 +71,18 @@ private:
 
 public:
 
+  tNumericStructureParameter(const util::tString& name, T default_value, bool constructor_prototype);
+
   tNumericStructureParameter(const util::tString& name, T default_value);
 
-  tNumericStructureParameter(const util::tString& name, T default_value, tBounds bounds_);
+  tNumericStructureParameter(const util::tString& name, T default_value, bool constructor_prototype, tBounds bounds_);
+
+  tNumericStructureParameter(const util::tString& name, T default_value, tBounds bounds2);
+
+  virtual ::finroc::core::tStructureParameterBase* DeepCopy()
+  {
+    return new tNumericStructureParameter<T>(GetName(), default_val, false, bounds);
+  }
 
   /*!
    * (not real-time capable in Java)
@@ -102,6 +112,19 @@ public:
     tCoreNumber cn(new_value);
     Set(&(cn));
   }
+
+  /*!
+   * Interprets/returns value in other (cloned) list
+   *
+   * \param list other list
+   * \return Value in other list
+   */
+  /*@SuppressWarnings("unchecked")
+  public T interpretSpec(StructureParameterList list) {
+      NumericStructureParameter<T> param = (NumericStructureParameter<T>)list.get(listIndex);
+      assert(param.getType() == getType());
+      return param.get();
+  }*/
 
 };
 

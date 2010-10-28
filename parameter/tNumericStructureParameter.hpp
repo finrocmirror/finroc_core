@@ -19,30 +19,65 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
 template<typename T>
-tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& name, T default_value) :
-    tStructureParameter<tCoreNumber>(name, tCoreNumber::cTYPE),
+tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& name, T default_value, bool constructor_prototype) :
+    tStructureParameter<tCoreNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>()), constructor_prototype),
     unit(&(tUnit::cNO_UNIT)),
     bounds(tBounds()),
     default_val(default_value)
 {
-  // this(name,defaultValue,new Bounds());
-  Set(default_value);
+  // this(name,defaultValue,constructorPrototype,new Bounds());
+  if (!constructor_prototype)
+  {
+    Set(default_value);
+  }
 }
 
 template<typename T>
-tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& name, T default_value, tBounds bounds_) :
-    tStructureParameter<tCoreNumber>(name, tCoreNumber::cTYPE),
+tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& name, T default_value) :
+    tStructureParameter<tCoreNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>()), false),
+    unit(&(tUnit::cNO_UNIT)),
+    bounds(tBounds()),
+    default_val(default_value)
+{
+  // this(name,defaultValue,false,new Bounds());
+  if (!false)
+  {
+    Set(default_value);
+  }
+}
+
+template<typename T>
+tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& name, T default_value, bool constructor_prototype, tBounds bounds_) :
+    tStructureParameter<tCoreNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>()), constructor_prototype),
     unit(&(tUnit::cNO_UNIT)),
     bounds(bounds_),
     default_val(default_value)
 {
-  Set(default_value);
+  if (!constructor_prototype)
+  {
+    Set(default_value);
+  }
+}
+
+template<typename T>
+tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& name, T default_value, tBounds bounds2) :
+    tStructureParameter<tCoreNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>()), false),
+    unit(&(tUnit::cNO_UNIT)),
+    bounds(bounds2),
+    default_val(default_value)
+{
+  // this(name,defaultValue,false,bounds2);
+  if (!false)
+  {
+    Set(default_value);
+  }
 }
 
 template<typename T>

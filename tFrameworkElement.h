@@ -37,6 +37,7 @@ namespace core
 class tRuntimeEnvironment;
 class tAbstractPort;
 class tCreateModuleAction;
+class tConstructorParameters;
 class tCoreOutput;
 
 /*!
@@ -1256,8 +1257,9 @@ public:
    * (should only be called by AdminServer and CreateModuleActions)
    *
    * \param create_action Action with which framework element was created
+   * \param params Parameters that module was created with (may be null)
    */
-  void SetFinstructed(tCreateModuleAction* create_action);
+  void SetFinstructed(tCreateModuleAction* create_action, tConstructorParameters* params);
 
   /*!
    * Called whenever a structure parameter on this framework element changed

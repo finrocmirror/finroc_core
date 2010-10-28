@@ -24,15 +24,15 @@
 #ifndef CORE__PARAMETER__TSTRINGSTRUCTUREPARAMETER_H
 #define CORE__PARAMETER__TSTRINGSTRUCTUREPARAMETER_H
 
+#include "core/portdatabase/tDataTypeRegister.h"
 #include "core/datatype/tCoreString.h"
+#include "core/parameter/tStructureParameterBase.h"
 #include "core/parameter/tStructureParameter.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-
 /*!
  * \author Max Reichardt
  *
@@ -42,19 +42,27 @@ class tStringStructureParameter : public tStructureParameter<tCoreString>
 {
 public:
 
-  tStringStructureParameter(const util::tString& name, bool const_parameter, bool constructor_prototype, const util::tString& default_value) :
-      tStructureParameter<tCoreString>(name, tCoreString::cTYPE, const_parameter, constructor_prototype, default_value)
+  tStringStructureParameter(const util::tString& name, bool constructor_prototype, const util::tString& default_value = "") :
+      tStructureParameter<tCoreString>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>()), constructor_prototype, default_value)
   {
   }
 
   tStringStructureParameter(const util::tString& name, const util::tString& default_value) :
-      tStructureParameter<tCoreString>(name, tCoreString::cTYPE, default_value)
+      tStructureParameter<tCoreString>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>()), default_value)
   {
   }
 
-  tStringStructureParameter(const util::tString& name, tDataType* type) :
-      tStructureParameter<tCoreString>(name, tCoreString::cTYPE)
+  tStringStructureParameter(const util::tString& name) :
+      tStructureParameter<tCoreString>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>()), "")
   {
+  }
+
+  /* (non-Javadoc)
+   * @see org.finroc.core.parameter.StructureParameter#deepCopy()
+   */
+  virtual ::finroc::core::tStructureParameterBase* DeepCopy()
+  {
+    return new tStringStructureParameter(GetName(), false, "");
   }
 
   /*!
@@ -72,6 +80,18 @@ public:
   {
     GetValue()->Get(sb);
   }
+
+  /*!
+   * Interprets/returns value in other (cloned) list
+   *
+   * \param list other list
+   * \return Value in other list
+   */
+  /*public String interpretSpec(StructureParameterList list) {
+      StringStructureParameter param = (StringStructureParameter)list.get(listIndex);
+      assert(param.getType() == getType());
+      return param.get();
+  }*/
 
 };
 

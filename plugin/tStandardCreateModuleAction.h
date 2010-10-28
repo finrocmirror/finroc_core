@@ -32,6 +32,7 @@ namespace finroc
 namespace core
 {
 class tFrameworkElement;
+class tConstructorParameters;
 class tStructureParameterList;
 
 /*!
@@ -77,7 +78,7 @@ public:
     tPlugins::GetInstance()->AddModuleType(this);
   }
 
-  virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tStructureParameterList* params) const
+  virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* params) const
   {
     return new T(name, parent);
   }

@@ -22,19 +22,60 @@
 #include "core/finstructable/tGroupInterface.h"
 #include "core/tAnnotatable.h"
 #include "core/parameter/tStructureParameterList.h"
+#include "core/tCoreFlags.h"
+#include "core/port/tPortFlags.h"
 
 namespace finroc
 {
 namespace core
 {
-tStandardCreateModuleAction<tGroupInterface> tGroupInterface::cCREATE_ACTION("core", "Interface", util::tTypedClass<tGroupInterface>());
+tStandardCreateModuleAction<tGroupInterface> tGroupInterface::cCREATE_ACTION("core", "Default Interface", util::tTypedClass<tGroupInterface>());
+tConstructorCreateModuleAction<tGroupInterface, tGroupInterface::tDataClassification, tGroupInterface::tPortDirection, bool, bool> tGroupInterface::cCOMPLEX_CREATE_ACTION("core", "Interface", util::tTypedClass<tGroupInterface>(), "Data classification, Port direction, Shared?, Unique Links");
 
 tGroupInterface::tGroupInterface(const util::tString& description, tFrameworkElement* parent) :
-    tEdgeAggregator(description, parent, 0),
+    tEdgeAggregator(description, parent, ::finroc::core::tEdgeAggregator::cIS_INTERFACE),
     ports(new tStructureParameter<tPortCreationList>("Ports", tPortCreationList::cTYPE))
 {
   AddAnnotation(new tStructureParameterList(ports));
   ports->GetValue()->InitialSetup(this, 0, true);
+}
+
+tGroupInterface::tGroupInterface(const util::tString& description, tFrameworkElement* parent, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link) :
+    tEdgeAggregator(description, parent, ComputePortFlags(data_class, port_dir, shared, unique_link)),
+    ports(new tStructureParameter<tPortCreationList>("Ports", tPortCreationList::cTYPE))
+{
+  AddAnnotation(new tStructureParameterList(ports));
+  ports->GetValue()->InitialSetup(this, 0, port_dir == tGroupInterface::eBOTH);
+}
+
+int tGroupInterface::ComputePortFlags(tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link)
+{
+  int flags = ::finroc::core::tEdgeAggregator::cIS_INTERFACE;
+  if (data_class == tGroupInterface::eSENSOR_DATA)
+  {
+    flags |= ::finroc::core::tEdgeAggregator::cSENSOR_DATA;
+  }
+  else if (data_class == tGroupInterface::eCONTROLLER_DATA)
+  {
+    flags |= ::finroc::core::tEdgeAggregator::cCONTROLLER_DATA;
+  }
+  if (shared)
+  {
+    flags |= tCoreFlags::cSHARED;
+  }
+  if (unique_link)
+  {
+    flags |= tCoreFlags::cGLOBALLY_UNIQUE_LINK;
+  }
+  if (port_dir == tGroupInterface::eINPUT_ONLY)
+  {
+    flags |= tPortFlags::cINPUT_PROXY;
+  }
+  else if (port_dir == tGroupInterface::eOUTPUT_ONLY)
+  {
+    flags |= tPortFlags::cOUTPUT_PROXY;
+  }
+  return flags;
 }
 
 } // namespace finroc

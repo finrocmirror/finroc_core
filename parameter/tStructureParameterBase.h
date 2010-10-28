@@ -54,6 +54,7 @@ class tCoreOutput;
  */
 class tStructureParameterBase : public tCoreSerializable
 {
+  friend class tStructureParameterList;
 private:
 
   /*! Name of parameter */
@@ -62,9 +63,6 @@ private:
   /*! DataType of parameter */
   tDataType* type;
 
-  /*! Constant parameter (usually the case, with constructor parameters) */
-  bool const_parameter;
-
 protected:
 
   /*! Current parameter value (in CreateModuleAction-prototypes this is null) - Standard type */
@@ -72,6 +70,9 @@ protected:
 
   /*! Current parameter value (in CreateModuleAction-prototypes this is null) - CC type */
   tCCInterThreadContainer<>* cc_value;
+
+  /*! Index in parameter list */
+  int list_index;
 
 public:
 
@@ -126,10 +127,18 @@ public:
   /*!
    * \param name Name of parameter
    * \param type DataType of parameter
-   * \param const_parameter Constant parameter (usually the case, with constructor parameters)
    * \param constructor_prototype Is this a CreteModuleActionPrototype (no buffer will be allocated)
    */
-  tStructureParameterBase(const util::tString& name_, tDataType* type_, bool const_parameter_, bool constructor_prototype);
+  tStructureParameterBase(const util::tString& name_, tDataType* type_, bool constructor_prototype);
+
+  /*!
+   * (should be overridden by subclasses)
+   * \return Deep copy of parameter (without value)
+   */
+  virtual tStructureParameterBase* DeepCopy()
+  {
+    throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
+  }
 
   virtual ~tStructureParameterBase()
   {
@@ -154,14 +163,6 @@ public:
   inline tDataType* GetType()
   {
     return type;
-  }
-
-  /*!
-   * \return Constant parameter (usually the case, with constructor parameters)
-   */
-  inline bool IsConstParameter()
-  {
-    return const_parameter;
   }
 
   virtual void Serialize(tCoreOutput& os) const;

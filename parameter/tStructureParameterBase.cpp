@@ -32,12 +32,12 @@ namespace finroc
 {
 namespace core
 {
-tStructureParameterBase::tStructureParameterBase(const util::tString& name_, tDataType* type_, bool const_parameter_, bool constructor_prototype) :
+tStructureParameterBase::tStructureParameterBase(const util::tString& name_, tDataType* type_, bool constructor_prototype) :
     name(name_),
     type(type_),
-    const_parameter(const_parameter_),
     value(NULL),
-    cc_value(NULL)
+    cc_value(NULL),
+    list_index(0)
 {
   if (!constructor_prototype)
   {
@@ -83,7 +83,6 @@ void tStructureParameterBase::Deserialize(tCoreInput& is)
   {
     is.ReadString();
     is.ReadString();
-    is.ReadBoolean();
   }
   if (is.ReadBoolean())
   {
@@ -118,7 +117,6 @@ void tStructureParameterBase::Serialize(tCoreOutput& os) const
 {
   os.WriteString(name);
   os.WriteString(type->GetName());
-  os.WriteBoolean(const_parameter);
   tTypedObject* val = ValPointer();
 
   os.WriteBoolean(val != NULL);
@@ -145,7 +143,6 @@ void tStructureParameterBase::Set(const util::tString& s)
   }
   else
   {
-    assert((!const_parameter));
     assert((type != NULL));
     tDataType* dt = sSerializationHelper::GetTypedStringDataType(type, s);
     tTypedObject* val = ValPointer();

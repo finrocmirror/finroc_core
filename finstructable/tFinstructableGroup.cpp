@@ -24,12 +24,12 @@
 #include "core/tAnnotatable.h"
 #include "core/parameter/tStructureParameterList.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "core/parameter/tStructureParameterBase.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/tAbstractPort.h"
+#include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "core/plugin/tCreateModuleAction.h"
 #include "core/plugin/tPlugins.h"
+#include "core/parameter/tConstructorParameters.h"
 #include "rrlib/xml2_wrapper/tXML2WrapperException.h"
 #include "rrlib/xml2_wrapper/tXMLDocument.h"
 #include "core/tFrameworkElementTreeFilter.h"
@@ -71,22 +71,6 @@ tFinstructableGroup::tFinstructableGroup(const util::tString& name, tFrameworkEl
   catch (const util::tException& e)
   {
     FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
-  }
-}
-
-void tFinstructableGroup::DeserializeParameterList(rrlib::xml2::tXMLNode& node, tStructureParameterList* params)
-{
-  util::tSimpleList<rrlib::xml2::tXMLNode> vec;
-  vec.AddAll(node.GetChildren());
-  if (vec.Size() != params->Size())
-  {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Parameter list size and number of xml parameters differ. Trying anyway");
-  }
-  int count = util::tMath::Min(vec.Size(), params->Size());
-  for (int i = 0; i < count; i++)
-  {
-    tStructureParameterBase* param = params->Get(i);
-    param->Deserialize(vec.Get(i));
   }
 }
 
@@ -150,41 +134,46 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
       return;
     }
 
-    // get parameter node
+    // read parameters
     util::tSimpleList<rrlib::xml2::tXMLNode> children;
     children.AddAll(node.GetChildren());
-    rrlib::xml2::tXMLNode parameters = children.Get(0);
-    util::tString p_name = parameters.GetName();
-    if (!p_name.Equals("parameters"))
+    int idx = 0;
+    rrlib::xml2::tXMLNode* parameters = NULL;
+    rrlib::xml2::tXMLNode* constructor_params = NULL;
+    rrlib::xml2::tXMLNode xn = children.Get(idx);
+    util::tString p_name = xn.GetName();
+    if (p_name.Equals("constructor"))
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Failed to instantiate element. No parameters found. Skipping...");
-      return;
+      constructor_params = &(xn);
+      idx++;
+      xn = children.Get(idx);
+      p_name = xn.GetName();
+    }
+    if (p_name.Equals("parameters"))
+    {
+      parameters = &(xn);
+      idx++;
     }
 
     // create mode
-    bool standard_finroc_module = (action->GetParameterTypes() == NULL) || (action->GetParameterTypes()->Size() == 0);
     ::finroc::core::tFrameworkElement* created = NULL;
-    if (standard_finroc_module)
+    tConstructorParameters* spl = NULL;
+    if (constructor_params != NULL)
     {
-      // mode1: Finroc standard module with empty constructor that creates its parameters by itself
-      created = action->CreateModule(name, parent, NULL);
-      created->SetFinstructed(action);
-      created->Init();
-      DeserializeParameterList(parameters, static_cast<tStructureParameterList*>(created->GetAnnotation(tStructureParameterList::cTYPE)));
-      created->StructureParametersChanged();
+      spl = action->GetParameterTypes()->Instantiate();
+      spl->Deserialize(*constructor_params);
     }
-    else
+    created = action->CreateModule(name, parent, spl);
+    created->SetFinstructed(action, spl);
+    created->Init();
+    if (parameters != NULL)
     {
-      // mode2: module that already needs parameters for constructor
-      tStructureParameterList* spl = action->GetParameterTypes()->CloneList();
-      DeserializeParameterList(parameters, spl);
-      created = action->CreateModule(name, parent, spl);
-      created->SetFinstructed(action);
-      created->Init();
+      (static_cast<tStructureParameterList*>(created->GetAnnotation(tStructureParameterList::cTYPE)))->Deserialize(*parameters);
+      created->StructureParametersChanged();
     }
 
     // continue with children
-    for (size_t i = 1u; i < children.Size(); i++)
+    for (size_t i = idx; i < children.Size(); i++)
     {
       rrlib::xml2::tXMLNode node2 = children.Get(i);
       util::tString name2 = node2.GetName();
@@ -322,7 +311,8 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
   while ((fe = ci.Next()) != NULL)
   {
     tStructureParameterList* spl = static_cast<tStructureParameterList*>(fe->GetAnnotation(tStructureParameterList::cTYPE));
-    if (fe->IsReady() && fe->GetFlag(tCoreFlags::cFINSTRUCTED) && spl != NULL)
+    tConstructorParameters* cps = static_cast<tConstructorParameters*>(fe->GetAnnotation(tConstructorParameters::cTYPE));
+    if (fe->IsReady() && fe->GetFlag(tCoreFlags::cFINSTRUCTED))
     {
       // serialize framework element
       rrlib::xml2::tXMLNode n = node.AddChildNode("element");
@@ -330,13 +320,15 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
       tCreateModuleAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(spl->GetCreateAction());
       n.SetAttribute("group", cma->GetModuleGroup());
       n.SetAttribute("type", cma->GetName());
-      rrlib::xml2::tXMLNode pn = n.AddChildNode("parameters");
-      for (size_t i = 0u; i < spl->Size(); i++)
+      if (cps != NULL)
       {
-        rrlib::xml2::tXMLNode p = pn.AddChildNode("parameter");
-        tStructureParameterBase* param = spl->Get(i);
-        p.SetAttribute("name", param->GetName());
-        param->Serialize(p);
+        rrlib::xml2::tXMLNode pn = n.AddChildNode("constructor");
+        cps->Serialize(pn);
+      }
+      if (spl != NULL)
+      {
+        rrlib::xml2::tXMLNode pn = n.AddChildNode("parameters");
+        spl->Serialize(pn);
       }
 
       // serialize its children

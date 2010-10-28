@@ -24,6 +24,9 @@
 #include "core/parameter/tStructureParameterBase.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/tFrameworkElement.h"
+#include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/parameter/tConstructorParameters.h"
 #include "core/buffers/tCoreOutput.h"
 
 namespace finroc
@@ -42,6 +45,7 @@ void tStructureParameterList::Add(tStructureParameterBase* param)
 {
   if (param != NULL)
   {
+    param->list_index = parameters.Size();
     parameters.Add(param);
   }
 }
@@ -52,18 +56,6 @@ void tStructureParameterList::Clear()
   {
     delete parameters.Remove(i);
   }
-}
-
-tStructureParameterList* tStructureParameterList::CloneList() const
-{
-  tStructureParameterList* c = new tStructureParameterList();
-  c->create_action = create_action;
-  for (size_t i = 0u; i < parameters.Size(); i++)
-  {
-    tStructureParameterBase* p = parameters.Get(i);
-    c->parameters.Add(new tStructureParameterBase(p->GetName(), p->GetType(), p->IsConstParameter(), true));
-  }
-  return c;
 }
 
 void tStructureParameterList::Deserialize(tCoreInput& is)
@@ -88,6 +80,22 @@ void tStructureParameterList::Deserialize(tCoreInput& is)
   }
 }
 
+void tStructureParameterList::Deserialize(const rrlib::xml2::tXMLNode& node)
+{
+  util::tSimpleList<rrlib::xml2::tXMLNode> vec;
+  vec.AddAll(node.GetChildren());
+  if (vec.Size() != Size())
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Parameter list size and number of xml parameters differ. Trying anyway");
+  }
+  int count = util::tMath::Min(vec.Size(), Size());
+  for (int i = 0; i < count; i++)
+  {
+    tStructureParameterBase* param = Get(i);
+    param->Deserialize(vec.Get(i));
+  }
+}
+
 tStructureParameterList* tStructureParameterList::GetOrCreate(tFrameworkElement* fe)
 {
   tStructureParameterList* result = static_cast<tStructureParameterList*>(fe->GetAnnotation(cTYPE));
@@ -99,6 +107,19 @@ tStructureParameterList* tStructureParameterList::GetOrCreate(tFrameworkElement*
   return result;
 }
 
+tConstructorParameters* tStructureParameterList::Instantiate() const
+{
+  tConstructorParameters* cp = new tConstructorParameters();
+  tStructureParameterList* c = cp;
+  c->create_action = create_action;
+  for (size_t i = 0u; i < parameters.Size(); i++)
+  {
+    tStructureParameterBase* p = parameters.Get(i);
+    c->Add(p->DeepCopy());
+  }
+  return cp;
+}
+
 void tStructureParameterList::Serialize(tCoreOutput& os) const
 {
   os.WriteInt(create_action);
@@ -106,6 +127,17 @@ void tStructureParameterList::Serialize(tCoreOutput& os) const
   for (size_t i = 0u; i < parameters.Size(); i++)
   {
     parameters.Get(i)->Serialize(os);
+  }
+}
+
+void tStructureParameterList::Serialize(rrlib::xml2::tXMLNode& node) const
+{
+  for (size_t i = 0u; i < Size(); i++)
+  {
+    rrlib::xml2::tXMLNode p = node.AddChildNode("parameter");
+    tStructureParameterBase* param = Get(i);
+    p.SetAttribute("name", param->GetName());
+    param->Serialize(p);
   }
 }
 

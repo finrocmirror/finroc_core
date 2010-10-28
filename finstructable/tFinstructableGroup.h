@@ -42,7 +42,6 @@ namespace finroc
 namespace core
 {
 class tAbstractPort;
-class tStructureParameterList;
 
 /*!
  * \author Max Reichardt
@@ -79,14 +78,6 @@ public:
   RRLIB_LOG_CREATE_NAMED_DOMAIN(edge_log, "finstructable");
 
 private:
-
-  /*!
-   * Deserialize parameter list
-   *
-   * \param node XML node containing parameters
-   * \param params StructureParameterList to deserialize values of
-   */
-  void DeserializeParameterList(rrlib::xml2::tXMLNode& node, tStructureParameterList* params);
 
   /*!
    * \param cRelative port link

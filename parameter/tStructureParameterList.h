@@ -29,6 +29,14 @@
 #include "core/plugin/tPlugins.h"
 #include "core/tFinrocAnnotation.h"
 
+namespace rrlib
+{
+namespace xml2
+{
+class tXMLNode;
+} // namespace rrlib
+} // namespace xml2
+
 namespace finroc
 {
 namespace core
@@ -37,6 +45,7 @@ class tDataType;
 class tStructureParameterBase;
 class tCoreInput;
 class tFrameworkElement;
+class tConstructorParameters;
 class tCoreOutput;
 class tCreateModuleAction;
 
@@ -68,7 +77,7 @@ public:
 
 private:
 
-  /*! Clear list */
+  /*! Clear list (deletes parameters) */
   void Clear();
 
 public:
@@ -116,13 +125,6 @@ public:
    */
   void Add(tStructureParameterBase* param);
 
-  /*!
-   * Clone parameter list - deep-copy without values
-   *
-   * \return Cloned list
-   */
-  tStructureParameterList* CloneList() const;
-
   virtual ~tStructureParameterList()
   {
     Clear();
@@ -135,6 +137,9 @@ public:
   {
     sSerializationHelper::DeserializeFromHexString(this, s);
   }
+
+  // only used in FinstructableGroup
+  virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
 
   /*!
    * \param i Index
@@ -161,12 +166,23 @@ public:
    */
   static tStructureParameterList* GetOrCreate(tFrameworkElement* fe);
 
+  /*!
+   * If this is constructor parameter prototype: create instance that can be filled with values
+   * (More or less clones parameter list (deep-copy without values))
+   *
+   * \return Cloned list
+   */
+  tConstructorParameters* Instantiate() const;
+
   virtual void Serialize(tCoreOutput& os) const;
 
   virtual util::tString Serialize() const
   {
     return sSerializationHelper::SerializeToHexString(this);
   }
+
+  // only used in FinstructableGroup
+  virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
 
   /*!
    * \param create_action CreateModuleAction that was used to create framework element

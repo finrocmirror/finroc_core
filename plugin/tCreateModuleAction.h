@@ -29,6 +29,7 @@ namespace finroc
 namespace core
 {
 class tFrameworkElement;
+class tConstructorParameters;
 class tStructureParameterList;
 
 /*!
@@ -46,10 +47,10 @@ public:
    *
    * \param name Name of instantiated module
    * \param parent Parent of instantiated module
-   * \param parameters Parameters
+   * \param params Parameters
    * \return Created Module (or Group)
    */
-  virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tStructureParameterList* params) const = 0;
+  virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* params) const = 0;
 
   /*!
    * \return Returns name of group to which this create module action belongs

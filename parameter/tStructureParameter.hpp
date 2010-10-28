@@ -25,11 +25,17 @@ namespace finroc
 namespace core
 {
 template<typename T>
-tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType* type, bool const_parameter, bool constructor_prototype, const util::tString& default_value) :
-    tStructureParameterBase(name, type, const_parameter, constructor_prototype)
+tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType* type, bool constructor_prototype) :
+    tStructureParameterBase(name, type, constructor_prototype)
+{
+}
+
+template<typename T>
+tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType* type, bool constructor_prototype, const util::tString& default_value) :
+    tStructureParameterBase(name, type, constructor_prototype)
 {
   util::tString dv = default_value;
-  if (dv.Length() > 0)
+  if ((!constructor_prototype) && dv.Length() > 0)
   {
     try
     {
@@ -44,11 +50,11 @@ tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType
 
 template<typename T>
 tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType* type, const util::tString& default_value) :
-    tStructureParameterBase(name, type, false, false)
+    tStructureParameterBase(name, type, false)
 {
-  // this(name,type,false,false,defaultValue);
+  // this(name,type,false,defaultValue);
   util::tString dv = default_value;
-  if (dv.Length() > 0)
+  if ((!false) && dv.Length() > 0)
   {
     try
     {
@@ -63,12 +69,12 @@ tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType
 
 template<typename T>
 tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType* type) :
-    tStructureParameterBase(name, type, false, false)
+    tStructureParameterBase(name, type, false)
 {
   // this(name,type,"");
-  // this(name,type,false,false,defaultValue);
+  // this(name,type,false,defaultValue);
   util::tString dv = "";
-  if (dv.Length() > 0)
+  if ((!false) && dv.Length() > 0)
   {
     try
     {

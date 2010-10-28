@@ -42,6 +42,7 @@
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/std/tPortBase.h"
+#include "core/parameter/tConstructorParameters.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/parameter/tStructureParameterBase.h"
 #include "core/finstructable/tFinstructableGroup.h"
@@ -269,7 +270,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int port_handle
 
 void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int cma_index, tCoreString* name, int parent_handle, tMemBuffer* params_buffer)
 {
-  tStructureParameterList* params = NULL;
+  tConstructorParameters* params = NULL;
   if (method == &(cSET_ANNOTATION))
   {
     assert((name == NULL));
@@ -310,42 +311,45 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int cma_index, 
   {
     try
     {
-      tCreateModuleAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(cma_index);
-      ::finroc::core::tFrameworkElement* parent = tRuntimeEnvironment::GetInstance()->GetElement(parent_handle);
-      if (parent == NULL || (!parent->IsReady()))
       {
-        FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Parent not available. Cancelling remote module creation.");
-      }
-      else
-      {
-        FINROC_LOG_STREAM(rrlib::logging::eLL_USER, log_domain, "Creating Module ", parent->GetQualifiedLink(), "/", name->ToString());
-
-        if (cma->GetParameterTypes() != NULL && cma->GetParameterTypes()->Size() > 0)
+        util::tLock lock4(GetRegistryLock());
+        tCreateModuleAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(cma_index);
+        ::finroc::core::tFrameworkElement* parent = tRuntimeEnvironment::GetInstance()->GetElement(parent_handle);
+        if (parent == NULL || (!parent->IsReady()))
         {
-          params = cma->GetParameterTypes()->CloneList();
-          tCoreInput ci(params_buffer);
-          for (size_t i = 0u; i < params->Size(); i++)
-          {
-            tStructureParameterBase* param = params->Get(i);
-            util::tString s = ci.ReadString();
-            try
-            {
-              param->Set(s);
-            }
-            catch (const util::tException& e)
-            {
-              FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Error parsing '", s, "' for parameter ", param->GetName());
-              FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
-            }
-          }
-          ci.Close();
+          FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Parent not available. Cancelling remote module creation.");
         }
-        ::finroc::core::tFrameworkElement* created = cma->CreateModule(name->ToString(), parent, params);
-        created->SetFinstructed(cma);
-        created->Init();
-        params = NULL;
+        else
+        {
+          FINROC_LOG_STREAM(rrlib::logging::eLL_USER, log_domain, "Creating Module ", parent->GetQualifiedLink(), "/", name->ToString());
 
-        FINROC_LOG_STREAM(rrlib::logging::eLL_USER, log_domain, "Creating Module succeeded");
+          if (cma->GetParameterTypes() != NULL && cma->GetParameterTypes()->Size() > 0)
+          {
+            params = cma->GetParameterTypes()->Instantiate();
+            tCoreInput ci(params_buffer);
+            for (size_t i = 0u; i < params->Size(); i++)
+            {
+              tStructureParameterBase* param = params->Get(i);
+              util::tString s = ci.ReadString();
+              try
+              {
+                param->Set(s);
+              }
+              catch (const util::tException& e)
+              {
+                FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Error parsing '", s, "' for parameter ", param->GetName());
+                FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+              }
+            }
+            ci.Close();
+          }
+          ::finroc::core::tFrameworkElement* created = cma->CreateModule(name->ToString(), parent, params);
+          created->SetFinstructed(cma, params);
+          created->Init();
+          params = NULL;
+
+          FINROC_LOG_STREAM(rrlib::logging::eLL_USER, log_domain, "Creating Module succeeded");
+        }
       }
     }
     catch (const util::tException& e)

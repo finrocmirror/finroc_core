@@ -24,8 +24,9 @@
 #ifndef CORE__PARAMETER__TBOOLSTRUCTUREPARAMETER_H
 #define CORE__PARAMETER__TBOOLSTRUCTUREPARAMETER_H
 
-#include "core/datatype/tCoreNumber.h"
+#include "core/portdatabase/tDataTypeRegister.h"
 #include "core/datatype/tCoreBoolean.h"
+#include "core/parameter/tStructureParameterBase.h"
 #include "core/parameter/tStructureParameter.h"
 
 namespace finroc
@@ -41,10 +42,28 @@ class tBoolStructureParameter : public tStructureParameter<tCoreBoolean>
 {
 public:
 
-  tBoolStructureParameter(const util::tString& name, bool default_value) :
-      tStructureParameter<tCoreBoolean>(name, tCoreNumber::cTYPE)
+  tBoolStructureParameter(const util::tString& name, bool default_value, bool constructor_prototype) :
+      tStructureParameter<tCoreBoolean>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreBoolean>()), constructor_prototype, "")
   {
-    Set(default_value);
+    if (!constructor_prototype)
+    {
+      Set(default_value);
+    }
+  }
+
+  tBoolStructureParameter(const util::tString& name, bool default_value) :
+      tStructureParameter<tCoreBoolean>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreBoolean>()), false, "")
+  {
+    // this(name,defaultValue,false);
+    if (!false)
+    {
+      Set(default_value);
+    }
+  }
+
+  virtual ::finroc::core::tStructureParameterBase* DeepCopy()
+  {
+    return new tBoolStructureParameter(GetName(), false, false);
   }
 
   /*!
@@ -62,6 +81,18 @@ public:
   {
     ::finroc::core::tStructureParameter<tCoreBoolean>::GetValue()->Set(new_value);
   }
+
+  /*!
+   * Interprets/returns value in other (cloned) list
+   *
+   * \param list other list
+   * \return Value in other list
+   */
+  /*public boolean interpretSpec(StructureParameterList list) {
+      BoolStructureParameter param = (BoolStructureParameter)list.get(listIndex);
+      assert(param.getType() == getType());
+      return param.get();
+  }*/
 
 };
 

@@ -24,6 +24,7 @@
 #ifndef CORE__FINSTRUCTABLE__TGROUPINTERFACE_H
 #define CORE__FINSTRUCTABLE__TGROUPINTERFACE_H
 
+#include "core/plugin/tConstructorCreateModuleAction.h"
 #include "core/parameter/tStructureParameter.h"
 #include "core/datatype/tPortCreationList.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
@@ -40,6 +41,14 @@ namespace core
  */
 class tGroupInterface : public tEdgeAggregator
 {
+public:
+
+public:
+
+  enum tDataClassification { eSENSOR_DATA, eCONTROLLER_DATA, eANY };
+
+  enum tPortDirection { eINPUT_ONLY, eOUTPUT_ONLY, eBOTH };
+
 private:
 
   /*! List of ports */
@@ -48,9 +57,42 @@ private:
   /*! CreateModuleAction */
   static tStandardCreateModuleAction<tGroupInterface> cCREATE_ACTION;
 
+  /*! CreateModuleAction */
+  static tConstructorCreateModuleAction<tGroupInterface, tGroupInterface::tDataClassification, tGroupInterface::tPortDirection, bool, bool> cCOMPLEX_CREATE_ACTION;
+
+  /*!
+   * Compute port flags
+   *
+   * \param data_class Classifies data in this interface
+   * \param port_dir Which types of ports can be created in this interface?
+   * \param shared Shared interface/ports?
+   * \param unique_link Do ports habe globally unique link
+   * \return flags for these parameters
+   */
+  static int ComputePortFlags(tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link);
+
 public:
 
+  /*!
+   * Default constructor
+   *
+   * \param description Interface description
+   * \param parent Parent element
+   */
   tGroupInterface(const util::tString& description, tFrameworkElement* parent);
+
+  /*!
+   * Advanced constructor
+   *
+   * \param description Interface description
+   * \param parent Parent element
+   * \param data_class Classifies data in this interface
+   * \param port_dir Which types of ports can be created in this interface?
+   * \param shared Shared interface/ports?
+   * \param unique_link Do ports habe globally unique link
+   * \return flags for these parameters
+   */
+  tGroupInterface(const util::tString& description, tFrameworkElement* parent, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link);
 
 };
 
