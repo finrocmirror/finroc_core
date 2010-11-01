@@ -31,7 +31,15 @@ tDataType* tEnumValue::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(uti
 
 void tEnumValue::Deserialize(const util::tString& s)
 {
-  value = util::tInteger::ParseInt(s.Substring(0, s.IndexOf("|")));
+  if (s.Contains("|"))
+  {
+    value = util::tInteger::ParseInt(s.Substring(0, s.IndexOf("|")));
+  }
+  else
+  {
+    value = util::tInteger::ParseInt(s);
+    return;
+  }
 }
 
 void tEnumValue::Deserialize(const rrlib::xml2::tXMLNode& node)
