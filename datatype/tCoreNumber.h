@@ -184,7 +184,7 @@ public:
     case eCONSTANT:
       return static_cast<T>(unit->GetValue().Value<T>());
     default:
-      assert(false);
+      assert(false && "Possibly not a CoreNumber at this memory address?");
       return 0;
     }
   }

@@ -66,6 +66,7 @@ void tAbstractCall::DeserializeImpl(tCoreInput* is_, bool skip_parameters)
   {
     return;
   }
+  this->is.SetTypeTranslation(is_->GetTypeTranslation());
   param_storage.Deserialize(*is_);
   int resp_size = is_->ReadByte();
   assert((responsibilities.Size() == 0));
