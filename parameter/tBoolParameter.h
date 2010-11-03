@@ -25,6 +25,7 @@
 #define CORE__PARAMETER__TBOOLPARAMETER_H
 
 #include "core/datatype/tCoreBoolean.h"
+#include "core/port/cc/tCCPort.h"
 #include "core/parameter/tCCParameter.h"
 #include "core/port/cc/tCCPortListener.h"
 
@@ -47,15 +48,17 @@ private:
 public:
 
   tBoolParameter(const util::tString& description, tFrameworkElement* parent, bool default_value, const util::tString& config_entry) :
-      tCCParameter<tCoreBoolean>(description, parent, tCoreBoolean::GetInstance(default_value), config_entry, tCoreBoolean::cTYPE),
-      current_value(false)
+      tCCParameter<tCoreBoolean>(description, parent, *tCoreBoolean::GetInstance(default_value), config_entry, tCoreBoolean::cTYPE),
+      current_value(default_value)
   {
+    AddPortListener(this);
   }
 
   tBoolParameter(const util::tString& description, tFrameworkElement* parent, bool default_value) :
-      tCCParameter<tCoreBoolean>(description, parent, tCoreBoolean::GetInstance(default_value), tCoreBoolean::cTYPE),
-      current_value(false)
+      tCCParameter<tCoreBoolean>(description, parent, *tCoreBoolean::GetInstance(default_value), tCoreBoolean::cTYPE),
+      current_value(default_value)
   {
+    AddPortListener(this);
   }
 
   /*!

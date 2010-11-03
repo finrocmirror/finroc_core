@@ -121,6 +121,14 @@ public:
     type = cTYPE;
   }
 
+  tCoreNumber(uint32_t value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
+      ival(value_),
+      num_type(eINT),
+      unit(unit_)
+  {
+    type = cTYPE;
+  }
+
   tCoreNumber(int value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
       ival(value_),
       num_type(eINT),
@@ -326,11 +334,11 @@ public:
 
   void SetValue(const util::tNumber& value_, tUnit* unit_);
 
-  void SetValue(uint32_t t)
+  void SetValue(const uint32_t& t)
   {
     SetValue((int32_t)t);
   }
-  void SetValue(uint32_t t, tUnit* u)
+  void SetValue(const uint32_t& t, tUnit* u)
   {
     SetValue((int32_t)t, u);
   }

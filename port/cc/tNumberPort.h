@@ -167,22 +167,22 @@ public:
    */
   inline void SetDefault(double new_default)
   {
-    ::finroc::core::tCCPort<tCoreNumber>::GetDefaultBuffer()->SetValue(new_default, unit);
+    ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(new_default, unit));
   }
 
   inline void SetDefault(int new_default)
   {
-    ::finroc::core::tCCPort<tCoreNumber>::GetDefaultBuffer()->SetValue(new_default, unit);
+    ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(new_default, unit));
   }
 
   inline void SetDefault(int64 new_default)
   {
-    ::finroc::core::tCCPort<tCoreNumber>::GetDefaultBuffer()->SetValue(new_default, unit);
+    ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(new_default, unit));
   }
 
   inline void SetDefault(float new_default)
   {
-    ::finroc::core::tCCPort<tCoreNumber>::GetDefaultBuffer()->SetValue(new_default, unit);
+    ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(new_default, unit));
   }
 
 };

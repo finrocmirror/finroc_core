@@ -30,9 +30,9 @@
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCQueueFragment.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
-#include "core/tFrameworkElement.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/tThreadLocalCache.h"
+#include "core/tFrameworkElement.h"
 #include "core/port/cc/tCCPortData.h"
 
 namespace finroc
@@ -117,17 +117,6 @@ public:
     return reinterpret_cast<const T*>(GetAutoLockedRaw());
   }
 
-  /*!
-   * \return Buffer with default value. Can be used to change default value
-   * for port. However, this should be done before the port is used.
-   */
-  inline T* GetDefaultBuffer()
-  {
-    assert(((!IsReady())) && "please set default value _before_ initializing port");
-
-    return reinterpret_cast<T*>(this->default_value->GetData());
-  }
-
   //
   //
   //  ::std::tr1::shared_ptr<T> getValue() {
@@ -178,7 +167,11 @@ public:
    */
   inline void SetDefault(const T& t)
   {
+    assert(((!IsReady())) && "please set default value _before_ initializing port");
     this->default_value->Assign(&(reinterpret_cast<const tCCPortData&>(t)));
+    tCCPortDataContainer<T>* c = GetUnusedBuffer();
+    c->SetData(&(t));
+    BrowserPublish(reinterpret_cast<tCCPortDataContainer<>*>(c));
   }
 
 };

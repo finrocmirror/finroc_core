@@ -24,6 +24,7 @@
 #include "core/parameter/tParameterInfo.h"
 #include "core/tAnnotatable.h"
 #include "core/datatype/tCoreNumber.h"
+#include "core/port/cc/tCCPort.h"
 #include "core/datatype/tUnit.h"
 #include "core/port/cc/tNumberPort.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
@@ -36,11 +37,12 @@ template<typename T>
 tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds b, const util::tString& config_entry) :
     tBoundedNumberPort(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT, u), b),
     info(new tParameterInfo()),
-    current_value()
+    current_value(default_value)
 {
   // this(description,parent,u,defaultValue,b);
   AddAnnotation(info);
-  ::finroc::core::tCCPort<tCoreNumber>::GetDefaultBuffer()->SetValue(default_value, u);
+  ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(default_value, u));
+  AddPortListener(this);
   info->SetConfigEntry(config_entry);
 }
 
@@ -48,21 +50,23 @@ template<typename T>
 tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds b) :
     tBoundedNumberPort(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT, &(tUnit::cNO_UNIT)), b),
     info(new tParameterInfo()),
-    current_value()
+    current_value(default_value)
 {
   // this(description,parent,Unit.NO_UNIT,defaultValue,b);
   AddAnnotation(info);
-  ::finroc::core::tCCPort<tCoreNumber>::GetDefaultBuffer()->SetValue(default_value, &(tUnit::cNO_UNIT));
+  ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(default_value, &(tUnit::cNO_UNIT)));
+  AddPortListener(this);
 }
 
 template<typename T>
 tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds b) :
     tBoundedNumberPort(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT, u), b),
     info(new tParameterInfo()),
-    current_value()
+    current_value(default_value)
 {
   AddAnnotation(info);
-  ::finroc::core::tCCPort<tCoreNumber>::GetDefaultBuffer()->SetValue(default_value, u);
+  ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(default_value, u));
+  AddPortListener(this);
 }
 
 template<typename T>
