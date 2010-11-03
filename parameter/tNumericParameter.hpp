@@ -24,8 +24,8 @@
 #include "core/parameter/tParameterInfo.h"
 #include "core/tAnnotatable.h"
 #include "core/datatype/tCoreNumber.h"
-#include "core/port/cc/tNumberPort.h"
 #include "core/datatype/tUnit.h"
+#include "core/port/cc/tNumberPort.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
@@ -34,7 +34,7 @@ namespace core
 {
 template<typename T>
 tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds b, const util::tString& config_entry) :
-    tBoundedNumberPort(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT), b),
+    tBoundedNumberPort(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT, u), b),
     info(new tParameterInfo()),
     current_value()
 {
@@ -45,8 +45,19 @@ tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrame
 }
 
 template<typename T>
+tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds b) :
+    tBoundedNumberPort(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT, &(tUnit::cNO_UNIT)), b),
+    info(new tParameterInfo()),
+    current_value()
+{
+  // this(description,parent,Unit.NO_UNIT,defaultValue,b);
+  AddAnnotation(info);
+  ::finroc::core::tCCPort<tCoreNumber>::GetDefaultBuffer()->SetValue(default_value, &(tUnit::cNO_UNIT));
+}
+
+template<typename T>
 tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds b) :
-    tBoundedNumberPort(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT), b),
+    tBoundedNumberPort(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT, u), b),
     info(new tParameterInfo()),
     current_value()
 {

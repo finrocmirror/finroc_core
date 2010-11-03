@@ -27,8 +27,8 @@
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
 #include "core/parameter/tParameterInfo.h"
-#include "core/tAnnotatable.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "core/tFrameworkElement.h"
 #include "core/port/std/tPort.h"
 
 namespace finroc
@@ -61,7 +61,7 @@ protected:
     }
     catch (const util::tException& e)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, ::finroc::core::tFrameworkElement::log_domain, e);
     }
   }
 
@@ -72,7 +72,7 @@ public:
       info(new tParameterInfo())
   {
     // this(description,parent,dt);
-    AddAnnotation(info);
+    ::finroc::core::tAnnotatable::AddAnnotation(info);
     info->SetConfigEntry(config_entry);
   }
 
@@ -80,7 +80,7 @@ public:
       tPort<T>(tPortCreationInfo(description, parent, dt, tPortFlags::cINPUT_PORT)),
       info(new tParameterInfo())
   {
-    AddAnnotation(info);
+    ::finroc::core::tAnnotatable::AddAnnotation(info);
   }
 
 };

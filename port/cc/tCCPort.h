@@ -33,13 +33,12 @@
 #include "core/tFrameworkElement.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/tThreadLocalCache.h"
+#include "core/port/cc/tCCPortData.h"
 
 namespace finroc
 {
 namespace core
 {
-class tCCPortData;
-
 /*!
  * \author Max Reichardt
  *
@@ -152,6 +151,18 @@ public:
   }
 
   /*!
+   * Publish data
+   *
+   * \param t Data to publish
+   */
+  inline void Publish(const T& t)
+  {
+    tCCPortDataContainer<T>* c = GetUnusedBuffer();
+    c->SetData(&(t));
+    Publish(c);
+  }
+
+  /*!
    * \param listener Listener to add
    */
   inline void RemovePortListener(tCCPortListener<T>* listener)
@@ -167,7 +178,7 @@ public:
    */
   inline void SetDefault(const T& t)
   {
-    this->default_value->Assign(&(t));
+    this->default_value->Assign(&(reinterpret_cast<const tCCPortData&>(t)));
   }
 
 };

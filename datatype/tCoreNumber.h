@@ -326,6 +326,15 @@ public:
 
   void SetValue(const util::tNumber& value_, tUnit* unit_);
 
+  void SetValue(uint32_t t)
+  {
+    SetValue((int32_t)t);
+  }
+  void SetValue(uint32_t t, tUnit* u)
+  {
+    SetValue((int32_t)t, u);
+  }
+
   void SetValue(const tCoreNumber& value_);
 
   virtual const util::tString ToString() const;

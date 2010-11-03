@@ -27,9 +27,9 @@
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
 #include "core/parameter/tParameterInfo.h"
-#include "core/tAnnotatable.h"
 #include "core/port/cc/tCCPort.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "core/tFrameworkElement.h"
 
 namespace finroc
 {
@@ -61,28 +61,28 @@ protected:
     }
     catch (const util::tException& e)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, ::finroc::core::tFrameworkElement::log_domain, e);
     }
   }
 
 public:
 
-  tCCParameter(const util::tString& description, tFrameworkElement* parent, const T* default_value, const util::tString& config_entry, tDataType* dt = NULL) :
+  tCCParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, const util::tString& config_entry, tDataType* dt = NULL) :
       tCCPort<T>(tPortCreationInfo(description, parent, dt, tPortFlags::cINPUT_PORT)),
       info(new tParameterInfo())
   {
     // this(description,parent,defaultValue,dt);
-    AddAnnotation(info);
-    SetDefault(*default_value);
+    ::finroc::core::tAnnotatable::AddAnnotation(info);
+    SetDefault(default_value);
     info->SetConfigEntry(config_entry);
   }
 
-  tCCParameter(const util::tString& description, tFrameworkElement* parent, const T* default_value, tDataType* dt = NULL) :
+  tCCParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, tDataType* dt = NULL) :
       tCCPort<T>(tPortCreationInfo(description, parent, dt, tPortFlags::cINPUT_PORT)),
       info(new tParameterInfo())
   {
-    AddAnnotation(info);
-    SetDefault(*default_value);
+    ::finroc::core::tAnnotatable::AddAnnotation(info);
+    SetDefault(default_value);
   }
 
 };

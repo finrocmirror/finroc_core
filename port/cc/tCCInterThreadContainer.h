@@ -169,6 +169,21 @@ public:
     port_data.Serialize(node);
   }
 
+  void SetData(const T& data)
+  {
+    SetData(&data);
+  }
+
+  /*!
+   * Assign new value to container
+   *
+   * \param data new value
+   */
+  inline void SetData(const T* data)
+  {
+    port_data.Assign(reinterpret_cast<const tCCPortData*>(data));
+  }
+
   virtual const util::tString ToString() const
   {
     return util::tStringBuilder("CCInterThreadContainer: ") + port_data.ToString();

@@ -60,6 +60,8 @@ public:
 
   tNumericParameter(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds b, const util::tString& config_entry);
 
+  tNumericParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds b);
+
   tNumericParameter(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds b);
 
   /*!

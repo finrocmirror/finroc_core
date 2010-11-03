@@ -48,6 +48,10 @@ void tParameterInfo::LoadValue(bool ignore_ready)
     if (ann != NULL && (ignore_ready || ann->IsReady()))
     {
       tConfigFile* cf = tConfigFile::Find(ann);
+      if (cf == NULL)
+      {
+        return;
+      }
       if (cf->HasEntry(config_entry))
       {
         rrlib::xml2::tXMLNode node = cf->GetEntry(config_entry, false);

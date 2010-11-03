@@ -114,6 +114,22 @@ public:
   }
 
   /*!
+   * \return Maximum value
+   */
+  inline double GetMax()
+  {
+    return max;
+  }
+
+  /*!
+   * \return Minimum value
+   */
+  inline double GetMin()
+  {
+    return min;
+  }
+
+  /*!
    * \return Default value when value is out of bounds
    */
   inline tCoreNumber* GetOutOfBoundsDefault()

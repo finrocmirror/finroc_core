@@ -27,6 +27,7 @@
 #include "core/portdatabase/tTypedObjectContainer.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "rrlib/finroc_core_utils/container/tReusableTL.h"
+#include "core/port/cc/tCCPortData.h"
 #include "core/port/cc/tCCContainerBase.h"
 
 #include "core/port/tCombinedPointer.h"
@@ -44,7 +45,6 @@ namespace finroc
 namespace core
 {
 class tDataType;
-class tCCPortData;
 class tCoreInput;
 class tCCPortDataRef;
 class tCCPortDataBufferPool;
@@ -268,6 +268,21 @@ public:
   virtual void Serialize(rrlib::xml2::tXMLNode& node) const
   {
     port_data.Serialize(node);
+  }
+
+  void SetData(const T& data)
+  {
+    SetData(&data);
+  }
+
+  /*!
+   * Assign new value to container
+   *
+   * \param data new value
+   */
+  inline void SetData(const T* data)
+  {
+    port_data.Assign(reinterpret_cast<const tCCPortData*>(data));
   }
 
   /*!
