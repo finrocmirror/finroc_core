@@ -41,7 +41,7 @@ tNumberPort* tNumberSettingUtil::GetPort(tAbstractPort* p)
 
 void tNumberSettingUtil::SetDefault(tAbstractPort* p, tCoreNumber value)
 {
-  (static_cast<tNumberPort*>(p))->GetDefaultBuffer()->SetValue(value);
+  (static_cast<tNumberPort*>(p))->SetDefault(value);
 }
 
 } // namespace finroc

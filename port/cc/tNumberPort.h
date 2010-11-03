@@ -185,6 +185,11 @@ public:
     ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(new_default, unit));
   }
 
+  inline void SetDefault(const tCoreNumber& new_default)
+  {
+    ::finroc::core::tCCPort<tCoreNumber>::SetDefault(new_default);
+  }
+
 };
 
 } // namespace finroc
