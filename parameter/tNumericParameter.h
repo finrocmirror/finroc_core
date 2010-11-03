@@ -74,6 +74,11 @@ public:
 
   virtual void PortChanged(tCCPortBase* origin, const tCoreNumber* value);
 
+  /*!
+   * \param b new value
+   */
+  void Set(T v);
+
 };
 
 } // namespace finroc

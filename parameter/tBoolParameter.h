@@ -26,6 +26,8 @@
 
 #include "core/datatype/tCoreBoolean.h"
 #include "core/port/cc/tCCPort.h"
+#include "core/port/cc/tCCPortDataContainer.h"
+#include "core/port/cc/tCCPortBase.h"
 #include "core/parameter/tCCParameter.h"
 #include "core/port/cc/tCCPortListener.h"
 
@@ -72,6 +74,17 @@ public:
   virtual void PortChanged(tCCPortBase* origin, const tCoreBoolean* value)
   {
     current_value = value->Get();
+  }
+
+  /*!
+   * \param b new value
+   */
+  inline void Set(bool b)
+  {
+    tCCPortDataContainer<tCoreBoolean>* cb = GetUnusedBuffer();
+    cb->GetData()->Set(b);
+    Publish(cb);
+    current_value = b;
   }
 
 };

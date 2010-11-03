@@ -28,6 +28,7 @@
 #include "core/datatype/tUnit.h"
 #include "core/port/cc/tNumberPort.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "core/port/cc/tCCPortDataContainer.h"
 
 namespace finroc
 {
@@ -41,7 +42,7 @@ tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrame
 {
   // this(description,parent,u,defaultValue,b);
   AddAnnotation(info);
-  ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(default_value, u));
+  ::finroc::core::tNumberPort::SetDefault(tCoreNumber(default_value, u));
   AddPortListener(this);
   info->SetConfigEntry(config_entry);
 }
@@ -54,7 +55,7 @@ tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrame
 {
   // this(description,parent,Unit.NO_UNIT,defaultValue,b);
   AddAnnotation(info);
-  ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(default_value, &(tUnit::cNO_UNIT)));
+  ::finroc::core::tNumberPort::SetDefault(tCoreNumber(default_value, &(tUnit::cNO_UNIT)));
   AddPortListener(this);
 }
 
@@ -65,7 +66,7 @@ tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrame
     current_value(default_value)
 {
   AddAnnotation(info);
-  ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(default_value, u));
+  ::finroc::core::tNumberPort::SetDefault(tCoreNumber(default_value, u));
   AddPortListener(this);
 }
 
@@ -96,6 +97,15 @@ void tNumericParameter<T>::PostChildInit()
   {
     FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
   }
+}
+
+template<typename T>
+void tNumericParameter<T>::Set(T v)
+{
+  tCCPortDataContainer<tCoreNumber>* cb = GetUnusedBuffer();
+  cb->GetData()->SetValue(v, GetUnit());
+  ::finroc::core::tCCPortBase::Publish(reinterpret_cast<tCCPortDataContainer<>*>(cb));
+  current_value = v;
 }
 
 } // namespace finroc
