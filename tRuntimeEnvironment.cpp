@@ -340,7 +340,7 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement* ele
 
       }
 
-      registry.listeners.Notify(element, NULL, change_type);
+      registry.listeners.Notify(element, edge_target, change_type);
     }
   }
 }
