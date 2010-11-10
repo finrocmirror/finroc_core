@@ -28,9 +28,9 @@
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/cc/tCCPortListener.h"
 #include "core/port/cc/tCCPortBase.h"
+#include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/cc/tCCQueueFragment.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
-#include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/tFrameworkElement.h"
 #include "core/port/cc/tCCPortData.h"
@@ -67,6 +67,17 @@ public:
   inline void AddPortListener(tCCPortListener<T>* listener)
   {
     AddPortListenerRaw(reinterpret_cast<tCCPortListener<>*>(listener));
+  }
+
+  /*!
+   * Publish buffer through port
+   * (not in normal operation, but from browser; difference: listeners on this port will be notified)
+   *
+   * \param buffer Buffer with data (must be owned by current thread)
+   */
+  inline void BrowserPublish(tCCPortDataContainer<T>* buffer)
+  {
+    ::finroc::core::tCCPortBase::BrowserPublishRaw(reinterpret_cast<tCCPortDataContainer<>*>(buffer));
   }
 
   /*!
@@ -171,7 +182,7 @@ public:
     this->default_value->Assign(&(reinterpret_cast<const tCCPortData&>(t)));
     tCCPortDataContainer<T>* c = GetUnusedBuffer();
     c->SetData(&(t));
-    BrowserPublish(reinterpret_cast<tCCPortDataContainer<>*>(c));
+    BrowserPublish(c);
   }
 
 };

@@ -247,7 +247,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int port_handle
           tCCPortBase* p = static_cast<tCCPortBase*>(port);
           tCCPortDataContainer<>* c = tThreadLocalCache::Get()->GetUnusedBuffer(cc_data->GetType());
           c->Assign(((tCCPortData*)cc_data->GetDataPtr()));
-          p->BrowserPublish(c);
+          p->BrowserPublishRaw(c);
         }
         else if (port->GetDataType()->IsStdType() && port_data != NULL)
         {

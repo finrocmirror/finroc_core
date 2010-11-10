@@ -60,7 +60,7 @@ void tParameterInfo::LoadValue(bool ignore_ready)
           tCCPortBase* port = static_cast<tCCPortBase*>(ann);
           tCCPortDataContainer<>* c = tThreadLocalCache::Get()->GetUnusedBuffer(port->GetDataType());
           c->Deserialize(node);
-          port->BrowserPublish(c);
+          port->BrowserPublishRaw(c);
         }
         else if (ann->GetDataType()->IsStdType())
         {

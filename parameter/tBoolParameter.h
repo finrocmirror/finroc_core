@@ -27,7 +27,6 @@
 #include "core/datatype/tCoreBoolean.h"
 #include "core/port/cc/tCCPort.h"
 #include "core/port/cc/tCCPortDataContainer.h"
-#include "core/port/cc/tCCPortBase.h"
 #include "core/parameter/tCCParameter.h"
 #include "core/port/cc/tCCPortListener.h"
 

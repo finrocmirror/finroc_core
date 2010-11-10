@@ -510,7 +510,7 @@ public:
    *
    * \param buffer Buffer with data (must be owned by current thread)
    */
-  void BrowserPublish(tCCPortDataContainer<>* buffer);
+  void BrowserPublishRaw(tCCPortDataContainer<>* buffer);
 
   /*!
    * \return Does port contain default value?

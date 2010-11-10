@@ -68,7 +68,7 @@ void tCCPortBase::ApplyDefaultValue()
   Publish(tc, c);
 }
 
-void tCCPortBase::BrowserPublish(tCCPortDataContainer<>* buffer)
+void tCCPortBase::BrowserPublishRaw(tCCPortDataContainer<>* buffer)
 {
   assert((buffer->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId()));
   tThreadLocalCache* tc = tThreadLocalCache::Get();

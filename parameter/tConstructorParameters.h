@@ -47,7 +47,6 @@ public:
   static tDataType* cTYPE;
 
   tConstructorParameters() {}
-
 };
 
 } // namespace finroc
