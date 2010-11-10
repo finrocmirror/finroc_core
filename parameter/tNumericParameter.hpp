@@ -104,7 +104,7 @@ void tNumericParameter<T>::Set(T v)
 {
   tCCPortDataContainer<tCoreNumber>* cb = GetUnusedBuffer();
   cb->GetData()->SetValue(v, GetUnit());
-  ::finroc::core::tCCPortBase::Publish(reinterpret_cast<tCCPortDataContainer<>*>(cb));
+  ::finroc::core::tCCPortBase::BrowserPublish(reinterpret_cast<tCCPortDataContainer<>*>(cb));
   current_value = v;
 }
 

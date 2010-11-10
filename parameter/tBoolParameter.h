@@ -83,7 +83,7 @@ public:
   {
     tCCPortDataContainer<tCoreBoolean>* cb = GetUnusedBuffer();
     cb->GetData()->Set(b);
-    Publish(cb);
+    BrowserPublish(cb);
     current_value = b;
   }
 
