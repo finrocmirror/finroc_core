@@ -42,7 +42,7 @@ class tStringStructureParameter : public tStructureParameter<tCoreString>
 {
 public:
 
-  tStringStructureParameter(const util::tString& name, bool constructor_prototype, const util::tString& default_value = "") :
+  tStringStructureParameter(const util::tString& name, const util::tString& default_value, bool constructor_prototype) :
       tStructureParameter<tCoreString>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>()), constructor_prototype, default_value)
   {
   }
@@ -62,7 +62,7 @@ public:
    */
   virtual ::finroc::core::tStructureParameterBase* DeepCopy()
   {
-    return new tStringStructureParameter(GetName(), false, "");
+    return new tStringStructureParameter(GetName(), "", false);
   }
 
   /*!

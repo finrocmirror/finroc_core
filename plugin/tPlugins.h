@@ -132,6 +132,16 @@ public:
   }
 
   /*!
+   * Returns/loads CreateModuleAction with specified name and specified .so file.
+   * (doesn't do any dynamic loading, if .so is already present)
+   *
+   * \param group Group (.jar or .so)
+   * \param name Module type name
+   * \return CreateModuleAction - null if it could not be found
+   */
+  tCreateModuleAction* LoadModuleType(const util::tString& group, const util::tString& name);
+
+  /*!
    * Register module that can be used as external connection (e.g. in GUI)
    *
    * \param action Action to be registered

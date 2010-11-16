@@ -32,7 +32,7 @@ void pFinstructed::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 {
   tRuntimeEnvironment* re = tRuntimeEnvironment::GetInstance();
   tcp::tTCPServer* server = new tcp::tTCPServer(4444, true, NULL);
-  server->Init();  // TODO: remove
+  server->Init();
 
   tFinstructableGroup* fg = new tFinstructableGroup("finstructed", re, "etc/finstructed_test.xml");
   fg->Init();

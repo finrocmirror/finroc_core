@@ -106,7 +106,9 @@ public:
   SPT12* p12;
 
   /*! Name and group of module */
-  util::tString name, group;
+  util::tString name;
+
+  util::tString group;
 
 private:
 
@@ -132,7 +134,7 @@ private:
 
 public:
 
-  tConstructorCreateModuleActionBase(const util::tString& group_, const util::tString& type_name, const util::tString& param_names);
+  tConstructorCreateModuleActionBase(const util::tString& type_name, const util::tString& param_names);
 
   virtual util::tString GetModuleGroup() const
   {

@@ -30,7 +30,7 @@ namespace finroc
 {
 namespace core
 {
-tStandardCreateModuleAction<tThreadContainer> tThreadContainer::cCREATE_ACTION("core", "ThreadContainer", util::tTypedClass<tThreadContainer>());
+tStandardCreateModuleAction<tThreadContainer> tThreadContainer::cCREATE_ACTION("ThreadContainer", util::tTypedClass<tThreadContainer>());
 
 tThreadContainer::tThreadContainer(const util::tString& description, tFrameworkElement* parent) :
     tGroup(description, parent),

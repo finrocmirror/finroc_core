@@ -26,7 +26,7 @@ namespace finroc
 namespace core
 {
 template<typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10, typename P11, typename P12>
-tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>::tConstructorCreateModuleActionBase(const util::tString& group_, const util::tString& type_name, const util::tString& param_names) :
+tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>::tConstructorCreateModuleActionBase(const util::tString& type_name, const util::tString& param_names) :
     spl(),
     p1(NULL),
     p2(NULL),
@@ -41,7 +41,7 @@ tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11,
     p11(NULL),
     p12(NULL),
     name(type_name),
-    group(group_)
+    group()
 {
   tPlugins::GetInstance()->AddModuleType(this);
 

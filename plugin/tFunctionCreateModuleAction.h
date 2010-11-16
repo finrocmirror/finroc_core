@@ -147,6 +147,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f12 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10, typename P11>
@@ -156,6 +157,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f11 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
@@ -165,6 +167,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f10 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
@@ -174,6 +177,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f9 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
@@ -183,6 +187,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f8 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
@@ -192,6 +197,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f7 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
@@ -201,6 +207,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f6 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5>
@@ -210,6 +217,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f5 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4>
@@ -219,6 +227,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f4 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3>
@@ -228,6 +237,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f3 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2>
@@ -237,6 +247,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f2 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   template <typename P1>
@@ -246,6 +257,7 @@ public:
     W* w = new W(group, type, param_names);
     w->f1 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 
   tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent))
@@ -254,6 +266,7 @@ public:
     W* w = new W(group, type, "");
     w->f0 = func;
     wrapped.reset(w);
+    group = GetBinary((void*)func);
   }
 };
 

@@ -24,6 +24,8 @@
 #ifndef CORE__PLUGIN__TCREATEMODULEACTION_H
 #define CORE__PLUGIN__TCREATEMODULEACTION_H
 
+#include <dlfcn.h>
+
 namespace finroc
 {
 namespace core
@@ -50,7 +52,7 @@ public:
    * \param params Parameters
    * \return Created Module (or Group)
    */
-  virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* params) const = 0;
+  virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* params = NULL) const = 0;
 
   /*!
    * \return Returns name of group to which this create module action belongs
@@ -66,6 +68,15 @@ public:
    * \return Returns types of parameters that the create method requires
    */
   virtual const tStructureParameterList* GetParameterTypes() const = 0;
+
+  // returns .so file in which address provided as argument is found by dladdr
+  util::tString GetBinary(void* addr)
+  {
+    Dl_info info;
+    dladdr(addr, &info);
+    util::tString tmp(info.dli_fname);
+    return tmp.Substring(tmp.LastIndexOf("/") + 1);
+  }
 
 };
 

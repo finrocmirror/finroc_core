@@ -26,7 +26,7 @@ namespace finroc
 namespace core
 {
 template<typename E>
-tEnumStructureParameter<E>::tEnumStructureParameter(const util::tString& name, bool constructor_prototype, E default_value, ::std::tr1::shared_ptr<util::tSimpleList<util::tString> > string_constants_) :
+tEnumStructureParameter<E>::tEnumStructureParameter(const util::tString& name, E default_value, bool constructor_prototype, ::std::tr1::shared_ptr<util::tSimpleList<util::tString> > string_constants_) :
     tStructureParameter<tEnumValue>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tEnumValue>()), constructor_prototype),
     string_constants(string_constants_)
 {

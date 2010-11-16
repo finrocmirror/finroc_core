@@ -42,7 +42,7 @@ namespace finroc
 {
 namespace core
 {
-tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup::cCREATE_ACTION("core", "Finstructable Group", util::tTypedClass<tFinstructableGroup>());
+tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup::cCREATE_ACTION("Finstructable Group", util::tTypedClass<tFinstructableGroup>());
 
 tFinstructableGroup::tFinstructableGroup(const util::tString& name, tFrameworkElement* parent) :
     tFrameworkElement(name, parent, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
@@ -116,18 +116,7 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     util::tString type = node.GetStringAttribute("type");
 
     // find action
-    const util::tSimpleList<tCreateModuleAction*>& cmas = tPlugins::GetInstance()->GetModuleTypes();
-    tCreateModuleAction* action = NULL;
-    for (size_t i = 0u; i < cmas.Size(); i++)
-    {
-      tCreateModuleAction* cma = cmas.Get(i);
-      if (cma->GetModuleGroup().Equals(group) && cma->GetName().Equals(type))
-      {
-        action = cma;
-        break;
-      }
-    }
-
+    tCreateModuleAction* action = tPlugins::GetInstance()->LoadModuleType(group, type);
     if (action == NULL)
     {
       FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Failed to instantiate element. No module type ", group, "/", type, " available. Skipping...");
@@ -230,7 +219,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
           tAbstractPort* dest_port = GetChildPort(dest);
           if (src_port == NULL && dest_port == NULL)
           {
-            FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Cannot edge because neither port is available: ", src, ", ", dest);
+            FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Cannot create edge because neither port is available: ", src, ", ", dest);
           }
           else if (src_port == NULL || src_port->IsVolatile())    // source volatile
           {

@@ -59,11 +59,13 @@ public:
    * \param group Name of module group
    * \param type_name Name of module type
    */
-  tStandardCreateModuleAction(const util::tString& group_, const util::tString& type_name_) :
-      group(group_),
+  tStandardCreateModuleAction(const util::tString& type_name_) :
+      group(),
       type_name(type_name_)
   {
     tPlugins::GetInstance()->AddModuleType(this);
+
+    group = GetBinary((void*)CreateModule);
   }
 
   /*!
@@ -71,16 +73,23 @@ public:
    * \param type_name Name of module type
    * \param module_class Module class (only needed in Java)
    */
-  tStandardCreateModuleAction(const util::tString& group_, const util::tString& type_name_, const util::tTypedClass<T>& module_class) :
-      group(group_),
+  tStandardCreateModuleAction(const util::tString& type_name_, const util::tTypedClass<T>& module_class) :
+      group(),
       type_name(type_name_)
   {
     tPlugins::GetInstance()->AddModuleType(this);
+
+    group = GetBinary((void*)CreateModuleImpl);
+  }
+
+  static tFrameworkElement* CreateModuleImpl(const util::tString& name, tFrameworkElement* parent)
+  {
+    return new T(name, parent);
   }
 
   virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* params) const
   {
-    return new T(name, parent);
+    return CreateModuleImpl(name, parent);
   }
 
   virtual util::tString GetModuleGroup() const

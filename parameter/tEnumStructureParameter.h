@@ -67,7 +67,7 @@ public:
    * \param default_value Default Value
    * \param string_constants String constants for enum values (comma-separated string)
    */
-  tEnumStructureParameter(const util::tString& name, bool constructor_prototype, E default_value, ::std::tr1::shared_ptr<util::tSimpleList<util::tString> > string_constants_);
+  tEnumStructureParameter(const util::tString& name, E default_value, bool constructor_prototype, ::std::tr1::shared_ptr<util::tSimpleList<util::tString> > string_constants_);
 
   /*!
    * \param name Parameter name
@@ -78,7 +78,7 @@ public:
 
   virtual ::finroc::core::tStructureParameterBase* DeepCopy()
   {
-    return new tEnumStructureParameter<E>(GetName(), false, GetValueForInt(0), string_constants);
+    return new tEnumStructureParameter<E>(GetName(), GetValueForInt(0), false, string_constants);
   }
 
   /*!

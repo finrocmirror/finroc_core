@@ -29,8 +29,8 @@ namespace finroc
 {
 namespace core
 {
-tStandardCreateModuleAction<tGroupInterface> tGroupInterface::cCREATE_ACTION("core", "Default Interface", util::tTypedClass<tGroupInterface>());
-tConstructorCreateModuleAction<tGroupInterface, tGroupInterface::tDataClassification, tGroupInterface::tPortDirection, bool, bool> tGroupInterface::cCOMPLEX_CREATE_ACTION("core", "Interface", util::tTypedClass<tGroupInterface>(), "Data classification, Port direction, Shared?, Unique Links");
+tStandardCreateModuleAction<tGroupInterface> tGroupInterface::cCREATE_ACTION("Default Interface", util::tTypedClass<tGroupInterface>());
+tConstructorCreateModuleAction<tGroupInterface, tGroupInterface::tDataClassification, tGroupInterface::tPortDirection, bool, bool> tGroupInterface::cCOMPLEX_CREATE_ACTION("Interface", util::tTypedClass<tGroupInterface>(), "Data classification, Port direction, Shared?, Unique Links");
 
 tGroupInterface::tGroupInterface(const util::tString& description, tFrameworkElement* parent) :
     tEdgeAggregator(description, parent, ::finroc::core::tEdgeAggregator::cIS_INTERFACE),

@@ -27,7 +27,7 @@ namespace finroc
 {
 namespace core
 {
-tStandardCreateModuleAction<tGroup> tGroup::cCREATE_ACTION("core", "Group", util::tTypedClass<tGroup>());
+tStandardCreateModuleAction<tGroup> tGroup::cCREATE_ACTION("Group", util::tTypedClass<tGroup>());
 
 tGroup::tGroup(const util::tString& description, tFrameworkElement* parent) :
     tEdgeAggregator(description, parent, 0),

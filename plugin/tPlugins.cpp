@@ -37,6 +37,46 @@ void tPlugins::FindAndLoadPlugins()
   // plugins.Add(new tMCA2Plugin());
 }
 
+tCreateModuleAction* tPlugins::LoadModuleType(const util::tString& group, const util::tString& name)
+{
+  // dynamically loaded .so files
+  static util::tSimpleList<util::tString> loaded;
+
+  // try to find module among existing modules
+  const util::tSimpleList<tCreateModuleAction*>& modules = GetModuleTypes();
+  for (size_t i = 0u; i < modules.Size(); i++)
+  {
+    tCreateModuleAction* cma = modules.Get(i);
+    if (cma->GetModuleGroup().Equals(group) && cma->GetName().Equals(name))
+    {
+      return cma;
+    }
+  }
+
+  // hmm... we didn't find it - have we already tried to load .so?
+  bool already_loaded = false;
+  for (size_t i = 0; i < loaded.Size(); i++)
+  {
+    if (loaded.Get(i).Equals(group))
+    {
+      already_loaded = true;
+      break;
+    }
+  }
+
+  if (!already_loaded)
+  {
+    loaded.Add(group);
+    if (dlopen(group.GetCString(), RTLD_NOW | RTLD_GLOBAL))
+    {
+      return LoadModuleType(group, name);
+    }
+  }
+
+  FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Could not find/load module ", name, " in ", group);
+  return NULL;
+}
+
 ::std::tr1::shared_ptr<tCreateExternalConnectionAction> tPlugins::RegisterExternalConnection(::std::tr1::shared_ptr<tCreateExternalConnectionAction> action)
 {
   external_connections.Add(action);
