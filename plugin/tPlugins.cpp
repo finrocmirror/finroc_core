@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/plugin/tPlugins.h"
+#include "core/plugin/tCreateExternalConnectionAction.h"
 
 namespace finroc
 {
@@ -77,10 +78,10 @@ tCreateModuleAction* tPlugins::LoadModuleType(const util::tString& group, const 
   return NULL;
 }
 
-::std::tr1::shared_ptr<tCreateExternalConnectionAction> tPlugins::RegisterExternalConnection(::std::tr1::shared_ptr<tCreateExternalConnectionAction> action)
+tCreateExternalConnectionAction* tPlugins::RegisterExternalConnection(tCreateExternalConnectionAction* action)
 {
   external_connections.Add(action);
-  GetModuleTypes().Add(action.get());
+  GetModuleTypes().Add(action);
   return action;
 }
 

@@ -26,7 +26,6 @@
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tPlugin.h"
-#include "core/plugin/tCreateExternalConnectionAction.h"
 #include "core/plugin/tPluginManager.h"
 #include "core/plugin/tCreateModuleAction.h"
 
@@ -34,6 +33,8 @@ namespace finroc
 {
 namespace core
 {
+class tCreateExternalConnectionAction;
+
 /*!
  * \author Max Reichardt
  *
@@ -47,7 +48,7 @@ private:
   util::tSimpleList< ::std::tr1::shared_ptr<tPlugin> > plugins;
 
   /*! List with actions to create external connections */
-  util::tSimpleList< ::std::tr1::shared_ptr<tCreateExternalConnectionAction> > external_connections;
+  util::tSimpleList<tCreateExternalConnectionAction*> external_connections;
 
   /*! Plugin manager instance */
   tPluginManager plugin_manager;
@@ -100,7 +101,7 @@ public:
   /*!
    * \return List with modules for external connections
    */
-  inline util::tSimpleList< ::std::tr1::shared_ptr<tCreateExternalConnectionAction> >* GetExternalConnections()
+  inline util::tSimpleList<tCreateExternalConnectionAction*>* GetExternalConnections()
   {
     return &(external_connections);
   }
@@ -147,7 +148,7 @@ public:
    * \param action Action to be registered
    * \return Action to be registered (same as above)
    */
-  ::std::tr1::shared_ptr<tCreateExternalConnectionAction> RegisterExternalConnection(::std::tr1::shared_ptr<tCreateExternalConnectionAction> action);
+  tCreateExternalConnectionAction* RegisterExternalConnection(tCreateExternalConnectionAction* action);
 
   //
   //  /** PluginsListener */
