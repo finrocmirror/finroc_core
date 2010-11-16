@@ -165,6 +165,7 @@ struct tParamType<tEmpty>
   static tEmpty Get(tStructureParameterBase* x)
   {
     assert(false);
+    return tEmpty();
   }
   static t* Create(const util::tString& name)
   {

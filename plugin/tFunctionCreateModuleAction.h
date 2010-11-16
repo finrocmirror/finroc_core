@@ -67,9 +67,10 @@ public:
   tFunc12 f12;
 
   tFunctionCreateModuleActionImpl(const util::tString& group, const util::tString& type, const util::tString& param_names) :
-      tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>(group, type, param_names),
+      tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>(type, param_names),
       f0(NULL), f1(NULL), f2(NULL), f3(NULL), f4(NULL), f5(NULL), f6(NULL), f7(NULL), f8(NULL), f9(NULL), f10(NULL), f11(NULL), f12(NULL)
   {
+    this->group = group;
   }
 
   virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* p) const
@@ -141,132 +142,119 @@ struct tFunctionCreateModuleAction
 public:
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10, typename P11, typename P12>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11, P12 t12))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11, P12 t12))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f12 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10, typename P11>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f11 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f10 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7, P8, P9> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f9 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7, P8> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f8 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f7 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f6 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f5 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3, typename P4>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f4 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2, typename P3>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f3 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1, typename P2>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f2 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
   template <typename P1>
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1))
   {
     typedef tFunctionCreateModuleActionImpl<P1> W;
-    W* w = new W(group, type, param_names);
+    W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
     w->f1 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 
-  tFunctionCreateModuleAction(const util::tString& group, const util::tString& type, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent))
+  tFunctionCreateModuleAction(const util::tString& type, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent))
   {
     typedef tFunctionCreateModuleActionImpl<tEmpty> W;
-    W* w = new W(group, type, "");
+    W* w = new W(wrapped->GetBinary((void*)func), type, "");
     w->f0 = func;
     wrapped.reset(w);
-    group = GetBinary((void*)func);
   }
 };
 
