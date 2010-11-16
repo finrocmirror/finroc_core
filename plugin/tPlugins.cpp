@@ -72,6 +72,10 @@ tCreateModuleAction* tPlugins::LoadModuleType(const util::tString& group, const 
     {
       return LoadModuleType(group, name);
     }
+    else
+    {
+      FINROC_LOG_MESSAGE(rrlib::logging::eLL_ERROR, log_domain, "Error from dlopen: %s", dlerror());
+    }
   }
 
   FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Could not find/load module ", name, " in ", group);
