@@ -65,7 +65,7 @@ public:
   {
     tPlugins::GetInstance()->AddModuleType(this);
 
-    group = GetBinary((void*)CreateModule);
+    group = GetBinary((void*)CreateModuleImpl);
   }
 
   /*!
