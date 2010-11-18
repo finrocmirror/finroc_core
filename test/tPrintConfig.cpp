@@ -46,6 +46,12 @@ int main(int argc__, char **argv__)
   printf(" __JC_ENFORCE_LOCK_ORDER__: false\n");
 #endif
 
+#ifdef __JC_CREATE_JNI_WRAPPERS__
+  printf(" __JC_CREATE_JNI_WRAPPERS__: true\n");
+#else
+  printf(" __JC_CREATE_JNI_WRAPPERS__: false\n");
+#endif
+
   printf(" sizeof(tPortDataManager): %d\n", sizeof(finroc::core::tPortDataManager));
   printf(" sizeof(tCoreNumber): %d\n", sizeof(finroc::core::tCoreNumber));
   printf(" sizeof(tCoreString): %d\n", sizeof(finroc::core::tCoreString));
