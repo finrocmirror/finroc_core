@@ -54,5 +54,11 @@
       test/tBasicRealtimeTest.cpp
     </sources>
   </testprogram>
+
+  <testprogram name="configuration">
+    <sources>
+      test/tPrintConfig.cpp
+    </sources>
+  </testprogram>
   
 </targets>
