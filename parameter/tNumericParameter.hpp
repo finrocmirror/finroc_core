@@ -24,10 +24,10 @@
 #include "core/parameter/tParameterInfo.h"
 #include "core/tAnnotatable.h"
 #include "core/datatype/tCoreNumber.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/port/cc/tCCPort.h"
 #include "core/datatype/tUnit.h"
 #include "core/port/cc/tNumberPort.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 
 namespace finroc
@@ -42,7 +42,16 @@ tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrame
 {
   // this(description,parent,u,defaultValue,b);
   AddAnnotation(info);
-  ::finroc::core::tNumberPort::SetDefault(tCoreNumber(default_value, u));
+  T d = default_value;
+  if (b.InBounds(d))
+  {
+    ::finroc::core::tNumberPort::SetDefault(tCoreNumber(default_value, u));
+  }
+  else
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Default value is out of bounds");
+    ::finroc::core::tNumberPort::SetDefault(tCoreNumber(b.ToBounds(d), u));
+  }
   AddPortListener(this);
   info->SetConfigEntry(config_entry);
 }
@@ -55,7 +64,16 @@ tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrame
 {
   // this(description,parent,Unit.NO_UNIT,defaultValue,b);
   AddAnnotation(info);
-  ::finroc::core::tNumberPort::SetDefault(tCoreNumber(default_value, &(tUnit::cNO_UNIT)));
+  T d = default_value;
+  if (b.InBounds(d))
+  {
+    ::finroc::core::tNumberPort::SetDefault(tCoreNumber(default_value, &(tUnit::cNO_UNIT)));
+  }
+  else
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Default value is out of bounds");
+    ::finroc::core::tNumberPort::SetDefault(tCoreNumber(b.ToBounds(d), &(tUnit::cNO_UNIT)));
+  }
   AddPortListener(this);
 }
 
@@ -66,7 +84,16 @@ tNumericParameter<T>::tNumericParameter(const util::tString& description, tFrame
     current_value(default_value)
 {
   AddAnnotation(info);
-  ::finroc::core::tNumberPort::SetDefault(tCoreNumber(default_value, u));
+  T d = default_value;
+  if (b.InBounds(d))
+  {
+    ::finroc::core::tNumberPort::SetDefault(tCoreNumber(default_value, u));
+  }
+  else
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Default value is out of bounds");
+    ::finroc::core::tNumberPort::SetDefault(tCoreNumber(b.ToBounds(d), u));
+  }
   AddPortListener(this);
 }
 
