@@ -19,6 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "core/tRuntimeEnvironment.h"
+
 #include "core/plugin/tPlugins.h"
 #include "core/plugin/tCreateExternalConnectionAction.h"
 
@@ -26,6 +28,15 @@ namespace finroc
 {
 namespace core
 {
+tPlugins::tDLCloser::~tDLCloser()
+{
+  tRuntimeEnvironment::Shutdown();
+  for (size_t i = 0; i < loaded.Size(); i++)
+  {
+    dlclose(loaded.Get(i));
+  }
+}
+
 void tPlugins::FindAndLoadPlugins()
 {
   //TODO do properly
@@ -42,6 +53,7 @@ tCreateModuleAction* tPlugins::LoadModuleType(const util::tString& group, const 
 {
   // dynamically loaded .so files
   static util::tSimpleList<util::tString> loaded;
+  static tDLCloser dlcloser;
 
   // try to find module among existing modules
   const util::tSimpleList<tCreateModuleAction*>& modules = GetModuleTypes();
@@ -68,8 +80,10 @@ tCreateModuleAction* tPlugins::LoadModuleType(const util::tString& group, const 
   if (!already_loaded)
   {
     loaded.Add(group);
-    if (dlopen(group.GetCString(), RTLD_NOW | RTLD_GLOBAL))
+    void* handle = dlopen(group.GetCString(), RTLD_NOW | RTLD_GLOBAL);
+    if (handle)
     {
+      dlcloser.loaded.Add(handle);
       return LoadModuleType(group, name);
     }
     else

@@ -54,7 +54,7 @@ tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11,
   }
   while (names.Size() < 12)
   {
-    names.Add(cPARAMETER + name);
+    names.Add(cPARAMETER + names.Size());
   }
 
   p1 = SP1::Create(names.Get(0));
