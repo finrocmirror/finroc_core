@@ -70,6 +70,8 @@ tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11,
   p11 = SP11::Create(names.Get(10));
   p12 = SP12::Create(names.Get(11));
 
+  CheckStructureParameterList();
+
 }
 
 template<typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10, typename P11, typename P12>
