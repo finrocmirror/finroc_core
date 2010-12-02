@@ -57,7 +57,7 @@ private:
   ::std::tr1::shared_ptr<util::tSimpleList<util::tString> > paths;
 
   /*! Constant for empty string - to allow this-constructor in c++ */
-  static util::tString cEMPTY_STRING;
+  static const util::tString& GetEmptyString();
 
 public:
 

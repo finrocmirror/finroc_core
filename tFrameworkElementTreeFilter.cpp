@@ -27,18 +27,15 @@ namespace finroc
 {
 namespace core
 {
-util::tString tFrameworkElementTreeFilter::cEMPTY_STRING = "";
-
 tFrameworkElementTreeFilter::tFrameworkElementTreeFilter() :
     relevant_flags(tCoreFlags::cSTATUS_FLAGS),
     flag_result(tCoreFlags::cREADY | tCoreFlags::cPUBLISHED),
     paths(new util::tSimpleList<util::tString>())
 {
-  // this(CoreFlags.STATUS_FLAGS,CoreFlags.READY | CoreFlags.PUBLISHED,EMPTY_STRING);
-  this->paths->AddAll(cEMPTY_STRING.Split(","));
-  if (this->paths->Size() == 1 && this->paths->Get(0).Length() == 0)
+  // this(CoreFlags.STATUS_FLAGS,CoreFlags.READY | CoreFlags.PUBLISHED,getEmptyString());
+  if (GetEmptyString().Length() > 0)
   {
-    this->paths->Clear();
+    this->paths->AddAll(GetEmptyString().Split(","));
   }
 }
 
@@ -47,11 +44,10 @@ tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(int relevant_flags_, in
     flag_result(flag_result_),
     paths(new util::tSimpleList<util::tString>())
 {
-  // this(relevantFlags,flagResult,EMPTY_STRING);
-  this->paths->AddAll(cEMPTY_STRING.Split(","));
-  if (this->paths->Size() == 1 && this->paths->Get(0).Length() == 0)
+  // this(relevantFlags,flagResult,getEmptyString());
+  if (GetEmptyString().Length() > 0)
   {
-    this->paths->Clear();
+    this->paths->AddAll(GetEmptyString().Split(","));
   }
 }
 
@@ -60,10 +56,9 @@ tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(int relevant_flags_, in
     flag_result(flag_result_),
     paths(new util::tSimpleList<util::tString>())
 {
-  this->paths->AddAll(paths_.Split(","));
-  if (this->paths->Size() == 1 && this->paths->Get(0).Length() == 0)
+  if (paths_.Length() > 0)
   {
-    this->paths->Clear();
+    this->paths->AddAll(paths_.Split(","));
   }
 }
 
@@ -104,6 +99,12 @@ void tFrameworkElementTreeFilter::Deserialize(tCoreInput& is)
   {
     paths->Add(is.ReadString());
   }
+}
+
+const util::tString& tFrameworkElementTreeFilter::GetEmptyString()
+{
+  static util::tString cEMPTY;
+  return cEMPTY;
 }
 
 void tFrameworkElementTreeFilter::Serialize(tCoreOutput& os) const
