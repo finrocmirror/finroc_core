@@ -27,6 +27,7 @@
 #include "core/portdatabase/sSerializationHelper.h"
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tConstant.h"
+#include "rrlib/finroc_core_utils/tGarbageCollector.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/rpc/tMethodCallSyncher.h"
 #include "rrlib/finroc_core_utils/container/tBoundedQElementContainer.h"
@@ -181,6 +182,7 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   tConstant::StaticInit();  // needs to be done after unit
   //      CoreNumber.staticInit(); // can be after data type register has been created
   util::tTime::GetInstance();  // (possibly) init timing thread
+  util::tGarbageCollector::CreateAndStartInstance();
   //      MethodCall.staticInit();
   //      PullCall.staticInit();
   ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock = tThreadLocalCache::StaticInit();  // can safely be done first

@@ -26,6 +26,7 @@
 
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
+#include "rrlib/finroc_core_utils/thread/tLoopThread.h"
 #include "core/thread/tCoreLoopThreadBase.h"
 
 namespace finroc
@@ -91,7 +92,11 @@ public:
   //      instance = null;
   //  }
 
-  virtual void StopThread();
+  virtual void StopThread()
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain, "Stopping StreamCommitThread");
+    ::finroc::util::tLoopThread::StopThread();
+  }
 
   /*!
    * (Called by OutputStreamPorts when they're deleted)

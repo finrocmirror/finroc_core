@@ -22,7 +22,6 @@
 #include "core/port/stream/tStreamCommitThread.h"
 #include "core/settings/tSetting.h"
 #include "core/tRuntimeSettings.h"
-#include "rrlib/finroc_core_utils/thread/tLoopThread.h"
 
 namespace finroc
 {
@@ -49,13 +48,6 @@ void tStreamCommitThread::MainLoopCallback()
       cb->StreamThreadCallback(time);
     }
   }
-}
-
-void tStreamCommitThread::StopThread()
-{
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain, "Stopping StreamCommitThread");
-  ::finroc::util::tLoopThread::StopThread();
-  instance.reset();
 }
 
 } // namespace finroc

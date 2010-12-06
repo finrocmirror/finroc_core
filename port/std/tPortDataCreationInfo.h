@@ -67,7 +67,7 @@ private:
   const tPortData* prototype;
 
   /*! Stores info for each thread - wouldn't be thread-safe otherwise */
-  static util::tFastStaticThreadLocal<tPortDataCreationInfo, tPortDataCreationInfo> info;
+  static util::tThreadLocal<tPortDataCreationInfo> info;
 
 public:
 

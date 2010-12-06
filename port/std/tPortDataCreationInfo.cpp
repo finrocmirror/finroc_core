@@ -26,7 +26,7 @@ namespace finroc
 {
 namespace core
 {
-util::tFastStaticThreadLocal<tPortDataCreationInfo, tPortDataCreationInfo> tPortDataCreationInfo::info;
+util::tThreadLocal<tPortDataCreationInfo> tPortDataCreationInfo::info;
 
 tPortDataCreationInfo* tPortDataCreationInfo::Get()
 {

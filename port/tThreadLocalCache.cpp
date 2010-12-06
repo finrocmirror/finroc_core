@@ -35,6 +35,10 @@ namespace finroc
 {
 namespace core
 {
+// This 'lock' ensures that Thread info is deallocated after last ThreadLocalCache
+util::tThreadInfoLock thread_info_lock = util::tThread::GetThreadInfoLock();
+// This 'lock' ensures that static AutoDeleter instance is deallocated after last ThreadLocalCache
+::std::tr1::shared_ptr<util::tAutoDeleter> auto_deleter_lock(util::tAutoDeleter::GetStaticInstance());
 util::tFastStaticThreadLocal<tThreadLocalCache, tThreadLocalCache, util::tGarbageCollector::tFunctor> tThreadLocalCache::info;
 
 ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCache::infos;
