@@ -70,6 +70,13 @@ public:
     // this(new PortCreationInfo(description,outputPort ? PortFlags.OUTPUT_PORT : PortFlags.INPUT_PORT));
   }
 
+  tNumberPort(const util::tString& description, tFrameworkElement* parent, bool output_port) :
+      tCCPort<tCoreNumber>(ProcessPciNP((tPortCreationInfo(description, parent, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT)))),
+      unit(&(tUnit::cNO_UNIT))
+  {
+    // this(new PortCreationInfo(description,parent,outputPort ? PortFlags.OUTPUT_PORT : PortFlags.INPUT_PORT));
+  }
+
   template<typename T>
   inline T GetRaw()
   {

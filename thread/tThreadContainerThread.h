@@ -37,6 +37,9 @@ private:
   /*! temporary list of tasks that need to be scheduled */
   util::tSimpleList<tPeriodicFrameworkElementTask*> tasks;
 
+  /*! temporary list of tasks that need to be scheduled - which are not sensor tasks */
+  util::tSimpleList<tPeriodicFrameworkElementTask*> non_sensor_tasks;
+
   /*! temporary variable for scheduling algorithm: trace we're currently following */
   util::tSimpleList<tEdgeAggregator*> trace;
 

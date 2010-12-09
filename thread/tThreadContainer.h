@@ -76,6 +76,14 @@ public:
 
   virtual ~tThreadContainer();
 
+  /*!
+   * \return Cycle time in milliseconds
+   */
+  inline int GetCycleTime()
+  {
+    return cycle_time->Get();
+  }
+
   virtual bool IsExecuting();
 
   /*!
@@ -87,6 +95,14 @@ public:
   {
     StopThread();
     JoinThread();
+  }
+
+  /*!
+   * \param period Cycle time in milliseconds
+   */
+  inline void SetCycleTime(int period)
+  {
+    cycle_time->Set(period);
   }
 
   virtual void StartExecution();

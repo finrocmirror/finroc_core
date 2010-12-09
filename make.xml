@@ -60,5 +60,12 @@
       test/tPrintConfig.cpp
     </sources>
   </testprogram>
+
+  <testprogram name="module_test">
+    <sources>
+      test/mTestModule.cpp
+      test/pTestModuleTest.cpp
+    </sources>
+  </testprogram>
   
 </targets>

@@ -21,6 +21,7 @@ tThreadContainerThread::tThreadContainerThread(tThreadContainer* thread_containe
     reschedule(true),
     schedule(),
     tasks(),
+    non_sensor_tasks(),
     trace(),
     trace_back(),
     filter(),
@@ -38,7 +39,9 @@ void tThreadContainerThread::MainLoopCallback()
 
       // find tasks
       tasks.Clear();
+      non_sensor_tasks.Clear();
       filter.TraverseElementTree(this->thread_container, this, NULL, tmp);
+      tasks.AddAll(non_sensor_tasks);
 
       // create task graph
       for (size_t i = 0u; i < tasks.Size(); i++)
@@ -69,6 +72,7 @@ void tThreadContainerThread::MainLoopCallback()
               tPeriodicFrameworkElementTask* next = task->next_tasks.Get(j);
               next->previous_tasks.RemoveElem(task);
             }
+            break;
           }
         }
         if (found)
@@ -112,18 +116,19 @@ void tThreadContainerThread::MainLoopCallback()
         }
       }
     }
+  }
 
-    // execute tasks
-    for (size_t i = 0u; i < schedule.Size(); i++)
-    {
-      schedule.Get(i)->task->ExecuteTask();
-    }
+  // execute tasks
+  for (size_t i = 0u; i < schedule.Size(); i++)
+  {
+    schedule.Get(i)->task->ExecuteTask();
   }
 }
 
 void tThreadContainerThread::Run()
 {
   this->thread_container->GetRuntime()->AddListener(this);
+  ::finroc::core::tCoreLoopThreadBase::Run();
 }
 
 void tThreadContainerThread::RuntimeChange(int8 change_type, tFrameworkElement* element)
@@ -226,7 +231,14 @@ void tThreadContainerThread::TreeFilterCallback(tFrameworkElement* fe, bool unus
     tPeriodicFrameworkElementTask* task = static_cast<tPeriodicFrameworkElementTask*>(ann);
     task->previous_tasks.Clear();
     task->next_tasks.Clear();
-    tasks.Add(task);
+    if (task->IsSenseTask())
+    {
+      tasks.Add(task);
+    }
+    else
+    {
+      non_sensor_tasks.Add(task);
+    }
   }
 }
 

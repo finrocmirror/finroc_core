@@ -87,6 +87,7 @@ void tThreadContainer::StartExecution()
   {
     util::sThreadUtil::MakeThreadRealtime(thread);
   }
+  thread->Start();
 }
 
 void tThreadContainer::StopThread()

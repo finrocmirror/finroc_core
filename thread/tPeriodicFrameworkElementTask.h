@@ -25,6 +25,7 @@
 #define CORE__THREAD__TPERIODICFRAMEWORKELEMENTTASK_H
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
+#include "core/port/tEdgeAggregator.h"
 #include "core/tFinrocAnnotation.h"
 
 namespace finroc
@@ -40,7 +41,6 @@ namespace finroc
 namespace core
 {
 class tDataType;
-class tEdgeAggregator;
 
 /*!
  * \author Max Reichardt
@@ -77,6 +77,14 @@ public:
    * \param task Task to execute
    */
   tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, util::tTask* task_);
+
+  /*!
+   * \return Is this a sensor task?
+   */
+  inline bool IsSenseTask()
+  {
+    return outgoing->GetFlag(tEdgeAggregator::cSENSOR_DATA) || incoming->GetFlag(tEdgeAggregator::cSENSOR_DATA);
+  }
 
 };
 
