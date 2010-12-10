@@ -130,12 +130,6 @@ void tThreadLocalCache::DeleteInfoForPort(int port_index)
         pd->NonOwnerLockRelease(tli->GetCCPool(pd->GetType()));
       }
 
-      //              // Delete pool
-      //              @Ptr PortDataBufferPool pool = tli.getBufferPool(handle);
-      //              if (pool != null) {
-      //                  pool.controlledDelete();
-      //                  tli.setBufferPool(handle, null);
-      //              }
     }
   }
 }
@@ -149,9 +143,6 @@ void tThreadLocalCache::FinalDelete()
   {
     method_syncher->Release();
   }
-
-  ///** Get back any returned buffers */
-  //reclaimReturnedBuffers();
 
   /*! Delete local port data buffer pools */
   for (size_t i = 0u; i < cc_type_pools.length; i++)
@@ -179,21 +170,6 @@ void tThreadLocalCache::FinalDelete()
       }
     }
   }
-
-  //          // Release port data lock - NO!!! - may release last lock on used data... data will be deleted with pool (see below)
-  //          PortData pd = getLastWrittenToPortRaw(i);
-  //          if (pd != null) {
-  //              pd.getManager().releaseOwnerLock();
-  //              setLastWrittenToPort(i, null);
-  //          }
-  //
-  //          // Delete pool
-  //          @Ptr PortDataBufferPool pool = getBufferPool(i);
-  //          if (pool != null) {
-  //              pool.controlledDelete();
-  //              setBufferPool(i, null);
-  //          }
-  //      }
 }
 
 tMethodCallSyncher* tThreadLocalCache::GetMethodSyncher()

@@ -101,9 +101,6 @@ public:
    */
   void CommitData(tCoreSerializable& data);
 
-  /* (non-Javadoc)
-   * @see core.port4.Port#getUnusedBuffer()
-   */
   tTransactionPacket* GetUnusedBuffer();
 
   virtual void StreamThreadCallback(int64 cur_time);

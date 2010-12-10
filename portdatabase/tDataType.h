@@ -67,12 +67,6 @@ private:
 
   const char* const rtti_name; // pointer to RTTI name - unambiguous according to gcc docs
 
-  /*! Methods for serialization */
-  //public enum SerializationMethod { Custom, Memcpy }
-
-  /*! Is this a custom serializable data type (currently prerequisite) */
-  //@Const private final SerializationMethod serialization = SerializationMethod.Custom;
-
   /*! Current default minimum network update interval for type im ms */
   int16 update_time;
 
@@ -114,16 +108,6 @@ public:
   {
     return this == data_type;
   }
-
-  //  @JavaOnly
-  //  public DataType(/*short uid,*/ String name, @AutoPtr PortDataFactory factory, boolean ccType/*, SerializationMethod serialization*/) {
-  //      //this.serialization = serialization;
-  //      //dataTypeUid = uid;
-  //      javaClass = null;
-  //      this.factory = factory;
-  //      this.ccType = ccType
-  //      ;
-  //  }
 
   /*!
    * \return Create new instance of data type
@@ -207,16 +191,6 @@ public:
   {
     return methods;
   }
-
-  //  @Override
-  //  public void deserialize(CoreInput is) {
-  //      throw new RuntimeException("Not intended");
-  //  }
-  //
-  //  @Override
-  //  public void serialize(CoreBuffer os) {
-  //      PortInfo.serializeDataType(this, os);
-  //  }
 
   /*!
    * \return Related data type - custom info for special purposes
@@ -329,13 +303,6 @@ public:
   {
     tDataTypeLookup<typename tListHelper<T, boost::is_base_of<tPortData, T>::value >::tListType>::type = this;
   }
-
-  //  SerializationMethod getSerialization(CoreSerializable* cs) {
-  //      return Custom;
-  //  }
-  //  SerializationMethod getSerialization(void* cs) {
-  //      return Memcpy;
-  //  }
 
   /*!
    * \return Uid of data type

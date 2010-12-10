@@ -60,7 +60,7 @@ public:
     SetPullRequestHandler(listener);
   }
 
-  /*
+  /*!
    * Write data buffer instantly to connected ports.
    * (only valid to call this on buffers that do not commit data deferred)
    *
@@ -71,9 +71,6 @@ public:
     Publish(data);
   }
 
-  /* (non-Javadoc)
-   * @see core.port4.Port#getUnusedBuffer()
-   */
   inline T* GetUnusedBuffer()
   {
     T* result = ::finroc::core::tPort<T>::GetUnusedBuffer();

@@ -51,35 +51,6 @@ public:
 
   tCCPortQueueElement() {}
 
-  //PortDataReference ref;
-
-  //  /** Number of bits for fragment index/size - currently 128 elements */
-  //  public static final @SizeT int BITS = 7;
-  //
-  //  /** Size of one backend chunk - must be 2^n */
-  //  public static final @SizeT int SIZE = 1 << BITS;
-  //
-  //  /** Mask to add absolute index with */
-  //  public static final @SizeT int MASK = SIZE - 1;
-  //
-  //  /** Array backend for chunk */
-  //  @InCpp("void* array[SIZE];")
-  //  Object[] array = new Object[SIZE];
-  //
-  //  public PortQueueFragment() {
-  //
-  //      // initialize array
-  //      for (size_t i = 0; i < CHUNK_SIZE; i++) {
-  //          array[i] = NULL;
-  //      }
-  //
-  //  }
-  //
-  /*  @Override
-      public void recycle() {
-          super.recycle();
-      }*/
-
   inline void Recycle(bool recycle_content)
   {
     if (recycle_content)

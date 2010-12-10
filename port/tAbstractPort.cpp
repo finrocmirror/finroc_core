@@ -61,9 +61,6 @@ tAbstractPort::tAbstractPort(tPortCreationInfo pci) :
     data_type(pci.data_type),
     min_net_update_time(pci.min_net_update_interval)
 {
-  //      if (getFlag(PortFlags.IS_SHARED)) {
-  //          createDefaultLink();
-  //      }
 }
 
 tNetPort* tAbstractPort::AsNetPort()
@@ -113,8 +110,6 @@ void tAbstractPort::ConnectToTarget(tAbstractPort* target)
     if (MayConnectTo(target) && (!IsConnectedTo(target)))
     {
       RawConnectToTarget(target);
-      //              strategy = (short)Math.max(0, strategy);
-      //              target.strategy = (short)Math.max(0, target.strategy);
       target->PropagateStrategy(NULL, this);
       NewConnection(target);
       target->NewConnection(this);
@@ -452,14 +447,6 @@ bool tAbstractPort::MayConnectTo(tAbstractPort* target)
     return false;
   }
 
-  // Check will be done by data type
-  /*if (getFlag(PortFlags.IS_CC_PORT) != target.getFlag(PortFlags.IS_CC_PORT)) {
-      return false;
-  }
-  if (getFlag(PortFlags.IS_INTERFACE_PORT) != target.getFlag(PortFlags.IS_INTERFACE_PORT)) {
-      return false;
-  }*/
-
   if (!data_type->IsConvertibleTo(target->data_type))
   {
     return false;
@@ -471,19 +458,8 @@ void tAbstractPort::PrepareDelete()
 {
   util::tLock lock1(this);
 
-  //      // remove links
-  //      if (linksTo != null) {
-  //          for (@SizeT int i = 0; i < linksTo.size(); i++) {
-  //              getRuntime().removeLink(linksTo.get(i));
-  //          }
-  //          linksTo.clear();
-  //      }
-
   // disconnect all edges
   DisconnectAll();
-
-  // publish deletion - done by FrameworkElement class now
-  //publishUpdatedPortInfo();
 }
 
 int tAbstractPort::ProcessFlags(const tPortCreationInfo& pci)

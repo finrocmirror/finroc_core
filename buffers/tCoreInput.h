@@ -90,20 +90,6 @@ public:
     return type_translation;
   }
 
-  //  /**
-  //   * Deserialize object from stream with fixed type
-  //   *
-  //   * \param to Object to read
-  //   */
-  //  public void readObject(TypedObject to) {
-  //      readSkipOffset();
-  //      if (to == null) {
-  //          throw new RuntimeException("Provided object is null");
-  //      } else {
-  //          to.deserialize(this);
-  //      }
-  //  }
-
   /*!
    * Deserialize object with variable type from stream
    *

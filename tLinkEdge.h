@@ -137,17 +137,6 @@ public:
     this->next = next_;
   }
 
-//  /**
-//   * Called by RuntimeEnvironment when link that this object is obviously interested in has been removed
-//   *
-//   * \param re RuntimeEnvironment
-//   * \param link Link that has been added
-//   * \param port port linked to
-//   */
-//  void linkRemoved(RuntimeEnvironment re, String link, AbstractPort port) {
-//      // do nothing... currently
-//  }
-
 };
 
 } // namespace finroc

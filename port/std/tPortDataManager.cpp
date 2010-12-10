@@ -59,10 +59,6 @@ tPortDataManager::tPortDataManager(tDataType* dt, const tPortData* port_data) :
 
   //System.out.println("New port data manager");
 
-  //ownerThread = ThreadUtil.getCurrentThreadId();
-
-  //PortDataCreationInfo.get().setType(type) - wäre obsolet, wenn man Typ irgendwie anders bekommen könnte
-
   tPortDataCreationInfo* pdci = tPortDataCreationInfo::Get();
   pdci->SetManager(this);
   pdci->SetPrototype(port_data);

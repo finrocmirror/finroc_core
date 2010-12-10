@@ -190,14 +190,6 @@ public:
     return GetClass().GetSimpleName() + " - " + last_address;
   }
 
-//  protected class ConnectionListenerManager extends WeakRefListenerManager<ConnectionListener> {
-//
-//      @Override
-//      protected void notifyObserver(ConnectionListener observer, Object... param) {
-//          observer.connectionEvent(ExternalConnection.this, (Event)param[0]);
-//      }
-//  }
-
 };
 
 } // namespace finroc

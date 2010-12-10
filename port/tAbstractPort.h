@@ -84,9 +84,6 @@ private:
   /*! Edges ending at this port */
   tEdgeList<>* edges_dest;
 
-  //  /** Contains names of any links to this port - for efficient destruction */
-  //  protected @Ptr SimpleList<String> linksTo;
-
   /*! Contains any link edges created by this port */
   util::tSimpleList<tLinkEdge*>* link_edges;
 
@@ -105,9 +102,6 @@ protected:
 
   /*! Type of port data */
   tDataType* const data_type;
-
-  //  /** Counter for pull & method calls in this port */
-  //  protected final AtomicInt callIndex = new AtomicInt(0);
 
   /*! Minimum network update interval. Value < 0 means default for this type */
   int16 min_net_update_time;
@@ -132,21 +126,6 @@ private:
    * \param target Potential Target port
    */
   void ConsiderInitialReversePush(tAbstractPort* target);
-
-  //          if (!acceptsReverseData()) {
-  //              if (strategy > 0 && max <= 0) { // reset INITIAL_PUSH_RECEIVED flag, when we switch to a pull strategy (so that switch to push strategy will cause a push again)
-  //                  setFlag(PortFlags.INITIAL_PUSH_RECEIVED, false);
-  //              } else if (strategy <= 0 && max > 0) { // we should consider an initial push
-  //                  if ((!hasIncomingEdges()) && considerPush) {
-  //                      for (int i = 0, n = it.size(); i < n; i++) {
-  //                          @Ptr AbstractPort port = it.get(i);
-  //                          if (port != null && port.pushStrategy()) {
-  //                              considerInitialPush(port);
-  //                          }
-  //                      }
-  //                  }
-  //              }
-  //          }
 
   /*!
    * Forward current strategy to source ports (helper for above - and possibly variations of above)
@@ -268,9 +247,6 @@ protected:
   inline void SetChangedInitial()
   {
     changed = cCHANGED_INITIAL;
-    /*if (parent instanceof PortSet) {
-        ((PortSet)parent).childChanged();
-    }*/
   }
 
   /*!
@@ -282,31 +258,6 @@ protected:
    */
   virtual void SetMaxQueueLengthImpl(int length) = 0;
 
-  //  /**
-  //   * \return Has port (ever) been linked?
-  //   */
-  //  @ConstMethod public boolean isLinked() {
-  //      return linksTo != null;
-  //  }
-  //
-  //  /**
-  //   * Does link name link to port?
-  //   *
-  //   * \param linkName link name
-  //   * \return Answer
-  //   */
-  //  @ConstMethod public boolean isLinked(@Const @Ref String linkName) {
-  //      if (linksTo == null) {
-  //          return false;
-  //      }
-  //      for (@SizeT int i = 0; i < linksTo.size(); i++) {
-  //          if (linksTo.get(i).equals(linkName)) {
-  //              return true;
-  //          }
-  //      }
-  //      return false;
-  //  }
-
   /*!
    * Update edge statistics
    *
@@ -315,23 +266,6 @@ protected:
    * \param data Data that was sent
    */
   void UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, tTypedObject* data);
-
-  //  /**
-  //   * \return Does port "want" to receive an initial push? Typically it does, unless it has multiple sources or no push strategy itself.
-  //   * (Standard implementation for this)
-  //   */
-  //  @SuppressWarnings("unchecked")
-  //  protected boolean wantsInitialPush() {
-  //      int sources = 0;
-  //      @Ptr ArrayWrapper<AbstractPort> src = edgesDest.getIterable();
-  //      for (int i = 0, n = src.size(); i < n; i++) {
-  //          @Ptr AbstractPort pb = src.get(i);
-  //          if (pb != null && pb.isReady()) {
-  //              sources++;
-  //          }
-  //      }
-  //      return isReady() && strategy > 0 && sources <= 1;
-  //  }
 
   template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   /*!
@@ -375,27 +309,6 @@ public:
    * \param pci PortCreationInformation
    */
   tAbstractPort(tPortCreationInfo pci);
-
-  //  /**
-  //   * Is specified link, the first link to this port?
-  //   *
-  //   * \param link link name
-  //   * \return Answer
-  //   */
-  //  @ConstMethod public boolean isFirstLink(@Const @Ref String link) {
-  //      return linksTo.get(0).equals(link);
-  //  }
-
-  //  /**
-  //   * Return link name of link number i
-  //   *
-  //   * \param i
-  //   * \param buffer Buffer for result
-  //   * \return link name
-  //   */
-  //  @ConstMethod public /*@Const @Ref*/ void getLink(int i, @Ref StringBuilder buffer) {
-  //      getQualifiedLink(buffer, i);
-  //  }
 
   /*!
    * \return Does port accept reverse data?
@@ -533,11 +446,6 @@ public:
     return link_edges;
   }
 
-  //  /**
-  //   * \return Current data auto-locked - Universal & virtual method - call ThreadLocalCache.get().releaseAllLocks to release lock
-  //   */
-  //  @Virtual public abstract TypedObject universalGetAutoLocked();
-
   /*!
    * \return Minimum Network Update Interval (only-port specific one; -1 if there's no specific setting for port)
    */
@@ -593,36 +501,6 @@ public:
   {
     return changed > cNO_CHANGE;
   }
-
-  //  /**
-  //   * \return Does port have edges to destinations with push strategy?
-  //   */
-  //  @SuppressWarnings("unchecked") @ConstMethod
-  //  public boolean hasActiveEdges() {
-  //      @Ptr ArrayWrapper<AbstractPort> it = edgesSrc.getIterable();
-  //      for (int i = 0, n = it.size(); i < n; i++) {
-  //          @Ptr AbstractPort port = it.get(i);
-  //          if (port.getFlag(PortFlags.PUSH_STRATEGY)) {
-  //              return true;
-  //          }
-  //      }
-  //      return false;
-  //  }
-
-  //  /**
-  //   * \return Does port have edges to sources with push strategy?
-  //   */
-  //  @SuppressWarnings("unchecked") @ConstMethod
-  //  public boolean hasActiveEdgesReverse() {
-  //      @Ptr ArrayWrapper<AbstractPort> it = edgesDest.getIterable();
-  //      for (int i = 0, n = it.size(); i < n; i++) {
-  //          @Ptr AbstractPort port = it.get(i);
-  //          if (port != null && port.getFlag(PortFlags.PUSH_STRATEGY_REVERSE)) {
-  //              return true;
-  //          }
-  //      }
-  //      return false;
-  //  }
 
   /*!
    * \return Does port have incoming edges?
@@ -764,9 +642,6 @@ public:
   inline void SetChanged()
   {
     changed = cCHANGED;
-    /*if (parent instanceof PortSet) {
-        ((PortSet)parent).childChanged();
-    }*/
   }
 
   /*!
@@ -777,9 +652,6 @@ public:
   inline void SetChanged(int8 change_constant)
   {
     changed = change_constant;
-    /*if (parent instanceof PortSet) {
-        ((PortSet)parent).childChanged();
-    }*/
   }
 
   /*!

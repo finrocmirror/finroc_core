@@ -55,22 +55,6 @@ private:
 
 public:
 
-  /*! Port to whose PortDataContainerPool this buffer belongs - automatically counts as initial user */
-  //protected final Port<?> origin;
-
-  /*! Last iteration of PortTracker when he found this buffer assigned to a port */
-  //protected volatile int lastTracked = -5;
-  //public static final int FILLING = Integer.MAX_VALUE;
-
-  /*! Value to add for user lock */
-  //private final static int USER_LOCK = 0x10000;
-
-  /*! Constant to AND refCounter with to determine whether there's a user lock */
-  //private final static int USER_LOCK_MASK = 0xFFFF0000;
-
-  /*! Constant to AND refCounter with to determine whether there's a system lock */
-  //private final static int SYSTEM_LOCK_MASK = 0xFFFF;
-
   /*! Log domain for serialization */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "serialization");
 
@@ -98,47 +82,10 @@ public:
     return manager;
   }
 
-  /* (non-Javadoc)
-   * @see core.port7.std.PortData#handleRecycle()
-   */
   virtual void HandleRecycle()
   {
     // default: do nothing
   }
-
-  //  /**
-  //   * Add read lock to buffer.
-  //   * Prerequisite: Buffer needs to be already read-locked...
-  //   * (usually the case after getting buffer from port)
-  //   */
-  //  // no extreme optimization necessary, since not called that often...
-  //  public void addReadLock() {
-  //      //int counterIndex = (refCounter.get() >> 28) & 0x3;
-  //      int counterIndex = reuseCounter & 0x3;
-  //      int old = refCounter.getAndAdd(refCounterIncrement[counterIndex]);
-  //      assert ((old & refCounterMasks[counterIndex]) != 0) : "Element already reused. Application in undefined state. Element has to be locked prior to calling this method.";
-  //      assert (counterIndex == ((old >> 28) & 0x3)) : "Counter index changed. Application in undefined state. Element has to be locked prior to calling this method.";
-  //      assert (counterIndex != refCounterMasks[counterIndex]) : "Reference counter overflow. Maximum of 127 locks allowed. Consider making a copy somewhere.";
-  //  }
-  //
-  //  /**
-  //   * Release lock from buffer
-  //   */
-  //  public void releaseLock() {
-  //      int counterIndex = reuseCounter & 0x3;
-  //      int count = refCounter.addAndGet(-refCounterIncrement[counterIndex]);
-  //      assert ((count & refCounterMasks[counterIndex]) != refCounterMasks[counterIndex]) : "More locks released than acquired. Application in undefined state.";
-  //      if ((count & refCounterMasks[counterIndex]) == 0) {
-  //          // reuse object
-  //          PortDataBufferPool owner = this.owner;
-  //          reuseCounter++;
-  //          if (owner != null) {
-  //              owner.enqueue(this);
-  //          } else {
-  //               delete this;
-  //          }
-  //      }
-  //  }
 
   /*!
    * initialize data type
@@ -146,40 +93,7 @@ public:
    */
   void InitDataType();
 
-  /*!
-   * For Port.get().
-   *
-   * A user lock is added to object, if there's still a system lock.
-   * Otherwise it is outdated and the next one in port should be used.
-   * User locks may still appear to be there although object has been reused,
-   * if this method is called concurrently.
-   *
-   * \return Did lock succeed?
-   */
-  /*boolean addUserLockIfSystemLock() {
-      int old = refCounter.getAndAdd(USER_LOCK);
-      if ((old & SYSTEM_LOCK_MASK) <= 0) {
-          refCounter.getAndAdd(-USER_LOCK); // remove interference
-          return false;
-      }
-      return true;
-  }*/
-
-  /*!
-   * Add read lock to buffer (thread safe)
-   *
-   * \return Did lock succeed (or is element already reused) ?
-   */
-  /*void addSystemReadLock() {
-      int old = refCounter.getAndIncrement();
-      if (old <= 0) {
-          throw new RuntimeException("Element already reused");
-      }
-  }*/
-
-  /*!
-   * Release read lock (thread safe)
-   */
+  // override toString to have it available in C++ for PortData
   virtual const util::tString ToString() const
   {
     return "some port data";

@@ -95,15 +95,6 @@ public:
     return static_cast<T*>(PerformSynchCallImpl(call, tmp, timeout));
   }
 
-//  /**
-//   * Mark this call and signal that it won't
-//   *
-//   * \param call Call
-//   */
-//  public static void noQuickReturn(AbstractCall call) {
-//
-//  }
-
 };
 
 } // namespace finroc

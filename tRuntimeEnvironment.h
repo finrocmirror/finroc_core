@@ -109,44 +109,6 @@ private:
   /*! Single final instance of above */
   tRegistry registry;
 
-  //
-  //  // Static elements to delete after all elements in runtime environment
-  //  std::tr1::shared_ptr<util::SimpleList<finroc::util::Object*> > deleteLastList;
-  //
-
-  /*! Loop threads in this runtime */
-  //private final SimpleList<CoreLoopThread> loopThreads = new SimpleList<CoreLoopThread>();
-
-  /*! Event threads in this runtime */
-  //private final SimpleList<CoreEventThread> eventThreads = new SimpleList<CoreEventThread>();
-
-  /*! Global list of all ports (also place holders for those that are currently not available) */
-  //private final Map<String, PortContainer> ports = new FastMap<String, PortContainer>();
-
-  /*!
-   * Global list of all ports (also place holders for those that are currently not available)
-   * allows accessing ports with simple index. This index is unique during runtime.
-   * List will grow... somewhat memory leak like... but still with 100.000 different port uids it's only 400kb
-   *
-   * Thread-safe for iteration.
-   */
-  //private final FastTable<PortContainer> indexedPorts = new FastTable<PortContainer>();
-
-  /*! List with Ports that actually exists - thread-safe for iteration - may contain null entries */
-  //private final SafeArrayList<Port<?>> existingPorts = new SafeArrayList<Port<?>>();
-
-  /*! Global list of all modules (also place holders for those that are currently not available) */
-  //private final FastMap<String, ModuleContainer> modules = new FastMap<String, ModuleContainer>();
-
-  /*! Number of active modules */
-  //private int activeModuleCount;
-
-  /*! All edges in runtime environment */
-  //private final List<Edge> edges = new ArrayList<Edge>();
-
-  /*! Flexible edges in runtime environment */
-  //private final List<FlexEdge> flexEdges = new ArrayList<FlexEdge>();
-
   /*! Singleton instance of Runtime environment - shared pointer so that is cleanly deleted at shutdown */
   static ::std::tr1::shared_ptr<tRuntimeEnvironment> instance;
 
@@ -164,73 +126,14 @@ private:
 
 public:
 
-  /*! Runtime settings */
-  //private final RuntimeSettings settings;
-
-  /*! Runtime listeners and Parameters */
-  //private final ListenerManager listeners = new ListenerManager();
-  //private final Byte ADD = 1, REMOVE = 2;
-
-  //  /** Links to framework elements */
-  //  private final ConcurrentMap<String, AbstractPort> links = new ConcurrentMap<String, AbstractPort>();
-
-  //  /** True, when Runtime environment is shutting down */
-  //  public static boolean shuttingDown = false;
-
   /*! Framework element that contains all framework elements that have no parent specified */
   ::finroc::core::tFrameworkElement* unrelated;
 
 private:
 
-  //  @SuppressWarnings("unused")
-  //  @InCppFile
-  //  private void stopStreamThread() {
-  //      StreamCommitThread.staticStop();
-  //  }
-
-  //@Init("deleteLastList(new util::SimpleList<finroc::util::Object*>())")
   tRuntimeEnvironment();
 
 protected:
-
-  //  /**
-  //   * (Should only be called by AbstractPort)
-  //   * Create link to port
-  //   *
-  //   * \param port Port
-  //   * \param linkName Name of link
-  //   */
-  //  public synchronized void link(AbstractPort port, String linkName) {
-  //      assert(!links.contains(linkName));
-  //      links.put(linkName, port);
-  //
-  //      // notify link listeners
-  //
-  //      for (@SizeT int i = 0; i < listeners.size(); i++) {
-  //          listeners.get(i).linkAdded(linkName, port);
-  //      }
-  //
-  //      // notify edges
-  //      LinkEdge interested = linkEdges.getPtr(linkName);
-  //      while(interested != null) {
-  //          interested.linkAdded(this, linkName, port);
-  //      }
-  //  }
-
-  //  /**
-  //   * (Should only be called by AbstractPort)
-  //   * Remove link to port
-  //   *
-  //   * \param linkName Name of link
-  //   */
-  //  public synchronized void removeLink(String linkName) {
-  //      AbstractPort ap = links.remove(linkName);
-  //
-  //      // notify link listeners
-  //      for (@SizeT int i = 0; i < linkListeners.size(); i++) {
-  //          linkListeners.get(i).linkRemoved(linkName, ap);
-  //      }
-  //  }
 
   /*!
    * (usually only called by LinkEdge)
@@ -279,19 +182,8 @@ public:
   {
     active = false;
     util::tThread::StopThreads();
-    //shuttingDown = true;
-    //util::GarbageCollector::deleteGarbageCollector(); // safer, this way
     DeleteChildren();
     instance_raw_ptr = NULL;
-
-    //      // delete thread local caches mainly
-    //      for (size_t i = 0; i < deleteLastList->size(); i++) {
-    //          delete deleteLastList->get(i);
-    //      }
-    //      deleteLastList->clear();
-    //      deleteLastList._reset();
-    // stopStreamThread();
-    // instance = NULL; will happen automatically
   }
 
   /*!
@@ -300,17 +192,6 @@ public:
    * \return Singleton instance of Runtime environment
    */
   static tRuntimeEnvironment* GetInstance();
-
-  //  /**
-  //   * (should only be called by thread local-cache)
-  //   * get port by raw index
-  //   *
-  //   * \param i Raw index
-  //   * \return Port
-  //   */
-  //  public AbstractPort getPortByRawIndex(int i) {
-  //      return ports.getByRawIndex(i);
-  //  }
 
   /*!
    * get Port by handle
@@ -360,116 +241,12 @@ public:
    */
   void MarkElementDeleted(tFrameworkElement* fe);
 
-  //  /**
-  //   * \return Iterator to iterate over links
-  //   */
-  //  public ConcurrentMap<String, AbstractPort>.MapIterator getLinkIterator() {
-  //      return links.getIterator();
-  //  }
-
-  //  /**
-  //   * Delete this object after all Framework elements
-  //   */
-  //  static void deleteLast(@Ptr Object t) {
-  //
-  //      if (instance == NULL || instance->deleteLastList._get() == NULL) {
-  //          delete t;
-  //      } else {
-  //          instance->deleteLastList->add(t);
-  //      }
-  //
-  //  }
-
   /*!
    * Called before a framework element is initialized - can be used to create links etc. to this element etc.
    *
    * \param element Framework element that will be initialized soon
    */
   void PreElementInit(tFrameworkElement* element);
-
-  //  @Override
-  //  protected void serializeUid(CoreOutputStream oos, boolean firstCall) throws IOException {
-  //      return;  // do not include Runtime Description in UIDs
-  //  }
-  //
-  //  /**
-  //   * \return Returns unmodifiable list of Ports.
-  //   */
-  //  public List<PortContainer> getPorts() {
-  //      return indexedPorts.unmodifiable();
-  //  }
-  //
-  //  /**
-  //   * \param index Port Index
-  //   * \return Returns PortContainer with specified global index
-  //   */
-  //  public PortContainer getPort(int index) {
-  //      return indexedPorts.get(index);
-  //  }
-
-  //  /**
-  //   * \return Runtime Settings module
-  //   */
-  //  public RuntimeSettings getSettings() {
-  //      return settings;
-  //  }
-  //
-  //
-  //  private class ListenerManager extends WeakRefListenerManager<RuntimeListener> {
-  //
-  //      @Override
-  //      protected void notifyObserver(RuntimeListener observer, Object... param) {
-  //          if (param[0] == ADD) {
-  //              observer.portAdded((Port<?>)param[1]);
-  //          } else {
-  //              observer.portRemoved((Port<?>)param[1]);
-  //          }
-  //      }
-  //  }
-  //
-  //  /**
-  //   * \param l
-  //   * @see core.util.WeakRefListenerManager#addListener(java.util.EventListener)
-  //   */
-  //  public synchronized void addListener(RuntimeListener l, boolean applyExistingPorts) {
-  //      listeners.addListener(l);
-  //      if (applyExistingPorts) {
-  //          for (int i = 0, n = indexedPorts.size(); i < n; i++) {
-  //              Port<?> p = indexedPorts.get(i).getPort();
-  //              if (p != null) {
-  //                  l.portAdded(p);
-  //              }
-  //          }
-  //      }
-  //  }
-  //
-  //  /**
-  //   * \param l
-  //   * @see core.util.WeakRefListenerManager#removeListener(java.util.EventListener)
-  //   */
-  //  public synchronized void removeListener(RuntimeListener l) {
-  //      listeners.removeListener(l);
-  //  }
-  //
-  //  /**
-  //   * \return Unmodifiable List with Ports that actually exists - thread-safe for iteration - may contain null entries
-  //   */
-  //  public List<Port<?>> getExistingPorts() {
-  //      return existingPorts.getFastUnmodifiable();
-  //  }
-  //
-  //  /**
-  //   * \return the activeModuleCount
-  //   */
-  //  public int getActiveModuleCount() {
-  //      return activeModuleCount;
-  //  }
-  //
-  //  public void resetLoopThreads() {
-  //      for (FastMap.Entry<String, ModuleContainer> e = modules.head(), end = modules.tail(); (e = e.getNext()) != end;) {
-  //          e.getValue().setLoopThreadInfo(null);
-  //      }
-  //  }
 
   /*!
    * Register framework element at RuntimeEnvironment.
@@ -525,201 +302,6 @@ public:
   {
     return util::tThread::StoppingThreads();
   }
-
-  /*!
-   * Get Port container. Create if not yet existent.
-   *
-   * \param uid Port UID
-   * \return Port container
-   */
-  /*public PortContainer getPort(String uid) {
-      PortContainer result = ports.get(uid);
-      if (result == null) {
-          synchronized (ports) {  // make port container creation thread-safe - only part in code that modifies ports and indexedPorts
-              result = ports.get(uid);
-              if (result == null) {
-                  result = new PortContainer(getModule(Module.getModulePartOfUID(uid)), uid);
-                  ports.put(uid, result);
-                  indexedPorts.add(result.getIndex(), result); // result.getIndex() should always be last index
-              }
-          }
-      }
-      return result;
-  }*/
-
-  //  /**
-  //   * Adds edge
-  //   *
-  //   * \param sourceUid UID of source port
-  //   * \param destUid UID of destination port
-  //   * \return added edge
-  //   */
-  //  public Edge addEdge(String sourceUid, String destUid) {
-  //      Edge e = new Edge(sourceUid, destUid);
-  //      addEdge(e);
-  //      return e;
-  //  }
-
-  /*!
-   * Add edge.
-   *
-   * \param e Edge
-   */
-  //  public void addEdge(Edge e) {
-  //      synchronized(edges) {
-  //          edges.add(e);
-  //          e.register(getPort(e.getSourceUID()), getPort(e.getDestinationUID()));
-  //      }
-  //      reschedule();
-  //
-  //  }
-  //
-  //  /**
-  //   * remove Edge
-  //   *
-  //   * \param e Edge
-  //   */
-  //  public void removeEdge(Edge e) {
-  //      synchronized(edges) {
-  //          edges.remove(e);
-  //          e.unregister(edges);
-  //      }
-  //      reschedule();
-  //  }
-  //
-  //  /**
-  //   * Add flexbible edge.
-  //   *
-  //   * \param e Edge
-  //   */
-  //  public synchronized void addFlexEdge(FlexEdge e) {
-  //      flexEdges.add(e);
-  //      addListener(e, true);
-  //  }
-  //
-  //  /**
-  //   * remove flexible Edge
-  //   *
-  //   * \param e Edge
-  //   */
-  //  public synchronized void removeFlexEdge(FlexEdge e) {
-  //      removeListener(e);
-  //      flexEdges.remove(e);
-  //      e.delete();
-  //  }
-  //
-  //  /**
-  //   * Called by ports when they are initialized.
-  //   * Attaches them to PortContainer
-  //   *
-  //   * \param port Port to register
-  //   * \return PortContainer to which this port was attached
-  //   */
-  //  public synchronized <T extends PortData> PortContainer registerPort(Port<T> port) {
-  //      PortContainer pc = getPort(port.getUid());
-  //      port.setIndex(pc.getIndex());
-  //      pc.setPort(port);
-  //      if (port.isShared()) {
-  //          settings.sharedPorts.add(new PortInfo(pc));
-  //      }
-  //      existingPorts.add(port);
-  //      listeners.fireEvent(ADD, port);
-  //      reschedule();
-  //      return pc;
-  //  }
-  //
-  //  /**
-  //   * Called by ports when they are deleted.
-  //   * Detaches them from PortContainer
-  //   *
-  //   * \param port Port to unregister
-  //   */
-  //  public void unregisterPort(Port<?> port) {
-  //      listeners.fireEvent(REMOVE, port);
-  //      existingPorts.remove(port);
-  //      PortContainer pc = getPort(port.getUid());
-  //      if (pc.getPort() == port) {
-  //          pc.setPort(null);
-  //          if (port.isShared()) {
-  //              settings.sharedPorts.remove(port.getIndex());
-  //          }
-  //      }
-  //      reschedule();
-  //  }
-
-  //  /**
-  //   * \param index Index
-  //   * \return Loop Thread with specified index
-  //   */
-  //  public @Ref CoreLoopThread getLoopThread(int index) {
-  //      return loopThreads.get(index);
-  //  }
-  //
-  //  /**
-  //   * \param index Index
-  //   * \return Loop Thread with specified index
-  //   */
-  //  public @Ref CoreEventThread getEventThread(int index) {
-  //      return eventThreads.get(index);
-  //  }
-
-  //  /**
-  //   * Called by modules when they are initialized.
-  //   * Attaches them to ModuleContainer
-  //   *
-  //   * \param port Module to register
-  //   */
-  //  public void registerModule(Module module) {
-  //      ModuleContainer mc = getModule(module.getUid());
-  //      mc.setModule(module);
-  //      activeModuleCount++;
-  //      reschedule();
-  //  }
-  //
-  //  /**
-  //   * Get Module container. Create if not yet existent.
-  //   *
-  //   * \param uid Module UID
-  //   * \return Module container
-  //   */
-  //  public ModuleContainer getModule(String uid) {
-  //      ModuleContainer result = modules.get(uid);
-  //      if (result == null) {
-  //          synchronized (modules) {  // make port container creation thread-safe
-  //              result = modules.get(uid);
-  //              if (result == null) {
-  //                  result = new ModuleContainer(uid);
-  //                  modules.put(uid, result);
-  //              }
-  //          }
-  //      }
-  //      return result;
-  //  }
-  //
-  //  /**
-  //   * Called by modules when they are deleted.
-  //   * Detaches them from ModuleContainer
-  //   *
-  //   * \param port Module to unregister
-  //   */
-  //  public void unregisterModule(Module module) {
-  //      ModuleContainer mc = getModule(module.getUid());
-  //      if (mc.getModule() == module) {
-  //          mc.setModule(null);
-  //          activeModuleCount--;
-  //      }
-  //      reschedule();
-  //  }
-
-  //  /**
-  //   * Set reschedule flags for all loop threads
-  //   */
-  //  public void reschedule() {
-  //      for (int i = 0; i < loopThreads.size(); i++) {
-  //          loopThreads.get(i).setRescheduleFlag();
-  //      }
-  //  }
-  //
 
   /*!
    * Start executing all Modules and Thread Containers in runtime

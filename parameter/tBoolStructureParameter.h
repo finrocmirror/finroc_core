@@ -82,18 +82,6 @@ public:
     ::finroc::core::tStructureParameter<tCoreBoolean>::GetValue()->Set(new_value);
   }
 
-  /*!
-   * Interprets/returns value in other (cloned) list
-   *
-   * \param list other list
-   * \return Value in other list
-   */
-  /*public boolean interpretSpec(StructureParameterList list) {
-      BoolStructureParameter param = (BoolStructureParameter)list.get(listIndex);
-      assert(param.getType() == getType());
-      return param.get();
-  }*/
-
 };
 
 } // namespace finroc

@@ -81,18 +81,6 @@ public:
     GetValue()->Get(sb);
   }
 
-  /*!
-   * Interprets/returns value in other (cloned) list
-   *
-   * \param list other list
-   * \return Value in other list
-   */
-  /*public String interpretSpec(StructureParameterList list) {
-      StringStructureParameter param = (StringStructureParameter)list.get(listIndex);
-      assert(param.getType() == getType());
-      return param.get();
-  }*/
-
 };
 
 } // namespace finroc

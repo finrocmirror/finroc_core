@@ -154,20 +154,6 @@ public:
     Reset();
   }
 
-  //  /**
-  //   * Pause thread until return value arrives
-  //   *
-  //   * \param timeout time to wait for return value
-  //   * @throws InterruptedException thrown as soon as return value arrived
-  //   */
-  //  public void waitForReturnValue(long timeout) throws InterruptedException {
-  //      //System.out.println("Thread " + Thread.currentThread().toString() + " waiting for return value");
-  //      Thread.sleep(timeout);
-  //      synchronized(this) {
-  //          threadWaitingForReturn = false;
-  //      }
-  //  }
-
   /*!
    * Return value arrives
    *

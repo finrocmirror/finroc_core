@@ -31,8 +31,6 @@ tPortData::tPortData() :
     manager(tPortDataCreationInfo::Get()->GetManager())
 {
   tPortDataCreationInfo::Get()->AddUnitializedObject(this);
-  //owner = PortDataCreationInfo.get().getOwner();
-  //type = PortDataCreationInfo.get().getType();
   assert((((unsigned int)this) & 0x7) == 0); // make sure requested alignment was honoured
 }
 
@@ -43,10 +41,6 @@ void tPortData::InitDataType()
     return;  // already set
   }
   type = LookupDataType();
-  //      if (type == null) {
-  //          int i = 4;
-  //      }
-  //      System.out.println(type);
   assert((type != NULL) && "Unknown Object type");
 }
 

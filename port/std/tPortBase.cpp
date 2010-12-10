@@ -21,7 +21,6 @@
  */
 #include "core/portdatabase/tDataType.h"
 #include "core/port/std/tPortBase.h"
-#include "core/port/std/tPortDataBufferPool.h"
 #include "core/port/std/tPullRequestHandler.h"
 
 namespace finroc
@@ -44,9 +43,6 @@ tPortBase::tPortBase(tPortCreationInfo pci) :
 {
   assert((pci.data_type->IsStdType()));
   InitLists(&(edges_src), &(edges_dest));
-  //pDefaultValue = pdm.getData();
-  //PortDataCreationInfo.get().reset();
-  //pdm.setLocks(2); // one... so it will stay read locked... and another one for pValue
   value.Set(default_value->GetCurReference());
   if (queue != NULL)
   {
@@ -127,20 +123,6 @@ void tPortBase::ForwardData(tAbstractPort* other)
   assert((other->GetDataType()->IsStdType()));
   (static_cast<tPortBase*>(other))->Publish(GetAutoLockedRaw());
   ReleaseAutoLocks();
-}
-
-tPortData* tPortBase::GetUnusedBufferRaw()
-{
-  return buffer_pool == NULL ? multi_buffer_pool->GetUnusedBuffer(cur_data_type) : buffer_pool->GetUnusedBuffer();
-
-  //      @Ptr ThreadLocalCache tli = ThreadLocalCache.get();
-  //      @Ptr PortDataBufferPool pdbp = tli.getBufferPool(handle);
-  //      boolean hasSQ = hasSpecialReuseQueue();
-  //      if ((!hasSQ) && pdbp != null) {  // common case
-  //          return pdbp.getUnusedBuffer();
-  //      }
-  //
-  //      return getUnusedBuffer2(pdbp, tli, hasSQ);
 }
 
 void tPortBase::InitialPushTo(tAbstractPort* target, bool reverse)
@@ -230,8 +212,6 @@ const tPortData* tPortBase::PullValueRaw(bool intermediate_assign)
   PullValueRawImpl(pc, intermediate_assign, true);
 
   // lock value and return
-  //pc.curRef.getManager().addLock(); we already have extra lock from pullValueRawImpl
-  //pc.setLocks++; we already have extra lock from pullValueRawImpl
   pc.ReleaseObsoleteLocks();
   return pc.cur_ref->GetData();
 }
@@ -278,36 +258,6 @@ const void tPortBase::PullValueRawImpl(tPublishCache& pc, bool intermediate_assi
     pc.cur_ref_counter = pc.cur_ref->GetRefCounter();
     pc.set_locks++;  // lock for return
   }
-
-  //      PullCall pc = ThreadLocalCache.getFast().getUnusedPullCall();
-  //
-  //      pc.ccPull = false;
-  //      pc.info.lockEstimate = intermediateAssign ? 2 : 1; // 3: 1 for call, 1 for this port, 1 for return
-  //      pc.info.setLocks = 0;
-  //      pc.intermediateAssign = intermediateAssign;
-  //      //pullValueRaw(pc);
-  //      try {
-  //          addLock(pc.info); // lock for the pull call
-  //          pc = SynchMethodCallLogic.<PullCall>performSynchCall(pc, this, callIndex, PULL_TIMEOUT);
-  //          addLock(pc.info); // lock for the outside
-  //
-  //          // assign if this wasn't done yet
-  //          if (!intermediateAssign) {
-  //              assign(pc.info);
-  //          }
-  //
-  //          assert(pc.info.curRef.isLocked());
-  //          PortData result = pc.info.curRef.getData();
-  //          pc.genericRecycle();
-  //          assert(result.getCurReference().isLocked());
-  //
-  //          return result;
-  //      } catch (MethodCallException e) {
-  //
-  //          // possibly timeout
-  //          pc.genericRecycle();
-  //          return lockCurrentValueForRead();
-  //      }
 }
 
 void tPortBase::SetMaxQueueLengthImpl(int length)

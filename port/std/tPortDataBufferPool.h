@@ -104,12 +104,6 @@ public:
     return CreateBuffer()->GetData();
   }
 
-  //  @Override
-  //  public void enqueue(@Ptr PortDataManager pd) {
-  //      //assert !pd.isLocked();
-  //      super.enqueue(pd);
-  //  }
-
   /*!
    * Prints info about all elements in pool to console
    *

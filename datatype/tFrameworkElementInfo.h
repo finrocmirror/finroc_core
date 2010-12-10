@@ -127,21 +127,6 @@ public:
 
   tFrameworkElementInfo();
 
-  //  /**
-  //   * Serialize data type update information
-  //   *
-  //   * \param dt Data type
-  //   * \param tp Packet to serialize to
-  //   */
-  //  public static void serializeDataType(DataType dt, CoreBuffer tp) {
-  //      tp.writeByte(UPDATE_TIME); // write opcode (see base class)
-  //      tp.writeInt(-1);
-  //      tp.writeShort(dt.getUid());
-  //      tp.writeInt(0);
-  //      tp.writeInt(1);
-  //      tp.writeByte((byte)0);
-  //  }
-
   /*!
    * \param is Input Stream to deserialize from
    * \param type_lookup Remote type information to lookup type
@@ -181,24 +166,6 @@ public:
     return flags;
   }
 
-  //  @Override
-  //  public Integer getKey() {
-  //      return handle;
-  //  }
-
-  //  @Override
-  //  public void handleChange(CoreByteBuffer buffer) {
-  //      // actually not used... but never mind
-  //      buffer.reset();
-  //      byte command = buffer.readByte();
-  //      int value = buffer.readInt();
-  //      if (command == UPDATE_TIME) {
-  //          minUpdateInterval = (short)value;
-  //      } else if (command == flags) {
-  //          flags = value;
-  //      }
-  //  }
-
   /*!
    * \return the index
    */
@@ -216,21 +183,6 @@ public:
     return &(links[index]);
   }
 
-  //
-  //  /**
-  //   * \return List with links for this port
-  //   */
-  //  @ConstMethod public @Const @Ref SimpleList<String> getLinks() {
-  //      return links;
-  //  }
-
-  //  /**
-  //   * \return List with links for this port
-  //   */
-  //  @ConstMethod public @Const @Ref SimpleList<Integer> getParents() {
-  //      return parents;
-  //  }
-
   /*!
    * number of parents/links
    */
@@ -238,22 +190,6 @@ public:
   {
     return link_count;
   }
-
-  //  /**
-  //   * \param index Index of parent
-  //   * \return Handle of parent
-  //   */
-  //  @ConstMethod public int getParentHandle(int index) {
-  //      return (int)(parents.get(index) >> 8);
-  //  }
-  //
-  //  /**
-  //   * \param index Index of parent
-  //   * \return Handle of parent
-  //   */
-  //  @ConstMethod public int getParentFlags(int index) {
-  //      return links
-  //  }
 
   /*!
    * \return Minimum network update interval

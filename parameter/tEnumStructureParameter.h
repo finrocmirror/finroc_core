@@ -94,19 +94,6 @@ public:
    */
   void Set(E default_value);
 
-  /*!
-   * Interprets/returns value in other (cloned) list
-   *
-   * \param list other list
-   * \return Value in other list
-   */
-  /*@SuppressWarnings("unchecked")
-  public E interpretSpec(StructureParameterList list) {
-      EnumStructureParameter<E> param = (EnumStructureParameter<E>)list.get(listIndex);
-      assert(param.getType() == getType());
-      return param.get();
-  }*/
-
 };
 
 } // namespace finroc

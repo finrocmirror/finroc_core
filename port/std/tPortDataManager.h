@@ -236,47 +236,10 @@ private:
 
 protected:
 
-  //  /**
-  //   * Reference/Lock counter - it is divided in four to avoid collisions with multiple iterations:
-  //   * [7bit counter[0]][7bit counter[1]][7bit counter[2]][7bit counter[3]][4 bit reuse counter]
-  //   * The reuse counter is incremented (and wrapped around) every time the buffer is recycled.
-  //   * Reuse counter % 4 is the index of the counter used (fast operation & 0x03)
-  //   * Warnings should be thrown if the reuse counter increases by two or more during a lock operation.
-  //   * If it increases by four or more, the counters may become corrupted. The program should be aborted.
-  //   * Increasing the initial number of buffers in the publish pool should solve the problem.
-  //   *
-  //   * There is a maximum of 127 locks per object (7 bit).
-  //   **/
-  //  protected final AtomicInt refCounter = new AtomicInt(); // 4byte => 16byte
-
-  //  /**
-  //   * for optimizations: Thread that owns this buffer... could be moved to owner in order to save memory... however, owner would need to final => not null
-  //   */
-  //  private final long ownerThread;
-
-  //  /** for optimizations: Reference/Lock counter for owner thread - when zero, the refCounter is decremented */
-  //  int ownerRefCounter = 0;
-
   /*! incremented every time buffer is reused */
   volatile int reuse_counter;
 
 public:
-
-  // static helper variables
-
-  /*! Bit masks for different counters in refCounter */
-  //protected final static int[] refCounterMasks = new int[]{0xFE000000, 0x1FC0000, 0x3F800, 0x7F0};
-
-  /*! Increment constant for different counters in refCounter */
-  //protected final static int[] refCounterIncrement = new int[]{0x2000000, 0x40000, 0x800, 0x10};
-
-  /*! Maximum number of locks */
-  //public final static int MAX_LOCKS = 63;/*refCounterMasks[3] / 2; // due to sign*/
-
-  /*!
-   * Masks for retrieving additional lock info from value pointer
-   */
-  //public static final @SizeT int LOCK_INFO_MASK = 0x7;
 
   /*! Number of reference to port data (same as in PortDataImpl) */
   static const size_t cNUMBER_OF_REFERENCES = 4u;
@@ -339,53 +302,6 @@ public:
     return GetRefCounter(reuse_counter & cREF_INDEX_MASK);
   }
 
-  //  /**
-  //   * \return Thread that owns this buffer
-  //   */
-  //  @Inline public long getOwnerThread() {
-  //      return ownerThread;
-  //  }
-
-  //  /**
-  //   * Release lock from buffer... may only be calld by owner thread
-  //   *
-  //   * (Should only be called by port directly)
-  //   */
-  //  @Inline public void releaseOwnerLock() {
-  //      ownerRefCounter--;
-  //      //System.out.println("Release Lock: " + data + " " + ownerRefCounter);
-  //      if (ownerRefCounter == 0) {
-  //          releaseNonOwnerLock();
-  //      }
-  //      assert ownerRefCounter >= 0 : "More locks released than acquired. Application in undefined state.";
-  //  }
-  //
-  //  /**
-  //   * Release lock from buffer
-  //   */
-  //  @Inline public void releaseLock() {
-  //      if (ThreadUtil.getCurrentThreadId() == ownerThread) {
-  //          releaseOwnerLock();
-  //      } else {
-  //          releaseNonOwnerLock();
-  //      }
-  //  }
-  //
-  //  /**
-  //   * Release lock from buffer - atomic add operation
-  //   */
-  //  @Inline private void releaseNonOwnerLock() {
-  //      int counterIndex = reuseCounter & 0x3;
-  //      int count = refCounter.addAndGet(-refCounterIncrement[counterIndex]);
-  //      assert ((count & refCounterMasks[counterIndex]) != refCounterMasks[counterIndex]) : "More locks released than acquired. Application in undefined state.";
-  //      if ((count & refCounterMasks[counterIndex]) == 0) {
-  //          // reuse object
-  //          //System.out.println("Recycling: " + data + " " + reuseCounter);
-  //          reuseCounter++;
-  //          recycle();
-  //      }
-  //  }
-
   inline const tPortData* GetData() const
   {
     return data;
@@ -437,107 +353,6 @@ public:
   {
     GetCurrentRefCounter()->ReleaseLock();
   }
-
-  //  /**
-  //   * (only called by port class)
-  //   * Set locks to specified amount
-  //   *
-  //   * \param count number of locks
-  //   */
-  //  @Inline protected void setLocksAsOwner(int count) {
-  //      int counterIndex = reuseCounter & LOCK_INFO_MASK;
-  //      int counterIndex2 = counterIndex & 0x3;
-  //      refCounter.set((refCounterIncrement[counterIndex2]) | counterIndex);
-  //      ownerRefCounter = count;
-  //  }
-  //
-  //  // see above
-  //  @Inline protected void setLocksAsNonOwner(int count) {
-  //      int counterIndex = reuseCounter & LOCK_INFO_MASK;
-  //      int counterIndex2 = counterIndex & 0x3;
-  //      refCounter.set((refCounterIncrement[counterIndex2] * count) | counterIndex);
-  //  }
-
-  //  /**
-  //   * (only called by port classes)
-  //   * Set locks to specified amount
-  //   *
-  //   * \param count number of locks
-  //   */
-  //  @Inline public void setLocks(int count) {
-  //      /*int counterIndex = reuseCounter & LOCK_INFO_MASK;
-  //      int counterIndex2 = counterIndex & 0x3;*/
-  //      int counterIndex2 = reuseCounter & 0x3;
-  //      refCounter.set((refCounterIncrement[counterIndex2] * count) | counterIndex2);
-  //  }
-
-  //  // see above
-  //  @Inline protected @Ptr PortDataManager setLocks(int count) {
-  //      if (ThreadUtil.getCurrentThreadId() == ownerThread) {
-  //          setLocksAsOwner(count);
-  //      } else {
-  //          setLocksAsNonOwner(count);
-  //      }
-  //      return this;
-  //  }
-
-  //  /**
-  //   * \return Is Buffer currently locked?
-  //   */
-  //  @Inline public boolean isLocked() {
-  //      int counterIndex = reuseCounter & 0x3;
-  //      int count = refCounter.get();
-  //      return (count & refCounterMasks[counterIndex]) > 0;
-  //  }
-  //
-  //  /**
-  //   * Acquire read lock.
-  //   * Prerequisite: Buffer needs to be already read-locked...
-  //   * (usually the case after getting buffer from port)
-  //   */
-  //  @Inline public void addReadLock() {
-  //      if (ThreadUtil.getCurrentThreadId() == ownerThread) {
-  //          if (ownerRefCounter > 0) {
-  //              ownerRefCounter++;
-  //              return;
-  //          } else {
-  //              ownerRefCounter = 1;
-  //          }
-  //      }
-  //      int counterIndex = reuseCounter & 0x3;
-  //      int old = refCounter.getAndAdd(refCounterIncrement[counterIndex]);
-  //      assert ((old & refCounterMasks[counterIndex]) != 0) : "Element already reused. Application in undefined state. Element has to be locked prior to calling this method.";
-  //      assert (counterIndex == ((old >> 28) & 0x3)) : "Counter index changed. Application in undefined state. Element has to be locked prior to calling this method.";
-  //      assert (counterIndex != refCounterMasks[counterIndex]) : "Reference counter overflow. Maximum of 127 locks allowed. Consider making a copy somewhere.";
-  //  }
-  //
-  //  /**
-  //   * Add owner lock.
-  //   * Precondition: there's already a owner lock
-  //   */
-  //  void addOwnerLock() {
-  //      assert ownerRefCounter > 0 : "Element already reused. Application in undefined state. Element has to be locked prior to calling this method.";
-  //      ownerRefCounter++;
-  //  }
-
-  /*!
-   * Releases all lock from object
-   * (should only be called prior to deletion - by ports)
-   */
-  /*void releaseAllLocks() {
-      assert refCounter.get() > 0 : "Element already recycled";
-      refCounter.set(0);
-      ownerRefCounter = 0;
-
-      // reuse object
-      PortDataBufferPool owner = this.owner;
-      reuseCounter++;
-      if (owner != null) {
-          owner.enqueue(this);
-      } else {
-           delete this;
-      }
-  }*/
 
   /*!
    * \param unused Is this (still) a unused buffer?

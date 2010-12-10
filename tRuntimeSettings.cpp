@@ -43,12 +43,6 @@ tRuntimeSettings::tRuntimeSettings() :
     tSettings("Settings", "Runtime", true),
     update_time_listener()
 {
-  // add shared ports port
-  //addChild(sharedPorts.getPortSet());
-
-  // init data type register
-  //DataTypeRegister.init();
-
   // add ports with update times
   //addChild(DataTypeRegister2.getInstance());
 

@@ -113,19 +113,6 @@ public:
     Set(&(cn));
   }
 
-  /*!
-   * Interprets/returns value in other (cloned) list
-   *
-   * \param list other list
-   * \return Value in other list
-   */
-  /*@SuppressWarnings("unchecked")
-  public T interpretSpec(StructureParameterList list) {
-      NumericStructureParameter<T> param = (NumericStructureParameter<T>)list.get(listIndex);
-      assert(param.getType() == getType());
-      return param.get();
-  }*/
-
 };
 
 } // namespace finroc

@@ -167,25 +167,6 @@ protected:
 
 public:
 
-  /*! RuntimeElement as TreeNode (only available if set in RuntimeSettings) */
-  //@JavaOnly private final DefaultMutableTreeNode treeNode;
-
-  /*! State Constants */
-  //public enum State { CONSTRUCTING, READY, DELETED };
-
-  /*! Element's state */
-  //protected volatile State state = State.CONSTRUCTING;
-
-  /*! Type Constants */
-  //public enum Type { STANDARD_ELEMENT, RUNTIME, PORT }
-
-  /*!
-   * Element's handle in local runtime environment
-   * ("normal" elements have negative handle, while ports have positive ones)
-   * Now stored in objMutex
-   */
-  //@Const protected final int handle;
-
   /*!
    * Defines lock order in which framework elements can be locked.
    * Generally the framework element tree is locked from root to leaves.
@@ -195,31 +176,6 @@ public:
    * ("normal" elements have negative handle, while ports have positive ones)
    */
   mutable util::tMutexLockOrder obj_mutex;
-
-  /*! This flag is set to true when the element has been initialized */
-  //private boolean initialized;
-
-  /*! This flag is set to true when element is deleted */
-  //protected volatile boolean deleted;
-
-  /*! Is RuntimeElement member of remote runtime; -1 = unknown, 0 = no, 1 = yes */
-  //private int remote = -1;
-
-  /*!
-   * List with owned ports.
-   *
-   * Methods that want to prevent a current port value (that this RuntimeElement manages)
-   * being outdated and reused while they are
-   * asynchronously getting it should synchronize with this list.
-   * Port methods do this.
-   *
-   * The owner module will synchronize on this list, every time it updates valuesBeforeAreUnused
-   * variable of the ports.
-   */
-  //protected final SafeArrayList<Port<?>> ownedPorts;
-
-  /*! Main Thread. This thread can write to the runtime element's ports without synchronization */
-  //protected Thread mainThread;
 
   /*! Log domain for this class */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "framework_elements");
@@ -310,22 +266,6 @@ private:
    * \return Is this a globally unique link?
    */
   bool GetQualifiedNameImpl(util::tStringBuilder& sb, const tLink* start, bool force_full_link) const;
-
-  //  /**
-  //   * Initialize this framework element and all framework elements in sub tree that were created by this thread
-  //   * and weren't initialized already - provided that the parent element already is initialized.
-  //   * (If parent is not initialized, nothing happens)
-  //   *
-  //   * Initializing must be done prior to using framework elements - and in order to them being published.
-  //   */
-  //  public void initIfParentIs() {
-  //      FrameworkElement parent = getParent();
-  //      synchronized(parent.children) {
-  //          if (parent.isReady()) {
-  //              init();
-  //          }
-  //      }
-  //  }
 
   /*!
    * Initializes element and all child elements that were created by this thread
@@ -440,19 +380,6 @@ protected:
    */
   virtual void PrintStructure(int indent, rrlib::logging::tLogStream& output);
 
-  //  /**
-  //   * Called whenever an asynchronous call returns.
-  //   * May be overriden/implemented by subclasses.
-  //   * Default behaviour is throwing an Exception.
-  //   * (Should only be called by framework-internal classes)
-  //   *
-  //   * \param pc Call Object containing various parameters
-  //   */
-  //  @InCppFile
-  //  @Virtual public void handleCallReturn(AbstractCall pc) {
-  //      throw new RuntimeException("This FrameworkElement cannot handle call returns");
-  //  }
-
   /*!
    * Publish updated edge information
    *
@@ -545,29 +472,6 @@ public:
   }
 
   /*!
-   * \return RuntimeElement as TreeNode (only available if set in RuntimeSettings)
-   */
-  /*@JavaOnly public DefaultMutableTreeNode asTreeNode() {
-      return treeNode;
-  }*/
-
-  /*!
-   * \param manages_ports Is RuntimeElement responsible for releasing unused port values?
-   */
-  //@SuppressWarnings("unchecked")
-  //public FrameworkElement(String description, boolean managesPorts, Thread mainThread) {
-  //ownedPorts = managesPorts ? new SafeArrayList<Port<?>>() : null;
-  //mainThread = mainThread == null ? (managesPorts ? Thread.currentThread() : null) : mainThread;
-  //}
-
-  //    /**
-  //     * \return Tree Node representation of this runtime object
-  //     */
-  //    @JavaOnly protected DefaultMutableTreeNode createTreeNode() {
-  //        return new DefaultMutableTreeNode(primary.description);
-  //    }
-
-  /*!
    *  same as below -
    *  except that we return a const char* in C++ - this way, no memory needs to be allocated
    */
@@ -578,16 +482,6 @@ public:
    * \return Returns first child with specified description - null if none exists
    */
   tFrameworkElement* GetChild(const util::tString& name) const;
-
-  //  /**
-  //   * Does element with specified qualified name exist?
-  //   *
-  //   * \param name (relative) Qualified name
-  //   * \return Answer
-  //   */
-  //  public boolean elementExists(@Const @Ref String name) {
-  //      return getChildElement(name, false) != null;
-  //  }
 
   /*!
    * \param name (relative) Qualified name
@@ -628,59 +522,6 @@ public:
       return (flags & flag) == flag;
     }
   }
-
-  //  ///////////////////// real factory methods /////////////////////////
-  //  //public Port<?>
-  //
-  //  protected NumberPort addNumberPort(boolean output, @Const @Ref String description, @CppDefault("CoreNumber::ZERO") @Const @Ref Number defaultValue, @CppDefault("NULL") Unit unit) {
-  //      return addNumberPort(output ? PortFlags.OUTPUT_PORT : PortFlags.INPUT_PORT, description, defaultValue, unit);
-  //  }
-  //
-  //  protected NumberPort addNumberPort(int flags, @Const @Ref String description, @CppDefault("CoreNumber::ZERO") @Const @Ref Number defaultValue, @CppDefault("NULL") Unit unit) {
-  //      PortCreationInfo pci = new PortCreationInfo(description, this, flags);
-  //      //PortDataCreationInfo.get().set(DataTypeRegister2.getDataTypeEntry(CoreNumberContainer.class), owner, prototype);
-  //      //pci.defaultValue = new CoreNumberContainer(new CoreNumber2(defaultValue, unit));
-  //      pci.unit = unit;
-  //      //pci.parent = this;
-  //      NumberPort np = new NumberPort(pci);
-  //      np.getDefaultBuffer().setValue(defaultValue, unit != null ? unit : Unit.NO_UNIT);
-  //      //addChild(np);
-  //      return np;
-  //  }
-  //
-  //  ///////////////////// convenience factory methods /////////////////////////
-  //  @JavaOnly public NumberPort addNumberInputPort(@Const @Ref String description) {
-  //      return addNumberInputPort(description, CoreNumber.ZERO, Unit.NO_UNIT);
-  //  }
-  //  @JavaOnly public NumberPort addNumberInputPort(@Const @Ref String description, @Const @Ref Number defaultValue) {
-  //      return addNumberInputPort(description, defaultValue, Unit.NO_UNIT);
-  //  }
-  //  @JavaOnly public NumberPort addNumberInputPort(@Const @Ref String description, @Ptr Unit unit) {
-  //      return addNumberInputPort(description, CoreNumber.ZERO, unit);
-  //  }
-  //  public NumberPort addNumberInputPort(@Const @Ref String description, @CppDefault("CoreNumber::ZERO") @Const @Ref Number defaultValue, @CppDefault("NULL") @Ptr Unit unit) {
-  //      return addNumberPort(false, description, defaultValue, unit);
-  //  }
-  //  /*public NumberPort addNumberInputPort(String description, Number defaultValue, Unit unit, double min, double max) {
-  //
-  //  }*/
-  //
-  //  @JavaOnly public NumberPort addNumberOutputPort(@Const @Ref String description) {
-  //      return addNumberOutputPort(description, CoreNumber.ZERO, Unit.NO_UNIT);
-  //  }
-  //  @JavaOnly public NumberPort addNumberOutputPort(@Const @Ref String description, @Const @Ref Number defaultValue) {
-  //      return addNumberOutputPort(description, defaultValue, Unit.NO_UNIT);
-  //  }
-  //  @JavaOnly public NumberPort addNumberOutputPort(@Const @Ref String description, @Ptr Unit unit) {
-  //      return addNumberOutputPort(description, CoreNumber.ZERO, unit);
-  //  }
-  //  public NumberPort addNumberOutputPort(@Const @Ref String description, @CppDefault("CoreNumber::ZERO") @Const @Ref Number defaultValue, @CppDefault("NULL") @Ptr Unit unit) {
-  //      return addNumberPort(true, description, defaultValue, unit);
-  //  }
-  //
-  //  public NumberPort addNumberProxyPort(boolean output, @Const @Ref String description, @CppDefault("CoreNumber::ZERO") @Const @Ref Number defaultValue, @CppDefault("NULL") @Ptr Unit unit) {
-  //      return addNumberPort(output ? PortFlags.OUTPUT_PROXY : PortFlags.INPUT_PROXY, description, defaultValue, unit);
-  //  }
 
   /*!
    * \return Element's handle in local runtime environment
@@ -788,19 +629,6 @@ public:
     return GetQualifiedName(sb, start, false);
   }
 
-  //  /**
-  //   * Get all children with specified flags set/unset
-  //   * (Don't store this array for longer than possible
-  //   *
-  //   * \param result Children will be copied to this array (if there are more, array will be filled completely)
-  //   * \param checkFlags Flags to check
-  //   * \param checkResult The result the check has to have in order to add child to result
-  //   * \return Number of elements in result.
-  //   */
-  //  public @SizeT int getChildrenFlagged(@Ref FrameworkElement[] result, int checkFlags, int checkResult) {
-  //
-  //  }
-
   /*!
    * (Use StringBuilder version if efficiency or real-time is an issue)
    * \return Concatenation of parent descriptions and this element's description
@@ -891,278 +719,6 @@ public:
   {
     return IsChildOf(re, false);
   }
-
-  //  /**
-  //   * \return Returns the element's uid, which is the concatenated description of it and all parents.
-  //   * It is only valid as long as the structure and descriptions stay the same.
-  //   */
-  //  public String getUid() {
-  //      return getUid(false, RuntimeEnvironment.class).toString();
-  //  }
-  //
-  //  /**
-  //   * \return Returns the element's uid, which is the concatenated description of it and all parents.
-  //   * In case it is part of a remote runtime environment, the uid in the remote environment is returned.
-  //   */
-  //  public String getOriginalUid() {
-  //      return getUid(false, core.Runtime.class).toString();
-  //  }
-  //
-  //  /**
-  //   * Optimized helper method for Uid creation
-  //   *
-  //   * \param includeSeparator Include separator at end?
-  //   * \param upToParent Type of parent up to which uid is created
-  //   * \return Returns the element's uid, which is the concatenated description of it and all parents.
-  //   */
-  //  protected StringBuilder getUid(boolean includeSeparator, Class<?> upToParent) {
-  //      StringBuilder temp = null;
-  //      if (upToParent.isAssignableFrom(getClass())) {
-  //          return new StringBuilder();
-  //      } else if (parent == null || upToParent.isAssignableFrom(parent.getClass())) {
-  //          temp = new StringBuilder(description);
-  //      } else {
-  //          temp = parent.getUid(true, upToParent).append(description);
-  //      }
-  //      if (includeSeparator) {
-  //          temp.append(getUidSeparator());
-  //      }
-  //      return temp;
-  //  }
-
-  //  /**
-  //   * \return Is RuntimeElement member of remote runtime
-  //   */
-  //  public boolean isRemote() {
-  //      if (remote >= 0) {
-  //          return remote > 0;
-  //      }
-  //      if (this instanceof core.Runtime) {
-  //          remote = (this instanceof RuntimeEnvironment) ? 0 : 1;
-  //          return remote > 0;
-  //      }
-  //      remote = parent.isRemote() ? 1 : 0;
-  //      return remote > 0;
-  //  }
-  //
-  //  /**
-  //   * \return Character Sequence that separates the UID after this class;
-  //   */
-  //  protected char getUidSeparator() {
-  //      return '.';
-  //  }
-  //
-  //  /**
-  //   * \return Returns true when element is deleted
-  //   */
-  //  public boolean isDeleted() {
-  //      return deleted;
-  //  }
-  //
-  //  /**
-  //   * Get all tasks from children... for thread migration... not a very nice way of doing it... but well
-  //   */
-  //  protected void collectTasks(List<Task> t) {
-  //      List<FrameworkElement> l = getChildren();
-  //      for (int i = 0; i < l.size(); i++) {
-  //          FrameworkElement child = l.get(i);
-  //          if (child != null) {
-  //              child.collectTasks(t);
-  //          }
-  //      }
-  //  }
-  //
-  //  /**
-  //   * \return Parent
-  //   */
-  //  public FrameworkElement getParent() {
-  //      return parent;
-  //  }
-  //
-  //  /**
-  //   * \return Umodifiable list of children. Can and should be used for fast
-  //   * safe unsynchronized iteration. May contain null-entries.
-  //   */
-  //  public List<FrameworkElement> getChildren() {
-  //      return children.getFastUnmodifiable();
-  //  }
-  //
-  //  /**
-  //   * \param childIndex Index
-  //   * \return Child at specified index
-  //   */
-  //  public FrameworkElement getChildAt(int childIndex) {
-  //      return children.get(childIndex);
-  //  }
-  //
-  //  /**
-  //   * Get Child with specified UID
-  //   * (optimized so that no new Strings need to be created in relative mode)
-  //   *
-  //   * \param uid UID
-  //   * \param b absolute UID? (rather than a relative one)
-  //   * \return Child (null if does not exists)
-  //   */
-  //  public FrameworkElement getChild(String uid, boolean absolute) {
-  //      if (absolute) {
-  //          String myUid = getUid(true, RuntimeEnvironment.class).toString();
-  //          if (!uid.startsWith(myUid)) {
-  //              return uid.equals(getUid()) ? this : null;
-  //          } else if (uid.length() == myUid.length()) {
-  //              return this;
-  //          }
-  //          uid = uid.substring(myUid.length());  // cut off separator
-  //      }
-  //
-  //      // uid now relative
-  //      List<FrameworkElement> l = getChildren();
-  //      for (int i = 0; i < l.size(); i++) {
-  //          FrameworkElement child = l.get(i);
-  //          if (child == null) {
-  //              continue;
-  //          }
-  //          String childDesc = child.getDescription();
-  //          if (uid.length() < childDesc.length()) {
-  //              continue;
-  //          } else if (uid.length() >= childDesc.length()) {
-  //              if (uid.startsWith(childDesc)) {
-  //                  if (uid.length() == childDesc.length()) {
-  //                      return child;
-  //                  } else if (uid.charAt(childDesc.length()) == child.getUidSeparator()){
-  //                      return child.getChild(uid.substring(childDesc.length() + 1), false);
-  //                  }
-  //              }
-  //          }
-  //      }
-  //      return null;
-  //  }
-  //
-  //  /**
-  //   * Get All children of the specified class
-  //   *
-  //   * \param childClass Class
-  //   * \return List of children
-  //   */
-  //  public <T extends FrameworkElement> List<T> getAllChildren(Class<T> childClass) {
-  //      List<T> result = new ArrayList<T>();
-  //      getAllChildrenHelper(result, childClass);
-  //      return result;
-  //  }
-  //
-  //  /**
-  //   * Recursive helper function to above function
-  //   *
-  //   * \param result List with results (only needs to be allocated once)
-  //   * \param childClass Class
-  //   */
-  //  @SuppressWarnings("unchecked")
-  //  private <T extends FrameworkElement> void getAllChildrenHelper(List<T> result, Class<T> childClass) {
-  //      for (int i = 0, n = children.size(); i < n; i++) {
-  //          FrameworkElement child = children.get(i);
-  //          if (child == null) {
-  //              continue;
-  //          }
-  //          if (childClass == null || childClass.isAssignableFrom(child.getClass())) {
-  //              result.add((T)child);
-  //          }
-  //          child.getAllChildrenHelper(result, childClass);
-  //      }
-  //  }
-  //
-  //  /**
-  //   * Serialize the runtime's uid to the specified output stream.
-  //   * This is very efficient, since no new objects need to be allocated
-  //   * to construct the uid
-  //   *
-  //   * \param oos Stream to serialize to.
-  //   */
-  //  public void serializeUid(CoreOutputStream oos) throws IOException  {
-  //      serializeUid(oos, true);
-  //  }
-  //
-  //  /**
-  //   * Helper method for above
-  //   *
-  //   * \param oos Stream to serialize to.
-  //   * \param firstCall Object the method was called on?
-  //   */
-  //  protected void serializeUid(CoreOutputStream oos, boolean firstCall) throws IOException {
-  //      if (parent != null) {
-  //          parent.serializeUid(oos, false);
-  //      }
-  //      oos.write8BitStringPart(description);
-  //      if (firstCall) {
-  //          oos.write8BitString(""); // end string
-  //      } else {
-  //          oos.writeByte(getUidSeparator());
-  //      }
-  //  }
-  //
-  //  /**
-  //   * \return Methods that want to prevent a current port value (that this RuntimeElement manages)
-  //   * being outdated and reused while they are
-  //   * asynchronously getting it should synchronize with this object.
-  //   */
-  //  public Object getPortManagerSynchInstance() {
-  //      return ownedPorts;
-  //  }
-  //
-  //  /**
-  //   * \return Is RuntimeElement responsible for releasing unused port values?
-  //   */
-  //  public boolean isPortManager() {
-  //      return ownedPorts != null;
-  //  }
-  //
-  //  /**
-  //   * \param p Port that this RuntimeElement owns
-  //   */
-  //  protected void addOwnedPort(Port<?> p) {
-  //      if (isPortManager()) {
-  //          if (p.isOutputPort()) {
-  //              p.setMainThread(getMainThread());
-  //          }
-  //          ownedPorts.add(p);
-  //      } else {
-  //          parent.addOwnedPort(p);
-  //      }
-  //  }
-  //
-  //  /**
-  //   * \param p Port that this RuntimeElement does not own any longer
-  //   */
-  //  protected void removeOwnedPort(Port<?> p) {
-  //      if (isPortManager()) {
-  //          ownedPorts.remove(p);
-  //      } else {
-  //          parent.removeOwnedPort(p);
-  //      }
-  //  }
-  //
-  //  /**
-  //   * \return Main Thread. This thread can write to the runtime element's ports without synchronization
-  //   */
-  //  public Thread getMainThread() {
-  //      return mainThread;
-  //  }
-  //
-  //  /**
-  //   * \param Main Thread. This thread can write to the runtime element's ports without synchronization
-  //   */
-  //  public void setMainThread(Thread mainThread) {
-  //      // update main thread of ports
-  //      this.mainThread = mainThread;
-  //      if (isPortManager()) {
-  //          synchronized(ownedPorts) {
-  //              for (int i = 0; i < ownedPorts.size(); i++) {
-  //                  PortBase<?> p = ownedPorts.get(i);
-  //                  if (p != null && p != this) {
-  //                      ownedPorts.get(i).setMainThread(mainThread);
-  //                  }
-  //              }
-  //          }
-  //      }
-  //  }
 
   /*!
    * \return true before element is officially declared as being initialized

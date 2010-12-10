@@ -64,28 +64,6 @@ private:
 
   int16 next_cCData_type_uid;
 
-  /*! Cached Port creation info for entry ports */
-  //private static final PortCreationInfo entryPortPci = new PortCreationInfo(PortFlags.INPUT_PORT, Unit.ms);
-
-  //  static {
-  //      // init Data Types
-  //      try {
-  ////            for (Class<?> cl : Files.getPackageClasses(DataTypeRegister2.class, "../datatype")) {
-  ////                if (RuntimeSettings.DISPLAY_DATATYPE_INIT) {
-  ////                    System.out.println("Initializing data type: " + cl.getName());
-  ////                }
-  ////                addClass(cl);
-  ////                /*for (Class<?> cl2 : cl.getClasses()) {
-  ////                    addClass(cl2);
-  ////                }*/
-  ////            }
-  //          // temporary
-  //          dataTypes[0] = new DataType((short)0, CoreNumberContainer.class);
-  //      } catch (Exception e) {
-  //          throw new RuntimeException(e);
-  //      }
-  //  }
-
   /*! Log domain for this class */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "data_types");
 
@@ -216,30 +194,6 @@ public:
     return GetDataType<T>();
   }
 
-  //  /**
-  //   * Add data type entry for class
-  //   *
-  //   * \param cl Class
-  //   */
-  //  private static DataType addClass(Class<?> cl) {
-  //      try {
-  //          if ((PortData.class.isAssignableFrom(cl) || CustomSerialization.class.isAssignableFrom(cl))) {
-  //              Class<PortData> dataClass = (Class<PortData>)cl;
-  //              short suid = getDataTypeUid(dataClass);
-  //              if (dataTypes[suid] != null) {
-  //                  throw new RuntimeException("There are two PortData classes with the same Uid " + suid + " (" + cl.getName() + " and " + dataTypes[suid].dataType.getName() + ").");
-  //              }
-  //              dataTypes[suid] = new DataType(dataClass, suid);
-  //
-  //              return dataTypes[suid];
-  //          }
-  //          return null;
-  //      } catch (Exception e) {
-  //          e.printStackTrace();
-  //      }
-  //      return null;
-  //  }
-
   /*!
    * Get Data Type for specified uid.
    *
@@ -304,28 +258,6 @@ public:
     next_cCData_type_uid = cc_uid;
     next_data_type_uid = uid;
   }
-
-  /*!
-   * Returns serialVersionUID of specified class (if between 0 and 32K)
-   *
-   * \param cl Class
-   * \return serialVersionUID
-   */
-//  private static short getDataTypeUid(Class<? extends PortData> cl) {
-//      if (!Modifier.isAbstract(cl.getModifiers())) {
-//          long uid = ObjectStreamClass.lookup(cl).getSerialVersionUID();  // hopefully this will work in applets
-//          if (uid > Short.MAX_VALUE || uid < 0) {
-//              throw new RuntimeException("The serialVersionUID of PortData classes must lie between 0 and " + Short.MAX_VALUE + " (Class: " + cl.getSimpleName() + ")");
-//          }
-//          return (short)uid;
-//      } else {
-//          PortData.InterfaceSpec i = cl.getAnnotation(PortData.InterfaceSpec.class);
-//          if (i == null) {
-//              throw new RuntimeException("Interfaces must implement PortData.InterfaceSpec. " + cl.getSimpleName() + " doesn't.");
-//          }
-//          return i.uid();
-//      }
-//  }
 
 };
 

@@ -54,57 +54,6 @@ public:
    */
   virtual int GetFlags() const = 0;
 
-//  /** Constructor to invoke */
-//  private Class<? extends ExternalConnection> c;
-//
-//  /** Default object when returning empty parameter list */
-//  private static final Class<?>[] params = new Class<?>[]{String.class};
-//
-//  /**
-//   * \param m wrapped method
-//   * \param group method's group
-//   */
-//  public CreateExternalConnectionAction(Class<? extends ExternalConnection> c) {
-//      this.c = c;
-//  }
-//
-//  @Override
-//  public ExternalConnection createModule(Object... params) throws Exception {
-//      return createModule(params[0].toString());
-//  }
-//
-//  public ExternalConnection createModule(String address) throws Exception {
-//      ExternalConnection m = (ExternalConnection)c.newInstance();
-//      m.connect(address);
-//      return m;
-//  }
-//
-//  /**
-//   * Create Connection Module. Window will pop up and ask for address.
-//   *
-//   * \return Created Connection Module
-//   */
-//  public ExternalConnection createModule() throws Exception {
-//      ExternalConnection m = (ExternalConnection)c.newInstance();
-//      m.connect(null);
-//      return m;
-//  }
-//
-//  @Override
-//  public Class<?>[] getParameterTypes() {
-//      return params;
-//  }
-//
-//  @Override
-//  public String toString() {
-//      return c.getSimpleName();
-//  }
-//
-//  @Override
-//  public String getModuleGroup() {
-//      return ExternalConnection.GROUP_NAME;
-//  }
-
 };
 
 } // namespace finroc

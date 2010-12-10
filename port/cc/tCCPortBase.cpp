@@ -262,28 +262,6 @@ tCCPortDataContainer<>* tCCPortBase::PullValueRaw(bool intermediate_assign)
 
   // return locked data
   return tc->data;
-
-  //      ThreadLocalCache tc = ThreadLocalCache.getFast();
-  //      PullCall pc = tc.getUnusedPullCall();
-  //      pc.ccPull = true;
-  //
-  //      //pullValueRaw(pc);
-  //      try {
-  //          pc = SynchMethodCallLogic.<PullCall>performSynchCall(pc, this, callIndex, PULL_TIMEOUT);
-  //          if (pc.tc != null && pc.tc.threadId != ThreadUtil.getCurrentThreadId()) { // reset thread local cache - if it was set by another thread
-  //              pc.tc = null;
-  //          }
-  //          if (pc.tc == null) { // init new PortDataContainer in thread local cache?
-  //              pc.setupThreadLocalCache();
-  //          }
-  //          CCPortDataContainer<?> result = pc.tc.data;
-  //          result.addLock();
-  //          pc.genericRecycle();
-  //          return result;
-  //      } catch (MethodCallException e) {
-  //          pc.genericRecycle();
-  //          return getLockedUnsafeInContainer();
-  //      }
 }
 
 void tCCPortBase::PullValueRawImpl(tThreadLocalCache* tc, bool intermediate_assign, bool first)

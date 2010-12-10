@@ -147,13 +147,6 @@ public:
     ::finroc::util::tReusable::Recycle();
   }
 
-  //  /**
-  //   * \return Actual data
-  //   */
-  //  @OrgWrapper @ConstMethod @Const public CCPortData getDataPtr() {
-  //      return (CCPortData)portData.getData();
-  //  }
-
   virtual void Serialize(tCoreOutput& os) const
   {
     port_data.Serialize(os);

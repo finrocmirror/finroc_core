@@ -64,20 +64,6 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
   instance = ::std::tr1::shared_ptr<tRuntimeEnvironment>(this);
   instance_raw_ptr = this;
   active = true;
-
-  //      for (int i = 0; i < RuntimeSettings.NUM_OF_LOOP_THREADS; i++) {
-  //          loopThreads.add(new CoreLoopThread(i, i < RuntimeSettings.SELF_UPDATING_LOOP_THREADS));
-  //      }
-  //      for (int i = 0; i < RuntimeSettings.NUM_OF_EVENT_THREADS; i++) {
-  //          eventThreads.add(new CoreEventThread(i));
-  //      }
-
-  // init runtime settings
-  //settings = new RuntimeSettings();
-  //addChild(settings);
-
-  // init Plugins etc.
-  //Plugins.getInstance().addPluginsFromApplicationDir();
 }
 
 void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge* edge)
@@ -180,17 +166,13 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   sSerializationHelper::StaticInit();  // can safely be done first
   tUnit::StaticInit();  // can safely be done first
   tConstant::StaticInit();  // needs to be done after unit
-  //      CoreNumber.staticInit(); // can be after data type register has been created
   util::tTime::GetInstance();  // (possibly) init timing thread
   util::tGarbageCollector::CreateAndStartInstance();
-  //      MethodCall.staticInit();
-  //      PullCall.staticInit();
   ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock = tThreadLocalCache::StaticInit();  // can safely be done first
   tMethodCallSyncher::StaticInit();  // dito
   util::tBoundedQElementContainer::StaticInit();
   util::tChunkedBuffer::StaticInit();
-  tStreamCommitThread::StaticInit();
-  //TransactionPacket.staticInit();  // should be done before any ports/elements are added
+  tStreamCommitThread::StaticInit();  // should be done before any ports/elements are added
 
   new tRuntimeEnvironment(); // should be done before any ports/elements are added
   instance->registry.infos_lock = infos_lock;

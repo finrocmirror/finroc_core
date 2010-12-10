@@ -94,26 +94,11 @@ void tPullCall::ExecuteTask()
   }
 }
 
-void tPullCall::Reset()
-{
-  RecycleParameters();
-  //      data = null;
-  //      ccData = null;
-  //      info.curRef = null;
-  //      info.curRefCounter = null;
-  //      info.lockEstimate = 5;
-  //      info.setLocks = 1;
-  //      tc = null;
-}
-
 void tPullCall::Serialize(tCoreOutput& oos) const
 {
   ::finroc::core::tAbstractCall::Serialize(oos);
   oos.WriteBoolean(intermediate_assign);
   oos.WriteBoolean(cc_pull);
-  //      if (isReturning(true)) {
-  //          oos.writeObject(ccPull ? (TypedObject)data : (TypedObject)info.curRef.getManager().getData());
-  //      }
 }
 
 } // namespace finroc

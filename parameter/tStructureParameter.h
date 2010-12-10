@@ -121,19 +121,6 @@ public:
     return tHelper::Get(value, cc_value);
   }
 
-  /*!
-   * Interprets/returns value in other (cloned) list
-   *
-   * \param list other list
-   * \return Value in other list
-   */
-  /*@SuppressWarnings("unchecked")
-  public T interpret(StructureParameterList list) {
-      StructureParameter<T> param = (StructureParameter<T>)list.get(listIndex);
-      assert(param.getType() == getType());
-      return param.getValue();
-  }*/
-
 };
 
 } // namespace finroc

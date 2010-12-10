@@ -121,90 +121,6 @@ private:
     return static_cast<tCCInterThreadContainer<>*>(dt->CreateInterThreadInstance());
   }
 
-  //  protected void receive(@Ptr PortData data, @SizeT int dataRaw, @Ptr CCPortBase origin, @Ptr ThreadLocalCache tli) {
-  //      if (standardAssign) {
-  //          data.getManager().addReadLock();
-  //          tli.setLastWrittenToPort(handle, data);
-  //
-  //          // JavaOnlyBlock
-  //          value = data;
-  //
-  //           value = data_raw;
-  //
-  //          changed = true;
-  //          notifyListeners();
-  //      } else {
-  //          nonStandardAssign(data, tli);
-  //      }
-  //
-  //      @Ptr ArrayWrapper<CCPortBase> dests = edgesSrc.getIterable();
-  //      for (int i = 0, n = dests.size(); i < n; i++) {
-  //          @Ptr CCPortBase pb = dests.get(i);
-  //          if (pb != null && (pb.flags | PortFlags.PUSH_STRATEGY) > 0) {
-  //              pb.receive(data, dataRaw, this, tli);
-  //          }
-  //      }
-  //
-  //      dests = edgesDest.getIterable();
-  //      for (int i = 0, n = dests.size(); i < n; i++) {
-  //          @Ptr CCPortBase pb = dests.get(i);
-  //          if (pb != null && pb != origin && (pb.flags | PortFlags.PUSH_STRATEGY_REVERSE) > 0) {
-  //              pb.receiveReverse(data, dataRaw, tli);
-  //          }
-  //      }
-  //  }
-  //
-  //  protected void receiveAsOwner(@Ptr PortData data, @SizeT int dataRaw, @Ptr CCPortBase origin, @Ptr ThreadLocalCache tli) {
-  //      if (standardAssign) {
-  //          data.getManager().addOwnerLock();
-  //          tli.newLastWrittenToPortByOwner(handle, data);
-  //
-  //          // JavaOnlyBlock
-  //          value = data;
-  //
-  //           value = data_raw;
-  //
-  //          changed = true;
-  //          notifyListeners();
-  //      } else {
-  //          nonStandardAssign(data, tli);
-  //      }
-  //
-  //      @Ptr ArrayWrapper<CCPortBase> dests = edgesSrc.getIterable();
-  //      for (int i = 0, n = dests.size(); i < n; i++) {
-  //          @Ptr CCPortBase pb = dests.get(i);
-  //          if (pb != null && (pb.flags | PortFlags.PUSH_STRATEGY) > 0) {
-  //              pb.receiveAsOwner(data, dataRaw, this, tli);
-  //          }
-  //      }
-  //
-  //      dests = edgesDest.getIterable();
-  //      for (int i = 0, n = dests.size(); i < n; i++) {
-  //          CCPortBase pb = dests.get(i);
-  //          if (pb != null && pb != origin && (pb.flags | PortFlags.PUSH_STRATEGY_REVERSE) > 0) {
-  //              pb.receiveReverse(data, dataRaw, tli);
-  //          }
-  //      }
-  //  }
-  //
-  //  private void receiveReverse(@Ptr PortData data, @SizeT int dataRaw, @Ptr ThreadLocalCache tli) {
-  //      if (standardAssign) {
-  //          data.getManager().addReadLock();
-  //          tli.setLastWrittenToPort(handle, data);
-  //
-  //          // JavaOnlyBlock
-  //          value = data;
-  //
-  //           value = data_raw;
-  //
-  //          changed = true;
-  //          notifyListeners();
-  //      } else {
-  //          nonStandardAssign(data, tli);
-  //      }
-  //  }
-  //
-
   inline void NotifyListeners(tThreadLocalCache* tc)
   {
     port_listener.Notify(this, ((tCCPortData*)tc->data->GetDataPtr()));
@@ -285,29 +201,6 @@ protected:
   {
     queue->Clear(true);
   }
-
-  //  @Override
-  //  public TypedObject universalGetAutoLocked() {
-  //      CCPortDataRef val = value;
-  //      CCPortDataContainer<?> valC = val.getContainer();
-  //      if (valC.getOwnerThread() == ThreadUtil.getCurrentThreadId()) { // if same thread: simply add read lock
-  //          valC.addLock();
-  //          return valC;
-  //      }
-  //
-  //      // not the same thread: create auto-locked inter-thread container
-  //      ThreadLocalCache tc = ThreadLocalCache.get();
-  //      CCInterThreadContainer<?> ccitc = tc.getUnusedInterThreadBuffer(getDataType());
-  //      tc.addAutoLock(ccitc);
-  //      for(;;) {
-  //          ccitc.assign(valC.getDataPtr());
-  //          if (val == value) { // still valid??
-  //              return ccitc;
-  //          }
-  //          val = value;
-  //          valC = val.getContainer();
-  //      }
-  //  }
 
   /*!
    * Get current data in container owned by this thread with a lock.
@@ -595,17 +488,6 @@ public:
    */
   tCCInterThreadContainer<>* GetInInterThreadContainer();
 
-  //  /**
-  //   * Pulls port data (regardless of strategy)
-  //   * (careful: no auto-release of lock)
-  //   * \param intermediateAssign Assign pulled value to ports in between?
-  //   *
-  //   * \return Pulled locked data
-  //   */
-  //  public @Const CCPortDataContainer<?> getPullLockedUnsafeRaw(boolean intermediateAssign) {
-  //      return pullValueRaw(intermediateAssign);
-  //  }
-
   /*!
    * Pulls port data (regardless of strategy) and returns it in interhread container
    * (careful: no auto-release of lock)
@@ -656,78 +538,6 @@ public:
   {
     port_listener.Remove(listener);
   }
-
-  //  @Override
-  //  public void invokeCall(PullCall call) {
-  //      if (pullValueRaw(call, ThreadLocalCache.get())) {
-  //          SynchMethodCallLogic.handleMethodReturn(call);
-  //      }
-  //  }
-  //
-  //  /**
-  //   * Pull/read current value from source port
-  //   * When multiple source ports are available an arbitrary one of them is used.
-  //   * (Should only be called by framework-internal classes)
-  //   *
-  //   * \param pc Various parameters
-  //   * \param tc Thread's ThreadLocalCache instance
-  //   * \return already returning pulled value (in same thread)
-  //   */
-  //  @Virtual public boolean pullValueRaw(PullCall call, ThreadLocalCache tc) {
-  //      @Ptr ArrayWrapper<CCPortBase> sources = edgesDest.getIterable();
-  //      if (pullRequestHandler != null) {
-  //          call.data = tc.getUnusedInterThreadBuffer(getDataType());
-  //          call.setStatusReturn();
-  //          pullRequestHandler.pullRequest(this, call.data.getDataPtr());
-  //          call.setupThreadLocalCache();
-  //          assign(tc);
-  //      } else {
-  //
-  //          // continue with next-best connected source port
-  //          for (@SizeT int i = 0, n = sources.size(); i < n; i++) {
-  //              CCPortBase pb = sources.get(i);
-  //              if (pb != null) {
-  //                  call.pushCaller(this);
-  //                  boolean returning = pb.pullValueRaw(call, tc);
-  //                  if (returning) {
-  //                      @CppUnused
-  //                      int x = call.popCaller(); // we're already returning, so we can remove ourselves from caller stack again
-  //                      assert(x == getHandle());
-  //                      if (!value.getContainer().contentEquals(call.data.getDataPtr())) { // exploit thread for the calls he made anyway
-  //                          call.setupThreadLocalCache();
-  //                          assign(tc);
-  //                      }
-  //                  }
-  //                  if (call.getStatus() != AbstractCall.CONNECTION_EXCEPTION) {
-  //                      return returning;
-  //                  }
-  //              }
-  //          }
-  //
-  //          // no connected source port... pull current value
-  //          call.data = getInInterThreadContainer();
-  //          call.setStatusReturn();
-  //      }
-  //      return true;
-  //  }
-  //
-  //  @Override
-  //  public void handleCallReturn(AbstractCall call) {
-  //      assert(call.isReturning(true));
-  //
-  //      PullCall pc = (PullCall)call;
-  //      if (!value.getContainer().contentEquals(pc.data.getDataPtr())) {
-  //          pc.setupThreadLocalCache();
-  //          assign(pc.tc);
-  //      }
-  //
-  //      // continue assignments
-  //      if (pc.callerStackSize() > 0) {
-  //          pc.returnToCaller();
-  //      } else {
-  //          SynchMethodCallLogic.handleMethodReturn(pc);
-  //      }
-  //  }
 
   /*!
    * \param pull_request_handler Object that handles pull requests - null if there is none (typical case)

@@ -69,12 +69,6 @@ protected:
 
 public:
 
-  //  /** Does port handle method calls? In this case this points to the class that will handle the method calls */
-  //  private CallHandler callHandler;
-  //
-  //  /** Does port accept return values from asynchronous method calls? In this case, this points to the class that will handle them */
-  //  private ReturnHandler returnHandler;
-
   /*! Pool with diverse data buffers */
   tMultiTypePortDataBufferPool* buf_pool;
 
@@ -145,136 +139,6 @@ public:
     return type;
   }
 
-  //  /**
-  //   * (low-level method - only use when you know what you're doing)
-  //   *
-  //   * Perform asynchronous method call with parameters in
-  //   * specified method call buffer.
-  //   *
-  //   * MethodCall buffer will be unlocked and recycled by receiver
-  //   *
-  //   * \param mc Filled Method call buffer
-  //   * \return Method call result - may be the same as parameter
-  //   */
-  //  protected void asynchMethodCall(MethodCall mc) {
-  //      mc.setupAsynchCall();
-  //      mc.pushCaller(this);
-  //      mc.alreadyDeferred = false;
-  //      sendMethodCall(mc);
-  //  }
-  //
-  //  /**
-  //   * Return from synchronous method call
-  //   *
-  //   * \param mc Method call data
-  //   */
-  //  @NonVirtual protected void returnValue(MethodCall mc) {
-  //      if (mc.callerStackSize() > 0) {
-  //
-  //          // return value to network port
-  //          mc.returnToCaller();
-  //
-  //      } else if (mc.getStatus() == MethodCall.SYNCH_RETURN || mc.getStatus() == MethodCall.CONNECTION_EXCEPTION) {
-  //
-  //          SynchMethodCallLogic.handleMethodReturn(mc);
-  //
-  //      } else if (mc.getStatus() == MethodCall.ASYNCH_RETURN) {
-  //
-  //          handleAsynchReturn(mc, false);
-  //      }
-  //  }
-  //
-  //  // These methods should typically not be called by subclasses
-  //
-  //  /**
-  //   * Receive method call (synch and asynch) - either forward or handle it
-  //   *
-  //   * \param mc Method call
-  //   */
-  //  @Inline
-  //  protected void receiveMethodCall(MethodCall mc) {
-  //      if (callHandler != null) {
-  //          handleCall(mc, false);
-  //      } else {
-  //          sendMethodCall(mc);
-  //      }
-  //  }
-  //
-  //  /**
-  //   * Handle method call (current or deferred)
-  //   *
-  //   * \param mc Method call
-  //   * \param deferredCall Is this a deferred call?
-  //   * \return Was call deferred?
-  //   */
-  //  protected boolean handleCall(MethodCall mc, boolean deferredCall) {
-  //      mc.autoRecycleTParam1 = true;
-  //      mc.autoRecycleTParam2 = true;
-  //      //mc.curServerPort = this;
-  //      mc.returnValueSet = false;
-  //      mc.defer = false;
-  //      mc.call(callHandler, deferredCall);
-  //      if (!mc.defer) {
-  //          if (mc.rType == MethodCall.NONE) {
-  //              mc.recycleComplete();
-  //              assert(!mc.returnValueSet);
-  //          } else {
-  //              mc.recycleParams();
-  //              assert(mc.returnValueSet);
-  //              mc.setStatus(mc.getStatus() == MethodCall.SYNCH_CALL ? MethodCall.SYNCH_RETURN : MethodCall.ASYNCH_RETURN);
-  //              returnValue(mc);
-  //          }
-  //      }
-  //      return mc.defer;
-  //  }
-  //
-  //  /**
-  //   * Handle method call (current or deferred)
-  //   *
-  //   * \param mc Method call
-  //   * \param deferredCall Deferred return call
-  //   * \return Was call deferred?
-  //   */
-  //  protected boolean handleAsynchReturn(MethodCall mc, boolean deferredCall) {
-  //      mc.autoRecycleRetVal = true;
-  //      //mc.curServerPort = this;
-  //      mc.defer = false;
-  //      returnHandler.handleMethodReturn(mc, mc.getMethodID(), mc.ri, mc.rd, mc.rt);
-  //      if (mc.defer) {
-  //          assert(mc.returnValueSet == false);
-  //      } else {
-  //          mc.recycleComplete();
-  //      }
-  //      return mc.defer;
-  //  }
-  //
-  //  /**
-  //   * Send/forward method call (synch and asynch)
-  //   *
-  //   * \param mc Method call data
-  //   */
-  //  @NonVirtual protected void sendMethodCall(MethodCall mc) {
-  //      @Ptr ArrayWrapper<InterfacePort> it = edgesDest.getIterable();
-  //      for (@SizeT int i = 0, n = it.size(); i < n; i++) {
-  //          InterfacePort ip = (InterfacePort)it.get(i);
-  //          if (ip != null) {
-  //              ip.receiveMethodCall(mc);
-  //              return;
-  //          }
-  //      }
-  //
-  //      // return NULL if not connected
-  //      if (mc.getStatus() == MethodCall.SYNCH_CALL) {
-  //          mc.setStatus(MethodCall.CONNECTION_EXCEPTION);
-  //          mc.autoRecycleTParam1 = true;
-  //          mc.autoRecycleTParam2 = true;
-  //          mc.recycleParams();
-  //          returnValue(mc);
-  //      } else {
-  //          mc.genericRecycle();
-  //      }
-  //  }
-
   /*!
    * (for non-cc types only)
    * \param dt Data type of object to get buffer of
@@ -293,31 +157,9 @@ public:
     return tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(dt);
   }
 
-  //  protected void setReturnHandler(ReturnHandler rh) {
-  //      assert(returnHandler == null);
-  //      returnHandler = rh;
-  //  }
-  //
-  //  protected void setCallHandler(CallHandler ch) {
-  //      assert(callHandler == null);
-  //      callHandler = ch;
-  //  }
-
   virtual void NotifyDisconnect()    /* don't do anything here... only in network ports */
   {
   }
-
-  //  @Override
-  //  public TypedObject universalGetAutoLocked() {
-  //      System.out.println("warning: cannot get current value from interface port");
-  //      return null;
-  //  }
-
-  //  @Override
-  //  public void invokeCall(MethodCall call) {
-  //      call.pushCaller(this);
-  //      sendMethodCall(call);
-  //  }
 
   virtual void SetMaxQueueLength(int length)
   {
