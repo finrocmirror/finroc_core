@@ -500,7 +500,7 @@ public:
    * \param flags_ Any special flags for framework element
    * \param lock_order_ Custom value for lock order (needs to be larger than parent's) - negative indicates unused.
    */
-  tFrameworkElement(const util::tString& description_ = "", tFrameworkElement* parent_ = NULL, int flags_ = tCoreFlags::cALLOWS_CHILDREN, int lock_order_ = -1);
+  tFrameworkElement(tFrameworkElement* parent_ = NULL, const util::tString& description_ = "", int flags_ = tCoreFlags::cALLOWS_CHILDREN, int lock_order_ = -1);
 
   /*!
    * Add Child to framework element

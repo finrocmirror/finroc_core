@@ -28,10 +28,10 @@ namespace finroc
 {
 namespace core
 {
-tStandardCreateModuleAction<mTestModule> TEST_MODULE_CREATE_ACTION("Test Module");
+tStandardCreateModuleAction<mTestModule> mTestModule::cCREATE_ACTION("Test Module", util::tTypedClass<mTestModule>());
 
-mTestModule::mTestModule(const util::tString& name, tFrameworkElement* parent) :
-    tModule(name, parent),
+mTestModule::mTestModule(tFrameworkElement* parent, const util::tString& name) :
+    tModule(parent, name),
     si(new tNumberPort("SI", this->sensor_input, false)),
     so(new tNumberPort("SO", this->sensor_output, true)),
     ci(new tNumberPort("CI", this->controller_input, false)),

@@ -97,7 +97,7 @@ public:
    * \param name Module name
    * \param parent Parent of module
    */
-  tModule(const util::tString& name, tFrameworkElement* parent);
+  tModule(tFrameworkElement* parent, const util::tString& name);
 
   virtual void ExecuteTask()
   {

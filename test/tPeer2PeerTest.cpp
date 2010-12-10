@@ -39,7 +39,7 @@ void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   tThreadLocalCache::Get();
 
   // Create two ports
-  tFrameworkElement* link_test = new tFrameworkElement("linkTest");
+  tFrameworkElement* link_test = new tFrameworkElement(NULL, "linkTest");
   tNumberPort* output = new tNumberPort(tPortCreationInfo("testOut", tPortFlags::cSHARED_OUTPUT_PORT));
   output->Link(link_test, "linkTestPort");
   tNumberPort* output2 = new tNumberPort(tPortCreationInfo("testOutGlobal", tPortFlags::cSHARED_OUTPUT_PORT | tCoreFlags::cGLOBALLY_UNIQUE_LINK));

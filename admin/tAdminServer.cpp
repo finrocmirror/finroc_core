@@ -343,7 +343,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int cma_index, 
             }
             ci.Close();
           }
-          ::finroc::core::tFrameworkElement* created = cma->CreateModule(name->ToString(), parent, params);
+          ::finroc::core::tFrameworkElement* created = cma->CreateModule(parent, name->ToString(), params);
           created->SetFinstructed(cma, params);
           created->Init();
           params = NULL;

@@ -82,14 +82,14 @@ public:
     group = GetBinary((void*)CreateModuleImpl);
   }
 
-  static tFrameworkElement* CreateModuleImpl(const util::tString& name, tFrameworkElement* parent)
+  static tFrameworkElement* CreateModuleImpl(tFrameworkElement* parent, const util::tString& name)
   {
-    return new T(name, parent);
+    return new T(parent, name);
   }
 
-  virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* params) const
+  virtual tFrameworkElement* CreateModule(tFrameworkElement* parent, const util::tString& name, tConstructorParameters* params) const
   {
-    return CreateModuleImpl(name, parent);
+    return CreateModuleImpl(parent, name);
   }
 
   virtual util::tString GetModuleGroup() const

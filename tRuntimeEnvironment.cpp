@@ -55,7 +55,7 @@ bool tRuntimeEnvironment::active = false;
 util::tMutexLockOrder tRuntimeEnvironment::static_class_mutex(tLockOrderLevels::cFIRST);
 
 tRuntimeEnvironment::tRuntimeEnvironment() :
-    tFrameworkElement("Runtime", NULL, tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cIS_RUNTIME, tLockOrderLevels::cRUNTIME_ROOT),
+    tFrameworkElement(NULL, "Runtime", tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cIS_RUNTIME, tLockOrderLevels::cRUNTIME_ROOT),
     registry(this),
     creation_time(util::tTime::GetPrecise()),
     unrelated(NULL)
@@ -199,7 +199,7 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   tStreamCommitThread::GetInstance()->Start();
 
   // add uninitialized child
-  instance->unrelated = new ::finroc::core::tFrameworkElement("Unrelated", instance.get());
+  instance->unrelated = new ::finroc::core::tFrameworkElement(instance.get(), "Unrelated");
   __attribute__((unused))
   tAdminServer* as = new tAdminServer();
   ::finroc::core::tFrameworkElement::InitAll();

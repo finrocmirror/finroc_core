@@ -24,13 +24,13 @@
 #ifndef CORE__TEST__TREALPORTTEST5_H
 #define CORE__TEST__TREALPORTTEST5_H
 
-#include "core/port/cc/tNumberPort.h"
-#include "core/tRuntimeEnvironment.h"
-
 namespace finroc
 {
 namespace core
 {
+class tNumberPort;
+class tRuntimeEnvironment;
+
 class tRealPortTest5 : public util::tUncopyableObject
 {
 private:
@@ -40,7 +40,7 @@ private:
 
   static const int cCYCLE_TIME = 3;
 
-  static const int cCYCLES = 100000;
+  static const int cCYCLES = 10000000;
 
 public:
 

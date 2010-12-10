@@ -20,8 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/test/tChunkBufferTest.h"
-#include "finroc_core_utils/stream/tInputStreamBuffer.h"
-#include "finroc_core_utils/stream/tOutputStreamBuffer.h"
+#include "rrlib/finroc_core_utils/stream/tChunkedBuffer.h"
+#include "rrlib/finroc_core_utils/stream/tInputStreamBuffer.h"
+#include "rrlib/finroc_core_utils/stream/tOutputStreamBuffer.h"
 
 namespace finroc
 {

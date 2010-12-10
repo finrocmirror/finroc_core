@@ -22,6 +22,7 @@
 #include "core/test/tRealPortQueueTest.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/tThreadLocalCache.h"
+#include "core/port/cc/tNumberPort.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
 #include "core/tFrameworkElement.h"

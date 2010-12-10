@@ -32,8 +32,8 @@ namespace core
 {
 tStandardCreateModuleAction<tThreadContainer> tThreadContainer::cCREATE_ACTION("ThreadContainer", util::tTypedClass<tThreadContainer>());
 
-tThreadContainer::tThreadContainer(const util::tString& description, tFrameworkElement* parent) :
-    tGroup(description, parent),
+tThreadContainer::tThreadContainer(tFrameworkElement* parent, const util::tString& description) :
+    tGroup(parent, description),
     rt_thread(new tBoolStructureParameter("Realtime Thread", false)),
     cycle_time(new tNumericStructureParameter<int>("Cycle Time", 40, tBounds(1, 60000, true))),
     warn_on_cycle_time_exceed(new tBoolStructureParameter("Warn on cycle time exceed", true)),

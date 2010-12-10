@@ -27,6 +27,7 @@
 #include "core/port/tPortFlags.h"
 #include "core/tFrameworkElement.h"
 #include "core/buffers/tCoreOutput.h"
+#include "rrlib/finroc_core_utils/stream/tFixedBuffer.h"
 #include "core/port/tThreadLocalCache.h"
 
 namespace finroc

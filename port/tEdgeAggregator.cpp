@@ -32,8 +32,8 @@ const int tEdgeAggregator::cSENSOR_DATA;
 const int tEdgeAggregator::cCONTROLLER_DATA;
 const int tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS;
 
-tEdgeAggregator::tEdgeAggregator(const util::tString& description_, tFrameworkElement* parent_, int flags_) :
-    tFrameworkElement(description_, parent_, flags_ | tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cEDGE_AGGREGATOR, parent_ == NULL ? tLockOrderLevels::cLEAF_GROUP : -1),
+tEdgeAggregator::tEdgeAggregator(tFrameworkElement* parent_, const util::tString& description_, int flags_) :
+    tFrameworkElement(parent_, description_, flags_ | tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cEDGE_AGGREGATOR, parent_ == NULL ? tLockOrderLevels::cLEAF_GROUP : -1),
     emerging_edges(0u, 5u)
 {
 }

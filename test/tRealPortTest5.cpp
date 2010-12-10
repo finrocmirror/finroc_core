@@ -23,6 +23,8 @@
 #include "core/plugin/tPlugins.h"
 
 #include "core/test/tRealPortTest5.h"
+#include "core/tRuntimeEnvironment.h"
+#include "core/port/cc/tNumberPort.h"
 #include "core/tFrameworkElement.h"
 #include "plugins/blackboard/tBlackboardManager.h"
 #include "core/port/std/tPort.h"
@@ -31,6 +33,7 @@
 #include "core/port/tPortFlags.h"
 #include "core/buffers/tCoreOutput.h"
 #include "core/buffers/tCoreInput.h"
+#include "core/port/std/tPortDataManager.h"
 #include "plugins/blackboard/tBlackboardServer.h"
 #include "plugins/blackboard/tRawBlackboardClient.h"
 #include "core/port/rpc/tMethodCallException.h"
@@ -49,8 +52,6 @@ void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 {
   // set up
   //RuntimeEnvironment.initialInit(/*new ByteArrayInputStream(new byte[0])*/);
-  //rrlib::logging::tLogDomainRegistry::GetInstance()->ConfigureFromFile("/home/max/rrlab/finroc/etc/log.xml");
-
   re = tRuntimeEnvironment::GetInstance();
   output = new tNumberPort("test1", true);
   input = new tNumberPort("test2", false);

@@ -35,13 +35,13 @@ int main(int argc__, char **argv__)
   server->Init();
 
   // Create Thread Container
-  tThreadContainer* tc = new tThreadContainer("tc", tRuntimeEnvironment::GetInstance());
+  tThreadContainer* tc = new tThreadContainer(tRuntimeEnvironment::GetInstance(), "tc");
   tc->SetCycleTime(500);
 
   // Create Modules
-  mTestModule* tm1 = new mTestModule("tm1", tc);
-  mTestModule* tm2 = new mTestModule("tm2", tc);
-  mTestModule* tm3 = new mTestModule("tm3", tc);
+  mTestModule* tm1 = new mTestModule(tc, "tm1");
+  mTestModule* tm2 = new mTestModule(tc, "tm2");
+  mTestModule* tm3 = new mTestModule(tc, "tm3");
 
   // Add Edges
   tm3->so->ConnectToTarget(tm2->si);

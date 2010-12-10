@@ -24,12 +24,12 @@
 #ifndef CORE__TEST__TBASICREALTIMETEST_H
 #define CORE__TEST__TBASICREALTIMETEST_H
 
-#include "core/port/cc/tNumberPort.h"
-
 namespace finroc
 {
 namespace core
 {
+class tNumberPort;
+
 /*!
  * \author Max Reichardt
  *

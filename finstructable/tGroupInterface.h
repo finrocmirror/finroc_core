@@ -79,7 +79,7 @@ public:
    * \param description Interface description
    * \param parent Parent element
    */
-  tGroupInterface(const util::tString& description, tFrameworkElement* parent);
+  tGroupInterface(tFrameworkElement* parent, const util::tString& description);
 
   /*!
    * Advanced constructor
@@ -92,7 +92,7 @@ public:
    * \param unique_link Do ports habe globally unique link
    * \return flags for these parameters
    */
-  tGroupInterface(const util::tString& description, tFrameworkElement* parent, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link);
+  tGroupInterface(tFrameworkElement* parent, const util::tString& description, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link);
 
 };
 

@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/test/tBasicRealtimeTest.h"
+#include "core/port/cc/tNumberPort.h"
 #include "core/tRuntimeEnvironment.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "rrlib/finroc_core_utils/tTime.h"

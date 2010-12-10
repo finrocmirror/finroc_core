@@ -44,8 +44,8 @@ namespace core
 {
 tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup::cCREATE_ACTION("Finstructable Group", util::tTypedClass<tFinstructableGroup>());
 
-tFinstructableGroup::tFinstructableGroup(const util::tString& name, tFrameworkElement* parent) :
-    tFrameworkElement(name, parent, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
+tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name) :
+    tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
     xml_file(new tStringStructureParameter("XML file", "")),
     current_xml_file(""),
     connect_tmp(),
@@ -55,13 +55,13 @@ tFinstructableGroup::tFinstructableGroup(const util::tString& name, tFrameworkEl
 }
 
 tFinstructableGroup::tFinstructableGroup(const util::tString& name, tFrameworkElement* parent, const util::tString& xml_file_) :
-    tFrameworkElement(name, parent, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
+    tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
     xml_file(new tStringStructureParameter("XML file", "")),
     current_xml_file(""),
     connect_tmp(),
     link_tmp("")
 {
-  // this(name,parent);
+  // this(parent,name);
   AddAnnotation(new tStructureParameterList(xml_file));
   try
   {
@@ -152,7 +152,7 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
       spl = action->GetParameterTypes()->Instantiate();
       spl->Deserialize(*constructor_params);
     }
-    created = action->CreateModule(name, parent, spl);
+    created = action->CreateModule(parent, name, spl);
     created->SetFinstructed(action, spl);
     created->Init();
     if (parameters != NULL)

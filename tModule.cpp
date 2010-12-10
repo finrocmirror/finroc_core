@@ -26,13 +26,13 @@ namespace finroc
 {
 namespace core
 {
-tModule::tModule(const util::tString& name, tFrameworkElement* parent) :
-    tFrameworkElement(name, parent),
+tModule::tModule(tFrameworkElement* parent, const util::tString& name) :
+    tFrameworkElement(parent, name),
     sense_task(this),
-    sensor_input(new tEdgeAggregator("Sensor Input", this, tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
-    sensor_output(new tEdgeAggregator("Sensor Output", this, tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
-    controller_input(new tEdgeAggregator("Controller Input", this, tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
-    controller_output(new tEdgeAggregator("Controller Output", this, tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA))
+    sensor_input(new tEdgeAggregator(this, "Sensor Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
+    sensor_output(new tEdgeAggregator(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
+    controller_input(new tEdgeAggregator(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
+    controller_output(new tEdgeAggregator(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA))
 {
   sensor_input->AddAnnotation(new tPeriodicFrameworkElementTask(sensor_input, sensor_output, &(sense_task)));
   controller_input->AddAnnotation(new tPeriodicFrameworkElementTask(controller_input, controller_output, this));

@@ -137,7 +137,7 @@ private:
 
 public:
 
-  tFinstructableGroup(const util::tString& name, tFrameworkElement* parent);
+  tFinstructableGroup(tFrameworkElement* parent, const util::tString& name);
 
   /*!
    * (if the provided file does not exist, it is created, when contents are saved)

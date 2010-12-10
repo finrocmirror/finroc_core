@@ -90,7 +90,7 @@ void tSettings::Init(tFrameworkElement* parent)
   {
     return;
   }
-  port_root = new tFrameworkElement(description, parent);
+  port_root = new tFrameworkElement(parent, description);
   for (int i = 0, n = settings.Size(); i < n; i++)
   {
     tSetting* set = settings.Get(i);

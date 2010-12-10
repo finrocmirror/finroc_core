@@ -40,10 +40,10 @@ namespace core
     tConstructorCreateModuleActionImpl(const util::tString& type, util::tTypedClass<MODULE> mc, const util::tString& param_names) : base(type, param_names) {\
       this->group = tCreateModuleAction::GetBinary((void*)CreateModuleImpl);\
     }\
-    virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* p) const {\
-      return CreateModuleImpl(this, name, parent, p);\
+    virtual tFrameworkElement* CreateModule(tFrameworkElement* parent, const util::tString& name, tConstructorParameters* p) const {\
+      return CreateModuleImpl(this, parent, name, p);\
     }\
-    static tFrameworkElement* CreateModuleImpl(const base* b, const util::tString& name, tFrameworkElement* parent, tConstructorParameters* p) {\
+    static tFrameworkElement* CreateModuleImpl(const base* b, tFrameworkElement* parent, const util::tString& name, tConstructorParameters* p) {\
        
 template <typename MODULE, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10, typename P11, typename P12>
 class tConstructorCreateModuleActionImpl : public tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>
@@ -58,79 +58,79 @@ public:
   {
     this->group = tCreateModuleAction::GetBinary((void*)CreateModuleImpl);
   }
-  virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* p) const
+  virtual tFrameworkElement* CreateModule(tFrameworkElement* parent, const util::tString& name, tConstructorParameters* p) const
   {
-    return CreateModuleImpl(this, name, parent, p);
+    return CreateModuleImpl(this, parent, name, p);
   }
-  static tFrameworkElement* CreateModuleImpl(const base* b, const util::tString& name, tFrameworkElement* parent, tConstructorParameters* p)
+  static tFrameworkElement* CreateModuleImpl(const base* b, tFrameworkElement* parent, const util::tString& name, tConstructorParameters* p)
   {
-    return new MODULE(name, parent, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p), b->GetP8(p), b->GetP9(p), b->GetP10(p), b->GetP11(p), b->GetP12(p));
+    return new MODULE(parent, name, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p), b->GetP8(p), b->GetP9(p), b->GetP10(p), b->GetP11(p), b->GetP12(p));
   }
 };
 
 template <typename MODULE, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10, typename P11>
 CONSTRUCTORCREATEMODULEACTIONIMPL(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, tEmpty)
-return new MODULE(name, parent, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p), b->GetP8(p), b->GetP9(p), b->GetP10(p), b->GetP11(p));
+return new MODULE(parent, name, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p), b->GetP8(p), b->GetP9(p), b->GetP10(p), b->GetP11(p));
 }
 };
 
 template <typename MODULE, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
 CONSTRUCTORCREATEMODULEACTIONIMPL(P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, tEmpty, tEmpty)
-return new MODULE(name, parent, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p), b->GetP8(p), b->GetP9(p), b->GetP10(p));
+return new MODULE(parent, name, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p), b->GetP8(p), b->GetP9(p), b->GetP10(p));
 }
 };
 
 template <typename MODULE, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
 CONSTRUCTORCREATEMODULEACTIONIMPL(P1, P2, P3, P4, P5, P6, P7, P8, P9, tEmpty, tEmpty, tEmpty)
-return new MODULE(name, parent, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p), b->GetP8(p), b->GetP9(p));
+return new MODULE(parent, name, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p), b->GetP8(p), b->GetP9(p));
        }
        };
 
        template <typename MODULE, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
        CONSTRUCTORCREATEMODULEACTIONIMPL(P1, P2, P3, P4, P5, P6, P7, P8, tEmpty, tEmpty, tEmpty, tEmpty)
-       return new MODULE(name, parent, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p), b->GetP8(p));
+       return new MODULE(parent, name, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p), b->GetP8(p));
               }
               };
 
               template <typename MODULE, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
               CONSTRUCTORCREATEMODULEACTIONIMPL(P1, P2, P3, P4, P5, P6, P7, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty)
-              return new MODULE(name, parent, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p));
+              return new MODULE(parent, name, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p), b->GetP7(p));
                      }
                      };
 
                      template <typename MODULE, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
                      CONSTRUCTORCREATEMODULEACTIONIMPL(P1, P2, P3, P4, P5, P6, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty)
-                     return new MODULE(name, parent, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p));
+                     return new MODULE(parent, name, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p), b->GetP6(p));
                             }
                             };
 
                             template <typename MODULE, typename P1, typename P2, typename P3, typename P4, typename P5>
                             CONSTRUCTORCREATEMODULEACTIONIMPL(P1, P2, P3, P4, P5, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty)
-                            return new MODULE(name, parent, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p));
+                            return new MODULE(parent, name, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p), b->GetP5(p));
                                    }
                                    };
 
                                    template <typename MODULE, typename P1, typename P2, typename P3, typename P4>
                                    CONSTRUCTORCREATEMODULEACTIONIMPL(P1, P2, P3, P4, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty)
-                                   return new MODULE(name, parent, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p));
+                                   return new MODULE(parent, name, b->GetP1(p), b->GetP2(p), b->GetP3(p), b->GetP4(p));
                                           }
                                           };
 
                                           template <typename MODULE, typename P1, typename P2, typename P3>
                                           CONSTRUCTORCREATEMODULEACTIONIMPL(P1, P2, P3, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty)
-                                          return new MODULE(name, parent, b->GetP1(p), b->GetP2(p), b->GetP3(p));
+                                          return new MODULE(parent, name, b->GetP1(p), b->GetP2(p), b->GetP3(p));
                                                  }
                                                  };
 
                                                  template <typename MODULE, typename P1, typename P2>
                                                  CONSTRUCTORCREATEMODULEACTIONIMPL(P1, P2, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty)
-                                                 return new MODULE(name, parent, b->GetP1(p), b->GetP2(p));
+                                                 return new MODULE(parent, name, b->GetP1(p), b->GetP2(p));
                                                         }
                                                         };
 
                                                         template <typename MODULE, typename P1>
                                                         CONSTRUCTORCREATEMODULEACTIONIMPL(P1, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty, tEmpty)
-                                                        return new MODULE(name, parent, b->GetP1(p));
+                                                        return new MODULE(parent, name, b->GetP1(p));
                                                                }
                                                                };
 

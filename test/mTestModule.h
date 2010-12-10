@@ -40,6 +40,11 @@ class tNumberPort;
  */
 class mTestModule : public tModule
 {
+private:
+
+  /*! Create Module Action for finstruct */
+  static tStandardCreateModuleAction<mTestModule> cCREATE_ACTION;
+
 public:
 
   /*! Test ports */
@@ -53,7 +58,7 @@ protected:
 
 public:
 
-  mTestModule(const util::tString& name, tFrameworkElement* parent);
+  mTestModule(tFrameworkElement* parent, const util::tString& name);
 
 };
 

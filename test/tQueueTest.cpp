@@ -20,10 +20,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/test/tQueueTest.h"
-#include "finroc_core_utils/container/tWonderQueue.h"
-#include "finroc_core_utils/container/tWonderQueueFast.h"
-#include "finroc_core_utils/container/tWonderQueueFastCR.h"
-#include "finroc_core_utils/container/tWonderQueueTL.h"
+#include "rrlib/finroc_core_utils/container/tWonderQueue.h"
+#include "rrlib/finroc_core_utils/container/tWonderQueueFast.h"
+#include "rrlib/finroc_core_utils/container/tWonderQueueFastCR.h"
+#include "rrlib/finroc_core_utils/container/tWonderQueueTL.h"
 
 namespace finroc
 {

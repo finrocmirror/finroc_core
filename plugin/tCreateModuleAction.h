@@ -52,7 +52,7 @@ public:
    * \param params Parameters
    * \return Created Module (or Group)
    */
-  virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* params = NULL) const = 0;
+  virtual tFrameworkElement* CreateModule(tFrameworkElement* parent, const util::tString& name, tConstructorParameters* params = NULL) const = 0;
 
   /*!
    * \return Returns name of group to which this create module action belongs

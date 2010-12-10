@@ -33,7 +33,7 @@ namespace finroc
 {
 namespace core
 {
-tFrameworkElement::tFrameworkElement(const util::tString& description_, tFrameworkElement* parent_, int flags_, int lock_order_) :
+tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tString& description_, int flags_, int lock_order_) :
     primary(this),
     flag_mutex(),
     creater_thread_uid(util::sThreadUtil::GetCurrentThreadId()),

@@ -72,7 +72,7 @@ public:
    * \param description Name
    * \param parent parent
    */
-  tThreadContainer(const util::tString& description, tFrameworkElement* parent);
+  tThreadContainer(tFrameworkElement* parent, const util::tString& description);
 
   virtual ~tThreadContainer();
 

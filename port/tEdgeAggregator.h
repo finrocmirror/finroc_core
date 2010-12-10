@@ -90,7 +90,7 @@ private:
 public:
 
   /*! see FrameworkElement for parameter description */
-  tEdgeAggregator(const util::tString& description_ = "", tFrameworkElement* parent_ = NULL, int flags_ = 0);
+  tEdgeAggregator(tFrameworkElement* parent_ = NULL, const util::tString& description_ = "", int flags_ = 0);
 
   /*!
    * (Should be called by abstract port only)

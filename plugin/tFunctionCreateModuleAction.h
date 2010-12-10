@@ -38,19 +38,19 @@ public:
 
   typedef tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12> base;
 
-  typedef tFrameworkElement*(*tFunc12)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11, P12 t12);
-  typedef tFrameworkElement*(*tFunc11)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11);
-  typedef tFrameworkElement*(*tFunc10)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10);
-  typedef tFrameworkElement*(*tFunc9)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9);
-  typedef tFrameworkElement*(*tFunc8)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8);
-  typedef tFrameworkElement*(*tFunc7)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7);
-  typedef tFrameworkElement*(*tFunc6)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6);
-  typedef tFrameworkElement*(*tFunc5)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5);
-  typedef tFrameworkElement*(*tFunc4)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4);
-  typedef tFrameworkElement*(*tFunc3)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3);
-  typedef tFrameworkElement*(*tFunc2)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2);
-  typedef tFrameworkElement*(*tFunc1)(const util::tString& name, tFrameworkElement* parent, P1 t1);
-  typedef tFrameworkElement*(*tFunc0)(const util::tString& name, tFrameworkElement* parent);
+  typedef tFrameworkElement*(*tFunc12)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11, P12 t12);
+  typedef tFrameworkElement*(*tFunc11)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11);
+  typedef tFrameworkElement*(*tFunc10)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10);
+  typedef tFrameworkElement*(*tFunc9)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9);
+  typedef tFrameworkElement*(*tFunc8)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8);
+  typedef tFrameworkElement*(*tFunc7)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7);
+  typedef tFrameworkElement*(*tFunc6)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6);
+  typedef tFrameworkElement*(*tFunc5)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5);
+  typedef tFrameworkElement*(*tFunc4)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4);
+  typedef tFrameworkElement*(*tFunc3)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3);
+  typedef tFrameworkElement*(*tFunc2)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2);
+  typedef tFrameworkElement*(*tFunc1)(tFrameworkElement* parent, const util::tString& name, P1 t1);
+  typedef tFrameworkElement*(*tFunc0)(tFrameworkElement* parent, const util::tString& name);
 
   tFunc0 f0;
   tFunc1 f1;
@@ -73,60 +73,60 @@ public:
     this->group = group;
   }
 
-  virtual tFrameworkElement* CreateModule(const util::tString& name, tFrameworkElement* parent, tConstructorParameters* p) const
+  virtual tFrameworkElement* CreateModule(tFrameworkElement* parent, const util::tString& name, tConstructorParameters* p) const
   {
     if (f0 != NULL)
     {
-      return (*f0)(name, parent);
+      return (*f0)(parent, name);
     }
     else if (f1 != NULL)
     {
-      return (*f1)(name, parent, base::GetP1(p));
+      return (*f1)(parent, name, base::GetP1(p));
     }
     else if (f2 != NULL)
     {
-      return (*f2)(name, parent, base::GetP1(p), base::GetP2(p));
+      return (*f2)(parent, name, base::GetP1(p), base::GetP2(p));
     }
     else if (f3 != NULL)
     {
-      return (*f3)(name, parent, base::GetP1(p), base::GetP2(p), base::GetP3(p));
+      return (*f3)(parent, name, base::GetP1(p), base::GetP2(p), base::GetP3(p));
     }
     else if (f4 != NULL)
     {
-      return (*f4)(name, parent, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p));
+      return (*f4)(parent, name, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p));
     }
     else if (f5 != NULL)
     {
-      return (*f5)(name, parent, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p));
+      return (*f5)(parent, name, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p));
     }
     else if (f6 != NULL)
     {
-      return (*f6)(name, parent, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p));
+      return (*f6)(parent, name, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p));
     }
     else if (f7 != NULL)
     {
-      return (*f7)(name, parent, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p));
+      return (*f7)(parent, name, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p));
     }
     else if (f8 != NULL)
     {
-      return (*f8)(name, parent, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p), base::GetP8(p));
+      return (*f8)(parent, name, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p), base::GetP8(p));
     }
     else if (f9 != NULL)
     {
-      return (*f9)(name, parent, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p), base::GetP8(p), base::GetP9(p));
+      return (*f9)(parent, name, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p), base::GetP8(p), base::GetP9(p));
     }
     else if (f10 != NULL)
     {
-      return (*f10)(name, parent, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p), base::GetP8(p), base::GetP9(p), base::GetP10(p));
+      return (*f10)(parent, name, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p), base::GetP8(p), base::GetP9(p), base::GetP10(p));
     }
     else if (f11 != NULL)
     {
-      return (*f11)(name, parent, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p), base::GetP8(p), base::GetP9(p), base::GetP10(p), base::GetP11(p));
+      return (*f11)(parent, name, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p), base::GetP8(p), base::GetP9(p), base::GetP10(p), base::GetP11(p));
     }
     else
     {
       assert(f12 != NULL);
-      return (*f12)(name, parent, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p), base::GetP8(p), base::GetP9(p), base::GetP10(p), base::GetP11(p), base::GetP12(p));
+      return (*f12)(parent, name, base::GetP1(p), base::GetP2(p), base::GetP3(p), base::GetP4(p), base::GetP5(p), base::GetP6(p), base::GetP7(p), base::GetP8(p), base::GetP9(p), base::GetP10(p), base::GetP11(p), base::GetP12(p));
     }
   }
 };
@@ -142,7 +142,7 @@ struct tFunctionCreateModuleAction
 public:
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10, typename P11, typename P12>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11, P12 t12))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11, P12 t12))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -151,7 +151,7 @@ public:
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10, typename P11>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10, P11 t11))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -160,7 +160,7 @@ public:
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9, P10 t10))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -169,7 +169,7 @@ public:
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8, P9 t9))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7, P8, P9> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -178,7 +178,7 @@ public:
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7, P8 t8))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7, P8> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -187,7 +187,7 @@ public:
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6, P7 t7))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6, P7> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -196,7 +196,7 @@ public:
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5, P6 t6))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5, P6> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -205,7 +205,7 @@ public:
   }
 
   template <typename P1, typename P2, typename P3, typename P4, typename P5>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4, P5 t5))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4, P5> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -214,7 +214,7 @@ public:
   }
 
   template <typename P1, typename P2, typename P3, typename P4>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3, P4 t4))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3, P4 t4))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3, P4> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -223,7 +223,7 @@ public:
   }
 
   template <typename P1, typename P2, typename P3>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2, P3 t3))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2, P3 t3))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2, P3> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -232,7 +232,7 @@ public:
   }
 
   template <typename P1, typename P2>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1, P2 t2))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1, P2 t2))
   {
     typedef tFunctionCreateModuleActionImpl<P1, P2> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -241,7 +241,7 @@ public:
   }
 
   template <typename P1>
-  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent, P1 t1))
+  tFunctionCreateModuleAction(const util::tString& type, const util::tString& param_names, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name, P1 t1))
   {
     typedef tFunctionCreateModuleActionImpl<P1> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, param_names);
@@ -249,7 +249,7 @@ public:
     wrapped.reset(w);
   }
 
-  tFunctionCreateModuleAction(const util::tString& type, tFrameworkElement*(*func)(const util::tString& name, tFrameworkElement* parent))
+  tFunctionCreateModuleAction(const util::tString& type, tFrameworkElement*(*func)(tFrameworkElement* parent, const util::tString& name))
   {
     typedef tFunctionCreateModuleActionImpl<tEmpty> W;
     W* w = new W(wrapped->GetBinary((void*)func), type, "");

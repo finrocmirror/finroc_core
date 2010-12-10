@@ -29,8 +29,8 @@ namespace core
 {
 tStandardCreateModuleAction<tGroup> tGroup::cCREATE_ACTION("Group", util::tTypedClass<tGroup>());
 
-tGroup::tGroup(const util::tString& description, tFrameworkElement* parent) :
-    tEdgeAggregator(description, parent, 0),
+tGroup::tGroup(tFrameworkElement* parent, const util::tString& description) :
+    tEdgeAggregator(parent, description, 0),
     ports(new tStructureParameter<tPortCreationList>("Ports", tPortCreationList::cTYPE))
 {
   AddAnnotation(new tStructureParameterList(ports));

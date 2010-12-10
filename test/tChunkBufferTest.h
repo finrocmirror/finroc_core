@@ -19,12 +19,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "finroc_core_utils/tJCBase.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
 
 #ifndef CORE__TEST__TCHUNKBUFFERTEST_H
 #define CORE__TEST__TCHUNKBUFFERTEST_H
 
-#include "finroc_core_utils/stream/tChunkedBuffer.h"
+namespace finroc
+{
+namespace util
+{
+class tChunkedBuffer;
+} // namespace finroc
+} // namespace util
 
 namespace finroc
 {
