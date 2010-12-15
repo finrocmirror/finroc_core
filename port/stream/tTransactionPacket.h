@@ -25,7 +25,7 @@
 #define CORE__PORT__STREAM__TTRANSACTIONPACKET_H
 
 #include "core/buffers/tCoreOutput.h"
-#include "core/portdatabase/tCoreSerializableImpl.h"
+#include "core/portdatabase/tCoreSerializable.h"
 #include "core/port/stream/tTransaction.h"
 #include "core/buffers/tChunkBuffer.h"
 

@@ -30,7 +30,7 @@ namespace finroc
 {
 namespace core
 {
-class tCoreNumber;
+class tNumber;
 
 /*!
  * \author Max Reichardt
@@ -186,10 +186,7 @@ public:
    * \param u Other Unit
    * \return Result
    */
-  inline double ConvertTo(double value, tUnit* to_unit) const
-  {
-    return GetConversionFactor(to_unit) * value;
-  }
+  double ConvertTo(double value, tUnit* to_unit) const;
 
   /*!
    * Is Unit convertible to other Unit?
@@ -249,7 +246,7 @@ public:
   /*!
    * \return Value of constant - Double.NaN for normal units
    */
-  virtual const tCoreNumber& GetValue() const;
+  virtual const tNumber& GetValue() const;
 
   /*!
    * \return Is this class a constant ?

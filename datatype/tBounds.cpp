@@ -39,6 +39,15 @@ tBounds::tBounds() :
 {
 }
 
+tBounds::tBounds(double min_, double max_) :
+    min(min_),
+    max(max_),
+    action(true ? tBounds::eADJUST_TO_RANGE : tBounds::eDISCARD),
+    out_of_bounds_default()
+{
+  // this(min,max,true);
+}
+
 tBounds::tBounds(double min_, double max_, bool adjust_to_range) :
     min(min_),
     max(max_),
@@ -47,7 +56,7 @@ tBounds::tBounds(double min_, double max_, bool adjust_to_range) :
 {
 }
 
-tBounds::tBounds(double min_, double max_, tCoreNumber* out_of_bounds_default_) :
+tBounds::tBounds(double min_, double max_, tNumber* out_of_bounds_default_) :
     min(min_),
     max(max_),
     action(tBounds::eAPPLY_DEFAULT),
@@ -91,7 +100,7 @@ void tBounds::Set(const tBounds& new_bounds)
   out_of_bounds_default.SetValue(new_bounds.out_of_bounds_default);
 }
 
-double tBounds::ToBounds(double val)
+double tBounds::ToBounds(double val) const
 {
   if (val < min)
   {

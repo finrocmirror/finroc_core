@@ -19,7 +19,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/std/tPortBase.h"
 #include "core/port/tPortFlags.h"
 #include "core/port/std/tPortDataReference.h"
 
@@ -28,10 +27,9 @@ namespace finroc
 namespace core
 {
 template<typename T>
-tSingletonPort<T>::tSingletonPort(tPortCreationInfo pci, T* singleton) :
-    tPort<T>(AdjustPci(pci)),
-    singleton_value(singleton)
+tSingletonPort<T>::tSingletonPort(tPortCreationInfo pci, T* singleton)
 {
+  this->wrapped = new tPortImpl<T*>(AdjustPci(pci), singleton);
   Publish(singleton);
 }
 
@@ -41,13 +39,20 @@ tPortCreationInfo tSingletonPort<T>::AdjustPci(tPortCreationInfo pci)
   pci.send_buffer_size = 1;
   pci.alt_send_buffer_size = 0;
   pci.SetFlag(tPortFlags::cPUSH_DATA_IMMEDIATELY | tPortFlags::cNON_STANDARD_ASSIGN, true);
-  return pci;
+  return ::finroc::core::tPort::ProcessPci(pci);
 }
 
 template<typename T>
-void tSingletonPort<T>::NonStandardAssign(tPublishCache& pc)
+tSingletonPort<T>::tPortImpl<T>::tPortImpl(tPortCreationInfo pci, T& singleton) :
+    tPortBase(pci),
+    singleton_value(singleton)
 {
-  if (pc.cur_ref->GetData() != singleton_value)
+}
+
+template<typename T>
+void tSingletonPort<T>::tPortImpl<T>::NonStandardAssign(tPublishCache& pc)
+{
+  if (pc.cur_ref->GetData() != &(singleton_value))
   {
     throw util::tRuntimeException("Cannot change contents of Singleton-Port", CODE_LOCATION_MACRO);
   }

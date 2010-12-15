@@ -24,7 +24,7 @@
 #ifndef CORE__PORTDATABASE__TSERIALIZATIONHELPER_H
 #define CORE__PORTDATABASE__TSERIALIZATIONHELPER_H
 
-#include "core/portdatabase/tCoreSerializableImpl.h"
+#include "core/portdatabase/tCoreSerializable.h"
 
 namespace finroc
 {

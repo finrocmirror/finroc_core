@@ -24,8 +24,8 @@
 #ifndef CORE__THREAD__TTHREADCONTAINER_H
 #define CORE__THREAD__TTHREADCONTAINER_H
 
-#include "core/parameter/tBoolStructureParameter.h"
-#include "core/parameter/tNumericStructureParameter.h"
+#include "core/parameter/tStructureParameterBool.h"
+#include "core/parameter/tStructureParameterNumeric.h"
 #include "core/datatype/tBounds.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/thread/tThreadContainerThread.h"
@@ -47,13 +47,13 @@ class tThreadContainer : public tGroup, public tStartAndPausable
 private:
 
   /*! Should this container contain a real-time thread? */
-  tBoolStructureParameter* rt_thread;
+  tStructureParameterBool* rt_thread;
 
   /*! Thread cycle time */
-  tNumericStructureParameter<int>* cycle_time;
+  tStructureParameterNumeric<int>* cycle_time;
 
   /*! Warn on cycle time exceed */
-  tBoolStructureParameter* warn_on_cycle_time_exceed;
+  tStructureParameterBool* warn_on_cycle_time_exceed;
 
   /*! CreateModuleAction */
   static tStandardCreateModuleAction<tThreadContainer> cCREATE_ACTION;

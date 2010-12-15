@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/datatype/tCoreNumber.h"
+#include "core/datatype/tNumber.h"
 #include "core/portdatabase/tDataTypeRegister.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/datatype/tConstant.h"
@@ -29,11 +29,11 @@ namespace finroc
 {
 namespace core
 {
-tCoreNumber tCoreNumber::cZERO(0);
-tDataType* const tCoreNumber::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>());
-const int8 tCoreNumber::cINT64, tCoreNumber::cINT32, tCoreNumber::cINT16, tCoreNumber::cFLOAT64, tCoreNumber::cFLOAT32, tCoreNumber::cCONST, tCoreNumber::cMIN_BARRIER;
+tNumber tNumber::cZERO(0);
+tDataType* const tNumber::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tNumber>(), "Number");
+const int8 tNumber::cINT64, tNumber::cINT32, tNumber::cINT16, tNumber::cFLOAT64, tNumber::cFLOAT32, tNumber::cCONST, tNumber::cMIN_BARRIER;
 
-void tCoreNumber::CopyFrom(const tCoreNumber& source)
+void tNumber::CopyFrom(const tNumber& source)
 {
   num_type = source.num_type;
   unit = source.unit;
@@ -41,7 +41,7 @@ void tCoreNumber::CopyFrom(const tCoreNumber& source)
   lval = source.lval;
 }
 
-void tCoreNumber::Deserialize(tCoreInput& ois)
+void tNumber::Deserialize(tCoreInput& ois)
 {
   int8 first_byte = ois.ReadByte();
   bool has_unit = (first_byte & 1) > 0;
@@ -74,7 +74,7 @@ void tCoreNumber::Deserialize(tCoreInput& ois)
   unit = has_unit ? tUnit::GetUnit(ois.ReadByte()) : &(tUnit::cNO_UNIT);
 }
 
-void tCoreNumber::Deserialize(const util::tString& s)
+void tNumber::Deserialize(const util::tString& s)
 {
   // scan for unit
   util::tString num = s;
@@ -107,7 +107,7 @@ void tCoreNumber::Deserialize(const util::tString& s)
   }
   else
   {
-    num_type = tCoreNumber::eLONG;
+    num_type = tNumber::eLONG;
     try
     {
       int64 l = util::tLong::ParseLong(num);
@@ -128,30 +128,30 @@ void tCoreNumber::Deserialize(const util::tString& s)
   }
 }
 
-bool tCoreNumber::Equals(const util::tObject& other) const
+bool tNumber::Equals(const util::tObject& other) const
 {
-  if (!(typeid(other) == typeid(tCoreNumber)))
+  if (!(typeid(other) == typeid(tNumber)))
   {
     return false;
   }
-  const tCoreNumber& o = static_cast<const tCoreNumber&>(other);
+  const tNumber& o = static_cast<const tNumber&>(other);
   bool value_matches = (lval == o.lval);
   return o.num_type == num_type && o.unit == unit && value_matches;
 }
 
-tConstant* tCoreNumber::GetConstant() const
+tConstant* tNumber::GetConstant() const
 {
   return (static_cast<tConstant*>(unit));
 }
 
-tUnit* tCoreNumber::GetUnit() const
+tUnit* tNumber::GetUnit() const
 {
-  return num_type == tCoreNumber::eCONSTANT ? GetConstant()->unit : unit;
+  return num_type == tNumber::eCONSTANT ? GetConstant()->unit : unit;
 }
 
-void tCoreNumber::Serialize(tCoreOutput& oos) const
+void tNumber::Serialize(tCoreOutput& oos) const
 {
-  if (num_type == tCoreNumber::eLONG || num_type == tCoreNumber::eINT)
+  if (num_type == tNumber::eLONG || num_type == tNumber::eINT)
   {
     int64 value = (num_type == eLONG) ? lval : ival;
     if (value >= cMIN_BARRIER && value <= 63)
@@ -174,32 +174,32 @@ void tCoreNumber::Serialize(tCoreOutput& oos) const
       oos.WriteLong(value);
     }
   }
-  else if (num_type == tCoreNumber::eDOUBLE)
+  else if (num_type == tNumber::eDOUBLE)
   {
     oos.WriteByte(PrepFirstByte(cFLOAT64));
 
     oos.WriteDouble(dval);
   }
-  else if (num_type == tCoreNumber::eFLOAT)
+  else if (num_type == tNumber::eFLOAT)
   {
     oos.WriteByte(PrepFirstByte(cFLOAT32));
 
     oos.WriteFloat(fval);
   }
-  else if (num_type == tCoreNumber::eCONSTANT)
+  else if (num_type == tNumber::eCONSTANT)
   {
     oos.WriteByte(PrepFirstByte(cCONST));
     oos.WriteByte((static_cast<tConstant*>(unit))->GetConstantId());
   }
 }
 
-void tCoreNumber::SetValue(tConstant* value_)
+void tNumber::SetValue(tConstant* value_)
 {
   this->unit = value_;
   num_type = eCONSTANT;
 }
 
-void tCoreNumber::SetValue(const util::tNumber& value_, tUnit* unit_)
+void tNumber::SetValue(const util::tNumber& value_, tUnit* unit_)
 {
   this->unit = unit_;
   if (typeid(value_) == typeid(int64))
@@ -214,9 +214,9 @@ void tCoreNumber::SetValue(const util::tNumber& value_, tUnit* unit_)
   {
     SetValue(value_.FloatValue());
   }
-  else if (typeid(value_) == typeid(tCoreNumber))
+  else if (typeid(value_) == typeid(tNumber))
   {
-    SetValue(static_cast<const tCoreNumber&>(value_));
+    SetValue(static_cast<const tNumber&>(value_));
   }
   else
   {
@@ -224,7 +224,7 @@ void tCoreNumber::SetValue(const util::tNumber& value_, tUnit* unit_)
   }
 }
 
-void tCoreNumber::SetValue(const tCoreNumber& value_)
+void tNumber::SetValue(const tNumber& value_)
 {
   this->unit = value_.unit;
   this->num_type = value_.num_type;
@@ -232,7 +232,7 @@ void tCoreNumber::SetValue(const tCoreNumber& value_)
   this->dval = value_.dval;
 }
 
-const util::tString tCoreNumber::ToString() const
+const util::tString tNumber::ToString() const
 {
   switch (num_type)
   {

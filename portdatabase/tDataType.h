@@ -29,7 +29,7 @@
 #include "core/port/std/tPortDataList.h"
 #include "core/portdatabase/tListTypeFactory.h"
 #include "core/portdatabase/tPortDataFactory.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 
 #include "core/portdatabase/tDataTypeUtil.h"
 #include <boost/type_traits/is_base_of.hpp>

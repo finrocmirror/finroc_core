@@ -21,7 +21,7 @@
  */
 #include "core/portdatabase/tDataType.h"
 #include "core/buffers/tCoreInput.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 #include "core/port/tAbstractPort.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/portdatabase/tDataTypeRegister.h"

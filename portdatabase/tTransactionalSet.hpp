@@ -23,7 +23,7 @@
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/port/tThreadLocalCache.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/port/stream/tTransactionPacket.h"
 #include "core/port/stream/tOutputTransactionStreamPort.h"
 #include "core/port/std/tPortDataManager.h"
@@ -156,7 +156,7 @@ template<typename K, typename B>
 const ::finroc::core::tPortData* tTransactionalSet<K, B>::PullRequest(tPortBase* origin, int8 add_locks)
 {
   util::tConcurrentMap<K, B>::tMapIterator it = set.GetIterator();
-  tTransactionPacket* tp = this->output->GetUnusedBuffer();
+  tTransactionPacket* tp = this->output.GetUnusedBuffer();
   tp->initial_packet = true;
   while (it.Next())
   {

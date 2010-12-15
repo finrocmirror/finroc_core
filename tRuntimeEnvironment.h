@@ -162,6 +162,8 @@ public:
    */
   void AddListener(tRuntimeListener* listener);
 
+  virtual ~tRuntimeEnvironment();
+
   /*!
    * \return Timestamp when runtime environment was created
    */
@@ -177,14 +179,6 @@ public:
    * \return Pointer to framework element - or null if it has been deleted
    */
   ::finroc::core::tFrameworkElement* GetElement(int handle);
-
-  virtual ~tRuntimeEnvironment()
-  {
-    active = false;
-    util::tThread::StopThreads();
-    DeleteChildren();
-    instance_raw_ptr = NULL;
-  }
 
   /*!
    * (IMPORTANT: This should not be called during static initialization)

@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tAbstractCall.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/port/std/tPortDataManager.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/port/tThreadLocalCache.h"

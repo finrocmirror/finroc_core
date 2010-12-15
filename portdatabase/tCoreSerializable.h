@@ -21,8 +21,8 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORTDATABASE__TCORESERIALIZABLEIMPL_H
-#define CORE__PORTDATABASE__TCORESERIALIZABLEIMPL_H
+#ifndef CORE__PORTDATABASE__TCORESERIALIZABLE_H
+#define CORE__PORTDATABASE__TCORESERIALIZABLE_H
 
 namespace rrlib
 {
@@ -100,4 +100,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORTDATABASE__TCORESERIALIZABLEIMPL_H
+#endif // CORE__PORTDATABASE__TCORESERIALIZABLE_H

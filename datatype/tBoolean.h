@@ -21,12 +21,12 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__DATATYPE__TCOREBOOLEAN_H
-#define CORE__DATATYPE__TCOREBOOLEAN_H
+#ifndef CORE__DATATYPE__TBOOLEAN_H
+#define CORE__DATATYPE__TBOOLEAN_H
 
 #include "core/buffers/tCoreInput.h"
 #include "core/buffers/tCoreOutput.h"
-#include "core/portdatabase/tCoreSerializableImpl.h"
+#include "core/portdatabase/tCoreSerializable.h"
 
 namespace finroc
 {
@@ -39,7 +39,7 @@ class tDataType;
  *
  * boolean type
  */
-class tCoreBoolean : public tCoreSerializable
+class tBoolean : public tCoreSerializable
 {
 private:
 
@@ -52,15 +52,15 @@ public:
   static tDataType* cTYPE;
 
   /*! Instances for True and false */
-  static const tCoreBoolean cTRUE, cFALSE;
+  static const tBoolean cTRUE, cFALSE;
 
-  tCoreBoolean();
+  tBoolean();
 
-  tCoreBoolean(bool value_);
+  tBoolean(bool value_);
 
   virtual void Assign(tCCPortData* other)
   {
-    value = (reinterpret_cast<tCoreBoolean*>(other))->value;
+    value = (reinterpret_cast<tBoolean*>(other))->value;
   }
 
   virtual void Deserialize(tCoreInput& is)
@@ -81,7 +81,7 @@ public:
     return value;
   }
 
-  inline static const tCoreBoolean* GetInstance(bool value_)
+  inline static const tBoolean* GetInstance(bool value_)
   {
     return value_ ? &(cTRUE) : &(cFALSE);
   }
@@ -114,4 +114,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__DATATYPE__TCOREBOOLEAN_H
+#endif // CORE__DATATYPE__TBOOLEAN_H

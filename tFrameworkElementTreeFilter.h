@@ -27,7 +27,7 @@
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
 #include "core/tFrameworkElement.h"
-#include "core/portdatabase/tCoreSerializableImpl.h"
+#include "core/portdatabase/tCoreSerializable.h"
 
 namespace finroc
 {

@@ -23,7 +23,7 @@
 #include "plugins/tcp/tTCPServer.h"
 #include "core/thread/tThreadContainer.h"
 #include "core/test/mTestModule.h"
-#include "core/port/cc/tNumberPort.h"
+#include "core/port/cc/tPortNumeric.h"
 
 using namespace finroc::core;
 using namespace finroc;
@@ -44,10 +44,10 @@ int main(int argc__, char **argv__)
   mTestModule* tm3 = new mTestModule(tc, "tm3");
 
   // Add Edges
-  tm3->so->ConnectToTarget(tm2->si);
-  tm2->so->ConnectToTarget(tm1->si);
-  tm1->co->ConnectToTarget(tm2->ci);
-  tm2->co->ConnectToTarget(tm3->ci);
+  tm3->so.ConnectToTarget(tm2->si);
+  tm2->so.ConnectToTarget(tm1->si);
+  tm1->co.ConnectToTarget(tm2->ci);
+  tm2->co.ConnectToTarget(tm3->ci);
 
   // Initialize created elements
   tc->Init();

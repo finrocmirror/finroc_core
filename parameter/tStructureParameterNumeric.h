@@ -21,14 +21,14 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TNUMERICSTRUCTUREPARAMETER_H
-#define CORE__PARAMETER__TNUMERICSTRUCTUREPARAMETER_H
+#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETERNUMERIC_H
+#define CORE__PARAMETER__TSTRUCTUREPARAMETERNUMERIC_H
 
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tBounds.h"
 #include "core/parameter/tStructureParameterBase.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
-#include "core/datatype/tCoreNumber.h"
+#include "core/datatype/tNumber.h"
 #include "core/parameter/tStructureParameter.h"
 
 namespace finroc
@@ -41,7 +41,7 @@ namespace core
  * Numeric Structure parameter.
  */
 template<typename T>
-class tNumericStructureParameter : public tStructureParameter<tCoreNumber>
+class tStructureParameterNumeric : public tStructureParameter<tNumber>
 {
 private:
 
@@ -57,9 +57,9 @@ private:
   /*!
    * \return CoreNumber buffer
    */
-  inline tCoreNumber* GetBuffer()
+  inline tNumber* GetBuffer()
   {
-    return (reinterpret_cast<tCCInterThreadContainer<tCoreNumber>*>(this->cc_value))->GetData();
+    return (reinterpret_cast<tCCInterThreadContainer<tNumber>*>(this->cc_value))->GetData();
   }
 
   /*!
@@ -67,21 +67,21 @@ private:
    *
    * \param cCurrent CoreNumber buffer
    */
-  void Set(tCoreNumber* cn);
+  void Set(tNumber* cn);
 
 public:
 
-  tNumericStructureParameter(const util::tString& name, T default_value, bool constructor_prototype);
+  tStructureParameterNumeric(const util::tString& name, T default_value, bool constructor_prototype);
 
-  tNumericStructureParameter(const util::tString& name, T default_value);
+  tStructureParameterNumeric(const util::tString& name, T default_value);
 
-  tNumericStructureParameter(const util::tString& name, T default_value, bool constructor_prototype, tBounds bounds_);
+  tStructureParameterNumeric(const util::tString& name, T default_value, bool constructor_prototype, tBounds bounds_);
 
-  tNumericStructureParameter(const util::tString& name, T default_value, tBounds bounds2);
+  tStructureParameterNumeric(const util::tString& name, T default_value, tBounds bounds2);
 
   virtual ::finroc::core::tStructureParameterBase* DeepCopy()
   {
-    return new tNumericStructureParameter<T>(GetName(), default_val, false, bounds);
+    return new tStructureParameterNumeric<T>(GetName(), default_val, false, bounds);
   }
 
   /*!
@@ -90,7 +90,7 @@ public:
    */
   inline T Get()
   {
-    tCoreNumber* cn = GetBuffer();
+    tNumber* cn = GetBuffer();
     return cn->Value<T>();
   }
 
@@ -109,7 +109,7 @@ public:
    */
   inline void Set(T new_value)
   {
-    tCoreNumber cn(new_value);
+    tNumber cn(new_value);
     Set(&(cn));
   }
 
@@ -118,6 +118,6 @@ public:
 } // namespace finroc
 } // namespace core
 
-#include "core/parameter/tNumericStructureParameter.hpp"
+#include "core/parameter/tStructureParameterNumeric.hpp"
 
-#endif // CORE__PARAMETER__TNUMERICSTRUCTUREPARAMETER_H
+#endif // CORE__PARAMETER__TSTRUCTUREPARAMETERNUMERIC_H

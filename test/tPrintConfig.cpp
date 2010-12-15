@@ -21,7 +21,7 @@
  */
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/std/tPortDataManager.h"
-#include "core/datatype/tCoreNumber.h"
+#include "core/datatype/tNumber.h"
 #include "core/datatype/tCoreString.h"
 
 int main(int argc__, char **argv__)
@@ -53,6 +53,6 @@ int main(int argc__, char **argv__)
 #endif
 
   printf(" sizeof(tPortDataManager): %d\n", sizeof(finroc::core::tPortDataManager));
-  printf(" sizeof(tCoreNumber): %d\n", sizeof(finroc::core::tCoreNumber));
+  printf(" sizeof(tNumber): %d\n", sizeof(finroc::core::tNumber));
   printf(" sizeof(tCoreString): %d\n", sizeof(finroc::core::tCoreString));
 }

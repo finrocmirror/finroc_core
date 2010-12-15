@@ -21,11 +21,11 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TBOOLSTRUCTUREPARAMETER_H
-#define CORE__PARAMETER__TBOOLSTRUCTUREPARAMETER_H
+#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETERBOOL_H
+#define CORE__PARAMETER__TSTRUCTUREPARAMETERBOOL_H
 
 #include "core/portdatabase/tDataTypeRegister.h"
-#include "core/datatype/tCoreBoolean.h"
+#include "core/datatype/tBoolean.h"
 #include "core/parameter/tStructureParameterBase.h"
 #include "core/parameter/tStructureParameter.h"
 
@@ -38,12 +38,12 @@ namespace core
  *
  * Boolean Structure parameter.
  */
-class tBoolStructureParameter : public tStructureParameter<tCoreBoolean>
+class tStructureParameterBool : public tStructureParameter<tBoolean>
 {
 public:
 
-  tBoolStructureParameter(const util::tString& name, bool default_value, bool constructor_prototype) :
-      tStructureParameter<tCoreBoolean>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreBoolean>()), constructor_prototype, "")
+  tStructureParameterBool(const util::tString& name, bool default_value, bool constructor_prototype) :
+      tStructureParameter<tBoolean>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tBoolean>()), constructor_prototype, "")
   {
     if (!constructor_prototype)
     {
@@ -51,8 +51,8 @@ public:
     }
   }
 
-  tBoolStructureParameter(const util::tString& name, bool default_value) :
-      tStructureParameter<tCoreBoolean>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreBoolean>()), false, "")
+  tStructureParameterBool(const util::tString& name, bool default_value) :
+      tStructureParameter<tBoolean>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tBoolean>()), false, "")
   {
     // this(name,defaultValue,false);
     if (!false)
@@ -63,7 +63,7 @@ public:
 
   virtual ::finroc::core::tStructureParameterBase* DeepCopy()
   {
-    return new tBoolStructureParameter(GetName(), false, false);
+    return new tStructureParameterBool(GetName(), false, false);
   }
 
   /*!
@@ -71,7 +71,7 @@ public:
    */
   inline bool Get()
   {
-    return ::finroc::core::tStructureParameter<tCoreBoolean>::GetValue()->Get();
+    return ::finroc::core::tStructureParameter<tBoolean>::GetValue()->Get();
   }
 
   /*!
@@ -79,7 +79,7 @@ public:
    */
   inline void Set(bool new_value)
   {
-    ::finroc::core::tStructureParameter<tCoreBoolean>::GetValue()->Set(new_value);
+    ::finroc::core::tStructureParameter<tBoolean>::GetValue()->Set(new_value);
   }
 
 };
@@ -87,4 +87,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TBOOLSTRUCTUREPARAMETER_H
+#endif // CORE__PARAMETER__TSTRUCTUREPARAMETERBOOL_H

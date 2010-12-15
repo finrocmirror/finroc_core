@@ -27,8 +27,8 @@
 
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/portdatabase/sSerializationHelper.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
-#include "core/portdatabase/tCoreSerializableImpl.h"
+#include "core/portdatabase/tTypedObject.h"
+#include "core/portdatabase/tCoreSerializable.h"
 
 namespace rrlib
 {

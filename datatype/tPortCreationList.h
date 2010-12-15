@@ -28,7 +28,7 @@
 #include "core/port/tPortFlags.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tFrameworkElement.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/datatype/tDataTypeReference.h"
 
 namespace rrlib

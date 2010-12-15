@@ -21,8 +21,8 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TENUMSTRUCTUREPARAMETER_H
-#define CORE__PARAMETER__TENUMSTRUCTUREPARAMETER_H
+#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETERENUM_H
+#define CORE__PARAMETER__TSTRUCTUREPARAMETERENUM_H
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/parameter/tStructureParameterBase.h"
@@ -39,7 +39,7 @@ namespace core
  * Enum structure parameter
  */
 template<typename E>
-class tEnumStructureParameter : public tStructureParameter<tEnumValue>
+class tStructureParameterEnum : public tStructureParameter<tEnumValue>
 {
 private:
 
@@ -57,7 +57,7 @@ private:
 
 public:
 
-  tEnumStructureParameter(const util::tString& name, bool constructor_prototype = false) :
+  tStructureParameterEnum(const util::tString& name, bool constructor_prototype = false) :
       tStructureParameter<tEnumValue>(name, tDataTypeRegister::GetInstance()->GetDataType<tEnumValue>(), constructor_prototype),
       string_constants()
   {}
@@ -67,18 +67,18 @@ public:
    * \param default_value Default Value
    * \param string_constants String constants for enum values (comma-separated string)
    */
-  tEnumStructureParameter(const util::tString& name, E default_value, bool constructor_prototype, ::std::tr1::shared_ptr<util::tSimpleList<util::tString> > string_constants_);
+  tStructureParameterEnum(const util::tString& name, E default_value, bool constructor_prototype, ::std::tr1::shared_ptr<util::tSimpleList<util::tString> > string_constants_);
 
   /*!
    * \param name Parameter name
    * \param default_value Default Value
    * \param string_constants String constants for enum values (comma-separated string)
    */
-  tEnumStructureParameter(const util::tString& name, E default_value, const util::tString& string_constants_);
+  tStructureParameterEnum(const util::tString& name, E default_value, const util::tString& string_constants_);
 
   virtual ::finroc::core::tStructureParameterBase* DeepCopy()
   {
-    return new tEnumStructureParameter<E>(GetName(), GetValueForInt(0), false, string_constants);
+    return new tStructureParameterEnum<E>(GetName(), GetValueForInt(0), false, string_constants);
   }
 
   /*!
@@ -99,6 +99,6 @@ public:
 } // namespace finroc
 } // namespace core
 
-#include "core/parameter/tEnumStructureParameter.hpp"
+#include "core/parameter/tStructureParameterEnum.hpp"
 
-#endif // CORE__PARAMETER__TENUMSTRUCTUREPARAMETER_H
+#endif // CORE__PARAMETER__TSTRUCTUREPARAMETERENUM_H

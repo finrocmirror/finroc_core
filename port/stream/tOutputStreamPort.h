@@ -25,7 +25,6 @@
 #define CORE__PORT__STREAM__TOUTPUTSTREAMPORT_H
 
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/std/tPortBase.h"
 #include "core/port/std/tPort.h"
 
 namespace finroc

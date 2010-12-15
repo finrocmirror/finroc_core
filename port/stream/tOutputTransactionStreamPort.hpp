@@ -19,7 +19,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/std/tPortBase.h"
 
 namespace finroc
 {
@@ -32,19 +31,33 @@ template<typename T>
 tTransactionPacket tOutputTransactionStreamPort<T>::cCOMMIT;
 
 template<typename T>
-tOutputTransactionStreamPort<T>::tOutputTransactionStreamPort(tPortCreationInfo pci, int commit_interval_, tPullRequestHandler* listener) :
-    tPort<tTransactionPacket>(pci),
+tOutputTransactionStreamPort<T>::tOutputTransactionStreamPort(tPortCreationInfo pci, int commit_interval, tPullRequestHandler* listener)
+{
+  this->wrapped = new tPortImpl(pci, commit_interval);
+  assert((commit_interval > 0));
+  SetPullRequestHandler(listener);
+  tStreamCommitThread::GetInstance()->Register(static_cast<tPortImpl*>(this->wrapped));
+}
+
+template<typename T>
+tTransactionPacket* tOutputTransactionStreamPort<T>::GetUnusedBuffer()
+{
+  tTransactionPacket* result = ::finroc::core::tPort<tTransactionPacket>::GetUnusedBuffer();
+  result->Reset();
+  return result;
+}
+
+template<typename T>
+tOutputTransactionStreamPort<T>::tPortImpl::tPortImpl(tPortCreationInfo pci, int commit_interval_) :
+    tPortBase(ProcessPci(pci)),
     commit_interval(commit_interval_),
     last_commit(0),
     current_packet()
 {
-  assert((commit_interval_ > 0));
-  SetPullRequestHandler(listener);
-  tStreamCommitThread::GetInstance()->Register(this);
 }
 
 template<typename T>
-void tOutputTransactionStreamPort<T>::CommitData(tCoreSerializable& data)
+void tOutputTransactionStreamPort<T>::tPortImpl::CommitData(tCoreSerializable& data)
 {
   // Lock packet
   tTransactionPacket* cb = NULL;
@@ -56,7 +69,7 @@ void tOutputTransactionStreamPort<T>::CommitData(tCoreSerializable& data)
     assert((cb != &(cCOMMIT)));  // concurrent write
     if (cb == NULL)
     {
-      cb = GetUnusedBuffer();
+      cb = static_cast<tTransactionPacket*>(GetUnusedBufferRaw());
       expect = NULL;
       break;
     }
@@ -85,15 +98,7 @@ void tOutputTransactionStreamPort<T>::CommitData(tCoreSerializable& data)
 }
 
 template<typename T>
-tTransactionPacket* tOutputTransactionStreamPort<T>::GetUnusedBuffer()
-{
-  tTransactionPacket* result = ::finroc::core::tPort<tTransactionPacket>::GetUnusedBuffer();
-  result->Reset();
-  return result;
-}
-
-template<typename T>
-void tOutputTransactionStreamPort<T>::StreamThreadCallback(int64 cur_time)
+void tOutputTransactionStreamPort<T>::tPortImpl::StreamThreadCallback(int64 cur_time)
 {
   if (cur_time >= last_commit + commit_interval)
   {

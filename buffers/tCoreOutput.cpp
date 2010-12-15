@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/buffers/tCoreOutput.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 
 namespace finroc
 {

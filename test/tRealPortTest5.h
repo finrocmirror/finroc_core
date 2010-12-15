@@ -24,11 +24,12 @@
 #ifndef CORE__TEST__TREALPORTTEST5_H
 #define CORE__TEST__TREALPORTTEST5_H
 
+#include "core/port/cc/tPortNumeric.h"
+
 namespace finroc
 {
 namespace core
 {
-class tNumberPort;
 class tRuntimeEnvironment;
 
 class tRealPortTest5 : public util::tUncopyableObject
@@ -44,7 +45,7 @@ private:
 
 public:
 
-  static tNumberPort* input, * output, * p1, * p2, * p3;
+  static ::std::tr1::shared_ptr<tPortNumeric> input, output, p1, p2, p3;
 
   static tRuntimeEnvironment* re;
 

@@ -24,15 +24,19 @@
 #ifndef CORE__PORT__STREAM__TINPUTSTREAMPORT_H
 #define CORE__PORT__STREAM__TINPUTSTREAMPORT_H
 
-#include "core/port/std/tPortQueueFragment.h"
-#include "core/port/stream/tInputPacketProcessor.h"
 #include "core/port/tPortCreationInfo.h"
+#include "core/port/stream/tInputPacketProcessor.h"
 #include "core/port/std/tPort.h"
+#include "core/port/std/tPortQueueFragment.h"
+#include "core/port/std/tPortBase.h"
 
 namespace finroc
 {
 namespace core
 {
+class tNewConnectionHandler;
+class tPortData;
+class tAbstractPort;
 class tPublishCache;
 
 /*!
@@ -47,17 +51,45 @@ class tPublishCache;
 template<typename T>
 class tInputStreamPort : public tPort<T>
 {
-private:
+protected:
 
-  /*!
-   * Used for dequeueing data
-   */
-  tPortQueueFragment<T> dequeue_buffer;
+  /*! Special Port class to load value when initialized */
+  template<typename T>
+  class tPortImpl : public tPortBase
+  {
+  private:
 
-  /*!
-   * User of input stream
-   */
-  tInputPacketProcessor<T>* user;
+    /*!
+     * Used for dequeueing data
+     */
+    tPortQueueFragment<tPortData> dequeue_buffer;
+
+    /*!
+     * User of input stream
+     */
+    tInputPacketProcessor<T>* user;
+
+    tNewConnectionHandler* conn_handler;
+
+  protected:
+
+    // we have a new connection
+    virtual void NewConnection(tAbstractPort* partner);
+
+    virtual void NonStandardAssign(tPublishCache& pc);
+
+    bool ProcessPacket(T* data);
+
+  public:
+
+    tPortImpl(tPortCreationInfo pci, tInputPacketProcessor<T>* user_, tNewConnectionHandler* conn_handler_);
+
+    /*!
+     * Process any packet currently in queue (method only for convenience)
+     */
+    void ProcessPackets();
+
+  };
 
 public:
 
@@ -68,20 +100,9 @@ private:
 
   static tPortCreationInfo ProcessPCI(tPortCreationInfo pci, const util::tString& description);
 
-protected:
-
-  virtual void NonStandardAssign(tPublishCache& pc);
-
-  bool ProcessPacket(T* data);
-
 public:
 
-  tInputStreamPort(const util::tString& description, tPortCreationInfo pci, tInputPacketProcessor<T>* user_);
-
-  /*!
-   * Process any packet currently in queue (method only for convenience)
-   */
-  void ProcessPackets();
+  tInputStreamPort(const util::tString& description, tPortCreationInfo pci, tInputPacketProcessor<T>* user, tNewConnectionHandler* conn_handler);
 
 };
 

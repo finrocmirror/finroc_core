@@ -28,7 +28,7 @@
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/std/tPortBase.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/buffers/tCoreOutput.h"
 
 namespace finroc

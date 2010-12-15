@@ -8,7 +8,6 @@
 #include "core/port/tAbstractPort.h"
 #include "core/port/tAggregatedEdge.h"
 #include "core/tFinrocAnnotation.h"
-#include "core/tChildIterator.h"
 #include "core/thread/tExecutionControl.h"
 
 namespace finroc
@@ -200,7 +199,7 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
             TraceOutgoing(task, ea);
           }
         }
-        tChildIterator ci(parent, tCoreFlags::cREADY | tCoreFlags::cEDGE_AGGREGATOR | tEdgeAggregator::cIS_INTERFACE);
+        tFrameworkElement::tChildIterator ci(parent, tCoreFlags::cREADY | tCoreFlags::cEDGE_AGGREGATOR | tEdgeAggregator::cIS_INTERFACE);
         tFrameworkElement* other_if = NULL;
         while ((other_if = ci.Next()) != NULL)
         {

@@ -25,24 +25,86 @@
 #define CORE__PORT__RPC__TINTERFACECLIENTPORT_H
 
 #include "core/port/rpc/tInterfacePort.h"
+#include "core/port/tPortWrapperBase.h"
 
 namespace finroc
 {
 namespace core
 {
+class tFrameworkElement;
 class tDataType;
+class tAbstractPort;
+class tPortData;
 
 /*! Base class for client interface ports */
-class tInterfaceClientPort : public tInterfacePort
+class tInterfaceClientPort : public tPortWrapperBase<tInterfacePort>
 {
+  /*! Special Port class to load value when initialized */
+  class tPortImpl : public tInterfacePort
+  {
+  private:
+
+    // Outer class InterfaceClientPort
+    tInterfaceClientPort* const outer_class_ptr;
+
+  protected:
+
+    virtual void ConnectionRemoved(tAbstractPort* partner);
+
+    virtual void NewConnection(tAbstractPort* partner);
+
+  public:
+
+    tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& description, tFrameworkElement* parent, tDataType* type, tInterfacePort::tType client);
+
+  };
+
+protected:
+
+  /*!
+   * Called whenever a connection to this port was removed
+   * (meant to be overridden by subclasses)
+   * (called with runtime-registry lock)
+   *
+   * \param partner Port at other end of connection
+   */
+  virtual void ConnectionRemoved(tAbstractPort* partner)
+  {
+  }
+
+  /*!
+   * Called whenever a new connection to this port was established
+   * (meant to be overridden by subclasses)
+   * (called with runtime-registry lock)
+   *
+   * \param partner Port at other end of connection
+   */
+  virtual void NewConnection(tAbstractPort* partner)
+  {
+  }
+
 public:
 
-  /* implements ReturnHandler*/
+  tInterfaceClientPort(const util::tString& description, tFrameworkElement* parent, tDataType* type);
 
-  tInterfaceClientPort(const util::tString& description, tFrameworkElement* parent, tDataType* type) :
-      tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eClient)
+  /*!
+   * (Usually called on client ports)
+   *
+   * \return "Server" Port that handles method call - either InterfaceServerPort or InterfaceNetPort (the latter if we have remote server)
+   */
+  inline tInterfacePort* GetServer()
   {
-    //setReturnHandler(this);
+    return this->wrapped->GetServer();
+  }
+
+  /*!
+   * (for non-cc types only)
+   * \param dt Data type of object to get buffer of
+   * \return Unused buffer of type
+   */
+  inline tPortData* GetUnusedBuffer(tDataType* dt)
+  {
+    return this->wrapped->GetUnusedBuffer(dt);
   }
 
   /*!
@@ -50,8 +112,8 @@ public:
    */
   inline bool HasRemoteServer()
   {
-    ::finroc::core::tInterfacePort* server = GetServer();
-    return (server != NULL) && (server->GetType() == ::finroc::core::tInterfacePort::eNetwork);
+    tInterfacePort* server = GetServer();
+    return (server != NULL) && (server->GetType() == tInterfacePort::eNetwork);
   }
 
 };

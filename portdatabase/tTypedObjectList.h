@@ -26,7 +26,7 @@
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 
 namespace rrlib
 {

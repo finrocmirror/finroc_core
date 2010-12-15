@@ -25,7 +25,7 @@
 #define CORE__PORTDATABASE__TTYPEDOBJECTCONTAINER_H
 
 #include "core/portdatabase/sSerializationHelper.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 
 namespace rrlib
 {

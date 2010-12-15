@@ -23,7 +23,7 @@
 #include "core/portdatabase/tDataTypeRegister.h"
 #include "rrlib/finroc_core_utils/sFiles.h"
 #include "rrlib/xml2_wrapper/tXML2WrapperException.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tFrameworkElement.h"
 #include "core/tFrameworkElementTreeFilter.h"

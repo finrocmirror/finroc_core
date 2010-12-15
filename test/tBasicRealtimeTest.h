@@ -24,12 +24,12 @@
 #ifndef CORE__TEST__TBASICREALTIMETEST_H
 #define CORE__TEST__TBASICREALTIMETEST_H
 
+#include "core/port/cc/tPortNumeric.h"
+
 namespace finroc
 {
 namespace core
 {
-class tNumberPort;
-
 /*!
  * \author Max Reichardt
  *
@@ -42,7 +42,7 @@ class tBasicRealtimeTest : public util::tThread
 {
 public:
 
-  tNumberPort* port;
+  tPortNumeric port;
 
   util::tAtomicInt64 max_latency;
 

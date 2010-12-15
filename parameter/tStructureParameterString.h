@@ -21,8 +21,8 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TSTRINGSTRUCTUREPARAMETER_H
-#define CORE__PARAMETER__TSTRINGSTRUCTUREPARAMETER_H
+#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETERSTRING_H
+#define CORE__PARAMETER__TSTRUCTUREPARAMETERSTRING_H
 
 #include "core/portdatabase/tDataTypeRegister.h"
 #include "core/datatype/tCoreString.h"
@@ -38,21 +38,21 @@ namespace core
  *
  * String StructureParameter class for convenience
  */
-class tStringStructureParameter : public tStructureParameter<tCoreString>
+class tStructureParameterString : public tStructureParameter<tCoreString>
 {
 public:
 
-  tStringStructureParameter(const util::tString& name, const util::tString& default_value, bool constructor_prototype) :
+  tStructureParameterString(const util::tString& name, const util::tString& default_value, bool constructor_prototype) :
       tStructureParameter<tCoreString>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>()), constructor_prototype, default_value)
   {
   }
 
-  tStringStructureParameter(const util::tString& name, const util::tString& default_value) :
+  tStructureParameterString(const util::tString& name, const util::tString& default_value) :
       tStructureParameter<tCoreString>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>()), default_value)
   {
   }
 
-  tStringStructureParameter(const util::tString& name) :
+  tStructureParameterString(const util::tString& name) :
       tStructureParameter<tCoreString>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>()), "")
   {
   }
@@ -62,7 +62,7 @@ public:
    */
   virtual ::finroc::core::tStructureParameterBase* DeepCopy()
   {
-    return new tStringStructureParameter(GetName(), "", false);
+    return new tStructureParameterString(GetName(), "", false);
   }
 
   /*!
@@ -86,4 +86,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TSTRINGSTRUCTUREPARAMETER_H
+#endif // CORE__PARAMETER__TSTRUCTUREPARAMETERSTRING_H

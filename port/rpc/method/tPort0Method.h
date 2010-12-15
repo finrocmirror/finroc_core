@@ -25,6 +25,7 @@
 #ifndef CORE__PORT__RPC__METHOD__TPORT0METHOD_H
 #define CORE__PORT__RPC__METHOD__TPORT0METHOD_H
 
+#include "core/port/rpc/tInterfaceClientPort.h"
 #include "core/port/rpc/method/tAsyncReturnHandler.h"
 #include "core/port/rpc/method/tAbstractMethod.h"
 
@@ -33,7 +34,6 @@ namespace finroc
 namespace core
 {
 class tPortInterface;
-class tInterfaceClientPort;
 class tMethodCall;
 class tInterfaceNetPort;
 class tAbstractAsyncReturnHandler;
@@ -69,7 +69,7 @@ public:
    * \param net_timout Network timeout in ms (value <= 0 means method default)
    * \return return value of method
    */
-  R Call(tInterfaceClientPort* port, int net_timeout = -1);
+  R Call(tInterfaceClientPort port, int net_timeout = -1);
 
   /*!
    * Asynchronously call method.

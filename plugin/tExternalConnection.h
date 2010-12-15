@@ -25,7 +25,7 @@
 #define CORE__PLUGIN__TEXTERNALCONNECTION_H
 
 #include "core/plugin/tConnectionListener.h"
-#include "core/parameter/tStringStructureParameter.h"
+#include "core/parameter/tStructureParameterString.h"
 #include "core/tFrameworkElement.h"
 
 namespace finroc
@@ -60,7 +60,7 @@ private:
   bool first_connect;
 
   /*! if set, this module automatically connects to this address */
-  tStringStructureParameter* auto_connect_to;
+  tStructureParameterString* auto_connect_to;
 
 public:
 

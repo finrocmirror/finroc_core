@@ -25,6 +25,7 @@
 #ifndef CORE__PORT__RPC__METHOD__TVOID1METHOD_H
 #define CORE__PORT__RPC__METHOD__TVOID1METHOD_H
 
+#include "core/port/rpc/tInterfaceClientPort.h"
 #include "core/port/rpc/method/tAbstractMethod.h"
 
 namespace finroc
@@ -32,7 +33,6 @@ namespace finroc
 namespace core
 {
 class tPortInterface;
-class tInterfaceClientPort;
 class tMethodCall;
 class tInterfaceNetPort;
 class tAbstractAsyncReturnHandler;
@@ -64,7 +64,7 @@ public:
    * \param p1 Parameter 1 (with one lock for call - typically server will release it)
    * \param force_same_thread Force that method call is performed by this thread on local machine (even if method call default is something else)
    */
-  void Call(tInterfaceClientPort* port, P1 p1, bool force_same_thread = false);
+  void Call(tInterfaceClientPort port, P1 p1, bool force_same_thread = false);
 
   virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall* call, tInterfaceNetPort* net_port, tAbstractAsyncReturnHandler* ret_handler, int net_timeout)
   {

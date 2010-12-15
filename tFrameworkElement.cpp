@@ -28,6 +28,7 @@
 #include "rrlib/finroc_core_utils/tGarbageCollector.h"
 #include "core/parameter/tStructureParameterList.h"
 #include "core/buffers/tCoreOutput.h"
+#include "core/port/tAbstractPort.h"
 
 namespace finroc
 {
@@ -225,7 +226,7 @@ void tFrameworkElement::DeleteChildren()
   children.Clear();
 }
 
-bool tFrameworkElement::DescriptionEquals(const util::tString& other)
+bool tFrameworkElement::DescriptionEquals(const util::tString& other) const
 {
   if (IsReady())
   {
@@ -818,7 +819,7 @@ void tFrameworkElement::SetDescription(const util::tString& description)
   }
 }
 
-void tFrameworkElement::SetFinstructed(tCreateModuleAction* create_action, tConstructorParameters* params)
+void tFrameworkElement::SetFinstructed(tCreateFrameworkElementAction* create_action, tConstructorParameters* params)
 {
   assert((!GetFlag(tCoreFlags::cFINSTRUCTED)));
   tStructureParameterList* list = tStructureParameterList::GetOrCreate(this);
@@ -864,6 +865,96 @@ void tFrameworkElement::WriteDescription(tCoreOutput* os, int i) const
       os->WriteString(IsDeleted() ? "deleted element" : GetLink(i)->description);
     }
   }
+}
+
+tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent) :
+    next_elem(NULL),
+    last(NULL),
+    flags(0),
+    result(0),
+    cur_parent(NULL)
+{
+  Reset(parent);
+}
+
+tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, int flags_) :
+    next_elem(NULL),
+    last(NULL),
+    flags(0),
+    result(0),
+    cur_parent(NULL)
+{
+  Reset(parent, flags_);
+}
+
+tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, int flags_, int result_) :
+    next_elem(NULL),
+    last(NULL),
+    flags(0),
+    result(0),
+    cur_parent(NULL)
+{
+  Reset(parent, flags_, result_);
+}
+
+tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, int flags_, int result_, bool include_non_ready) :
+    next_elem(NULL),
+    last(NULL),
+    flags(0),
+    result(0),
+    cur_parent(NULL)
+{
+  Reset(parent, flags_, result_, include_non_ready);
+}
+
+tFrameworkElement* tFrameworkElement::tChildIterator::Next()
+{
+  while (next_elem <= last)
+  {
+    tFrameworkElement::tLink* nex = *next_elem;
+    if (nex != NULL && (nex->GetChild()->GetAllFlags() & flags) == result)
+    {
+      next_elem++;
+      return nex->GetChild();
+    }
+    next_elem++;
+  }
+
+  return NULL;
+}
+
+tAbstractPort* tFrameworkElement::tChildIterator::NextPort()
+{
+  while (true)
+  {
+    tFrameworkElement* result = Next();
+    if (result == NULL)
+    {
+      return NULL;
+    }
+    if (result->IsPort())
+    {
+      return static_cast<tAbstractPort*>(result);
+    }
+  }
+}
+
+void tFrameworkElement::tChildIterator::Reset(const tFrameworkElement* parent, int flags_, int result_, bool include_non_ready)
+{
+  assert((parent != NULL));
+  this->flags = flags_ | tCoreFlags::cDELETED;
+  this->result = result_;
+  if (!include_non_ready)
+  {
+    flags_ |= tCoreFlags::cREADY;
+    result_ |= tCoreFlags::cREADY;
+  }
+  cur_parent = parent;
+
+  const util::tArrayWrapper<tFrameworkElement::tLink*>* array = parent->GetChildren();
+  next_elem = array->GetPointer();
+  last = (next_elem + array->Size()) - 1;
+
 }
 
 } // namespace finroc

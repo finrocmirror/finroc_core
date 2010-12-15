@@ -23,9 +23,10 @@
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/tFrameworkElement.h"
-#include "core/port/cc/tNumberPort.h"
+#include "core/port/cc/tPortNumeric.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
+#include "core/port/cc/tCCPortBase.h"
 #include "core/tCoreFlags.h"
 #include "plugins/tcp/tTCPPeer.h"
 
@@ -40,12 +41,12 @@ void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 
   // Create two ports
   tFrameworkElement* link_test = new tFrameworkElement(NULL, "linkTest");
-  tNumberPort* output = new tNumberPort(tPortCreationInfo("testOut", tPortFlags::cSHARED_OUTPUT_PORT));
-  output->Link(link_test, "linkTestPort");
-  tNumberPort* output2 = new tNumberPort(tPortCreationInfo("testOutGlobal", tPortFlags::cSHARED_OUTPUT_PORT | tCoreFlags::cGLOBALLY_UNIQUE_LINK));
-  tNumberPort* input = new tNumberPort(tPortCreationInfo("testIn", tPortFlags::cINPUT_PORT));
-  input->ConnectToSource("/TCP/localhost:4444/Unrelated/testOut");
-  input->ConnectToSource("/Unrelated/testOutGlobal");
+  tPortNumeric output(tPortCreationInfo("testOut", tPortFlags::cSHARED_OUTPUT_PORT));
+  output.GetWrapped()->Link(link_test, "linkTestPort");
+  tPortNumeric output2(tPortCreationInfo("testOutGlobal", tPortFlags::cSHARED_OUTPUT_PORT | tCoreFlags::cGLOBALLY_UNIQUE_LINK));
+  tPortNumeric input(tPortCreationInfo("testIn", tPortFlags::cINPUT_PORT));
+  input.ConnectToSource("/TCP/localhost:4444/Unrelated/testOut");
+  input.ConnectToSource("/Unrelated/testOutGlobal");
 
   // Create TCP peer
   util::tString addr = "localhost:4444";
@@ -55,8 +56,8 @@ void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   }
   tcp::tTCPPeer* peer = new tcp::tTCPPeer(addr, "", tcp::tTCPPeer::eFULL, 4444, tcp::tTCPPeer::cDEFAULT_FILTER);
   tFrameworkElement::InitAll();
-  output->Publish(4);
-  output2->Publish(5);
+  output.Publish(4);
+  output2.Publish(5);
   try
   {
     peer->Connect();
@@ -78,7 +79,7 @@ void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
       e.PrintStackTrace();
     }
     re->PrintStructure();
-    util::tSystem::out.Println(util::tStringBuilder("Input connections: ") + input->GetConnectionCount());
+    util::tSystem::out.Println(util::tStringBuilder("Input connections: ") + input.GetConnectionCount());
   }
 }
 

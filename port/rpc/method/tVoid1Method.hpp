@@ -21,7 +21,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tInterfacePort.h"
-#include "core/port/rpc/tInterfaceClientPort.h"
 #include "core/port/rpc/tMethodCall.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
@@ -41,18 +40,18 @@ tVoid1Method<HANDLER, P1>::tVoid1Method(tPortInterface& port_interface, const ut
 }
 
 template<typename HANDLER, typename P1>
-void tVoid1Method<HANDLER, P1>::Call(tInterfaceClientPort* port, P1 p1, bool force_same_thread)
+void tVoid1Method<HANDLER, P1>::Call(tInterfaceClientPort port, P1 p1, bool force_same_thread)
 {
   //1
   assert((HasLock(p1)));
-  tInterfacePort* ip = port->GetServer();
+  tInterfacePort* ip = port.GetServer();
   if (ip != NULL && ip->GetType() == tInterfacePort::eNetwork)
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
     mc->AddParamForSending(p1);
     mc->SendParametersComplete();
-    mc->SetMethod(this, port->GetDataType());
+    mc->SetMethod(this, port.GetDataType());
     (static_cast<tInterfaceNetPort*>(ip))->SendAsyncCall(mc);
   }
   else if (ip != NULL && ip->GetType() == tInterfacePort::eServer)
@@ -73,7 +72,7 @@ void tVoid1Method<HANDLER, P1>::Call(tInterfaceClientPort* port, P1 p1, bool for
       tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
       //1
       mc->AddParamForLocalCall(0, p1);
-      mc->PrepareExecution(this, port->GetDataType(), handler, NULL);
+      mc->PrepareExecution(this, port.GetDataType(), handler, NULL);
       tRPCThreadPool::GetInstance()->ExecuteTask(mc);
     }
   }

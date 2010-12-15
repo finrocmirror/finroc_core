@@ -27,7 +27,7 @@
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tPlugin.h"
 #include "core/plugin/tPluginManager.h"
-#include "core/plugin/tCreateModuleAction.h"
+#include "core/plugin/tCreateFrameworkElementAction.h"
 
 namespace finroc
 {
@@ -79,9 +79,9 @@ public:
    * Add Module Type
    * (objects won't be deleted by this class)
    *
-   * \param cma CreateModuleAction to add
+   * \param cma CreateFrameworkElementAction to add
    */
-  inline void AddModuleType(tCreateModuleAction* cma)
+  inline void AddModuleType(tCreateFrameworkElementAction* cma)
   {
     FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Adding module type: ", cma->GetName(), " (", cma->GetModuleGroup(), ")");
     GetModuleTypes().Add(cma);
@@ -118,9 +118,9 @@ public:
   /*!
    * \return List with modules that can be instantiated in this runtime using the standard mechanism
    */
-  inline util::tSimpleList<tCreateModuleAction*>& GetModuleTypes()
+  inline util::tSimpleList<tCreateFrameworkElementAction*>& GetModuleTypes()
   {
-    static util::tSimpleList<tCreateModuleAction*> module_types;
+    static util::tSimpleList<tCreateFrameworkElementAction*> module_types;
     return module_types;
   }
 
@@ -143,14 +143,14 @@ public:
   };
 
   /*!
-   * Returns/loads CreateModuleAction with specified name and specified .so file.
+   * Returns/loads CreateFrameworkElementAction with specified name and specified .so file.
    * (doesn't do any dynamic loading, if .so is already present)
    *
    * \param group Group (.jar or .so)
    * \param name Module type name
-   * \return CreateModuleAction - null if it could not be found
+   * \return CreateFrameworkElementAction - null if it could not be found
    */
-  tCreateModuleAction* LoadModuleType(const util::tString& group, const util::tString& name);
+  tCreateFrameworkElementAction* LoadModuleType(const util::tString& group, const util::tString& name);
 
   /*!
    * Register module that can be used as external connection (e.g. in GUI)

@@ -21,18 +21,18 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__CC__TBOUNDEDNUMBERPORT_H
-#define CORE__PORT__CC__TBOUNDEDNUMBERPORT_H
+#ifndef CORE__PORT__CC__TPORTNUMERICBOUNDED_H
+#define CORE__PORT__CC__TPORTNUMERICBOUNDED_H
 
-#include "core/datatype/tBounds.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/tPortFlags.h"
-#include "core/port/cc/tNumberPort.h"
+#include "core/datatype/tBounds.h"
+#include "core/port/cc/tPortNumeric.h"
 
 namespace finroc
 {
 namespace core
 {
+class tUnit;
 class tThreadLocalCache;
 
 /*!
@@ -40,42 +40,55 @@ class tThreadLocalCache;
  *
  * Number port with upper and lower bounds for values
  */
-class tBoundedNumberPort : public tNumberPort
+class tPortNumericBounded : public tPortNumeric
 {
-private:
+protected:
 
-  /*! Bounds of this port */
-  tBounds bounds;
+  /*! Special Port class to load value when initialized */
+  class tPortImpl : public tPortNumeric::tPortImplNum
+  {
+    friend class tPortNumericBounded;
+  private:
+
+    /*! Bounds of this port */
+    tBounds bounds;
+
+  protected:
+
+    virtual void NonStandardAssign(tThreadLocalCache* tc);
+
+  public:
+
+    tPortImpl(tPortCreationInfo pci, tBounds b, tUnit* u);
+
+  };
 
   /*!
    * Make sure non-standard assign flag is set
    */
-  inline static tPortCreationInfo ProcessPciBNP(tPortCreationInfo pci)
-  {
-    pci.flags = pci.flags | tPortFlags::cNON_STANDARD_ASSIGN;
-    return pci;
-  }
+  static tPortCreationInfo ProcessPciBNP(tPortCreationInfo pci);
 
 protected:
 
-  virtual void NonStandardAssign(tThreadLocalCache* tc);
+  /*!
+   * (Constructor for subclasses with own port class)
+   */
+  tPortNumericBounded();
 
 public:
 
   /*!
    * \param pci Port Creation info
-   * \param min Minimum Value
-   * \param max Maximum Value
-   * \param action Action to perform when index is out of bounds
+   * \param b Bounds for this port
    */
-  tBoundedNumberPort(tPortCreationInfo pci, tBounds b);
+  tPortNumericBounded(tPortCreationInfo pci, tBounds b);
 
   /*!
    * \return the bounds of this port
    */
-  inline tBounds GetBounds()
+  inline tBounds GetBounds() const
   {
-    return bounds;
+    return (static_cast<tPortImpl*>(this->wrapped))->bounds;
   }
 
   /*!
@@ -91,4 +104,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__CC__TBOUNDEDNUMBERPORT_H
+#endif // CORE__PORT__CC__TPORTNUMERICBOUNDED_H

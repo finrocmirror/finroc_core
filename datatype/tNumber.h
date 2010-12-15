@@ -21,11 +21,11 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__DATATYPE__TCORENUMBER_H
-#define CORE__DATATYPE__TCORENUMBER_H
+#ifndef CORE__DATATYPE__TNUMBER_H
+#define CORE__DATATYPE__TNUMBER_H
 
 #include "core/datatype/tUnit.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 
 namespace finroc
 {
@@ -41,7 +41,7 @@ class tCoreOutput;
  *
  * This class stores numbers (with units) of different types.
  */
-class tCoreNumber : public tTypedObject, public util::tUncopyableObject
+class tNumber : public tTypedObject, public util::tUncopyableObject
 {
 public:
 
@@ -59,7 +59,7 @@ private:
   };
 
   /*! Current Type */
-  tCoreNumber::tType num_type;
+  tNumber::tType num_type;
 
   /*! Unit of data */
   tUnit* unit;
@@ -67,7 +67,7 @@ private:
 public:
 
   /*! Zero Constant */
-  static tCoreNumber cZERO;
+  static tNumber cZERO;
 
   /*! Register Data type */
   static tDataType* const cTYPE;
@@ -93,14 +93,14 @@ private:
   inline int8 PrepFirstByte(int8 value2) const
   {
     int tmp = (value2 << 1);
-    return static_cast<int8>(((unit == &(tUnit::cNO_UNIT) || num_type == tCoreNumber::eCONSTANT) ? tmp : (tmp | 1)));
+    return static_cast<int8>(((unit == &(tUnit::cNO_UNIT) || num_type == tNumber::eCONSTANT) ? tmp : (tmp | 1)));
   }
 
 public:
 
   // All kinds of variations of constructors
 
-  tCoreNumber(const tCoreNumber& from)
+  tNumber(const tNumber& from)
   {
     unit = from.unit;
     num_type = from.num_type;
@@ -108,7 +108,7 @@ public:
     type = cTYPE;
   }
 
-  tCoreNumber() :
+  tNumber() :
       lval(0),
       num_type(),
       unit(&tUnit::cNO_UNIT)
@@ -116,7 +116,7 @@ public:
     type = cTYPE;
   }
 
-  tCoreNumber(uint32_t value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
+  tNumber(uint32_t value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
       ival(value_),
       num_type(eINT),
       unit(unit_)
@@ -124,7 +124,7 @@ public:
     type = cTYPE;
   }
 
-  tCoreNumber(int value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
+  tNumber(int value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
       ival(value_),
       num_type(eINT),
       unit(unit_)
@@ -132,7 +132,7 @@ public:
     type = cTYPE;
   }
 
-  tCoreNumber(int64 value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
+  tNumber(int64 value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
       lval(value_),
       num_type(eLONG),
       unit(unit_)
@@ -140,7 +140,7 @@ public:
     type = cTYPE;
   }
 
-  tCoreNumber(double value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
+  tNumber(double value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
       dval(value_),
       num_type(eDOUBLE),
       unit(unit_)
@@ -148,7 +148,7 @@ public:
     type = cTYPE;
   }
 
-  tCoreNumber(float value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
+  tNumber(float value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
       fval(value_),
       num_type(eFLOAT),
       unit(unit_)
@@ -156,7 +156,7 @@ public:
     type = cTYPE;
   }
 
-  tCoreNumber(const util::tNumber& value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
+  tNumber(const util::tNumber& value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
       num_type(),
       unit(NULL)
   {
@@ -164,7 +164,7 @@ public:
     SetValue(value_, unit_);
   }
 
-  virtual void CopyFrom(const tCoreNumber& source);
+  virtual void CopyFrom(const tNumber& source);
 
   virtual void Deserialize(tCoreInput& ois);
 
@@ -187,7 +187,7 @@ public:
     case eCONSTANT:
       return static_cast<T>(unit->GetValue().Value<T>());
     default:
-      assert(false && "Possibly not a CoreNumber at this memory address?");
+      assert(false && "Possibly not a Number at this memory address?");
       return 0;
     }
   }
@@ -235,7 +235,7 @@ public:
    */
   inline bool IsFloatingPoint()
   {
-    return num_type == tCoreNumber::eFLOAT || num_type == tCoreNumber::eDOUBLE;
+    return num_type == tNumber::eFLOAT || num_type == tNumber::eDOUBLE;
   }
 
   inline bool IsInt(int i, tUnit* unit_) const
@@ -338,7 +338,7 @@ public:
     SetValue((int32_t)t, u);
   }
 
-  void SetValue(const tCoreNumber& value_);
+  void SetValue(const tNumber& value_);
 
   virtual const util::tString ToString() const;
 
@@ -347,4 +347,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__DATATYPE__TCORENUMBER_H
+#endif // CORE__DATATYPE__TNUMBER_H

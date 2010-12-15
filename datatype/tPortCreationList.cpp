@@ -30,7 +30,6 @@
 #include "core/port/rpc/tInterfacePort.h"
 #include "core/buffers/tCoreInput.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "core/tChildIterator.h"
 #include "core/buffers/tCoreOutput.h"
 
 namespace finroc
@@ -205,7 +204,7 @@ void tPortCreationList::Deserialize(const rrlib::xml2::tXMLNode& node)
 void tPortCreationList::GetPorts(const tFrameworkElement* elem, util::tSimpleList<tAbstractPort*>& result)
 {
   result.Clear();
-  tChildIterator ci(elem);
+  tFrameworkElement::tChildIterator ci(elem);
   tAbstractPort* ap = NULL;
   while ((ap = ci.NextPort()) != NULL)
   {

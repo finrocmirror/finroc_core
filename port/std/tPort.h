@@ -26,36 +26,46 @@
 
 #include "core/portdatabase/tDataTypeRegister.h"
 #include "core/port/tPortCreationInfo.h"
+#include "core/port/std/tPortBase.h"
 #include "core/port/std/tPortListener.h"
 #include "core/port/std/tPortQueueFragment.h"
-#include "core/port/std/tPortBase.h"
+#include "core/port/tPortWrapperBase.h"
 
 namespace finroc
 {
 namespace core
 {
 class tPortData;
+class tPullRequestHandler;
 
 /*!
  * \author Max Reichardt
  *
  * This Port class is used in applications.
- * It kind of provides the API for PortBase
+ * It kind of provides the API for PortBase backend, which it wraps.
  * and is a generic wrapper for the type-less PortBase.
  *
  * In C++ code for correct casting is generated.
  */
 template<typename T>
-class tPort : public tPortBase
+class tPort : public tPortWrapperBase<tPortBase>
 {
+protected:
+
+  /*!
+   * (Constructor for derived classes)
+   * (wrapped must be set in constructor!)
+   */
+  tPort()  {}
+
 public:
 
   /*!
    * \param pci Construction parameters in Port Creation Info Object
    */
-  tPort(tPortCreationInfo pci) :
-      tPortBase(ProcessPci(pci))
+  tPort(tPortCreationInfo pci)
   {
+    this->wrapped = new tPortBase(ProcessPci(pci));
   }
 
   /*!
@@ -63,7 +73,7 @@ public:
    */
   inline void AddPortListener(tPortListener<T>* listener)
   {
-    ::finroc::core::tPortBase::AddPortListenerRaw(reinterpret_cast<tPortListener<>*>(listener));
+    this->wrapped->AddPortListenerRaw(reinterpret_cast<tPortListener<>*>(listener));
   }
 
   /*!
@@ -73,7 +83,7 @@ public:
    */
   inline void DequeueAll(tPortQueueFragment<T>& fragment)
   {
-    ::finroc::core::tPortBase::DequeueAllRaw(reinterpret_cast<tPortQueueFragment<tPortData>&>(fragment));
+    this->wrapped->DequeueAllRaw(reinterpret_cast<tPortQueueFragment<tPortData>&>(fragment));
   }
 
   /*!
@@ -88,7 +98,7 @@ public:
    */
   inline T* DequeueSingleAutoLocked()
   {
-    return static_cast<T*>(::finroc::core::tPortBase::DequeueSingleAutoLockedRaw());
+    return static_cast<T*>(this->wrapped->DequeueSingleAutoLockedRaw());
   }
 
   /*!
@@ -103,7 +113,7 @@ public:
    */
   inline T* DequeueSingleUnsafe()
   {
-    return static_cast<T*>(::finroc::core::tPortBase::DequeueSingleUnsafeRaw());
+    return static_cast<T*>(this->wrapped->DequeueSingleUnsafeRaw());
   }
 
   /*!
@@ -111,7 +121,7 @@ public:
    */
   inline const T* GetAutoLocked()
   {
-    return static_cast<const T*>(GetAutoLockedRaw());
+    return static_cast<const T*>(this->wrapped->GetAutoLockedRaw());
   }
 
   /*!
@@ -120,7 +130,7 @@ public:
    */
   inline T* GetDefaultBuffer()
   {
-    return static_cast<T*>(::finroc::core::tPortBase::GetDefaultBufferRaw());
+    return static_cast<T*>(this->wrapped->GetDefaultBufferRaw());
   }
 
   /*!
@@ -130,7 +140,7 @@ public:
    */
   inline const T* GetLockedUnsafe()
   {
-    return static_cast<const T*>(::finroc::core::tPortBase::GetLockedUnsafeRaw());
+    return static_cast<const T*>(this->wrapped->GetLockedUnsafeRaw());
   }
 
   /*!
@@ -140,9 +150,9 @@ public:
    *
    * \return Pulled locked data
    */
-  virtual const T* GetPullLockedUnsafe(bool intermediate_assign)
+  inline const T* GetPullLockedUnsafe(bool intermediate_assign)
   {
-    return static_cast<const T*>(PullValueRaw(intermediate_assign));
+    return static_cast<const T*>(this->wrapped->PullValueRaw(intermediate_assign));
   }
 
   //
@@ -158,7 +168,7 @@ public:
 
   inline T* GetUnusedBuffer()
   {
-    return static_cast<T*>(::finroc::core::tPortBase::GetUnusedBufferRaw());
+    return static_cast<T*>(this->wrapped->GetUnusedBufferRaw());
   }
 
   inline static tPortCreationInfo& ProcessPci(tPortCreationInfo& pci)
@@ -168,11 +178,43 @@ public:
   }
 
   /*!
+   * Publish Data Buffer. This data will be forwarded to any connected ports.
+   * It should not be modified thereafter.
+   * Should only be called on output ports
+   *
+   * \param data Data buffer acquired from a port using getUnusedBuffer (or locked data received from another port)
+   */
+  inline void Publish(const T* data)
+  {
+    this->wrapped->Publish(data);
+  }
+
+  /*!
    * \param listener Listener to add
    */
   inline void RemovePortListener(tPortListener<T>* listener)
   {
-    ::finroc::core::tPortBase::RemovePortListenerRaw(reinterpret_cast<tPortListener<>*>(listener));
+    this->wrapped->RemovePortListenerRaw(reinterpret_cast<tPortListener<>*>(listener));
+  }
+
+  /*!
+   * \param pull_request_handler Object that handles pull requests - null if there is none (typical case)
+   */
+  inline void SetPullRequestHandler(tPullRequestHandler* pull_request_handler)
+  {
+    this->wrapped->SetPullRequestHandler(pull_request_handler);
+  }
+
+  /*!
+   * Does port (still) have this value?
+   * (calling this is only safe, when pd is locked)
+   *
+   * \param pd Port value
+   * \return Answer
+   */
+  inline bool ValueIs(const T* pd) const
+  {
+    return this->wrapped->ValueIs(pd);
   }
 
 };

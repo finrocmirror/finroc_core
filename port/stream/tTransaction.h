@@ -26,7 +26,7 @@
 
 #include "core/buffers/tCoreInput.h"
 #include "core/buffers/tCoreOutput.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 
 namespace finroc
 {

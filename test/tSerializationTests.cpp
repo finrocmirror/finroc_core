@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/test/tSerializationTests.h"
-#include "core/datatype/tCoreNumber.h"
+#include "core/datatype/tNumber.h"
 #include "core/buffers/tMemBuffer.h"
 #include "core/buffers/tCoreOutput.h"
 #include "core/buffers/tCoreInput.h"
@@ -32,7 +32,7 @@ namespace core
 void tSerializationTests::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 {
   //testx((byte)0);
-  tCoreNumber* num = new tCoreNumber();
+  tNumber* num = new tNumber();
   tMemBuffer* mb = new tMemBuffer();
   tCoreOutput* buf = new tCoreOutput(mb);
   for (int i = -100; i < 69000; i++)

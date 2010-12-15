@@ -36,7 +36,7 @@ tExternalConnection::tExternalConnection(const util::tString& description, const
     connected(false),
     listener(),
     first_connect(true),
-    auto_connect_to(new tStringStructureParameter("Autoconnect to", ""))
+    auto_connect_to(new tStructureParameterString("Autoconnect to", ""))
 {
   tStructureParameterList::GetOrCreate(this)->Add(auto_connect_to);
 }

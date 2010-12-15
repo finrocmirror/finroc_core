@@ -19,17 +19,32 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/settings/tSetting.h"
+#include "core/portdatabase/tCoreSerializable.h"
+#include "core/portdatabase/sSerializationHelper.h"
+#include "rrlib/xml2_wrapper/tXMLNode.h"
 
 namespace finroc
 {
 namespace core
 {
-tSetting::tSetting(const util::tString& description_, bool publish) :
-    publish_as_aPort(publish),
-    description(description_),
-    port(NULL)
+void tCoreSerializable::Deserialize(const util::tString& s)
 {
+  sSerializationHelper::DeserializeFromHexString(this, s);
+}
+
+void tCoreSerializable::Deserialize(const rrlib::xml2::tXMLNode& node)
+{
+  Deserialize(node.GetTextContent());
+}
+
+util::tString tCoreSerializable::Serialize() const
+{
+  return sSerializationHelper::SerializeToHexString(this);
+}
+
+void tCoreSerializable::Serialize(rrlib::xml2::tXMLNode& node) const
+{
+  node.SetTextContent(Serialize());
 }
 
 } // namespace finroc

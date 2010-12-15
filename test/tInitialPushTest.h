@@ -24,7 +24,7 @@
 #ifndef CORE__TEST__TINITIALPUSHTEST_H
 #define CORE__TEST__TINITIALPUSHTEST_H
 
-#include "core/port/cc/tNumberPort.h"
+#include "core/port/cc/tPortNumeric.h"
 
 namespace finroc
 {
@@ -36,9 +36,9 @@ namespace core
  */
 class tInitialPushTest : public util::tUncopyableObject
 {
-  inline static void Print(tNumberPort* o2, int i)
+  inline static void Print(tPortNumeric& o2, int i)
   {
-    util::tSystem::out.Println(util::tStringBuilder("Port ") + o2->GetDescription() + ": " + o2->GetIntRaw() + " (expected: " + i + ")");
+    util::tSystem::out.Println(util::tStringBuilder("Port ") + o2.GetDescription() + ": " + o2.GetIntRaw() + " (expected: " + i + ")");
   }
 
 public:

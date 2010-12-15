@@ -21,8 +21,8 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TMODULE_H
-#define CORE__TMODULE_H
+#ifndef CORE__STRUCTURE__TMODULE_H
+#define CORE__STRUCTURE__TMODULE_H
 
 #include "core/port/tEdgeAggregator.h"
 #include "core/tFrameworkElement.h"
@@ -109,4 +109,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TMODULE_H
+#endif // CORE__STRUCTURE__TMODULE_H

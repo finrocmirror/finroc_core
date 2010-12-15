@@ -23,7 +23,7 @@
 #define CORE__PORT__RPC__TPARAMETERUTIL_H
 
 #include "core/port/rpc/tCallParameter.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/portdatabase/tDataTypeRegister.h"
 #include <boost/type_traits/is_base_of.hpp>

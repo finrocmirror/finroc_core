@@ -47,7 +47,7 @@ class tCoreInput;
 class tFrameworkElement;
 class tConstructorParameters;
 class tCoreOutput;
-class tCreateModuleAction;
+class tCreateFrameworkElementAction;
 
 /*!
  * \author Max Reichardt
@@ -187,7 +187,7 @@ public:
   /*!
    * \param create_action CreateModuleAction that was used to create framework element
    */
-  inline void SetCreateAction(tCreateModuleAction* create_action_)
+  inline void SetCreateAction(tCreateFrameworkElementAction* create_action_)
   {
     assert((this->create_action == -1));
     this->create_action = tPlugins::GetInstance()->GetModuleTypes().IndexOf(create_action_);

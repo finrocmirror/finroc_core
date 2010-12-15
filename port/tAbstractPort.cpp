@@ -451,7 +451,7 @@ bool tAbstractPort::MayConnectTo(tAbstractPort* target)
   {
     return false;
   }
-  return MayConnectTo2(target);
+  return true;
 }
 
 void tAbstractPort::PrepareDelete()

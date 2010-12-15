@@ -117,6 +117,9 @@ public:
   /*! Log domain for initial pushing */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(initial_push_log, "initial_pushes");
 
+  /*! Log domain for this class */
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "ports");
+
 private:
 
   /*!
@@ -195,18 +198,6 @@ protected:
    * \param reverse Is this a reverse push?
    */
   virtual void InitialPushTo(tAbstractPort* target, bool reverse) = 0;
-
-  /*!
-   * Can this port be connected to specified target port?
-   * (additional non-standard checks by subclass)
-   *
-   * \param target Target port?
-   * \return Answer
-   */
-  virtual bool MayConnectTo2(tAbstractPort* target)
-  {
-    return true;
-  }
 
   /*!
    * Called whenever a new connection to this port was established
@@ -585,6 +576,7 @@ public:
 
   /*!
    * Can this port be connected to specified target port? (additional non-standard checks)
+   * (may be overridden by subclass - should usually call superclass method, too)
    *
    * \param target Target port?
    * \return Answer

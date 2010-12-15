@@ -22,7 +22,7 @@
 #include "core/parameter/tStructureParameterBase.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/tThreadLocalCache.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/buffers/tCoreInput.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "core/portdatabase/tDataTypeRegister.h"

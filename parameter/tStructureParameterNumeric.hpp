@@ -26,8 +26,8 @@ namespace finroc
 namespace core
 {
 template<typename T>
-tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& name, T default_value, bool constructor_prototype) :
-    tStructureParameter<tCoreNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>()), constructor_prototype),
+tStructureParameterNumeric<T>::tStructureParameterNumeric(const util::tString& name, T default_value, bool constructor_prototype) :
+    tStructureParameter<tNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tNumber>()), constructor_prototype),
     unit(&(tUnit::cNO_UNIT)),
     bounds(tBounds()),
     default_val(default_value)
@@ -40,8 +40,8 @@ tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& n
 }
 
 template<typename T>
-tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& name, T default_value) :
-    tStructureParameter<tCoreNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>()), false),
+tStructureParameterNumeric<T>::tStructureParameterNumeric(const util::tString& name, T default_value) :
+    tStructureParameter<tNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tNumber>()), false),
     unit(&(tUnit::cNO_UNIT)),
     bounds(tBounds()),
     default_val(default_value)
@@ -54,8 +54,8 @@ tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& n
 }
 
 template<typename T>
-tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& name, T default_value, bool constructor_prototype, tBounds bounds_) :
-    tStructureParameter<tCoreNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>()), constructor_prototype),
+tStructureParameterNumeric<T>::tStructureParameterNumeric(const util::tString& name, T default_value, bool constructor_prototype, tBounds bounds_) :
+    tStructureParameter<tNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tNumber>()), constructor_prototype),
     unit(&(tUnit::cNO_UNIT)),
     bounds(bounds_),
     default_val(default_value)
@@ -67,8 +67,8 @@ tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& n
 }
 
 template<typename T>
-tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& name, T default_value, tBounds bounds2) :
-    tStructureParameter<tCoreNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreNumber>()), false),
+tStructureParameterNumeric<T>::tStructureParameterNumeric(const util::tString& name, T default_value, tBounds bounds2) :
+    tStructureParameter<tNumber>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tNumber>()), false),
     unit(&(tUnit::cNO_UNIT)),
     bounds(bounds2),
     default_val(default_value)
@@ -81,15 +81,15 @@ tNumericStructureParameter<T>::tNumericStructureParameter(const util::tString& n
 }
 
 template<typename T>
-void tNumericStructureParameter<T>::Set(const util::tString& new_value)
+void tStructureParameterNumeric<T>::Set(const util::tString& new_value)
 {
-  tCoreNumber cn;
+  tNumber cn;
   cn.Deserialize(new_value);
   Set(&(cn));
 }
 
 template<typename T>
-void tNumericStructureParameter<T>::Set(tCoreNumber* cn)
+void tStructureParameterNumeric<T>::Set(tNumber* cn)
 {
   if (unit != &(tUnit::cNO_UNIT) && cn->GetUnit() != unit)
   {

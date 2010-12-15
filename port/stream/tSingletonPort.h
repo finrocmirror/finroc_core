@@ -26,6 +26,7 @@
 
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/std/tPort.h"
+#include "core/port/std/tPortBase.h"
 
 namespace finroc
 {
@@ -44,10 +45,24 @@ class tPublishCache;
 template<typename T>
 class tSingletonPort : public tPort<T>
 {
-private:
+  /*! Special Port class to load value when initialized */
+  template<typename T>
+  class tPortImpl : public tPortBase
+  {
+  private:
 
-  /*! Singleton value */
-  T* singleton_value;
+    /*! Singleton value */
+    T singleton_value;
+
+  protected:
+
+    virtual void NonStandardAssign(tPublishCache& pc);
+
+  public:
+
+    tPortImpl(tPortCreationInfo pci, T& singleton);
+
+  };
 
   /*!
    * modifies PortCreationInfo for SingletonPort
@@ -57,10 +72,6 @@ private:
    * \return new PortCreationInfo
    */
   static tPortCreationInfo AdjustPci(tPortCreationInfo pci);
-
-protected:
-
-  virtual void NonStandardAssign(tPublishCache& pc);
 
 public:
 

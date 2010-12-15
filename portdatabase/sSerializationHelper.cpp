@@ -25,7 +25,7 @@
 #include "core/buffers/tCoreOutput.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/portdatabase/tDataTypeRegister.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 #include "core/port/tMultiTypePortDataBufferPool.h"
 #include "core/port/tThreadLocalCache.h"
 

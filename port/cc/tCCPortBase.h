@@ -59,6 +59,7 @@ class tCCPortBase : public tAbstractPort
 {
   template<typename T>
   friend class tCCPort;
+  friend class tPortNumeric;
 
 protected:
   /*implements Callable<PullCall>*/
@@ -191,11 +192,6 @@ private:
   }
 
 protected:
-
-  /*!
-   * Set current value to default value
-   */
-  void ApplyDefaultValue();
 
   virtual void ClearQueueImpl()
   {
@@ -371,6 +367,11 @@ public:
   {
     port_listener.Add(listener);
   }
+
+  /*!
+   * Set current value to default value
+   */
+  void ApplyDefaultValue();
 
   /*!
    * Publishes new data to port.

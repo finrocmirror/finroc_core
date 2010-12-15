@@ -26,7 +26,7 @@
 
 #include "core/parameter/tConstructorParameters.h"
 #include "core/parameter/tStructureParameterList.h"
-#include "core/plugin/tCreateModuleAction.h"
+#include "core/plugin/tCreateFrameworkElementAction.h"
 
 #include "core/plugin/tParamType.h"
 
@@ -42,7 +42,7 @@ class tStructureParameterBase;
  * Abstract base class for ConstructorCreateModuleAction
  */
 template<typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10, typename P11, typename P12>
-class tConstructorCreateModuleActionBase : public util::tUncopyableObject, public tCreateModuleAction
+class tConstructorCreateModuleActionBase : public util::tUncopyableObject, public tCreateFrameworkElementAction
 {
 protected:
 

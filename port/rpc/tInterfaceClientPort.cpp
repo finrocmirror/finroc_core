@@ -19,24 +19,31 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/datatype/tCoreBoolean.h"
-#include "core/portdatabase/tDataTypeRegister.h"
+#include "core/port/rpc/tInterfaceClientPort.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tCoreBoolean::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreBoolean>());
-const tCoreBoolean tCoreBoolean::cTRUE(true), tCoreBoolean::cFALSE(false);
-
-tCoreBoolean::tCoreBoolean() :
-    value(false)
-{}
-
-tCoreBoolean::tCoreBoolean(bool value_) :
-    value(value_)
+tInterfaceClientPort::tInterfaceClientPort(const util::tString& description, tFrameworkElement* parent, tDataType* type)
 {
-  // this();
+  this->wrapped = new tPortImpl(this, description, parent, type, tInterfacePort::eClient);
+}
+
+tInterfaceClientPort::tPortImpl::tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& description, tFrameworkElement* parent, tDataType* type, tInterfacePort::tType client) :
+    tInterfacePort(description, parent, type, client),
+    outer_class_ptr(outer_class_ptr_)
+{
+}
+
+void tInterfaceClientPort::tPortImpl::ConnectionRemoved(tAbstractPort* partner)
+{
+  outer_class_ptr->ConnectionRemoved(partner);
+}
+
+void tInterfaceClientPort::tPortImpl::NewConnection(tAbstractPort* partner)
+{
+  outer_class_ptr->NewConnection(partner);
 }
 
 } // namespace finroc

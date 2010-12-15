@@ -24,8 +24,8 @@
 #ifndef CORE__DATATYPE__TBOUNDS_H
 #define CORE__DATATYPE__TBOUNDS_H
 
-#include "core/datatype/tCoreNumber.h"
-#include "core/portdatabase/tCoreSerializableImpl.h"
+#include "core/datatype/tNumber.h"
+#include "core/portdatabase/tCoreSerializable.h"
 
 namespace finroc
 {
@@ -56,7 +56,7 @@ private:
   tBounds::tOutOfBoundsAction action;
 
   /*! Default value when value is out of bounds */
-  tCoreNumber out_of_bounds_default;
+  tNumber out_of_bounds_default;
 
 public:
 
@@ -65,6 +65,12 @@ public:
 
   /*! dummy constructor for no bounds */
   tBounds();
+
+  /*!
+   * \param min Minimum bound
+   * \param max Maximum bound
+   */
+  tBounds(double min_, double max_);
 
   /*!
    * \param min Minimum bound
@@ -78,7 +84,7 @@ public:
    * \param max Maximum bound
    * \param out_of_bounds_default Default value when value is out of bounds
    */
-  tBounds(double min_, double max_, tCoreNumber* out_of_bounds_default_);
+  tBounds(double min_, double max_, tNumber* out_of_bounds_default_);
 
   /*!
    * \param min Minimum bound
@@ -90,7 +96,7 @@ public:
   /*!
    * \return Adjust value to range?
    */
-  inline bool AdjustToRange()
+  inline bool AdjustToRange() const
   {
     return action == tBounds::eADJUST_TO_RANGE;
   }
@@ -98,7 +104,7 @@ public:
   /*!
    * \return Adjust value to range?
    */
-  inline bool ApplyDefault()
+  inline bool ApplyDefault() const
   {
     return action == tBounds::eAPPLY_DEFAULT;
   }
@@ -108,7 +114,7 @@ public:
   /*!
    * \return Discard values which are out of bounds?
    */
-  inline bool Discard()
+  inline bool Discard() const
   {
     return action == tBounds::eDISCARD;
   }
@@ -116,7 +122,7 @@ public:
   /*!
    * \return Maximum value
    */
-  inline double GetMax()
+  inline double GetMax() const
   {
     return max;
   }
@@ -124,7 +130,7 @@ public:
   /*!
    * \return Minimum value
    */
-  inline double GetMin()
+  inline double GetMin() const
   {
     return min;
   }
@@ -132,7 +138,7 @@ public:
   /*!
    * \return Default value when value is out of bounds
    */
-  inline tCoreNumber* GetOutOfBoundsDefault()
+  inline const tNumber* GetOutOfBoundsDefault() const
   {
     return &(out_of_bounds_default);
   }
@@ -148,7 +154,7 @@ public:
    * \param val Value
    * \return Answer
    */
-  inline bool InBounds(double val)
+  inline bool InBounds(double val) const
   {
     return val >= min && val <= max;
   }
@@ -166,7 +172,7 @@ public:
    * \param val Value to adjust to range
    * \return Adjusted value
    */
-  double ToBounds(double val);
+  double ToBounds(double val) const;
 
 };
 

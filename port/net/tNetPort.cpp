@@ -22,7 +22,7 @@
 #include "core/portdatabase/tDataType.h"
 #include "core/port/net/tNetPort.h"
 #include "core/buffers/tCoreInput.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/buffers/tCoreOutput.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/std/tPortQueueFragment.h"

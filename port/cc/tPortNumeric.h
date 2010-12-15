@@ -21,60 +21,59 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__CC__TNUMBERPORT_H
-#define CORE__PORT__CC__TNUMBERPORT_H
+#ifndef CORE__PORT__CC__TPORTNUMERIC_H
+#define CORE__PORT__CC__TPORTNUMERIC_H
 
 #include "core/port/tPortCreationInfo.h"
-#include "core/datatype/tUnit.h"
 #include "core/port/tPortFlags.h"
-#include "core/datatype/tCoreNumber.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/cc/tCCPortDataRef.h"
+#include "core/datatype/tNumber.h"
 #include "core/port/tThreadLocalCache.h"
+#include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCPort.h"
+#include "core/datatype/tUnit.h"
 
 namespace finroc
 {
 namespace core
 {
+class tFrameworkElement;
+
 /*!
  * \author Max Reichardt
  *
  * Port containing numbers.
  */
-class tNumberPort : public tCCPort<tCoreNumber>
+class tPortNumeric : public tCCPort<tNumber>
 {
-private:
+public:
+  class tPortImplNum; // inner class forward declaration
 
-  /*! Unit of numerical port */
-  tUnit* unit;
+protected:
 
-  inline static tPortCreationInfo ProcessPciNP(tPortCreationInfo pci)
-  {
-    pci.data_type = tCoreNumber::GetDataType();
-    return pci;
-  }
+  /*!
+   * for subclasses
+   */
+  tPortNumeric()  {}
 
 public:
 
-  tNumberPort(tPortCreationInfo pci) :
-      tCCPort<tCoreNumber>(ProcessPciNP(pci)),
-      unit(pci.unit != NULL ? pci.unit : &(tUnit::cNO_UNIT))
+  tPortNumeric(tPortCreationInfo pci)
   {
+    this->wrapped = new tPortImplNum(pci, pci.unit);
   }
 
-  tNumberPort(const util::tString& description, bool output_port) :
-      tCCPort<tCoreNumber>(ProcessPciNP((tPortCreationInfo(description, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT)))),
-      unit(&(tUnit::cNO_UNIT))
+  tPortNumeric(const util::tString& description, bool output_port)
   {
     // this(new PortCreationInfo(description,outputPort ? PortFlags.OUTPUT_PORT : PortFlags.INPUT_PORT));
+    this->wrapped = new tPortImplNum((tPortCreationInfo(description, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT)), (tPortCreationInfo(description, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT)).unit);
   }
 
-  tNumberPort(const util::tString& description, tFrameworkElement* parent, bool output_port) :
-      tCCPort<tCoreNumber>(ProcessPciNP((tPortCreationInfo(description, parent, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT)))),
-      unit(&(tUnit::cNO_UNIT))
+  tPortNumeric(const util::tString& description, tFrameworkElement* parent, bool output_port)
   {
     // this(new PortCreationInfo(description,parent,outputPort ? PortFlags.OUTPUT_PORT : PortFlags.INPUT_PORT));
+    this->wrapped = new tPortImplNum((tPortCreationInfo(description, parent, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT)), (tPortCreationInfo(description, parent, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT)).unit);
   }
 
   template<typename T>
@@ -84,10 +83,10 @@ public:
     {
       for (;;)
       {
-        tCCPortDataRef* val = value;
-        tCoreNumber* cn = (tCoreNumber*)(val->GetData());
+        tCCPortDataRef* val = wrapped->value;
+        tNumber* cn = (tNumber*)(val->GetData());
         T d = cn->Value<T>();
-        if (val == value)
+        if (val == wrapped->value)
         {
           return d;
         }
@@ -95,7 +94,7 @@ public:
     }
     else
     {
-      tCCPortDataContainer<tCoreNumber>* dc = (tCCPortDataContainer<tCoreNumber>*)PullValueRaw();
+      tCCPortDataContainer<tNumber>* dc = (tCCPortDataContainer<tNumber>*)wrapped->PullValueRaw();
       T result = dc->GetData()->Value<T>();
       dc->ReleaseLock();
       return result;
@@ -123,7 +122,7 @@ public:
    */
   inline tUnit* GetUnit()
   {
-    return unit;
+    return (static_cast<tPortImplNum*>(this->wrapped))->GetUnit();
   }
 
   /*!
@@ -134,16 +133,16 @@ public:
    */
   inline void Publish(double d)
   {
-    tCCPortDataRef* value = this->value;
-    if (value->GetContainer()->IsOwnerThread() && (reinterpret_cast<tCoreNumber*>(value->GetData()))->IsDouble(d, unit))
+    tCCPortDataRef* value = this->wrapped->value;
+    if (value->GetContainer()->IsOwnerThread() && (reinterpret_cast<tNumber*>(value->GetData()))->IsDouble(d, GetUnit()))
     {
       return;
     }
     tThreadLocalCache* tc = tThreadLocalCache::Get();
-    tCCPortDataContainer<>* ccdc = ::finroc::core::tCCPortBase::GetUnusedBuffer(tc);
-    tCoreNumber* cnc = reinterpret_cast<tCoreNumber*>(ccdc->GetDataPtr());
-    cnc->SetValue(d, unit);
-    ::finroc::core::tCCPortBase::Publish(tc, ccdc);
+    tCCPortDataContainer<>* ccdc = this->wrapped->GetUnusedBuffer(tc);
+    tNumber* cnc = reinterpret_cast<tNumber*>(ccdc->GetDataPtr());
+    cnc->SetValue(d, GetUnit());
+    this->wrapped->Publish(tc, ccdc);
   }
 
   /*!
@@ -154,16 +153,16 @@ public:
    */
   inline void Publish(int d)
   {
-    tCCPortDataRef* value = this->value;
-    if (value->GetContainer()->IsOwnerThread() && (reinterpret_cast<tCoreNumber*>(value->GetData()))->IsInt(d, unit))
+    tCCPortDataRef* value = this->wrapped->value;
+    if (value->GetContainer()->IsOwnerThread() && (reinterpret_cast<tNumber*>(value->GetData()))->IsInt(d, GetUnit()))
     {
       return;
     }
     tThreadLocalCache* tc = tThreadLocalCache::Get();
-    tCCPortDataContainer<>* ccdc = ::finroc::core::tCCPortBase::GetUnusedBuffer(tc);
-    tCoreNumber* cnc = reinterpret_cast<tCoreNumber*>(ccdc->GetDataPtr());
-    cnc->SetValue(d, unit);
-    ::finroc::core::tCCPortBase::Publish(tc, ccdc);
+    tCCPortDataContainer<>* ccdc = this->wrapped->GetUnusedBuffer(tc);
+    tNumber* cnc = reinterpret_cast<tNumber*>(ccdc->GetDataPtr());
+    cnc->SetValue(d, GetUnit());
+    this->wrapped->Publish(tc, ccdc);
   }
 
   /*!
@@ -174,32 +173,56 @@ public:
    */
   inline void SetDefault(double new_default)
   {
-    ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(new_default, unit));
+    ::finroc::core::tCCPort<tNumber>::SetDefault(tNumber(new_default, GetUnit()));
   }
 
   inline void SetDefault(int new_default)
   {
-    ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(new_default, unit));
+    ::finroc::core::tCCPort<tNumber>::SetDefault(tNumber(new_default, GetUnit()));
   }
 
   inline void SetDefault(int64 new_default)
   {
-    ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(new_default, unit));
+    ::finroc::core::tCCPort<tNumber>::SetDefault(tNumber(new_default, GetUnit()));
   }
 
   inline void SetDefault(float new_default)
   {
-    ::finroc::core::tCCPort<tCoreNumber>::SetDefault(tCoreNumber(new_default, unit));
+    ::finroc::core::tCCPort<tNumber>::SetDefault(tNumber(new_default, GetUnit()));
   }
 
-  inline void SetDefault(const tCoreNumber& new_default)
+  inline void SetDefault(const tNumber& new_default)
   {
-    ::finroc::core::tCCPort<tCoreNumber>::SetDefault(new_default);
+    ::finroc::core::tCCPort<tNumber>::SetDefault(new_default);
   }
+
+public:
+
+  class tPortImplNum : public tCCPortBase
+  {
+  protected:
+
+    /*! Unit of numerical port */
+    tUnit* unit;
+
+  public:
+
+    tPortImplNum(tPortCreationInfo pci, tUnit* unit_) :
+        tCCPortBase(pci.Derive(tNumber::cTYPE)),
+        unit(unit_ != NULL ? unit_ : &(tUnit::cNO_UNIT))
+    {
+    }
+
+    inline tUnit* GetUnit()
+    {
+      return unit;
+    }
+
+  };
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__CC__TNUMBERPORT_H
+#endif // CORE__PORT__CC__TPORTNUMERIC_H

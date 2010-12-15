@@ -20,10 +20,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
-#include "core/parameter/tBoolStructureParameter.h"
-#include "core/parameter/tNumericStructureParameter.h"
-#include "core/parameter/tStringStructureParameter.h"
-#include "core/parameter/tEnumStructureParameter.h"
+#include "core/parameter/tStructureParameterBool.h"
+#include "core/parameter/tStructureParameterNumeric.h"
+#include "core/parameter/tStructureParameterString.h"
+#include "core/parameter/tStructureParameterEnum.h"
 
 #include <boost/type_traits/remove_pointer.hpp>
 #include <boost/type_traits/is_pointer.hpp>
@@ -82,7 +82,7 @@ struct tParamTypeBase<T, false, true>
 template <typename T>
 struct tNumParamType
 {
-  typedef tNumericStructureParameter<T> t;
+  typedef tStructureParameterNumeric<T> t;
   static T Get(tStructureParameterBase* x)
   {
     return static_cast<t*>(x)->Get();
@@ -105,7 +105,7 @@ template <> struct tParamType<uint64_t> : tNumParamType<uint64_t> {};
 template <>
 struct tParamType<const char*>
 {
-  typedef tStringStructureParameter t;
+  typedef tStructureParameterString t;
   static const char* Get(tStructureParameterBase* x)
   {
     return static_cast<t*>(x)->GetValue()->GetBuffer().GetCString();
@@ -119,7 +119,7 @@ struct tParamType<const char*>
 template <>
 struct tParamType<std::string>
 {
-  typedef tStringStructureParameter t;
+  typedef tStructureParameterString t;
   static std::string Get(tStructureParameterBase* x)
   {
     return static_cast<t*>(x)->GetValue()->GetBuffer().GetStdString();
@@ -133,7 +133,7 @@ struct tParamType<std::string>
 template <>
 struct tParamType<util::tString>
 {
-  typedef tStringStructureParameter t;
+  typedef tStructureParameterString t;
   static util::tString Get(tStructureParameterBase* x)
   {
     return static_cast<t*>(x)->Get();
@@ -147,7 +147,7 @@ struct tParamType<util::tString>
 template <>
 struct tParamType<bool>
 {
-  typedef tBoolStructureParameter t;
+  typedef tStructureParameterBool t;
   static bool Get(tStructureParameterBase* x)
   {
     return static_cast<t*>(x)->Get();
@@ -176,7 +176,7 @@ struct tParamType<tEmpty>
 template <typename T>
 struct tParamTypeBase<T, true, false>
 {
-  typedef tEnumStructureParameter<T> t;
+  typedef tStructureParameterEnum<T> t;
   static T Get(tStructureParameterBase* x)
   {
     return static_cast<t*>(x)->Get();

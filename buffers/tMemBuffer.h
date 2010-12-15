@@ -27,7 +27,7 @@
 #include "core/buffers/tCoreInput.h"
 #include "core/buffers/tCoreOutput.h"
 #include "rrlib/finroc_core_utils/stream/tMemoryBuffer.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 
 namespace finroc
 {

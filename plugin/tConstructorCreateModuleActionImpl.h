@@ -35,10 +35,10 @@ namespace core
   public:\
     typedef tConstructorCreateModuleActionBase<param> base;\
     tConstructorCreateModuleActionImpl(const util::tString& type, const util::tString& param_names) : base(type, param_names) {\
-      this->group = tCreateModuleAction::GetBinary((void*)CreateModuleImpl);\
+      this->group = tCreateFrameworkElementAction::GetBinary((void*)CreateModuleImpl);\
     }\
     tConstructorCreateModuleActionImpl(const util::tString& type, util::tTypedClass<MODULE> mc, const util::tString& param_names) : base(type, param_names) {\
-      this->group = tCreateModuleAction::GetBinary((void*)CreateModuleImpl);\
+      this->group = tCreateFrameworkElementAction::GetBinary((void*)CreateModuleImpl);\
     }\
     virtual tFrameworkElement* CreateModule(tFrameworkElement* parent, const util::tString& name, tConstructorParameters* p) const {\
       return CreateModuleImpl(this, parent, name, p);\
@@ -52,11 +52,11 @@ public:
   typedef tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12> base;
   tConstructorCreateModuleActionImpl(const util::tString& type, const util::tString& param_names) : base(type, param_names)
   {
-    this->group = tCreateModuleAction::GetBinary((void*)CreateModuleImpl);
+    this->group = tCreateFrameworkElementAction::GetBinary((void*)CreateModuleImpl);
   }
   tConstructorCreateModuleActionImpl(const util::tString& type, util::tTypedClass<MODULE> mc, const util::tString& param_names) : base(type, param_names)
   {
-    this->group = tCreateModuleAction::GetBinary((void*)CreateModuleImpl);
+    this->group = tCreateFrameworkElementAction::GetBinary((void*)CreateModuleImpl);
   }
   virtual tFrameworkElement* CreateModule(tFrameworkElement* parent, const util::tString& name, tConstructorParameters* p) const
   {

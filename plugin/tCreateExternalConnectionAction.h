@@ -24,7 +24,7 @@
 #ifndef CORE__PLUGIN__TCREATEEXTERNALCONNECTIONACTION_H
 #define CORE__PLUGIN__TCREATEEXTERNALCONNECTIONACTION_H
 
-#include "core/plugin/tCreateModuleAction.h"
+#include "core/plugin/tCreateFrameworkElementAction.h"
 
 namespace finroc
 {
@@ -37,7 +37,7 @@ class tExternalConnection;
  *
  * Class to create Module using empty standard constructor
  */
-class tCreateExternalConnectionAction : public tCreateModuleAction
+class tCreateExternalConnectionAction : public tCreateFrameworkElementAction
 {
 public:
 

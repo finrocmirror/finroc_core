@@ -19,11 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/std/tPortDataReference.h"
 #include "core/port/tPortFlags.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "core/port/std/tPortQueue.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/stream/tNewConnectionHandler.h"
+#include "core/port/std/tPortDataReference.h"
+#include "core/tFrameworkElement.h"
+#include "core/port/std/tPortData.h"
 #include "core/port/std/tPortDataManager.h"
 
 namespace finroc
@@ -31,20 +31,9 @@ namespace finroc
 namespace core
 {
 template<typename T>
-tInputStreamPort<T>::tInputStreamPort(const util::tString& description, tPortCreationInfo pci, tInputPacketProcessor<T>* user_) :
-    tPort<T>(ProcessPCI(pci, description)),
-    dequeue_buffer(),
-    user(user_)
+tInputStreamPort<T>::tInputStreamPort(const util::tString& description, tPortCreationInfo pci, tInputPacketProcessor<T>* user, tNewConnectionHandler* conn_handler)
 {
-}
-
-template<typename T>
-void tInputStreamPort<T>::NonStandardAssign(tPublishCache& pc)
-{
-  if (user == NULL || ProcessPacket(static_cast<T*>(pc.cur_ref->GetData())))
-  {
-    ::finroc::core::tPortBase::NonStandardAssign(pc);  // enqueue
-  }
+  this->wrapped = new tPortImpl<T*>(ProcessPCI(pci, description), user, conn_handler);
 }
 
 template<typename T>
@@ -55,11 +44,38 @@ tPortCreationInfo tInputStreamPort<T>::ProcessPCI(tPortCreationInfo pci, const u
   pci.SetFlag(tPortFlags::cHAS_AND_USES_QUEUE, true);
   pci.SetFlag(tPortFlags::cOUTPUT_PORT, false);
   //pci.setFlag(PortFlags.ACCEPTS_REVERSE_DATA, false);
-  return pci;
+  return ::finroc::core::tPort::ProcessPci(pci);
 }
 
 template<typename T>
-bool tInputStreamPort<T>::ProcessPacket(T* data)
+tInputStreamPort<T>::tPortImpl<T>::tPortImpl(tPortCreationInfo pci, tInputPacketProcessor<T>* user_, tNewConnectionHandler* conn_handler_) :
+    tPortBase(ProcessPci(pci)),
+    dequeue_buffer(),
+    user(user_),
+    conn_handler(conn_handler_)
+{
+}
+
+template<typename T>
+void tInputStreamPort<T>::tPortImpl<T>::NewConnection(tAbstractPort* partner)
+{
+  if (conn_handler != NULL)
+  {
+    conn_handler->HandleNewConnection(partner);
+  }
+}
+
+template<typename T>
+void tInputStreamPort<T>::tPortImpl<T>::NonStandardAssign(tPublishCache& pc)
+{
+  if (user == NULL || ProcessPacket(static_cast<T*>(pc.cur_ref->GetData())))
+  {
+    ::finroc::core::tPortBase::NonStandardAssign(pc);  // enqueue
+  }
+}
+
+template<typename T>
+bool tInputStreamPort<T>::tPortImpl<T>::ProcessPacket(T* data)
 {
   try
   {
@@ -73,13 +89,13 @@ bool tInputStreamPort<T>::ProcessPacket(T* data)
 }
 
 template<typename T>
-void tInputStreamPort<T>::ProcessPackets()
+void tInputStreamPort<T>::tPortImpl<T>::ProcessPackets()
 {
-  this->queue->DequeueAll(dequeue_buffer);
-  T* pdr = NULL;
+  DequeueAllRaw(dequeue_buffer);
+  tPortData* pdr = NULL;
   while ((pdr = dequeue_buffer.DequeueUnsafe()) != NULL)
   {
-    user->ProcessPacket(pdr);
+    user->ProcessPacket(static_cast<T*>(pdr));
     pdr->GetManager()->ReleaseLock();
   }
 }

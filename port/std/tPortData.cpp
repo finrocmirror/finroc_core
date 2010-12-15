@@ -19,29 +19,34 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/settings/tNumberSetting.h"
-#include "core/port/cc/tBoundedNumberPort.h"
+#include "core/port/std/tPortData.h"
+#include "core/port/std/tPortDataCreationInfo.h"
+#include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
-
-tAbstractPort* tNumberSettingUtil::CreatePort(tPortCreationInfo pci, const tBounds& bounds, tCCPortListener<tCoreNumber>* l)
+tPortData::tPortData() :
+    manager(tPortDataCreationInfo::Get()->GetManager())
 {
-  tNumberPort* p = new tBoundedNumberPort(pci, bounds);
-  p->AddPortListener(l);
-  return p;
+  tPortDataCreationInfo::Get()->AddUnitializedObject(this);
+  assert((((unsigned int)this) & 0x7) == 0); // make sure requested alignment was honoured
 }
 
-tNumberPort* tNumberSettingUtil::GetPort(tAbstractPort* p)
+void tPortData::InitDataType()
 {
-  return static_cast<tNumberPort*>(p);
+  if (type != NULL)
+  {
+    return;  // already set
+  }
+  type = LookupDataType();
+  assert((type != NULL) && "Unknown Object type");
 }
 
-void tNumberSettingUtil::SetDefault(tAbstractPort* p, tCoreNumber value)
+tDataType* tPortData::LookupDataType()
 {
-  (static_cast<tNumberPort*>(p))->SetDefault(value);
+  return tDataTypeRegister::GetInstance()->LookupDataType(this);
 }
 
 } // namespace finroc

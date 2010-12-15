@@ -26,13 +26,13 @@
 
 #include "core/portdatabase/tDataTypeRegister.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/cc/tCCPortListener.h"
 #include "core/port/cc/tCCPortBase.h"
+#include "core/port/cc/tCCPortListener.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/cc/tCCQueueFragment.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/tThreadLocalCache.h"
-#include "core/tFrameworkElement.h"
+#include "core/port/tPortWrapperBase.h"
 #include "core/port/cc/tCCPortData.h"
 
 namespace finroc
@@ -49,24 +49,30 @@ namespace core
  * In C++ code for correct casting is generated.
  */
 template<typename T>
-class tCCPort : public tCCPortBase
+class tCCPort : public tPortWrapperBase<tCCPortBase>
 {
 public:
 
   /*!
    * \param pci Construction parameters in Port Creation Info Object
    */
-  tCCPort(tPortCreationInfo pci) :
-      tCCPortBase(ProcessPci(pci))
+  tCCPort(tPortCreationInfo pci)
   {
+    this->wrapped = new tCCPortBase(ProcessPci(pci));
   }
+
+  /*!
+   * (Constructor for derived classes)
+   * (wrapped must be set in constructor!)
+   */
+  tCCPort()  {}
 
   /*!
    * \param listener Listener to add
    */
   inline void AddPortListener(tCCPortListener<T>* listener)
   {
-    AddPortListenerRaw(reinterpret_cast<tCCPortListener<>*>(listener));
+    this->wrapped->AddPortListenerRaw(reinterpret_cast<tCCPortListener<>*>(listener));
   }
 
   /*!
@@ -77,7 +83,7 @@ public:
    */
   inline void BrowserPublish(tCCPortDataContainer<T>* buffer)
   {
-    ::finroc::core::tCCPortBase::BrowserPublishRaw(reinterpret_cast<tCCPortDataContainer<>*>(buffer));
+    this->wrapped->BrowserPublishRaw(reinterpret_cast<tCCPortDataContainer<>*>(buffer));
   }
 
   /*!
@@ -87,7 +93,7 @@ public:
    */
   inline void DequeueAll(tCCQueueFragment<T>& fragment)
   {
-    ::finroc::core::tCCPortBase::DequeueAllRaw(reinterpret_cast<tCCQueueFragment<tCCPortData>&>(fragment));
+    this->wrapped->DequeueAllRaw(reinterpret_cast<tCCQueueFragment<tCCPortData>&>(fragment));
   }
 
   /*!
@@ -102,7 +108,7 @@ public:
    */
   inline T* DequeueSingleAutoLocked()
   {
-    return reinterpret_cast<T*>(::finroc::core::tCCPortBase::DequeueSingleAutoLockedRaw());
+    return reinterpret_cast<T*>(this->wrapped->DequeueSingleAutoLockedRaw());
   }
 
   /*!
@@ -117,7 +123,7 @@ public:
    */
   inline tCCInterThreadContainer<T>* DequeueSingleUnsafe()
   {
-    return reinterpret_cast<tCCInterThreadContainer<T>*>(::finroc::core::tCCPortBase::DequeueSingleUnsafeRaw());
+    return reinterpret_cast<tCCInterThreadContainer<T>*>(this->wrapped->DequeueSingleUnsafeRaw());
   }
 
   /*!
@@ -125,7 +131,7 @@ public:
    */
   inline const T* GetAutoLocked()
   {
-    return reinterpret_cast<const T*>(GetAutoLockedRaw());
+    return reinterpret_cast<const T*>(this->wrapped->GetAutoLockedRaw());
   }
 
   //
@@ -141,7 +147,7 @@ public:
 
   inline tCCPortDataContainer<T>* GetUnusedBuffer()
   {
-    return reinterpret_cast<tCCPortDataContainer<T>*>(tThreadLocalCache::Get()->GetUnusedBuffer(this->data_type));
+    return reinterpret_cast<tCCPortDataContainer<T>*>(tThreadLocalCache::Get()->GetUnusedBuffer(this->wrapped->GetDataType()));
   }
 
   inline static tPortCreationInfo& ProcessPci(tPortCreationInfo& pci)
@@ -159,7 +165,7 @@ public:
   {
     tCCPortDataContainer<T>* c = GetUnusedBuffer();
     c->SetData(&(t));
-    Publish(c);
+    this->wrapped->Publish(c);
   }
 
   /*!
@@ -167,7 +173,7 @@ public:
    */
   inline void RemovePortListener(tCCPortListener<T>* listener)
   {
-    RemovePortListenerRaw(reinterpret_cast<tCCPortListener<>*>(listener));
+    this->wrapped->RemovePortListenerRaw(reinterpret_cast<tCCPortListener<>*>(listener));
   }
 
   /*!
@@ -179,7 +185,7 @@ public:
   inline void SetDefault(const T& t)
   {
     assert(((!IsReady())) && "please set default value _before_ initializing port");
-    this->default_value->Assign(&(reinterpret_cast<const tCCPortData&>(t)));
+    this->wrapped->default_value->Assign(&(reinterpret_cast<const tCCPortData&>(t)));
     tCCPortDataContainer<T>* c = GetUnusedBuffer();
     c->SetData(&(t));
     BrowserPublish(c);

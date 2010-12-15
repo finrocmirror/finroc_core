@@ -24,7 +24,7 @@
 
 #include "core/test/tRealPortTest5.h"
 #include "core/tRuntimeEnvironment.h"
-#include "core/port/cc/tNumberPort.h"
+#include "core/port/cc/tCCPortBase.h"
 #include "core/tFrameworkElement.h"
 #include "plugins/blackboard/tBlackboardManager.h"
 #include "core/port/std/tPort.h"
@@ -44,7 +44,7 @@ namespace core
 {
 const int tRealPortTest5::cNUM_OF_PORTS;
 const int tRealPortTest5::cCYCLE_TIME;
-tNumberPort* tRealPortTest5::input, * tRealPortTest5::output, * tRealPortTest5::p1, * tRealPortTest5::p2, * tRealPortTest5::p3;
+::std::tr1::shared_ptr<tPortNumeric> tRealPortTest5::input, tRealPortTest5::output, tRealPortTest5::p1, tRealPortTest5::p2, tRealPortTest5::p3;
 tRuntimeEnvironment* tRealPortTest5::re;
 const int tRealPortTest5::cCYCLES;
 
@@ -53,13 +53,13 @@ void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // set up
   //RuntimeEnvironment.initialInit(/*new ByteArrayInputStream(new byte[0])*/);
   re = tRuntimeEnvironment::GetInstance();
-  output = new tNumberPort("test1", true);
-  input = new tNumberPort("test2", false);
-  output->ConnectToTarget(input);
-  p1 = new tNumberPort("p1", false);
-  p2 = new tNumberPort("p2", false);
-  p3 = new tNumberPort("p3", false);
-  p3->Link(tRuntimeEnvironment::GetInstance(), "portlink");
+  output = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric("test1", true));
+  input = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric("test2", false));
+  output->ConnectToTarget(*input);
+  p1 = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric("p1", false));
+  p2 = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric("p2", false));
+  p3 = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric("p3", false));
+  p3->GetWrapped()->Link(tRuntimeEnvironment::GetInstance(), "portlink");
   tFrameworkElement::InitAll();
   //output.std11CaseReceiver = input;
 
@@ -68,8 +68,8 @@ void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   TestSimpleEdge2();
   TestSimpleEdgeBB();
 
-  input->ManagedDelete();
-  output->ManagedDelete();
+  input.reset();
+  output.reset();
 
   util::tSystem::out.Println("waiting");
 }
@@ -117,19 +117,19 @@ void tRealPortTest5::TestSimpleEdge2()
 {
   blackboard::tBlackboardManager::GetInstance();
 
-  tPort<finroc::blackboard::tBlackboardBuffer>* input = new tPort<finroc::blackboard::tBlackboardBuffer>(tPortCreationInfo("input", tPortFlags::cINPUT_PORT));
-  tPort<finroc::blackboard::tBlackboardBuffer>* output = new tPort<finroc::blackboard::tBlackboardBuffer>(tPortCreationInfo("output", tPortFlags::cOUTPUT_PORT));
+  tPort<finroc::blackboard::tBlackboardBuffer> input(tPortCreationInfo("input", tPortFlags::cINPUT_PORT));
+  tPort<finroc::blackboard::tBlackboardBuffer> output(tPortCreationInfo("output", tPortFlags::cOUTPUT_PORT));
 
-  output->ConnectToTarget(input);
+  output.ConnectToTarget(input);
   tFrameworkElement::InitAll();
 
-  blackboard::tBlackboardBuffer* buf = output->GetUnusedBuffer();
+  blackboard::tBlackboardBuffer* buf = output.GetUnusedBuffer();
   tCoreOutput co(buf);
   co.WriteInt(42);
   co.Close();
-  output->Publish(buf);
+  output.Publish(buf);
 
-  const blackboard::tBlackboardBuffer* cbuf = input->GetLockedUnsafe();
+  const blackboard::tBlackboardBuffer* cbuf = input.GetLockedUnsafe();
   tCoreInput ci(cbuf);
   util::tSystem::out.Println(ci.ReadInt());
   cbuf->GetManager()->GetCurrentRefCounter()->ReleaseLock();
@@ -146,13 +146,13 @@ void tRealPortTest5::TestSimpleEdge2()
   int result = 0;
   for (int i = 0; i < cCYCLES; i++)
   {
-    buf = output->GetUnusedBuffer();
+    buf = output.GetUnusedBuffer();
     co.Reset(buf);
     co.WriteInt(i);
-    output->Publish(buf);
+    output.Publish(buf);
     co.Close();
 
-    cbuf = input->GetLockedUnsafe();
+    cbuf = input.GetLockedUnsafe();
     ci.Reset(cbuf);
     result = ci.ReadInt();
     cbuf->GetManager()->GetCurrentRefCounter()->ReleaseLock();

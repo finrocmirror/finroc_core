@@ -21,8 +21,8 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PLUGIN__TCREATEMODULEACTION_H
-#define CORE__PLUGIN__TCREATEMODULEACTION_H
+#ifndef CORE__PLUGIN__TCREATEFRAMEWORKELEMENTACTION_H
+#define CORE__PLUGIN__TCREATEFRAMEWORKELEMENTACTION_H
 
 #include <dlfcn.h>
 
@@ -40,7 +40,7 @@ class tStructureParameterList;
  * Classes that implement this interface provide a generic method for
  * creating modules.
  */
-class tCreateModuleAction : public util::tInterface
+class tCreateFrameworkElementAction : public util::tInterface
 {
 public:
 
@@ -83,4 +83,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PLUGIN__TCREATEMODULEACTION_H
+#endif // CORE__PLUGIN__TCREATEFRAMEWORKELEMENTACTION_H

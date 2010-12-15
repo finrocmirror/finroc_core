@@ -21,10 +21,10 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORTDATABASE__TTYPEDOBJECTIMPL_H
-#define CORE__PORTDATABASE__TTYPEDOBJECTIMPL_H
+#ifndef CORE__PORTDATABASE__TTYPEDOBJECT_H
+#define CORE__PORTDATABASE__TTYPEDOBJECT_H
 
-#include "core/portdatabase/tCoreSerializableImpl.h"
+#include "core/portdatabase/tCoreSerializable.h"
 
 namespace finroc
 {
@@ -97,4 +97,4 @@ inline std::ostream& operator << (std::ostream& output, const tTypedObject& lu)
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORTDATABASE__TTYPEDOBJECTIMPL_H
+#endif // CORE__PORTDATABASE__TTYPEDOBJECT_H

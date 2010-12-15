@@ -25,13 +25,13 @@
 #define CORE__TEST__TTESTMODULE_H
 
 #include "core/plugin/tStandardCreateModuleAction.h"
-#include "core/tModule.h"
+#include "core/structure/tModule.h"
+#include "core/port/cc/tPortNumeric.h"
 
 namespace finroc
 {
 namespace core
 {
-class tNumberPort;
 
 /*!
  * \author Max Reichardt
@@ -48,7 +48,7 @@ private:
 public:
 
   /*! Test ports */
-  tNumberPort* si, * so, * ci, * co;
+  tPortNumeric si, so, ci, co;
 
 protected:
 

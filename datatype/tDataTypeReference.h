@@ -25,7 +25,7 @@
 #ifndef CORE__DATATYPE__TDATATYPEREFERENCE_H
 #define CORE__DATATYPE__TDATATYPEREFERENCE_H
 
-#include "core/datatype/tCoreNumber.h"
+#include "core/datatype/tNumber.h"
 #include "core/portdatabase/tDataTypeRegister.h"
 #include "core/datatype/tCoreString.h"
 
@@ -49,7 +49,7 @@ public:
 
   inline void DataType()
   {
-    Set(tCoreNumber::cTYPE);  // default is CoreNumber
+    Set(tNumber::cTYPE);  // default is CoreNumber
   }
 
   /*!

@@ -24,12 +24,12 @@
 #ifndef CORE__TEST__TREALPORTQUEUETEST_H
 #define CORE__TEST__TREALPORTQUEUETEST_H
 
+#include "core/port/cc/tPortNumeric.h"
+
 namespace finroc
 {
 namespace core
 {
-class tNumberPort;
-
 /*!
  * \author Max Reichardt
  *
@@ -42,7 +42,7 @@ public:
   // Number of iterations
   static int cCYCLES;
 
-  static tNumberPort* output;
+  static ::std::tr1::shared_ptr<tPortNumeric> output;
 
   static volatile int cPUBLISH_LIMIT;
 

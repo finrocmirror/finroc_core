@@ -25,7 +25,7 @@
 #define CORE__PLUGIN__TSTANDARDCREATEMODULEACTION_H
 
 #include "core/plugin/tPlugins.h"
-#include "core/plugin/tCreateModuleAction.h"
+#include "core/plugin/tCreateFrameworkElementAction.h"
 
 namespace finroc
 {
@@ -43,7 +43,7 @@ class tStructureParameterList;
  * Modules need to have a constructor taking name and parent
  */
 template<typename T>
-class tStandardCreateModuleAction : public util::tUncopyableObject, public tCreateModuleAction
+class tStandardCreateModuleAction : public util::tUncopyableObject, public tCreateFrameworkElementAction
 {
 private:
 

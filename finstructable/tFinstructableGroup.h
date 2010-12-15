@@ -24,7 +24,7 @@
 #ifndef CORE__FINSTRUCTABLE__TFINSTRUCTABLEGROUP_H
 #define CORE__FINSTRUCTABLE__TFINSTRUCTABLEGROUP_H
 
-#include "core/parameter/tStringStructureParameter.h"
+#include "core/parameter/tStructureParameterString.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/tFrameworkElement.h"
@@ -58,7 +58,7 @@ class tFinstructableGroup : public tFrameworkElement
 private:
 
   /*! contains name of XML to use */
-  tStringStructureParameter* xml_file;
+  tStructureParameterString* xml_file;
 
   /*! contains name of XML that is currently used (variable is used to detect changes to xmlFile parameter) */
   util::tString current_xml_file;

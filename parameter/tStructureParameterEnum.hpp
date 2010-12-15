@@ -26,7 +26,7 @@ namespace finroc
 namespace core
 {
 template<typename E>
-tEnumStructureParameter<E>::tEnumStructureParameter(const util::tString& name, E default_value, bool constructor_prototype, ::std::tr1::shared_ptr<util::tSimpleList<util::tString> > string_constants_) :
+tStructureParameterEnum<E>::tStructureParameterEnum(const util::tString& name, E default_value, bool constructor_prototype, ::std::tr1::shared_ptr<util::tSimpleList<util::tString> > string_constants_) :
     tStructureParameter<tEnumValue>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tEnumValue>()), constructor_prototype),
     string_constants(string_constants_)
 {
@@ -35,7 +35,7 @@ tEnumStructureParameter<E>::tEnumStructureParameter(const util::tString& name, E
 }
 
 template<typename E>
-tEnumStructureParameter<E>::tEnumStructureParameter(const util::tString& name, E default_value, const util::tString& string_constants_) :
+tStructureParameterEnum<E>::tStructureParameterEnum(const util::tString& name, E default_value, const util::tString& string_constants_) :
     tStructureParameter<tEnumValue>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tEnumValue>())),
     string_constants(new util::tSimpleList<util::tString>())
 {
@@ -45,7 +45,7 @@ tEnumStructureParameter<E>::tEnumStructureParameter(const util::tString& name, E
 }
 
 template<typename E>
-void tEnumStructureParameter<E>::Set(E default_value)
+void tStructureParameterEnum<E>::Set(E default_value)
 {
   int i = static_cast<int>(default_value);
   ::finroc::core::tStructureParameter<tEnumValue>::GetValue()->Set(i);

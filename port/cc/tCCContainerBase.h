@@ -24,7 +24,7 @@
 #ifndef CORE__PORT__CC__TCCCONTAINERBASE_H
 #define CORE__PORT__CC__TCCCONTAINERBASE_H
 
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 
 namespace finroc
 {

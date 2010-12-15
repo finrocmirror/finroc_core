@@ -137,7 +137,7 @@ public:
 struct tFunctionCreateModuleAction
 {
 
-  std::auto_ptr<tCreateModuleAction> wrapped;
+  std::auto_ptr<tCreateFrameworkElementAction> wrapped;
 
 public:
 

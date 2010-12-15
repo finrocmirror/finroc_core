@@ -19,7 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/datatype/tCoreNumber.h"
+#include "core/datatype/tNumber.h"
 
 #include "core/datatype/tUnit.h"
 
@@ -102,6 +102,15 @@ void tUnit::CalculateFactors(util::tSimpleList<tUnit*>& units)
   }
 }
 
+double tUnit::ConvertTo(double value, tUnit* to_unit) const
+{
+  if (this == &(tUnit::cNO_UNIT) || to_unit == &(tUnit::cNO_UNIT))
+  {
+    return value;
+  }
+  return GetConversionFactor(to_unit) * value;
+}
+
 double tUnit::GetConversionFactor(tUnit* u) const
 {
   if (ConvertibleTo(u))
@@ -124,9 +133,9 @@ tUnit* tUnit::GetUnit(const util::tString& unit_string)
   return &(cNO_UNIT);
 }
 
-const tCoreNumber& tUnit::GetValue() const
+const tNumber& tUnit::GetValue() const
 {
-  static tCoreNumber default_value(util::tDouble::cNaN);
+  static tNumber default_value(util::tDouble::cNaN);
   return default_value;
 }
 

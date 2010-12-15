@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/stream/tStreamCommitThread.h"
-#include "core/settings/tSetting.h"
+#include "core/parameter/tParameterNumeric.h"
 #include "core/tRuntimeSettings.h"
 
 namespace finroc

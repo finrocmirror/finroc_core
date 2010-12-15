@@ -26,8 +26,9 @@
 
 #include "core/port/stream/tTransactionPacket.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/stream/tStreamCommitThread.h"
 #include "core/port/std/tPort.h"
+#include "core/port/stream/tStreamCommitThread.h"
+#include "core/port/std/tPortBase.h"
 
 namespace finroc
 {
@@ -48,8 +49,53 @@ class tCoreSerializable;
  * (Implementation of this class is non-blocking... that's why it's slightly verbose)
  */
 template<typename T>
-class tOutputTransactionStreamPort : public tPort<tTransactionPacket>, public tStreamCommitThread::tCallback
+class tOutputTransactionStreamPort : public tPort<tTransactionPacket>
 {
+  /*! Special Port class to load value when initialized */
+  class tPortImpl : public tPortBase, public tStreamCommitThread::tCallback
+  {
+  protected:
+
+    /*!
+     * interval in which new data is commited
+     * higher values may be useful for grouping transactions.
+     */
+    int commit_interval;
+
+    /*!
+     * last time stamp of commit
+     */
+    int64 last_commit;
+
+    /*!
+     * Stream packet that is currently written.
+     * When it is written to, this variable contains lock to this packet.
+     * When packet has been committed, variable contains null
+     */
+    util::tAtomicPtr<tTransactionPacket> current_packet;
+
+    virtual void PrepareDelete()
+    {
+      tStreamCommitThread::GetInstance()->Unregister(this);
+      ::finroc::core::tAbstractPort::PrepareDelete();
+    }
+
+  public:
+
+    tPortImpl(tPortCreationInfo pci, int commit_interval_);
+
+    /*!
+     * Writes data to stream
+     * (may not be called concurrently)
+     *
+     * \param data Data to write (is copied and can instantly be reused)
+     */
+    void CommitData(tCoreSerializable& data);
+
+    virtual void StreamThreadCallback(int64 cur_time);
+
+  };
+
 private:
 
   /*! ChunkedBuffer for signalling only: SIGNAL that writer currently writes to chunk */
@@ -58,32 +104,6 @@ private:
   /*! ChunkedBuffer for signalling only: SIGNAL that writer should commit data after writing */
   static tTransactionPacket cCOMMIT;
 
-protected:
-
-  /*!
-   * interval in which new data is commited
-   * higher values may be useful for grouping transactions.
-   */
-  int commit_interval;
-
-  /*!
-   * last time stamp of commit
-   */
-  int64 last_commit;
-
-  /*!
-   * Stream packet that is currently written.
-   * When it is written to, this variable contains lock to this packet.
-   * When packet has been committed, variable contains null
-   */
-  util::tAtomicPtr<tTransactionPacket> current_packet;
-
-  virtual void PrepareDelete()
-  {
-    tStreamCommitThread::GetInstance()->Unregister(this);
-    ::finroc::core::tAbstractPort::PrepareDelete();
-  }
-
 public:
 
   /*!
@@ -91,7 +111,7 @@ public:
    * \param commit_interval Interval in which new data is commited - higher values may be useful for grouping transactions.
    * \param listener Listener for pull requests
    */
-  tOutputTransactionStreamPort(tPortCreationInfo pci, int commit_interval_, tPullRequestHandler* listener);
+  tOutputTransactionStreamPort(tPortCreationInfo pci, int commit_interval, tPullRequestHandler* listener);
 
   /*!
    * Writes data to stream
@@ -99,11 +119,12 @@ public:
    *
    * \param data Data to write (is copied and can instantly be reused)
    */
-  void CommitData(tCoreSerializable& data);
+  inline void CommitData(tCoreSerializable& data)
+  {
+    (static_cast<tPortImpl*>(this->wrapped))->CommitData(data);
+  }
 
   tTransactionPacket* GetUnusedBuffer();
-
-  virtual void StreamThreadCallback(int64 cur_time);
 
 };
 

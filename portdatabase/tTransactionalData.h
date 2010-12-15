@@ -26,10 +26,11 @@
 
 #include "core/port/stream/tOutputTransactionStreamPort.h"
 #include "core/port/stream/tSingletonPort.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/port/stream/tInputPacketProcessor.h"
 #include "core/port/stream/tStreamCommitThread.h"
 #include "core/port/std/tPullRequestHandler.h"
+#include "core/port/stream/tNewConnectionHandler.h"
 #include "core/tFrameworkElement.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/stream/tInputTransactionStreamPort.h"
@@ -60,7 +61,7 @@ class tTransactionPacket;
  * This class already creates the necessary ports in a PortSet. This can be retrieved using getPortSet()
  */
 template<typename B>
-class tTransactionalData : public tPortData, public tInputPacketProcessor<tTransactionPacket>, public tStreamCommitThread::tCallback, public tPullRequestHandler
+class tTransactionalData : public tPortData, public tInputPacketProcessor<tTransactionPacket>, public tStreamCommitThread::tCallback, public tPullRequestHandler, public tNewConnectionHandler
 {
 private:
   class tTDPortSet; // inner class forward declaration
@@ -74,18 +75,16 @@ private:
 protected:
 
   /*! Port for outgoing transactions */
-  tOutputTransactionStreamPort<B>* output;
+  tOutputTransactionStreamPort<B> output;
 
   /*! Port for incoming transactions */
-  tInputTransactions* input;
+  tInputTransactions input;
 
   /*! Port sharing data locally */
-  tSingletonPort<tTransactionalData<B>*>* local_data;
+  tSingletonPort<tTransactionalData<B>*> local_data;
 
   /*! Are we currently handling new connection? */
   volatile bool handling_new_connection;
-
-  virtual void HandleNewConnection(tAbstractPort* partner);
 
   /*! may be overridden */
   inline void PostChildInit()
@@ -122,6 +121,8 @@ public:
   {
     return port_set;
   }
+
+  virtual void HandleNewConnection(tAbstractPort* partner);
 
   virtual void Serialize(tCoreOutput& os) const
   {
@@ -174,14 +175,6 @@ protected:
 
     // Outer class TransactionalData
     tTransactionalData* const outer_class_ptr;
-
-  protected:
-
-    // we have a new connection
-    virtual void NewConnection(tAbstractPort* partner)
-    {
-      HandleNewConnection(partner);
-    }
 
   public:
 

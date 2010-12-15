@@ -19,34 +19,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/std/tPortDataImpl.h"
-#include "core/port/std/tPortDataCreationInfo.h"
+#include "core/datatype/tBoolean.h"
 #include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
-tPortData::tPortData() :
-    manager(tPortDataCreationInfo::Get()->GetManager())
-{
-  tPortDataCreationInfo::Get()->AddUnitializedObject(this);
-  assert((((unsigned int)this) & 0x7) == 0); // make sure requested alignment was honoured
-}
+tDataType* tBoolean::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tBoolean>(), "Boolean");
+const tBoolean tBoolean::cTRUE(true), tBoolean::cFALSE(false);
 
-void tPortData::InitDataType()
-{
-  if (type != NULL)
-  {
-    return;  // already set
-  }
-  type = LookupDataType();
-  assert((type != NULL) && "Unknown Object type");
-}
+tBoolean::tBoolean() :
+    value(false)
+{}
 
-tDataType* tPortData::LookupDataType()
+tBoolean::tBoolean(bool value_) :
+    value(value_)
 {
-  return tDataTypeRegister::GetInstance()->LookupDataType(this);
+  // this();
 }
 
 } // namespace finroc

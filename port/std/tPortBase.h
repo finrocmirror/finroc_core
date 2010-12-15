@@ -37,7 +37,7 @@
 #include "core/port/tMultiTypePortDataBufferPool.h"
 #include "core/port/std/tPortDataBufferPool.h"
 #include "core/port/tPortFlags.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/port/std/tPublishCache.h"
 #include "core/tRuntimeSettings.h"
 
@@ -115,14 +115,6 @@ protected:
   tPortListenerManager<tPortData> port_listener;
 
 private:
-
-  /*!
-   * Set current value to default value
-   */
-  inline void ApplyDefaultValue()
-  {
-    Publish(default_value);
-  }
 
   // helper for direct member initialization in C++
   static tPortData* CreateDefaultValue(tDataType* dt);
@@ -406,6 +398,14 @@ public:
   }
 
   /*!
+   * Set current value to default value
+   */
+  inline void ApplyDefaultValue()
+  {
+    Publish(default_value);
+  }
+
+  /*!
    * Publish buffer through port
    * (not in normal operation, but from browser; difference: listeners on this port will be notified)
    *
@@ -500,7 +500,7 @@ public:
    *
    * \return Pulled locked data
    */
-  virtual const tPortData* GetPullLockedUnsafe(bool intermediate_assign)
+  inline const tPortData* GetPullLockedUnsafe(bool intermediate_assign)
   {
     return PullValueRaw(intermediate_assign);
   }
@@ -527,7 +527,7 @@ public:
    * It should not be modified thereafter.
    * Should only be called on output ports
    *
-   * \param cnc Data buffer acquired from a port using getUnusedBuffer (or locked data received from another port)
+   * \param data Data buffer acquired from a port using getUnusedBuffer (or locked data received from another port)
    */
   inline void Publish(const tPortData* data)
   {

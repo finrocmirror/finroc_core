@@ -24,7 +24,7 @@
 #ifndef CORE__DATATYPE__TCONSTANT_H
 #define CORE__DATATYPE__TCONSTANT_H
 
-#include "core/datatype/tCoreNumber.h"
+#include "core/datatype/tNumber.h"
 #include "core/datatype/tUnit.h"
 
 namespace finroc
@@ -52,7 +52,7 @@ private:
   int8 constant_id;
 
   /*! Value of constant */
-  tCoreNumber value;
+  tNumber value;
 
 public:
 
@@ -73,7 +73,7 @@ private:
    * \param name Name of constant;
    * \param value Value of constant;
    */
-  tConstant(const util::tString& name, tCoreNumber value_);
+  tConstant(const util::tString& name, tNumber value_);
 
 public:
 
@@ -94,15 +94,15 @@ public:
     return constant_id;
   }
 
-  virtual const tCoreNumber& GetValue() const
+  virtual const tNumber& GetValue() const
   {
     return value;
   }
 
   inline static void StaticInit()
   {
-    cNO_MIN_TIME_LIMIT = ::std::tr1::shared_ptr<tConstant>(new tConstant("No Limit", tCoreNumber(-1, &(::finroc::core::tUnit::ms))));
-    cNO_MAX_TIME_LIMIT = ::std::tr1::shared_ptr<tConstant>(new tConstant("No Limit", tCoreNumber(util::tInteger::cMAX_VALUE, &(::finroc::core::tUnit::ms))));
+    cNO_MIN_TIME_LIMIT = ::std::tr1::shared_ptr<tConstant>(new tConstant("No Limit", tNumber(-1, &(::finroc::core::tUnit::ms))));
+    cNO_MAX_TIME_LIMIT = ::std::tr1::shared_ptr<tConstant>(new tConstant("No Limit", tNumber(util::tInteger::cMAX_VALUE, &(::finroc::core::tUnit::ms))));
   }
 
 };

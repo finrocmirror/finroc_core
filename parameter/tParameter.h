@@ -27,9 +27,11 @@
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
 #include "core/parameter/tParameterInfo.h"
+#include "core/port/std/tPort.h"
+#include "core/tAnnotatable.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tFrameworkElement.h"
-#include "core/port/std/tPort.h"
+#include "core/port/std/tPortBase.h"
 
 namespace finroc
 {
@@ -45,42 +47,57 @@ class tDataType;
 template<typename T>
 class tParameter : public tPort<T>
 {
-private:
-
-  /*! Paramater info */
-  tParameterInfo* info;
-
-protected:
-
-  virtual void PostChildInit()
+  /*! Special Port class to load value when initialized */
+  class tPortImpl : public tPortBase
   {
-    ::finroc::core::tFrameworkElement::PostChildInit();
-    try
+  private:
+
+    /*! Paramater info */
+    tParameterInfo* info;
+
+  protected:
+
+    virtual void PostChildInit()
     {
-      info->LoadValue(true);
+      ::finroc::core::tFrameworkElement::PostChildInit();
+      try
+      {
+        info->LoadValue(true);
+      }
+      catch (const util::tException& e)
+      {
+        FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, ::finroc::core::tFrameworkElement::log_domain, e);
+      }
     }
-    catch (const util::tException& e)
+
+  public:
+
+    tPortImpl(tPortCreationInfo pci) :
+        tPortBase(pci),
+        info(new tParameterInfo())
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, ::finroc::core::tFrameworkElement::log_domain, e);
+      AddAnnotation(info);
     }
+
+  };
+
+  inline static tDataType* GetType(tDataType* dt)
+  {
+    return dt != NULL ? dt : tDataTypeRegister::GetInstance()->GetDataType<T>();
   }
 
 public:
 
-  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry, tDataType* dt = NULL) :
-      tPort<T>(tPortCreationInfo(description, parent, dt, tPortFlags::cINPUT_PORT)),
-      info(new tParameterInfo())
+  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry, tDataType* dt = NULL)
   {
     // this(description,parent,dt);
-    ::finroc::core::tAnnotatable::AddAnnotation(info);
-    info->SetConfigEntry(config_entry);
+    this->wrapped = new tPortImpl(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT));
+    (static_cast<tPortImpl*>(this->wrapped))->info->SetConfigEntry(config_entry);
   }
 
-  tParameter(const util::tString& description, tFrameworkElement* parent, tDataType* dt = NULL) :
-      tPort<T>(tPortCreationInfo(description, parent, dt, tPortFlags::cINPUT_PORT)),
-      info(new tParameterInfo())
+  tParameter(const util::tString& description, tFrameworkElement* parent, tDataType* dt = NULL)
   {
-    ::finroc::core::tAnnotatable::AddAnnotation(info);
+    this->wrapped = new tPortImpl(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT));
   }
 
 };

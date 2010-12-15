@@ -36,7 +36,7 @@ namespace core
 {
 class tRuntimeEnvironment;
 class tAbstractPort;
-class tCreateModuleAction;
+class tCreateFrameworkElementAction;
 class tConstructorParameters;
 class tCoreOutput;
 
@@ -134,6 +134,8 @@ public:
 
   };
 
+public:
+  class tChildIterator; // inner class forward declaration
   friend class util::tGarbageCollector;
   friend class tChildIterator;
   friend class tRuntimeEnvironment;
@@ -461,7 +463,7 @@ public:
    * \param other Other String
    * \return Result
    */
-  bool DescriptionEquals(const util::tString& other);
+  bool DescriptionEquals(const util::tString& other) const;
 
   /*!
    * \return Returns constant and non-constant flags
@@ -472,7 +474,7 @@ public:
   }
 
   /*!
-   *  same as below -
+   *  same as getDescription()
    *  except that we return a const char* in C++ - this way, no memory needs to be allocated
    */
   const char* GetCDescription() const;
@@ -808,6 +810,27 @@ public:
    */
   void SetDescription(const util::tString& description);
 
+  // for efficient streaming of fully-qualified framework element name
+  void StreamQualifiedName(std::ostream& output) const
+  {
+    if (!GetFlag(tCoreFlags::cIS_RUNTIME))
+    {
+      StreamQualifiedParent(output);
+    }
+    output << GetCDescription();
+  }
+
+  void StreamQualifiedParent(std::ostream& output) const
+  {
+    const tFrameworkElement* parent = GetParent();
+    if (parent != NULL && (!parent->GetFlag(tCoreFlags::cIS_RUNTIME)))
+    {
+      parent->StreamQualifiedParent(output);
+      output << parent->GetCDescription();
+      output << "/";
+    }
+  }
+
   /*!
    * Mark element as finstructed
    * (should only be called by AdminServer and CreateModuleActions)
@@ -815,7 +838,7 @@ public:
    * \param create_action Action with which framework element was created
    * \param params Parameters that module was created with (may be null)
    */
-  void SetFinstructed(tCreateModuleAction* create_action, tConstructorParameters* params);
+  void SetFinstructed(tCreateFrameworkElementAction* create_action, tConstructorParameters* params);
 
   /*!
    * Called whenever a structure parameter on this framework element changed
@@ -838,26 +861,125 @@ public:
    */
   void WriteDescription(tCoreOutput* os, int i) const;
 
-  // for efficient streaming of fully-qualified framework element name
-  void StreamQualifiedName(std::ostream& output) const
-  {
-    if (!GetFlag(tCoreFlags::cIS_RUNTIME))
-    {
-      StreamQualifiedParent(output);
-    }
-    output << GetCDescription();
-  }
+public:
 
-  void StreamQualifiedParent(std::ostream& output) const
+  /*!
+   * \author Max Reichardt
+   *
+   * Used to iterate over a framework element's children.
+   */
+  class tChildIterator : public util::tObject
   {
-    const tFrameworkElement* parent = GetParent();
-    if (parent != NULL && (!parent->GetFlag(tCoreFlags::cIS_RUNTIME)))
+  private:
+
+    // next element to check (in array)
+    tFrameworkElement::tLink* const * next_elem;
+
+    // last element in array
+    tFrameworkElement::tLink* const * last;
+
+    /*! Relevant flags */
+    int flags;
+
+    /*! Expected result when ANDing with flags */
+    int result;
+
+  protected:
+
+    /*! FrameworkElement that is currently iterated over */
+    const tFrameworkElement* cur_parent;
+
+  public:
+
+    tChildIterator(const tFrameworkElement* parent);
+
+    /*!
+     * \param parent Framework element over whose child to iterate
+     * \param flags Flags that children must have in order to be considered
+     */
+    tChildIterator(const tFrameworkElement* parent, int flags_);
+
+    /*!
+     * \param parent Framework element over whose child to iterate
+     * \param flags Relevant flags
+     * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
+     */
+    tChildIterator(const tFrameworkElement* parent, int flags_, int result_);
+
+    /*!
+     * \param parent Framework element over whose child to iterate
+     * \param flags Relevant flags
+     * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
+     * \param include_non_ready Include children that are not fully initialized yet?
+     */
+    tChildIterator(const tFrameworkElement* parent, int flags_, int result_, bool include_non_ready);
+
+    /*!
+     * \return Next child - or null if there are no more children left
+     */
+    tFrameworkElement* Next();
+
+    /*!
+     * \return Next child that is a port - or null if there are no more children left
+     */
+    tAbstractPort* NextPort();
+
+    /*!
+     * Use iterator again on same framework element
+     */
+    inline void Reset()
     {
-      parent->StreamQualifiedParent(output);
-      output << parent->GetCDescription();
-      output << "/";
+      Reset(cur_parent);
     }
-  }
+
+    /*!
+     * Use Iterator for different framework element
+     * (or same and reset)
+     *
+     * \param parent Framework element over whose child to iterate
+     */
+    inline void Reset(const tFrameworkElement* parent)
+    {
+      Reset(parent, 0, 0);
+    }
+
+    /*!
+     * Use Iterator for different framework element
+     * (or same and reset)
+     *
+     * \param parent Framework element over whose child to iterate
+     * \param flags Flags that children must have in order to be considered
+     */
+    inline void Reset(const tFrameworkElement* parent, int flags_)
+    {
+      Reset(parent, flags_, flags_);
+    }
+
+    /*!
+     * Use Iterator for different framework element
+     * (or same and reset)
+     *
+     * \param parent Framework element over whose child to iterate
+     * \param flags Relevant flags
+     * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
+     */
+    inline void Reset(const tFrameworkElement* parent, int flags_, int result_)
+    {
+      Reset(parent, flags_, result_, false);
+    }
+
+    /*!
+     * Use Iterator for different framework element
+     * (or same and reset)
+     *
+     * \param parent Framework element over whose child to iterate
+     * \param flags Relevant flags
+     * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
+     * \param include_non_ready Include children that are not fully initialized yet?
+     */
+    void Reset(const tFrameworkElement* parent, int flags_, int result_, bool include_non_ready);
+
+  };
 
 };
 

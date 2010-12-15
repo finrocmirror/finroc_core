@@ -24,7 +24,7 @@
 #ifndef CORE__PORT__STD__TEMPTYPORTDATAIMPL_H
 #define CORE__PORT__STD__TEMPTYPORTDATAIMPL_H
 
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 
 namespace finroc
 {

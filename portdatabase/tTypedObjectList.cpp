@@ -24,7 +24,7 @@
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/buffers/tCoreInput.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "core/portdatabase/tDataTypeRegister.h"
 #include "core/buffers/tCoreOutput.h"

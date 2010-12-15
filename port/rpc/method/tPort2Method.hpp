@@ -21,7 +21,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tInterfacePort.h"
-#include "core/port/rpc/tInterfaceClientPort.h"
 #include "core/port/rpc/tMethodCall.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
@@ -40,12 +39,12 @@ tPort2Method<HANDLER, R, P1, P2>::tPort2Method(tPortInterface& port_interface, c
 }
 
 template<typename HANDLER, typename R, typename P1, typename P2>
-R tPort2Method<HANDLER, R, P1, P2>::Call(tInterfaceClientPort* port, P1 p1, P2 p2, int net_timeout)
+R tPort2Method<HANDLER, R, P1, P2>::Call(tInterfaceClientPort port, P1 p1, P2 p2, int net_timeout)
 {
   //1
   assert((HasLock(p1)));  //2
   assert((HasLock(p2)));
-  tInterfacePort* ip = port->GetServer();
+  tInterfacePort* ip = port.GetServer();
   if (ip != NULL && ip->GetType() == tInterfacePort::eNetwork)
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
@@ -53,7 +52,7 @@ R tPort2Method<HANDLER, R, P1, P2>::Call(tInterfaceClientPort* port, P1 p1, P2 p
     mc->AddParamForSending(p1);  //2
     mc->AddParamForSending(p2);
     mc->SendParametersComplete();
-    mc->PrepareSyncRemoteExecution(this, port->GetDataType(), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());
+    mc->PrepareSyncRemoteExecution(this, port.GetDataType(), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());
     try
     {
       mc = (static_cast<tInterfaceNetPort*>(ip))->SynchCallOverTheNet(mc, mc->GetNetTimeout());

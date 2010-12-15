@@ -30,9 +30,9 @@ namespace core
 template<typename B>
 tTransactionalData<B>::tTransactionalData(const util::tString& description, bool input_, bool output_, bool local, tDataType* bclass, int commit_interval, bool input_shared, bool output_shared) :
     port_set(new tTDPortSet(this, description)),
-    output(output_ ? new tOutputTransactionStreamPort<B>(tPortCreationInfo("output transactions", port_set, bclass, output_shared ? tPortFlags::cSHARED_OUTPUT_PORT : tPortFlags::cOUTPUT_PORT), commit_interval, this) : NULL),
-    input(input_ ? new tInputTransactions(this, tPortCreationInfo(bclass, input_shared ? tPortFlags::cSHARED_INPUT_PORT : tPortFlags::cINPUT_PORT)) : NULL),
-    local_data(local ? new tSingletonPort<tTransactionalData<B>*>(tPortCreationInfo("data", this->GetType(), tPortFlags::cOUTPUT_PORT), this) : NULL),
+    output(output_ ? tOutputTransactionStreamPort<B>(tPortCreationInfo("output transactions", port_set, bclass, output_shared ? tPortFlags::cSHARED_OUTPUT_PORT : tPortFlags::cOUTPUT_PORT), commit_interval, this) : NULL),
+    input(input_ ? tInputTransactions(this, tPortCreationInfo(bclass, input_shared ? tPortFlags::cSHARED_INPUT_PORT : tPortFlags::cINPUT_PORT)) : NULL),
+    local_data(local ? tSingletonPort<tTransactionalData<B>*>(tPortCreationInfo("data", this->GetType(), tPortFlags::cOUTPUT_PORT), this) : NULL),
     handling_new_connection(false)
 {
   tStreamCommitThread::GetInstance()->Register(this);
@@ -43,7 +43,7 @@ void tTransactionalData<B>::CommitData(B data)
 {
   if (output != NULL)
   {
-    output->CommitData(data);
+    output.CommitData(data);
   }
 }
 
@@ -51,7 +51,7 @@ template<typename B>
 void tTransactionalData<B>::HandleNewConnection(tAbstractPort* partner)
 {
   handling_new_connection = true;
-  const tTransactionPacket* b = static_cast<const tTransactionPacket*>(input->GetPullLockedUnsafe(false));
+  const tTransactionPacket* b = static_cast<const tTransactionPacket*>(input.GetPullLockedUnsafe(false));
   this->ProcessPacket(b);
   b->GetManager()->GetCurrentRefCounter()->ReleaseLock();
   handling_new_connection = false;
@@ -66,7 +66,7 @@ tTransactionalData<B>::tTDPortSet::tTDPortSet(tTransactionalData* const outer_cl
 
 template<typename B>
 tTransactionalData<B>::tInputTransactions::tInputTransactions(tTransactionalData* const outer_class_ptr_, tPortCreationInfo pci) :
-    tInputTransactionStreamPort<B>("input transactions", pci, outer_class_ptr_),
+    tInputTransactionStreamPort<B>("input transactions", pci, outer_class_ptr_, outer_class_ptr_),
     outer_class_ptr(outer_class_ptr_)
 {
 }

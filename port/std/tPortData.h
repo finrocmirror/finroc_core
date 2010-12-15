@@ -21,10 +21,10 @@
  */
 #include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__STD__TPORTDATAIMPL_H
-#define CORE__PORT__STD__TPORTDATAIMPL_H
+#ifndef CORE__PORT__STD__TPORTDATA_H
+#define CORE__PORT__STD__TPORTDATA_H
 
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 
 namespace finroc
 {
@@ -119,4 +119,4 @@ tPortDataReference* tPortData::GetCurReference() const
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__STD__TPORTDATAIMPL_H
+#endif // CORE__PORT__STD__TPORTDATA_H

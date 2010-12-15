@@ -25,17 +25,17 @@
 #define CORE__TRUNTIMESETTINGS_H
 
 #include "core/port/net/tUpdateTimeChangeListener.h"
-#include "core/datatype/tCoreNumber.h"
-#include "core/settings/tSettings.h"
+#include "core/datatype/tNumber.h"
+#include "core/tFrameworkElement.h"
 #include "core/port/cc/tCCPortListener.h"
-
-#include "core/settings/tNumberSetting.h"
 
 namespace finroc
 {
 namespace core
 {
-class tSetting;
+class tParameterBool;
+template<typename T>
+class tParameterNumeric;
 class tDataType;
 class tCCPortBase;
 
@@ -48,7 +48,7 @@ class tCCPortBase;
  *
  * staticInit() should be called after runtime and data types have been initialized.
  */
-class tRuntimeSettings : public tSettings, public tCCPortListener<tCoreNumber>
+class tRuntimeSettings : public tFrameworkElement, public tCCPortListener<tNumber>
 {
 private:
 
@@ -61,16 +61,16 @@ private:
 public:
 
   /*! Display warning, if loop times of CoreLoopThreads are exceeded? */
-  static tBoolSetting* cWARN_ON_CYCLE_TIME_EXCEED;
+  static tParameterBool* cWARN_ON_CYCLE_TIME_EXCEED;
 
   /*! Default cycle time of CoreLoopThreads in ms*/
-  static tLongSetting* cDEFAULT_CYCLE_TIME;
+  static tParameterNumeric<int64>* cDEFAULT_CYCLE_TIME;
 
   /*! Default number of event threads */
   //public static final IntSetting NUM_OF_EVENT_THREADS = inst.add("NUM_OF_EVENT_THREADS", 2, false);
 
   /*! Default minimum network update time (ms) */
-  static tIntSetting* cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME;
+  static tParameterNumeric<int>* cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME;
 
   static const int cEDGE_LIST_DEFAULT_SIZE = 0;
 
@@ -80,7 +80,7 @@ public:
   //public static final IntSetting BUFFER_TRACKER_LOOP_TIME = inst.add("BUFFER_TRACKER_LOOP_TIME", 140, true);
 
   /*! Cycle time for stream thread */
-  static tIntSetting* cSTREAM_THREAD_CYCLE_TIME;
+  static tParameterNumeric<int>* cSTREAM_THREAD_CYCLE_TIME;
 
   /*! > 0 if Runtime is instantiated in Java Applet - contains bit size of server CPU */
   //public static final IntSetting runningInApplet = inst.add("RUNNING_IN_APPLET", 0, false);
@@ -89,20 +89,13 @@ public:
    * Period in ms after which garbage collector will delete objects... any threads
    * still working on objects while creating deletion task should be finished by then
    */
-  static tIntSetting* cGARBAGE_COLLECTOR_SAFETY_PERIOD;
+  static tParameterNumeric<int>* cGARBAGE_COLLECTOR_SAFETY_PERIOD;
 
   /*! Collect edge statistics ? */
   static const bool cCOLLECT_EDGE_STATISTICS = false;
 
   /*! Log domain for this class */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "settings");
-
-private:
-
-  inline static const char* GetLogDescription()
-  {
-    return "RuntimeSettings";
-  }
 
 protected:
 
@@ -132,7 +125,7 @@ public:
     update_time_listener.Notify(dt, NULL, time);
   }
 
-  virtual void PortChanged(tCCPortBase* origin, const tCoreNumber* value)
+  virtual void PortChanged(tCCPortBase* origin, const tNumber* value)
   {
     update_time_listener.Notify(NULL, NULL, static_cast<int16>(value->IntValue()));
   }

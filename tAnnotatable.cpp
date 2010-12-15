@@ -32,6 +32,7 @@ void tAnnotatable::AddAnnotation(tFinrocAnnotation* ann)
   if (ann->GetType() == NULL)
   {
     ann->InitDataType();
+    assert(((ann->GetType() != NULL)) && "Initializing data type failed");
   }
   assert(((ann->annotated == NULL)) && "Already used as annotation in other object. Not allowed (double deleteting etc.)");
   ann->annotated = this;

@@ -25,7 +25,7 @@
 #include "core/buffers/tCoreInput.h"
 #include "core/tFrameworkElement.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 #include "core/parameter/tConstructorParameters.h"
 #include "core/buffers/tCoreOutput.h"
 

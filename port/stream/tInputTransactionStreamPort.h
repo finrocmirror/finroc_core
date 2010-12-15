@@ -33,6 +33,7 @@ namespace finroc
 namespace core
 {
 class tTransactionPacket;
+class tNewConnectionHandler;
 
 /*!
  * \author Max Reichardt
@@ -48,8 +49,8 @@ class tInputTransactionStreamPort : public tInputStreamPort<tTransactionPacket>
 {
 public:
 
-  tInputTransactionStreamPort(const util::tString& description, tPortCreationInfo pci, tInputPacketProcessor<tTransactionPacket>* user) :
-      tInputStreamPort<tTransactionPacket>(description, pci, user)
+  tInputTransactionStreamPort(const util::tString& description, tPortCreationInfo pci, tInputPacketProcessor<tTransactionPacket>* user, tNewConnectionHandler* conn_handler) :
+      tInputStreamPort<tTransactionPacket>(description, pci, user, conn_handler)
   {
   }
 

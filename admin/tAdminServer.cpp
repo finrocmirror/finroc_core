@@ -21,7 +21,7 @@
  */
 #include "core/portdatabase/tDataType.h"
 #include "core/admin/tAdminServer.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/buffers/tMemBuffer.h"
 #include "core/datatype/tCoreString.h"
 #include "core/portdatabase/tDataTypeRegister.h"
@@ -30,7 +30,7 @@
 #include "core/port/rpc/tInterfacePort.h"
 #include "core/buffers/tCoreOutput.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
-#include "core/plugin/tCreateModuleAction.h"
+#include "core/plugin/tCreateFrameworkElementAction.h"
 #include "core/plugin/tPlugins.h"
 #include "core/parameter/tStructureParameterList.h"
 #include "core/port/std/tPortDataManager.h"
@@ -96,10 +96,10 @@ tMemBuffer* tAdminServer::HandleCall(const tAbstractMethod* method)
   assert((method == &(cGET_CREATE_MODULE_ACTIONS)));
   tMemBuffer* mb = static_cast<tMemBuffer*>(GetUnusedBuffer(tMemBuffer::cBUFFER_TYPE));
   tCoreOutput* co = new tCoreOutput(mb);
-  const util::tSimpleList<tCreateModuleAction*>& module_types = tPlugins::GetInstance()->GetModuleTypes();
+  const util::tSimpleList<tCreateFrameworkElementAction*>& module_types = tPlugins::GetInstance()->GetModuleTypes();
   for (size_t i = 0u; i < module_types.Size(); i++)
   {
-    const tCreateModuleAction& cma = *module_types.Get(i);
+    const tCreateFrameworkElementAction& cma = *module_types.Get(i);
     co->WriteString(cma.GetName());
     co->WriteString(cma.GetModuleGroup());
     if (cma.GetParameterTypes() != NULL)
@@ -313,7 +313,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int cma_index, 
     {
       {
         util::tLock lock4(GetRegistryLock());
-        tCreateModuleAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(cma_index);
+        tCreateFrameworkElementAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(cma_index);
         ::finroc::core::tFrameworkElement* parent = tRuntimeEnvironment::GetInstance()->GetElement(parent_handle);
         if (parent == NULL || (!parent->IsReady()))
         {

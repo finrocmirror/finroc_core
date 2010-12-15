@@ -24,6 +24,7 @@
 #include "rrlib/finroc_core_utils/tTime.h"
 #include "core/tLinkEdge.h"
 #include "core/port/tAbstractPort.h"
+#include "core/tRuntimeSettings.h"
 #include "core/portdatabase/sSerializationHelper.h"
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tConstant.h"
@@ -32,9 +33,8 @@
 #include "core/port/rpc/tMethodCallSyncher.h"
 #include "rrlib/finroc_core_utils/container/tBoundedQElementContainer.h"
 #include "rrlib/finroc_core_utils/stream/tChunkedBuffer.h"
-#include "core/port/stream/tStreamCommitThread.h"
 #include "core/admin/tAdminServer.h"
-#include "core/tRuntimeSettings.h"
+#include "core/port/stream/tStreamCommitThread.h"
 #include "core/plugin/tPlugins.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tFrameworkElementTreeFilter.h"
@@ -100,6 +100,26 @@ void tRuntimeEnvironment::AddListener(tRuntimeListener* listener)
     util::tLock lock2(registry);
     registry.listeners.Add(listener);
   }
+}
+
+tRuntimeEnvironment::~tRuntimeEnvironment()
+{
+  ;
+  active = false;
+  util::tThread::StopThreads();
+
+  // delete all children - (runtime settings last)
+  tFrameworkElement::tChildIterator ci(this);
+  ::finroc::core::tFrameworkElement* next = NULL;
+  while ((next = ci.Next()) != NULL)
+  {
+    if (next != tRuntimeSettings::GetInstance())
+    {
+      next->ManagedDelete();
+    }
+  }
+  tRuntimeSettings::GetInstance()->ManagedDelete();
+  instance_raw_ptr = NULL;
 }
 
 ::finroc::core::tFrameworkElement* tRuntimeEnvironment::GetElement(int handle)
@@ -171,14 +191,10 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock = tThreadLocalCache::StaticInit();  // can safely be done first
   tMethodCallSyncher::StaticInit();  // dito
   util::tBoundedQElementContainer::StaticInit();
-  util::tChunkedBuffer::StaticInit();
-  tStreamCommitThread::StaticInit();  // should be done before any ports/elements are added
+  util::tChunkedBuffer::StaticInit();  // should be done before any ports/elements are added
 
   new tRuntimeEnvironment(); // should be done before any ports/elements are added
   instance->registry.infos_lock = infos_lock;
-
-  // Start thread - because it needs a thread local cache
-  tStreamCommitThread::GetInstance()->Start();
 
   // add uninitialized child
   instance->unrelated = new ::finroc::core::tFrameworkElement(instance.get(), "Unrelated");
@@ -191,6 +207,10 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
 
   //ConfigFile.init(conffile);
   tRuntimeSettings::StaticInit();  // can be done now... or last
+
+  tStreamCommitThread::StaticInit();
+  // Start thread
+  tStreamCommitThread::GetInstance()->Start();
 
   //Load plugins
   tPlugins::StaticInit();

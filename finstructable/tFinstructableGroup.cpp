@@ -27,13 +27,12 @@
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/tAbstractPort.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "core/plugin/tCreateModuleAction.h"
+#include "core/plugin/tCreateFrameworkElementAction.h"
 #include "core/plugin/tPlugins.h"
 #include "core/parameter/tConstructorParameters.h"
 #include "rrlib/xml2_wrapper/tXML2WrapperException.h"
 #include "rrlib/xml2_wrapper/tXMLDocument.h"
 #include "core/tFrameworkElementTreeFilter.h"
-#include "core/tChildIterator.h"
 #include "core/datatype/tCoreString.h"
 #include "rrlib/finroc_core_utils/sFiles.h"
 #include "core/tLinkEdge.h"
@@ -46,7 +45,7 @@ tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup::cCREATE_AC
 
 tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name) :
     tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
-    xml_file(new tStringStructureParameter("XML file", "")),
+    xml_file(new tStructureParameterString("XML file", "")),
     current_xml_file(""),
     connect_tmp(),
     link_tmp("")
@@ -56,7 +55,7 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
 
 tFinstructableGroup::tFinstructableGroup(const util::tString& name, tFrameworkElement* parent, const util::tString& xml_file_) :
     tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
-    xml_file(new tStringStructureParameter("XML file", "")),
+    xml_file(new tStructureParameterString("XML file", "")),
     current_xml_file(""),
     connect_tmp(),
     link_tmp("")
@@ -116,7 +115,7 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     util::tString type = node.GetStringAttribute("type");
 
     // find action
-    tCreateModuleAction* action = tPlugins::GetInstance()->LoadModuleType(group, type);
+    tCreateFrameworkElementAction* action = tPlugins::GetInstance()->LoadModuleType(group, type);
     if (action == NULL)
     {
       FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Failed to instantiate element. No module type ", group, "/", type, " available. Skipping...");
@@ -295,7 +294,7 @@ void tFinstructableGroup::SaveXml()
 
 void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFrameworkElement* current)
 {
-  tChildIterator ci(current);
+  tFrameworkElement::tChildIterator ci(current);
   ::finroc::core::tFrameworkElement* fe = NULL;
   while ((fe = ci.Next()) != NULL)
   {
@@ -306,7 +305,7 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
       // serialize framework element
       rrlib::xml2::tXMLNode n = node.AddChildNode("element");
       n.SetAttribute("name", fe->GetCDescription());
-      tCreateModuleAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(spl->GetCreateAction());
+      tCreateFrameworkElementAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(spl->GetCreateAction());
       n.SetAttribute("group", cma->GetModuleGroup());
       n.SetAttribute("type", cma->GetName());
       if (cps != NULL)

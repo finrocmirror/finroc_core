@@ -19,34 +19,36 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tCoreSerializableImpl.h"
-#include "core/portdatabase/sSerializationHelper.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "rrlib/finroc_core_utils/tJCBase.h"
+
+#ifndef CORE__PORT__STREAM__TNEWCONNECTIONHANDLER_H
+#define CORE__PORT__STREAM__TNEWCONNECTIONHANDLER_H
 
 namespace finroc
 {
 namespace core
 {
-void tCoreSerializable::Deserialize(const util::tString& s)
-{
-  sSerializationHelper::DeserializeFromHexString(this, s);
-}
+class tAbstractPort;
 
-void tCoreSerializable::Deserialize(const rrlib::xml2::tXMLNode& node)
+/*!
+ * \author Max Reichardt
+ *
+ * Called when a port is connected
+ */
+class tNewConnectionHandler : public util::tInterface
 {
-  Deserialize(node.GetTextContent());
-}
+public:
 
-util::tString tCoreSerializable::Serialize() const
-{
-  return sSerializationHelper::SerializeToHexString(this);
-}
+  /*!
+   * Called when a port is connected
+   *
+   * \param partner Partner port
+   */
+  virtual void HandleNewConnection(tAbstractPort* partner) = 0;
 
-void tCoreSerializable::Serialize(rrlib::xml2::tXMLNode& node) const
-{
-  node.SetTextContent(Serialize());
-}
+};
 
 } // namespace finroc
 } // namespace core
 
+#endif // CORE__PORT__STREAM__TNEWCONNECTIONHANDLER_H

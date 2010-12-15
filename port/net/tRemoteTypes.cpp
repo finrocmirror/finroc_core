@@ -22,9 +22,9 @@
 #include "core/port/net/tRemoteTypes.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/portdatabase/tDataTypeRegister.h"
-#include "core/buffers/tCoreOutput.h"
-#include "core/settings/tSetting.h"
+#include "core/parameter/tParameterNumeric.h"
 #include "core/tRuntimeSettings.h"
+#include "core/buffers/tCoreOutput.h"
 
 namespace finroc
 {
@@ -72,7 +72,8 @@ tDataType* tRemoteTypes::GetLocalType(int16 uid)
 
 void tRemoteTypes::SerializeLocalDataTypes(tDataTypeRegister* dtr, tCoreOutput* co)
 {
-  co->WriteShort(static_cast<int16>(tRuntimeSettings::cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME->Get()));
+  int t = tRuntimeSettings::cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME->Get();
+  co->WriteShort(static_cast<int16>(t));
   co->WriteShort(dtr->GetMaxTypeIndex());
   for (int16 i = 0, n = static_cast<int16>(dtr->GetMaxTypeIndex()); i < n; i++)
   {

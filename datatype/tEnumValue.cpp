@@ -21,7 +21,7 @@
  */
 #include "core/datatype/tEnumValue.h"
 #include "core/portdatabase/tDataTypeRegister.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 
 namespace finroc
 {

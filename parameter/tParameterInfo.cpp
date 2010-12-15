@@ -29,10 +29,10 @@
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/std/tPortBase.h"
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/std/tPortDataManager.h"
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 
 namespace finroc
 {

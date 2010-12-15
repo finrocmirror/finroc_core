@@ -24,7 +24,7 @@
 #ifndef CORE__TFINROCANNOTATION_H
 #define CORE__TFINROCANNOTATION_H
 
-#include "core/portdatabase/tTypedObjectImpl.h"
+#include "core/portdatabase/tTypedObject.h"
 
 namespace finroc
 {

@@ -20,7 +20,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/test/tBasicRealtimeTest.h"
-#include "core/port/cc/tNumberPort.h"
 #include "core/tRuntimeEnvironment.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "rrlib/finroc_core_utils/tTime.h"
@@ -32,12 +31,12 @@ namespace core
 const int tBasicRealtimeTest::cINTERVAL;
 
 tBasicRealtimeTest::tBasicRealtimeTest(const util::tString& name) :
-    port(new tNumberPort(name + "-port", true)),
+    port(name + "-port", true),
     max_latency(),
     total_latency(),
     cycles()
 {
-  port->Init();
+  port.Init();
   SetName(name);
 }
 
@@ -67,8 +66,8 @@ void tBasicRealtimeTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
 
 void tBasicRealtimeTest::Run()
 {
-  port->Publish(40);
-  port->Publish(42);
+  port.Publish(40);
+  port.Publish(42);
 
   int64 next = util::tTime::NanoTime() + util::tTime::cNSEC_PER_SEC;
   while (true)
@@ -81,7 +80,7 @@ void tBasicRealtimeTest::Run()
     }
     total_latency.Set(total_latency.Get() + diff);
     int c = cycles.IncrementAndGet();
-    port->Publish(c);
+    port.Publish(c);
     next += cINTERVAL;
   }
 }

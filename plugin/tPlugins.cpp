@@ -49,17 +49,17 @@ void tPlugins::FindAndLoadPlugins()
   // plugins.Add(new tMCA2Plugin());
 }
 
-tCreateModuleAction* tPlugins::LoadModuleType(const util::tString& group, const util::tString& name)
+tCreateFrameworkElementAction* tPlugins::LoadModuleType(const util::tString& group, const util::tString& name)
 {
   // dynamically loaded .so files
   static util::tSimpleList<util::tString> loaded;
   static tDLCloser dlcloser;
 
   // try to find module among existing modules
-  const util::tSimpleList<tCreateModuleAction*>& modules = GetModuleTypes();
+  const util::tSimpleList<tCreateFrameworkElementAction*>& modules = GetModuleTypes();
   for (size_t i = 0u; i < modules.Size(); i++)
   {
-    tCreateModuleAction* cma = modules.Get(i);
+    tCreateFrameworkElementAction* cma = modules.Get(i);
     if (cma->GetModuleGroup().Equals(group) && cma->GetName().Equals(name))
     {
       return cma;

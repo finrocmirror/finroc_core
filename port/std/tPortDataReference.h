@@ -24,7 +24,7 @@
 #ifndef CORE__PORT__STD__TPORTDATAREFERENCE_H
 #define CORE__PORT__STD__TPORTDATAREFERENCE_H
 
-#include "core/port/std/tPortDataImpl.h"
+#include "core/port/std/tPortData.h"
 #include "core/port/std/tPortDataManager.h"
 
 #include "core/port/tCombinedPointer.h"

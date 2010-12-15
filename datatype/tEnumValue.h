@@ -28,7 +28,7 @@
 #include "core/buffers/tCoreInput.h"
 #include "core/buffers/tCoreOutput.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "core/portdatabase/tCoreSerializableImpl.h"
+#include "core/portdatabase/tCoreSerializable.h"
 
 namespace finroc
 {
