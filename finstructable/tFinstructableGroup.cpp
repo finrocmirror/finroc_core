@@ -53,7 +53,7 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
   AddAnnotation(new tStructureParameterList(xml_file));
 }
 
-tFinstructableGroup::tFinstructableGroup(const util::tString& name, tFrameworkElement* parent, const util::tString& xml_file_) :
+tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_) :
     tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
     xml_file(new tStructureParameterString("XML file", "")),
     current_xml_file(""),
@@ -331,7 +331,7 @@ void tFinstructableGroup::StructureParametersChanged()
   if (!current_xml_file.Equals(xml_file->GetValue()->ToString()))
   {
     current_xml_file = xml_file->Get();
-    if (this->ChildCount() == 0 && util::sFiles::Exists(current_xml_file))
+    if (util::sFiles::Exists(current_xml_file)) //this->ChildCount() == 0 &&
     {
       LoadXml(current_xml_file);
     }

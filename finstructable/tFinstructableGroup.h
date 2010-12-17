@@ -85,6 +85,7 @@ private:
    */
   tAbstractPort* GetChildPort(const util::tString& link);
 
+protected:
   /*!
    * \param link (as from link edge)
    * \return Relative link to this port (or absolute link if it is globally unique)
@@ -97,6 +98,7 @@ private:
    */
   util::tString GetEdgeLink(tAbstractPort* ap);
 
+private:
   /*!
    * Intantiate element
    *
@@ -145,7 +147,7 @@ public:
    *
    * \param xml_file name of XML file (relative to finroc repository) that determines contents of this group
    */
-  tFinstructableGroup(const util::tString& name, tFrameworkElement* parent, const util::tString& xml_file_);
+  tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_);
 
   /*!
    * Save contents of group back to Xml file
@@ -154,7 +156,7 @@ public:
 
   virtual void StructureParametersChanged();
 
-  void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode& root);
+  virtual void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode& root);
 
 };
 
