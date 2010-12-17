@@ -85,20 +85,6 @@ private:
    */
   tAbstractPort* GetChildPort(const util::tString& link);
 
-protected:
-  /*!
-   * \param link (as from link edge)
-   * \return Relative link to this port (or absolute link if it is globally unique)
-   */
-  util::tString GetEdgeLink(const util::tString& target_link);
-
-  /*!
-   * \param ap Port
-   * \return Relative link to this port (or absolute link if it is globally unique)
-   */
-  util::tString GetEdgeLink(tAbstractPort* ap);
-
-private:
   /*!
    * Intantiate element
    *
@@ -137,12 +123,26 @@ private:
    */
   void SerializeChildren(rrlib::xml2::tXMLNode& node, tFrameworkElement* current);
 
+protected:
+
+  /*!
+   * \param link (as from link edge)
+   * \return Relative link to this port (or absolute link if it is globally unique)
+   */
+  util::tString GetEdgeLink(const util::tString& target_link);
+
+  /*!
+   * \param ap Port
+   * \return Relative link to this port (or absolute link if it is globally unique)
+   */
+  util::tString GetEdgeLink(tAbstractPort* ap);
+
 public:
 
   tFinstructableGroup(tFrameworkElement* parent, const util::tString& name);
 
   /*!
-   * (if the provided file does not exist, it is created, when contents are saved)
+   * (if the provided file does not exist, it is created, when contents are saved - and a warning is displayed)
    * (if the provided file exists, its contents are loaded)
    *
    * \param xml_file name of XML file (relative to finroc repository) that determines contents of this group
@@ -156,7 +156,7 @@ public:
 
   virtual void StructureParametersChanged();
 
-  virtual void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode& root);
+  void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode& root);
 
 };
 

@@ -331,9 +331,14 @@ void tFinstructableGroup::StructureParametersChanged()
   if (!current_xml_file.Equals(xml_file->GetValue()->ToString()))
   {
     current_xml_file = xml_file->Get();
-    if (util::sFiles::Exists(current_xml_file)) //this->ChildCount() == 0 &&
+    //if (this.childCount() == 0) { // TODO: original intension: changing xml files to mutliple existing ones in finstruct shouldn't load all of them
+    if (util::sFiles::Exists(current_xml_file))
     {
       LoadXml(current_xml_file);
+    }
+    else
+    {
+      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Cannot find XML file ", current_xml_file, ". Creating empty group. You may edit and save this group using finstruct.");
     }
   }
 }
