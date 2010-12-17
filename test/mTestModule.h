@@ -1,68 +1,98 @@
-/**
- * You received this file as part of an advanced experimental
- * robotics framework prototype ('finroc')
+//
+// You received this file as part of Finroc
+// A framework for integrated robot control
+//
+// Copyright (C) AG Robotersysteme TU Kaiserslautern
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+//----------------------------------------------------------------------
+/*!\file    mTestModule.h
  *
- * Copyright (C) 2007-2010 Max Reichardt,
- *   Robotics Research Lab, University of Kaiserslautern
+ * \author  Tobias Foehst
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * \date    2010-12-09
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * \brief Contains mTestModule
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * \b mTestModule
+ *
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
+//----------------------------------------------------------------------
+#ifndef _core__mTestModule_h_
+#define _core__mTestModule_h_
 
-#ifndef CORE__TEST__TTESTMODULE_H
-#define CORE__TEST__TTESTMODULE_H
-
-#include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/structure/tModule.h"
-#include "core/port/cc/tPortNumeric.h"
 
-namespace finroc
-{
-namespace core
-{
+//----------------------------------------------------------------------
+// External includes (system with <>, local with "")
+//----------------------------------------------------------------------
 
+//----------------------------------------------------------------------
+// Internal includes with ""
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Debugging
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Namespace declaration
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Forward declarations / typedefs / enums
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Class declaration
+//----------------------------------------------------------------------
+//!
 /*!
- * \author Max Reichardt
  *
- * Module for testing scheduling
  */
-class mTestModule : public tModule
+class mTestModule : public finroc::core::structure::tModule
 {
-private:
+  static finroc::core::tStandardCreateModuleAction<mTestModule> cCREATE_ACTION;
 
-  /*! Create Module Action for finstruct */
-  static tStandardCreateModuleAction<mTestModule> cCREATE_ACTION;
+  int counter;
 
-public:
-
-  /*! Test ports */
-  tPortNumeric si, so, ci, co;
-
-protected:
+//----------------------------------------------------------------------
+// Protected methods
+//----------------------------------------------------------------------
 
   virtual void Control();
 
   virtual void Sense();
 
+//----------------------------------------------------------------------
+// Public methods
+//----------------------------------------------------------------------
 public:
 
-  mTestModule(tFrameworkElement* parent, const util::tString& name);
+  mTestModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name = "TestModule");
+
+  tCI<finroc::core::tPortNumeric> ci_signal_1;
+  tCO<finroc::core::tPortNumeric> co_signal_2;
+  tSI<finroc::core::tPortNumeric> si_signal_3;
+  tSO<finroc::core::tPortNumeric> so_signal_4;
 
 };
 
-} // namespace finroc
-} // namespace core
+//----------------------------------------------------------------------
+// End of namespace declaration
+//----------------------------------------------------------------------
 
-#endif // CORE__TEST__TTESTMODULE_H
+#endif

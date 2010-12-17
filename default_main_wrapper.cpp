@@ -1,6 +1,6 @@
 //
 // You received this file as part of Finroc
-// A framework for innovative robot control
+// A framework for integrated robot control
 //
 // Copyright (C) AG Robotersysteme TU Kaiserslautern
 //
@@ -19,138 +19,113 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    tModule.h
+/*!\file    default_main_wrapper.cpp
  *
  * \author  Tobias Foehst
  * \author  Bernd-Helge Schaefer
  *
  * \date    2010-12-09
  *
- * \brief Contains tModule
- *
- * \b tModule
- *
  */
 //----------------------------------------------------------------------
-#ifndef _core__structure__tModule_h_
-#define _core__structure__tModule_h_
-
-#include "core/tFrameworkElement.h"
+#include "core/default_main_wrapper.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include <cstdlib>
 
+extern "C"
+{
+#include <libgen.h>
+}
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
-#include "core/port/tEdgeAggregator.h"
-#include "core/port/cc/tPortNumeric.h"
-#include "core/plugin/tStandardCreateModuleAction.h"
+#include "rrlib/logging/definitions.h"
+
+#include "core/tRuntimeEnvironment.h"
+#include "plugins/tcp/tTCPServer.h"
 
 //----------------------------------------------------------------------
 // Debugging
+//----------------------------------------------------------------------
+#include <cassert>
+
+//----------------------------------------------------------------------
+// Namespace usage
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
 // Namespace declaration
 //----------------------------------------------------------------------
-namespace finroc
-{
-namespace core
-{
-namespace structure
-{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Class declaration
+// Const values
 //----------------------------------------------------------------------
-//!
-/*!
- *
- */
-class tModule : public finroc::core::tFrameworkElement
+
+//----------------------------------------------------------------------
+// Implementation
+//----------------------------------------------------------------------
+
+bool LogConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
 {
-  class ControlTask : public finroc::util::tTask
+  rrlib::getopt::tOption log_config(name_to_option_map.at("log-config"));
+  if (log_config->IsActive())
   {
-    tModule *const module;
-  public:
-    ControlTask(tModule *module);
-    virtual void ExecuteTask();
-  };
+    rrlib::logging::tLogDomainRegistry::GetInstance()->ConfigureFromFile(boost::any_cast<const char *>(log_config->GetValue()));
+  }
 
-  class SenseTask : public finroc::util::tTask
-  {
-    tModule *const module;
-  public:
-    SenseTask(tModule *module);
-    virtual void ExecuteTask();
-  };
+  return true;
+}
 
-  finroc::core::tEdgeAggregator *controller_input;
-  finroc::core::tEdgeAggregator *controller_output;
-  ControlTask control_task;
-
-  finroc::core::tEdgeAggregator *sensor_input;
-  finroc::core::tEdgeAggregator *sensor_output;
-  SenseTask sense_task;
 
 //----------------------------------------------------------------------
-// Protected methods
+// main
 //----------------------------------------------------------------------
-protected:
+int main(int argc, char **argv)
+{
+  rrlib::logging::default_log_description = basename(argv[0]);
 
-  virtual void Control();
+  rrlib::getopt::SetProgramVersion(cPROGRAM_VERSION);
+  rrlib::getopt::SetProgramDescription(cPROGRAM_DESCRIPTION);
 
-  virtual void Sense();
+  rrlib::getopt::AddValue("log-config", 'l', "Log config file", &LogConfigHandler);
 
-//----------------------------------------------------------------------
-// Public methods
-//----------------------------------------------------------------------
-public:
+  StartUp();
 
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tCI : public TPort
+  rrlib::getopt::ProcessCommandLine(argc, argv);
+
+  finroc::core::tRuntimeEnvironment *runtime_environment = finroc::core::tRuntimeEnvironment::GetInstance();
+  finroc::tcp::tTCPServer *server = new finroc::tcp::tTCPServer(4444, true, NULL);
+  server->Init();
+
+  finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread");
+
+  InitMainGroup(main_thread);
+
+  main_thread->Init();
+  main_thread->StartExecution();
+
+  while (true)
   {
-    tCI(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->controller_input, false)
-    {}
-  };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tCO : public TPort
-  {
-    tCO(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->controller_output, true)
-    {}
-  };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tSI : public TPort
-  {
-    tSI(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->sensor_input, false)
-    {}
-  };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tSO : public TPort
-  {
-    tSO(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->sensor_output, true)
-    {}
-  };
+    try
+    {
+      finroc::util::tThread::Sleep(10000);
+    }
+    catch (const finroc::util::tInterruptedException& e)
+    {
+    }
+  }
+  //  main_thread->JoinThread();
 
-  tModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
-
-};
+  return EXIT_SUCCESS;
+}
 
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------
-}
-}
-}
-
-#endif

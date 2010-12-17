@@ -19,15 +19,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    mTestModule.cpp
+/*!\file    default_main_wrapper.h
  *
  * \author  Tobias Foehst
+ * \author  Bernd-Helge Schaefer
  *
  * \date    2010-12-09
  *
+ * \brief
+ *
+ * \b
+ *
  */
 //----------------------------------------------------------------------
-#include "core/test/mTestModule.h"
+#ifndef _core__default_main_wrapper_h_
+#define _core__default_main_wrapper_h_
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -36,56 +42,35 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "rrlib/getopt/parser.h"
+
+#include "core/thread/tThreadContainer.h"
 
 //----------------------------------------------------------------------
 // Debugging
 //----------------------------------------------------------------------
-#include <cassert>
 
 //----------------------------------------------------------------------
-// Namespace usage
-//----------------------------------------------------------------------
-using namespace rrlib::logging;
-
-//----------------------------------------------------------------------
-// Forward declarations / typedefs / enums
+// Namespace declaration
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Const values
+// Forward declarations / typedefs / enums / const values
 //----------------------------------------------------------------------
-finroc::core::tStandardCreateModuleAction<mTestModule> mTestModule::cCREATE_ACTION("TestModule");
+extern const char * const cPROGRAM_VERSION;
+extern const char * const cPROGRAM_DESCRIPTION;
 
 //----------------------------------------------------------------------
-// Implementation
+// Function declaration
 //----------------------------------------------------------------------
 
-//----------------------------------------------------------------------
-// mTestModule constructors
-//----------------------------------------------------------------------
-mTestModule::mTestModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name)
-    : tModule(parent, name),
+void StartUp();
+void InitMainGroup(finroc::core::tThreadContainer *main_thread);
 
-    counter(0),
 
-    ci_signal_1(this, "Signal 1"),
-    co_signal_2(this, "Signal 2"),
-    si_signal_3(this, "Signal 3"),
-    so_signal_4(this, "Signal 4")
-{}
 
 //----------------------------------------------------------------------
-// mTestModule Control
+// End of namespace declaration
 //----------------------------------------------------------------------
-void mTestModule::Control()
-{
-  this->co_signal_2.Publish(this->counter);
-  FINROC_LOG_STREAM(eLL_DEBUG) << this->counter;
-  this->counter++;
-}
 
-//----------------------------------------------------------------------
-// mTestModule Sense
-//----------------------------------------------------------------------
-void mTestModule::Sense()
-{}
+#endif

@@ -2,10 +2,16 @@
 <targets>
 
   <finroclibrary name="core" libs="dl">
-    <sources exclude="test/** finstructable/pFinstructed.cpp">
+    <sources exclude="default_main_wrapper.* test/** finstructable/pFinstructed.cpp">
       **.cpp
     </sources>
   </finroclibrary>
+  
+  <finroclibrary name="main_wrapper">
+    <sources>
+      default_main_wrapper.cpp
+    </sources>
+  </finroclibrary>  
 
   <finrocprogram name="finstructed">
     <sources>
@@ -61,11 +67,16 @@
     </sources>
   </testprogram>
 
-  <testprogram name="module_test">
+  <finroclibrary name="test_module">
     <sources>
       test/mTestModule.cpp
-      test/pTestModuleTest.cpp
+    </sources>
+  </finroclibrary>
+
+  <testprogram name="module_and_main_wrapper">
+    <sources>
+      test/pTestModule.cpp
     </sources>
   </testprogram>
-  
+
 </targets>

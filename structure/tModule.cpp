@@ -1,48 +1,122 @@
-/**
- * You received this file as part of an advanced experimental
- * robotics framework prototype ('finroc')
+//
+// You received this file as part of Finroc
+// A framework for integrated robot control
+//
+// Copyright (C) AG Robotersysteme TU Kaiserslautern
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+//----------------------------------------------------------------------
+/*!\file    tModule.cpp
  *
- * Copyright (C) 2007-2010
- *   Robotics Research Lab, University of Kaiserslautern
+ * \author  Tobias Foehst
+ * \author  Bernd-Helge Schaefer
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * \date    2010-12-09
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+//----------------------------------------------------------------------
 #include "core/structure/tModule.h"
+
+//----------------------------------------------------------------------
+// External includes (system with <>, local with "")
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Internal includes with ""
+//----------------------------------------------------------------------
 #include "core/thread/tPeriodicFrameworkElementTask.h"
 
-namespace finroc
-{
-namespace core
-{
-tModule::tModule(tFrameworkElement* parent, const util::tString& name) :
-    tFrameworkElement(parent, name),
-    sense_task(this),
+//----------------------------------------------------------------------
+// Debugging
+//----------------------------------------------------------------------
+#include <cassert>
+
+//----------------------------------------------------------------------
+// Namespace usage
+//----------------------------------------------------------------------
+using namespace finroc::core::structure;
+
+//----------------------------------------------------------------------
+// Forward declarations / typedefs / enums
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Const values
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Implementation
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// tModule constructors
+//----------------------------------------------------------------------
+tModule::tModule(tFrameworkElement *parent, const util::tString &name)
+    : tFrameworkElement(parent, name),
+
+    controller_input(new tEdgeAggregator(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
+    controller_output(new tEdgeAggregator(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
+    control_task(this),
+
     sensor_input(new tEdgeAggregator(this, "Sensor Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
     sensor_output(new tEdgeAggregator(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
-    controller_input(new tEdgeAggregator(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
-    controller_output(new tEdgeAggregator(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA))
+    sense_task(this)
 {
-  sensor_input->AddAnnotation(new tPeriodicFrameworkElementTask(sensor_input, sensor_output, &(sense_task)));
-  controller_input->AddAnnotation(new tPeriodicFrameworkElementTask(controller_input, controller_output, this));
+  this->AddAnnotation(new tPeriodicFrameworkElementTask(this->controller_input, this->controller_output, &this->control_task));
+  this->AddAnnotation(new tPeriodicFrameworkElementTask(this->sensor_input, this->sensor_output, &this->sense_task));
 }
 
-void tModule::tSenseTask::ExecuteTask()
+//----------------------------------------------------------------------
+// tModule Control
+//----------------------------------------------------------------------
+void tModule::Control()
+{}
+
+//----------------------------------------------------------------------
+// tModule Sense
+//----------------------------------------------------------------------
+void tModule::Sense()
+{}
+
+//----------------------------------------------------------------------
+// tModule::ControlTask constructors
+//----------------------------------------------------------------------
+tModule::ControlTask::ControlTask(tModule *module)
+    : module(module)
+{}
+
+//----------------------------------------------------------------------
+// tModule::ControlTask ExecuteTask
+//----------------------------------------------------------------------
+void tModule::ControlTask::ExecuteTask()
 {
-  outer_class_ptr->Sense();
+  this->module->Control();
 }
 
-} // namespace finroc
-} // namespace core
+//----------------------------------------------------------------------
+// tModule::SenseTask constructors
+//----------------------------------------------------------------------
+tModule::SenseTask::SenseTask(tModule *module)
+    : module(module)
+{}
 
+//----------------------------------------------------------------------
+// tModule::ControlTask ExecuteTask
+//----------------------------------------------------------------------
+void tModule::SenseTask::ExecuteTask()
+{
+  this->module->Sense();
+}

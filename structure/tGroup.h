@@ -19,21 +19,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    tModule.h
+/*!\file    tGroup.h
  *
  * \author  Tobias Foehst
  * \author  Bernd-Helge Schaefer
  *
  * \date    2010-12-09
  *
- * \brief Contains tModule
+ * \brief Contains tGroup
  *
- * \b tModule
+ * \b tGroup
  *
  */
 //----------------------------------------------------------------------
-#ifndef _core__structure__tModule_h_
-#define _core__structure__tModule_h_
+#ifndef _core__tGroup_h_
+#define _core__tGroup_h_
 
 #include "core/tFrameworkElement.h"
 
@@ -47,6 +47,8 @@
 #include "core/port/tEdgeAggregator.h"
 #include "core/port/cc/tPortNumeric.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
+#include "core/parameter/tStructureParameterList.h"
+#include "core/finstructable/tFinstructableGroup.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -73,40 +75,18 @@ namespace structure
 /*!
  *
  */
-class tModule : public finroc::core::tFrameworkElement
+class tGroup : public tFinstructableGroup
 {
-  class ControlTask : public finroc::util::tTask
-  {
-    tModule *const module;
-  public:
-    ControlTask(tModule *module);
-    virtual void ExecuteTask();
-  };
+  finroc::core::tEdgeAggregator* controller_input;
+  finroc::core::tEdgeAggregator* controller_output;
 
-  class SenseTask : public finroc::util::tTask
-  {
-    tModule *const module;
-  public:
-    SenseTask(tModule *module);
-    virtual void ExecuteTask();
-  };
-
-  finroc::core::tEdgeAggregator *controller_input;
-  finroc::core::tEdgeAggregator *controller_output;
-  ControlTask control_task;
-
-  finroc::core::tEdgeAggregator *sensor_input;
-  finroc::core::tEdgeAggregator *sensor_output;
-  SenseTask sense_task;
+  finroc::core::tEdgeAggregator* sensor_input;
+  finroc::core::tEdgeAggregator* sensor_output;
 
 //----------------------------------------------------------------------
 // Protected methods
 //----------------------------------------------------------------------
 protected:
-
-  virtual void Control();
-
-  virtual void Sense();
 
 //----------------------------------------------------------------------
 // Public methods
@@ -116,33 +96,38 @@ public:
   template < typename TPort = finroc::core::tPortNumeric >
   struct tCI : public TPort
   {
-    tCI(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->controller_input, false)
+    tCI(tGroup *parent, const finroc::util::tString &name)
+        : TPort(tPortCreationInfo(name, parent->controller_input, tPortFlags::cINPUT_PROXY))
     {}
   };
   template < typename TPort = finroc::core::tPortNumeric >
   struct tCO : public TPort
   {
-    tCO(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->controller_output, true)
+    tCO(tGroup *parent, const finroc::util::tString &name)
+        : TPort(tPortCreationInfo(name, parent->controller_output, tPortFlags::cOUTPUT_PROXY))
     {}
   };
   template < typename TPort = finroc::core::tPortNumeric >
   struct tSI : public TPort
   {
-    tSI(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->sensor_input, false)
+    tSI(tGroup *parent, const finroc::util::tString &name)
+        : TPort(tPortCreationInfo(name, parent->sensor_input, tPortFlags::cINPUT_PROXY))
     {}
   };
   template < typename TPort = finroc::core::tPortNumeric >
   struct tSO : public TPort
   {
-    tSO(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->sensor_output, true)
+    tSO(tGroup *parent, const finroc::util::tString &name)
+        : TPort(tPortCreationInfo(name, parent->sensor_output, tPortFlags::cOUTPUT_PROXY))
     {}
   };
 
-  tModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
+  tGroup(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
+
+  void SetParameter(size_t index, const finroc::util::tString &new_value);
+  void SetParameter(const finroc::util::tString &name, const finroc::util::tString &new_value);
+
+  virtual void TreeFilterCallback(finroc::core::tFrameworkElement *fe, rrlib::xml2::tXMLNode &root);
 
 };
 
