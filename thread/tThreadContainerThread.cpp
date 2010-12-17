@@ -39,6 +39,7 @@ void tThreadContainerThread::MainLoopCallback()
       // find tasks
       tasks.Clear();
       non_sensor_tasks.Clear();
+      schedule.Clear();
       filter.TraverseElementTree(this->thread_container, this, NULL, tmp);
       tasks.AddAll(non_sensor_tasks);
 
