@@ -69,11 +69,18 @@
 
   <finroclibrary name="test_module">
     <sources>
+      test/mTestSenseControlModule.cpp
       test/mTestModule.cpp
     </sources>
   </finroclibrary>
 
-  <testprogram name="module_and_main_wrapper">
+  <testprogram name="sense_control_module">
+    <sources>
+      test/pTestSenseControlModule.cpp
+    </sources>
+  </testprogram>
+
+  <testprogram name="module">
     <sources>
       test/pTestModule.cpp
     </sources>

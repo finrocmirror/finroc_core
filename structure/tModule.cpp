@@ -24,7 +24,7 @@
  * \author  Tobias Foehst
  * \author  Bernd-Helge Schaefer
  *
- * \date    2010-12-09
+ * \date    2010-12-17
  *
  */
 //----------------------------------------------------------------------
@@ -67,56 +67,30 @@ using namespace finroc::core::structure;
 tModule::tModule(tFrameworkElement *parent, const util::tString &name)
     : tFrameworkElement(parent, name),
 
-    controller_input(new tEdgeAggregator(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
-    controller_output(new tEdgeAggregator(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
-    control_task(this),
-
-    sensor_input(new tEdgeAggregator(this, "Sensor Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
-    sensor_output(new tEdgeAggregator(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
-    sense_task(this)
+    input(new tEdgeAggregator(this, "Input", tEdgeAggregator::cIS_INTERFACE)),
+    output(new tEdgeAggregator(this, "Output", tEdgeAggregator::cIS_INTERFACE)),
+    update_task(this)
 {
-  this->AddAnnotation(new tPeriodicFrameworkElementTask(this->controller_input, this->controller_output, &this->control_task));
-  this->AddAnnotation(new tPeriodicFrameworkElementTask(this->sensor_input, this->sensor_output, &this->sense_task));
+  this->AddAnnotation(new tPeriodicFrameworkElementTask(this->input, this->output, &this->update_task));
 }
 
 //----------------------------------------------------------------------
-// tModule Control
+// tModule Update
 //----------------------------------------------------------------------
-void tModule::Control()
+void tModule::Update()
 {}
 
 //----------------------------------------------------------------------
-// tModule Sense
+// tModule::UpdateTask constructors
 //----------------------------------------------------------------------
-void tModule::Sense()
-{}
-
-//----------------------------------------------------------------------
-// tModule::ControlTask constructors
-//----------------------------------------------------------------------
-tModule::ControlTask::ControlTask(tModule *module)
+tModule::UpdateTask::UpdateTask(tModule *module)
     : module(module)
 {}
 
 //----------------------------------------------------------------------
-// tModule::ControlTask ExecuteTask
+// tModule::UpdateTask ExecuteTask
 //----------------------------------------------------------------------
-void tModule::ControlTask::ExecuteTask()
+void tModule::UpdateTask::ExecuteTask()
 {
-  this->module->Control();
-}
-
-//----------------------------------------------------------------------
-// tModule::SenseTask constructors
-//----------------------------------------------------------------------
-tModule::SenseTask::SenseTask(tModule *module)
-    : module(module)
-{}
-
-//----------------------------------------------------------------------
-// tModule::ControlTask ExecuteTask
-//----------------------------------------------------------------------
-void tModule::SenseTask::ExecuteTask()
-{
-  this->module->Sense();
+  this->module->Update();
 }

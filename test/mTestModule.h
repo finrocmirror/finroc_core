@@ -73,9 +73,7 @@ class mTestModule : public finroc::core::structure::tModule
 // Protected methods
 //----------------------------------------------------------------------
 
-  virtual void Control();
-
-  virtual void Sense();
+  virtual void Update();
 
 //----------------------------------------------------------------------
 // Public methods
@@ -84,10 +82,8 @@ public:
 
   mTestModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name = "TestModule");
 
-  tCI<finroc::core::tPortNumeric> ci_signal_1;
-  tCO<finroc::core::tPortNumeric> co_signal_2;
-  tSI<finroc::core::tPortNumeric> si_signal_3;
-  tSO<finroc::core::tPortNumeric> so_signal_4;
+  tInput<> signal_1;
+  tOutput<> signal_2;
 
 };
 

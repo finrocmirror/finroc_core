@@ -48,7 +48,6 @@
 #include "core/port/cc/tPortNumeric.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/parameter/tStructureParameterList.h"
-#include "core/finstructable/tFinstructableGroup.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -75,18 +74,13 @@ namespace structure
 /*!
  *
  */
-class tGroup : public tFinstructableGroup
+class tGroup : public tFrameworkElement
 {
   finroc::core::tEdgeAggregator* controller_input;
   finroc::core::tEdgeAggregator* controller_output;
 
   finroc::core::tEdgeAggregator* sensor_input;
   finroc::core::tEdgeAggregator* sensor_output;
-
-//----------------------------------------------------------------------
-// Protected methods
-//----------------------------------------------------------------------
-protected:
 
 //----------------------------------------------------------------------
 // Public methods
@@ -124,10 +118,8 @@ public:
 
   tGroup(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
 
-  void SetParameter(size_t index, const finroc::util::tString &new_value);
-  void SetParameter(const finroc::util::tString &name, const finroc::util::tString &new_value);
-
-  virtual void TreeFilterCallback(finroc::core::tFrameworkElement *fe, rrlib::xml2::tXMLNode &root);
+//  void SetParameter(size_t index, const finroc::util::tString &new_value);
+//  void SetParameter(const finroc::util::tString &name, const finroc::util::tString &new_value);
 
 };
 

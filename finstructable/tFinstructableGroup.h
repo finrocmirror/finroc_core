@@ -25,9 +25,10 @@
 #define CORE__FINSTRUCTABLE__TFINSTRUCTABLEGROUP_H
 
 #include "core/parameter/tStructureParameterString.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
-#include "core/tFrameworkElement.h"
+#include "core/structure/tGroup.h"
+
+#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 
 namespace rrlib
 {
@@ -53,7 +54,8 @@ class tAbstractPort;
  * XML file.
  * Changes made using finstruct can be saved back to these files.
  */
-class tFinstructableGroup : public tFrameworkElement
+template < typename TGroup = structure::tGroup >
+class tFinstructableGroup : public TGroup
 {
 private:
 
@@ -70,7 +72,7 @@ private:
   util::tString link_tmp;
 
   /*! CreateModuleAction */
-  static tStandardCreateModuleAction<tFinstructableGroup> cCREATE_ACTION;
+//  static tStandardCreateModuleAction<tFinstructableGroup> cCREATE_ACTION;
 
 public:
 
@@ -162,5 +164,7 @@ public:
 
 } // namespace finroc
 } // namespace core
+
+#include "core/finstructable/tFinstructableGroup.hpp"
 
 #endif // CORE__FINSTRUCTABLE__TFINSTRUCTABLEGROUP_H

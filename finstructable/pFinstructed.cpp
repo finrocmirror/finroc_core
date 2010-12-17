@@ -34,7 +34,7 @@ void pFinstructed::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   tcp::tTCPServer* server = new tcp::tTCPServer(4444, true, NULL);
   server->Init();
 
-  tFinstructableGroup* fg = new tFinstructableGroup(re, "finstructed", "etc/finstructed_test.xml");
+  tFinstructableGroup<> *fg = new tFinstructableGroup<>(re, "finstructed", "etc/finstructed_test.xml");
   fg->Init();
 
   while (true)

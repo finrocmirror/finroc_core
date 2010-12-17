@@ -1,6 +1,6 @@
 //
 // You received this file as part of Finroc
-// A framework for innovative robot control
+// A framework for integrated robot control
 //
 // Copyright (C) AG Robotersysteme TU Kaiserslautern
 //
@@ -19,23 +19,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    tModule.h
+/*!\file    mTestSenseControlModule.h
  *
  * \author  Tobias Foehst
- * \author  Bernd-Helge Schaefer
  *
  * \date    2010-12-17
  *
- * \brief Contains tModule
+ * \brief Contains mTestModule
  *
- * \b tModule
+ * \b mTestModule
  *
  */
 //----------------------------------------------------------------------
-#ifndef _core__structure__tModule_h_
-#define _core__structure__tModule_h_
+#ifndef _core__mTestSenseControlModule_h_
+#define _core__mTestSenseControlModule_h_
 
-#include "core/tFrameworkElement.h"
+#include "core/structure/tSenseControlModule.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -44,9 +43,6 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
-#include "core/port/tEdgeAggregator.h"
-#include "core/port/cc/tPortNumeric.h"
-#include "core/plugin/tStandardCreateModuleAction.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -55,12 +51,6 @@
 //----------------------------------------------------------------------
 // Namespace declaration
 //----------------------------------------------------------------------
-namespace finroc
-{
-namespace core
-{
-namespace structure
-{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
@@ -73,56 +63,36 @@ namespace structure
 /*!
  *
  */
-class tModule : public finroc::core::tFrameworkElement
+class mTestSenseControlModule : public finroc::core::structure::tSenseControlModule
 {
-  class UpdateTask : public finroc::util::tTask
-  {
-    tModule *const module;
-  public:
-    UpdateTask(tModule *module);
-    virtual void ExecuteTask();
-  };
+  static finroc::core::tStandardCreateModuleAction<mTestSenseControlModule> cCREATE_ACTION;
 
-  finroc::core::tEdgeAggregator *input;
-  finroc::core::tEdgeAggregator *output;
-  UpdateTask update_task;
+  int counter;
 
 //----------------------------------------------------------------------
 // Protected methods
 //----------------------------------------------------------------------
-protected:
 
-  virtual void Update();
+  virtual void Control();
+
+  virtual void Sense();
 
 //----------------------------------------------------------------------
 // Public methods
 //----------------------------------------------------------------------
 public:
 
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tInput : public TPort
-  {
-    tInput(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->input, false)
-    {}
-  };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tOutput : public TPort
-  {
-    tOutput(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->output, true)
-    {}
-  };
+  mTestSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name = "TestModule");
 
-  tModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
+  tCI<finroc::core::tPortNumeric> ci_signal_1;
+  tCO<finroc::core::tPortNumeric> co_signal_2;
+  tSI<finroc::core::tPortNumeric> si_signal_3;
+  tSO<finroc::core::tPortNumeric> so_signal_4;
 
 };
 
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------
-}
-}
-}
 
 #endif

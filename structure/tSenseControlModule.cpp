@@ -19,7 +19,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    tGroup.cpp
+/*!\file    tSenseControlModule.cpp
  *
  * \author  Tobias Foehst
  * \author  Bernd-Helge Schaefer
@@ -28,7 +28,7 @@
  *
  */
 //----------------------------------------------------------------------
-#include "core/structure/tGroup.h"
+#include "core/structure/tSenseControlModule.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -39,11 +39,6 @@
 //----------------------------------------------------------------------
 #include "core/thread/tPeriodicFrameworkElementTask.h"
 
-#include "core/port/tAbstractPort.h"
-#include "core/tLinkEdge.h"
-
-#include "rrlib/logging/definitions.h"
-
 //----------------------------------------------------------------------
 // Debugging
 //----------------------------------------------------------------------
@@ -52,9 +47,7 @@
 //----------------------------------------------------------------------
 // Namespace usage
 //----------------------------------------------------------------------
-//using namespace finroc;
 using namespace finroc::core::structure;
-using namespace rrlib::logging;
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
@@ -69,47 +62,61 @@ using namespace rrlib::logging;
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// tGroup constructors
+// tSenseControlModule constructors
 //----------------------------------------------------------------------
-tGroup::tGroup(tFrameworkElement *parent, const util::tString &name)
+tSenseControlModule::tSenseControlModule(tFrameworkElement *parent, const util::tString &name)
     : tFrameworkElement(parent, name),
 
     controller_input(new tEdgeAggregator(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
     controller_output(new tEdgeAggregator(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
+    control_task(this),
 
     sensor_input(new tEdgeAggregator(this, "Sensor Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
-    sensor_output(new tEdgeAggregator(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA))
+    sensor_output(new tEdgeAggregator(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
+    sense_task(this)
+{
+  this->AddAnnotation(new tPeriodicFrameworkElementTask(this->controller_input, this->controller_output, &this->control_task));
+  this->AddAnnotation(new tPeriodicFrameworkElementTask(this->sensor_input, this->sensor_output, &this->sense_task));
+}
+
+//----------------------------------------------------------------------
+// tSenseControlModule Control
+//----------------------------------------------------------------------
+void tSenseControlModule::Control()
 {}
 
-////----------------------------------------------------------------------
-//// tGroup SetParameter
-////----------------------------------------------------------------------
-//void tGroup::SetParameter(size_t index, const finroc::util::tString &new_value)
-//{
-//  finroc::core::tStructureParameterList* spl = static_cast<finroc::core::tStructureParameterList*>(this->GetAnnotation(finroc::core::tStructureParameterList::cTYPE));
-//  finroc::core::tStructureParameterBase* param = spl->Get(index);
-//  param->Set(new_value);
-//
-//  FINROC_LOG_STREAM(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> updating parameter with name: " << param->GetName();
-//
-//  this->StructureParametersChanged();
-//}
-//
-//void tGroup::SetParameter(const finroc::util::tString &name, const finroc::util::tString &new_value)
-//{
-//  FINROC_LOG_STREAM(eLL_DEBUG) << this->GetDescription() << "::SetParameter(" << name << ", " << new_value << ") called";
-//
-//  finroc::core::tStructureParameterList* spl = static_cast<finroc::core::tStructureParameterList*>(this->GetAnnotation(finroc::core::tStructureParameterList::cTYPE));
-//
-//  size_t dimension = spl->Size();
-//  FINROC_LOG_STREAM(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> analysing structure parameter ist of size " << dimension;
-//  for (size_t i = 0; i < dimension; ++i)
-//  {
-//    finroc::core::tStructureParameterBase* param = spl->Get(i);
-//    if (param->GetName() == name)
-//    {
-//      this->SetParameter(i, new_value);
-//      break;
-//    }
-//  }
-//}
+//----------------------------------------------------------------------
+// tSenseControlModule Sense
+//----------------------------------------------------------------------
+void tSenseControlModule::Sense()
+{}
+
+//----------------------------------------------------------------------
+// tSenseControlModule::ControlTask constructors
+//----------------------------------------------------------------------
+tSenseControlModule::ControlTask::ControlTask(tSenseControlModule *module)
+    : module(module)
+{}
+
+//----------------------------------------------------------------------
+// tSenseControlModule::ControlTask ExecuteTask
+//----------------------------------------------------------------------
+void tSenseControlModule::ControlTask::ExecuteTask()
+{
+  this->module->Control();
+}
+
+//----------------------------------------------------------------------
+// tSenseControlModule::SenseTask constructors
+//----------------------------------------------------------------------
+tSenseControlModule::SenseTask::SenseTask(tSenseControlModule *module)
+    : module(module)
+{}
+
+//----------------------------------------------------------------------
+// tSenseControlModule::ControlTask ExecuteTask
+//----------------------------------------------------------------------
+void tSenseControlModule::SenseTask::ExecuteTask()
+{
+  this->module->Sense();
+}

@@ -41,27 +41,32 @@ namespace finroc
 {
 namespace core
 {
-tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup::cCREATE_ACTION("Finstructable Group", util::tTypedClass<tFinstructableGroup>());
+//template <typename TGroup>
+//tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup<TGroup>::cCREATE_ACTION("Finstructable Group", util::tTypedClass<tFinstructableGroup>());
 
-tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name) :
-    tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
+template <typename TGroup>
+tFinstructableGroup<TGroup>::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name) :
+    TGroup(parent, name),
     xml_file(new tStructureParameterString("XML file", "")),
     current_xml_file(""),
     connect_tmp(),
     link_tmp("")
 {
-  AddAnnotation(new tStructureParameterList(xml_file));
+  TGroup::SetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP);
+  this->AddAnnotation(new tStructureParameterList(xml_file));
 }
 
-tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_) :
-    tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
+template <typename TGroup>
+tFinstructableGroup<TGroup>::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_) :
+    TGroup(parent, name),
     xml_file(new tStructureParameterString("XML file", "")),
     current_xml_file(""),
     connect_tmp(),
     link_tmp("")
 {
+  TGroup::SetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP);
   // this(parent,name);
-  AddAnnotation(new tStructureParameterList(xml_file));
+  this->AddAnnotation(new tStructureParameterList(xml_file));
   try
   {
     this->xml_file->Set(xml_file_);
@@ -69,17 +74,18 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, this->log_domain, e);
   }
 }
 
-tAbstractPort* tFinstructableGroup::GetChildPort(const util::tString& link)
+template <typename TGroup>
+tAbstractPort* tFinstructableGroup<TGroup>::GetChildPort(const util::tString& link)
 {
   if (link.StartsWith("/"))
   {
-    return GetRuntime()->GetPort(link);
+    return this->GetRuntime()->GetPort(link);
   }
-  ::finroc::core::tFrameworkElement* fe = GetChildElement(link, false);
+  ::finroc::core::tFrameworkElement* fe = this->GetChildElement(link, false);
   if (fe != NULL && fe->IsPort())
   {
     return static_cast<tAbstractPort*>(fe);
@@ -87,7 +93,8 @@ tAbstractPort* tFinstructableGroup::GetChildPort(const util::tString& link)
   return NULL;
 }
 
-util::tString tFinstructableGroup::GetEdgeLink(const util::tString& target_link)
+template <typename TGroup>
+util::tString tFinstructableGroup<TGroup>::GetEdgeLink(const util::tString& target_link)
 {
   if (target_link.StartsWith(link_tmp))
   {
@@ -96,7 +103,8 @@ util::tString tFinstructableGroup::GetEdgeLink(const util::tString& target_link)
   return target_link;
 }
 
-util::tString tFinstructableGroup::GetEdgeLink(tAbstractPort* ap)
+template <typename TGroup>
+util::tString tFinstructableGroup<TGroup>::GetEdgeLink(tAbstractPort* ap)
 {
   ::finroc::core::tFrameworkElement* alt_root = ap->GetParentWithFlags(tCoreFlags::cALTERNATE_LINK_ROOT);
   if (alt_root != NULL && alt_root->IsChildOf(this))
@@ -106,7 +114,8 @@ util::tString tFinstructableGroup::GetEdgeLink(tAbstractPort* ap)
   return ap->GetQualifiedName().Substring(link_tmp.Length());
 }
 
-void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFrameworkElement* parent)
+template <typename TGroup>
+void tFinstructableGroup<TGroup>::Instantiate(const rrlib::xml2::tXMLNode& node, tFrameworkElement* parent)
 {
   try
   {
@@ -118,7 +127,7 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     tCreateFrameworkElementAction* action = tPlugins::GetInstance()->LoadModuleType(group, type);
     if (action == NULL)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Failed to instantiate element. No module type ", group, "/", type, " available. Skipping...");
+      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, this->log_domain, "Failed to instantiate element. No module type ", group, "/", type, " available. Skipping...");
       return;
     }
 
@@ -171,34 +180,35 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
       }
       else
       {
-        FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Unknown XML tag: ", name2);
+        FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, this->log_domain, "Unknown XML tag: ", name2);
       }
     }
 
   }
   catch (const rrlib::xml2::tXML2WrapperException& e)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Failed to instantiate element. Skipping...");
+    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, this->log_domain, "Failed to instantiate element. Skipping...");
     LogException(e);
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Failed to instantiate element. Skipping...");
-    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, e);
+    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, this->log_domain, "Failed to instantiate element. Skipping...");
+    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, this->log_domain, e);
   }
 }
 
-void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
+template <typename TGroup>
+void tFinstructableGroup<TGroup>::LoadXml(const util::tString& xml_file_)
 {
   util::tLock lock1(this);
   {
-    util::tLock lock2(GetRegistryLock());
+    util::tLock lock2(this->GetRegistryLock());
     try
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain, "Loading XML: ", xml_file_);
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, this->log_domain, "Loading XML: ", xml_file_);
       rrlib::xml2::tXMLDocument doc(xml_file_);
       rrlib::xml2::tXMLNode root = doc.GetRootNode();
-      link_tmp = GetQualifiedName() + "/";
+      link_tmp = this->GetQualifiedName() + "/";
 
       util::tSimpleList<rrlib::xml2::tXMLNode> children;
       children.AddAll(root.GetChildren());
@@ -218,7 +228,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
           tAbstractPort* dest_port = GetChildPort(dest);
           if (src_port == NULL && dest_port == NULL)
           {
-            FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Cannot create edge because neither port is available: ", src, ", ", dest);
+            FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, this->log_domain, "Cannot create edge because neither port is available: ", src, ", ", dest);
           }
           else if (src_port == NULL || src_port->IsVolatile())    // source volatile
           {
@@ -235,26 +245,28 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
         }
         else
         {
-          FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Unknown XML tag: ", name);
+          FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, this->log_domain, "Unknown XML tag: ", name);
         }
       }
-      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain, "Loading XML successful");
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, this->log_domain, "Loading XML successful");
     }
     catch (const rrlib::xml2::tXML2WrapperException& e)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Loading XML failed: ", xml_file_);
-      LogException(e);
+      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, this->log_domain, "Loading XML failed: ", xml_file_);
+      this->LogException(e);
     }
   }
 }
 
-void tFinstructableGroup::LogException(const rrlib::xml2::tXML2WrapperException& e)
+template <typename TGroup>
+void tFinstructableGroup<TGroup>::LogException(const rrlib::xml2::tXML2WrapperException& e)
 {
   const char* msg = e.what();
-  FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, msg);
+  FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, this->log_domain, msg);
 }
 
-util::tString tFinstructableGroup::QualifyLink(const util::tString& link)
+template <typename TGroup>
+util::tString tFinstructableGroup<TGroup>::QualifyLink(const util::tString& link)
 {
   if (link.StartsWith("/"))
   {
@@ -263,11 +275,12 @@ util::tString tFinstructableGroup::QualifyLink(const util::tString& link)
   return link_tmp + link;
 }
 
-void tFinstructableGroup::SaveXml()
+template <typename TGroup>
+void tFinstructableGroup<TGroup>::SaveXml()
 {
   {
-    util::tLock lock2(GetRegistryLock());
-    FINROC_LOG_STREAM(rrlib::logging::eLL_USER, log_domain, "Saving XML: ", current_xml_file);
+    util::tLock lock2(this->GetRegistryLock());
+    FINROC_LOG_STREAM(rrlib::logging::eLL_USER, this->log_domain, "Saving XML: ", current_xml_file);
     rrlib::xml2::tXMLDocument doc;
     try
     {
@@ -277,22 +290,23 @@ void tFinstructableGroup::SaveXml()
       SerializeChildren(root, this);
 
       // serialize edges
-      link_tmp = GetQualifiedName() + "/";
+      link_tmp = this->GetQualifiedName() + "/";
       tFrameworkElementTreeFilter filter(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
       filter.TraverseElementTree(this, this, root);
       doc.WriteToFile(current_xml_file);
-      FINROC_LOG_STREAM(rrlib::logging::eLL_USER, log_domain, "Saving successful");
+      FINROC_LOG_STREAM(rrlib::logging::eLL_USER, this->log_domain, "Saving successful");
     }
     catch (const rrlib::xml2::tXML2WrapperException& e)
     {
       const char* msg = e.what();
-      FINROC_LOG_STREAM(rrlib::logging::eLL_USER, log_domain, "Saving failed: ", msg);
+      FINROC_LOG_STREAM(rrlib::logging::eLL_USER, this->log_domain, "Saving failed: ", msg);
       throw util::tException(msg);
     }
   }
 }
 
-void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFrameworkElement* current)
+template <typename TGroup>
+void tFinstructableGroup<TGroup>::SerializeChildren(rrlib::xml2::tXMLNode& node, tFrameworkElement* current)
 {
   tFrameworkElement::tChildIterator ci(current);
   ::finroc::core::tFrameworkElement* fe = NULL;
@@ -325,25 +339,22 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
   }
 }
 
-void tFinstructableGroup::StructureParametersChanged()
+template <typename TGroup>
+void tFinstructableGroup<TGroup>::StructureParametersChanged()
 {
   util::tLock lock1(this);
   if (!current_xml_file.Equals(xml_file->GetValue()->ToString()))
   {
     current_xml_file = xml_file->Get();
-    //if (this.childCount() == 0) { // TODO: original intension: changing xml files to mutliple existing ones in finstruct shouldn't load all of them
-    if (util::sFiles::Exists(current_xml_file))
+    if (this->ChildCount() == 0 && util::sFiles::Exists(current_xml_file))
     {
       LoadXml(current_xml_file);
-    }
-    else
-    {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Cannot find XML file ", current_xml_file, ". Creating empty group. You may edit and save this group using finstruct.");
     }
   }
 }
 
-void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode& root)
+template <typename TGroup>
+void tFinstructableGroup<TGroup>::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode& root)
 {
   assert((fe->IsPort()));
   tAbstractPort* ap = static_cast<tAbstractPort*>(fe);
@@ -357,7 +368,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
     // check1: different finstructed elements as parent?
     if (ap->GetParentWithFlags(tCoreFlags::cFINSTRUCTED) == ap2->GetParentWithFlags(tCoreFlags::cFINSTRUCTED))
     {
-      continue;
+//      continue;
     }
 
     // check2: their deepest common finstructable_group parent is this
@@ -369,13 +380,13 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
     ::finroc::core::tFrameworkElement* common_finstructable_parent = common_parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
     if (common_finstructable_parent != this)
     {
-      continue;
+//      continue;
     }
 
     // check3: only save non-volatile connections in this step
     if (ap->IsVolatile() || ap2->IsVolatile())
     {
-      continue;
+//      continue;
     }
 
     // save edge

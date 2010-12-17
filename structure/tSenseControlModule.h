@@ -19,21 +19,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    tModule.h
+/*!\file    tSenseControlModule.h
  *
  * \author  Tobias Foehst
  * \author  Bernd-Helge Schaefer
  *
- * \date    2010-12-17
+ * \date    2010-12-09
  *
- * \brief Contains tModule
+ * \brief Contains tSenseControlModule
  *
- * \b tModule
+ * \b tSenseControlModule
  *
  */
 //----------------------------------------------------------------------
-#ifndef _core__structure__tModule_h_
-#define _core__structure__tModule_h_
+#ifndef _core__structure__tSenseControlModule_h_
+#define _core__structure__tSenseControlModule_h_
 
 #include "core/tFrameworkElement.h"
 
@@ -73,26 +73,40 @@ namespace structure
 /*!
  *
  */
-class tModule : public finroc::core::tFrameworkElement
+class tSenseControlModule : public finroc::core::tFrameworkElement
 {
-  class UpdateTask : public finroc::util::tTask
+  class ControlTask : public finroc::util::tTask
   {
-    tModule *const module;
+    tSenseControlModule *const module;
   public:
-    UpdateTask(tModule *module);
+    ControlTask(tSenseControlModule *module);
     virtual void ExecuteTask();
   };
 
-  finroc::core::tEdgeAggregator *input;
-  finroc::core::tEdgeAggregator *output;
-  UpdateTask update_task;
+  class SenseTask : public finroc::util::tTask
+  {
+    tSenseControlModule *const module;
+  public:
+    SenseTask(tSenseControlModule *module);
+    virtual void ExecuteTask();
+  };
+
+  finroc::core::tEdgeAggregator *controller_input;
+  finroc::core::tEdgeAggregator *controller_output;
+  ControlTask control_task;
+
+  finroc::core::tEdgeAggregator *sensor_input;
+  finroc::core::tEdgeAggregator *sensor_output;
+  SenseTask sense_task;
 
 //----------------------------------------------------------------------
 // Protected methods
 //----------------------------------------------------------------------
 protected:
 
-  virtual void Update();
+  virtual void Control();
+
+  virtual void Sense();
 
 //----------------------------------------------------------------------
 // Public methods
@@ -100,21 +114,35 @@ protected:
 public:
 
   template < typename TPort = finroc::core::tPortNumeric >
-  struct tInput : public TPort
+  struct tCI : public TPort
   {
-    tInput(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->input, false)
+    tCI(tSenseControlModule *parent, const finroc::util::tString &name)
+        : TPort(name, parent->controller_input, false)
     {}
   };
   template < typename TPort = finroc::core::tPortNumeric >
-  struct tOutput : public TPort
+  struct tCO : public TPort
   {
-    tOutput(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->output, true)
+    tCO(tSenseControlModule *parent, const finroc::util::tString &name)
+        : TPort(name, parent->controller_output, true)
+    {}
+  };
+  template < typename TPort = finroc::core::tPortNumeric >
+  struct tSI : public TPort
+  {
+    tSI(tSenseControlModule *parent, const finroc::util::tString &name)
+        : TPort(name, parent->sensor_input, false)
+    {}
+  };
+  template < typename TPort = finroc::core::tPortNumeric >
+  struct tSO : public TPort
+  {
+    tSO(tSenseControlModule *parent, const finroc::util::tString &name)
+        : TPort(name, parent->sensor_output, true)
     {}
   };
 
-  tModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
+  tSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
 
 };
 

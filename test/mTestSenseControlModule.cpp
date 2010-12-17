@@ -1,6 +1,6 @@
 //
 // You received this file as part of Finroc
-// A framework for innovative robot control
+// A framework for integrated robot control
 //
 // Copyright (C) AG Robotersysteme TU Kaiserslautern
 //
@@ -19,23 +19,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    tModule.h
+/*!\file    mTestSenseControlModule.cpp
  *
  * \author  Tobias Foehst
- * \author  Bernd-Helge Schaefer
  *
  * \date    2010-12-17
  *
- * \brief Contains tModule
- *
- * \b tModule
- *
  */
 //----------------------------------------------------------------------
-#ifndef _core__structure__tModule_h_
-#define _core__structure__tModule_h_
-
-#include "core/tFrameworkElement.h"
+#include "core/test/mTestSenseControlModule.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -44,85 +36,56 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
-#include "core/port/tEdgeAggregator.h"
-#include "core/port/cc/tPortNumeric.h"
-#include "core/plugin/tStandardCreateModuleAction.h"
 
 //----------------------------------------------------------------------
 // Debugging
 //----------------------------------------------------------------------
+#include <cassert>
 
 //----------------------------------------------------------------------
-// Namespace declaration
+// Namespace usage
 //----------------------------------------------------------------------
-namespace finroc
-{
-namespace core
-{
-namespace structure
-{
+using namespace rrlib::logging;
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Class declaration
+// Const values
 //----------------------------------------------------------------------
-//!
-/*!
- *
- */
-class tModule : public finroc::core::tFrameworkElement
+finroc::core::tStandardCreateModuleAction<mTestSenseControlModule> mTestSenseControlModule::cCREATE_ACTION("TestModule");
+
+//----------------------------------------------------------------------
+// Implementation
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// mTestSenseControlModule constructors
+//----------------------------------------------------------------------
+mTestSenseControlModule::mTestSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name)
+    : tSenseControlModule(parent, name),
+
+    counter(0),
+
+    ci_signal_1(this, "Signal 1"),
+    co_signal_2(this, "Signal 2"),
+    si_signal_3(this, "Signal 3"),
+    so_signal_4(this, "Signal 4")
+{}
+
+//----------------------------------------------------------------------
+// mTestSenseControlModule Control
+//----------------------------------------------------------------------
+void mTestSenseControlModule::Control()
 {
-  class UpdateTask : public finroc::util::tTask
-  {
-    tModule *const module;
-  public:
-    UpdateTask(tModule *module);
-    virtual void ExecuteTask();
-  };
-
-  finroc::core::tEdgeAggregator *input;
-  finroc::core::tEdgeAggregator *output;
-  UpdateTask update_task;
-
-//----------------------------------------------------------------------
-// Protected methods
-//----------------------------------------------------------------------
-protected:
-
-  virtual void Update();
-
-//----------------------------------------------------------------------
-// Public methods
-//----------------------------------------------------------------------
-public:
-
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tInput : public TPort
-  {
-    tInput(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->input, false)
-    {}
-  };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tOutput : public TPort
-  {
-    tOutput(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->output, true)
-    {}
-  };
-
-  tModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
-
-};
-
-//----------------------------------------------------------------------
-// End of namespace declaration
-//----------------------------------------------------------------------
-}
-}
+  this->co_signal_2.Publish(this->counter);
+  FINROC_LOG_STREAM(eLL_DEBUG) << this->counter;
+  this->counter++;
 }
 
-#endif
+//----------------------------------------------------------------------
+// mTestSenseControlModule Sense
+//----------------------------------------------------------------------
+void mTestSenseControlModule::Sense()
+{}

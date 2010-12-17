@@ -68,24 +68,16 @@ mTestModule::mTestModule(finroc::core::tFrameworkElement *parent, const finroc::
 
     counter(0),
 
-    ci_signal_1(this, "Signal 1"),
-    co_signal_2(this, "Signal 2"),
-    si_signal_3(this, "Signal 3"),
-    so_signal_4(this, "Signal 4")
+    signal_1(this, "Signal 1"),
+    signal_2(this, "Signal 2")
 {}
 
 //----------------------------------------------------------------------
-// mTestModule Control
+// mTestModule Update
 //----------------------------------------------------------------------
-void mTestModule::Control()
+void mTestModule::Update()
 {
-  this->co_signal_2.Publish(this->counter);
+  this->signal_2.Publish(this->counter);
   FINROC_LOG_STREAM(eLL_DEBUG) << this->counter;
   this->counter++;
 }
-
-//----------------------------------------------------------------------
-// mTestModule Sense
-//----------------------------------------------------------------------
-void mTestModule::Sense()
-{}
