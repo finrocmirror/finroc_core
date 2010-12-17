@@ -59,29 +59,26 @@ public:
   /*! Is this object globally unique - that means: it is reachable in any runtime environment using the same name */
   static const int cGLOBALLY_UNIQUE_LINK = 1 << 1;
 
-  /*! Is this a finstructable group? */
-  static const int cFINSTRUCTABLE_GROUP = 1 << 2;
-
   /*! Is this the one and only Runtime environment? */
-  static const int cIS_RUNTIME = 1 << 3;
+  static const int cIS_RUNTIME = 1 << 2;
 
   /*! Is this an edge aggregating framework element? */
-  static const int cEDGE_AGGREGATOR = 1 << 4;
+  static const int cEDGE_AGGREGATOR = 1 << 3;
 
   /*! Is this an alternate root for links to globally unique objects (such as a remote runtime mapped into this one) */
-  static const int cALTERNATE_LINK_ROOT = 1 << 5;
+  static const int cALTERNATE_LINK_ROOT = 1 << 4;
 
   /*! Is this a network port or framework element? */
-  static const int cNETWORK_ELEMENT = 1 << 6;
+  static const int cNETWORK_ELEMENT = 1 << 5;
 
   /*! Can framework element have children - typically true */
-  static const int cALLOWS_CHILDREN = 1 << 7;
+  static const int cALLOWS_CHILDREN = 1 << 6;
 
   /*! Should framework element be visible/available in other RuntimeEnvironments? - (TreeFilter specified by other runtime may override this) */
-  static const int cSHARED = 1 << 8;
+  static const int cSHARED = 1 << 7;
 
   /*! First flag whose meaning differs between ports and non-ports */
-  static const int cFIRST_PORT_FLAG = 1 << 9;
+  static const int cFIRST_PORT_FLAG = 1 << 8;
 
   // Non-port constant flags (second 8 bit)
 
@@ -106,8 +103,11 @@ public:
   /*! Is this an element created by finstruct? */
   static const int cFINSTRUCTED = 1 << 25;
 
+  /*! Is this a finstructable group? */
+  static const int cFINSTRUCTABLE_GROUP = 1 << 26;
+
   /*! Client may use flags beginning from this */
-  static const int cFIRST_CUSTOM_NON_CONST_FLAG = 1 << 26;
+  static const int cFIRST_CUSTOM_NON_CONST_FLAG = 1 << 27;
 
   /*! All status flags */
   static const int cSTATUS_FLAGS = cREADY | cPUBLISHED | cDELETED;
