@@ -398,7 +398,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int handle)
   {
     try
     {
-      (static_cast<tFinstructableGroup<> *>(fe))->SaveXml();
+      (static_cast<tFinstructableGroup*>(fe))->SaveXml();
     }
     catch (const util::tException& e)
     {

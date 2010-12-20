@@ -39,9 +39,6 @@
 //----------------------------------------------------------------------
 #include "core/thread/tPeriodicFrameworkElementTask.h"
 
-#include "core/port/tAbstractPort.h"
-#include "core/tLinkEdge.h"
-
 #include "rrlib/logging/definitions.h"
 
 //----------------------------------------------------------------------
@@ -71,8 +68,8 @@ using namespace rrlib::logging;
 //----------------------------------------------------------------------
 // tGroup constructors
 //----------------------------------------------------------------------
-tGroup::tGroup(tFrameworkElement *parent, const util::tString &name)
-    : tFrameworkElement(parent, name),
+tGroup::tGroup(tFrameworkElement *parent, const util::tString &name, const util::tString &structure_config_file)
+    : tFinstructableGroup(parent, name, structure_config_file),
 
     controller_input(new tEdgeAggregator(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
     controller_output(new tEdgeAggregator(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),

@@ -35,7 +35,7 @@
 #ifndef _core__tGroup_h_
 #define _core__tGroup_h_
 
-#include "core/tFrameworkElement.h"
+#include "core/finstructable/tFinstructableGroup.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -47,7 +47,6 @@
 #include "core/port/tEdgeAggregator.h"
 #include "core/port/cc/tPortNumeric.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
-#include "core/parameter/tStructureParameterList.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -74,7 +73,7 @@ namespace structure
 /*!
  *
  */
-class tGroup : public tFrameworkElement
+class tGroup : public tFinstructableGroup
 {
   finroc::core::tEdgeAggregator* controller_input;
   finroc::core::tEdgeAggregator* controller_output;
@@ -116,7 +115,7 @@ public:
     {}
   };
 
-  tGroup(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
+  tGroup(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name, const finroc::util::tString &structure_config_file);
 
 //  void SetParameter(size_t index, const finroc::util::tString &new_value);
 //  void SetParameter(const finroc::util::tString &name, const finroc::util::tString &new_value);
