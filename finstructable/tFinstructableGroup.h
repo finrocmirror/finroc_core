@@ -143,11 +143,17 @@ public:
 
   /*!
    * (if the provided file does not exist, it is created, when contents are saved - and a warning is displayed)
-   * (if the provided file exists, its contents are loaded)
+   * (if the provided file exists, its contents are loaded when group is initialized)
    *
    * \param xml_file name of XML file (relative to finroc repository) that determines contents of this group
    */
   tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_);
+
+  virtual void PostChildInit()
+  {
+    ::finroc::core::tFrameworkElement::PostChildInit();
+    StructureParametersChanged();
+  }
 
   /*!
    * Save contents of group back to Xml file

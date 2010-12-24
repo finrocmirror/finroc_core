@@ -65,7 +65,6 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
   try
   {
     this->xml_file->Set(xml_file_);
-    StructureParametersChanged();
   }
   catch (const util::tException& e)
   {
