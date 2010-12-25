@@ -54,7 +54,7 @@ void tParameterInfo::LoadValue(bool ignore_ready)
       }
       if (cf->HasEntry(config_entry))
       {
-        rrlib::xml2::tXMLNode node = cf->GetEntry(config_entry, false);
+        const rrlib::xml2::tXMLNode &node = cf->GetEntry(config_entry, false);
         if (ann->GetDataType()->IsCCType())
         {
           tCCPortBase* port = static_cast<tCCPortBase*>(ann);
@@ -92,7 +92,7 @@ void tParameterInfo::SaveValue()
     tCCPortBase* port = static_cast<tCCPortBase*>(ann);
     if (has_entry || (!port->ContainsDefaultValue()))
     {
-      rrlib::xml2::tXMLNode node = cf->GetEntry(config_entry, true);
+      rrlib::xml2::tXMLNode &node = cf->GetEntry(config_entry, true);
       tCCInterThreadContainer<>* c = port->GetInInterThreadContainer();
       c->Serialize(node);
       c->Recycle2();
@@ -103,7 +103,7 @@ void tParameterInfo::SaveValue()
     tPortBase* port = static_cast<tPortBase*>(ann);
     if (has_entry || (!port->ContainsDefaultValue()))
     {
-      rrlib::xml2::tXMLNode node = cf->GetEntry(config_entry, true);
+      rrlib::xml2::tXMLNode &node = cf->GetEntry(config_entry, true);
       const tPortData* pd = port->GetLockedUnsafeRaw();
       pd->Serialize(node);
       pd->GetManager()->ReleaseLock();

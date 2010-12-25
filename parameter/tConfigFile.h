@@ -99,7 +99,7 @@ public:
    * \param create (Re)create entry node?
    * \return XMLNode representing entry
    */
-  rrlib::xml2::tXMLNode GetEntry(const util::tString& entry, bool create);
+  rrlib::xml2::tXMLNode &GetEntry(const util::tString& entry, bool create);
 
   /*!
    * Does configuration file have the specified entry?

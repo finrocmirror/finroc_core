@@ -145,19 +145,19 @@ public:
   {
     return sSerializationHelper::DeserializeFromHexString(this, s);
   }
-  void Serialize2(const tCoreSerializable* data, rrlib::xml2::tXMLNode node) const
+  void Serialize2(const tCoreSerializable* data, rrlib::xml2::tXMLNode &node) const
   {
-    return data->Serialize(node);
+    data->Serialize(node);
   }
-  void Serialize2(const void* data, rrlib::xml2::tXMLNode node) const
+  void Serialize2(const void* data, rrlib::xml2::tXMLNode &node) const
   {
     tCoreSerializable::Serialize(node);
   }
-  void Deserialize2(tCoreSerializable* data, rrlib::xml2::tXMLNode node)
+  void Deserialize2(tCoreSerializable* data, const rrlib::xml2::tXMLNode &node)
   {
     return data->Deserialize(node);
   }
-  void Deserialize2(void* data, rrlib::xml2::tXMLNode node)
+  void Deserialize2(void* data, const rrlib::xml2::tXMLNode &node)
   {
     tCoreSerializable::Deserialize(node);
   }

@@ -64,28 +64,24 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
   }
 }
 
-rrlib::xml2::tXMLNode tConfigFile::GetEntry(const util::tString& entry, bool create)
+rrlib::xml2::tXMLNode &tConfigFile::GetEntry(const util::tString& entry, bool create)
 {
   util::tSimpleList<util::tString> nodes;
   nodes.AddAll(entry.Split(cSEPARATOR));
   size_t idx = 0u;
-  rrlib::xml2::tXMLNode current = wrapped.GetRootNode();
-  rrlib::xml2::tXMLNode parent = current;
-  util::tSimpleList<rrlib::xml2::tXMLNode> children;
+  rrlib::xml2::tXMLNode::iterator current = &wrapped.GetRootNode();
+  rrlib::xml2::tXMLNode::iterator parent = current;
   bool created = false;
   while (idx < nodes.Size())
   {
-    children.Clear();
-    children.AddAll(current.GetChildren());
     bool found = false;
-    for (size_t i = 0u; i < children.Size(); i++)
+    for (rrlib::xml2::tXMLNode::iterator child = current->GetChildrenBegin(); child != current->GetChildrenEnd(); ++child)
     {
-      rrlib::xml2::tXMLNode child = children.Get(i);
-      if (cXML_BRANCH_NAME.Equals(child.GetName()) || cXML_LEAF_NAME.Equals(child.GetName()))
+      if (cXML_BRANCH_NAME.Equals(child->GetName()) || cXML_LEAF_NAME.Equals(child->GetName()))
       {
         try
         {
-          if (nodes.Get(idx).Equals(child.GetStringAttribute("name")))
+          if (nodes.Get(idx).Equals(child->GetStringAttribute("name")))
           {
             idx++;
             parent = current;
@@ -105,9 +101,9 @@ rrlib::xml2::tXMLNode tConfigFile::GetEntry(const util::tString& entry, bool cre
       if (create)
       {
         parent = current;
-        current = current.AddChildNode((idx == nodes.Size() - 1) ? cXML_LEAF_NAME : cXML_BRANCH_NAME);
+        current = &current->AddChildNode((idx == nodes.Size() - 1) ? cXML_LEAF_NAME : cXML_BRANCH_NAME);
         created = true;
-        current.SetAttribute("name", nodes.Get(idx));
+        current->SetAttribute("name", nodes.Get(idx));
         idx++;
       }
       else
@@ -116,7 +112,7 @@ rrlib::xml2::tXMLNode tConfigFile::GetEntry(const util::tString& entry, bool cre
       }
     }
   }
-  if (!cXML_LEAF_NAME.Equals(current.GetName()))
+  if (!cXML_LEAF_NAME.Equals(current->GetName()))
   {
     throw util::tRuntimeException("Node no leaf", CODE_LOCATION_MACRO);
   }
@@ -124,12 +120,12 @@ rrlib::xml2::tXMLNode tConfigFile::GetEntry(const util::tString& entry, bool cre
   // Recreate node?
   if (create && (!created))
   {
-    parent.RemoveChildNode(current);
-    current = parent.AddChildNode(cXML_LEAF_NAME);
-    current.SetAttribute("name", nodes.Get(nodes.Size() - 1));
+    parent->RemoveChildNode(*current);
+    current = &parent->AddChildNode(cXML_LEAF_NAME);
+    current->SetAttribute("name", nodes.Get(nodes.Size() - 1));
   }
 
-  return current;
+  return *current;
 }
 
 bool tConfigFile::HasEntry(const util::tString& entry)
@@ -137,21 +133,17 @@ bool tConfigFile::HasEntry(const util::tString& entry)
   util::tSimpleList<util::tString> nodes;
   nodes.AddAll(entry.Split(cSEPARATOR));
   size_t idx = 0u;
-  rrlib::xml2::tXMLNode current = wrapped.GetRootNode();
-  util::tSimpleList<rrlib::xml2::tXMLNode> children;
+  rrlib::xml2::tXMLNode::const_iterator current = &wrapped.GetRootNode();
   while (idx < nodes.Size())
   {
-    children.Clear();
-    children.AddAll(current.GetChildren());
     bool found = false;
-    for (size_t i = 0u; i < children.Size(); i++)
+    for (rrlib::xml2::tXMLNode::const_iterator child = current->GetChildrenBegin(); child != current->GetChildrenEnd(); ++child)
     {
-      rrlib::xml2::tXMLNode child = children.Get(i);
-      if (cXML_BRANCH_NAME.Equals(child.GetName()) || cXML_LEAF_NAME.Equals(child.GetName()))
+      if (cXML_BRANCH_NAME.Equals(child->GetName()) || cXML_LEAF_NAME.Equals(child->GetName()))
       {
         try
         {
-          if (nodes.Get(idx).Equals(child.GetStringAttribute("name")))
+          if (nodes.Get(idx).Equals(child->GetStringAttribute("name")))
           {
             idx++;
             current = child;
@@ -170,7 +162,7 @@ bool tConfigFile::HasEntry(const util::tString& entry)
       return false;
     }
   }
-  return cXML_LEAF_NAME.Equals(current.GetName());
+  return cXML_LEAF_NAME.Equals(current->GetName());
 }
 
 void tConfigFile::LoadParameterValues()

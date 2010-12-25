@@ -109,7 +109,7 @@ public:
   virtual void Serialize(rrlib::xml2::tXMLNode& node) const
   {
     node.SetAttribute("value", util::tInteger::ToString(value));
-    node.SetTextContent(string_constants->Get(value));
+    node.SetContent(string_constants->Get(value));
   }
 
   /*!

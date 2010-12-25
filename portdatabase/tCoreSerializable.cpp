@@ -44,7 +44,7 @@ util::tString tCoreSerializable::Serialize() const
 
 void tCoreSerializable::Serialize(rrlib::xml2::tXMLNode& node) const
 {
-  node.SetTextContent(Serialize());
+  node.SetContent(Serialize());
 }
 
 } // namespace finroc

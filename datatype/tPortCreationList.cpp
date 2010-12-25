@@ -172,29 +172,27 @@ void tPortCreationList::Deserialize(const rrlib::xml2::tXMLNode& node)
   {
     util::tLock lock2(io_vector);
     show_output_port_selection = node.GetBoolAttribute("showOutputSelection");
-    util::tSimpleList<rrlib::xml2::tXMLNode> children;
-    children.AddAll(node.GetChildren());
     util::tSimpleList<tAbstractPort*> ports;
     GetPorts(io_vector, ports);
-    for (size_t i = 0u; i < children.Size(); i++)
+    size_t i = 0;
+    for (rrlib::xml2::tXMLNode::const_iterator port = node.GetChildrenBegin(); port != node.GetChildrenEnd(); ++port, ++i)
     {
       tAbstractPort* ap = i < ports.Size() ? ports.Get(i) : NULL;
-      rrlib::xml2::tXMLNode port = children.Get(i);
-      util::tString port_name = port.GetName();
+      util::tString port_name = port->GetName();
       assert((port_name.Equals("port")));
       bool b = false;
       if (show_output_port_selection)
       {
-        b = port.GetBoolAttribute("output");
+        b = port->GetBoolAttribute("output");
       }
-      tDataType* dt = tDataTypeRegister::GetInstance()->GetDataType(port.GetStringAttribute("type"));
+      tDataType* dt = tDataTypeRegister::GetInstance()->GetDataType(port->GetStringAttribute("type"));
       if (dt == NULL)
       {
         throw util::tRuntimeException(util::tStringBuilder("Type ") + (*dt) + " not available", CODE_LOCATION_MACRO);
       }
-      CheckPort(ap, io_vector, flags, port.GetStringAttribute("name"), dt, b, NULL);
+      CheckPort(ap, io_vector, flags, port->GetStringAttribute("name"), dt, b, NULL);
     }
-    for (size_t i = children.Size(); i < ports.Size(); i++)
+    for (; i < ports.Size(); i++)
     {
       ports.Get(i)->ManagedDelete();
     }
@@ -266,12 +264,12 @@ void tPortCreationList::Serialize(rrlib::xml2::tXMLNode& node) const
     for (int i = 0; i < size; i++)
     {
       tAbstractPort* p = ports.Get(i);
-      rrlib::xml2::tXMLNode n = node.AddChildNode("port");
-      n.SetAttribute("name", p->GetCDescription());
-      n.SetAttribute("type", p->GetDataType()->GetName());
+      rrlib::xml2::tXMLNode &child = node.AddChildNode("port");
+      child.SetAttribute("name", p->GetCDescription());
+      child.SetAttribute("type", p->GetDataType()->GetName());
       if (show_output_port_selection)
       {
-        n.SetAttribute("output", p->IsOutputPort());
+        child.SetAttribute("output", p->IsOutputPort());
       }
     }
   }

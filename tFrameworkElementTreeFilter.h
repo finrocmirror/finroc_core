@@ -118,7 +118,7 @@ public:
   inline void TraverseElementTree(tFrameworkElement* root, T* callback, P custom_param) const
   {
     util::tStringBuilder sb;
-    TraverseElementTree(root, callback, custom_param, sb);
+    TraverseElementTree<T, P>(root, callback, custom_param, sb);
   }
 
   /*!
@@ -144,7 +144,7 @@ public:
       tFrameworkElement::tLink* link = children->Get(i);
       if (link != NULL && link->GetChild() != NULL && link->IsPrimaryLink())
       {
-        TraverseElementTree(link->GetChild(), callback, custom_param, tmp);
+        TraverseElementTree<T, P>(link->GetChild(), callback, custom_param, tmp);
       }
     }
   }

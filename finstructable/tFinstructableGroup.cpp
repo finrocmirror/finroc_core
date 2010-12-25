@@ -122,24 +122,20 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     }
 
     // read parameters
-    util::tSimpleList<rrlib::xml2::tXMLNode> children;
-    children.AddAll(node.GetChildren());
-    int idx = 0;
-    rrlib::xml2::tXMLNode* parameters = NULL;
-    rrlib::xml2::tXMLNode* constructor_params = NULL;
-    rrlib::xml2::tXMLNode xn = children.Get(idx);
-    util::tString p_name = xn.GetName();
+    rrlib::xml2::tXMLNode::const_iterator child_node = node.GetChildrenBegin();
+    const rrlib::xml2::tXMLNode *parameters = NULL;
+    const rrlib::xml2::tXMLNode *constructor_params = NULL;
+    util::tString p_name = child_node->GetName();
     if (p_name.Equals("constructor"))
     {
-      constructor_params = &(xn);
-      idx++;
-      xn = children.Get(idx);
-      p_name = xn.GetName();
+      constructor_params = &(*child_node);
+      child_node++;
+      p_name = child_node->GetName();
     }
     if (p_name.Equals("parameters"))
     {
-      parameters = &(xn);
-      idx++;
+      parameters = &(*child_node);
+      child_node++;
     }
 
     // create mode
@@ -160,13 +156,12 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     }
 
     // continue with children
-    for (size_t i = idx; i < children.Size(); i++)
+    for (; child_node != node.GetChildrenEnd(); ++child_node)
     {
-      rrlib::xml2::tXMLNode node2 = children.Get(i);
-      util::tString name2 = node2.GetName();
+      util::tString name2 = child_node->GetName();
       if (name2.Equals("element"))
       {
-        Instantiate(node2, created);
+        Instantiate(*child_node, created);
       }
       else
       {
@@ -196,23 +191,20 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
     {
       FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain, "Loading XML: ", xml_file_);
       rrlib::xml2::tXMLDocument doc(xml_file_);
-      rrlib::xml2::tXMLNode root = doc.GetRootNode();
+      rrlib::xml2::tXMLNode &root = doc.GetRootNode();
       link_tmp = GetQualifiedName() + "/";
 
-      util::tSimpleList<rrlib::xml2::tXMLNode> children;
-      children.AddAll(root.GetChildren());
-      for (size_t i = 0u; i < children.Size(); i++)
+      for (rrlib::xml2::tXMLNode::const_iterator node = root.GetChildrenBegin(); node != root.GetChildrenEnd(); ++node)
       {
-        rrlib::xml2::tXMLNode node = children.Get(i);
-        util::tString name = node.GetName();
+        util::tString name = node->GetName();
         if (name.Equals("element"))
         {
-          Instantiate(node, this);
+          Instantiate(*node, this);
         }
         else if (name.Equals("edge"))
         {
-          util::tString src = node.GetStringAttribute("src");
-          util::tString dest = node.GetStringAttribute("dest");
+          util::tString src = node->GetStringAttribute("src");
+          util::tString dest = node->GetStringAttribute("dest");
           tAbstractPort* src_port = GetChildPort(src);
           tAbstractPort* dest_port = GetChildPort(dest);
           if (src_port == NULL && dest_port == NULL)
@@ -270,7 +262,7 @@ void tFinstructableGroup::SaveXml()
     rrlib::xml2::tXMLDocument doc;
     try
     {
-      rrlib::xml2::tXMLNode root = doc.AddRootNode("FinstructableGroup");
+      rrlib::xml2::tXMLNode &root = doc.AddRootNode("FinstructableGroup");
 
       // serialize framework elements
       SerializeChildren(root, this);
@@ -278,7 +270,7 @@ void tFinstructableGroup::SaveXml()
       // serialize edges
       link_tmp = GetQualifiedName() + "/";
       tFrameworkElementTreeFilter filter(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
-      filter.TraverseElementTree(this, this, root);
+      filter.TraverseElementTree<tFinstructableGroup, rrlib::xml2::tXMLNode &>(this, this, root);
       doc.WriteToFile(current_xml_file);
       FINROC_LOG_STREAM(rrlib::logging::eLL_USER, log_domain, "Saving successful");
     }
@@ -302,19 +294,19 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
     if (fe->IsReady() && fe->GetFlag(tCoreFlags::cFINSTRUCTED))
     {
       // serialize framework element
-      rrlib::xml2::tXMLNode n = node.AddChildNode("element");
+      rrlib::xml2::tXMLNode &n = node.AddChildNode("element");
       n.SetAttribute("name", fe->GetCDescription());
       tCreateFrameworkElementAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(spl->GetCreateAction());
       n.SetAttribute("group", cma->GetModuleGroup());
       n.SetAttribute("type", cma->GetName());
       if (cps != NULL)
       {
-        rrlib::xml2::tXMLNode pn = n.AddChildNode("constructor");
+        rrlib::xml2::tXMLNode &pn = n.AddChildNode("constructor");
         cps->Serialize(pn);
       }
       if (spl != NULL)
       {
-        rrlib::xml2::tXMLNode pn = n.AddChildNode("parameters");
+        rrlib::xml2::tXMLNode &pn = n.AddChildNode("parameters");
         spl->Serialize(pn);
       }
 
@@ -378,7 +370,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
     }
 
     // save edge
-    rrlib::xml2::tXMLNode edge = root.AddChildNode("edge");
+    rrlib::xml2::tXMLNode &edge = root.AddChildNode("edge");
     edge.SetAttribute("src", GetEdgeLink(ap));
     edge.SetAttribute("dest", GetEdgeLink(ap2));
   }
@@ -392,14 +384,14 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
       if (le->GetSourceLink().Length() > 0)
       {
         // save edge
-        rrlib::xml2::tXMLNode edge = root.AddChildNode("edge");
+        rrlib::xml2::tXMLNode &edge = root.AddChildNode("edge");
         edge.SetAttribute("src", GetEdgeLink(le->GetSourceLink()));
         edge.SetAttribute("dest", GetEdgeLink(ap));
       }
       else
       {
         // save edge
-        rrlib::xml2::tXMLNode edge = root.AddChildNode("edge");
+        rrlib::xml2::tXMLNode &edge = root.AddChildNode("edge");
         edge.SetAttribute("src", GetEdgeLink(ap));
         edge.SetAttribute("dest", GetEdgeLink(le->GetTargetLink()));
       }

@@ -82,17 +82,17 @@ void tStructureParameterList::Deserialize(tCoreInput& is)
 
 void tStructureParameterList::Deserialize(const rrlib::xml2::tXMLNode& node)
 {
-  util::tSimpleList<rrlib::xml2::tXMLNode> vec;
-  vec.AddAll(node.GetChildren());
-  if (vec.Size() != Size())
+  size_t number_of_children = std::distance(node.GetChildrenBegin(), node.GetChildrenEnd());
+  if (number_of_children != Size())
   {
     FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Parameter list size and number of xml parameters differ. Trying anyway");
   }
-  int count = util::tMath::Min(vec.Size(), Size());
+  int count = util::tMath::Min(number_of_children, Size());
+  rrlib::xml2::tXMLNode::const_iterator child = node.GetChildrenBegin();
   for (int i = 0; i < count; i++)
   {
     tStructureParameterBase* param = Get(i);
-    param->Deserialize(vec.Get(i));
+    param->Deserialize(*child++);
   }
 }
 
@@ -134,10 +134,10 @@ void tStructureParameterList::Serialize(rrlib::xml2::tXMLNode& node) const
 {
   for (size_t i = 0u; i < Size(); i++)
   {
-    rrlib::xml2::tXMLNode p = node.AddChildNode("parameter");
+    rrlib::xml2::tXMLNode &child = node.AddChildNode("parameter");
     tStructureParameterBase* param = Get(i);
-    p.SetAttribute("name", param->GetName());
-    param->Serialize(p);
+    child.SetAttribute("name", param->GetName());
+    param->Serialize(child);
   }
 }
 

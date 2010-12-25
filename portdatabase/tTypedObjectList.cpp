@@ -100,19 +100,17 @@ void tTypedObjectList::Deserialize(tCoreInput& is)
 void tTypedObjectList::Deserialize(const rrlib::xml2::tXMLNode& node)
 {
   list.Clear();
-  util::tSimpleList<rrlib::xml2::tXMLNode> children;
-  children.AddAll(node.GetChildren());
-  if (children.Size() > list.Size())
+  if (std::distance(node.GetChildrenBegin(), node.GetChildrenEnd()) > list.Size())
   {
     SetCapacity(size, NULL);
   }
-  for (size_t i = 0u; i < children.Size(); i++)
+  size_t i = 0;
+  for (rrlib::xml2::tXMLNode::const_iterator child_node = node.GetChildrenBegin(); child_node != node.GetChildrenEnd(); ++child_node, ++i)
   {
-    rrlib::xml2::tXMLNode n = children.Get(i);
     tDataType* dt = element_type;
-    if (n.HasAttribute("type"))
+    if (child_node->HasAttribute("type"))
     {
-      dt = tDataTypeRegister::GetInstance()->GetDataType(n.GetStringAttribute("type"));
+      dt = tDataTypeRegister::GetInstance()->GetDataType(child_node->GetStringAttribute("type"));
     }
     if (dt == NULL)
     {
@@ -126,7 +124,7 @@ void tTypedObjectList::Deserialize(const rrlib::xml2::tXMLNode& node)
       to = CreateBuffer(dt);
       list.Set(i, to);
     }
-    to->Deserialize(n);
+    to->Deserialize(*child_node);
   }
   SetSize(size);
 }
@@ -169,12 +167,12 @@ void tTypedObjectList::Serialize(rrlib::xml2::tXMLNode& node) const
   for (size_t i = 0u; i < list.Size(); i++)
   {
     ::finroc::core::tTypedObject* to = list.Get(i);
-    rrlib::xml2::tXMLNode n = node.AddChildNode("element");
+    rrlib::xml2::tXMLNode &child = node.AddChildNode("element");
     if (to->GetType() != element_type)
     {
-      n.SetAttribute("type", to->GetType()->GetName());
+      child.SetAttribute("type", to->GetType()->GetName());
     }
-    to->Serialize(n);
+    to->Serialize(child);
   }
 }
 
