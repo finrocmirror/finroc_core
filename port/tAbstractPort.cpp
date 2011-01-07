@@ -486,7 +486,7 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
     util::tLock lock2(GetRegistryLock());
 
     // step1: determine max queue length (strategy) for this port
-    int16 max = static_cast<int16>(util::tMath::Min(GetStrategyRequirement(), util::tShort::cMAX_VALUE));
+    int16 max = static_cast<int16>(std::min(GetStrategyRequirement(), util::tShort::cMAX_VALUE));
     util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
     util::tArrayWrapper<tAbstractPort*>* it_prev = edges_dest->GetIterable();
     for (int i = 0, n = it->Size(); i < n; i++)
@@ -494,7 +494,7 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
       tAbstractPort* port = it->Get(i);
       if (port != NULL)
       {
-        max = static_cast<int16>(util::tMath::Max(max, port->GetStrategy()));
+        max = static_cast<int16>(std::max(max, port->GetStrategy()));
       }
     }
 
@@ -646,7 +646,7 @@ void tAbstractPort::SetMinNetUpdateInterval(int interval2)
 {
   {
     util::tLock lock2(GetRegistryLock());
-    int16 interval = static_cast<int16>(util::tMath::Min(interval2, util::tShort::cMAX_VALUE));
+    int16 interval = static_cast<int16>(std::min(interval2, static_cast<int>(util::tShort::cMAX_VALUE)));
     if (min_net_update_time != interval)
     {
       min_net_update_time = interval;
