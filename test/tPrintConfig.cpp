@@ -52,7 +52,7 @@ int main(int argc__, char **argv__)
   printf(" __JC_CREATE_JNI_WRAPPERS__: false\n");
 #endif
 
-  printf(" sizeof(tPortDataManager): %d\n", sizeof(finroc::core::tPortDataManager));
-  printf(" sizeof(tNumber): %d\n", sizeof(finroc::core::tNumber));
-  printf(" sizeof(tCoreString): %d\n", sizeof(finroc::core::tCoreString));
+  printf(" sizeof(tPortDataManager): %zd\n", sizeof(finroc::core::tPortDataManager));
+  printf(" sizeof(tNumber): %zd\n", sizeof(finroc::core::tNumber));
+  printf(" sizeof(tCoreString): %zd\n", sizeof(finroc::core::tCoreString));
 }

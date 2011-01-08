@@ -79,7 +79,7 @@ public:
    */
   inline int GetDataRate()
   {
-    return static_cast<int>(((publish_size.Get() * 1000) / std::max(1LL, util::tTime::GetCoarse() - creation_time)));
+    return static_cast<int>(((publish_size.Get() * 1000) / std::max(static_cast<int64>(1), util::tTime::GetCoarse() - creation_time)));
   }
 
   /*!
@@ -87,7 +87,7 @@ public:
    */
   inline float GetPublishRate()
   {
-    return ((static_cast<float>(publish_count.Get())) * 1000.0f) / (static_cast<float>(std::max(1LL, util::tTime::GetCoarse() - creation_time)));
+    return ((static_cast<float>(publish_count.Get())) * 1000.0f) / (static_cast<float>(std::max(static_cast<int64>(1), util::tTime::GetCoarse() - creation_time)));
   }
 
 };

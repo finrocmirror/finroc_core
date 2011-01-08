@@ -31,7 +31,7 @@ tPortData::tPortData() :
     manager(tPortDataCreationInfo::Get()->GetManager())
 {
   tPortDataCreationInfo::Get()->AddUnitializedObject(this);
-  assert((((unsigned int)this) & 0x7) == 0); // make sure requested alignment was honoured
+  assert((((size_t)this) & 0x7) == 0); // make sure requested alignment was honoured
 }
 
 void tPortData::InitDataType()
