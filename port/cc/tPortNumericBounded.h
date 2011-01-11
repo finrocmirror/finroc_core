@@ -77,6 +77,10 @@ protected:
 
 public:
 
+  tPortNumericBounded(const util::tString& description, tFrameworkElement* parent, bool output_port):
+      tPortNumeric(description, parent, output_port)
+  {}
+
   /*!
    * \param pci Port Creation info
    * \param b Bounds for this port

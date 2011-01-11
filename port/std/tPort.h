@@ -60,6 +60,12 @@ protected:
 
 public:
 
+  tPort(const util::tString& description, tFrameworkElement* parent, bool output_port)
+  {
+    tPortCreationInfo pci(description, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT);
+    this->wrapped = new tPortBase(pci);
+  }
+
   /*!
    * \param pci Construction parameters in Port Creation Info Object
    */
