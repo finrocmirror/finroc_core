@@ -348,7 +348,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
     // check1: different finstructed elements as parent?
     if (ap->GetParentWithFlags(tCoreFlags::cFINSTRUCTED) == ap2->GetParentWithFlags(tCoreFlags::cFINSTRUCTED))
     {
-      continue;
+      //      continue;
     }
 
     // check2: their deepest common finstructable_group parent is this
@@ -360,13 +360,13 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
     ::finroc::core::tFrameworkElement* common_finstructable_parent = common_parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
     if (common_finstructable_parent != this)
     {
-      continue;
+      //      continue;
     }
 
     // check3: only save non-volatile connections in this step
     if (ap->IsVolatile() || ap2->IsVolatile())
     {
-      continue;
+      //      continue;
     }
 
     // save edge
