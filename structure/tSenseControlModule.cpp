@@ -75,8 +75,8 @@ tSenseControlModule::tSenseControlModule(tFrameworkElement *parent, const util::
     sensor_output(new tEdgeAggregator(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
     sense_task(this)
 {
-  this->AddAnnotation(new tPeriodicFrameworkElementTask(this->controller_input, this->controller_output, &this->control_task));
-  this->AddAnnotation(new tPeriodicFrameworkElementTask(this->sensor_input, this->sensor_output, &this->sense_task));
+  controller_input->AddAnnotation(new tPeriodicFrameworkElementTask(this->controller_input, this->controller_output, &this->control_task));
+  sensor_input->AddAnnotation(new tPeriodicFrameworkElementTask(this->sensor_input, this->sensor_output, &this->sense_task));
 }
 
 //----------------------------------------------------------------------
