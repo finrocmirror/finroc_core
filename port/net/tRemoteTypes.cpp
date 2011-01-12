@@ -32,6 +32,7 @@ namespace core
 {
 tRemoteTypes::tRemoteTypes() :
     types(NULL),
+    types_by_local_uid(NULL),
     global_default(0)
 {
 }
@@ -41,6 +42,8 @@ void tRemoteTypes::Deserialize(tCoreInput* ci)
   assert(((!Initialized())) && "Already initialized");
   global_default = ci->ReadShort();
   types = new ::finroc::util::tArrayWrapper<tEntry>(ci->ReadShort());
+  int max_types = tDataTypeRegister::GetInstance()->GetMaxTypeIndex();
+  types_by_local_uid = new ::finroc::util::tArrayWrapper<tEntry>(max_types);
   int16 next = ci->ReadShort();
   rrlib::logging::tLogStream ls = FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain);
   ls << "Connection Partner knows types:" << std::endl;
@@ -53,6 +56,10 @@ void tRemoteTypes::Deserialize(tCoreInput* ci)
     tEntry e(time, local);
     (*(types))[next] = e;
 
+    if (local != NULL)
+    {
+      (*(types_by_local_uid))[local->GetUid()] = e;
+    }
     next = ci->ReadShort();
   }
   ;

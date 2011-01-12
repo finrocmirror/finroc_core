@@ -54,7 +54,7 @@ void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   {
     addr = args[0];
   }
-  tcp::tTCPPeer* peer = new tcp::tTCPPeer(addr, "", tcp::tTCPPeer::eFULL, 4444, tcp::tTCPPeer::cDEFAULT_FILTER);
+  tcp::tTCPPeer* peer = new tcp::tTCPPeer(addr, "", tcp::tTCPPeer::eFULL, 4444, tcp::tTCPPeer::cDEFAULT_FILTER, false);
   tFrameworkElement::InitAll();
   output.Publish(4);
   output2.Publish(5);

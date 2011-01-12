@@ -73,8 +73,11 @@ class tRemoteTypes : public util::tLogUser
 
 private:
 
-  /*! List with remote types */
+  /*! List with remote types - index is remote type id */
   ::finroc::util::tArrayWrapper<tEntry>* types;
+
+  /*! List with remote types - index is local type id */
+  ::finroc::util::tArrayWrapper<tEntry>* types_by_local_uid;
 
   /*! Remote Global default update time */
   int16 global_default;
@@ -114,13 +117,13 @@ public:
   tDataType* GetLocalType(int16 uid);
 
   /*!
-   * \param data_type Data Type
+   * \param data_type Local Data Type
    * \return Remote default minimum network update interval for this type
    */
   inline int16 GetTime(tDataType* data_type)
   {
     assert(((Initialized())) && "Not initialized");
-    return (*(types))[data_type->GetUid()].update_time;
+    return (*(types_by_local_uid))[data_type->GetUid()].update_time;
   }
 
   /*!
