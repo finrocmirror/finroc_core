@@ -27,6 +27,7 @@
 #include "core/portdatabase/tDataTypeRegister.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/cc/tCCPortBase.h"
+#include "core/port/tPortFlags.h"
 #include "core/port/cc/tCCPortListener.h"
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/cc/tCCQueueFragment.h"
@@ -39,6 +40,8 @@ namespace finroc
 {
 namespace core
 {
+class tFrameworkElement;
+
 /*!
  * \author Max Reichardt
  *
@@ -59,6 +62,12 @@ public:
   tCCPort(tPortCreationInfo pci)
   {
     this->wrapped = new tCCPortBase(ProcessPci(pci));
+  }
+
+  tCCPort(const util::tString& description, tFrameworkElement* parent, bool output_port)
+  {
+    // this(new PortCreationInfo(description,parent,outputPort ? PortFlags.OUTPUT_PORT : PortFlags.INPUT_PORT));
+    this->wrapped = new tCCPortBase(ProcessPci((tPortCreationInfo(description, parent, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT))));
   }
 
   /*!
@@ -150,7 +159,7 @@ public:
     return reinterpret_cast<tCCPortDataContainer<T>*>(tThreadLocalCache::Get()->GetUnusedBuffer(this->wrapped->GetDataType()));
   }
 
-  inline static tPortCreationInfo& ProcessPci(tPortCreationInfo& pci)
+  inline static tPortCreationInfo ProcessPci(tPortCreationInfo pci)
   {
     pci.data_type = tDataTypeRegister::GetInstance()->GetDataType<T>();
     return pci;
