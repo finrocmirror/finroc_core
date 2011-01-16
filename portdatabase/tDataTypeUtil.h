@@ -69,7 +69,7 @@ public:
   }
   static bool HasVTableHelper(const boost::false_type&)
   {
-    return true;
+    return false;
   }
 
   // Helper methods for determining whether a type is a transaction type
