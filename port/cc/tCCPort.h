@@ -32,9 +32,9 @@
 #include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/cc/tCCQueueFragment.h"
 #include "core/port/cc/tCCInterThreadContainer.h"
+#include "core/port/cc/tCCPortData.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/tPortWrapperBase.h"
-#include "core/port/cc/tCCPortData.h"
 
 namespace finroc
 {
@@ -136,6 +136,15 @@ public:
   }
 
   /*!
+   * \param buffer Buffer to store current value from port in
+   */
+  inline void Get(T& buffer)
+  {
+    T* buf_ptr = &(buffer);
+    this->wrapped->GetRaw(reinterpret_cast<tCCPortData*>(buf_ptr));
+  }
+
+  /*!
    * \return current auto-locked Port data (unlock with getThreadLocalCache.releaseAllLocks())
    */
   inline const T* GetAutoLocked()
@@ -174,7 +183,7 @@ public:
   {
     tCCPortDataContainer<T>* c = GetUnusedBuffer();
     c->SetData(&(t));
-    this->wrapped->Publish(c);
+    this->wrapped->Publish(reinterpret_cast<tCCPortDataContainer<>*>(c));
   }
 
   /*!
