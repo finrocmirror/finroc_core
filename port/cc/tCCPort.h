@@ -56,12 +56,6 @@ class tCCPort : public tPortWrapperBase<tCCPortBase>
 {
 public:
 
-  tCCPort(const util::tString& description, tFrameworkElement* parent, bool output_port)
-  {
-    tPortCreationInfo pci(description, parent, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT);
-    this->wrapped = new tCCPortBase(ProcessPci(pci));
-  }
-
   /*!
    * \param pci Construction parameters in Port Creation Info Object
    */
