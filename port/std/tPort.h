@@ -62,8 +62,8 @@ public:
 
   tPort(const util::tString& description, tFrameworkElement* parent, bool output_port)
   {
-    tPortCreationInfo pci(description, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT);
-    this->wrapped = new tPortBase(pci);
+    tPortCreationInfo pci(description, parent, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT);
+    this->wrapped = new tPortBase(ProcessPci(pci));
   }
 
   /*!
