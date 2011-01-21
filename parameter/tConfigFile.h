@@ -70,14 +70,10 @@ public:
   /*! Log domain */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(edge_log, "parameter");
 
-private:
-
   /*!
    * \param file File name of configuration file (loaded if it exists already)
    */
   tConfigFile(const util::tString& filename_);
-
-public:
 
   /*!
    * Find ConfigFile which specified element is configured from

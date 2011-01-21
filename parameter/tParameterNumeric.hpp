@@ -70,6 +70,7 @@ tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrame
     ::finroc::core::tPortNumeric::SetDefault(tNumber(b.ToBounds(d), &(tUnit::cNO_UNIT)));
   }
   (static_cast<tPortImpl2*>(this->wrapped))->current_value = default_value;
+  (static_cast<tPortImpl2*>(this->wrapped))->info->SetConfigEntry(description);
 }
 
 template<typename T>

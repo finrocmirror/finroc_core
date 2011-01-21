@@ -48,7 +48,7 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
   {
     try
     {
-      wrapped = rrlib::xml2::tXMLDocument(filename_);
+      wrapped = rrlib::xml2::tXMLDocument(filename_, false); // false = do not validate with dtd
     }
     catch (const rrlib::xml2::tXML2WrapperException& e)
     {

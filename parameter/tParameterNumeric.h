@@ -50,12 +50,10 @@ class tParameterNumeric : public tPortNumericBounded
   /*! Special Port class to load value when initialized */
   class tPortImpl2 : public tPortNumericBounded::tPortImpl, public tCCPortListener<>
   {
-  private:
+  public:
 
     /*! Paramater info */
     tParameterInfo* info;
-
-  public:
 
     /*! Cached current value (we will much more often that it will be changed) */
     volatile T current_value;
