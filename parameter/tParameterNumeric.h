@@ -91,6 +91,12 @@ public:
    */
   void Set(T v);
 
+  /*!
+   * Set parameter to value in config file that is associated with given string
+   * \param config_entry name of parameter entry in config value
+   */
+  void SetConfigEntry(const util::tString& config_entry);
+
 };
 
 } // namespace finroc

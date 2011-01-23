@@ -70,7 +70,6 @@ tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrame
     ::finroc::core::tPortNumeric::SetDefault(tNumber(b.ToBounds(d), &(tUnit::cNO_UNIT)));
   }
   (static_cast<tPortImpl2*>(this->wrapped))->current_value = default_value;
-  (static_cast<tPortImpl2*>(this->wrapped))->info->SetConfigEntry(description);
 }
 
 template<typename T>
@@ -98,6 +97,13 @@ void tParameterNumeric<T>::Set(T v)
   ::finroc::core::tCCPort<tNumber>::BrowserPublish(cb);
   (static_cast<tPortImpl2*>(this->wrapped))->current_value = v;
 }
+
+template<typename T>
+void tParameterNumeric<T>::SetConfigEntry(const util::tString& config_entry)
+{
+  (static_cast<tPortImpl2*>(this->wrapped))->info->SetConfigEntry(config_entry);
+}
+
 
 template<typename T>
 tParameterNumeric<T>::tPortImpl2::tPortImpl2(tPortCreationInfo pci, tBounds b, tUnit* u) :

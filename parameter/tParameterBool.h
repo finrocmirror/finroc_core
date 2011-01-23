@@ -107,6 +107,15 @@ public:
     (static_cast<tPortImpl2*>(this->wrapped))->current_value = b;
   }
 
+  /*!
+   * Set parameter to value in config file that is associated with given string
+   * \param config_entry name of parameter entry in config value
+   */
+  void SetConfigEntry(const util::tString& config_entry)
+  {
+    (static_cast<tPortImpl2*>(this->wrapped))->info->SetConfigEntry(config_entry);
+  }
+
 };
 
 } // namespace finroc
