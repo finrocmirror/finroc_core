@@ -84,6 +84,22 @@ bool LogConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
 }
 
 
+rrlib::getopt::tOption& ParameterConfig()
+{
+  static rrlib::getopt::tOption parameter_config;
+  return parameter_config;
+}
+
+bool ParameterConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
+{
+  rrlib::getopt::tOption parameter_config(name_to_option_map.at("config_file"));
+  if (parameter_config->IsActive())
+  {
+    ParameterConfig() = parameter_config;
+  }
+  return true;
+}
+
 //----------------------------------------------------------------------
 // main
 //----------------------------------------------------------------------
@@ -96,6 +112,8 @@ int main(int argc, char **argv)
 
   rrlib::getopt::AddValue("log-config", 'l', "Log config file", &LogConfigHandler);
 
+  rrlib::getopt::AddValue("config_file", 'c', "Parameter config file", &ParameterConfigHandler);
+
   StartUp();
 
   rrlib::getopt::ProcessCommandLine(argc, argv);
@@ -106,7 +124,7 @@ int main(int argc, char **argv)
 
   finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread");
 
-  InitMainGroup(main_thread);
+  InitMainGroup(main_thread, ParameterConfig());
 
   main_thread->Init();
   main_thread->StartExecution();
