@@ -29,6 +29,7 @@
 #include "core/tFrameworkElementTreeFilter.h"
 #include "core/tCoreFlags.h"
 #include "core/parameter/tParameterInfo.h"
+#include "core/datatype/tCoreString.h"
 
 namespace finroc
 {
@@ -223,6 +224,21 @@ void tConfigFile::TreeFilterCallback(tFrameworkElement* fe, bool loading_paramet
     }
   }
 }
+
+util::tString tConfigFile::GetStringEntry(const util::tString& entry)
+{
+  if (this->HasEntry(entry))
+  {
+    finroc::core::tCoreString content;
+    (dynamic_cast<finroc::core::tCoreSerializable*>(&content))->Deserialize(this->GetEntry(entry, false));
+    return content.ToString();
+  }
+  else
+  {
+    return "";
+  }
+}
+
 
 } // namespace finroc
 } // namespace core

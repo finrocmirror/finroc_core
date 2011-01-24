@@ -117,6 +117,13 @@ public:
 
   void TreeFilterCallback(tFrameworkElement* fe, bool loading_parameters);
 
+  /*!
+   * Searches given entry in config file and returns its value as string if present.
+   * \param entry the entry in the config file to be searched
+   * \return string value of entry if present, empty string otherwise
+   */
+  util::tString GetStringEntry(const util::tString& entry);
+
 };
 
 } // namespace finroc
