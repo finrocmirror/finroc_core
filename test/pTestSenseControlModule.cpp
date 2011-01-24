@@ -76,7 +76,7 @@ void StartUp()
 //----------------------------------------------------------------------
 // InitMainGroup
 //----------------------------------------------------------------------
-void InitMainGroup(finroc::core::tThreadContainer *main_thread)
+void InitMainGroup(finroc::core::tThreadContainer *main_thread, const rrlib::getopt::tOption& option)
 {
 
   mTestSenseControlModule *test_module = new mTestSenseControlModule(main_thread);
