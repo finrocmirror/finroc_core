@@ -45,7 +45,7 @@ class tPlugins : public util::tUncopyableObject
 private:
 
   /*! All Plugins that are currently available */
-  util::tSimpleList< ::std::tr1::shared_ptr<tPlugin> > plugins;
+  util::tSimpleList< ::std::shared_ptr<tPlugin> > plugins;
 
   /*! List with actions to create external connections */
   util::tSimpleList<tCreateExternalConnectionAction*> external_connections;
@@ -94,7 +94,7 @@ public:
    */
   inline void AddPlugin(tPlugin* p)
   {
-    plugins.Add(::std::tr1::shared_ptr<tPlugin>(p));
+    plugins.Add(::std::shared_ptr<tPlugin>(p));
     p->Init(plugin_manager);
   }
 
@@ -127,7 +127,7 @@ public:
   /*!
    * \return List with plugins (do not modify!)
    */
-  inline util::tSimpleList< ::std::tr1::shared_ptr<tPlugin> >* GetPlugins()
+  inline util::tSimpleList< ::std::shared_ptr<tPlugin> >* GetPlugins()
   {
     return &(plugins);
   }

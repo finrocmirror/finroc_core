@@ -124,13 +124,13 @@ public:
 
   int stop_cycle;
 
-  ::std::tr1::shared_ptr<tPortNumeric> cc_push_out, cc_pull_push_out, cc_rev_push_out, cc_rev_push_out_local, cc_qOut;
+  ::std::shared_ptr<tPortNumeric> cc_push_out, cc_pull_push_out, cc_rev_push_out, cc_rev_push_out_local, cc_qOut;
 
-  ::std::tr1::shared_ptr<tPortNumeric> cc_push_in, cc_pull_push_in, cc_rev_push_in, cc_qIn;
+  ::std::shared_ptr<tPortNumeric> cc_push_in, cc_pull_push_in, cc_rev_push_in, cc_qIn;
 
-  ::std::tr1::shared_ptr<tTestStdPort> std_push_out, std_pull_push_out, std_rev_push_out, std_rev_push_out_local, std_qOut;
+  ::std::shared_ptr<tTestStdPort> std_push_out, std_pull_push_out, std_rev_push_out, std_rev_push_out_local, std_qOut;
 
-  ::std::tr1::shared_ptr<tTestStdPort> std_push_in, std_pull_push_in, std_rev_push_in, std_qIn;
+  ::std::shared_ptr<tTestStdPort> std_push_in, std_pull_push_in, std_rev_push_in, std_qIn;
 
   blackboard::tRawBlackboardClient* bb_client, * local_bb_client;
 
@@ -173,29 +173,29 @@ public:
     {
       if (cPUSH_TESTS)
       {
-        cc_push_out = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Output", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_push_in = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Input", tPortFlags::cSHARED_INPUT_PORT)));
+        cc_push_out = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Output", tPortFlags::cSHARED_OUTPUT_PORT)));
+        cc_push_in = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Input", tPortFlags::cSHARED_INPUT_PORT)));
         cc_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
       }
       if (cPULL_PUSH_TESTS)
       {
-        cc_pull_push_out = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPullPush Output", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_pull_push_in = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPullPush Input", tPortFlags::cSHARED_INPUT_PORT)));
+        cc_pull_push_out = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPullPush Output", tPortFlags::cSHARED_OUTPUT_PORT)));
+        cc_pull_push_in = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPullPush Input", tPortFlags::cSHARED_INPUT_PORT)));
         cc_pull_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         cc_pull_push_in->SetPushStrategy(false);
       }
       if (cREVERSE_PUSH_TESTS)
       {
-        cc_rev_push_out = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCRevPush Output", tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH)));
-        cc_rev_push_out_local = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_rev_push_in = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCRevPush Input", tPortFlags::cSHARED_INPUT_PORT)));
+        cc_rev_push_out = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCRevPush Output", tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH)));
+        cc_rev_push_out_local = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT)));
+        cc_rev_push_in = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCRevPush Input", tPortFlags::cSHARED_INPUT_PORT)));
         cc_rev_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         cc_rev_push_out_local->ConnectToTarget(*cc_rev_push_in);
       }
       if (cQ_TESTS)
       {
-        cc_qOut = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Queue Output", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_qIn = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Queue Input", tPortFlags::cSHARED_INPUT_PORT, 0)));
+        cc_qOut = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Queue Output", tPortFlags::cSHARED_OUTPUT_PORT)));
+        cc_qIn = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Queue Input", tPortFlags::cSHARED_INPUT_PORT, 0)));
         cc_qIn->SetMinNetUpdateInterval(cRECV_FREQ);
       }
     }
@@ -204,29 +204,29 @@ public:
       tDataType* bt = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tMemBuffer>());
       if (cPUSH_TESTS)
       {
-        std_push_out = ::std::tr1::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_push_in = ::std::tr1::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
+        std_push_out = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
+        std_push_in = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
         std_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
       }
       if (cPULL_PUSH_TESTS)
       {
-        std_pull_push_out = ::std::tr1::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPullPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_pull_push_in = ::std::tr1::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPullPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
+        std_pull_push_out = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPullPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
+        std_pull_push_in = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPullPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
         std_pull_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         std_pull_push_in->SetPushStrategy(false);
       }
       if (cREVERSE_PUSH_TESTS)
       {
-        std_rev_push_out = ::std::tr1::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdRevPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH)));
-        std_rev_push_out_local = ::std::tr1::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdRevPush Output Local", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_rev_push_in = ::std::tr1::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdRevPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
+        std_rev_push_out = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdRevPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH)));
+        std_rev_push_out_local = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdRevPush Output Local", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
+        std_rev_push_in = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdRevPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
         std_rev_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         std_rev_push_out_local->ConnectToTarget(*std_rev_push_in);
       }
       if (cQ_TESTS)
       {
-        std_qOut = ::std::tr1::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Queue Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_qIn = ::std::tr1::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Queue Input", bt, tPortFlags::cSHARED_INPUT_PORT, 0)));
+        std_qOut = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Queue Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
+        std_qIn = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Queue Input", bt, tPortFlags::cSHARED_INPUT_PORT, 0)));
         std_qIn->SetMinNetUpdateInterval(cRECV_FREQ);
       }
     }

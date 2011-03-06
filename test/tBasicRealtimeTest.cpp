@@ -44,8 +44,8 @@ void tBasicRealtimeTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
 {
   tRuntimeEnvironment::GetInstance();
 
-  ::std::tr1::shared_ptr<tBasicRealtimeTest> rt = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("RT-Thread"));
-  ::std::tr1::shared_ptr<tBasicRealtimeTest> t = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("non-RT-Thread"));
+  ::std::shared_ptr<tBasicRealtimeTest> rt = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("RT-Thread"));
+  ::std::shared_ptr<tBasicRealtimeTest> t = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("non-RT-Thread"));
   util::sThreadUtil::MakeThreadRealtime(rt);
   rt->Start();
   t->Start();

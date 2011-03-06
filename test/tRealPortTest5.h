@@ -45,7 +45,7 @@ private:
 
 public:
 
-  static ::std::tr1::shared_ptr<tPortNumeric> input, output, p1, p2, p3;
+  static ::std::shared_ptr<tPortNumeric> input, output, p1, p2, p3;
 
   static tRuntimeEnvironment* re;
 

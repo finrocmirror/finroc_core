@@ -31,7 +31,7 @@ tCoreOutput::tCoreOutput() :
 {
 }
 
-tCoreOutput::tCoreOutput(::std::tr1::shared_ptr<util::tSink> sink) :
+tCoreOutput::tCoreOutput(::std::shared_ptr<util::tSink> sink) :
     util::tOutputStreamBuffer(sink)
 {
 }

@@ -163,7 +163,7 @@ public:
 
   //
   //
-  //  ::std::tr1::shared_ptr<T> getValue() {
+  //  ::std::shared_ptr<T> getValue() {
   //        return shared_ptr<T>(((PortDataContainer<T>)lockContainer())->data), **valueUnlocker**);
   //  }
   //

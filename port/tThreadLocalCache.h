@@ -71,10 +71,10 @@ private:
   static util::tFastStaticThreadLocal<tThreadLocalCache, tThreadLocalCache, util::tGarbageCollector::tFunctor> info;
 
   /*! List with all ThreadLocalInfo objects... necessary for cleaning up... is deleted with last thread */
-  static ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos;
+  static ::std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos;
 
   /*! Lock to above - for every cache */
-  ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock;
+  ::std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock;
 
   /*! object to help synchronize method calls - lazily initialized */
   tMethodCallSyncher* method_syncher;
@@ -134,7 +134,7 @@ public:
   int64 thread_id;
 
   /*! Port Register - we need to have this for clean thread cleanup */
-  ::std::tr1::shared_ptr<const tCoreRegister<tAbstractPort*> > port_register;
+  ::std::shared_ptr<const tCoreRegister<tAbstractPort*> > port_register;
 
 private:
 
@@ -251,7 +251,7 @@ public:
    *
    * (should only be called by CCPortDataBufferPool)
    */
-  inline ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > GetInfosLock()
+  inline ::std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > GetInfosLock()
   {
     return infos_lock;
   }
@@ -337,7 +337,7 @@ public:
     FinalDelete();
   }
 
-  static ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > StaticInit();
+  static ::std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > StaticInit();
 
 };
 

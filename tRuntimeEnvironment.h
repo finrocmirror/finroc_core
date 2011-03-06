@@ -64,7 +64,7 @@ public:
     tRuntimeEnvironment* const outer_class_ptr;
 
     /*! Global register of all ports. Allows accessing ports with simple handle. */
-    ::std::tr1::shared_ptr<tCoreRegister<tAbstractPort*> > ports;
+    ::std::shared_ptr<tCoreRegister<tAbstractPort*> > ports;
 
     /*! Global register of all framework elements (except of ports) */
     tCoreRegister<tFrameworkElement*> elements;
@@ -84,7 +84,7 @@ public:
   public:
 
     /*! Lock to thread local cache list */
-    ::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock;
+    ::std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock;
 
     /*! Mutex */
     mutable util::tMutexLockOrder obj_mutex;
@@ -110,7 +110,7 @@ private:
   tRegistry registry;
 
   /*! Singleton instance of Runtime environment - shared pointer so that is cleanly deleted at shutdown */
-  static ::std::tr1::shared_ptr<tRuntimeEnvironment> instance;
+  static ::std::shared_ptr<tRuntimeEnvironment> instance;
 
   /*! Raw pointer to above - that also exists during destruction */
   static tRuntimeEnvironment* instance_raw_ptr;
@@ -205,7 +205,7 @@ public:
    * (Should only be called by ThreadLocalCache class - needed for clean cleanup - port register needs to exists longer than runtime environment)
    * \return Port register
    */
-  inline ::std::tr1::shared_ptr<const tCoreRegister<tAbstractPort*> > GetPorts()
+  inline ::std::shared_ptr<const tCoreRegister<tAbstractPort*> > GetPorts()
   {
     return registry.ports;
   }

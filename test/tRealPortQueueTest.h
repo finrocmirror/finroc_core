@@ -42,7 +42,7 @@ public:
   // Number of iterations
   static int cCYCLES;
 
-  static ::std::tr1::shared_ptr<tPortNumeric> output;
+  static ::std::shared_ptr<tPortNumeric> output;
 
   static volatile int cPUBLISH_LIMIT;
 

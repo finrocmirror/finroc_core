@@ -55,7 +55,7 @@ tThreadContainer::~tThreadContainer()
 
 bool tThreadContainer::IsExecuting()
 {
-  ::std::tr1::shared_ptr<tThreadContainerThread> t = thread;
+  ::std::shared_ptr<tThreadContainerThread> t = thread;
   if (t != NULL)
   {
     return t->IsRunning();

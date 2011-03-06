@@ -45,7 +45,7 @@ public:
 private:
 
   /*! Singleton instance */
-  static ::std::tr1::shared_ptr<tStreamCommitThread> instance;
+  static ::std::shared_ptr<tStreamCommitThread> instance;
 
   /*! All stream threads that need to be processed */
   util::tSafeConcurrentlyIterableList<tCallback*> callbacks;

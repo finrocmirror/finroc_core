@@ -28,7 +28,7 @@ namespace finroc
 namespace core
 {
 const int8 tAbstractPeerTracker::cDISCOVERED, tAbstractPeerTracker::cREMOVED;
-::std::tr1::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > tAbstractPeerTracker::instances(new util::tSimpleListWithMutex<tAbstractPeerTracker*>(tLockOrderLevels::cINNER_MOST - 1));
+::std::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > tAbstractPeerTracker::instances(new util::tSimpleListWithMutex<tAbstractPeerTracker*>(tLockOrderLevels::cINNER_MOST - 1));
 
 tAbstractPeerTracker::tAbstractPeerTracker(int lock_order) :
     instances_lock(instances),

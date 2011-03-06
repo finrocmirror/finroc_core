@@ -44,7 +44,7 @@ namespace core
 {
 const int tRealPortTest5::cNUM_OF_PORTS;
 const int tRealPortTest5::cCYCLE_TIME;
-::std::tr1::shared_ptr<tPortNumeric> tRealPortTest5::input, tRealPortTest5::output, tRealPortTest5::p1, tRealPortTest5::p2, tRealPortTest5::p3;
+::std::shared_ptr<tPortNumeric> tRealPortTest5::input, tRealPortTest5::output, tRealPortTest5::p1, tRealPortTest5::p2, tRealPortTest5::p3;
 tRuntimeEnvironment* tRealPortTest5::re;
 const int tRealPortTest5::cCYCLES;
 
@@ -53,12 +53,12 @@ void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // set up
   //RuntimeEnvironment.initialInit(/*new ByteArrayInputStream(new byte[0])*/);
   re = tRuntimeEnvironment::GetInstance();
-  output = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric("test1", true));
-  input = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric("test2", false));
+  output = ::std::shared_ptr<tPortNumeric>(new tPortNumeric("test1", true));
+  input = ::std::shared_ptr<tPortNumeric>(new tPortNumeric("test2", false));
   output->ConnectToTarget(*input);
-  p1 = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric("p1", false));
-  p2 = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric("p2", false));
-  p3 = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric("p3", false));
+  p1 = ::std::shared_ptr<tPortNumeric>(new tPortNumeric("p1", false));
+  p2 = ::std::shared_ptr<tPortNumeric>(new tPortNumeric("p2", false));
+  p3 = ::std::shared_ptr<tPortNumeric>(new tPortNumeric("p3", false));
   p3->GetWrapped()->Link(tRuntimeEnvironment::GetInstance(), "portlink");
   tFrameworkElement::InitAll();
   //output.std11CaseReceiver = input;

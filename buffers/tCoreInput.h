@@ -66,11 +66,11 @@ public:
 
   tCoreInput();
 
-  tCoreInput(::std::tr1::shared_ptr<const util::tConstSource> source);
+  tCoreInput(::std::shared_ptr<const util::tConstSource> source);
 
   tCoreInput(const util::tConstSource* source);
 
-  tCoreInput(::std::tr1::shared_ptr<util::tSource> source);
+  tCoreInput(::std::shared_ptr<util::tSource> source);
 
   tCoreInput(util::tSource* source);
 

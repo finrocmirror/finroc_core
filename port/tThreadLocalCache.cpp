@@ -38,10 +38,10 @@ namespace core
 // This 'lock' ensures that Thread info is deallocated after last ThreadLocalCache
 util::tThreadInfoLock thread_info_lock = util::tThread::GetThreadInfoLock();
 // This 'lock' ensures that static AutoDeleter instance is deallocated after last ThreadLocalCache
-::std::tr1::shared_ptr<util::tAutoDeleter> auto_deleter_lock(util::tAutoDeleter::GetStaticInstance());
+::std::shared_ptr<util::tAutoDeleter> auto_deleter_lock(util::tAutoDeleter::GetStaticInstance());
 util::tFastStaticThreadLocal<tThreadLocalCache, tThreadLocalCache, util::tGarbageCollector::tFunctor> tThreadLocalCache::info;
 
-::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCache::infos;
+::std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCache::infos;
 util::tAtomicInt tThreadLocalCache::thread_uid_counter(1);
 
 tThreadLocalCache::tThreadLocalCache() :
@@ -207,7 +207,7 @@ void tThreadLocalCache::ReleaseAllLocks()
   cc_inter_auto_locks.Clear();
 }
 
-::std::tr1::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCache::StaticInit()
+::std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCache::StaticInit()
 {
   infos.reset(new util::tSimpleListWithMutex<tThreadLocalCache*>(tLockOrderLevels::cINNER_MOST - 100));
 

@@ -35,7 +35,7 @@ namespace finroc
 namespace core
 {
 int tRealPortQueueTest::cCYCLES = 10000000;
-::std::tr1::shared_ptr<tPortNumeric> tRealPortQueueTest::output;
+::std::shared_ptr<tPortNumeric> tRealPortQueueTest::output;
 volatile int tRealPortQueueTest::cPUBLISH_LIMIT;
 util::tAtomicInt tRealPortQueueTest::finished(0);
 
@@ -49,7 +49,7 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   // Create number output port and input port with queue
   tRuntimeEnvironment::GetInstance();
   tThreadLocalCache::Get();
-  output = ::std::tr1::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("output", tPortFlags::cOUTPUT_PORT)));
+  output = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("output", tPortFlags::cOUTPUT_PORT)));
   tPortCreationInfo input_pCI("input", tPortFlags::cINPUT_PORT | tPortFlags::cHAS_AND_USES_QUEUE | tPortFlags::cPUSH_STRATEGY);
   input_pCI.max_queue_size = 10;
   tPortNumeric input(input_pCI);
@@ -140,8 +140,8 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   tThreadLocalCache::GetFast()->ReleaseAllLocks();
 
   // start writer threads
-  ::std::tr1::shared_ptr<tRealPortQueueTest> thread1 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(true));
-  ::std::tr1::shared_ptr<tRealPortQueueTest> thread2 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(false));
+  ::std::shared_ptr<tRealPortQueueTest> thread1 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(true));
+  ::std::shared_ptr<tRealPortQueueTest> thread2 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(false));
   printf("Created threads %p and %p\n", thread1.get(), thread2.get());
   thread1->Start();
   thread2->Start();

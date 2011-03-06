@@ -38,7 +38,7 @@ tCoreInput::tCoreInput() :
 {
 }
 
-tCoreInput::tCoreInput(::std::tr1::shared_ptr<const util::tConstSource> source) :
+tCoreInput::tCoreInput(::std::shared_ptr<const util::tConstSource> source) :
     util::tInputStreamBuffer(source),
     buffer_source(NULL),
     type_translation(NULL)
@@ -52,7 +52,7 @@ tCoreInput::tCoreInput(const util::tConstSource* source) :
 {
 }
 
-tCoreInput::tCoreInput(::std::tr1::shared_ptr<util::tSource> source) :
+tCoreInput::tCoreInput(::std::shared_ptr<util::tSource> source) :
     util::tInputStreamBuffer(source),
     buffer_source(NULL),
     type_translation(NULL)

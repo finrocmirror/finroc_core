@@ -46,7 +46,7 @@ public:
 
   tCoreOutput();
 
-  tCoreOutput(::std::tr1::shared_ptr<util::tSink> sink);
+  tCoreOutput(::std::shared_ptr<util::tSink> sink);
 
   tCoreOutput(util::tSink* sink);
 

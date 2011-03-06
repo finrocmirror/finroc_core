@@ -59,7 +59,7 @@ private:
   static tStandardCreateModuleAction<tThreadContainer> cCREATE_ACTION;
 
   /*! Thread - while program is running - in pause mode null */
-  ::std::tr1::shared_ptr<tThreadContainerThread> thread;
+  ::std::shared_ptr<tThreadContainerThread> thread;
 
   /*!
    * Stop thread in thread container (does not block - call join thread to block until thread has terminated)
