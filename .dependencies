@@ -1,4 +1,3 @@
-rrlib_finroc_core_utils
+finroc_plugins_tcp
 rrlib_getopt
 rrlib_logging
-rrlib_xml2_wrapper
