@@ -19,12 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
-#include "core/portdatabase/tDataType.h"
 
-#ifndef CORE__PORT__NET__TREMOTETYPES_H
-#define CORE__PORT__NET__TREMOTETYPES_H
+#ifndef core__port__net__tRemoteTypes_h__
+#define core__port__net__tRemoteTypes_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
@@ -32,7 +33,6 @@ namespace finroc
 namespace core
 {
 class tCoreInput;
-class tDataTypeRegister;
 class tCoreOutput;
 
 /*!
@@ -52,13 +52,13 @@ class tRemoteTypes : public util::tLogUser
     int16 update_time;
 
     /*! local data type that represents the same time - null if there is noch such type in local runtime environment */
-    tDataType* local_data_type;
+    rrlib::serialization::tDataTypeBase local_data_type;
 
   public:
 
     tEntry();
 
-    tEntry(int16 time, tDataType* local);
+    tEntry(int16 time, rrlib::serialization::tDataTypeBase local);
 
     bool operator==(void* x)
     {
@@ -114,16 +114,16 @@ public:
    * \param uid Remote type uid
    * \return Local data type - which is identical to remote type; or null if no such type exists
    */
-  tDataType* GetLocalType(int16 uid);
+  rrlib::serialization::tDataTypeBase GetLocalType(int16 uid);
 
   /*!
    * \param data_type Local Data Type
    * \return Remote default minimum network update interval for this type
    */
-  inline int16 GetTime(tDataType* data_type)
+  inline int16 GetTime(const rrlib::serialization::tDataTypeBase& data_type)
   {
     assert(((Initialized())) && "Not initialized");
-    return (*(types_by_local_uid))[data_type->GetUid()].update_time;
+    return (*(types_by_local_uid))[data_type.GetUid()].update_time;
   }
 
   /*!
@@ -140,7 +140,7 @@ public:
    * \param dtr DataTypeRegister to serialize
    * \param co Output Stream to write information to
    */
-  static void SerializeLocalDataTypes(tDataTypeRegister* dtr, tCoreOutput* co);
+  static void SerializeLocalDataTypes(tCoreOutput* co);
 
   /*!
    * Set new update time for specified Type
@@ -155,4 +155,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__NET__TREMOTETYPES_H
+#endif // core__port__net__tRemoteTypes_h__

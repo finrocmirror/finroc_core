@@ -20,17 +20,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tNumber.h"
-#include "core/portdatabase/tDataTypeRegister.h"
-#include "core/buffers/tCoreInput.h"
+#include "rrlib/serialization/tInputStream.h"
 #include "core/datatype/tConstant.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tStringInputStream.h"
+#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {
 namespace core
 {
 tNumber tNumber::cZERO(0);
-tDataType* const tNumber::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tNumber>(), "Number");
+const rrlib::serialization::tDataType<tNumber> tNumber::cTYPE("Number");
 const int8 tNumber::cINT64, tNumber::cINT32, tNumber::cINT16, tNumber::cFLOAT64, tNumber::cFLOAT32, tNumber::cCONST, tNumber::cMIN_BARRIER;
 
 void tNumber::CopyFrom(const tNumber& source)
@@ -41,7 +41,7 @@ void tNumber::CopyFrom(const tNumber& source)
   lval = source.lval;
 }
 
-void tNumber::Deserialize(tCoreInput& ois)
+void tNumber::Deserialize(rrlib::serialization::tInputStream& ois)
 {
   int8 first_byte = ois.ReadByte();
   bool has_unit = (first_byte & 1) > 0;
@@ -74,16 +74,17 @@ void tNumber::Deserialize(tCoreInput& ois)
   unit = has_unit ? tUnit::GetUnit(ois.ReadByte()) : &(tUnit::cNO_UNIT);
 }
 
-void tNumber::Deserialize(const util::tString& s)
+void tNumber::Deserialize(rrlib::serialization::tStringInputStream& is)
 {
   // scan for unit
+  util::tString s = is.ReadWhile("eE-.", rrlib::serialization::tStringInputStream::cDIGIT, true);
   util::tString num = s;
   for (size_t i = 0u; i < s.Length(); i++)
   {
     char c = s.CharAt(i);
-    if (util::tCharacter::IsLetter(c))
+    if (isalpha(c))
     {
-      if ((c == 'e' || c == 'E') && (s.Length() > i + 1) && (c == '-' || util::tCharacter::IsDigit(s.CharAt(i + 1))))
+      if ((c == 'e' || c == 'E') && (s.Length() > i + 1) && (c == '-' || isdigit(s.CharAt(i + 1))))
       {
         continue;  // exponent in decimal notation
       }
@@ -107,7 +108,7 @@ void tNumber::Deserialize(const util::tString& s)
   }
   else
   {
-    num_type = tNumber::eLONG;
+    num_type = eLONG;
     try
     {
       int64 l = util::tLong::ParseLong(num);
@@ -146,12 +147,12 @@ tConstant* tNumber::GetConstant() const
 
 tUnit* tNumber::GetUnit() const
 {
-  return num_type == tNumber::eCONSTANT ? GetConstant()->unit : unit;
+  return num_type == eCONSTANT ? GetConstant()->unit : unit;
 }
 
-void tNumber::Serialize(tCoreOutput& oos) const
+void tNumber::Serialize(rrlib::serialization::tOutputStream& oos) const
 {
-  if (num_type == tNumber::eLONG || num_type == tNumber::eINT)
+  if (num_type == eLONG || num_type == eINT)
   {
     int64 value = (num_type == eLONG) ? lval : ival;
     if (value >= cMIN_BARRIER && value <= 63)
@@ -174,19 +175,19 @@ void tNumber::Serialize(tCoreOutput& oos) const
       oos.WriteLong(value);
     }
   }
-  else if (num_type == tNumber::eDOUBLE)
+  else if (num_type == eDOUBLE)
   {
     oos.WriteByte(PrepFirstByte(cFLOAT64));
 
     oos.WriteDouble(dval);
   }
-  else if (num_type == tNumber::eFLOAT)
+  else if (num_type == eFLOAT)
   {
     oos.WriteByte(PrepFirstByte(cFLOAT32));
 
     oos.WriteFloat(fval);
   }
-  else if (num_type == tNumber::eCONSTANT)
+  else if (num_type == eCONSTANT)
   {
     oos.WriteByte(PrepFirstByte(cCONST));
     oos.WriteByte((static_cast<tConstant*>(unit))->GetConstantId());

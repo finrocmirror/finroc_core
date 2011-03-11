@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__THREAD__TTHREADCONTAINER_H
-#define CORE__THREAD__TTHREADCONTAINER_H
+#ifndef core__thread__tThreadContainer_h__
+#define core__thread__tThreadContainer_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/parameter/tStructureParameterBool.h"
 #include "core/parameter/tStructureParameterNumeric.h"
@@ -112,4 +113,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__THREAD__TTHREADCONTAINER_H
+#endif // core__thread__tThreadContainer_h__

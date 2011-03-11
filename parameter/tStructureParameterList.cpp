@@ -20,20 +20,19 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/parameter/tStructureParameterList.h"
-#include "core/portdatabase/tDataTypeRegister.h"
 #include "core/parameter/tStructureParameterBase.h"
-#include "core/buffers/tCoreInput.h"
+#include "rrlib/serialization/tInputStream.h"
 #include "core/tFrameworkElement.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "core/portdatabase/tTypedObject.h"
+#include "rrlib/serialization/tTypedObject.h"
 #include "core/parameter/tConstructorParameters.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tStructureParameterList::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tStructureParameterList>());
+rrlib::serialization::tDataType<tStructureParameterList> tStructureParameterList::cTYPE;
 tStructureParameterList tStructureParameterList::cEMPTY;
 
 tStructureParameterList::tStructureParameterList() :
@@ -58,7 +57,7 @@ void tStructureParameterList::Clear()
   }
 }
 
-void tStructureParameterList::Deserialize(tCoreInput& is)
+void tStructureParameterList::Deserialize(rrlib::serialization::tInputStream& is)
 {
   if (GetAnnotated() == NULL)
   {
@@ -92,7 +91,8 @@ void tStructureParameterList::Deserialize(const rrlib::xml2::tXMLNode& node)
   for (int i = 0; i < count; i++)
   {
     tStructureParameterBase* param = Get(i);
-    param->Deserialize(*child++);
+    param->Deserialize(*child);
+    ++child;
   }
 }
 
@@ -120,7 +120,7 @@ tConstructorParameters* tStructureParameterList::Instantiate() const
   return cp;
 }
 
-void tStructureParameterList::Serialize(tCoreOutput& os) const
+void tStructureParameterList::Serialize(rrlib::serialization::tOutputStream& os) const
 {
   os.WriteInt(create_action);
   os.WriteInt(parameters.Size());
@@ -134,7 +134,7 @@ void tStructureParameterList::Serialize(rrlib::xml2::tXMLNode& node) const
 {
   for (size_t i = 0u; i < Size(); i++)
   {
-    rrlib::xml2::tXMLNode &child = node.AddChildNode("parameter");
+    rrlib::xml2::tXMLNode& child = node.AddChildNode("parameter");
     tStructureParameterBase* param = Get(i);
     child.SetAttribute("name", param->GetName());
     param->Serialize(child);

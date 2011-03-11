@@ -19,20 +19,27 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__CC__TCCPORTDATAREF_H
-#define CORE__PORT__CC__TCCPORTDATAREF_H
+#ifndef core__port__cc__tCCPortDataRef_h__
+#define core__port__cc__tCCPortDataRef_h__
 
-#include "core/port/cc/tCCPortDataContainer.h"
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tCombinedPointer.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tGenericObject;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
-class tCCPortData;
+class tCCPortDataManagerTL;
 
 /*!
  * References to cheap copy port data.
@@ -44,14 +51,14 @@ class tCCPortData;
  * In C++, this is a pointer that points slightly above the port data
  * That means, the class is empty and no objects of this class actually exist.
  */
-class tCCPortDataRef : public tCombinedPointer<tCCPortDataContainer<> >
+class tCCPortDataRef : public tCombinedPointer<tCCPortDataManagerTL>
 {
 public:
 
   /*!
    * \return Container of referenced data
    */
-  inline tCCPortDataContainer<>* GetContainer()
+  inline tCCPortDataManagerTL* GetContainer()
   {
     return GetPointer();
   }
@@ -59,9 +66,9 @@ public:
   /*!
    * \return Referenced port data
    */
-  inline void* GetData()
+  inline rrlib::serialization::tGenericObject* GetData()
   {
-    return GetContainer()->GetDataPtr();
+    return GetContainer()->GetObject();
   }
 
 };
@@ -69,4 +76,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__CC__TCCPORTDATAREF_H
+#endif // core__port__cc__tCCPortDataRef_h__

@@ -49,8 +49,7 @@ void tVoid1Method<HANDLER, P1>::Call(tInterfaceClientPort port, P1 p1, bool forc
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
-    mc->AddParamForSending(p1);
-    mc->SendParametersComplete();
+    mc->AddParam(0, p1);
     mc->SetMethod(this, port.GetDataType());
     (static_cast<tInterfaceNetPort*>(ip))->SendAsyncCall(mc);
   }
@@ -71,7 +70,7 @@ void tVoid1Method<HANDLER, P1>::Call(tInterfaceClientPort port, P1 p1, bool forc
     {
       tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
       //1
-      mc->AddParamForLocalCall(0, p1);
+      mc->AddParam(0, p1);
       mc->PrepareExecution(this, port.GetDataType(), handler, NULL);
       tRPCThreadPool::GetInstance()->ExecuteTask(mc);
     }

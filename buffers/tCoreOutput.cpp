@@ -20,28 +20,29 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/buffers/tCoreOutput.h"
-#include "core/portdatabase/tTypedObject.h"
+#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/serialization/tGenericObject.h"
 
 namespace finroc
 {
 namespace core
 {
 tCoreOutput::tCoreOutput() :
-    util::tOutputStreamBuffer()
+    rrlib::serialization::tOutputStream()
 {
 }
 
-tCoreOutput::tCoreOutput(::std::shared_ptr<util::tSink> sink) :
-    util::tOutputStreamBuffer(sink)
+tCoreOutput::tCoreOutput(::std::shared_ptr<rrlib::serialization::tSink> sink) :
+    rrlib::serialization::tOutputStream(sink)
 {
 }
 
-tCoreOutput::tCoreOutput(util::tSink* sink) :
-    util::tOutputStreamBuffer(sink)
+tCoreOutput::tCoreOutput(rrlib::serialization::tSink* sink) :
+    rrlib::serialization::tOutputStream(sink)
 {
 }
 
-void tCoreOutput::WriteObject(const tTypedObject* to)
+void tCoreOutput::WriteObject(const rrlib::serialization::tGenericObject* to)
 {
   if (to == NULL)
   {
@@ -49,7 +50,7 @@ void tCoreOutput::WriteObject(const tTypedObject* to)
   }
 
   //writeSkipOffsetPlaceholder();
-  WriteShort(to->GetType()->GetUid());
+  WriteShort(to->GetType().GetUid());
   to->Serialize(*this);
   //skipTargetHere();
 }

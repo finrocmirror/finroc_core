@@ -19,12 +19,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
+#ifndef core__test__tRealPortTest5_h__
+#define core__test__tRealPortTest5_h__
 
-#ifndef CORE__TEST__TREALPORTTEST5_H
-#define CORE__TEST__TREALPORTTEST5_H
+#include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/port/cc/tPortNumeric.h"
+#include "core/port/tPort.h"
 
 namespace finroc
 {
@@ -45,11 +45,19 @@ private:
 
 public:
 
-  static ::std::shared_ptr<tPortNumeric> input, output, p1, p2, p3;
+  static ::std::shared_ptr<tPort<int> > input, output, p1, p2, p3;
 
   static tRuntimeEnvironment* re;
 
+  /*! Log domain for this class */
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "test");
+
   tRealPortTest5() {}
+
+  inline static util::tString GetLogDescription()
+  {
+    return "RealPortTest";
+  }
 
   static void Main(::finroc::util::tArrayWrapper<util::tString>& args);
 
@@ -72,4 +80,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TEST__TREALPORTTEST5_H
+#endif // core__test__tRealPortTest5_h__

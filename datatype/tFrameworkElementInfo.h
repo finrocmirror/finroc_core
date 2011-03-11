@@ -19,12 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__DATATYPE__TFRAMEWORKELEMENTINFO_H
-#define CORE__DATATYPE__TFRAMEWORKELEMENTINFO_H
+#ifndef core__datatype__tFrameworkElementInfo_h__
+#define core__datatype__tFrameworkElementInfo_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/tRuntimeListener.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tEdgeAggregator.h"
@@ -34,7 +36,6 @@ namespace finroc
 {
 namespace core
 {
-class tDataType;
 class tCoreInput;
 class tRemoteTypes;
 class tFrameworkElement;
@@ -79,7 +80,7 @@ private:
   int handle;
 
   /*! Type of port data */
-  tDataType* type;
+  rrlib::serialization::tDataTypeBase type;
 
   /*! Port Flags */
   int flags;
@@ -153,7 +154,7 @@ public:
   /*!
    * \return Type of port data
    */
-  inline tDataType* GetDataType() const
+  inline rrlib::serialization::tDataTypeBase GetDataType() const
   {
     return type;
   }
@@ -235,4 +236,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__DATATYPE__TFRAMEWORKELEMENTINFO_H
+#endif // core__datatype__tFrameworkElementInfo_h__

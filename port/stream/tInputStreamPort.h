@@ -19,15 +19,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__STREAM__TINPUTSTREAMPORT_H
-#define CORE__PORT__STREAM__TINPUTSTREAMPORT_H
+#ifndef core__port__stream__tInputStreamPort_h__
+#define core__port__stream__tInputStreamPort_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/stream/tInputPacketProcessor.h"
-#include "core/port/std/tPort.h"
-#include "core/port/std/tPortQueueFragment.h"
+#include "core/port/tPort.h"
+#include "core/port/std/tPortQueueFragmentRaw.h"
 #include "core/port/std/tPortBase.h"
 
 namespace finroc
@@ -35,7 +36,6 @@ namespace finroc
 namespace core
 {
 class tNewConnectionHandler;
-class tPortData;
 class tAbstractPort;
 class tPublishCache;
 
@@ -62,7 +62,7 @@ protected:
     /*!
      * Used for dequeueing data
      */
-    tPortQueueFragment<tPortData> dequeue_buffer;
+    tPortQueueFragmentRaw dequeue_buffer;
 
     /*!
      * User of input stream
@@ -111,4 +111,4 @@ public:
 
 #include "core/port/stream/tInputStreamPort.hpp"
 
-#endif // CORE__PORT__STREAM__TINPUTSTREAMPORT_H
+#endif // core__port__stream__tInputStreamPort_h__

@@ -19,22 +19,29 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__RPC__TINTERFACECLIENTPORT_H
-#define CORE__PORT__RPC__TINTERFACECLIENTPORT_H
+#ifndef core__port__rpc__tInterfaceClientPort_h__
+#define core__port__rpc__tInterfaceClientPort_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/rpc/tInterfacePort.h"
 #include "core/port/tPortWrapperBase.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tDataTypeBase;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
 class tFrameworkElement;
-class tDataType;
 class tAbstractPort;
-class tPortData;
 
 /*! Base class for client interface ports */
 class tInterfaceClientPort : public tPortWrapperBase<tInterfacePort>
@@ -55,7 +62,7 @@ class tInterfaceClientPort : public tPortWrapperBase<tInterfacePort>
 
   public:
 
-    tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& description, tFrameworkElement* parent, tDataType* type, tInterfacePort::tType client);
+    tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type, tInterfacePort::tType client);
 
   };
 
@@ -85,7 +92,20 @@ protected:
 
 public:
 
-  tInterfaceClientPort(const util::tString& description, tFrameworkElement* parent, tDataType* type);
+  tInterfaceClientPort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type);
+
+  /*!
+   * Get buffer to use in method call (has one lock)
+   *
+   * (for non-cc types only)
+   * \param dt Data type of object to get buffer of
+   * \return Unused buffer of type
+   */
+  template <typename T>
+  inline ::std::shared_ptr<T> GetBufferForCall(const rrlib::serialization::tDataTypeBase& dt = NULL)
+  {
+    return this->wrapped->GetBufferForCall<T>(dt);
+  }
 
   /*!
    * (Usually called on client ports)
@@ -95,16 +115,6 @@ public:
   inline tInterfacePort* GetServer()
   {
     return this->wrapped->GetServer();
-  }
-
-  /*!
-   * (for non-cc types only)
-   * \param dt Data type of object to get buffer of
-   * \return Unused buffer of type
-   */
-  inline tPortData* GetUnusedBuffer(tDataType* dt)
-  {
-    return this->wrapped->GetUnusedBuffer(dt);
   }
 
   /*!
@@ -121,4 +131,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__RPC__TINTERFACECLIENTPORT_H
+#endif // core__port__rpc__tInterfaceClientPort_h__

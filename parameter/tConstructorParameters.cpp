@@ -20,13 +20,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/parameter/tConstructorParameters.h"
-#include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tConstructorParameters::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tConstructorParameters>());
+rrlib::serialization::tDataType<tConstructorParameters> tConstructorParameters::cTYPE;
 
 } // namespace finroc
 } // namespace core

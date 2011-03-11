@@ -48,8 +48,7 @@ R tPort1Method<HANDLER, R, P1>::Call(tInterfaceClientPort port, P1 p1, int net_t
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
-    mc->AddParamForSending(p1);
-    mc->SendParametersComplete();
+    mc->AddParam(0, p1);
     mc->PrepareSyncRemoteExecution(this, port.GetDataType(), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());
     try
     {
@@ -60,7 +59,6 @@ R tPort1Method<HANDLER, R, P1>::Call(tInterfaceClientPort port, P1 p1, int net_t
       // we shouldn't need to recycle anything, since call is responsible for this
       throw tMethodCallException(e.GetType(), CODE_LOCATION_MACRO);
     }
-    mc->DeserializeParamaters();
     if (mc->HasException())
     {
       int8 type = 0;
@@ -113,8 +111,7 @@ void tPort1Method<HANDLER, R, P1>::CallAsync(const tInterfaceClientPort* port, t
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
-    mc->AddParamForSending(p1);
-    mc->SendParametersComplete();
+    mc->AddParam(0, p1);
     mc->PrepareSyncRemoteExecution(this, port->GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
     tRPCThreadPool::GetInstance()->ExecuteTask(mc);
   }
@@ -144,7 +141,7 @@ void tPort1Method<HANDLER, R, P1>::CallAsync(const tInterfaceClientPort* port, t
     {
       tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
       //1
-      mc->AddParamForLocalCall(0, p1);
+      mc->AddParam(0, p1);
       mc->PrepareExecution(this, port->GetDataType(), mhandler, handler);
       tRPCThreadPool::GetInstance()->ExecuteTask(mc);
     }
@@ -173,7 +170,6 @@ void tPort1Method<HANDLER, R, P1>::ExecuteAsyncNonVoidCallOverTheNet(tMethodCall
     r_handler->HandleMethodCallException(this, e);
     return;
   }
-  mc->DeserializeParamaters();
   if (mc->HasException())
   {
     int8 type = 0;
@@ -228,8 +224,7 @@ void tPort1Method<HANDLER, R, P1>::ExecuteFromMethodCallObject(tMethodCall* call
     {
       call->RecycleParameters();
       call->SetStatusReturn();
-      call->AddParamForSending(ret);
-      call->SendParametersComplete();
+      call->AddParam(0, ret);
     }
   }
   catch (const tMethodCallException& e)

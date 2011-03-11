@@ -19,20 +19,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TCONFIGFILE_H
-#define CORE__PARAMETER__TCONFIGFILE_H
+#ifndef core__parameter__tConfigFile_h__
+#define core__parameter__tConfigFile_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
 #include "rrlib/xml2_wrapper/tXMLDocument.h"
 #include "core/tFinrocAnnotation.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
+
+namespace rrlib
+{
+namespace xml2
+{
+class tXMLNode;
+} // namespace rrlib
+} // namespace xml2
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
 class tFrameworkElement;
 
 /*!
@@ -65,7 +73,7 @@ private:
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tConfigFile> cTYPE;
 
   /*! Log domain */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(edge_log, "parameter");
@@ -74,6 +82,11 @@ public:
    * \param file File name of configuration file (loaded if it exists already)
    */
   tConfigFile(const util::tString& filename_);
+
+  /*!
+   * Dummy constructor. Generic instantiation is not supported.
+   */
+  tConfigFile();
 
   /*!
    * Find ConfigFile which specified element is configured from
@@ -95,7 +108,14 @@ public:
    * \param create (Re)create entry node?
    * \return XMLNode representing entry
    */
-  rrlib::xml2::tXMLNode &GetEntry(const util::tString& entry, bool create);
+  rrlib::xml2::tXMLNode& GetEntry(const util::tString& entry, bool create);
+
+  /*!
+   * Searches given entry in config file and returns its value as string if present.
+   * \param entry the entry in the config file to be searched
+   * \return string value of entry if present, empty string otherwise
+   */
+  util::tString GetStringEntry(const util::tString& entry);
 
   /*!
    * Does configuration file have the specified entry?
@@ -117,16 +137,9 @@ public:
 
   void TreeFilterCallback(tFrameworkElement* fe, bool loading_parameters);
 
-  /*!
-   * Searches given entry in config file and returns its value as string if present.
-   * \param entry the entry in the config file to be searched
-   * \return string value of entry if present, empty string otherwise
-   */
-  util::tString GetStringEntry(const util::tString& entry);
-
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TCONFIGFILE_H
+#endif // core__parameter__tConfigFile_h__

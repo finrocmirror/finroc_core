@@ -19,27 +19,30 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__DATATYPE__TBOOLEAN_H
-#define CORE__DATATYPE__TBOOLEAN_H
+#ifndef core__datatype__tBoolean_h__
+#define core__datatype__tBoolean_h__
 
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
-#include "core/portdatabase/tCoreSerializable.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
+#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/serialization/tStringInputStream.h"
+#include "rrlib/serialization/tOutputStream.h"
+#include "rrlib/serialization/tStringOutputStream.h"
+#include "rrlib/serialization/tSerializable.h"
+#include "core/portdatabase/tCCType.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-
 /*!
  * \author Max Reichardt
  *
  * boolean type
  */
-class tBoolean : public tCoreSerializable
+class tBoolean : public rrlib::serialization::tSerializable, public tCCType
 {
 private:
 
@@ -49,7 +52,7 @@ private:
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tBoolean> cTYPE;
 
   /*! Instances for True and false */
   static const tBoolean cTRUE, cFALSE;
@@ -58,19 +61,20 @@ public:
 
   tBoolean(bool value_);
 
-  virtual void Assign(tCCPortData* other)
+  inline void CopyFrom(tBoolean& source)
   {
-    value = (reinterpret_cast<tBoolean*>(other))->value;
+    value = source.value;
   }
 
-  virtual void Deserialize(tCoreInput& is)
+  virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
     value = is.ReadBoolean();
   }
 
-  virtual void Deserialize(const util::tString& s)
+  virtual void Deserialize(rrlib::serialization::tStringInputStream& is)
   {
-    value = s.Trim().ToLowerCase().Equals("true");
+    util::tString s = is.ReadWhile("", rrlib::serialization::tStringInputStream::cLETTER | rrlib::serialization::tStringInputStream::cWHITESPACE, true);
+    value = s.ToLowerCase().Equals("true");
   }
 
   /*!
@@ -81,24 +85,19 @@ public:
     return value;
   }
 
-  inline static const tBoolean* GetInstance(bool value_)
+  inline static const tBoolean GetInstance(bool value_)
   {
-    return value_ ? &(cTRUE) : &(cFALSE);
+    return value_ ? cTRUE : cFALSE;
   }
 
-  inline tDataType* GetType()
-  {
-    return cTYPE;
-  }
-
-  virtual void Serialize(tCoreOutput& os) const
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const
   {
     os.WriteBoolean(value);
   }
 
-  virtual util::tString Serialize() const
+  virtual void Serialize(rrlib::serialization::tStringOutputStream& os) const
   {
-    return value ? "true" : "false";
+    os.Append(value ? "true" : "false");
   }
 
   /*!
@@ -114,4 +113,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__DATATYPE__TBOOLEAN_H
+#endif // core__datatype__tBoolean_h__

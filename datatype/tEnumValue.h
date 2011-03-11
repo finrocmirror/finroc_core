@@ -19,23 +19,32 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__DATATYPE__TENUMVALUE_H
-#define CORE__DATATYPE__TENUMVALUE_H
+#ifndef core__datatype__tEnumValue_h__
+#define core__datatype__tEnumValue_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/serialization/tOutputStream.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "core/portdatabase/tCoreSerializable.h"
+#include "rrlib/serialization/tSerializable.h"
+#include "core/portdatabase/tCCType.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tStringInputStream;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-
 /*!
  * \author Max Reichardt
  *
@@ -43,7 +52,7 @@ class tDataType;
  * Currently only meant for use in structure parameters.
  * (In port-classes it's probably better to wrap port classes)
  */
-class tEnumValue : public tCoreSerializable
+class tEnumValue : public rrlib::serialization::tSerializable, public tCCType
 {
 private:
 
@@ -56,7 +65,7 @@ private:
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tEnumValue> cTYPE;
 
   /*! Log domain for serialization */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "enum");
@@ -76,18 +85,18 @@ public:
       string_constants(new util::tSimpleList<util::tString>())
   {}
 
-  virtual void Assign(tCCPortData* other)
+  inline void CopyFrom(tEnumValue& source)
   {
-    value = (reinterpret_cast<tEnumValue*>(other))->value;
-    string_constants = (reinterpret_cast<tEnumValue*>(other))->string_constants;
+    value = source.value;
+    string_constants = source.string_constants;
   }
 
-  virtual void Deserialize(tCoreInput& is)
+  virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
     value = is.ReadInt();
   }
 
-  virtual void Deserialize(const util::tString& s);
+  virtual void Deserialize(rrlib::serialization::tStringInputStream& is);
 
   virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
 
@@ -99,12 +108,12 @@ public:
     return value;
   }
 
-  virtual void Serialize(tCoreOutput& os) const
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const
   {
     os.WriteInt(value);
   }
 
-  virtual util::tString Serialize() const;
+  virtual void Serialize(rrlib::serialization::tStringOutputStream& sb) const;
 
   virtual void Serialize(rrlib::xml2::tXMLNode& node) const
   {
@@ -133,4 +142,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__DATATYPE__TENUMVALUE_H
+#endif // core__datatype__tEnumValue_h__

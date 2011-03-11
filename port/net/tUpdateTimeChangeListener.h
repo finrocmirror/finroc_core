@@ -19,19 +19,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__NET__TUPDATETIMECHANGELISTENER_H
-#define CORE__PORT__NET__TUPDATETIMECHANGELISTENER_H
+#ifndef core__port__net__tUpdateTimeChangeListener_h__
+#define core__port__net__tUpdateTimeChangeListener_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/tListenerManager.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-
 /*!
  * \author Max Reichardt
  *
@@ -50,19 +50,19 @@ public:
    * \param dt DataType - null for global change
    * \param new_update_time new update time
    */
-  virtual void UpdateTimeChanged(tDataType* dt, int16 new_update_time) = 0;
+  virtual void UpdateTimeChanged(rrlib::serialization::tDataTypeBase dt, int16 new_update_time) = 0;
 
 public:
 
-  class tManager : public util::tListenerManager<tDataType, util::tObject, tUpdateTimeChangeListener, tUpdateTimeChangeListener::tManager>
+  class tManager : public util::tListenerManager<rrlib::serialization::tDataTypeBase, util::tObject, tUpdateTimeChangeListener, tUpdateTimeChangeListener::tManager>
   {
   public:
 
     tManager() {}
 
-    inline void SingleNotify(tUpdateTimeChangeListener* listener, tDataType* origin, const util::tObject* parameter, int call_id)
+    inline void SingleNotify(tUpdateTimeChangeListener* listener, rrlib::serialization::tDataTypeBase* origin, const util::tObject* parameter, int call_id)
     {
-      listener->UpdateTimeChanged(origin, static_cast<int16>(call_id));
+      listener->UpdateTimeChanged(*origin, static_cast<int16>(call_id));
     }
 
   };
@@ -72,4 +72,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__NET__TUPDATETIMECHANGELISTENER_H
+#endif // core__port__net__tUpdateTimeChangeListener_h__

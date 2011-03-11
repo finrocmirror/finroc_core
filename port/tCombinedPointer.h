@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef CORE__PORT__TCOMBINEDPOINTER_H
-#define CORE__PORT__TCOMBINEDPOINTER_H
+#ifndef core__port__tCombinedPointer_h__
+#define core__port__tCombinedPointer_h__
 
 namespace finroc
 {
@@ -144,4 +144,4 @@ public:
 } // namespace core
 
 
-#endif // CORE__PORT__TCOMBINEDPOINTER_H
+#endif // core__port__tCombinedPointer_h__

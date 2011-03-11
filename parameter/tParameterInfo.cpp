@@ -19,26 +19,39 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
 #include "core/parameter/tParameterInfo.h"
-#include "core/portdatabase/tDataTypeRegister.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "core/tFrameworkElement.h"
 #include "core/port/tAbstractPort.h"
 #include "core/parameter/tConfigFile.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/cc/tCCPortBase.h"
-#include "core/port/cc/tCCPortDataContainer.h"
+#include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/tThreadLocalCache.h"
+#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/std/tPortBase.h"
-#include "core/port/std/tPortData.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/std/tPortDataManager.h"
-#include "core/portdatabase/tTypedObject.h"
+#include "core/port/cc/tCCPortDataManager.h"
+#include "rrlib/serialization/tTypedObject.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tParameterInfo::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tParameterInfo>());
+rrlib::serialization::tDataType<tParameterInfo> tParameterInfo::cTYPE;
+
+void tParameterInfo::AnnotatedObjectInitialized()
+{
+  try
+  {
+    LoadValue(true);
+  }
+  catch (const util::tException& e)
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, tFrameworkElement::log_domain, e);
+  }
+}
 
 void tParameterInfo::LoadValue(bool ignore_ready)
 {
@@ -54,20 +67,36 @@ void tParameterInfo::LoadValue(bool ignore_ready)
       }
       if (cf->HasEntry(config_entry))
       {
-        const rrlib::xml2::tXMLNode &node = cf->GetEntry(config_entry, false);
-        if (ann->GetDataType()->IsCCType())
+        rrlib::xml2::tXMLNode& node = cf->GetEntry(config_entry, false);
+        if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
         {
           tCCPortBase* port = static_cast<tCCPortBase*>(ann);
-          tCCPortDataContainer<>* c = tThreadLocalCache::Get()->GetUnusedBuffer(port->GetDataType());
-          c->Deserialize(node);
-          port->BrowserPublishRaw(c);
+          tCCPortDataManagerTL* c = tThreadLocalCache::Get()->GetUnusedBuffer(port->GetDataType());
+          try
+          {
+            c->GetObject()->Deserialize(node);
+            port->BrowserPublishRaw(c);
+          }
+          catch (const util::tException& e)
+          {
+            c->SetRefCounter(1);
+            c->ReleaseLock();
+          }
         }
-        else if (ann->GetDataType()->IsStdType())
+        else if (tFinrocTypeInfo::IsStdType(ann->GetDataType()))
         {
           tPortBase* port = static_cast<tPortBase*>(ann);
-          tPortData* pd = port->GetUnusedBufferRaw();
-          pd->Deserialize(node);
-          port->BrowserPublish(pd);
+          tPortDataManager* pd = port->GetUnusedBufferRaw();
+          try
+          {
+            pd->GetObject()->Deserialize(node);
+            port->BrowserPublish(pd);
+          }
+          catch (const util::tException& e)
+          {
+            pd->GetCurrentRefCounter()->SetOrAddLock();
+            pd->ReleaseLock();
+          }
         }
         else
         {
@@ -87,26 +116,26 @@ void tParameterInfo::SaveValue()
   }
   tConfigFile* cf = tConfigFile::Find(ann);
   bool has_entry = cf->HasEntry(config_entry);
-  if (ann->GetDataType()->IsCCType())
+  if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
   {
     tCCPortBase* port = static_cast<tCCPortBase*>(ann);
     if (has_entry || (!port->ContainsDefaultValue()))
     {
-      rrlib::xml2::tXMLNode &node = cf->GetEntry(config_entry, true);
-      tCCInterThreadContainer<>* c = port->GetInInterThreadContainer();
-      c->Serialize(node);
+      rrlib::xml2::tXMLNode& node = cf->GetEntry(config_entry, true);
+      tCCPortDataManager* c = port->GetInInterThreadContainer();
+      c->GetObject()->Serialize(node);
       c->Recycle2();
     }
   }
-  else if (ann->GetDataType()->IsStdType())
+  else if (tFinrocTypeInfo::IsStdType(ann->GetDataType()))
   {
     tPortBase* port = static_cast<tPortBase*>(ann);
     if (has_entry || (!port->ContainsDefaultValue()))
     {
-      rrlib::xml2::tXMLNode &node = cf->GetEntry(config_entry, true);
-      const tPortData* pd = port->GetLockedUnsafeRaw();
-      pd->Serialize(node);
-      pd->GetManager()->ReleaseLock();
+      rrlib::xml2::tXMLNode& node = cf->GetEntry(config_entry, true);
+      tPortDataManager* pd = port->GetLockedUnsafeRaw();
+      pd->GetObject()->Serialize(node);
+      pd->ReleaseLock();
     }
   }
   else

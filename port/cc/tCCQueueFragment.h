@@ -19,13 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
+#ifndef core__port__cc__tCCQueueFragment_h__
+#define core__port__cc__tCCQueueFragment_h__
 
-#ifndef CORE__PORT__CC__TCCQUEUEFRAGMENT_H
-#define CORE__PORT__CC__TCCQUEUEFRAGMENT_H
+#include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/tThreadLocalCache.h"
+#include "rrlib/serialization/tGenericObject.h"
+#include "core/port/cc/tCCPortDataManager.h"
 #include "rrlib/finroc_core_utils/container/tQueueFragment.h"
 
 namespace finroc
@@ -40,7 +41,7 @@ class tCCPortQueueElement;
  * Fragment for dequeueing bunch of values
  */
 template<typename T>
-class tCCQueueFragment : public util::tQueueFragment<tCCInterThreadContainer<T>, tCCPortQueueElement>
+class tCCQueueFragment : public util::tQueueFragment<tCCPortDataManager, tCCPortQueueElement>
 {
 public:
 
@@ -54,13 +55,13 @@ public:
    */
   inline T* DequeueAutoLocked()
   {
-    tCCInterThreadContainer<T>* tmp = ::finroc::util::tQueueFragment<tCCInterThreadContainer<T>, tCCPortQueueElement>::Dequeue();
+    tCCPortDataManager* tmp = ::finroc::util::tQueueFragment<tCCPortDataManager, tCCPortQueueElement>::Dequeue();
     if (tmp == NULL)
     {
       return NULL;
     }
     tThreadLocalCache::Get()->AddAutoLock(tmp);
-    return tmp->GetData();
+    return tmp->GetObject()->GetData<T>();
   }
 
   /*!
@@ -69,9 +70,9 @@ public:
    *
    * \return Next element in QueueFragment
    */
-  inline tCCInterThreadContainer<T>* DequeueUnsafe()
+  inline tCCPortDataManager* DequeueUnsafe()
   {
-    return ::finroc::util::tQueueFragment<tCCInterThreadContainer<T>, tCCPortQueueElement>::Dequeue();
+    return ::finroc::util::tQueueFragment<tCCPortDataManager, tCCPortQueueElement>::Dequeue();
   }
 
 };
@@ -79,4 +80,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__CC__TCCQUEUEFRAGMENT_H
+#endif // core__port__cc__tCCQueueFragment_h__

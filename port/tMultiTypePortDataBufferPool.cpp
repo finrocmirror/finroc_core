@@ -25,7 +25,7 @@ namespace finroc
 {
 namespace core
 {
-tPortData* tMultiTypePortDataBufferPool::PossiblyCreatePool(tDataType* data_type)
+tPortDataManager* tMultiTypePortDataBufferPool::PossiblyCreatePool(rrlib::serialization::tDataTypeBase data_type)
 {
   util::tLock lock1(this);
 

@@ -1,8 +1,9 @@
 
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__THREAD__TTHREADCONTAINERTHREAD_H
-#define CORE__THREAD__TTHREADCONTAINERTHREAD_H
+#ifndef core__thread__tThreadContainerThread_h__
+#define core__thread__tThreadContainerThread_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tFrameworkElementTreeFilter.h"
@@ -97,4 +98,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__THREAD__TTHREADCONTAINERTHREAD_H
+#endif // core__thread__tThreadContainerThread_h__

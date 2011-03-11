@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__STD__TPORTQUEUE_H
-#define CORE__PORT__STD__TPORTQUEUE_H
+#ifndef core__port__std__tPortQueue_h__
+#define core__port__std__tPortQueue_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/std/tPortQueueElement.h"
 #include "core/port/tThreadLocalCache.h"
@@ -44,7 +45,6 @@ class tPortDataReference;
  *
  * Use concurrentDequeue, with threads reading from this queue concurrently.
  */
-template < typename T = tPortData >
 class tPortQueue : public util::tWonderQueueBounded<tPortDataReference, tPortQueueElement>
 {
   inline tPortQueueElement* GetEmptyContainer2()
@@ -86,4 +86,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__STD__TPORTQUEUE_H
+#endif // core__port__std__tPortQueue_h__

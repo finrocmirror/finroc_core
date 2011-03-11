@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TFRAMEWORKELEMENT_H
-#define CORE__TFRAMEWORKELEMENT_H
+#ifndef core__tFrameworkElement_h__
+#define core__tFrameworkElement_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/tCoreFlags.h"
@@ -1005,4 +1006,4 @@ inline std::ostream& operator << (std::ostream& output, const tFrameworkElement&
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TFRAMEWORKELEMENT_H
+#endif // core__tFrameworkElement_h__

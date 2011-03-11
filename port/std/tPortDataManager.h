@@ -19,32 +19,39 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__STD__TPORTDATAMANAGER_H
-#define CORE__PORT__STD__TPORTDATAMANAGER_H
+#ifndef core__port__std__tPortDataManager_h__
+#define core__port__std__tPortDataManager_h__
 
-#include "rrlib/finroc_core_utils/container/tReusable.h"
+#include "rrlib/finroc_core_utils/definitions.h"
 
+#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/serialization/tGenericObject.h"
+#include "core/portdatabase/tReusableGenericObjectManager.h"
+
+#include "core/portdatabase/tSharedPtrDeleteHandler.h"
 #include "core/port/tCombinedPointer.h"
 
 namespace finroc
 {
 namespace core
 {
-class tPortData;
-class tDataType;
+class tPortDataReference;
 
 /*!
  * \author Max Reichardt
  *
- * This class is used for allocating/managing/deleting a single port data object that
- * is used in ports.
- * It handles information on locks etc.
- * It may do this for multiple port data objects if port data object owns other
- * port data object.
+ * This class is used for managing a single port data object (or "buffer").
+ *
+ * It handles information on locks, data type etc.
+ *
+ * If it possible to derive a port data managers from another port data manager.
+ * They will share the same reference counter.
+ * This makes sense, when an object contained in the original port data buffer
+ * shall be used in a port.
+ * This way, it does not need to copied.
  */
-class tPortDataManager : public util::tReusable
+class __attribute__((aligned(8))) tPortDataManager : public tReusableGenericObjectManager
 {
 public:
 
@@ -210,8 +217,8 @@ public:
 
   template<typename T>
   friend class tPort;
-  friend class tPortData;
   friend class tPortDataReference;
+  friend class rrlib::serialization::tDataTypeBase;
 private:
 
   /*! Reference counters in this manager - 8 bytes in C++ (due to mean tricks) ... probably > 60 bytes in Java */
@@ -226,13 +233,8 @@ private:
   // PortDataManager prototype to obtain above offset
   static tPortDataManager cPROTOTYPE;
 
-  tPortDataManager()
-  {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating PROTOTYPE");
-  } // dummy constructor for prototype
-
-  /*! Pointer to actual PortData (outermost buffer) */
-  tPortData* data;
+  /*! PortDataManager that this manager is derived from - null if not derived */
+  tPortDataManager* derived_from;
 
 protected:
 
@@ -247,10 +249,20 @@ public:
   /*! Mask for selection of current reference */
   static const size_t cREF_INDEX_MASK = cNUMBER_OF_REFERENCES - 1u;
 
+  /*! Helper variable - e.g. for blackboards */
+  int lock_iD;
+
   /*! Log domain for this class */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "port_data");
 
 protected:
+
+  /*!
+   * Standard constructor
+   *
+   * \param dt Data Type of managed data
+   */
+  tPortDataManager();
 
   /*!
    * Returns reference counter with specified index
@@ -270,10 +282,6 @@ protected:
 
 public:
 
-  virtual ~tPortDataManager();
-
-  tPortDataManager(tDataType* dt, const tPortData* port_data);
-
   /*!
    * Add read lock
    */
@@ -283,10 +291,36 @@ public:
   }
 
   /*!
+   * Create object of specified type managed by PortDataManager
+   *
+   * \param data_type Data type
+   * \return Manager
+   */
+  inline static tPortDataManager* Create(const rrlib::serialization::tDataTypeBase& data_type)
+  {
+    return static_cast<tPortDataManager*>(data_type.CreateInstanceGeneric<tPortDataManager>()->GetManager());
+  }
+
+  /*!
    * Recycle manager and port data...
    * (This method is not intended to be used by framework users. Use only, if you know exactly what you're doing.)
    */
   void DangerousDirectRecycle();
+
+  virtual bool GenericHasLock()
+  {
+    return IsLocked();
+  }
+
+  virtual void GenericLockRelease()
+  {
+    ReleaseLock();
+  }
+
+  inline tPortDataReference* GetCurReference() const
+  {
+    return tCombinedPointerOps::Create<tPortDataReference>(this, reuse_counter & 0x3);
+  }
 
   /*!
    * \return Returns current reference counter
@@ -302,14 +336,33 @@ public:
     return GetRefCounter(reuse_counter & cREF_INDEX_MASK);
   }
 
-  inline const tPortData* GetData() const
+  //    /**
+  //     * \return Pointer to managed object/buffer
+  //     */
+  //    @OrgWrapper @ConstMethod @Inline public @Const @VoidPtr Object getDataRaw() {
+  //        return data;
+  //    }
+
+  inline static void SharedPointerRelease(tPortDataManager* manager, bool active)
   {
-    return data;
+    if (active)
+    {
+      assert((!manager->IsUnused()) && ("Unused buffers retrieved from ports must be published"));
+      manager->ReleaseLock();
+    }
   }
 
-  inline tPortData* GetData()
+  /*!
+   * Retrieve manager for port data
+   *
+   * \param data Port data
+   * \param reset_active_flag Reset active flag (set when unused buffers are handed to user)
+   * \return Manager for port data - or null if it does not exist
+   */
+  template <typename T>
+  inline static tPortDataManager* GetManager(::std::shared_ptr<T> data, bool reset_active_flag = false)
   {
-    return data;
+    return tSharedPtrDeleteHandler<tPortDataManager>::GetManager(data, reset_active_flag);
   }
 
   /*!
@@ -330,6 +383,14 @@ public:
   inline int64 GetTimestamp()
   {
     return 0;
+  }
+
+  /*!
+   * \return Type of managed object
+   */
+  inline rrlib::serialization::tDataTypeBase GetType() const
+  {
+    return GetObject()->GetType();
   }
 
   /*! Is port data currently locked (convenience method)? */
@@ -394,4 +455,4 @@ void tPortDataManager::tRefCounter::ReleaseLocks(int8 count)
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__STD__TPORTDATAMANAGER_H
+#endif // core__port__std__tPortDataManager_h__

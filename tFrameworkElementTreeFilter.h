@@ -19,23 +19,29 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TFRAMEWORKELEMENTTREEFILTER_H
-#define CORE__TFRAMEWORKELEMENTTREEFILTER_H
+#ifndef core__tFrameworkElementTreeFilter_h__
+#define core__tFrameworkElementTreeFilter_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
 #include "core/tFrameworkElement.h"
-#include "core/portdatabase/tCoreSerializable.h"
+#include "rrlib/serialization/tSerializable.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
-class tCoreInput;
-class tCoreOutput;
-
 /*!
  * \author Max Reichardt
  *
@@ -43,7 +49,7 @@ class tCoreOutput;
  *
  * Can be used to efficiently traverse trees of framework elements.
  */
-class tFrameworkElementTreeFilter : public tCoreSerializable
+class tFrameworkElementTreeFilter : public rrlib::serialization::tSerializable
 {
 private:
 
@@ -83,7 +89,7 @@ public:
    */
   bool Accept(tFrameworkElement* element, util::tStringBuilder& tmp) const;
 
-  virtual void Deserialize(tCoreInput& is);
+  virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
   /*!
    * \return Is this a filter that accepts all framework elements?
@@ -102,7 +108,7 @@ public:
     return (relevant_flags & flag_result & tCoreFlags::cIS_PORT) > 0;
   }
 
-  virtual void Serialize(tCoreOutput& os) const;
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 
   /*!
    * Traverse (part of) element tree.
@@ -115,10 +121,10 @@ public:
    * \param custom_param Custom parameter
    */
   template <typename T, typename P>
-  inline void TraverseElementTree(tFrameworkElement* root, T* callback, P custom_param) const
+  inline void TraverseElementTree(tFrameworkElement* root, T* callback, const P& custom_param) const
   {
     util::tStringBuilder sb;
-    TraverseElementTree<T, P>(root, callback, custom_param, sb);
+    TraverseElementTree(root, callback, custom_param, sb);
   }
 
   /*!
@@ -132,7 +138,7 @@ public:
    * \param tmp Temporary StringBuilder buffer
    */
   template <typename T, typename P>
-  inline void TraverseElementTree(tFrameworkElement* root, T* callback, P custom_param, util::tStringBuilder& tmp) const
+  inline void TraverseElementTree(tFrameworkElement* root, T* callback, const P& custom_param, util::tStringBuilder& tmp) const
   {
     if (Accept(root, tmp))
     {
@@ -144,7 +150,7 @@ public:
       tFrameworkElement::tLink* link = children->Get(i);
       if (link != NULL && link->GetChild() != NULL && link->IsPrimaryLink())
       {
-        TraverseElementTree<T, P>(link->GetChild(), callback, custom_param, tmp);
+        TraverseElementTree(link->GetChild(), callback, custom_param, tmp);
       }
     }
   }
@@ -154,4 +160,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TFRAMEWORKELEMENTTREEFILTER_H
+#endif // core__tFrameworkElementTreeFilter_h__

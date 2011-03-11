@@ -19,7 +19,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
 #include "core/datatype/tFrameworkElementInfo.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/port/net/tRemoteTypes.h"
@@ -198,7 +197,7 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
   {
     tAbstractPort* port = static_cast<tAbstractPort*>(fe);
 
-    tp->WriteShort(port->GetDataType()->GetUid());
+    tp->WriteShort(port->GetDataType().GetUid());
     tp->WriteShort(port->GetStrategy());
     tp->WriteShort(port->GetMinNetUpdateInterval());
 

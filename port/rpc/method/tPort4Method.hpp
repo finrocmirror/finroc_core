@@ -51,12 +51,11 @@ R tPort4Method<HANDLER, R, P1, P2, P3, P4>::Call(tInterfaceClientPort port, P1 p
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
-    mc->AddParamForSending(p1);  //2
-    mc->AddParamForSending(p2);  //3
-    mc->AddParamForSending(p3);  //4
-    mc->AddParamForSending(p4);
+    mc->AddParam(0, p1);  //2
+    mc->AddParam(1, p2);  //3
+    mc->AddParam(2, p3);  //4
+    mc->AddParam(3, p4);
     //n
-    mc->SendParametersComplete();
     mc->PrepareSyncRemoteExecution(this, port.GetDataType(), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());
     try
     {
@@ -67,7 +66,6 @@ R tPort4Method<HANDLER, R, P1, P2, P3, P4>::Call(tInterfaceClientPort port, P1 p
       // we shouldn't need to recycle anything, since call is responsible for this
       throw tMethodCallException(e.GetType(), CODE_LOCATION_MACRO);
     }
-    mc->DeserializeParamaters();
     if (mc->HasException())
     {
       int8 type = 0;
@@ -132,12 +130,11 @@ void tPort4Method<HANDLER, R, P1, P2, P3, P4>::CallAsync(const tInterfaceClientP
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
-    mc->AddParamForSending(p1);  //2
-    mc->AddParamForSending(p2);  //3
-    mc->AddParamForSending(p3);  //4
-    mc->AddParamForSending(p4);
+    mc->AddParam(0, p1);  //2
+    mc->AddParam(1, p2);  //3
+    mc->AddParam(2, p3);  //4
+    mc->AddParam(3, p4);
     //n
-    mc->SendParametersComplete();
     mc->PrepareSyncRemoteExecution(this, port->GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
     tRPCThreadPool::GetInstance()->ExecuteTask(mc);
   }
@@ -171,10 +168,10 @@ void tPort4Method<HANDLER, R, P1, P2, P3, P4>::CallAsync(const tInterfaceClientP
     {
       tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
       //1
-      mc->AddParamForLocalCall(0, p1);  //2
-      mc->AddParamForLocalCall(1, p2);  //3
-      mc->AddParamForLocalCall(2, p3);  //4
-      mc->AddParamForLocalCall(3, p4);
+      mc->AddParam(0, p1);  //2
+      mc->AddParam(1, p2);  //3
+      mc->AddParam(2, p3);  //4
+      mc->AddParam(3, p4);
       //n
       mc->PrepareExecution(this, port->GetDataType(), mhandler, handler);
       tRPCThreadPool::GetInstance()->ExecuteTask(mc);
@@ -208,7 +205,6 @@ void tPort4Method<HANDLER, R, P1, P2, P3, P4>::ExecuteAsyncNonVoidCallOverTheNet
     r_handler->HandleMethodCallException(this, e);
     return;
   }
-  mc->DeserializeParamaters();
   if (mc->HasException())
   {
     int8 type = 0;
@@ -275,8 +271,7 @@ void tPort4Method<HANDLER, R, P1, P2, P3, P4>::ExecuteFromMethodCallObject(tMeth
     {
       call->RecycleParameters();
       call->SetStatusReturn();
-      call->AddParamForSending(ret);
-      call->SendParametersComplete();
+      call->AddParam(0, ret);
     }
   }
   catch (const tMethodCallException& e)

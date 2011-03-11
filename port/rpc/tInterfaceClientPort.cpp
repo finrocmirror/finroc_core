@@ -25,12 +25,12 @@ namespace finroc
 {
 namespace core
 {
-tInterfaceClientPort::tInterfaceClientPort(const util::tString& description, tFrameworkElement* parent, tDataType* type)
+tInterfaceClientPort::tInterfaceClientPort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type)
 {
   this->wrapped = new tPortImpl(this, description, parent, type, tInterfacePort::eClient);
 }
 
-tInterfaceClientPort::tPortImpl::tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& description, tFrameworkElement* parent, tDataType* type, tInterfacePort::tType client) :
+tInterfaceClientPort::tPortImpl::tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type, tInterfacePort::tType client) :
     tInterfacePort(description, parent, type, client),
     outer_class_ptr(outer_class_ptr_)
 {

@@ -19,16 +19,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
 #include "core/port/rpc/tPullCall.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/port/net/tNetPort.h"
 #include "core/port/tAbstractPort.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/cc/tCCPortBase.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
+#include "core/port/cc/tCCPortDataManager.h"
 #include "core/port/std/tPortBase.h"
-#include "core/port/std/tPortData.h"
+#include "core/port/std/tPortDataManager.h"
 #include "core/buffers/tCoreOutput.h"
 
 namespace finroc
@@ -62,27 +62,25 @@ void tPullCall::ExecuteTask()
       Recycle();
     }
 
-    if (port->GetPort()->GetDataType()->IsCCType())
+    if (tFinrocTypeInfo::IsCCType(port->GetPort()->GetDataType()))
     {
       tCCPortBase* cp = static_cast<tCCPortBase*>(port->GetPort());
-      tCCInterThreadContainer<>* cpd = cp->GetPullInInterthreadContainerRaw(true);
+      tCCPortDataManager* cpd = cp->GetPullInInterthreadContainerRaw(true);
       RecycleParameters();
 
-      AddParamForSending(cpd);
+      AddParam(0, std::shared_ptr<rrlib::serialization::tGenericObject>(cpd->GetObject(), tSharedPtrDeleteHandler<tCCPortDataManager>(cpd)));
 
-      SendParametersComplete();
       SetStatusReturn();
       port->SendCallReturn(this);
     }
-    else if (port->GetPort()->GetDataType()->IsStdType())
+    else if (tFinrocTypeInfo::IsStdType(port->GetPort()->GetDataType()))
     {
       tPortBase* p = static_cast<tPortBase*>(port->GetPort());
-      const tPortData* pd = p->GetPullLockedUnsafe(true);
+      tPortDataManager* pd = p->GetPullLockedUnsafe(true);
       RecycleParameters();
 
-      AddParamForSending(pd);
+      AddParam(0, std::shared_ptr<rrlib::serialization::tGenericObject>(pd->GetObject(), tSharedPtrDeleteHandler<tPortDataManager>(pd)));
 
-      SendParametersComplete();
       SetStatusReturn();
       port->SendCallReturn(this);
     }

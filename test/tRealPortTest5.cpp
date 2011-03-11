@@ -24,27 +24,31 @@
 
 #include "core/test/tRealPortTest5.h"
 #include "core/tRuntimeEnvironment.h"
-#include "core/port/cc/tCCPortBase.h"
+#include "core/port/tAbstractPort.h"
 #include "core/tFrameworkElement.h"
 #include "plugins/blackboard/tBlackboardManager.h"
-#include "core/port/std/tPort.h"
 #include "plugins/blackboard/tBlackboardBuffer.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
 #include "core/buffers/tCoreOutput.h"
 #include "core/buffers/tCoreInput.h"
-#include "core/port/std/tPortDataManager.h"
-#include "plugins/blackboard/tBlackboardServer.h"
+#include "plugins/blackboard/tSingleBufferedBlackboardServer.h"
+#include "rrlib/serialization/tMemoryBuffer.h"
+#include "plugins/blackboard/tBlackboardClient.h"
 #include "plugins/blackboard/tRawBlackboardClient.h"
+#include "plugins/blackboard/tBlackboardWriteAccess.h"
+#include "plugins/blackboard/tBBLockException.h"
 #include "core/port/rpc/tMethodCallException.h"
 
 namespace finroc
 {
 namespace core
 {
+using rrlib::serialization::tMemoryBuffer;
+
 const int tRealPortTest5::cNUM_OF_PORTS;
 const int tRealPortTest5::cCYCLE_TIME;
-::std::shared_ptr<tPortNumeric> tRealPortTest5::input, tRealPortTest5::output, tRealPortTest5::p1, tRealPortTest5::p2, tRealPortTest5::p3;
+::std::shared_ptr<tPort<int> > tRealPortTest5::input, tRealPortTest5::output, tRealPortTest5::p1, tRealPortTest5::p2, tRealPortTest5::p3;
 tRuntimeEnvironment* tRealPortTest5::re;
 const int tRealPortTest5::cCYCLES;
 
@@ -53,12 +57,12 @@ void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // set up
   //RuntimeEnvironment.initialInit(/*new ByteArrayInputStream(new byte[0])*/);
   re = tRuntimeEnvironment::GetInstance();
-  output = ::std::shared_ptr<tPortNumeric>(new tPortNumeric("test1", true));
-  input = ::std::shared_ptr<tPortNumeric>(new tPortNumeric("test2", false));
+  output = ::std::shared_ptr<tPort<int> >(new tPort<int>("test1", NULL, true));
+  input = ::std::shared_ptr<tPort<int> >(new tPort<int>("test2", NULL, false));
   output->ConnectToTarget(*input);
-  p1 = ::std::shared_ptr<tPortNumeric>(new tPortNumeric("p1", false));
-  p2 = ::std::shared_ptr<tPortNumeric>(new tPortNumeric("p2", false));
-  p3 = ::std::shared_ptr<tPortNumeric>(new tPortNumeric("p3", false));
+  p1 = ::std::shared_ptr<tPort<int> >(new tPort<int>("p1", NULL, false));
+  p2 = ::std::shared_ptr<tPort<int> >(new tPort<int>("p2", NULL, false));
+  p3 = ::std::shared_ptr<tPort<int> >(new tPort<int>("p3", NULL, false));
   p3->GetWrapped()->Link(tRuntimeEnvironment::GetInstance(), "portlink");
   tFrameworkElement::InitAll();
   //output.std11CaseReceiver = input;
@@ -68,8 +72,8 @@ void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   TestSimpleEdge2();
   TestSimpleEdgeBB();
 
-  input.reset();
-  output.reset();
+  input->GetWrapped()->ManagedDelete();
+  output->GetWrapped()->ManagedDelete();
 
   util::tSystem::out.Println("waiting");
 }
@@ -91,7 +95,8 @@ void tRealPortTest5::TestSimpleEdge()
   output.connectToTarget(input);*/
 
   output->Publish(42);
-  util::tSystem::out.Println(input->GetDoubleRaw());
+
+  std::cout << input->GetValue() << std::endl;
 
   try
   {
@@ -107,7 +112,8 @@ void tRealPortTest5::TestSimpleEdge()
   {
     //for (int i = 0; i < 1000000; i++) {
     output->Publish(i);
-    result = input->GetIntRaw();
+
+    result = input->GetValue();
   }
   int64 time = util::tSystem::CurrentTimeMillis() - start;
   util::tSystem::out.Println(util::tLong::ToString(time) + " " + result);
@@ -123,16 +129,16 @@ void tRealPortTest5::TestSimpleEdge2()
   output.ConnectToTarget(input);
   tFrameworkElement::InitAll();
 
-  blackboard::tBlackboardBuffer* buf = output.GetUnusedBuffer();
+  ::std::shared_ptr<blackboard::tBlackboardBuffer> buf = output.GetUnusedBuffer();
   tCoreOutput co(buf);
   co.WriteInt(42);
   co.Close();
   output.Publish(buf);
 
-  const blackboard::tBlackboardBuffer* cbuf = input.GetLockedUnsafe();
+  const blackboard::tBlackboardBuffer* cbuf = input.GetAutoLocked();
   tCoreInput ci(cbuf);
   util::tSystem::out.Println(ci.ReadInt());
-  cbuf->GetManager()->GetCurrentRefCounter()->ReleaseLock();
+  input.ReleaseAutoLocks();
 
   try
   {
@@ -147,15 +153,15 @@ void tRealPortTest5::TestSimpleEdge2()
   for (int i = 0; i < cCYCLES; i++)
   {
     buf = output.GetUnusedBuffer();
-    co.Reset(buf);
+    co.Reset(buf.get());
     co.WriteInt(i);
     output.Publish(buf);
     co.Close();
 
-    cbuf = input.GetLockedUnsafe();
+    cbuf = input.GetAutoLocked();
     ci.Reset(cbuf);
     result = ci.ReadInt();
-    cbuf->GetManager()->GetCurrentRefCounter()->ReleaseLock();
+    input.ReleaseAutoLocks();
   }
   int64 time = util::tSystem::CurrentTimeMillis() - start;
   util::tSystem::out.Println(util::tLong::ToString(time) + " " + result);
@@ -165,53 +171,68 @@ void tRealPortTest5::TestSimpleEdgeBB()
 {
   blackboard::tBlackboardManager::GetInstance();
   __attribute__((unused))
-  blackboard::tBlackboardServer* server = new blackboard::tBlackboardServer("testbb");
-  //SingleBufferedBlackboardServer server2 = new SingleBufferedBlackboardServer("testbb");
-  blackboard::tRawBlackboardClient* client = new blackboard::tRawBlackboardClient(blackboard::tRawBlackboardClient::GetDefaultPci().Derive("testbb"));
+  blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>* server2 = new blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>("testbb");
+  blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> client(blackboard::tRawBlackboardClient::GetDefaultPci().Derive("testbb"), true, -1);
   //client.autoConnect();
   tFrameworkElement::InitAll();
 
-  blackboard::tBlackboardBuffer* buf = client->WriteLock(4000000);
-  buf->Resize(8, 8, 8, false);
-  client->Unlock();
+  try
+  {
+    blackboard::tBlackboardWriteAccess<rrlib::serialization::tMemoryBuffer> bbw(client, 4000000);
+    bbw.Resize(8u);
+  }
+  catch (const blackboard::tBBLockException& ex)
+  {
+  }
 
-  buf = client->GetUnusedBuffer();
-  tCoreOutput co(buf);
+  std::shared_ptr<std::vector<tMemoryBuffer> > buf = client.GetUnusedChangeBuffer();
+  buf->resize(1);
+  tCoreOutput co(&buf->at(0));
   co.WriteInt(0x4BCDEF12);
   co.Close();
   try
   {
-    client->CommitAsynchChange(2, buf);
+    client.CommitAsynchChange(buf, 0, 2);
   }
   catch (const tMethodCallException& e)
   {
     e.PrintStackTrace();
   }
 
-  const blackboard::tBlackboardBuffer* cbuf = client->Read();
-  tCoreInput ci(cbuf);
+  buf.reset();
+
+  std::shared_ptr<const std::vector<tMemoryBuffer> > cbuf = client.Read();
+  tCoreInput ci(&cbuf->at(0));
   util::tSystem::out.Println(ci.ReadInt());
-  cbuf->GetManager()->ReleaseLock();
+
+  cbuf.reset();
 
   int64 start = util::tSystem::CurrentTimeMillis();
   int result = 0;
   int64 size = 0;
   for (int i = 0; i < cCYCLES; i++)
   {
-    buf = client->WriteLock(3000000000LL);
-    co.Reset(buf);
+    buf = client.WriteLock(300000000);
+
+    co.Reset(&buf->at(0));
+
     co.WriteInt(i);
     co.WriteInt(45);
     co.Close();
-    size = buf->GetSize();
-    client->Unlock();
+
+    size = buf->at(0).GetSize();
+
+    client.Unlock();
 
     /*cbuf = client.readPart(2, 4, 20000);
     cbuf.getManager().getCurrentRefCounter().releaseLock();*/
-    cbuf = client->Read();
-    ci.Reset(cbuf);
+    cbuf = client.Read();
+
+    ci.Reset(&cbuf->at(0));
+
     result = ci.ReadInt();
-    cbuf->GetManager()->ReleaseLock();
+
+    cbuf.reset();
   }
   int64 time = util::tSystem::CurrentTimeMillis() - start;
   util::tSystem::out.Println(util::tLong::ToString(time) + " " + result + " " + size);
@@ -234,7 +255,8 @@ void tRealPortTest5::TestSimpleSet()
     output->Publish(i);
   }
   int64 time = util::tSystem::CurrentTimeMillis() - start;
-  util::tSystem::out.Println(time + " " + output->GetIntRaw());
+
+  std::cout << time << " " << output->GetValue() << std::endl;
 }
 
 } // namespace finroc

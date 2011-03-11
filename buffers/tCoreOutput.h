@@ -19,52 +19,53 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
-#include "core/portdatabase/tDataType.h"
 
-#ifndef CORE__BUFFERS__TCOREOUTPUT_H
-#define CORE__BUFFERS__TCOREOUTPUT_H
+#ifndef core__buffers__tCoreOutput_h__
+#define core__buffers__tCoreOutput_h__
 
-#include "rrlib/finroc_core_utils/stream/tSink.h"
-#include "rrlib/finroc_core_utils/stream/tOutputStreamBuffer.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tSink.h"
+#include "rrlib/serialization/tOutputStream.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tGenericObject;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
-class tTypedObject;
-
 /*!
  * \author Max Reichardt
  *
  * This is a specialized version of the StreamBuffer that is used
  * throughout the framework
  */
-class tCoreOutput : public util::tOutputStreamBuffer
+class tCoreOutput : public rrlib::serialization::tOutputStream
 {
 public:
 
   tCoreOutput();
 
-  tCoreOutput(::std::shared_ptr<util::tSink> sink);
+  tCoreOutput(::std::shared_ptr<rrlib::serialization::tSink> sink);
 
-  tCoreOutput(util::tSink* sink);
+  tCoreOutput(rrlib::serialization::tSink* sink);
 
   /*!
    * Serialize Object of arbitrary type to stream
    *
    * \param to Object to write (may be null)
    */
-  void WriteObject(const tTypedObject* to);
-
-  inline void WriteType(tDataType* data_type)
-  {
-    WriteShort(data_type == NULL ? -1 : data_type->GetUid());
-  }
+  void WriteObject(const rrlib::serialization::tGenericObject* to);
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__BUFFERS__TCOREOUTPUT_H
+#endif // core__buffers__tCoreOutput_h__

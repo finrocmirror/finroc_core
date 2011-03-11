@@ -19,14 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PLUGIN__TPLUGINS_H
-#define CORE__PLUGIN__TPLUGINS_H
+#ifndef core__plugin__tPlugins_h__
+#define core__plugin__tPlugins_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tPlugin.h"
-#include "core/plugin/tPluginManager.h"
 #include "core/plugin/tCreateFrameworkElementAction.h"
 
 namespace finroc
@@ -50,9 +50,6 @@ private:
   /*! List with actions to create external connections */
   util::tSimpleList<tCreateExternalConnectionAction*> external_connections;
 
-  /*! Plugin manager instance */
-  tPluginManager plugin_manager;
-
 public:
 
   /*! Log domain for this class */
@@ -71,8 +68,7 @@ public:
 
   tPlugins() :
       plugins(),
-      external_connections(),
-      plugin_manager()
+      external_connections()
   {}
 
   /*!
@@ -95,7 +91,7 @@ public:
   inline void AddPlugin(tPlugin* p)
   {
     plugins.Add(::std::shared_ptr<tPlugin>(p));
-    p->Init(plugin_manager);
+    p->Init();
   }
 
   /*!
@@ -174,4 +170,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PLUGIN__TPLUGINS_H
+#endif // core__plugin__tPlugins_h__

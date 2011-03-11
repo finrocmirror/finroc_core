@@ -19,25 +19,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TPARAMETER_H
-#define CORE__PARAMETER__TPARAMETER_H
+#ifndef core__parameter__tParameter_h__
+#define core__parameter__tParameter_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
+#include "core/port/tAbstractPort.h"
 #include "core/parameter/tParameterInfo.h"
-#include "core/port/std/tPort.h"
-#include "core/tAnnotatable.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "core/tFrameworkElement.h"
-#include "core/port/std/tPortBase.h"
+#include "core/datatype/tBounds.h"
+#include "rrlib/serialization/tDataTypeBase.h"
+#include "core/port/tPort.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
+class tFrameworkElement;
+class tUnit;
 
 /*!
  * \author Max Reichardt
@@ -47,57 +48,48 @@ class tDataType;
 template<typename T>
 class tParameter : public tPort<T>
 {
-  /*! Special Port class to load value when initialized */
-  class tPortImpl : public tPortBase
+  inline static rrlib::serialization::tDataTypeBase GetType(const rrlib::serialization::tDataTypeBase& dt)
   {
-  private:
-
-    /*! Paramater info */
-    tParameterInfo* info;
-
-  protected:
-
-    virtual void PostChildInit()
-    {
-      ::finroc::core::tFrameworkElement::PostChildInit();
-      try
-      {
-        info->LoadValue(true);
-      }
-      catch (const util::tException& e)
-      {
-        FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, ::finroc::core::tFrameworkElement::log_domain, e);
-      }
-    }
-
-  public:
-
-    tPortImpl(tPortCreationInfo pci) :
-        tPortBase(pci),
-        info(new tParameterInfo())
-    {
-      AddAnnotation(info);
-    }
-
-  };
-
-  inline static tDataType* GetType(tDataType* dt)
-  {
-    return dt != NULL ? dt : tDataTypeRegister::GetInstance()->GetDataType<T>();
+    return dt != NULL ? dt : rrlib::serialization::tDataType<T>();
   }
 
 public:
 
-  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry, tDataType* dt = NULL)
+  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry, const rrlib::serialization::tDataTypeBase& dt = NULL) :
+      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT))
   {
     // this(description,parent,dt);
-    this->wrapped = new tPortImpl(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT));
-    (static_cast<tPortImpl*>(this->wrapped))->info->SetConfigEntry(config_entry);
+    this->wrapped->AddAnnotation(new tParameterInfo());
+    SetConfigEntry(config_entry);
   }
 
-  tParameter(const util::tString& description, tFrameworkElement* parent, tDataType* dt = NULL)
+  tParameter(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& dt = NULL) :
+      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT))
   {
-    this->wrapped = new tPortImpl(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT));
+    this->wrapped->AddAnnotation(new tParameterInfo());
+  }
+
+  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry, tBounds<T> b, const rrlib::serialization::tDataTypeBase& dt = NULL, tUnit* u = NULL) :
+      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u), b)
+  {
+    // this(description,parent,b,dt,u);
+    this->wrapped->AddAnnotation(new tParameterInfo());
+    SetConfigEntry(config_entry);
+  }
+
+  tParameter(const util::tString& description, tFrameworkElement* parent, tBounds<T> b, const rrlib::serialization::tDataTypeBase& dt = NULL, tUnit* u = NULL) :
+      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u), b)
+  {
+    this->wrapped->AddAnnotation(new tParameterInfo());
+  }
+
+  /*!
+   * \param config_entry New Place in Configuration tree, this parameter is configured from (nodes are separated with dots)
+   */
+  inline void SetConfigEntry(const util::tString& config_entry)
+  {
+    tParameterInfo* info = static_cast<tParameterInfo*>(this->wrapped->GetAnnotation(tParameterInfo::cTYPE));
+    info->SetConfigEntry(config_entry);
   }
 
 };
@@ -105,4 +97,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TPARAMETER_H
+#endif // core__parameter__tParameter_h__

@@ -19,18 +19,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
 #include "core/port/net/tNetPort.h"
 #include "core/buffers/tCoreInput.h"
-#include "core/port/std/tPortData.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/std/tPortDataManager.h"
-#include "core/port/std/tPortQueueFragment.h"
+#include "core/port/cc/tCCPortDataManagerTL.h"
+#include "core/buffers/tCoreOutput.h"
+#include "core/port/std/tPortQueueFragmentRaw.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/std/tPortDataReference.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
-#include "core/port/cc/tCCQueueFragment.h"
-#include "core/port/cc/tCCPortData.h"
+#include "core/port/cc/tCCPortDataManager.h"
+#include "core/port/cc/tCCQueueFragmentRaw.h"
 #include "core/port/rpc/tMethodCallException.h"
 
 namespace finroc
@@ -43,6 +42,7 @@ tNetPort::tNetPort(tPortCreationInfo pci, util::tObject* belongs_to_) :
     wrapped(NULL),
     belongs_to(belongs_to_),
     remote_handle(0),
+    ftype(tFinrocTypeInfo::Get(pci.data_type).GetType()),
     last_update(util::tLong::cMIN_VALUE)
 {
   // keep most these flags
@@ -59,12 +59,13 @@ tNetPort::tNetPort(tPortCreationInfo pci, util::tObject* belongs_to_) :
       f |= tPortFlags::cUSES_QUEUE;
     }
   }
-  if (pci.data_type->IsStdType() || pci.data_type->IsMethodType())
+  if (IsStdType() || IsMethodType())
   {
     f |= tPortFlags::cSPECIAL_REUSE_QUEUE;  // different data types may be incoming - cc types are thread local
   }
   pci.flags = f;
-  wrapped = (pci.data_type->IsMethodType() ? static_cast<tAbstractPort*>(new tInterfaceNetPortImpl(this, pci)) : (pci.data_type->IsCCType() ? static_cast<tAbstractPort*>(new tCCNetPort(this, pci)) : static_cast<tAbstractPort*>(new tStdNetPort(this, pci))));
+
+  wrapped = (IsMethodType() ? static_cast<tAbstractPort*>(new tInterfaceNetPortImpl(this, pci)) : (IsCCType() ? static_cast<tAbstractPort*>(new tCCNetPort(this, pci)) : static_cast<tAbstractPort*>(new tStdNetPort(this, pci))));
 }
 
 void tNetPort::PropagateStrategyFromTheNet(int16 strategy)
@@ -90,23 +91,23 @@ void tNetPort::PropagateStrategyFromTheNet(int16 strategy)
 void tNetPort::ReceiveDataFromStream(tCoreInput* ci, int64 timestamp, int8 changed_flag)
 {
   assert((GetPort()->IsReady()));
-  if (wrapped->GetDataType()->IsStdType() || wrapped->GetDataType()->IsTransactionType())
+  if (IsStdType() || IsTransactionType())
   {
     tStdNetPort* pb = static_cast<tStdNetPort*>(wrapped);
     ci->SetBufferSource(pb);
     do
     {
-      pb->PublishFromNet(static_cast<tPortData*>(ci->ReadObject()), changed_flag);
+      pb->PublishFromNet(static_cast<tPortDataManager*>(ci->ReadObject()->GetManager()), changed_flag);
     }
     while (ci->ReadBoolean());
     ci->SetBufferSource(NULL);
   }
-  else if (wrapped->GetDataType()->IsCCType())
+  else if (IsCCType())
   {
     tCCNetPort* pb = static_cast<tCCNetPort*>(wrapped);
     do
     {
-      pb->PublishFromNet(static_cast<tCCPortDataContainer<>*>(ci->ReadObject()), changed_flag);
+      pb->PublishFromNet(static_cast<tCCPortDataManagerTL*>(ci->ReadObject()->GetManager()), changed_flag);
     }
     while (ci->ReadBoolean());
   }
@@ -124,11 +125,11 @@ void tNetPort::UpdateFlags(int flags)
   flags &= ~(keep_flags);
   flags |= cur_flags;
 
-  if (wrapped->GetDataType()->IsStdType() || wrapped->GetDataType()->IsTransactionType())
+  if (IsStdType() || IsTransactionType())
   {
     (static_cast<tStdNetPort*>(wrapped))->UpdateFlags(flags);
   }
-  else if (wrapped->GetDataType()->IsCCType())
+  else if (IsCCType())
   {
     (static_cast<tCCNetPort*>(wrapped))->UpdateFlags(flags);
   }
@@ -142,18 +143,18 @@ void tNetPort::WriteDataToNetwork(tCoreOutput* co, int64 start_time)
 {
   bool use_q = wrapped->GetFlag(tPortFlags::cUSES_QUEUE);
   bool first = true;
-  if (wrapped->GetDataType()->IsStdType() || wrapped->GetDataType()->IsTransactionType())
+  if (IsStdType() || IsTransactionType())
   {
     tStdNetPort* pb = static_cast<tStdNetPort*>(wrapped);
     if (!use_q)
     {
-      const tPortData* pd = pb->GetLockedUnsafeRaw();
-      co->WriteObject(pd);
-      pd->GetManager()->ReleaseLock();
+      tPortDataManager* pd = pb->GetLockedUnsafeRaw();
+      co->WriteObject(pd->GetObject());
+      pd->ReleaseLock();
     }
     else
     {
-      tPortQueueFragment<tPortData> fragment;
+      tPortQueueFragmentRaw fragment;
       pb->DequeueAllRaw(fragment);
       const tPortDataReference* pd = NULL;
       while ((pd = static_cast<tPortDataReference*>(fragment.Dequeue())) != NULL)
@@ -163,33 +164,33 @@ void tNetPort::WriteDataToNetwork(tCoreOutput* co, int64 start_time)
           co->WriteBoolean(true);
         }
         first = false;
-        co->WriteObject(pd->GetData());
+        co->WriteObject(pd->GetManager()->GetObject());
         pd->GetManager()->ReleaseLock();
       }
     }
   }
-  else if (wrapped->GetDataType()->IsCCType())
+  else if (IsCCType())
   {
     tCCNetPort* pb = static_cast<tCCNetPort*>(wrapped);
     if (!use_q)
     {
-      tCCInterThreadContainer<>* ccitc = pb->GetInInterThreadContainer();
-      co->WriteObject(ccitc);
+      tCCPortDataManager* ccitc = pb->GetInInterThreadContainer();
+      co->WriteObject(ccitc->GetObject());
       ccitc->Recycle2();
     }
     else
     {
-      tCCQueueFragment<tCCPortData> fragment;
+      tCCQueueFragmentRaw fragment;
       pb->DequeueAllRaw(fragment);
-      tCCInterThreadContainer<>* pd = NULL;
-      while ((pd = reinterpret_cast<tCCInterThreadContainer<>*>(fragment.Dequeue())) != NULL)
+      tCCPortDataManager* pd = NULL;
+      while ((pd = fragment.DequeueUnsafe()) != NULL)
       {
         if (!first)
         {
           co->WriteBoolean(true);
         }
         first = false;
-        co->WriteObject(pd);
+        co->WriteObject(pd->GetObject());
         pd->Recycle2();
       }
     }
@@ -271,14 +272,14 @@ void tNetPort::tCCNetPort::PropagateStrategy(int16 strategy)
   ::finroc::core::tAbstractPort::SetMaxQueueLength(strategy);
 }
 
-void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataContainer<>* read_object, int8 changed_flag)
+void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataManagerTL* read_object, int8 changed_flag)
 {
   if (changed_flag != ::finroc::core::tAbstractPort::cCHANGED_INITIAL)    // always publish initial pushes
   {
 
     // only publish if value has actually changed...
-    tCCPortDataContainer<>* cur_data = this->GetLockedUnsafeInContainer();
-    bool equal = cur_data->ContentEquals(((tCCPortData*)read_object->GetDataPtr()));
+    tCCPortDataManagerTL* cur_data = this->GetLockedUnsafeInContainer();
+    bool equal = cur_data->ContentEquals(read_object->GetObject()->GetRawDataPtr());
     cur_data->ReleaseLock();   // unlock value that we just locked for comparison
     if (equal)
     {
@@ -305,7 +306,7 @@ void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataContainer<>* read_object, i
   }
 }
 
-void tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, void* result_buffer)
+void tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer)
 {
   tPullCall* pc = tThreadLocalCache::GetFast()->GetUnusedPullCall();
   pc->SetRemotePortHandle(outer_class_ptr->remote_handle);
@@ -315,23 +316,19 @@ void tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, void* result_buffer)
     pc = tSynchMethodCallLogic::PerformSynchCall(pc, this, cPULL_TIMEOUT);
     if (pc->HasException())
     {
-      GetRaw(((tCCPortData*)result_buffer));
+      GetRaw(result_buffer);
     }
     else
     {
-      tCCInterThreadContainer<>* c;
-
-      pc->GetParam(0, c);
-
-      c->AssignTo(((tCCPortData*)result_buffer));
-      c->Recycle2();
+      ::std::shared_ptr<rrlib::serialization::tGenericObject> o = pc->GetParamGeneric(0);
+      tCCPortDataManager* c = static_cast<tCCPortDataManager*>(o->GetManager());
+      result_buffer->GetObject()->DeepCopyFrom(c->GetObject(), NULL);
     }
-    pc->Recycle();
 
   }
   catch (const tMethodCallException& e)
   {
-    GetRaw(((tCCPortData*)result_buffer));
+    GetRaw(result_buffer);
   }
 }
 
@@ -398,7 +395,7 @@ bool tNetPort::tStdNetPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstr
   }
 }
 
-void tNetPort::tStdNetPort::PublishFromNet(tPortData* read_object, int8 changed_flag)
+void tNetPort::tStdNetPort::PublishFromNet(tPortDataManager* read_object, int8 changed_flag)
 {
   if (!IsOutputPort())
   {
@@ -410,7 +407,7 @@ void tNetPort::tStdNetPort::PublishFromNet(tPortData* read_object, int8 changed_
   ::finroc::core::tPortBase::Publish(read_object, !IsOutputPort(), changed_flag);
 }
 
-const tPortData* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, int8 add_locks)
+const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, int8 add_locks)
 {
   assert((add_locks > 0));
   tPullCall* pc = tThreadLocalCache::GetFast()->GetUnusedPullCall();
@@ -422,18 +419,17 @@ const tPortData* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, int8 add_
     if (pc->HasException())
     {
       // return local port data
-      const tPortData* pd = GetLockedUnsafeRaw();
-      pd->GetManager()->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - 1)));  // we already have one lock
+      tPortDataManager* pd = GetLockedUnsafeRaw();
+      pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - 1)));  // we already have one lock
       pc->Recycle();
       return pd;
     }
     else
     {
-      tPortData* pd;
-
-      pc->GetParam(0, pd);
-
-      pd->GetManager()->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - 1)));  // we already have one lock
+      ::std::shared_ptr<rrlib::serialization::tGenericObject> o = pc->GetParamGeneric(0);
+      tPortDataManager* pd = static_cast<tPortDataManager*>(o->GetManager());
+      int locks = 0;  // Java: we already have one lock
+      pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - locks)));
       pc->Recycle();
       return pd;
     }
@@ -442,8 +438,8 @@ const tPortData* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, int8 add_
   catch (const tMethodCallException& e)
   {
     // return local port data
-    const tPortData* pd = GetLockedUnsafeRaw();
-    pd->GetManager()->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - 1)));  // we already have one lock
+    tPortDataManager* pd = GetLockedUnsafeRaw();
+    pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - 1)));  // we already have one lock
     pc->Recycle();
     return pd;
   }

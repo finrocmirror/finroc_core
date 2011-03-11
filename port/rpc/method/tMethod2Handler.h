@@ -20,10 +20,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__RPC__METHOD__TMETHOD2HANDLER_H
-#define CORE__PORT__RPC__METHOD__TMETHOD2HANDLER_H
+#ifndef core__port__rpc__method__tMethod2Handler_h__
+#define core__port__rpc__method__tMethod2Handler_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 namespace finroc
 {
@@ -32,7 +33,7 @@ namespace core
 class tAbstractMethod;
 
 template<typename R, typename P1, typename P2>
-class tMethod2Handler : public util::tInterface
+class tMethod2Handler
 {
 public:
 
@@ -51,4 +52,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__RPC__METHOD__TMETHOD2HANDLER_H
+#endif // core__port__rpc__method__tMethod2Handler_h__

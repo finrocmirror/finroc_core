@@ -25,7 +25,7 @@ namespace finroc
 {
 namespace core
 {
-tDataType* tDataTypeReference::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tDataTypeReference>());
+rrlib::serialization::tDataType<tDataTypeReference> tDataTypeReference::cTYPE;
 
 } // namespace finroc
 } // namespace core

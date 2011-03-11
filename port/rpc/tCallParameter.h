@@ -19,17 +19,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__RPC__TCALLPARAMETER_H
-#define CORE__PORT__RPC__TCALLPARAMETER_H
+#ifndef core__port__rpc__tCallParameter_h__
+#define core__port__rpc__tCallParameter_h__
 
-#include "core/port/cc/tCCInterThreadContainer.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "core/port/cc/tCCPortDataManager.h"
+#include "core/datatype/tNumber.h"
+#include "rrlib/serialization/tGenericObject.h"
 
 namespace finroc
 {
 namespace core
 {
+class tCoreInput;
+class tCoreOutput;
+
 /*!
  * Storage for a parameter
  *
@@ -43,20 +49,13 @@ class tCallParameter : public util::tObject
 public:
 
   /*! Constants for different types of parameters in serialization */
-  static const int8 cNULLPARAM = 0, cINT = 1, cLONG = 2, cFLOAT = 3, cDOUBLE = 4, cPORTDATA = 5, cCCDATA = 6, cCCCONTAINER = 7, cBYTE = 8, cSHORT = 9;
+  static const int8 cNULLPARAM = 0, cNUMBER = 1, cOBJECT = 2;
 
-  /*! Parameter */
-  union
-  {
-    int ival;
-    int64 lval;
-    float fval;
-    double dval;
-    int8 bval;
-    int16 sval;
-    tCCInterThreadContainer<>* ccval;
-    const tPortData* value;
-  };
+  /*! Storage for numeric parameter */
+  tNumber number;
+
+  /*! Object Parameter */
+  ::std::shared_ptr<rrlib::serialization::tGenericObject> value;
 
   /*! Type of parameter (see constants at beginning of class) */
   int8 type;
@@ -66,14 +65,23 @@ public:
   inline void Clear()
   {
     type = cNULLPARAM;
-    value = NULL;
+    value.reset();
   }
 
+  virtual ~tCallParameter()
+  {
+    Recycle();
+  }
+
+  void Deserialize(tCoreInput& is);
+
   void Recycle();
+
+  void Serialize(tCoreOutput& oos) const;
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__RPC__TCALLPARAMETER_H
+#endif // core__port__rpc__tCallParameter_h__

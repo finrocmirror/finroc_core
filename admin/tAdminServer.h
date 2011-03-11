@@ -19,21 +19,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__ADMIN__TADMINSERVER_H
-#define CORE__ADMIN__TADMINSERVER_H
+#ifndef core__admin__tAdminServer_h__
+#define core__admin__tAdminServer_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/rpc/method/tPortInterface.h"
 #include "core/port/rpc/method/tVoid2Method.h"
 #include "core/port/rpc/method/tVoid3Method.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
 #include "core/port/rpc/method/tPort0Method.h"
 #include "core/port/rpc/method/tVoid4Method.h"
+#include "core/datatype/tCoreString.h"
 #include "core/port/rpc/method/tVoid1Method.h"
 #include "core/port/rpc/method/tPort2Method.h"
 #include "core/port/rpc/method/tVoid0Method.h"
 #include "core/port/rpc/method/tPort1Method.h"
+#include "core/portdatabase/tRPCInterfaceType.h"
+#include "rrlib/serialization/tMemoryBuffer.h"
 #include "core/port/rpc/tInterfaceServerPort.h"
 #include "core/port/rpc/method/tAbstractMethodCallHandler.h"
 
@@ -41,10 +44,6 @@ namespace finroc
 {
 namespace core
 {
-class tPortData;
-class tMemBuffer;
-class tCoreString;
-class tDataType;
 class tAbstractMethod;
 
 /*!
@@ -69,22 +68,22 @@ public:
   static tVoid2Method<tAdminServer*, int, int> cDISCONNECT_ALL;
 
   /*! Set a port's value */
-  static tVoid3Method<tAdminServer*, int, tCCInterThreadContainer<>*, tPortData*> cSET_PORT_VALUE;
+  static tVoid3Method<tAdminServer*, int, std::shared_ptr<const rrlib::serialization::tMemoryBuffer>, int> cSET_PORT_VALUE;
 
-  /*! Set a port's value */
-  static tPort0Method<tAdminServer*, tMemBuffer*> cGET_CREATE_MODULE_ACTIONS;
+  /*! Get module types */
+  static tPort0Method<tAdminServer*, std::shared_ptr<rrlib::serialization::tMemoryBuffer> > cGET_CREATE_MODULE_ACTIONS;
 
-  /*! Set a port's value */
-  static tVoid4Method<tAdminServer*, int, tCoreString*, int, tMemBuffer*> cCREATE_MODULE;
+  /*! Create a module */
+  static tVoid4Method<tAdminServer*, int, std::shared_ptr<tCoreString>, int, std::shared_ptr<const rrlib::serialization::tMemoryBuffer> > cCREATE_MODULE;
 
   /*! Save finstructable group */
   static tVoid1Method<tAdminServer*, int> cSAVE_FINSTRUCTABLE_GROUP;
 
   /*! Get annotation */
-  static tPort2Method<tAdminServer*, tMemBuffer*, int, tCoreString*> cGET_ANNOTATION;
+  static tPort2Method<tAdminServer*, std::shared_ptr<rrlib::serialization::tMemoryBuffer>, int, std::shared_ptr<tCoreString> > cGET_ANNOTATION;
 
   /*! Set annotation */
-  static tVoid4Method<tAdminServer*, int, tCoreString*, int, tMemBuffer*> cSET_ANNOTATION;
+  static tVoid4Method<tAdminServer*, int, std::shared_ptr<tCoreString>, int, std::shared_ptr<const rrlib::serialization::tMemoryBuffer> > cSET_ANNOTATION;
 
   /*! Delete element */
   static tVoid1Method<tAdminServer*, int> cDELETE_ELEMENT;
@@ -99,7 +98,7 @@ public:
   static tPort1Method<tAdminServer*, int, int> cIS_RUNNING;
 
   /*! Data Type of method calls to this port */
-  static tDataType* cDATA_TYPE;
+  static tRPCInterfaceType cDATA_TYPE;
 
   /*! Port name of admin interface */
   static util::tString cPORT_NAME;
@@ -121,17 +120,17 @@ public:
 
   tAdminServer();
 
-  tMemBuffer* HandleCall(const tAbstractMethod* method);
+  ::std::shared_ptr<rrlib::serialization::tMemoryBuffer> HandleCall(tAbstractMethod* method);
 
-  tMemBuffer* HandleCall(const tAbstractMethod* method, int handle, tCoreString* type);
+  ::std::shared_ptr<rrlib::serialization::tMemoryBuffer> HandleCall(tAbstractMethod* method, int handle, ::std::shared_ptr<tCoreString> type);
 
   int HandleCall(const tAbstractMethod* method, int handle);
 
   void HandleVoidCall(const tAbstractMethod* method, int p1, int p2);
 
-  void HandleVoidCall(const tAbstractMethod* method, int port_handle, tCCInterThreadContainer<>* cc_data, tPortData* port_data);
+  void HandleVoidCall(tAbstractMethod* method, int port_handle, ::std::shared_ptr<const rrlib::serialization::tMemoryBuffer> buf, int dummy);
 
-  void HandleVoidCall(const tAbstractMethod* method, int cma_index, tCoreString* name, int parent_handle, tMemBuffer* params_buffer);
+  void HandleVoidCall(tAbstractMethod* method, int cma_index, ::std::shared_ptr<tCoreString> name, int parent_handle, ::std::shared_ptr<const rrlib::serialization::tMemoryBuffer> params_buffer);
 
   void HandleVoidCall(const tAbstractMethod* method, int handle);
 
@@ -142,4 +141,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__ADMIN__TADMINSERVER_H
+#endif // core__admin__tAdminServer_h__

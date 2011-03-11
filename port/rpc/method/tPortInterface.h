@@ -19,13 +19,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
-#include "core/portdatabase/tDataType.h"
 
-#ifndef CORE__PORT__RPC__METHOD__TPORTINTERFACE_H
-#define CORE__PORT__RPC__METHOD__TPORTINTERFACE_H
+#ifndef core__port__rpc__method__tPortInterface_h__
+#define core__port__rpc__method__tPortInterface_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
+#include "rrlib/serialization/tDataTypeBase.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 
 namespace finroc
 {
@@ -49,7 +51,7 @@ private:
 public:
 
   /*! Data type for this port interface - the last one in case there are multiple (e.g. for different types of blackboards) - set by DataTypeRegister */
-  tDataType* my_type;
+  rrlib::serialization::tDataTypeBase my_type;
 
   /*! Name of port interface */
   util::tString name;
@@ -70,7 +72,7 @@ public:
   /*!
    * \return Data type of this port interface (must have been set before)
    */
-  inline tDataType* GetDataType()
+  inline const rrlib::serialization::tDataTypeBase GetDataType()
   {
     assert((my_type != NULL));
     return my_type;
@@ -91,9 +93,9 @@ public:
    *
    * \param data_type Data type that has this port interface
    */
-  inline void SetDataType(tDataType* data_type)
+  inline void SetDataType(const rrlib::serialization::tDataTypeBase& data_type)
   {
-    assert((data_type->GetPortInterface() == this));
+    assert((tFinrocTypeInfo::Get(data_type).GetPortInterface() == this));
     my_type = data_type;
   }
 
@@ -102,4 +104,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__RPC__METHOD__TPORTINTERFACE_H
+#endif // core__port__rpc__method__tPortInterface_h__

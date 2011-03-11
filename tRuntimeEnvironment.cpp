@@ -25,7 +25,6 @@
 #include "core/tLinkEdge.h"
 #include "core/port/tAbstractPort.h"
 #include "core/tRuntimeSettings.h"
-#include "core/portdatabase/sSerializationHelper.h"
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tConstant.h"
 #include "rrlib/finroc_core_utils/tGarbageCollector.h"
@@ -183,7 +182,6 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   assert((!ShuttingDown()));
 
   // Finish initializing static members of classes
-  sSerializationHelper::StaticInit();  // can safely be done first
   tUnit::StaticInit();  // can safely be done first
   tConstant::StaticInit();  // needs to be done after unit
   util::tTime::GetInstance();  // (possibly) init timing thread
@@ -191,7 +189,8 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   ::std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock = tThreadLocalCache::StaticInit();  // can safely be done first
   tMethodCallSyncher::StaticInit();  // dito
   util::tBoundedQElementContainer::StaticInit();
-  util::tChunkedBuffer::StaticInit();  // should be done before any ports/elements are added
+  util::tChunkedBuffer::StaticInit();
+  typeutil::InitCCTypes();  // should be done before any ports/elements are added
 
   new tRuntimeEnvironment(); // should be done before any ports/elements are added
   instance->registry.infos_lock = infos_lock;

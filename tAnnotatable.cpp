@@ -58,7 +58,7 @@ tAnnotatable::~tAnnotatable()
   }
 }
 
-tFinrocAnnotation* tAnnotatable::GetAnnotation(tDataType* dt)
+tFinrocAnnotation* tAnnotatable::GetAnnotation(const rrlib::serialization::tDataTypeBase& dt)
 {
   tFinrocAnnotation* ann = first_annotation;
   while (ann != NULL)
@@ -70,6 +70,26 @@ tFinrocAnnotation* tAnnotatable::GetAnnotation(tDataType* dt)
     ann = ann->next_annotation;
   }
   return NULL;
+}
+
+void tAnnotatable::NotifyAnnotationsDelete()
+{
+  tFinrocAnnotation* ann = first_annotation;
+  while (ann != NULL)
+  {
+    ann->AnnotatedObjectToBeDeleted();
+    ann = ann->next_annotation;
+  }
+}
+
+void tAnnotatable::NotifyAnnotationsInitialized()
+{
+  tFinrocAnnotation* ann = first_annotation;
+  while (ann != NULL)
+  {
+    ann->AnnotatedObjectInitialized();
+    ann = ann->next_annotation;
+  }
 }
 
 } // namespace finroc

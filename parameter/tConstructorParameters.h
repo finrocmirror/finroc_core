@@ -19,19 +19,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TCONSTRUCTORPARAMETERS_H
-#define CORE__PARAMETER__TCONSTRUCTORPARAMETERS_H
+#ifndef core__parameter__tConstructorParameters_h__
+#define core__parameter__tConstructorParameters_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
 #include "core/parameter/tStructureParameterList.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-
 /*!
  * \author Max Reichardt
  *
@@ -44,7 +44,7 @@ class tConstructorParameters : public tStructureParameterList
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tConstructorParameters> cTYPE;
 
   tConstructorParameters() {}
 };
@@ -52,4 +52,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TCONSTRUCTORPARAMETERS_H
+#endif // core__parameter__tConstructorParameters_h__

@@ -27,10 +27,10 @@ namespace finroc
 namespace core
 {
 template<typename T>
-tSingletonPort<T>::tSingletonPort(tPortCreationInfo pci, T* singleton)
+tSingletonPort<T>::tSingletonPort(tPortCreationInfo pci, T& singleton)
 {
-  this->wrapped = new tPortImpl<T*>(AdjustPci(pci), singleton);
-  Publish(singleton);
+  this->wrapped = new tPortImpl<T>(AdjustPci(pci), singleton);
+  Publish(::std::shared_ptr<T>(&(singleton)));
 }
 
 template<typename T>

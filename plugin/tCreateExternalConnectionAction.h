@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PLUGIN__TCREATEEXTERNALCONNECTIONACTION_H
-#define CORE__PLUGIN__TCREATEEXTERNALCONNECTIONACTION_H
+#ifndef core__plugin__tCreateExternalConnectionAction_h__
+#define core__plugin__tCreateExternalConnectionAction_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/plugin/tCreateFrameworkElementAction.h"
 
@@ -59,4 +60,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PLUGIN__TCREATEEXTERNALCONNECTIONACTION_H
+#endif // core__plugin__tCreateExternalConnectionAction_h__

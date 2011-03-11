@@ -19,12 +19,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
 #include "core/buffers/tCoreInput.h"
-#include "core/portdatabase/tTypedObject.h"
 #include "core/port/tAbstractPort.h"
 #include "core/port/tThreadLocalCache.h"
-#include "core/portdatabase/tDataTypeRegister.h"
+#include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/net/tRemoteTypes.h"
 
 namespace finroc
@@ -32,70 +30,42 @@ namespace finroc
 namespace core
 {
 tCoreInput::tCoreInput() :
-    util::tInputStreamBuffer(),
+    rrlib::serialization::tInputStream(),
     buffer_source(NULL),
     type_translation(NULL)
 {
 }
 
-tCoreInput::tCoreInput(::std::shared_ptr<const util::tConstSource> source) :
-    util::tInputStreamBuffer(source),
-    buffer_source(NULL),
-    type_translation(NULL)
-{
-}
-
-tCoreInput::tCoreInput(const util::tConstSource* source) :
-    util::tInputStreamBuffer(source),
-    buffer_source(NULL),
-    type_translation(NULL)
-{
-}
-
-tCoreInput::tCoreInput(::std::shared_ptr<util::tSource> source) :
-    util::tInputStreamBuffer(source),
-    buffer_source(NULL),
-    type_translation(NULL)
-{
-}
-
-tCoreInput::tCoreInput(util::tSource* source) :
-    util::tInputStreamBuffer(source),
-    buffer_source(NULL),
-    type_translation(NULL)
-{
-}
-
-tTypedObject* tCoreInput::ReadObject(bool in_inter_thread_container)
+rrlib::serialization::tGenericObject* tCoreInput::ReadObject(bool in_inter_thread_container)
 {
   //readSkipOffset();
-  tDataType* dt = ReadType();
+  rrlib::serialization::tDataTypeBase dt = ReadType();
   if (dt == NULL)
   {
     return NULL;
   }
-  if (buffer_source == NULL && dt->IsStdType())    // skip object?
+  if (buffer_source == NULL && tFinrocTypeInfo::IsStdType(dt))    // skip object?
   {
     //toSkipTarget();
-    throw util::tRuntimeException(util::tStringBuilder("Buffer source does not support type ") + dt->GetName(), CODE_LOCATION_MACRO);
+    throw util::tRuntimeException(util::tStringBuilder("Buffer source does not support type ") + dt.GetName(), CODE_LOCATION_MACRO);
     //return null;
   }
   else
   {
-    tTypedObject* buffer = dt->IsStdType() ? static_cast<tTypedObject*>(buffer_source->GetUnusedBuffer(dt)) : (in_inter_thread_container ? static_cast<tTypedObject*>(tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(dt)) : static_cast<tTypedObject*>(tThreadLocalCache::Get()->GetUnusedBuffer(dt)));
+    rrlib::serialization::tGenericObject* buffer = tFinrocTypeInfo::IsStdType(dt) ? static_cast<rrlib::serialization::tGenericObject*>(buffer_source->GetUnusedBufferRaw(dt)->GetObject()) : (in_inter_thread_container ? static_cast<rrlib::serialization::tGenericObject*>(tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(dt)->GetObject()) : static_cast<rrlib::serialization::tGenericObject*>(tThreadLocalCache::Get()->GetUnusedBuffer(dt)->GetObject()));
     buffer->Deserialize(*this);
     return buffer;
   }
 }
 
-tDataType* tCoreInput::ReadType()
+rrlib::serialization::tDataTypeBase tCoreInput::ReadType()
 {
   int16 type_uid = ReadShort();
   if (type_uid == -1)
   {
     return NULL;
   }
-  tDataType* dt = type_translation == NULL ? tDataTypeRegister::GetInstance()->GetDataType(type_uid) : type_translation->GetLocalType(type_uid);
+  rrlib::serialization::tDataTypeBase dt = type_translation == NULL ? rrlib::serialization::tDataTypeBase::GetType(type_uid) : type_translation->GetLocalType(type_uid);
   return dt;
 }
 

@@ -19,17 +19,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__CC__TCCPULLREQUESTHANDLER_H
-#define CORE__PORT__CC__TCCPULLREQUESTHANDLER_H
+#ifndef core__port__cc__tCCPullRequestHandler_h__
+#define core__port__cc__tCCPullRequestHandler_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 namespace finroc
 {
 namespace core
 {
 class tCCPortBase;
-class tCCPortData;
+class tCCPortDataManagerTL;
 
 /*!
  * \author Max Reichardt
@@ -46,11 +47,11 @@ public:
    * \param origin (Output) Port pull request comes from
    * \param result_buffer Buffer with result
    */
-  virtual void PullRequest(tCCPortBase* origin, void* result_buffer) = 0;
+  virtual void PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer) = 0;
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__CC__TCCPULLREQUESTHANDLER_H
+#endif // core__port__cc__tCCPullRequestHandler_h__

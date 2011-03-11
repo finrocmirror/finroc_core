@@ -35,7 +35,7 @@ tStandardCreateModuleAction<tThreadContainer> tThreadContainer::cCREATE_ACTION("
 tThreadContainer::tThreadContainer(tFrameworkElement* parent, const util::tString& description) :
     tGroup(parent, description),
     rt_thread(new tStructureParameterBool("Realtime Thread", false)),
-    cycle_time(new tStructureParameterNumeric<int>("Cycle Time", 40, tBounds(1, 60000, true))),
+    cycle_time(new tStructureParameterNumeric<int>("Cycle Time", 40, tBounds<int>(1, 60000, true))),
     warn_on_cycle_time_exceed(new tStructureParameterBool("Warn on cycle time exceed", true)),
     thread()
 {

@@ -19,15 +19,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__STD__TPORTDATAREFERENCE_H
-#define CORE__PORT__STD__TPORTDATAREFERENCE_H
+#ifndef core__port__std__tPortDataReference_h__
+#define core__port__std__tPortDataReference_h__
 
-#include "core/port/std/tPortData.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
 #include "core/port/std/tPortDataManager.h"
 
 #include "core/port/tCombinedPointer.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tGenericObject;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
@@ -47,16 +55,16 @@ namespace core
  *
  * Is immutable
  */
-class tPortDataReference : public tCombinedPointer<tPortData>
+class tPortDataReference : public tCombinedPointer<tPortDataManager>
 {
 public:
 
   /*!
    * \return Referenced port data
    */
-  inline tPortData* GetData() const
+  inline rrlib::serialization::tGenericObject* GetData() const
   {
-    return GetPointer();
+    return GetManager()->GetObject();
   }
 
   /*!
@@ -64,7 +72,7 @@ public:
    */
   inline tPortDataManager* GetManager() const
   {
-    return GetData()->GetManager();
+    return GetPointer();
   }
 
   /*!
@@ -88,4 +96,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__STD__TPORTDATAREFERENCE_H
+#endif // core__port__std__tPortDataReference_h__

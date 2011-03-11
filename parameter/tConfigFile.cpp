@@ -20,22 +20,21 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/parameter/tConfigFile.h"
-#include "core/portdatabase/tDataTypeRegister.h"
 #include "rrlib/finroc_core_utils/sFiles.h"
 #include "rrlib/xml2_wrapper/tXML2WrapperException.h"
-#include "core/portdatabase/tTypedObject.h"
+#include "rrlib/serialization/tTypedObject.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
+#include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "core/tFrameworkElement.h"
 #include "core/tFrameworkElementTreeFilter.h"
 #include "core/tCoreFlags.h"
 #include "core/parameter/tParameterInfo.h"
-#include "core/datatype/tCoreString.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tConfigFile::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tConfigFile>());
+rrlib::serialization::tDataType<tConfigFile> tConfigFile::cTYPE;
 util::tString tConfigFile::cSEPARATOR = "/";
 util::tString tConfigFile::cXML_BRANCH_NAME = "node";
 util::tString tConfigFile::cXML_LEAF_NAME = "value";
@@ -65,7 +64,15 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
   }
 }
 
-rrlib::xml2::tXMLNode &tConfigFile::GetEntry(const util::tString& entry, bool create)
+tConfigFile::tConfigFile() :
+    wrapped(),
+    filename(),
+    temp_buffer()
+{
+  throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
+}
+
+rrlib::xml2::tXMLNode& tConfigFile::GetEntry(const util::tString& entry, bool create)
 {
   util::tSimpleList<util::tString> nodes;
   nodes.AddAll(entry.Split(cSEPARATOR));
@@ -102,7 +109,7 @@ rrlib::xml2::tXMLNode &tConfigFile::GetEntry(const util::tString& entry, bool cr
       if (create)
       {
         parent = current;
-        current = &current->AddChildNode((idx == nodes.Size() - 1) ? cXML_LEAF_NAME : cXML_BRANCH_NAME);
+        current = &(current->AddChildNode((idx == nodes.Size() - 1) ? cXML_LEAF_NAME : cXML_BRANCH_NAME));
         created = true;
         current->SetAttribute("name", nodes.Get(idx));
         idx++;
@@ -122,11 +129,30 @@ rrlib::xml2::tXMLNode &tConfigFile::GetEntry(const util::tString& entry, bool cr
   if (create && (!created))
   {
     parent->RemoveChildNode(*current);
-    current = &parent->AddChildNode(cXML_LEAF_NAME);
+    current = &(parent->AddChildNode(cXML_LEAF_NAME));
     current->SetAttribute("name", nodes.Get(nodes.Size() - 1));
   }
 
   return *current;
+}
+
+util::tString tConfigFile::GetStringEntry(const util::tString& entry)
+{
+  if (this->HasEntry(entry))
+  {
+    try
+    {
+      return GetEntry(entry, false).GetTextContent();
+    }
+    catch (const rrlib::xml2::tXML2WrapperException& e)
+    {
+      return "";
+    }
+  }
+  else
+  {
+    return "";
+  }
 }
 
 bool tConfigFile::HasEntry(const util::tString& entry)
@@ -224,21 +250,6 @@ void tConfigFile::TreeFilterCallback(tFrameworkElement* fe, bool loading_paramet
     }
   }
 }
-
-util::tString tConfigFile::GetStringEntry(const util::tString& entry)
-{
-  if (this->HasEntry(entry))
-  {
-    finroc::core::tCoreString content;
-    (dynamic_cast<finroc::core::tCoreSerializable*>(&content))->Deserialize(this->GetEntry(entry, false));
-    return content.ToString();
-  }
-  else
-  {
-    return "";
-  }
-}
-
 
 } // namespace finroc
 } // namespace core

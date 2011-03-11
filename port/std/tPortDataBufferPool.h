@@ -19,22 +19,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__STD__TPORTDATABUFFERPOOL_H
-#define CORE__PORT__STD__TPORTDATABUFFERPOOL_H
+#ifndef core__port__std__tPortDataBufferPool_h__
+#define core__port__std__tPortDataBufferPool_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/port/std/tPortDataManager.h"
-#include "rrlib/finroc_core_utils/container/tAbstractReusablesPool.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPoolCR.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-class tPortData;
-
 /*!
  * \author Max Reichardt
  *
@@ -47,7 +45,7 @@ class tPortDataBufferPool : public util::tReusablesPoolCR<tPortDataManager>
 public:
 
   /*! Data Type of buffers in pool */
-  tDataType* data_type;
+  const rrlib::serialization::tDataTypeBase data_type;
 
 private:
 
@@ -61,7 +59,7 @@ private:
    */
   inline tPortDataManager* CreateBufferRaw()
   {
-    return new tPortDataManager(data_type, GetLastCreated() == NULL ? NULL : GetLastCreated()->GetData());
+    return tPortDataManager::Create(data_type);
   }
 
   /*!
@@ -84,7 +82,7 @@ public:
   /*!
    * \param data_type Type of buffers in pool
    */
-  tPortDataBufferPool(tDataType* data_type_, int initial_size);
+  tPortDataBufferPool(const rrlib::serialization::tDataTypeBase& data_type_, int initial_size);
 
   /*!
    * Is final so it is not used polymorphically -
@@ -93,15 +91,15 @@ public:
    *
    * \return Returns unused buffer. If there are no buffers that can be reused, a new buffer is allocated.
    */
-  inline tPortData* GetUnusedBuffer()
+  inline tPortDataManager* GetUnusedBuffer()
   {
     tPortDataManager* pc = GetUnused();
     if (pc != NULL)
     {
       pc->SetUnused(true);
-      return pc->GetData();
+      return pc;
     }
-    return CreateBuffer()->GetData();
+    return CreateBuffer();
   }
 
   /*!
@@ -117,4 +115,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__STD__TPORTDATABUFFERPOOL_H
+#endif // core__port__std__tPortDataBufferPool_h__

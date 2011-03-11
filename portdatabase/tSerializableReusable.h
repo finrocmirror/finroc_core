@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORTDATABASE__TSERIALIZABLEREUSABLE_H
-#define CORE__PORTDATABASE__TSERIALIZABLEREUSABLE_H
+#ifndef core__portdatabase__tSerializableReusable_h__
+#define core__portdatabase__tSerializableReusable_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tReusable.h"
 #include "core/portdatabase/tCoreSerializable.h"
@@ -58,4 +59,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORTDATABASE__TSERIALIZABLEREUSABLE_H
+#endif // core__portdatabase__tSerializableReusable_h__

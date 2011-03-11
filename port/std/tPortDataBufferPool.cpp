@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
 #include "core/port/std/tPortDataBufferPool.h"
+#include "rrlib/finroc_core_utils/container/tAbstractReusablesPool.h"
 
 namespace finroc
 {
@@ -31,7 +31,7 @@ tPortDataBufferPool::tPortDataBufferPool() :
 {
 }
 
-tPortDataBufferPool::tPortDataBufferPool(tDataType* data_type_, int initial_size) :
+tPortDataBufferPool::tPortDataBufferPool(const rrlib::serialization::tDataTypeBase& data_type_, int initial_size) :
     data_type(data_type_)
 {
   for (int i = 0; i < initial_size; i++)
@@ -71,7 +71,7 @@ void tPortDataBufferPool::PrintStructure(int indent, rrlib::logging::tLogStream&
   {
     output << " ";
   }
-  output << util::tStringBuilder("PortDataBufferPool (") + data_type->GetName() + ")" << std::endl;
+  output << util::tStringBuilder("PortDataBufferPool (") + data_type.GetName() + ")" << std::endl;
   PrintElement(indent + 2, GetLastCreated(), output);
 }
 

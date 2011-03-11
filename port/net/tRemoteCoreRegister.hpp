@@ -96,13 +96,13 @@ T tRemoteCoreRegister<T>::tIterator::Next()
 {
   while (true)
   {
-    if (lvl2_idx >= cLEVEL_TWO_BLOCK_SIZE - 1)
+    if (lvl2_idx >= tRemoteCoreRegister::cLEVEL_TWO_BLOCK_SIZE - 1)
     {
       lvl2_idx = 0;
       do
       {
         lvl1_idx++;
-        if (lvl1_idx == cLEVEL_ONE_BLOCK_SIZE)    // we're finished
+        if (lvl1_idx == tRemoteCoreRegister::cLEVEL_ONE_BLOCK_SIZE)    // we're finished
         {
           return NULL;
         }
@@ -127,7 +127,7 @@ void tRemoteCoreRegister<T>::tIterator::Reset()
 {
   cur_lvl2_block = NULL;
   lvl1_idx = -1;
-  lvl2_idx = cLEVEL_TWO_BLOCK_SIZE;
+  lvl2_idx = tRemoteCoreRegister::cLEVEL_TWO_BLOCK_SIZE;
 }
 
 } // namespace finroc

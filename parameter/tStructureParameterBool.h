@@ -19,14 +19,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETERBOOL_H
-#define CORE__PARAMETER__TSTRUCTUREPARAMETERBOOL_H
+#ifndef core__parameter__tStructureParameterBool_h__
+#define core__parameter__tStructureParameterBool_h__
 
-#include "core/portdatabase/tDataTypeRegister.h"
-#include "core/datatype/tBoolean.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
 #include "core/parameter/tStructureParameterBase.h"
+#include "core/datatype/tBoolean.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/parameter/tStructureParameter.h"
 
 namespace finroc
@@ -43,7 +44,7 @@ class tStructureParameterBool : public tStructureParameter<tBoolean>
 public:
 
   tStructureParameterBool(const util::tString& name, bool default_value, bool constructor_prototype) :
-      tStructureParameter<tBoolean>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tBoolean>()), constructor_prototype, "")
+      tStructureParameter<tBoolean>(name, GetDataType(), constructor_prototype, "")
   {
     if (!constructor_prototype)
     {
@@ -52,7 +53,7 @@ public:
   }
 
   tStructureParameterBool(const util::tString& name, bool default_value) :
-      tStructureParameter<tBoolean>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tBoolean>()), false, "")
+      tStructureParameter<tBoolean>(name, GetDataType(), false, "")
   {
     // this(name,defaultValue,false);
     if (!false)
@@ -74,6 +75,12 @@ public:
     return ::finroc::core::tStructureParameter<tBoolean>::GetValue()->Get();
   }
 
+  /*! Helper to get this safely during static initialization */
+  inline static rrlib::serialization::tDataTypeBase GetDataType()
+  {
+    return rrlib::serialization::tDataType<tBoolean>();
+  }
+
   /*!
    * \param new_value New Value
    */
@@ -87,4 +94,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TSTRUCTUREPARAMETERBOOL_H
+#endif // core__parameter__tStructureParameterBool_h__

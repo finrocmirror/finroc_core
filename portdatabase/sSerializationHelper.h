@@ -19,22 +19,29 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORTDATABASE__TSERIALIZATIONHELPER_H
-#define CORE__PORTDATABASE__TSERIALIZATIONHELPER_H
+#ifndef core__portdatabase__tSerializationHelper_h__
+#define core__portdatabase__tSerializationHelper_h__
 
-#include "core/portdatabase/tCoreSerializable.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tSerializable.h"
+#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/serialization/tTypedObject.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tGenericObject;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
-class tCoreInput;
-class tCoreOutput;
-class tDataType;
 class tMultiTypePortDataBufferPool;
-class tTypedObject;
 
 /*!
  * \author Max Reichardt
@@ -46,52 +53,38 @@ class sSerializationHelper : public util::tUncopyableObject
 {
 private:
 
-  /*! int -> hex char */
-  static ::finroc::util::tArrayWrapper<char> cTO_HEX;
+  //TODO: SFINAE check whether stream operator is implemented
+  template<typename T>
+  static void Serialize(rrlib::serialization::tOutputStream& os, const T* const port_data2, rrlib::serialization::tDataTypeBase type)
+  {
+    os << (*port_data2);
+  }
 
-  /*! hex char -> int */
-  static ::finroc::util::tArrayWrapper<int> cTO_INT;
+  //    template<typename T>
+  //    static void serialize(OutputStreamBuffer& os, const T* const portData2, DataType* type) {
+  //      throw new RuntimeException(util::tStringBuilder("Serialization not supported for type ") + typeid(T).name());
+  //    }
+
+  //TODO: SFINAE check whether stream operator is implemented
+  template<typename T>
+  inline static void Deserialize(rrlib::serialization::tInputStream& is, T* port_data2, rrlib::serialization::tDataTypeBase type)
+  {
+    is >> (*port_data2);
+  }
+
+  /*! Log domain for this class */
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "data_types");
 
 public:
 
   sSerializationHelper() {}
 
   /*!
-   * Deserializes binary CoreSerializable from hex string
-   *
-   * \param cs CoreSerializable
-   * \param s Hex String to deserialize from
-   */
-  static void DeserializeFromHexString(tCoreSerializable* cs, const util::tString& s);
-
-  /*!
    * \param expected Expected data type
    * \param s String to deserialize from
    * \return Data type (null - if type is not available in this runtime)
    */
-  static tDataType* GetTypedStringDataType(tDataType* expected, const util::tString& s);
-
-  inline static void Serialize2(tCoreOutput& os, const tCoreSerializable* const port_data2, tDataType* type)
-  {
-    port_data2->Serialize(os); // should not be a virtual call with a proper compiler
-  }
-  static void Serialize2(tCoreOutput& os, const void* const port_data2, tDataType* type);
-
-  inline static void Deserialize2(tCoreInput& is, tCoreSerializable* port_data2, tDataType* type)
-  {
-    port_data2->Deserialize(is); // should not be a virtual call with a proper compiler
-  }
-  static void Deserialize2(tCoreInput& is, void* port_data2, tDataType* type);
-
-  /*!
-   * Serializes binary CoreSerializable to hex string
-   *
-   * \param cs CoreSerializable
-   * \return Hex string
-   */
-  static util::tString SerializeToHexString(const tCoreSerializable* cs);
-
-  static void StaticInit();
+  static rrlib::serialization::tDataTypeBase GetTypedStringDataType(const rrlib::serialization::tDataTypeBase& expected, const util::tString& s);
 
   /*!
    * Deserialize object from string
@@ -100,7 +93,7 @@ public:
    * \param cs buffer
    * \param s String to deserialize from
    */
-  static void TypedStringDeserialize(tCoreSerializable* cs, const util::tString& s);
+  static void TypedStringDeserialize(rrlib::serialization::tSerializable* cs, const util::tString& s);
 
   /*!
    * Deserialize object from string
@@ -110,7 +103,7 @@ public:
    * \param s String to deserialize from
    * \return Typed object
    */
-  static tTypedObject* TypedStringDeserialize(tDataType* expected, tMultiTypePortDataBufferPool* buffer_pool, const util::tString& s);
+  static rrlib::serialization::tGenericObject* TypedStringDeserialize(const rrlib::serialization::tDataTypeBase& expected, tMultiTypePortDataBufferPool* buffer_pool, const util::tString& s);
 
   /*!
    * Serialize object to string
@@ -119,11 +112,24 @@ public:
    * \param expected Expected data type
    * \param cs Typed object
    */
-  static util::tString TypedStringSerialize(tDataType* expected, tTypedObject* cs);
+  inline static util::tString TypedStringSerialize(const rrlib::serialization::tDataTypeBase& expected, rrlib::serialization::tTypedObject* cs)
+  {
+    return TypedStringSerialize(expected, cs, cs->GetType());
+  }
+
+  /*!
+   * Serialize object to string
+   * (Stores type information if type differs from expected data type)
+   *
+   * \param expected Expected data type
+   * \param cs object
+   * \param cs_type Type of object
+   */
+  static util::tString TypedStringSerialize(const rrlib::serialization::tDataTypeBase& expected, rrlib::serialization::tSerializable* cs, rrlib::serialization::tDataTypeBase cs_type);
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORTDATABASE__TSERIALIZATIONHELPER_H
+#endif // core__portdatabase__tSerializationHelper_h__

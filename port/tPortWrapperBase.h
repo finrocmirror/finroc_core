@@ -19,17 +19,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__TPORTWRAPPERBASE_H
-#define CORE__PORT__TPORTWRAPPERBASE_H
+#ifndef core__port__tPortWrapperBase_h__
+#define core__port__tPortWrapperBase_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataTypeBase.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
+#include "core/port/tThreadLocalCache.h"
 
 namespace finroc
 {
 namespace core
 {
 class tAbstractPort;
-class tDataType;
 
 /*!
  * \author Max Reichardt
@@ -164,9 +168,17 @@ public:
   /*!
    * \return Type of port data
    */
-  inline tDataType* GetDataType() const
+  inline const rrlib::serialization::tDataTypeBase GetDataType() const
   {
     return wrapped->GetDataType();
+  }
+
+  /*!
+   * \return Additional type info for port data
+   */
+  inline tFinrocTypeInfo GetDataTypeInfo() const
+  {
+    return tFinrocTypeInfo::Get(wrapped->GetDataType());
   }
 
   /*!
@@ -259,6 +271,14 @@ public:
   }
 
   /*!
+   * Releases all automatically acquired locks
+   */
+  inline void ReleaseAutoLocks()
+  {
+    tThreadLocalCache::GetFast()->ReleaseAllLocks();
+  }
+
+  /*!
    * (relevant for input ports only)
    *
    * Reset changed flag.
@@ -321,4 +341,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__TPORTWRAPPERBASE_H
+#endif // core__port__tPortWrapperBase_h__

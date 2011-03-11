@@ -45,7 +45,7 @@
 // Internal includes with ""
 //----------------------------------------------------------------------
 #include "core/port/tEdgeAggregator.h"
-#include "core/port/cc/tPortNumeric.h"
+#include "core/port/tPort.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 
 //----------------------------------------------------------------------
@@ -113,32 +113,32 @@ protected:
 //----------------------------------------------------------------------
 public:
 
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tCI : public TPort
+  template < typename T = double >
+  struct tCI : public tPort<T>
   {
     tCI(tSenseControlModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->controller_input, false)
+        : tPort<T>(name, parent->controller_input, false)
     {}
   };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tCO : public TPort
+  template < typename T = double >
+  struct tCO : public tPort<T>
   {
     tCO(tSenseControlModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->controller_output, true)
+        : tPort<T>(name, parent->controller_output, true)
     {}
   };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tSI : public TPort
+  template < typename T = double >
+  struct tSI : public tPort<T>
   {
     tSI(tSenseControlModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->sensor_input, false)
+        : tPort<T>(name, parent->sensor_input, false)
     {}
   };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tSO : public TPort
+  template < typename T = double >
+  struct tSO : public tPort<T>
   {
     tSO(tSenseControlModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->sensor_output, true)
+        : tPort<T>(name, parent->sensor_output, true)
     {}
   };
 

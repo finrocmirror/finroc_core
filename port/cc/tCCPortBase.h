@@ -19,32 +19,41 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
-#include "core/portdatabase/tDataType.h"
 
-#ifndef CORE__PORT__CC__TCCPORTBASE_H
-#define CORE__PORT__CC__TCCPORTBASE_H
+#ifndef core__port__cc__tCCPortBase_h__
+#define core__port__cc__tCCPortBase_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/port/tAbstractPort.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
-#include "core/port/cc/tCCPortDataContainer.h"
-#include "core/port/cc/tCCPortQueue.h"
-#include "core/port/cc/tCCPortListener.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/cc/tCCQueueFragment.h"
+#include "core/port/cc/tCCPortDataManagerTL.h"
+#include "core/port/cc/tCCPortQueue.h"
 #include "core/port/tThreadLocalCache.h"
-#include "core/port/cc/tCCPortDataRef.h"
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
+#include "core/port/cc/tCCPortDataManager.h"
 #include "core/tFrameworkElement.h"
+#include "rrlib/serialization/tGenericObjectManager.h"
+#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
+#include "rrlib/serialization/tGenericObject.h"
 #include "core/tRuntimeSettings.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tDataTypeBase;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
-class tCCPortData;
+class tCCPortDataRef;
 class tCCPullRequestHandler;
+class tUnit;
+class tCCQueueFragmentRaw;
 
 /*!
  * \author Max Reichardt
@@ -58,8 +67,7 @@ class tCCPullRequestHandler;
 class tCCPortBase : public tAbstractPort
 {
   template<typename T>
-  friend class tCCPort;
-  friend class tPortNumeric;
+  friend class tPort;
 
 protected:
   /*implements Callable<PullCall>*/
@@ -71,7 +79,7 @@ protected:
   tAbstractPort::tEdgeList<tCCPortBase*> edges_dest;
 
   /*! default value - invariant: must never be null if used (must always be copied, too) */
-  tCCInterThreadContainer<>* default_value;
+  tCCPortDataManager* default_value;
 
   /*!
    * current value (set by main thread) - invariant: must never be null - sinnvoll(?)
@@ -83,7 +91,7 @@ protected:
   /*!
    * Data that is currently owned - used to belong to a terminated thread
    */
-  tCCPortDataContainer<>* owned_data;
+  tCCPortDataManagerTL* owned_data;
 
   /*!
    * Is data assigned to port in standard way? Otherwise - for instance, when using queues -
@@ -106,25 +114,28 @@ protected:
   const int port_index;
 
   /*! Queue for ports with incoming value queue */
-  tCCPortQueue<tCCPortData>* queue;
+  tCCPortQueue* queue;
 
   /*! Listens to port value changes - may be null */
-  tCCPortListenerManager<tCCPortData> port_listener;
+  tPortListenerManager port_listener;
 
   /*! Object that handles pull requests - null if there is none (typical case) */
   tCCPullRequestHandler* pull_request_handler;
 
+  /*! Unit of port (currently only used for numeric ports) */
+  tUnit* unit;
+
 private:
 
   // helper for direct member initialization in C++
-  inline static tCCInterThreadContainer<>* CreateDefaultValue(tDataType* dt)
+  inline static tCCPortDataManager* CreateDefaultValue(const rrlib::serialization::tDataTypeBase& dt)
   {
-    return static_cast<tCCInterThreadContainer<>*>(dt->CreateInterThreadInstance());
+    return static_cast<tCCPortDataManager*>(dt.CreateInstanceGeneric<tCCPortDataManager>()->GetManager());
   }
 
   inline void NotifyListeners(tThreadLocalCache* tc)
   {
-    port_listener.Notify(this, ((tCCPortData*)tc->data->GetDataPtr()));
+    port_listener.Notify(this, tc->data);
   }
 
   template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cINFORM_LISTENERS>
@@ -137,9 +148,9 @@ private:
    * \param changed_constant changedConstant to use
    * \param inform_listeners Inform this port's listeners on change? (usually only when value comes from browser)
    */
-  inline void PublishImpl(tThreadLocalCache* tc, tCCPortDataContainer<>* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
+  inline void PublishImpl(tThreadLocalCache* tc, tCCPortDataManagerTL* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
   {
-    assert((data->GetType() != NULL) && "Port data type not initialized");
+    assert((data->GetObject()->GetType() != NULL) && "Port data type not initialized");
     assert((IsInitialized() || cINFORM_LISTENERS) && "Port not initialized");
 
     util::tArrayWrapper<tCCPortBase*>* dests = cREVERSE ? edges_dest.GetIterable() : edges_src.GetIterable();
@@ -187,7 +198,7 @@ private:
   {
     if (tRuntimeSettings::cCOLLECT_EDGE_STATISTICS)    // const, so method can be optimized away completely
     {
-      UpdateEdgeStatistics(source, target, tc->data);
+      UpdateEdgeStatistics(source, target, tc->data->GetObject());
     }
   }
 
@@ -204,7 +215,7 @@ protected:
    *
    * \return Container (non-const - public wrapper should return it const)
    */
-  tCCPortDataContainer<>* GetLockedUnsafeInContainer();
+  tCCPortDataManagerTL* GetLockedUnsafeInContainer();
 
   virtual int GetMaxQueueLengthImpl() const
   {
@@ -217,7 +228,7 @@ protected:
    * \param tc ThreadLocalCache
    * \return Unused buffer for writing
    */
-  inline tCCPortDataContainer<>* GetUnusedBuffer(tThreadLocalCache* tc)
+  inline tCCPortDataManagerTL* GetUnusedBuffer(tThreadLocalCache* tc)
   {
     return tc->GetUnusedBuffer(this->data_type);
   }
@@ -238,7 +249,7 @@ protected:
    * \param tc ThreadLocalCache
    * \param data Data to publish
    */
-  inline void Publish(tThreadLocalCache* tc, tCCPortDataContainer<>* data)
+  inline void Publish(tThreadLocalCache* tc, tCCPortDataManagerTL* data)
   {
     PublishImpl<false, cCHANGED, false>(tc, data);
   }
@@ -251,7 +262,7 @@ protected:
    * \param reverse Value received in reverse direction?
    * \param changed_constant changedConstant to use
    */
-  inline void Publish(tThreadLocalCache* tc, tCCPortDataContainer<>* data, bool reverse, int8 changed_constant)
+  inline void Publish(tThreadLocalCache* tc, tCCPortDataManagerTL* data, bool reverse, int8 changed_constant)
   {
     if (!reverse)
     {
@@ -285,7 +296,7 @@ protected:
    * \param intermediate_assign Assign pulled value to ports in between?
    * \return Locked port data (non-const!)
    */
-  inline tCCPortDataContainer<>* PullValueRaw()
+  inline tCCPortDataManagerTL* PullValueRaw()
   {
     return PullValueRaw(true);
   }
@@ -297,7 +308,7 @@ protected:
    * \param intermediate_assign Assign pulled value to ports in between?
    * \return Locked port data (current thread is owner; there is one additional lock for caller; non-const(!))
    */
-  tCCPortDataContainer<>* PullValueRaw(bool intermediate_assign);
+  tCCPortDataManagerTL* PullValueRaw(bool intermediate_assign);
 
   template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   /*!
@@ -311,7 +322,7 @@ protected:
   inline void Receive(tThreadLocalCache* tc, tCCPortBase* origin, bool reverse, int8 changed_constant)
   {
     // Backup tc references (in case it is modified - e.g. in BoundedNumberPort)
-    tCCPortDataContainer<>* old_data = tc->data;
+    tCCPortDataManagerTL* old_data = tc->data;
     tCCPortDataRef* old_ref = tc->ref;
 
     Assign(tc);
@@ -363,7 +374,7 @@ public:
   /*!
    * \param listener Listener to add
    */
-  inline void AddPortListenerRaw(tCCPortListener<>* listener)
+  inline void AddPortListenerRaw(tPortListenerRaw* listener)
   {
     port_listener.Add(listener);
   }
@@ -389,7 +400,7 @@ public:
 
     // assign anyway
     tc->data->AddLock();
-    tCCPortDataContainer<>* pdc = tc->last_written_to_port[port_index];
+    tCCPortDataManagerTL* pdc = tc->last_written_to_port[port_index];
     if (pdc != NULL)
     {
       pdc->ReleaseLock();
@@ -404,7 +415,7 @@ public:
    *
    * \param buffer Buffer with data (must be owned by current thread)
    */
-  void BrowserPublishRaw(tCCPortDataContainer<>* buffer);
+  void BrowserPublishRaw(tCCPortDataManagerTL* buffer);
 
   /*!
    * \return Does port contain default value?
@@ -418,7 +429,7 @@ public:
    *
    * \param fragment Fragment to store all dequeued values in
    */
-  void DequeueAllRaw(tCCQueueFragment<tCCPortData>& fragment);
+  void DequeueAllRaw(tCCQueueFragmentRaw& fragment);
 
   /*!
    * Dequeue first/oldest element in queue.
@@ -430,15 +441,15 @@ public:
    *
    * \return Dequeued first/oldest element in queue
    */
-  inline tCCPortData* DequeueSingleAutoLockedRaw()
+  inline rrlib::serialization::tGenericObject* DequeueSingleAutoLockedRaw()
   {
-    tCCInterThreadContainer<>* result = DequeueSingleUnsafeRaw();
+    tCCPortDataManager* result = DequeueSingleUnsafeRaw();
     if (result == NULL)
     {
       return NULL;
     }
     tThreadLocalCache::Get()->AddAutoLock(result);
-    return result->GetData();
+    return result->GetObject();
   }
 
   /*!
@@ -451,43 +462,46 @@ public:
    *
    * \return Dequeued first/oldest element in queue
    */
-  tCCInterThreadContainer<>* DequeueSingleUnsafeRaw();
+  tCCPortDataManager* DequeueSingleUnsafeRaw();
 
   virtual void ForwardData(tAbstractPort* other);
 
   /*!
    * \return Current data with auto-lock (can only be unlocked with ThreadLocalCache auto-unlock)
    */
-  inline const tCCPortData* GetAutoLockedRaw()
+  inline const rrlib::serialization::tGenericObject* GetAutoLockedRaw()
   {
-    tCCPortDataRef* val = value;
-    tCCPortDataContainer<>* val_c = val->GetContainer();
-    if (val_c->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId())    // if same thread: simply add read lock
-    {
-      val_c->AddLock();
-      return ((tCCPortData*)val_c->GetDataPtr());
-    }
-
-    // not the same thread: create auto-locked inter-thread container
     tThreadLocalCache* tc = tThreadLocalCache::Get();
-    tCCInterThreadContainer<>* ccitc = tc->GetUnusedInterThreadBuffer(GetDataType());
-    tc->AddAutoLock(ccitc);
-    for (; ;)
+
+    if (PushStrategy())
     {
-      ccitc->Assign(((tCCPortData*)val_c->GetDataPtr()));
-      if (val == value)    // still valid??
-      {
-        return ((tCCPortData*)ccitc->GetDataPtr());
-      }
-      val = value;
-      val_c = val->GetContainer();
+      tCCPortDataManagerTL* mgr = GetLockedUnsafeInContainer();
+      tc->AddAutoLock(mgr);
+      return mgr->GetObject();
+
     }
+    else
+    {
+      tCCPortDataManager* mgr = GetInInterThreadContainer();
+      tc->AddAutoLock(mgr);
+      return mgr->GetObject();
+    }
+  }
+
+  /*!
+   * \return Buffer with default value. Can be used to change default value
+   * for port. However, this should be done before the port is used.
+   */
+  inline rrlib::serialization::tGenericObject* GetDefaultBufferRaw()
+  {
+    assert(((!IsReady())) && "please set default value _before_ initializing port");
+    return default_value->GetObject();
   }
 
   /*!
    * \return Current data in CC Interthread-container. Needs to be recycled manually.
    */
-  tCCInterThreadContainer<>* GetInInterThreadContainer();
+  tCCPortDataManager* GetInInterThreadContainer();
 
   /*!
    * Pulls port data (regardless of strategy) and returns it in interhread container
@@ -496,28 +510,32 @@ public:
    *
    * \return Pulled locked data
    */
-  tCCInterThreadContainer<>* GetPullInInterthreadContainerRaw(bool intermediate_assign);
+  tCCPortDataManager* GetPullInInterthreadContainerRaw(bool intermediate_assign);
 
   /*!
    * Copy current value to buffer (Most efficient get()-version)
    *
    * \param buffer Buffer to copy current data
    */
-  void GetRaw(tCCInterThreadContainer<>* buffer);
-
-  /*!
-   * Copy current value to buffer (Most efficient get()-version)
-   *
-   * \param buffer Buffer to copy current data
-   */
-  void GetRaw(tCCPortDataContainer<>* buffer);
+  inline void GetRaw(rrlib::serialization::tGenericObjectManager* buffer)
+  {
+    GetRaw(buffer->GetObject());
+  }
 
   /*!
    * Copy current value to buffer (Most efficient get()-version)
    *
    * \param buffer Buffer to copy current data to
    */
-  void GetRaw(tCCPortData* buffer);
+  void GetRaw(rrlib::serialization::tGenericObject* buffer);
+
+  /*!
+   * \return Unit of port
+   */
+  inline tUnit* GetUnit()
+  {
+    return unit;
+  }
 
   virtual void NotifyDisconnect();
 
@@ -526,7 +544,7 @@ public:
    *
    * \param read_object Buffer with data (must be owned by current thread)
    */
-  inline void Publish(tCCPortDataContainer<>* buffer)
+  inline void Publish(tCCPortDataManagerTL* buffer)
   {
     assert((buffer->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId()));
     Publish(tThreadLocalCache::GetFast(), buffer);
@@ -535,7 +553,7 @@ public:
   /*!
    * \param listener Listener to add
    */
-  inline void RemovePortListenerRaw(tCCPortListener<>* listener)
+  inline void RemovePortListenerRaw(tPortListenerRaw* listener)
   {
     port_listener.Remove(listener);
   }
@@ -551,11 +569,11 @@ public:
    *
    * \param port_data_container port data container to transfer ownership of
    */
-  void TransferDataOwnership(tCCPortDataContainer<>* port_data_container);
+  void TransferDataOwnership(tCCPortDataManagerTL* port_data_container);
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__CC__TCCPORTBASE_H
+#endif // core__port__cc__tCCPortBase_h__

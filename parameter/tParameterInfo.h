@@ -19,21 +19,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TPARAMETERINFO_H
-#define CORE__PARAMETER__TPARAMETERINFO_H
+#ifndef core__parameter__tParameterInfo_h__
+#define core__parameter__tParameterInfo_h__
 
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
+#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/serialization/tStringInputStream.h"
+#include "rrlib/serialization/tOutputStream.h"
+#include "rrlib/serialization/tStringOutputStream.h"
 #include "core/tFinrocAnnotation.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-
 /*!
  * \author Max Reichardt
  *
@@ -50,23 +52,29 @@ private:
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tParameterInfo> cTYPE;
 
   /*! Log domain */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(edge_log, "parameter");
+
+protected:
+
+  virtual void AnnotatedObjectInitialized();
+
+public:
 
   tParameterInfo() :
       config_entry()
   {}
 
-  virtual void Deserialize(tCoreInput& is)
+  virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
     SetConfigEntry(is.ReadString());
   }
 
-  virtual void Deserialize(const util::tString& s)
+  virtual void Deserialize(rrlib::serialization::tStringInputStream& is)
   {
-    SetConfigEntry(s);
+    SetConfigEntry(is.ReadAll());
   }
 
   /*!
@@ -98,14 +106,14 @@ public:
    */
   void SaveValue();
 
-  virtual void Serialize(tCoreOutput& os) const
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const
   {
     os.WriteString(config_entry);
   }
 
-  virtual util::tString Serialize() const
+  virtual void Serialize(rrlib::serialization::tStringOutputStream& os) const
   {
-    return config_entry;
+    os.Append(config_entry);
   }
 
   /*!
@@ -120,4 +128,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TPARAMETERINFO_H
+#endif // core__parameter__tParameterInfo_h__

@@ -20,17 +20,22 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/thread/tExecutionControl.h"
-#include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tExecutionControl::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tExecutionControl>());
+rrlib::serialization::tDataType<tExecutionControl> tExecutionControl::cTYPE;
 
 tExecutionControl::tExecutionControl(tStartAndPausable& implementation_) :
     implementation(&(implementation_))
 {
+}
+
+tExecutionControl::tExecutionControl() :
+    implementation(NULL)
+{
+  throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
 }
 
 } // namespace finroc

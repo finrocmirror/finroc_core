@@ -19,17 +19,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PLUGIN__TPLUGIN_H
-#define CORE__PLUGIN__TPLUGIN_H
+#ifndef core__plugin__tPlugin_h__
+#define core__plugin__tPlugin_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 namespace finroc
 {
 namespace core
 {
-class tPluginManager;
-
 /*!
  * \author Max Reichardt
  *
@@ -45,14 +44,12 @@ public:
    * This method is called once at initialization.
    * Data types, modules, widgets etc. can/should be added to the central
    * registry by calling the Plugin manager's approriate methods.
-   *
-   * \param mgr Plugin Manager
    */
-  virtual void Init(tPluginManager& mgr) = 0;
+  virtual void Init() = 0;
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PLUGIN__TPLUGIN_H
+#endif // core__plugin__tPlugin_h__

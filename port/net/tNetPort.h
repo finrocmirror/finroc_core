@@ -19,19 +19,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__NET__TNETPORT_H
-#define CORE__PORT__NET__TNETPORT_H
+#ifndef core__port__net__tNetPort_h__
+#define core__port__net__tNetPort_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/rpc/tPullCall.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/rpc/tSynchMethodCallLogic.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tAbstractPort.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "core/port/std/tPortListener.h"
-#include "core/port/cc/tCCPortListener.h"
-#include "core/port/cc/tCCPortDataContainer.h"
+#include "core/port/tPortListener.h"
 #include "core/tFrameworkElement.h"
 #include "core/tCoreFlags.h"
 #include "core/port/cc/tCCPortBase.h"
@@ -48,10 +48,10 @@ namespace finroc
 namespace core
 {
 class tAbstractCall;
-class tPortData;
-class tCCPortData;
 class tCoreInput;
 class tCoreOutput;
+class tCCPortDataManagerTL;
+class tPortDataManager;
 
 /*!
  * \author Max Reichardt
@@ -59,7 +59,7 @@ class tCoreOutput;
  * Port that is used for networking.
  * Uniform wrapper class for Std, CC, and Interface ports.
  */
-class tNetPort : public util::tLogUser, public tPortListener<>, public tCCPortListener<>
+class tNetPort : public util::tLogUser, public tPortListener<>
 {
 public:
   class tCCNetPort; // inner class forward declaration
@@ -80,6 +80,9 @@ protected:
   /*! Handle of Remote port */
   int remote_handle;
 
+  /*! Finroc Type info type */
+  tFinrocTypeInfo::tType ftype;
+
 public:
 
   /*! Default timeout for pulling data over the net */
@@ -87,6 +90,19 @@ public:
 
   /*! Last time the value was updated (used to make sure that minimum update interval is kept) */
   int64 last_update;
+
+private:
+
+  /*! Helper methods for data type type */
+  inline bool IsStdType()
+  {
+    return ftype == tFinrocTypeInfo::eSTD;
+  }
+
+  inline bool IsUnknownType()
+  {
+    return ftype == tFinrocTypeInfo::eUNKNOWN;
+  }
 
 protected:
 
@@ -202,18 +218,28 @@ public:
     tSynchMethodCallLogic::HandleMethodReturn(mc);
   }
 
+  inline bool IsCCType()
+  {
+    return ftype == tFinrocTypeInfo::eCC;
+  }
+
+  inline bool IsMethodType()
+  {
+    return ftype == tFinrocTypeInfo::eMETHOD;
+  }
+
+  inline bool IsTransactionType()
+  {
+    return ftype == tFinrocTypeInfo::eTRANSACTION;
+  }
+
   /*! Delete port */
   inline void ManagedDelete()
   {
     GetPort()->ManagedDelete();
   }
 
-  virtual void PortChanged(tPortBase* origin, const tPortData* value)
-  {
-    PortChanged();
-  }
-
-  virtual void PortChanged(tCCPortBase* origin, const tCCPortData* value)
+  virtual void PortChanged(tAbstractPort* origin, void* const& value)
   {
     PortChanged();
   }
@@ -325,9 +351,9 @@ public:
 
     void PropagateStrategy(int16 strategy);
 
-    void PublishFromNet(tCCPortDataContainer<>* read_object, int8 changed_flag);
+    void PublishFromNet(tCCPortDataManagerTL* read_object, int8 changed_flag);
 
-    virtual void PullRequest(tCCPortBase* origin, void* result_buffer);
+    virtual void PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer);
 
     inline void UpdateFlags(int flags)
     {
@@ -404,9 +430,9 @@ public:
       ::finroc::core::tAbstractPort::SetMaxQueueLength(strategy);
     }
 
-    void PublishFromNet(tPortData* read_object, int8 changed_flag);
+    void PublishFromNet(tPortDataManager* read_object, int8 changed_flag);
 
-    virtual const tPortData* PullRequest(tPortBase* origin, int8 add_locks);
+    virtual const tPortDataManager* PullRequest(tPortBase* origin, int8 add_locks);
 
     inline void UpdateFlags(int flags)
     {
@@ -507,4 +533,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__NET__TNETPORT_H
+#endif // core__port__net__tNetPort_h__

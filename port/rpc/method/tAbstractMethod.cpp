@@ -41,7 +41,7 @@ tAbstractMethod::tAbstractMethod(tPortInterface& port_interface, const util::tSt
   parameter_names[1] = p2_name;
   parameter_names[2] = p3_name;
   parameter_names[3] = p4_name;
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < parameter_count; i++)
   {
     if (parameter_names[i].Equals(no_param))
     {

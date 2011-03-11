@@ -27,34 +27,34 @@ namespace finroc
 {
 namespace core
 {
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_) :
+tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_) :
     tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, 0)), type_, -1)),
     type(type_),
     edges_src(),
     edges_dest(),
-    buf_pool((type_ == tInterfacePort::eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+    buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
   // this(new PortCreationInfo(description,parent,dataType,0),type,-1);
   InitLists(&(edges_src), &(edges_dest));
 }
 
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_, int custom_flags) :
+tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, int custom_flags) :
     tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, custom_flags)), type_, -1)),
     type(type_),
     edges_src(),
     edges_dest(),
-    buf_pool((type_ == tInterfacePort::eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+    buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
   // this(new PortCreationInfo(description,parent,dataType,customFlags),type,-1);
   InitLists(&(edges_src), &(edges_dest));
 }
 
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_, int custom_flags, int lock_level) :
+tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, int custom_flags, int lock_level) :
     tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, custom_flags)), type_, lock_level)),
     type(type_),
     edges_src(),
     edges_dest(),
-    buf_pool((type_ == tInterfacePort::eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+    buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
   // this(new PortCreationInfo(description,parent,dataType,customFlags),type,lockLevel);
   InitLists(&(edges_src), &(edges_dest));
@@ -65,7 +65,7 @@ tInterfacePort::tInterfacePort(tPortCreationInfo pci, tInterfacePort::tType type
     type(type_),
     edges_src(),
     edges_dest(),
-    buf_pool((type_ == tInterfacePort::eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+    buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
   InitLists(&(edges_src), &(edges_dest));
 }
@@ -101,16 +101,16 @@ tInterfacePort* tInterfacePort::GetServer()
       return NULL;
     }
 
-    if (current->GetType() == tInterfacePort::eServer || current->GetType() == tInterfacePort::eNetwork)
+    if (current->GetType() == eServer || current->GetType() == eNetwork)
     {
       return current;
     }
   }
 }
 
-tPortData* tInterfacePort::GetUnusedBuffer(tDataType* dt)
+tPortDataManager* tInterfacePort::GetUnusedBufferRaw(rrlib::serialization::tDataTypeBase dt)
 {
-  assert((!dt->IsCCType()));
+  assert((!tFinrocTypeInfo::IsCCType(dt)));
   assert((buf_pool != NULL));
   return buf_pool->GetUnusedBuffer(dt);
 }

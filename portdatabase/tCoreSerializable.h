@@ -19,18 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORTDATABASE__TCORESERIALIZABLE_H
-#define CORE__PORTDATABASE__TCORESERIALIZABLE_H
+#ifndef core__portdatabase__tCoreSerializable_h__
+#define core__portdatabase__tCoreSerializable_h__
 
-namespace rrlib
-{
-namespace xml2
-{
-class tXMLNode;
-} // namespace rrlib
-} // namespace xml2
+#include "rrlib/finroc_core_utils/definitions.h"
 
 namespace finroc
 {
@@ -42,15 +35,15 @@ class tCoreOutput;
 /*!
  * \author Max Reichardt
  *
- * Default implementation of CoreSerializable
+ * Classes/objects that can be cleanly serialized to
+ * CoreInputStreams and deserialized from CoreOutputStreams.
+ *
+ * And - optionally - to and from strings. If this is not supported,
+ * classes should use binary serialization and print hex string (this is the default in C++)
  */
-class tCoreSerializable
+class tCoreSerializable : public util::tInterface
 {
 public:
-
-  tCoreSerializable() {}
-
-  virtual ~tCoreSerializable() {}
 
   /*!
    * Deserialize object. Object has to already exists.
@@ -61,43 +54,13 @@ public:
   virtual void Deserialize(tCoreInput& is) = 0;
 
   /*!
-   * Deserialize object. Object has to already exists.
-   * Should be suited for reusing old objects.
-   *
-   * Parsing errors should throw an Exception - and set object to
-   * sensible (default?) value
-   *
-   * \param s String to deserialize from
-   */
-  virtual void Deserialize(const util::tString& s);
-
-  /*!
-   * Deserialize from XML Node
-   *
-   * \param node Node to deserialize from
-   */
-  virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
-
-  /*!
-   * \param os Stream to serialize object to
+   * \param oos Stream to serialize object to
    */
   virtual void Serialize(tCoreOutput& os) const = 0;
-
-  /*!
-   * \return Object serialized as string (e.g. for xml output)
-   */
-  virtual util::tString Serialize() const;
-
-  /*!
-   * Serialize object to XML
-   *
-   * \param node Empty XML node (name shouldn't be changed)
-   */
-  virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORTDATABASE__TCORESERIALIZABLE_H
+#endif // core__portdatabase__tCoreSerializable_h__

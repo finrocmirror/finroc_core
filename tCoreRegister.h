@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TCOREREGISTER_H
-#define CORE__TCOREREGISTER_H
+#ifndef core__tCoreRegister_h__
+#define core__tCoreRegister_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 namespace finroc
 {
@@ -151,4 +152,4 @@ public:
 
 #include "core/tCoreRegister.hpp"
 
-#endif // CORE__TCOREREGISTER_H
+#endif // core__tCoreRegister_h__

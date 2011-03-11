@@ -19,11 +19,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
-#include "core/port/cc/tCCPortDataContainer.h"
 #include "core/port/tThreadLocalCache.h"
 
 #include "core/port/cc/tCCPortDataBufferPool.h"
+#include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/cc/tCCPortQueueElement.h"
 #include "core/port/tThreadLocalCache.h"
 #include "rrlib/finroc_core_utils/container/tAbstractReusable.h"
@@ -32,24 +31,30 @@ namespace finroc
 {
 namespace core
 {
-tCCPortDataBufferPool::tCCPortDataBufferPool(tDataType* data_type_, int initial_size) :
+tCCPortDataBufferPool::tCCPortDataBufferPool(const rrlib::serialization::tDataTypeBase& data_type_, int initial_size) :
     thread_local_cache_infos(tThreadLocalCache::Get()->GetInfosLock()),
     returned_buffers(),
-    inter_threads(new util::tReusablesPool<tCCInterThreadContainer<> >()),
+    inter_threads(new util::tReusablesPool<tCCPortDataManager>()),
     data_type(data_type_)
 {
   for (int i = 0; i < initial_size; i++)
   {
     //enqueue(createBuffer());
-    Attach(static_cast<tCCPortDataContainer<>*>(data_type_->CreateInstance()), true);
+    Attach(tCCPortDataManagerTL::Create(data_type_), true);
   }
   assert(thread_local_cache_infos.get() != NULL);
 }
 
-tCCPortDataContainer<>* tCCPortDataBufferPool::CreateBuffer()
+void tCCPortDataBufferPool::ControlledDelete()
+{
+  inter_threads->ControlledDelete();
+  ::finroc::util::tReusablesPoolTL<tCCPortDataManagerTL>::ControlledDelete();
+}
+
+tCCPortDataManagerTL* tCCPortDataBufferPool::CreateBuffer()
 {
   // try to reclaim any returned buffers, before new one is created - not so deterministic, but usually doesn't occur and memory allocation is anyway
-  tCCPortDataContainer<>* pc;
+  tCCPortDataManagerTL* pc;
   bool found = false;
   while (true)
   {
@@ -58,7 +63,7 @@ tCCPortDataContainer<>* tCCPortDataBufferPool::CreateBuffer()
     {
       break;
     }
-    pc = static_cast<tCCPortDataContainer<>*>(pqe->GetElement());
+    pc = static_cast<tCCPortDataManagerTL*>(pqe->GetElement());
     pqe->Recycle(false);
     found = true;
     pc->ReleaseLock();
@@ -73,14 +78,14 @@ tCCPortDataContainer<>* tCCPortDataBufferPool::CreateBuffer()
   }
 
   // okay... create new buffer
-  tCCPortDataContainer<>* pdm = static_cast<tCCPortDataContainer<>*>(data_type->CreateInstance());
+  tCCPortDataManagerTL* pdm = tCCPortDataManagerTL::Create(data_type);
   Attach(pdm, false);
   return pdm;
 }
 
-tCCInterThreadContainer<>* tCCPortDataBufferPool::CreateInterThreadBuffer()
+tCCPortDataManager* tCCPortDataBufferPool::CreateInterThreadBuffer()
 {
-  tCCInterThreadContainer<>* pc = static_cast<tCCInterThreadContainer<>*>(data_type->CreateInterThreadInstance());
+  tCCPortDataManager* pc = tCCPortDataManager::Create(data_type);
   inter_threads->Attach(pc, false);
   return pc;
 }
@@ -89,13 +94,13 @@ tCCPortDataBufferPool::~tCCPortDataBufferPool()
 {
   // delete any returned buffers
   tCCPortQueueElement* pqe = returned_buffers.Dequeue();
-  tCCPortDataContainer<>* pc = NULL;
+  tCCPortDataManagerTL* pc = NULL;
   {
     util::tLock lock2(GetThreadLocalCacheInfosLock());  // for postThreadReleaseLock()
     while (pqe != NULL)
     {
       //pc = static_cast<CCPortDataContainer<>*>(pqe->getElement());
-      pc = static_cast<tCCPortDataContainer<>*>(pqe->GetElement());
+      pc = static_cast<tCCPortDataManagerTL*>(pqe->GetElement());
       pqe->Recycle(false);
       pc->PostThreadReleaseLock();
       pqe = returned_buffers.Dequeue();
@@ -109,7 +114,7 @@ util::tMutexLockOrder& tCCPortDataBufferPool::GetThreadLocalCacheInfosLock()
   return static_cast<util::tSimpleListWithMutex<tThreadLocalCache*>*>(thread_local_cache_infos.get())->obj_mutex;
 }
 
-void tCCPortDataBufferPool::ReleaseLock(tCCPortDataContainer<>* pd)
+void tCCPortDataBufferPool::ReleaseLock(tCCPortDataManagerTL* pd)
 {
   tCCPortQueueElement* pqe = tThreadLocalCache::GetFast()->GetUnusedCCPortQueueFragment();
   pqe->SetElement(pd);

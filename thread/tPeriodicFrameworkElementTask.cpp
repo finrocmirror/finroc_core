@@ -20,13 +20,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/thread/tPeriodicFrameworkElementTask.h"
-#include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tPeriodicFrameworkElementTask::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tPeriodicFrameworkElementTask>());
+rrlib::serialization::tDataType<tPeriodicFrameworkElementTask> tPeriodicFrameworkElementTask::cTYPE;
 
 tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, util::tTask* task_) :
     task(task_),
@@ -35,6 +34,16 @@ tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(tEdgeAggregator* in
     previous_tasks(),
     next_tasks()
 {
+}
+
+tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask() :
+    task(NULL),
+    incoming(NULL),
+    outgoing(NULL),
+    previous_tasks(),
+    next_tasks()
+{
+  throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
 }
 
 } // namespace finroc

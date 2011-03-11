@@ -19,28 +19,36 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__DATATYPE__TCORESTRING_H
-#define CORE__DATATYPE__TCORESTRING_H
+#ifndef core__datatype__tCoreString_h__
+#define core__datatype__tCoreString_h__
 
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
-#include "core/port/std/tPortData.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
+#include "rrlib/serialization/tStringInputStream.h"
+#include "rrlib/serialization/tStringOutputStream.h"
+#include "rrlib/serialization/tSerializable.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-
 /*!
  * \author Max Reichardt
  *
  * Simple string (buffer) type to use in ports
  * Has 512 bytes initially.
  */
-class tCoreString : public tPortData
+class tCoreString : public rrlib::serialization::tSerializable
 {
 private:
 
@@ -50,18 +58,18 @@ private:
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tCoreString> cTYPE;
 
   tCoreString();
 
-  virtual void Deserialize(tCoreInput& is)
+  virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
-    is.ReadString(buffer);
+    is >> buffer;
   }
 
-  virtual void Deserialize(const util::tString& s)
+  virtual void Deserialize(rrlib::serialization::tStringInputStream& s)
   {
-    Set(s);
+    Set(s.ReadAll());
   }
 
   /*!
@@ -83,14 +91,14 @@ public:
     return buffer;
   }
 
-  virtual void Serialize(tCoreOutput& os) const
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const
   {
-    os.WriteString(buffer);
+    os << buffer;
   }
 
-  virtual util::tString Serialize() const
+  virtual void Serialize(rrlib::serialization::tStringOutputStream& os) const
   {
-    return buffer.ToString();
+    os.Append(buffer.ToString());
   }
 
   /*!
@@ -112,4 +120,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__DATATYPE__TCORESTRING_H
+#endif // core__datatype__tCoreString_h__

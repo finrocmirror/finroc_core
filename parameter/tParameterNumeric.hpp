@@ -19,130 +19,89 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/tPortFlags.h"
 #include "core/datatype/tNumber.h"
 #include "core/port/tPortWrapperBase.h"
 #include "core/datatype/tUnit.h"
-#include "core/port/cc/tCCPortDataContainer.h"
-#include "core/port/cc/tCCPort.h"
-#include "core/port/cc/tPortNumeric.h"
-#include "core/tAnnotatable.h"
+#include "core/port/cc/tCCPortDataManagerTL.h"
+#include "core/port/tThreadLocalCache.h"
+#include "core/datatype/tBoolean.h"
+#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/cc/tCCPortBase.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "core/tFrameworkElement.h"
 
 namespace finroc
 {
 namespace core
 {
 template<typename T>
-tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds b, const util::tString& config_entry)
+tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds<T> b, const util::tString& config_entry) :
+    tParameter<T>(description, parent, b, tNumber::cTYPE, u),
+    cache(new tNumberCache())
 {
   // this(description,parent,u,defaultValue,b);
-  this->wrapped = new tPortImpl2(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT, u), b, u);
   T d = default_value;
   if (b.InBounds(d))
   {
-    ::finroc::core::tPortNumeric::SetDefault(tNumber(default_value, u));
+    this->SetDefault(default_value);
   }
   else
   {
     FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Default value is out of bounds");
-    ::finroc::core::tPortNumeric::SetDefault(tNumber(b.ToBounds(d), u));
+
+    this->SetDefault(default_value);
   }
-  (static_cast<tPortImpl2*>(this->wrapped))->current_value = default_value;
-  (static_cast<tPortImpl2*>(this->wrapped))->info->SetConfigEntry(config_entry);
+  cache->current_value = default_value;
+  this->AddPortListener(cache.get());
+  this->SetConfigEntry(config_entry);
 }
 
 template<typename T>
-tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds b)
+tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds<T> b) :
+    tParameter<T>(description, parent, b, tNumber::cTYPE, &(tUnit::cNO_UNIT)),
+    cache(new tNumberCache())
 {
   // this(description,parent,Unit.NO_UNIT,defaultValue,b);
-  this->wrapped = new tPortImpl2(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT, &(tUnit::cNO_UNIT)), b, &(tUnit::cNO_UNIT));
   T d = default_value;
   if (b.InBounds(d))
   {
-    ::finroc::core::tPortNumeric::SetDefault(tNumber(default_value, &(tUnit::cNO_UNIT)));
+    this->SetDefault(default_value);
   }
   else
   {
     FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Default value is out of bounds");
-    ::finroc::core::tPortNumeric::SetDefault(tNumber(b.ToBounds(d), &(tUnit::cNO_UNIT)));
+
+    this->SetDefault(default_value);
   }
-  (static_cast<tPortImpl2*>(this->wrapped))->current_value = default_value;
+  cache->current_value = default_value;
+  this->AddPortListener(cache.get());
 }
 
 template<typename T>
-tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds b)
+tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds<T> b) :
+    tParameter<T>(description, parent, b, tNumber::cTYPE, u),
+    cache(new tNumberCache())
 {
-  this->wrapped = new tPortImpl2(tPortCreationInfo(description, parent, tPortFlags::cINPUT_PORT, u), b, u);
   T d = default_value;
   if (b.InBounds(d))
   {
-    ::finroc::core::tPortNumeric::SetDefault(tNumber(default_value, u));
+    this->SetDefault(default_value);
   }
   else
   {
     FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Default value is out of bounds");
-    ::finroc::core::tPortNumeric::SetDefault(tNumber(b.ToBounds(d), u));
+
+    this->SetDefault(default_value);
   }
-  (static_cast<tPortImpl2*>(this->wrapped))->current_value = default_value;
+  cache->current_value = default_value;
+  this->AddPortListener(cache.get());
 }
 
 template<typename T>
 void tParameterNumeric<T>::Set(T v)
 {
-  tCCPortDataContainer<tNumber>* cb = GetUnusedBuffer();
-  cb->GetData()->SetValue(v, GetUnit());
-  ::finroc::core::tCCPort<tNumber>::BrowserPublish(cb);
-  (static_cast<tPortImpl2*>(this->wrapped))->current_value = v;
-}
-
-template<typename T>
-void tParameterNumeric<T>::SetConfigEntry(const util::tString& config_entry)
-{
-  (static_cast<tPortImpl2*>(this->wrapped))->info->SetConfigEntry(config_entry);
-}
-
-
-template<typename T>
-tParameterNumeric<T>::tPortImpl2::tPortImpl2(tPortCreationInfo pci, tBounds b, tUnit* u) :
-    tPortNumericBounded::tPortImpl(ProcessPci(pci), b, u),
-    info(new tParameterInfo()),
-    current_value()
-{
-  AddAnnotation(info);
-  AddPortListenerRaw(this);
-}
-
-template<typename T>
-void tParameterNumeric<T>::tPortImpl2::PortChanged(tCCPortBase* origin, const tCCPortData* value_raw)
-{
-  const tNumber* value = reinterpret_cast<const tNumber*>(value_raw);
-  if (GetUnit() != value->GetUnit())
-  {
-    double val = value->GetUnit()->ConvertTo(value->DoubleValue(), GetUnit());
-
-    current_value = (T)val;
-  }
-  else
-  {
-    current_value = value->Value<T>();
-  }
-}
-
-template<typename T>
-void tParameterNumeric<T>::tPortImpl2::PostChildInit()
-{
-  ::finroc::core::tFrameworkElement::PostChildInit();
-  try
-  {
-    this->info->LoadValue(true);
-  }
-  catch (const util::tException& e)
-  {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, ::finroc::core::tFrameworkElement::log_domain, e);
-  }
+  tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(tBoolean::cTYPE);
+  cb->GetObject()->GetData<tNumber>()->SetValue(v, (static_cast<tCCPortBase*>(this->wrapped))->GetUnit());
+  (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
+  cache->current_value = v;
 }
 
 } // namespace finroc

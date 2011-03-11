@@ -46,7 +46,6 @@ R tPort0Method<HANDLER, R>::Call(tInterfaceClientPort port, int net_timeout)
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
 
-    mc->SendParametersComplete();
     mc->PrepareSyncRemoteExecution(this, port.GetDataType(), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());
     try
     {
@@ -57,7 +56,6 @@ R tPort0Method<HANDLER, R>::Call(tInterfaceClientPort port, int net_timeout)
       // we shouldn't need to recycle anything, since call is responsible for this
       throw tMethodCallException(e.GetType(), CODE_LOCATION_MACRO);
     }
-    mc->DeserializeParamaters();
     if (mc->HasException())
     {
       int8 type = 0;
@@ -104,7 +102,6 @@ void tPort0Method<HANDLER, R>::CallAsync(const tInterfaceClientPort* port, tAsyn
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
 
-    mc->SendParametersComplete();
     mc->PrepareSyncRemoteExecution(this, port->GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
     tRPCThreadPool::GetInstance()->ExecuteTask(mc);
   }
@@ -158,7 +155,6 @@ void tPort0Method<HANDLER, R>::ExecuteAsyncNonVoidCallOverTheNet(tMethodCall* mc
     r_handler->HandleMethodCallException(this, e);
     return;
   }
-  mc->DeserializeParamaters();
   if (mc->HasException())
   {
     int8 type = 0;
@@ -209,8 +205,7 @@ void tPort0Method<HANDLER, R>::ExecuteFromMethodCallObject(tMethodCall* call, co
     {
       call->RecycleParameters();
       call->SetStatusReturn();
-      call->AddParamForSending(ret);
-      call->SendParametersComplete();
+      call->AddParam(0, ret);
     }
   }
   catch (const tMethodCallException& e)

@@ -19,15 +19,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TRUNTIMESETTINGS_H
-#define CORE__TRUNTIMESETTINGS_H
+#ifndef core__tRuntimeSettings_h__
+#define core__tRuntimeSettings_h__
 
-#include "core/port/net/tUpdateTimeChangeListener.h"
-#include "core/datatype/tNumber.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
 #include "core/tFrameworkElement.h"
-#include "core/port/cc/tCCPortListener.h"
+#include "core/port/tPortListener.h"
+#include "core/port/net/tUpdateTimeChangeListener.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 
 namespace finroc
 {
@@ -36,8 +37,6 @@ namespace core
 class tParameterBool;
 template<typename T>
 class tParameterNumeric;
-class tDataType;
-class tCCPortBase;
 
 /*!
  * \author Max Reichardt
@@ -48,7 +47,7 @@ class tCCPortBase;
  *
  * staticInit() should be called after runtime and data types have been initialized.
  */
-class tRuntimeSettings : public tFrameworkElement, public tCCPortListener<tNumber>
+class tRuntimeSettings : public tFrameworkElement, public tPortListener<int>
 {
 private:
 
@@ -114,20 +113,20 @@ public:
   /*! @return Singleton instance */
   static tRuntimeSettings* GetInstance();
 
+  virtual void PortChanged(tAbstractPort* origin, const int& value)
+  {
+    update_time_listener.Notify(NULL, NULL, static_cast<int16>(value));
+  }
+
   /*!
    * Notify update time change listener of change
    *
    * \param dt Datatype whose default time has changed
    * \param time New time
    */
-  inline void NotifyUpdateTimeChangeListener(tDataType* dt, int16 time)
+  inline void NotifyUpdateTimeChangeListener(rrlib::serialization::tDataTypeBase dt, int16 time)
   {
-    update_time_listener.Notify(dt, NULL, time);
-  }
-
-  virtual void PortChanged(tCCPortBase* origin, const tNumber* value)
-  {
-    update_time_listener.Notify(NULL, NULL, static_cast<int16>(value->IntValue()));
+    update_time_listener.Notify(&(dt), NULL, time);
   }
 
   /*!
@@ -146,4 +145,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TRUNTIMESETTINGS_H
+#endif // core__tRuntimeSettings_h__

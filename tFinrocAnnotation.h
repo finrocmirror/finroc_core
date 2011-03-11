@@ -19,22 +19,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TFINROCANNOTATION_H
-#define CORE__TFINROCANNOTATION_H
+#ifndef core__tFinrocAnnotation_h__
+#define core__tFinrocAnnotation_h__
 
-#include "core/portdatabase/tTypedObject.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tTypedObject.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
 class tAnnotatable;
-class tCoreInput;
 class tFrameworkElement;
-class tDataType;
-class tCoreOutput;
 
 /*!
  * \author Max Reichardt
@@ -44,9 +50,10 @@ class tCoreOutput;
  * If annotation should be available over the net (e.g. in finstruct),
  * the serialization methods need to be overridden.
  */
-class tFinrocAnnotation : public tTypedObject
+class tFinrocAnnotation : public rrlib::serialization::tTypedObject
 {
   friend class tFrameworkElement;
+  friend class tAnnotatable;
 
 public:
 
@@ -59,13 +66,29 @@ public:
 protected:
 
   /*!
+   * Called when annotated object is initialized
+   * (supposed to be overridden)
+   */
+  virtual void AnnotatedObjectInitialized()
+  {
+  }
+
+  /*!
+   * Called when annotated object is about to be deleted
+   * (supposed to be overridden)
+   */
+  virtual void AnnotatedObjectToBeDeleted()
+  {
+  }
+
+  /*!
    * Searches for parent with annotation of specified type
    *
    * \param fe Framework element to start searching at
    * \param type Data Type
    * \return Annotation of first parent that has one - or null
    */
-  static tFinrocAnnotation* FindParentWithAnnotation(tFrameworkElement* fe, tDataType* type);
+  static tFinrocAnnotation* FindParentWithAnnotation(tFrameworkElement* fe, const rrlib::serialization::tDataTypeBase& type);
 
 public:
 
@@ -84,7 +107,7 @@ public:
   {
   }
 
-  virtual void Deserialize(tCoreInput& is)
+  virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
     throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
   }
@@ -102,7 +125,7 @@ public:
    */
   void InitDataType();
 
-  virtual void Serialize(tCoreOutput& os) const
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const
   {
     throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
   }
@@ -112,4 +135,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TFINROCANNOTATION_H
+#endif // core__tFinrocAnnotation_h__

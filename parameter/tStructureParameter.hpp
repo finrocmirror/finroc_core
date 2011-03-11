@@ -25,13 +25,13 @@ namespace finroc
 namespace core
 {
 template<typename T>
-tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType* type, bool constructor_prototype) :
+tStructureParameter<T>::tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type, bool constructor_prototype) :
     tStructureParameterBase(name, type, constructor_prototype)
 {
 }
 
 template<typename T>
-tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType* type, bool constructor_prototype, const util::tString& default_value) :
+tStructureParameter<T>::tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type, bool constructor_prototype, const util::tString& default_value) :
     tStructureParameterBase(name, type, constructor_prototype)
 {
   util::tString dv = default_value;
@@ -49,7 +49,7 @@ tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType
 }
 
 template<typename T>
-tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType* type, const util::tString& default_value) :
+tStructureParameter<T>::tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type, const util::tString& default_value) :
     tStructureParameterBase(name, type, false)
 {
   // this(name,type,false,defaultValue);
@@ -68,7 +68,7 @@ tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType
 }
 
 template<typename T>
-tStructureParameter<T>::tStructureParameter(const util::tString& name, tDataType* type) :
+tStructureParameter<T>::tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type) :
     tStructureParameterBase(name, type, false)
 {
   // this(name,type,"");

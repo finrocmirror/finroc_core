@@ -49,9 +49,8 @@ R tPort2Method<HANDLER, R, P1, P2>::Call(tInterfaceClientPort port, P1 p1, P2 p2
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
-    mc->AddParamForSending(p1);  //2
-    mc->AddParamForSending(p2);
-    mc->SendParametersComplete();
+    mc->AddParam(0, p1);  //2
+    mc->AddParam(1, p2);
     mc->PrepareSyncRemoteExecution(this, port.GetDataType(), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());
     try
     {
@@ -62,7 +61,6 @@ R tPort2Method<HANDLER, R, P1, P2>::Call(tInterfaceClientPort port, P1 p1, P2 p2
       // we shouldn't need to recycle anything, since call is responsible for this
       throw tMethodCallException(e.GetType(), CODE_LOCATION_MACRO);
     }
-    mc->DeserializeParamaters();
     if (mc->HasException())
     {
       int8 type = 0;
@@ -118,9 +116,8 @@ void tPort2Method<HANDLER, R, P1, P2>::CallAsync(const tInterfaceClientPort* por
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
-    mc->AddParamForSending(p1);  //2
-    mc->AddParamForSending(p2);
-    mc->SendParametersComplete();
+    mc->AddParam(0, p1);  //2
+    mc->AddParam(1, p2);
     mc->PrepareSyncRemoteExecution(this, port->GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
     tRPCThreadPool::GetInstance()->ExecuteTask(mc);
   }
@@ -151,8 +148,8 @@ void tPort2Method<HANDLER, R, P1, P2>::CallAsync(const tInterfaceClientPort* por
     {
       tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
       //1
-      mc->AddParamForLocalCall(0, p1);  //2
-      mc->AddParamForLocalCall(1, p2);
+      mc->AddParam(0, p1);  //2
+      mc->AddParam(1, p2);
       mc->PrepareExecution(this, port->GetDataType(), mhandler, handler);
       tRPCThreadPool::GetInstance()->ExecuteTask(mc);
     }
@@ -182,7 +179,6 @@ void tPort2Method<HANDLER, R, P1, P2>::ExecuteAsyncNonVoidCallOverTheNet(tMethod
     r_handler->HandleMethodCallException(this, e);
     return;
   }
-  mc->DeserializeParamaters();
   if (mc->HasException())
   {
     int8 type = 0;
@@ -239,8 +235,7 @@ void tPort2Method<HANDLER, R, P1, P2>::ExecuteFromMethodCallObject(tMethodCall* 
     {
       call->RecycleParameters();
       call->SetStatusReturn();
-      call->AddParamForSending(ret);
-      call->SendParametersComplete();
+      call->AddParam(0, ret);
     }
   }
   catch (const tMethodCallException& e)

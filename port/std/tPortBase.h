@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2011 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -19,25 +19,25 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__STD__TPORTBASE_H
-#define CORE__PORT__STD__TPORTBASE_H
+#ifndef core__port__std__tPortBase_h__
+#define core__port__std__tPortBase_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/port/tAbstractPort.h"
-#include "core/port/std/tPortQueue.h"
-#include "core/port/std/tPortListener.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/std/tPortDataReference.h"
-#include "core/port/std/tPortQueueFragment.h"
+#include "core/port/std/tPortQueue.h"
+#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/tFrameworkElement.h"
 #include "core/port/tMultiTypePortDataBufferPool.h"
 #include "core/port/std/tPortDataBufferPool.h"
 #include "core/port/tPortFlags.h"
-#include "core/port/std/tPortData.h"
 #include "core/port/std/tPublishCache.h"
 #include "core/tRuntimeSettings.h"
 
@@ -45,8 +45,8 @@ namespace finroc
 {
 namespace core
 {
-class tDataType;
 class tPullRequestHandler;
+class tPortQueueFragmentRaw;
 
 /*!
  * \author Max Reichardt
@@ -72,7 +72,7 @@ protected:
   tAbstractPort::tEdgeList<tPortBase*> edges_dest;
 
   /*! default value - invariant: must never be null if used */
-  tPortData* default_value;
+  tPortDataManager* default_value;
 
   /*!
    * current value (set by main thread) - invariant: must never be null - sinnvoll(?)
@@ -82,7 +82,7 @@ protected:
   util::tAtomicPtr<tPortDataReference> value;
 
   /*! Current type of port data - relevant for ports with multi type buffer pool */
-  tDataType* cur_data_type;
+  const rrlib::serialization::tDataTypeBase cur_data_type;
 
   /*! Pool with reusable buffers that are published to this port... by any thread */
   tPortDataBufferPool* buffer_pool;
@@ -99,7 +99,7 @@ protected:
   const bool standard_assign;
 
   /*! Queue for ports with incoming value queue */
-  tPortQueue<tPortData>* queue;
+  tPortQueue* queue;
 
   /*!
    * Optimization - if this is not null that means:
@@ -111,17 +111,17 @@ protected:
   /*! Object that handles pull requests - null if there is none (typical case) */
   tPullRequestHandler* pull_request_handler;
 
-  /*! Listens to port value changes - may be null */
-  tPortListenerManager<tPortData> port_listener;
+  /*! Listen to port value changes - may be null */
+  tPortListenerManager port_listener;
 
 private:
 
   // helper for direct member initialization in C++
-  static tPortData* CreateDefaultValue(tDataType* dt);
+  static tPortDataManager* CreateDefaultValue(const rrlib::serialization::tDataTypeBase& dt);
 
   inline void NotifyListeners(tPublishCache* pc)
   {
-    port_listener.Notify(this, pc->cur_ref->GetData());
+    port_listener.Notify(this, pc->cur_ref->GetManager());
   }
 
   /*! makes adjustment to flags passed through constructor */
@@ -140,10 +140,9 @@ private:
    * \param changed_constant changedConstant to use
    * \param inform_listeners Inform this port's listeners on change? (usually only when value comes from browser)
    */
-  inline void PublishImpl(const tPortData* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
+  inline void PublishImpl(const tPortDataManager* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
   {
     assert((data->GetType() != NULL) && "Port data type not initialized");
-    assert((data->GetManager() != NULL) && "Only port data obtained from a port can be sent");
     assert(IsInitialized() || cINFORM_LISTENERS);
 
     // assign
@@ -200,7 +199,7 @@ private:
   {
     if (tRuntimeSettings::cCOLLECT_EDGE_STATISTICS)    // const, so method can be optimized away completely
     {
-      UpdateEdgeStatistics(source, target, pc.cur_ref->GetData());
+      UpdateEdgeStatistics(source, target, pc.cur_ref->GetManager()->GetObject());
     }
   }
 
@@ -247,9 +246,9 @@ protected:
   // quite similar to publish
   virtual void InitialPushTo(tAbstractPort* target, bool reverse);
 
-  inline const tPortData* LockCurrentValueForRead() const
+  inline tPortDataManager* LockCurrentValueForRead() const
   {
-    return LockCurrentValueForRead(static_cast<int8>(1))->GetData();
+    return LockCurrentValueForRead(static_cast<int8>(1))->GetManager();
   }
 
   /*!
@@ -290,7 +289,7 @@ protected:
    * \param reverse Value received in reverse direction?
    * \param changed_constant changedConstant to use
    */
-  inline void Publish(const tPortData* data, bool reverse, int8 changed_constant)
+  inline void Publish(const tPortDataManager* data, bool reverse, int8 changed_constant)
   {
     if (!reverse)
     {
@@ -324,7 +323,7 @@ protected:
    * \param intermediate_assign Assign pulled value to ports in between?
    * \return Locked port data
    */
-  inline const tPortData* PullValueRaw()
+  inline tPortDataManager* PullValueRaw()
   {
     return PullValueRaw(true);
   }
@@ -336,7 +335,7 @@ protected:
    * \param intermediate_assign Assign pulled value to ports in between?
    * \return Locked port data
    */
-  const tPortData* PullValueRaw(bool intermediate_assign);
+  tPortDataManager* PullValueRaw(bool intermediate_assign);
 
   template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   /*!
@@ -392,7 +391,7 @@ public:
   /*!
    * \param listener Listener to add
    */
-  inline void AddPortListenerRaw(tPortListener<>* listener)
+  inline void AddPortListenerRaw(tPortListenerRaw* listener)
   {
     port_listener.Add(listener);
   }
@@ -411,14 +410,14 @@ public:
    *
    * \param buffer Buffer with data (must be owned by current thread)
    */
-  void BrowserPublish(const tPortData* data);
+  void BrowserPublish(const tPortDataManager* data);
 
   /*!
    * \return Does port contain default value?
    */
   inline bool ContainsDefaultValue()
   {
-    return value.Get()->GetData() == default_value;
+    return value.Get()->GetData()->GetRawDataPtr() == default_value->GetObject()->GetRawDataPtr();
   }
 
   virtual ~tPortBase();
@@ -428,7 +427,7 @@ public:
    *
    * \param fragment Fragment to store all dequeued values in
    */
-  void DequeueAllRaw(tPortQueueFragment<tPortData>& fragment);
+  void DequeueAllRaw(tPortQueueFragmentRaw& fragment);
 
   /*!
    * Dequeue first/oldest element in queue.
@@ -440,7 +439,7 @@ public:
    *
    * \return Dequeued first/oldest element in queue
    */
-  tPortData* DequeueSingleAutoLockedRaw();
+  tPortDataManager* DequeueSingleAutoLockedRaw();
 
   /*!
    * Dequeue first/oldest element in queue.
@@ -452,16 +451,16 @@ public:
    *
    * \return Dequeued first/oldest element in queue
    */
-  tPortData* DequeueSingleUnsafeRaw();
+  tPortDataManager* DequeueSingleUnsafeRaw();
 
   virtual void ForwardData(tAbstractPort* other);
 
   /*!
    * \return current auto-locked Port data (unlock with getThreadLocalCache.releaseAllLocks())
    */
-  inline const tPortData* GetAutoLockedRaw()
+  inline tPortDataManager* GetAutoLockedRaw()
   {
-    const tPortData* pd = GetLockedUnsafeRaw();
+    tPortDataManager* pd = GetLockedUnsafeRaw();
     tThreadLocalCache::Get()->AddAutoLock(pd);
     return pd;
   }
@@ -470,10 +469,10 @@ public:
    * \return Buffer with default value. Can be used to change default value
    * for port. However, this should be done before the port is used.
    */
-  inline tPortData* GetDefaultBufferRaw()
+  inline rrlib::serialization::tGenericObject* GetDefaultBufferRaw()
   {
     assert(((!IsReady())) && "please set default value _before_ initializing port");
-    return default_value;
+    return default_value->GetObject();
   }
 
   /*!
@@ -481,7 +480,7 @@ public:
    *
    * \return current locked port data
    */
-  inline const tPortData* GetLockedUnsafeRaw()
+  inline tPortDataManager* GetLockedUnsafeRaw()
   {
     if (PushStrategy())
     {
@@ -500,24 +499,24 @@ public:
    *
    * \return Pulled locked data
    */
-  inline const tPortData* GetPullLockedUnsafe(bool intermediate_assign)
+  inline tPortDataManager* GetPullLockedUnsafe(bool intermediate_assign)
   {
     return PullValueRaw(intermediate_assign);
-  }
-
-  virtual tPortData* GetUnusedBuffer(tDataType* dt)
-  {
-    assert((multi_buffer_pool != NULL));
-    return multi_buffer_pool->GetUnusedBuffer(dt);
   }
 
   /*!
    * \return Unused buffer from send buffers for writing.
    * (Using this method, typically no new buffers/objects need to be allocated)
    */
-  inline tPortData* GetUnusedBufferRaw()
+  inline tPortDataManager* GetUnusedBufferRaw()
   {
     return buffer_pool == NULL ? multi_buffer_pool->GetUnusedBuffer(cur_data_type) : buffer_pool->GetUnusedBuffer();
+  }
+
+  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::serialization::tDataTypeBase dt)
+  {
+    assert((multi_buffer_pool != NULL));
+    return multi_buffer_pool->GetUnusedBuffer(dt);
   }
 
   virtual void NotifyDisconnect();
@@ -529,7 +528,7 @@ public:
    *
    * \param data Data buffer acquired from a port using getUnusedBuffer (or locked data received from another port)
    */
-  inline void Publish(const tPortData* data)
+  inline void Publish(const tPortDataManager* data)
   {
     PublishImpl<false, cCHANGED, false>(data);
   }
@@ -537,7 +536,7 @@ public:
   /*!
    * \param listener Listener to add
    */
-  inline void RemovePortListenerRaw(tPortListener<>* listener)
+  inline void RemovePortListenerRaw(tPortListenerRaw* listener)
   {
     port_listener.Remove(listener);
   }
@@ -554,7 +553,7 @@ public:
    * \param pd Port value
    * \return Answer
    */
-  inline bool ValueIs(const tPortData* pd) const
+  inline bool ValueIs(const void* pd) const
   {
     return value.Get()->GetData() == pd;
   }
@@ -564,4 +563,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__STD__TPORTBASE_H
+#endif // core__port__std__tPortBase_h__

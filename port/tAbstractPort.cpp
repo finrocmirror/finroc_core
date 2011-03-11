@@ -19,7 +19,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
 #include "core/port/tAbstractPort.h"
 #include "core/tLockOrderLevels.h"
 #include "core/tRuntimeListener.h"
@@ -28,6 +27,7 @@
 #include "core/tRuntimeEnvironment.h"
 #include "core/tCoreFlags.h"
 #include "core/port/net/tNetPort.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tEdgeAggregator.h"
 #include "core/buffers/tCoreOutput.h"
 
@@ -447,7 +447,7 @@ bool tAbstractPort::MayConnectTo(tAbstractPort* target)
     return false;
   }
 
-  if (!data_type->IsConvertibleTo(target->data_type))
+  if (!data_type.IsConvertibleTo(target->data_type))
   {
     return false;
   }
@@ -470,7 +470,7 @@ int tAbstractPort::ProcessFlags(const tPortCreationInfo& pci)
   if ((flags & cBULK_N_EXPRESS) == 0)
   {
     // no priority flags set... typical case... get them from type
-    flags |= pci.data_type->IsCCType() ? tPortFlags::cIS_EXPRESS_PORT : tPortFlags::cIS_BULK_PORT;
+    flags |= tFinrocTypeInfo::IsCCType(pci.data_type) ? tPortFlags::cIS_EXPRESS_PORT : tPortFlags::cIS_BULK_PORT;
   }
   if ((flags & tPortFlags::cPUSH_STRATEGY_REVERSE) != 0)
   {
@@ -696,9 +696,9 @@ void tAbstractPort::SetReversePushStrategy(bool push)
   }
 }
 
-void tAbstractPort::UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, tTypedObject* data)
+void tAbstractPort::UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, rrlib::serialization::tGenericObject* data)
 {
-  tEdgeAggregator::UpdateEdgeStatistics(source, target, tDataType::EstimateDataSize(data));
+  tEdgeAggregator::UpdateEdgeStatistics(source, target, tFinrocTypeInfo::EstimateDataSize(data));
 }
 
 } // namespace finroc

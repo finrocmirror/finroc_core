@@ -19,16 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TPARAMETERNUMERIC_H
-#define CORE__PARAMETER__TPARAMETERNUMERIC_H
+#ifndef core__parameter__tParameterNumeric_h__
+#define core__parameter__tParameterNumeric_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "core/parameter/tParameter.h"
 #include "core/datatype/tBounds.h"
-#include "core/port/cc/tPortNumericBounded.h"
-#include "core/parameter/tParameterInfo.h"
-#include "core/port/tPortCreationInfo.h"
-#include "core/port/cc/tCCPortListener.h"
 
 namespace finroc
 {
@@ -36,8 +34,6 @@ namespace core
 {
 class tFrameworkElement;
 class tUnit;
-class tCCPortBase;
-class tCCPortData;
 
 /*!
  * \author Max Reichardt
@@ -45,57 +41,54 @@ class tCCPortData;
  * Parameter template class for numeric types
  */
 template<typename T>
-class tParameterNumeric : public tPortNumericBounded
+class tParameterNumeric : public tParameter<T>
 {
-  /*! Special Port class to load value when initialized */
-  class tPortImpl2 : public tPortNumericBounded::tPortImpl, public tCCPortListener<>
+  using tPortWrapperBase<tCCPortBase>::log_domain;
+
+  /*!
+   * Caches numeric value of parameter port (optimization)
+   */
+  class tNumberCache : public tPortListener<T>
   {
   public:
 
-    /*! Paramater info */
-    tParameterInfo* info;
-
-    /*! Cached current value (we will much more often that it will be changed) */
+    /*! Cached current value (we will much more often read than it will be changed) */
     volatile T current_value;
 
-  protected:
+    tNumberCache() :
+        current_value()
+    {}
 
-    virtual void PostChildInit();
-
-  public:
-
-    tPortImpl2(tPortCreationInfo pci, tBounds b, tUnit* u);
-
-    virtual void PortChanged(tCCPortBase* origin, const tCCPortData* value_raw);
+    virtual void PortChanged(tAbstractPort* origin, const T& value)
+    {
+      current_value = value;
+    }
 
   };
 
 public:
 
-  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds b, const util::tString& config_entry);
+  /*! Number cache instance used for this parameter */
+  ::std::shared_ptr<tNumberCache> cache;
 
-  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds b);
+  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds<T> b, const util::tString& config_entry);
 
-  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds b);
+  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds<T> b);
+
+  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds<T> b);
 
   /*!
    * \return Current parameter value
    */
-  inline T Get() const
+  inline T GetValue() const
   {
-    return (static_cast<tPortImpl2*>(this->wrapped))->current_value;
+    return cache->current_value;
   }
 
   /*!
    * \param b new value
    */
   void Set(T v);
-
-  /*!
-   * Set parameter to value in config file that is associated with given string
-   * \param config_entry name of parameter entry in config value
-   */
-  void SetConfigEntry(const util::tString& config_entry);
 
 };
 
@@ -104,4 +97,4 @@ public:
 
 #include "core/parameter/tParameterNumeric.hpp"
 
-#endif // CORE__PARAMETER__TPARAMETERNUMERIC_H
+#endif // core__parameter__tParameterNumeric_h__

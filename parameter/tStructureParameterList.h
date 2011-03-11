@@ -19,15 +19,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETERLIST_H
-#define CORE__PARAMETER__TSTRUCTUREPARAMETERLIST_H
+#ifndef core__parameter__tStructureParameterList_h__
+#define core__parameter__tStructureParameterList_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
-#include "core/portdatabase/sSerializationHelper.h"
 #include "core/plugin/tPlugins.h"
 #include "core/tFinrocAnnotation.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
 
 namespace rrlib
 {
@@ -41,12 +50,9 @@ namespace finroc
 {
 namespace core
 {
-class tDataType;
 class tStructureParameterBase;
-class tCoreInput;
 class tFrameworkElement;
 class tConstructorParameters;
-class tCoreOutput;
 class tCreateFrameworkElementAction;
 
 /*!
@@ -70,7 +76,7 @@ private:
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tStructureParameterList> cTYPE;
 
   /*! Empty parameter list */
   static tStructureParameterList cEMPTY;
@@ -131,12 +137,7 @@ public:
     ;
   }
 
-  virtual void Deserialize(tCoreInput& is);
-
-  virtual void Deserialize(const util::tString& s)
-  {
-    sSerializationHelper::DeserializeFromHexString(this, s);
-  }
+  virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
   // only used in FinstructableGroup
   virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
@@ -174,12 +175,7 @@ public:
    */
   tConstructorParameters* Instantiate() const;
 
-  virtual void Serialize(tCoreOutput& os) const;
-
-  virtual util::tString Serialize() const
-  {
-    return sSerializationHelper::SerializeToHexString(this);
-  }
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 
   // only used in FinstructableGroup
   virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
@@ -206,4 +202,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TSTRUCTUREPARAMETERLIST_H
+#endif // core__parameter__tStructureParameterList_h__

@@ -20,10 +20,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__RPC__METHOD__TVOID0HANDLER_H
-#define CORE__PORT__RPC__METHOD__TVOID0HANDLER_H
+#ifndef core__port__rpc__method__tVoid0Handler_h__
+#define core__port__rpc__method__tVoid0Handler_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 namespace finroc
 {
@@ -31,7 +32,7 @@ namespace core
 {
 class tAbstractMethod;
 
-class tVoid0Handler : public util::tInterface
+class tVoid0Handler
 {
 public:
 
@@ -51,4 +52,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__RPC__METHOD__TVOID0HANDLER_H
+#endif // core__port__rpc__method__tVoid0Handler_h__

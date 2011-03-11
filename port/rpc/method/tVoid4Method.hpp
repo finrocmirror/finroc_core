@@ -52,12 +52,11 @@ void tVoid4Method<HANDLER, P1, P2, P3, P4>::Call(tInterfaceClientPort port, P1 p
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
-    mc->AddParamForSending(p1);  //2
-    mc->AddParamForSending(p2);  //3
-    mc->AddParamForSending(p3);  //4
-    mc->AddParamForSending(p4);
+    mc->AddParam(0, p1);  //2
+    mc->AddParam(1, p2);  //3
+    mc->AddParam(2, p3);  //4
+    mc->AddParam(3, p4);
     //n
-    mc->SendParametersComplete();
     mc->SetMethod(this, port.GetDataType());
     (static_cast<tInterfaceNetPort*>(ip))->SendAsyncCall(mc);
   }
@@ -82,10 +81,10 @@ void tVoid4Method<HANDLER, P1, P2, P3, P4>::Call(tInterfaceClientPort port, P1 p
     {
       tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
       //1
-      mc->AddParamForLocalCall(0, p1);  //2
-      mc->AddParamForLocalCall(1, p2);  //3
-      mc->AddParamForLocalCall(2, p3);  //4
-      mc->AddParamForLocalCall(3, p4);
+      mc->AddParam(0, p1);  //2
+      mc->AddParam(1, p2);  //3
+      mc->AddParam(2, p3);  //4
+      mc->AddParam(3, p4);
       //n
       mc->PrepareExecution(this, port.GetDataType(), handler, NULL);
       tRPCThreadPool::GetInstance()->ExecuteTask(mc);

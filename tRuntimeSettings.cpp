@@ -24,10 +24,10 @@
 
 #include "core/tRuntimeSettings.h"
 #include "core/tRuntimeEnvironment.h"
+#include "rrlib/finroc_core_utils/tAutoDeleter.h"
 #include "core/parameter/tParameterBool.h"
 #include "core/parameter/tParameterNumeric.h"
 #include "core/datatype/tBounds.h"
-#include "rrlib/finroc_core_utils/tAutoDeleter.h"
 
 namespace finroc
 {
@@ -48,10 +48,10 @@ tRuntimeSettings::tRuntimeSettings() :
     update_time_listener()
 {
   cWARN_ON_CYCLE_TIME_EXCEED = util::tAutoDeleter::AddStatic(new tParameterBool("WARN_ON_CYCLE_TIME_EXCEED", this, true));
-  cDEFAULT_CYCLE_TIME = util::tAutoDeleter::AddStatic(new tParameterNumeric<int64>("DEFAULT_CYCLE_TIME", this, 50LL, tBounds(1, 2000)));
-  cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME = util::tAutoDeleter::AddStatic(new tParameterNumeric<int>("DEFAULT_MINIMUM_NETWORK_UPDATE_TIME", this, 40, tBounds(1, 2000)));
-  cSTREAM_THREAD_CYCLE_TIME = util::tAutoDeleter::AddStatic(new tParameterNumeric<int>("STREAM_THREAD_CYCLE_TIME", this, 200, tBounds(1, 2000)));
-  cGARBAGE_COLLECTOR_SAFETY_PERIOD = util::tAutoDeleter::AddStatic(new tParameterNumeric<int>("GARBAGE_COLLECTOR_SAFETY_PERIOD", this, 5000, tBounds(500, 50000)));
+  cDEFAULT_CYCLE_TIME = util::tAutoDeleter::AddStatic(new tParameterNumeric<int64>("DEFAULT_CYCLE_TIME", this, 50LL, tBounds<int64>(1, 2000)));
+  cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME = util::tAutoDeleter::AddStatic(new tParameterNumeric<int>("DEFAULT_MINIMUM_NETWORK_UPDATE_TIME", this, 40, tBounds<int>(1, 2000)));
+  cSTREAM_THREAD_CYCLE_TIME = util::tAutoDeleter::AddStatic(new tParameterNumeric<int>("STREAM_THREAD_CYCLE_TIME", this, 200, tBounds<int>(1, 2000)));
+  cGARBAGE_COLLECTOR_SAFETY_PERIOD = util::tAutoDeleter::AddStatic(new tParameterNumeric<int>("GARBAGE_COLLECTOR_SAFETY_PERIOD", this, 5000, tBounds<int>(500, 50000)));
 
   // add ports with update times
   //addChild(DataTypeRegister2.getInstance());
@@ -67,7 +67,7 @@ tRuntimeSettings* tRuntimeSettings::GetInstance()
   if (inst == NULL)
   {
     inst = new tRuntimeSettings();
-    //util::tAutoDeleter::AddStatic(inst);
+    //AutoDeleter.addStatic(inst);
   }
   return inst;
 }

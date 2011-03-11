@@ -19,27 +19,37 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
-#include "core/portdatabase/tDataType.h"
 
-#ifndef CORE__PORT__TTHREADLOCALCACHE_H
-#define CORE__PORT__TTHREADLOCALCACHE_H
+#ifndef core__port__tThreadLocalCache_h__
+#define core__port__tThreadLocalCache_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/tGarbageCollector.h"
 #include "core/port/rpc/tMethodCall.h"
 #include "core/port/rpc/tPullCall.h"
-#include "core/port/cc/tCCPortDataContainer.h"
+#include "rrlib/finroc_core_utils/tAutoDeleter.h"
+#include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/tCoreRegister.h"
 #include "core/port/cc/tCCPortDataBufferPool.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPool.h"
 #include "core/buffers/tCoreInput.h"
 #include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/port/cc/tCCPortQueueElement.h"
 #include "rrlib/finroc_core_utils/container/tBoundedQElementContainer.h"
 #include "core/port/std/tPortQueueElement.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tGenericObject;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
@@ -47,9 +57,9 @@ namespace core
 {
 class tCCPortDataRef;
 class tMethodCallSyncher;
-class tPortData;
+class tPortDataManager;
+class tCCPortDataManager;
 class tAbstractPort;
-class tTypedObject;
 
 /*!
  * \author Max Reichardt
@@ -86,11 +96,11 @@ private:
   static util::tAtomicInt thread_uid_counter;
 
   /*! Automatic locks - are released/recycled with releaseAllLocks() */
-  util::tSimpleList<const tPortData*> auto_locks;
+  util::tSimpleList<tPortDataManager*> auto_locks;
 
-  util::tSimpleList<tCCPortDataContainer<>*> cc_auto_locks;
+  util::tSimpleList<tCCPortDataManagerTL*> cc_auto_locks;
 
-  util::tSimpleList<tCCInterThreadContainer<>*> cc_inter_auto_locks;
+  util::tSimpleList<tCCPortDataManager*> cc_inter_auto_locks;
 
 protected:
 
@@ -103,14 +113,14 @@ public:
 
   // at the beginning: diverse cached information
 
-  tCCPortDataContainer<>* data;
+  tCCPortDataManagerTL* data;
 
   tCCPortDataRef* ref;
 
   // ThreadLocal port information
 
   /*! Contains port data that was last written to every port - list index is last part of port handle (see CoreRegister) */
-  ::finroc::util::tArrayWrapper<tCCPortDataContainer<>*> last_written_to_port;
+  ::finroc::util::tArrayWrapper<tCCPortDataManagerTL*> last_written_to_port;
 
   /*! Thread-local pools of buffers for every "cheap-copy" port data type */
   ::finroc::util::tArrayWrapper<tCCPortDataBufferPool*> cc_type_pools;
@@ -140,7 +150,7 @@ private:
 
   tThreadLocalCache();
 
-  tCCPortDataBufferPool* CreateCCPool(tDataType* data_type, int16 uid);
+  tCCPortDataBufferPool* CreateCCPool(const rrlib::serialization::tDataTypeBase& data_type, int16 uid);
 
   tMethodCall* CreateMethodCall();
 
@@ -151,9 +161,10 @@ private:
    */
   void FinalDelete();
 
-  inline tCCPortDataBufferPool* GetCCPool(tDataType* data_type)
+  inline tCCPortDataBufferPool* GetCCPool(const rrlib::serialization::tDataTypeBase& data_type)
   {
-    int16 uid = data_type->GetUid();
+    int16 uid = tFinrocTypeInfo::Get(data_type.GetUid()).GetCCIndex();
+    assert((uid >= 0));
     tCCPortDataBufferPool* pool = cc_type_pools[uid];
     if (pool == NULL)
     {
@@ -170,7 +181,7 @@ public:
    *
    * \param obj Object
    */
-  void AddAutoLock(tTypedObject* obj);
+  void AddAutoLock(rrlib::serialization::tGenericObject* obj);
 
   /*!
    * Add object that will be automatically unlocked/recycled
@@ -178,7 +189,7 @@ public:
    *
    * \param obj Object
    */
-  inline void AddAutoLock(const tPortData* obj)
+  inline void AddAutoLock(tPortDataManager* obj)
   {
     assert((obj != NULL));
     auto_locks.Add(obj);
@@ -190,7 +201,7 @@ public:
    *
    * \param obj Object
    */
-  void AddAutoLock(tCCPortDataContainer<>* obj);
+  void AddAutoLock(tCCPortDataManagerTL* obj);
 
   /*!
    * Add object that will be automatically unlocked/recycled
@@ -198,7 +209,7 @@ public:
    *
    * \param obj Object
    */
-  inline void AddAutoLock(tCCInterThreadContainer<>* obj)
+  inline void AddAutoLock(tCCPortDataManager* obj)
   {
     assert((obj != NULL));
     cc_inter_auto_locks.Add(obj);
@@ -266,7 +277,7 @@ public:
     return thread_uid;
   }
 
-  inline tCCPortDataContainer<>* GetUnusedBuffer(tDataType* data_type)
+  inline tCCPortDataManagerTL* GetUnusedBuffer(const rrlib::serialization::tDataTypeBase& data_type)
   {
     return GetCCPool(data_type)->GetUnusedBuffer();
   }
@@ -285,7 +296,7 @@ public:
     return pf;
   }
 
-  tCCInterThreadContainer<>* GetUnusedInterThreadBuffer(tDataType* data_type);
+  tCCPortDataManager* GetUnusedInterThreadBuffer(const rrlib::serialization::tDataTypeBase& data_type);
 
   inline tMethodCall* GetUnusedMethodCall()
   {
@@ -344,4 +355,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__TTHREADLOCALCACHE_H
+#endif // core__port__tThreadLocalCache_h__

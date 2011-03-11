@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2011 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -19,8 +19,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
+#include "core/port/std/tPortQueueFragmentRaw.h"
+
 #include "core/port/std/tPortBase.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/std/tPullRequestHandler.h"
 
 namespace finroc
@@ -37,11 +39,11 @@ tPortBase::tPortBase(tPortCreationInfo pci) :
     buffer_pool(HasSpecialReuseQueue() ? NULL : new tPortDataBufferPool(this->data_type, IsOutputPort() ? 2 : 0)),
     multi_buffer_pool(HasSpecialReuseQueue() ? new tMultiTypePortDataBufferPool() : NULL),
     standard_assign(!GetFlag(tPortFlags::cNON_STANDARD_ASSIGN) && (!GetFlag(tPortFlags::cHAS_QUEUE))),
-    queue(GetFlag(tPortFlags::cHAS_QUEUE) ? new tPortQueue<tPortData>(pci.max_queue_size) : NULL),
+    queue(GetFlag(tPortFlags::cHAS_QUEUE) ? new tPortQueue(pci.max_queue_size) : NULL),
     pull_request_handler(NULL),
     port_listener()
 {
-  assert((pci.data_type->IsStdType()));
+  assert((tFinrocTypeInfo::IsStdType(pci.data_type)));
   InitLists(&(edges_src), &(edges_dest));
   value.Set(default_value->GetCurReference());
   if (queue != NULL)
@@ -62,22 +64,22 @@ void tPortBase::AddLock(tPublishCache& pc)
   }
 }
 
-void tPortBase::BrowserPublish(const tPortData* data)
+void tPortBase::BrowserPublish(const tPortDataManager* data)
 {
   PublishImpl<false, cCHANGED, true>(data);
 }
 
-tPortData* tPortBase::CreateDefaultValue(tDataType* dt)
+tPortDataManager* tPortBase::CreateDefaultValue(const rrlib::serialization::tDataTypeBase& dt)
 {
-  tPortDataManager* pdm = new tPortDataManager(dt, NULL);
+  tPortDataManager* pdm = tPortDataManager::Create(dt);  //new PortDataManager(dt, null);
   pdm->GetCurrentRefCounter()->SetLocks(static_cast<int8>(2));
-  return pdm->GetData();
+  return pdm;
 }
 
 tPortBase::~tPortBase()
 {
   util::tLock lock1(this);
-  default_value->GetManager()->GetCurrentRefCounter()->ReleaseLock();  // thread safe, since called deferred - when no one else should access this port anymore
+  default_value->GetCurrentRefCounter()->ReleaseLock();  // thread safe, since called deferred - when no one else should access this port anymore
   value.Get()->GetRefCounter()->ReleaseLock();  // thread safe, since nobody should publish to port anymore
 
   if (buffer_pool != NULL)
@@ -96,14 +98,14 @@ tPortBase::~tPortBase()
   ;
 }
 
-void tPortBase::DequeueAllRaw(tPortQueueFragment<tPortData>& fragment)
+void tPortBase::DequeueAllRaw(tPortQueueFragmentRaw& fragment)
 {
   queue->DequeueAll(fragment);
 }
 
-tPortData* tPortBase::DequeueSingleAutoLockedRaw()
+tPortDataManager* tPortBase::DequeueSingleAutoLockedRaw()
 {
-  tPortData* result = DequeueSingleUnsafeRaw();
+  tPortDataManager* result = DequeueSingleUnsafeRaw();
   if (result != NULL)
   {
     tThreadLocalCache::Get()->AddAutoLock(result);
@@ -111,26 +113,25 @@ tPortData* tPortBase::DequeueSingleAutoLockedRaw()
   return result;
 }
 
-tPortData* tPortBase::DequeueSingleUnsafeRaw()
+tPortDataManager* tPortBase::DequeueSingleUnsafeRaw()
 {
   assert((queue != NULL));
   tPortDataReference* pd = queue->Dequeue();
-  return pd != NULL ? pd->GetData() : NULL;
+  return pd != NULL ? pd->GetManager() : NULL;
 }
 
 void tPortBase::ForwardData(tAbstractPort* other)
 {
-  assert((other->GetDataType()->IsStdType()));
+  assert((tFinrocTypeInfo::IsStdType(other->GetDataType())));
   (static_cast<tPortBase*>(other))->Publish(GetAutoLockedRaw());
   ReleaseAutoLocks();
 }
 
 void tPortBase::InitialPushTo(tAbstractPort* target, bool reverse)
 {
-  const tPortData* pd = GetLockedUnsafeRaw();
+  tPortDataManager* pd = GetLockedUnsafeRaw();
 
   assert((pd->GetType() != NULL) && "Port data type not initialized");
-  assert((pd->GetManager() != NULL) && "Only port data obtained from a port can be sent");
   assert(IsInitialized());
   assert(target != NULL);
 
@@ -200,7 +201,7 @@ tPortCreationInfo& tPortBase::ProcessPci(tPortCreationInfo& pci)
   return pci;
 }
 
-const tPortData* tPortBase::PullValueRaw(bool intermediate_assign)
+tPortDataManager* tPortBase::PullValueRaw(bool intermediate_assign)
 {
   // prepare publish cache
   tPublishCache pc;
@@ -213,7 +214,7 @@ const tPortData* tPortBase::PullValueRaw(bool intermediate_assign)
 
   // lock value and return
   pc.ReleaseObsoleteLocks();
-  return pc.cur_ref->GetData();
+  return pc.cur_ref->GetManager();
 }
 
 const void tPortBase::PullValueRawImpl(tPublishCache& pc, bool intermediate_assign, bool first)

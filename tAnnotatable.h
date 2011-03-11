@@ -19,19 +19,27 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TANNOTATABLE_H
-#define CORE__TANNOTATABLE_H
+#ifndef core__tAnnotatable_h__
+#define core__tAnnotatable_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tDataTypeBase;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
 class tFinrocAnnotation;
-class tDataType;
 
 /*!
  * \author Max Reichardt
@@ -54,6 +62,20 @@ public:
   // for synchronization on an object of this class
   mutable util::tMutex obj_mutex;
 
+protected:
+
+  /*!
+   * Notify annotations that object is to be deleted
+   */
+  void NotifyAnnotationsDelete();
+
+  /*!
+   * Notify annotations that object has been initialized
+   */
+  void NotifyAnnotationsInitialized();
+
+public:
+
   tAnnotatable() :
       first_annotation(NULL),
       obj_mutex()
@@ -73,11 +95,11 @@ public:
    *
    * \param type Data type of annotation we're looking for
    */
-  tFinrocAnnotation* GetAnnotation(tDataType* dt);
+  tFinrocAnnotation* GetAnnotation(const rrlib::serialization::tDataTypeBase& dt);
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TANNOTATABLE_H
+#endif // core__tAnnotatable_h__

@@ -20,17 +20,19 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tEnumValue.h"
-#include "core/portdatabase/tDataTypeRegister.h"
-#include "core/portdatabase/tTypedObject.h"
+#include "rrlib/serialization/tStringInputStream.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "rrlib/serialization/tStringOutputStream.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tEnumValue::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tEnumValue>());
+rrlib::serialization::tDataType<tEnumValue> tEnumValue::cTYPE;
 
-void tEnumValue::Deserialize(const util::tString& s)
+void tEnumValue::Deserialize(rrlib::serialization::tStringInputStream& is)
 {
+  util::tString s = is.ReadAll();
   if (s.Contains("|"))
   {
     value = util::tInteger::ParseInt(s.Substring(0, s.IndexOf("|")));
@@ -71,16 +73,14 @@ int tEnumValue::GetStringAsValue(const util::tString& name)
   return -1;
 }
 
-util::tString tEnumValue::Serialize() const
+void tEnumValue::Serialize(rrlib::serialization::tStringOutputStream& sb) const
 {
-  util::tStringBuilder sb;
   sb.Append(value).Append("|").Append(string_constants->Get(0));
   for (size_t i = 1u; i < string_constants->Size(); i++)
   {
     sb.Append(",");
     sb.Append(string_constants->Get(i));
   }
-  return sb.ToString();
 }
 
 } // namespace finroc

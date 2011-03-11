@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__RPC__METHOD__TABSTRACTMETHOD_H
-#define CORE__PORT__RPC__METHOD__TABSTRACTMETHOD_H
+#ifndef core__port__rpc__method__tAbstractMethod_h__
+#define core__port__rpc__method__tAbstractMethod_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 
@@ -210,4 +211,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__RPC__METHOD__TABSTRACTMETHOD_H
+#endif // core__port__rpc__method__tAbstractMethod_h__

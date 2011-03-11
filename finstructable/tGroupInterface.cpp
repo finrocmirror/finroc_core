@@ -45,17 +45,17 @@ tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString&
     ports(new tStructureParameter<tPortCreationList>("Ports", tPortCreationList::cTYPE))
 {
   AddAnnotation(new tStructureParameterList(ports));
-  ports->GetValue()->InitialSetup(this, 0, port_dir == tGroupInterface::eBOTH);
+  ports->GetValue()->InitialSetup(this, 0, port_dir == eBOTH);
 }
 
 int tGroupInterface::ComputePortFlags(tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link)
 {
   int flags = ::finroc::core::tEdgeAggregator::cIS_INTERFACE;
-  if (data_class == tGroupInterface::eSENSOR_DATA)
+  if (data_class == eSENSOR_DATA)
   {
     flags |= ::finroc::core::tEdgeAggregator::cSENSOR_DATA;
   }
-  else if (data_class == tGroupInterface::eCONTROLLER_DATA)
+  else if (data_class == eCONTROLLER_DATA)
   {
     flags |= ::finroc::core::tEdgeAggregator::cCONTROLLER_DATA;
   }
@@ -67,11 +67,11 @@ int tGroupInterface::ComputePortFlags(tGroupInterface::tDataClassification data_
   {
     flags |= tCoreFlags::cGLOBALLY_UNIQUE_LINK;
   }
-  if (port_dir == tGroupInterface::eINPUT_ONLY)
+  if (port_dir == eINPUT_ONLY)
   {
     flags |= tPortFlags::cINPUT_PROXY;
   }
-  else if (port_dir == tGroupInterface::eOUTPUT_ONLY)
+  else if (port_dir == eOUTPUT_ONLY)
   {
     flags |= tPortFlags::cOUTPUT_PROXY;
   }

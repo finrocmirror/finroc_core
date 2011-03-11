@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/tFrameworkElementTreeFilter.h"
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {
@@ -89,7 +89,7 @@ bool tFrameworkElementTreeFilter::Accept(tFrameworkElement* element, util::tStri
   return false;
 }
 
-void tFrameworkElementTreeFilter::Deserialize(tCoreInput& is)
+void tFrameworkElementTreeFilter::Deserialize(rrlib::serialization::tInputStream& is)
 {
   relevant_flags = is.ReadInt();
   flag_result = is.ReadInt();
@@ -107,7 +107,7 @@ const util::tString& tFrameworkElementTreeFilter::GetEmptyString()
   return cEMPTY;
 }
 
-void tFrameworkElementTreeFilter::Serialize(tCoreOutput& os) const
+void tFrameworkElementTreeFilter::Serialize(rrlib::serialization::tOutputStream& os) const
 {
   os.WriteInt(relevant_flags);
   os.WriteInt(flag_result);

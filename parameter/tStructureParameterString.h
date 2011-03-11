@@ -19,15 +19,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETERSTRING_H
-#define CORE__PARAMETER__TSTRUCTUREPARAMETERSTRING_H
+#ifndef core__parameter__tStructureParameterString_h__
+#define core__parameter__tStructureParameterString_h__
 
-#include "core/portdatabase/tDataTypeRegister.h"
-#include "core/datatype/tCoreString.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
 #include "core/parameter/tStructureParameterBase.h"
+#include "core/datatype/tCoreString.h"
 #include "core/parameter/tStructureParameter.h"
+#include "rrlib/serialization/tDataType.h"
 
 namespace finroc
 {
@@ -43,17 +44,17 @@ class tStructureParameterString : public tStructureParameter<tCoreString>
 public:
 
   tStructureParameterString(const util::tString& name, const util::tString& default_value, bool constructor_prototype) :
-      tStructureParameter<tCoreString>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>()), constructor_prototype, default_value)
+      tStructureParameter<tCoreString>(name, GetDataType(), constructor_prototype, default_value)
   {
   }
 
   tStructureParameterString(const util::tString& name, const util::tString& default_value) :
-      tStructureParameter<tCoreString>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>()), default_value)
+      tStructureParameter<tCoreString>(name, GetDataType(), default_value)
   {
   }
 
   tStructureParameterString(const util::tString& name) :
-      tStructureParameter<tCoreString>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tCoreString>()), "")
+      tStructureParameter<tCoreString>(name, GetDataType(), "")
   {
   }
 
@@ -81,9 +82,15 @@ public:
     GetValue()->Get(sb);
   }
 
+  /*! Helper to get this safely during static initialization */
+  inline static rrlib::serialization::tDataType<tCoreString> GetDataType()
+  {
+    return rrlib::serialization::tDataType<tCoreString>();
+  }
+
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TSTRUCTUREPARAMETERSTRING_H
+#endif // core__parameter__tStructureParameterString_h__

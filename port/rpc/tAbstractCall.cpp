@@ -20,10 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tAbstractCall.h"
-#include "core/port/std/tPortData.h"
-#include "core/port/std/tPortDataManager.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "core/port/tThreadLocalCache.h"
+#include "core/buffers/tCoreInput.h"
+#include "core/buffers/tCoreOutput.h"
+#include "core/datatype/tNumber.h"
 #include "core/port/rpc/tMethodCallSyncher.h"
 
 namespace finroc
@@ -44,109 +43,42 @@ tAbstractCall::tAbstractCall() :
     method_call_index(0),
     local_port_handle(0),
     remote_port_handle(0),
-    param_storage(150u, 1),
-    os(&(param_storage)),
-    is(&(param_storage)),
-    responsibilities(),
-    deserializable_parameters(false),
     status(cNONE)
 {
   //callerStack = new CallStack(maxCallDepth);
 }
 
-void tAbstractCall::DeserializeImpl(tCoreInput* is_, bool skip_parameters)
+void tAbstractCall::DeserializeImpl(tCoreInput* is, bool skip_parameters)
 {
-  status = is_->ReadByte();
-  syncher_iD = is_->ReadByte();
-  thread_uid = is_->ReadInt();
-  method_call_index = is_->ReadShort();
+  status = is->ReadByte();
+  syncher_iD = is->ReadByte();
+  thread_uid = is->ReadInt();
+  method_call_index = is->ReadShort();
 
   // deserialize parameters
   if (skip_parameters)
   {
     return;
   }
-  this->is.SetTypeTranslation(is_->GetTypeTranslation());
-  param_storage.Deserialize(*is_);
-  int resp_size = is_->ReadByte();
-  assert((responsibilities.Size() == 0));
-  for (int i = 0; i < resp_size; i++)
+  for (size_t i = 0u; i < cMAX_PARAMS; i++)
   {
-    tPortData* p = static_cast<tPortData*>(is_->ReadObject());
-    p->GetManager()->GetCurrentRefCounter()->SetLocks(static_cast<int8>(1));  // one lock for us
-    responsibilities.Add(p);
-  }
-
-  deserializable_parameters = true;
-}
-
-void tAbstractCall::DeserializeParamaters()
-{
-  if (!deserializable_parameters)
-  {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "warning: double deserialization of parameters");
-    return;
-  }
-  deserializable_parameters = false;
-  is.Reset();
-  int cur_param = 0;
-  int cur_resp = 0;
-  tCCInterThreadContainer<>* container = NULL;
-  while (is.MoreDataAvailable())
-  {
-    tCallParameter* p = &(params[cur_param]);
-    p->type = is.ReadByte();
-    switch (p->type)
-    {
-    case tCallParameter::cNULLPARAM:
-      p->value = NULL;
-      break;
-    case tCallParameter::cINT:
-
-      p->ival = is.ReadInt();
-      break;
-    case tCallParameter::cLONG:
-
-      p->lval = is.ReadLong();
-      break;
-    case tCallParameter::cFLOAT:
-
-      p->fval = is.ReadFloat();
-      break;
-    case tCallParameter::cDOUBLE:
-
-      p->dval = is.ReadDouble();
-      break;
-    case tCallParameter::cBYTE:
-
-      p->bval = is.ReadByte();
-      break;
-    case tCallParameter::cSHORT:
-
-      p->sval = is.ReadShort();
-      break;
-    case tCallParameter::cCCDATA:
-    case tCallParameter::cCCCONTAINER:
-      container = static_cast<tCCInterThreadContainer<>*>(is.ReadObjectInInterThreadContainer());
-
-      p->ccval = container;
-      break;
-    case tCallParameter::cPORTDATA:
-      p->value = responsibilities.Get(cur_resp);
-
-      p->value->GetManager()->AddLock();
-
-      cur_resp++;
-      break;
-    }
-
-    cur_param++;
+    params[i].Deserialize(*is);
   }
 }
 
-tCCInterThreadContainer<>* tAbstractCall::GetInterThreadBuffer(tDataType* dt)
+::std::shared_ptr<rrlib::serialization::tGenericObject> tAbstractCall::GetParamGeneric(int index)
 {
-  return tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(dt);
+  tCallParameter p = params[index];
+  if (p.type == tCallParameter::cNULLPARAM || p.value == NULL)
+  {
+    return std::shared_ptr<rrlib::serialization::tGenericObject>();
+  }
+  else
+  {
+    ::std::shared_ptr<rrlib::serialization::tGenericObject> go = p.value;
+    p.Clear();
+    return go;
+  }
 }
 
 void tAbstractCall::Recycle()
@@ -162,18 +94,10 @@ void tAbstractCall::Recycle()
 
 void tAbstractCall::RecycleParameters()
 {
-  param_storage.Clear();
-  os.Reset(&(param_storage));
-  for (size_t i = 0u; i < responsibilities.Size(); i++)
-  {
-    responsibilities.Get(i)->GetManager()->ReleaseLock();
-  }
-  responsibilities.Clear();
   for (size_t i = 0u; i < cMAX_PARAMS; i++)
   {
     params[i].Recycle();
   }
-  deserializable_parameters = false;
 }
 
 void tAbstractCall::Serialize(tCoreOutput& oos) const
@@ -184,11 +108,9 @@ void tAbstractCall::Serialize(tCoreOutput& oos) const
   oos.WriteShort(method_call_index);
 
   // Serialize parameters
-  param_storage.Serialize(oos);
-  oos.WriteByte(responsibilities.Size());
-  for (size_t i = 0u; i < responsibilities.Size(); i++)
+  for (size_t i = 0u; i < cMAX_PARAMS; i++)
   {
-    oos.WriteObject(responsibilities.Get(i));
+    params[i].Serialize(oos);
   }
 }
 
@@ -196,11 +118,9 @@ void tAbstractCall::SetExceptionStatus(int8 type_id)
 {
   RecycleParameters();
   SetStatus(cCONNECTION_EXCEPTION);
-  AddParamForSending(type_id);
-  params[0].type = tCallParameter::cBYTE;
-
-  params[0].bval = type_id;
-  SendParametersComplete();
+  params[0].type = tCallParameter::cNUMBER;
+  params[0].value.reset();
+  params[0].number.SetValue(type_id);
 }
 
 void tAbstractCall::SetupAsynchCall()

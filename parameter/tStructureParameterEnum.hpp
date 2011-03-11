@@ -19,7 +19,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
@@ -27,7 +26,7 @@ namespace core
 {
 template<typename E>
 tStructureParameterEnum<E>::tStructureParameterEnum(const util::tString& name, E default_value, bool constructor_prototype, ::std::shared_ptr<util::tSimpleList<util::tString> > string_constants_) :
-    tStructureParameter<tEnumValue>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tEnumValue>()), constructor_prototype),
+    tStructureParameter<tEnumValue>(name, GetDataType(), constructor_prototype),
     string_constants(string_constants_)
 {
   Set(default_value);
@@ -36,7 +35,7 @@ tStructureParameterEnum<E>::tStructureParameterEnum(const util::tString& name, E
 
 template<typename E>
 tStructureParameterEnum<E>::tStructureParameterEnum(const util::tString& name, E default_value, const util::tString& string_constants_) :
-    tStructureParameter<tEnumValue>(name, tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tEnumValue>())),
+    tStructureParameter<tEnumValue>(name, GetDataType()),
     string_constants(new util::tSimpleList<util::tString>())
 {
   this->string_constants->AddAll(string_constants_.Split(","));

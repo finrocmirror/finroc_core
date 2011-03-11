@@ -21,7 +21,6 @@
  */
 #include "core/tFinrocAnnotation.h"
 #include "core/tFrameworkElement.h"
-#include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
@@ -39,7 +38,7 @@ void tFinrocAnnotation::Append(tFinrocAnnotation* ann)
   }
 }
 
-tFinrocAnnotation* tFinrocAnnotation::FindParentWithAnnotation(tFrameworkElement* fe, tDataType* type)
+tFinrocAnnotation* tFinrocAnnotation::FindParentWithAnnotation(tFrameworkElement* fe, const rrlib::serialization::tDataTypeBase& type)
 {
   tFinrocAnnotation* ann = fe->GetAnnotation(type);
   if (ann != NULL)
@@ -60,7 +59,9 @@ void tFinrocAnnotation::InitDataType()
   {
     return;  // already set
   }
-  this->type = tDataTypeRegister::GetInstance()->LookupDataType(this);
+
+  type = rrlib::serialization::tDataTypeBase::FindTypeByRtti(typeid(*this).name());
+
   assert((this->type != NULL) && "Unknown Object type");
 }
 

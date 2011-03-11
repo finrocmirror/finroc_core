@@ -22,13 +22,13 @@
 #include "core/port/tThreadLocalCache.h"
 #include "core/tRuntimeEnvironment.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
-#include "core/portdatabase/tTypedObject.h"
-#include "core/port/cc/tCCContainerBase.h"
-#include "core/port/std/tPortData.h"
+#include "rrlib/serialization/tGenericObjectManager.h"
+#include "rrlib/serialization/tGenericObject.h"
+#include "core/port/cc/tCCPortDataManager.h"
+#include "core/port/std/tPortDataManager.h"
 #include "core/port/rpc/tMethodCallSyncher.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/tAbstractPort.h"
-#include "core/port/std/tPortDataManager.h"
 #include "core/port/std/tPortDataReference.h"
 
 namespace finroc
@@ -38,7 +38,7 @@ namespace core
 // This 'lock' ensures that Thread info is deallocated after last ThreadLocalCache
 util::tThreadInfoLock thread_info_lock = util::tThread::GetThreadInfoLock();
 // This 'lock' ensures that static AutoDeleter instance is deallocated after last ThreadLocalCache
-::std::shared_ptr<util::tAutoDeleter> auto_deleter_lock(util::tAutoDeleter::GetStaticInstance());
+std::shared_ptr<util::tAutoDeleter> auto_deleter_lock(util::tAutoDeleter::GetStaticInstance());
 util::tFastStaticThreadLocal<tThreadLocalCache, tThreadLocalCache, util::tGarbageCollector::tFunctor> tThreadLocalCache::info;
 
 ::std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCache::infos;
@@ -48,12 +48,13 @@ tThreadLocalCache::tThreadLocalCache() :
     infos_lock(infos),
     method_syncher(NULL),
     thread_uid(thread_uid_counter.GetAndIncrement()),
+    auto_locks(),
     cc_auto_locks(),
     cc_inter_auto_locks(),
     data(NULL),
     ref(NULL),
     last_written_to_port(tCoreRegister<>::cMAX_ELEMENTS),
-    cc_type_pools(tDataType::cMAX_CHEAP_COPYABLE_TYPES),
+    cc_type_pools(tFinrocTypeInfo::cMAX_CCTYPES),
     method_calls(new util::tReusablesPool<tMethodCall>()),
     pull_calls(new util::tReusablesPool<tPullCall>()),
     pq_fragments(new util::tReusablesPool<tPortQueueElement>()),
@@ -65,34 +66,34 @@ tThreadLocalCache::tThreadLocalCache() :
   FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating ThreadLocalCache for thread ", util::tThread::CurrentThread()->GetName());
 }
 
-void tThreadLocalCache::AddAutoLock(tTypedObject* obj)
+void tThreadLocalCache::AddAutoLock(rrlib::serialization::tGenericObject* obj)
 {
-  if (obj->GetType()->IsCCType())
+  rrlib::serialization::tGenericObjectManager* mgr = obj->GetManager();
+  if (tFinrocTypeInfo::IsCCType(obj->GetType()))
   {
-    tCCContainerBase* cb = static_cast<tCCContainerBase*>(obj);
-    if (cb->IsInterThreadContainer())
+    if (typeid(*mgr) == typeid(tCCPortDataManager))
     {
-      AddAutoLock(static_cast<tCCInterThreadContainer<>*>(cb));
+      AddAutoLock(static_cast<tCCPortDataManager*>(mgr));
     }
     else
     {
-      AddAutoLock(static_cast<tCCPortDataContainer<>*>(cb));
+      AddAutoLock(static_cast<tCCPortDataManagerTL*>(mgr));
     }
   }
   else
   {
-    AddAutoLock(static_cast<tPortData*>(obj));
+    AddAutoLock(static_cast<tPortDataManager*>(mgr));
   }
 }
 
-void tThreadLocalCache::AddAutoLock(tCCPortDataContainer<>* obj)
+void tThreadLocalCache::AddAutoLock(tCCPortDataManagerTL* obj)
 {
   assert((obj != NULL));
   assert((obj->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId()));
   cc_auto_locks.Add(obj);
 }
 
-tCCPortDataBufferPool* tThreadLocalCache::CreateCCPool(tDataType* data_type, int16 uid)
+tCCPortDataBufferPool* tThreadLocalCache::CreateCCPool(const rrlib::serialization::tDataTypeBase& data_type, int16 uid)
 {
   tCCPortDataBufferPool* pool = new tCCPortDataBufferPool(data_type, 10);  // create 10 buffers by default
   cc_type_pools[uid] = pool;
@@ -123,11 +124,11 @@ void tThreadLocalCache::DeleteInfoForPort(int port_index)
       tThreadLocalCache* tli = infos->Get(i);
 
       // Release port data lock
-      tCCPortDataContainer<>* pd = tli->last_written_to_port[port_index];
+      tCCPortDataManagerTL* pd = tli->last_written_to_port[port_index];
       if (pd != NULL)
       {
         tli->last_written_to_port[port_index] = NULL;
-        pd->NonOwnerLockRelease(tli->GetCCPool(pd->GetType()));
+        pd->NonOwnerLockRelease(tli->GetCCPool(pd->GetObject()->GetType()));
       }
 
     }
@@ -181,9 +182,9 @@ tMethodCallSyncher* tThreadLocalCache::GetMethodSyncher()
   return method_syncher;
 }
 
-tCCInterThreadContainer<>* tThreadLocalCache::GetUnusedInterThreadBuffer(tDataType* data_type)
+tCCPortDataManager* tThreadLocalCache::GetUnusedInterThreadBuffer(const rrlib::serialization::tDataTypeBase& data_type)
 {
-  tCCInterThreadContainer<>* buf = GetCCPool(data_type)->GetUnusedInterThreadBuffer();
+  tCCPortDataManager* buf = GetCCPool(data_type)->GetUnusedInterThreadBuffer();
   //System.out.println("Getting unused interthread buffer: " + buf.hashCode());
   return buf;
 }

@@ -19,10 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "core/port/cc/tCCQueueFragmentRaw.h"
+
 #include "core/port/cc/tCCPortBase.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/tCoreRegister.h"
 #include "core/port/tPortFlags.h"
-#include "core/port/cc/tCCPortData.h"
+#include "rrlib/serialization/sSerialization.h"
+#include "core/port/cc/tCCPortDataRef.h"
 #include "core/port/cc/tCCPullRequestHandler.h"
 
 namespace finroc
@@ -38,11 +42,12 @@ tCCPortBase::tCCPortBase(tPortCreationInfo pci) :
     owned_data(NULL),
     standard_assign(!GetFlag(tPortFlags::cNON_STANDARD_ASSIGN) && (!GetFlag(tPortFlags::cHAS_QUEUE))),
     port_index(GetHandle() & tCoreRegister<>::cELEM_INDEX_MASK),
-    queue(GetFlag(tPortFlags::cHAS_QUEUE) ? new tCCPortQueue<tCCPortData>(pci.max_queue_size) : NULL),
+    queue(GetFlag(tPortFlags::cHAS_QUEUE) ? new tCCPortQueue(pci.max_queue_size) : NULL),
     port_listener(),
-    pull_request_handler(NULL)
+    pull_request_handler(NULL),
+    unit(pci.unit)
 {
-  assert((pci.data_type->IsCCType()));
+  assert((tFinrocTypeInfo::IsCCType(pci.data_type)));
   InitLists(&(edges_src), &(edges_dest));
   if (queue != NULL)
   {
@@ -52,8 +57,8 @@ tCCPortBase::tCCPortBase(tPortCreationInfo pci) :
 
   // set initial value to default
   tThreadLocalCache* tc = tThreadLocalCache::Get();
-  tCCPortDataContainer<>* c = GetUnusedBuffer(tc);
-  c->Assign(((tCCPortData*)default_value->GetDataPtr()));
+  tCCPortDataManagerTL* c = GetUnusedBuffer(tc);
+  c->GetObject()->DeepCopyFrom(default_value->GetObject(), NULL);
   c->AddLock();
   value = c->GetCurrentRef();
   tc->last_written_to_port[port_index] = c;
@@ -63,12 +68,12 @@ void tCCPortBase::ApplyDefaultValue()
 {
   //publish(ThreadLocalCache.get(), defaultValue.getContainer());
   tThreadLocalCache* tc = tThreadLocalCache::GetFast();
-  tCCPortDataContainer<>* c = GetUnusedBuffer(tc);
-  c->Assign(((tCCPortData*)default_value->GetDataPtr()));
+  tCCPortDataManagerTL* c = GetUnusedBuffer(tc);
+  c->GetObject()->DeepCopyFrom(default_value->GetObject(), NULL);
   Publish(tc, c);
 }
 
-void tCCPortBase::BrowserPublishRaw(tCCPortDataContainer<>* buffer)
+void tCCPortBase::BrowserPublishRaw(tCCPortDataManagerTL* buffer)
 {
   assert((buffer->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId()));
   tThreadLocalCache* tc = tThreadLocalCache::Get();
@@ -78,8 +83,8 @@ void tCCPortBase::BrowserPublishRaw(tCCPortDataContainer<>* buffer)
 
 bool tCCPortBase::ContainsDefaultValue()
 {
-  tCCInterThreadContainer<>* c = GetInInterThreadContainer();
-  bool result = c->GetType() == default_value->GetType() && c->ContentEquals(((tCCPortData*)default_value->GetDataPtr()));
+  tCCPortDataManager* c = GetInInterThreadContainer();
+  bool result = c->GetObject()->GetType() == default_value->GetObject()->GetType() && rrlib::serialization::sSerialization::Equals(*c->GetObject(), *default_value->GetObject());
   c->Recycle2();
   return result;
 }
@@ -106,12 +111,12 @@ tCCPortBase::~tCCPortBase()
   ;
 }
 
-void tCCPortBase::DequeueAllRaw(tCCQueueFragment<tCCPortData>& fragment)
+void tCCPortBase::DequeueAllRaw(tCCQueueFragmentRaw& fragment)
 {
   queue->DequeueAll(fragment);
 }
 
-tCCInterThreadContainer<>* tCCPortBase::DequeueSingleUnsafeRaw()
+tCCPortDataManager* tCCPortBase::DequeueSingleUnsafeRaw()
 {
   assert((queue != NULL));
   return queue->Dequeue();
@@ -119,30 +124,23 @@ tCCInterThreadContainer<>* tCCPortBase::DequeueSingleUnsafeRaw()
 
 void tCCPortBase::ForwardData(tAbstractPort* other)
 {
-  assert((other->GetDataType()->IsCCType()));
-  tCCPortDataContainer<>* c = GetLockedUnsafeInContainer();
+  assert((tFinrocTypeInfo::IsCCType(other->GetDataType())));
+  tCCPortDataManagerTL* c = GetLockedUnsafeInContainer();
   (static_cast<tCCPortBase*>(other))->Publish(c);
   c->ReleaseLock();
 }
 
-tCCInterThreadContainer<>* tCCPortBase::GetInInterThreadContainer()
+tCCPortDataManager* tCCPortBase::GetInInterThreadContainer()
 {
-  tCCInterThreadContainer<>* ccitc = tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(GetDataType());
-  for (; ;)
-  {
-    tCCPortDataRef* val = value;
-    ccitc->Assign(((tCCPortData*)val->GetContainer()->GetDataPtr()));
-    if (val == value)    // still valid??
-    {
-      return ccitc;
-    }
-  }
+  tCCPortDataManager* ccitc = tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(GetDataType());
+  GetRaw(ccitc);
+  return ccitc;
 }
 
-tCCPortDataContainer<>* tCCPortBase::GetLockedUnsafeInContainer()
+tCCPortDataManagerTL* tCCPortBase::GetLockedUnsafeInContainer()
 {
   tCCPortDataRef* val = value;
-  tCCPortDataContainer<>* val_c = val->GetContainer();
+  tCCPortDataManagerTL* val_c = val->GetContainer();
   if (val_c->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId())    // if same thread: simply add read lock
   {
     val_c->AddLock();
@@ -151,11 +149,11 @@ tCCPortDataContainer<>* tCCPortBase::GetLockedUnsafeInContainer()
 
   // not the same thread: create auto-locked new container
   tThreadLocalCache* tc = tThreadLocalCache::Get();
-  tCCPortDataContainer<>* ccitc = tc->GetUnusedBuffer(this->data_type);
+  tCCPortDataManagerTL* ccitc = tc->GetUnusedBuffer(this->data_type);
   ccitc->ref_counter = 1;
   for (; ;)
   {
-    ccitc->Assign(((tCCPortData*)val_c->GetDataPtr()));
+    ccitc->GetObject()->DeepCopyFrom(val_c->GetObject(), NULL);
     if (val == value)    // still valid??
     {
       return ccitc;
@@ -165,51 +163,34 @@ tCCPortDataContainer<>* tCCPortBase::GetLockedUnsafeInContainer()
   }
 }
 
-tCCInterThreadContainer<>* tCCPortBase::GetPullInInterthreadContainerRaw(bool intermediate_assign)
+tCCPortDataManager* tCCPortBase::GetPullInInterthreadContainerRaw(bool intermediate_assign)
 {
-  tCCPortDataContainer<>* tmp = PullValueRaw(intermediate_assign);
-  tCCInterThreadContainer<>* ret = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(this->data_type);
-  ret->Assign(((tCCPortData*)tmp->GetDataPtr()));
+  tCCPortDataManagerTL* tmp = PullValueRaw(intermediate_assign);
+  tCCPortDataManager* ret = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(this->data_type);
+  ret->GetObject()->DeepCopyFrom(tmp->GetObject(), NULL);
   tmp->ReleaseLock();
   return ret;
 }
 
-void tCCPortBase::GetRaw(tCCInterThreadContainer<>* buffer)
+void tCCPortBase::GetRaw(rrlib::serialization::tGenericObject* buffer)
 {
-  for (; ;)
+  if (PushStrategy())
   {
-    tCCPortDataRef* val = value;
-    buffer->Assign(((tCCPortData*)val->GetContainer()->GetDataPtr()));
-    if (val == value)    // still valid??
+    for (; ;)
     {
-      return;
+      tCCPortDataRef* val = value;
+      buffer->DeepCopyFrom(val->GetData(), NULL);
+      if (val == value)    // still valid??
+      {
+        return;
+      }
     }
   }
-}
-
-void tCCPortBase::GetRaw(tCCPortDataContainer<>* buffer)
-{
-  for (; ;)
+  else
   {
-    tCCPortDataRef* val = value;
-    buffer->Assign(((tCCPortData*)val->GetContainer()->GetDataPtr()));
-    if (val == value)    // still valid??
-    {
-      return;
-    }
-  }
-}
-
-void tCCPortBase::GetRaw(tCCPortData* buffer)
-{
-  for (; ;)
-  {
-    tCCPortDataRef* val = value;
-    val->GetContainer()->AssignTo(buffer);
-    if (val == value)    // still valid??
-    {
-      return;
-    }
+    tCCPortDataManagerTL* dc = PullValueRaw();
+    buffer->DeepCopyFrom(dc->GetObject(), NULL);
+    dc->ReleaseLock();
   }
 }
 
@@ -239,8 +220,8 @@ void tCCPortBase::NonStandardAssign(tThreadLocalCache* tc)
     assert((GetFlag(tPortFlags::cHAS_QUEUE)));
 
     // enqueue
-    tCCInterThreadContainer<tCCPortData>* itc = reinterpret_cast<tCCInterThreadContainer<tCCPortData>*>(tc->GetUnusedInterThreadBuffer(tc->data->GetType()));
-    itc->Assign(((tCCPortData*)tc->data->GetDataPtr()));
+    tCCPortDataManager* itc = tc->GetUnusedInterThreadBuffer(tc->data->GetObject()->GetType());
+    itc->GetObject()->DeepCopyFrom(tc->data->GetObject(), NULL);
     queue->EnqueueWrapped(itc);
   }
 }
@@ -253,7 +234,7 @@ void tCCPortBase::NotifyDisconnect()
   }
 }
 
-tCCPortDataContainer<>* tCCPortBase::PullValueRaw(bool intermediate_assign)
+tCCPortDataManagerTL* tCCPortBase::PullValueRaw(bool intermediate_assign)
 {
   tThreadLocalCache* tc = tThreadLocalCache::GetFast();
 
@@ -270,7 +251,7 @@ void tCCPortBase::PullValueRawImpl(tThreadLocalCache* tc, bool intermediate_assi
   if ((!first) && pull_request_handler != NULL)    // for network port pulling it's good if pullRequestHandler is not called on first port - and there aren't any scenarios where this would make sense
   {
     tc->data = tc->GetUnusedBuffer(this->data_type);
-    pull_request_handler->PullRequest(this, tc->data->GetDataPtr());
+    pull_request_handler->PullRequest(this, tc->data);
     tc->data->SetRefCounter(1);  // one lock for caller
     tc->ref = tc->data->GetCurrentRef();
     Assign(tc);
@@ -284,7 +265,7 @@ void tCCPortBase::PullValueRawImpl(tThreadLocalCache* tc, bool intermediate_assi
       if (pb != NULL)
       {
         pb->PullValueRawImpl(tc, intermediate_assign, false);
-        if ((first || intermediate_assign) && (!value->GetContainer()->ContentEquals(((tCCPortData*)tc->data->GetDataPtr()))))
+        if ((first || intermediate_assign) && (!value->GetContainer()->ContentEquals(tc->data->GetObject()->GetRawDataPtr())))
         {
           Assign(tc);
         }
@@ -314,9 +295,9 @@ void tCCPortBase::SetPullRequestHandler(tCCPullRequestHandler* pull_request_hand
   }
 }
 
-void tCCPortBase::TransferDataOwnership(tCCPortDataContainer<>* port_data_container)
+void tCCPortBase::TransferDataOwnership(tCCPortDataManagerTL* port_data_container)
 {
-  tCCPortDataContainer<>* current = value->GetContainer();
+  tCCPortDataManagerTL* current = value->GetContainer();
   if (current == port_data_container)    // ownedData is outdated and can be deleted
   {
     if (owned_data != NULL)

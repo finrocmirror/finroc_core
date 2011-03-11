@@ -19,39 +19,64 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/std/tPortData.h"
-
 #include "core/port/rpc/tCallParameter.h"
+#include "core/buffers/tCoreInput.h"
+#include "core/port/std/tPortDataManager.h"
+#include "core/buffers/tCoreOutput.h"
 
 namespace finroc
 {
 namespace core
 {
-const int8 tCallParameter::cNULLPARAM, tCallParameter::cINT, tCallParameter::cLONG, tCallParameter::cFLOAT, tCallParameter::cDOUBLE, tCallParameter::cPORTDATA, tCallParameter::cCCDATA, tCallParameter::cCCCONTAINER, tCallParameter::cBYTE, tCallParameter::cSHORT;
+const int8 tCallParameter::cNULLPARAM, tCallParameter::cNUMBER, tCallParameter::cOBJECT;
 
 tCallParameter::tCallParameter() :
-    lval(0),
+    number(),
+    value(),
     type(0)
 {
 }
 
+void tCallParameter::Deserialize(tCoreInput& is)
+{
+  type = is.ReadByte();
+  if (type == cNUMBER)
+  {
+    number.Deserialize(is);
+  }
+  else if (type == cOBJECT)
+  {
+    assert((value == NULL));
+    value = std::shared_ptr<rrlib::serialization::tGenericObject>(is.ReadObjectInInterThreadContainer());
+    tPortDataManager* pdm = tPortDataManager::GetManager(value);
+    if (pdm != NULL)
+    {
+      pdm->lock_iD = is.ReadInt();
+    }
+  }
+}
+
 void tCallParameter::Recycle()
 {
-  if (value == NULL)
-  {
-    return;
-  }
-  if (type == cCCDATA || type == cCCCONTAINER)
-  {
-    ccval->Recycle2();
+  value.reset();
+}
 
-  }
-  else if (type == cPORTDATA)
+void tCallParameter::Serialize(tCoreOutput& oos) const
+{
+  oos.WriteByte(type);
+  if (type == cNUMBER)
   {
-    value->GetManager()->ReleaseLock();
-
+    number.Serialize(oos);
   }
-  value = NULL;
+  else if (type == cOBJECT)
+  {
+    oos.WriteObject(value.get());
+    tPortDataManager* pdm = tPortDataManager::GetManager(value);
+    if (pdm != NULL)
+    {
+      oos.WriteInt(pdm->lock_iD);
+    }
+  }
 }
 
 } // namespace finroc

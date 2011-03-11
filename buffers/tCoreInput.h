@@ -19,13 +19,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__BUFFERS__TCOREINPUT_H
-#define CORE__BUFFERS__TCOREINPUT_H
+#ifndef core__buffers__tCoreInput_h__
+#define core__buffers__tCoreInput_h__
 
-#include "rrlib/finroc_core_utils/stream/tSource.h"
-#include "rrlib/finroc_core_utils/stream/tInputStreamBuffer.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "core/port/std/tPortDataManager.h"
+#include "core/port/cc/tCCPortDataManager.h"
+#include "rrlib/serialization/tGenericObject.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
+#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/serialization/tInputStream.h"
+
+#include "core/portdatabase/tSharedPtrDeleteHandler.h"
 
 namespace finroc
 {
@@ -33,8 +40,6 @@ namespace core
 {
 class tAbstractPort;
 class tRemoteTypes;
-class tTypedObject;
-class tDataType;
 
 /*!
  * \author Max Reichardt
@@ -42,7 +47,7 @@ class tDataType;
  * This is a specialized version of the StreamBuffer read view that is used
  * throughout the framework
  */
-class tCoreInput : public util::tInputStreamBuffer
+class tCoreInput : public rrlib::serialization::tInputStream
 {
 protected:
 
@@ -60,19 +65,19 @@ private:
    * \param in_inter_thread_container Deserialize "cheap copy" data in interthread container?
    * \return Buffer with read object
    */
-  tTypedObject* ReadObject(bool in_inter_thread_container);
+  rrlib::serialization::tGenericObject* ReadObject(bool in_inter_thread_container);
 
 public:
 
+  template <typename T>
+  tCoreInput(T t) :
+      rrlib::serialization::tInputStream(t),
+      buffer_source(NULL),
+      type_translation(NULL)
+  {
+  }
+
   tCoreInput();
-
-  tCoreInput(::std::shared_ptr<const util::tConstSource> source);
-
-  tCoreInput(const util::tConstSource* source);
-
-  tCoreInput(::std::shared_ptr<util::tSource> source);
-
-  tCoreInput(util::tSource* source);
 
   /*!
    * \return Buffer Source for any buffers that are needed
@@ -95,7 +100,7 @@ public:
    *
    * \return Buffer with read object (no locks)
    */
-  inline tTypedObject* ReadObject()
+  inline rrlib::serialization::tGenericObject* ReadObject()
   {
     return ReadObject(false);
   }
@@ -105,15 +110,26 @@ public:
    *
    * \return Buffer with read object (no locks)
    */
-  inline tTypedObject* ReadObjectInInterThreadContainer()
+  inline ::std::shared_ptr<rrlib::serialization::tGenericObject> ReadObjectInInterThreadContainer()
   {
-    return ReadObject(true);
+    rrlib::serialization::tGenericObject* tmp = ReadObject(true);
+    bool cc_type = tFinrocTypeInfo::IsCCType(tmp->GetType());
+
+    if (cc_type)
+    {
+      tCCPortDataManager* mgr = (tCCPortDataManager*)tmp->GetManager();
+      return std::shared_ptr<rrlib::serialization::tGenericObject>(tmp, tSharedPtrDeleteHandler<tCCPortDataManager>(mgr));
+    }
+    else
+    {
+      tPortDataManager* mgr = (tPortDataManager*)tmp->GetManager();
+      mgr->GetCurrentRefCounter()->SetOrAddLocks(1);
+      return std::shared_ptr<rrlib::serialization::tGenericObject>(tmp, tSharedPtrDeleteHandler<tPortDataManager>(mgr));
+    }
+
   }
 
-  /*!
-   * \return Deserialized data type (using type translation lookup table)
-   */
-  tDataType* ReadType();
+  virtual rrlib::serialization::tDataTypeBase ReadType();
 
   /*!
    * \param buffer_source Source for any buffers that are needed
@@ -136,4 +152,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__BUFFERS__TCOREINPUT_H
+#endif // core__buffers__tCoreInput_h__

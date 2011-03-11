@@ -19,17 +19,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__STD__TPULLREQUESTHANDLER_H
-#define CORE__PORT__STD__TPULLREQUESTHANDLER_H
+#ifndef core__port__std__tPullRequestHandler_h__
+#define core__port__std__tPullRequestHandler_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 namespace finroc
 {
 namespace core
 {
 class tPortBase;
-class tPortData;
+class tPortDataManager;
 
 /*!
  * \author Max Reichardt
@@ -47,11 +48,11 @@ public:
    * \param add_locks Number of locks to set/add
    * \return PortData to answer request with (with one additional lock)
    */
-  virtual const tPortData* PullRequest(tPortBase* origin, int8 add_locks) = 0;
+  virtual const tPortDataManager* PullRequest(tPortBase* origin, int8 add_locks) = 0;
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__STD__TPULLREQUESTHANDLER_H
+#endif // core__port__std__tPullRequestHandler_h__

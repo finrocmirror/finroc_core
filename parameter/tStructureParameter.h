@@ -19,38 +19,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETER_H
-#define CORE__PARAMETER__TSTRUCTUREPARAMETER_H
+#ifndef core__parameter__tStructureParameter_h__
+#define core__parameter__tStructureParameter_h__
 
-#include "core/portdatabase/tDataTypeRegister.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/parameter/tStructureParameterBase.h"
+#include "rrlib/serialization/tGenericObject.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-
-template <typename T, bool C>
-struct tStructureParameterBufferHelper
-{
-  static T* Get(tPortData* pd, tCCInterThreadContainer<>* cc)
-  {
-    return (T*)cc->GetData();
-  }
-};
-
-template <typename T>
-struct tStructureParameterBufferHelper<T, true>
-{
-  static T* Get(tPortData* pd, tCCInterThreadContainer<>* cc)
-  {
-    return (T*)pd;
-  }
-};
-
 /*!
  * \author Max Reichardt
  *
@@ -70,10 +52,8 @@ class tStructureParameter : public tStructureParameterBase
 {
 public:
 
-  typedef tStructureParameterBufferHelper<T, boost::is_base_of<tPortData, T>::value> tHelper;
-
   tStructureParameter(const util::tString& name) :
-      tStructureParameterBase(name, tDataTypeRegister::GetInstance()->GetDataType<T>(), false)
+      tStructureParameterBase(name, rrlib::serialization::tDataType<T>(), false)
   {}
 
   /*!
@@ -81,7 +61,7 @@ public:
    * \param type DataType of parameter
    * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
    */
-  tStructureParameter(const util::tString& name, tDataType* type, bool constructor_prototype);
+  tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type, bool constructor_prototype);
 
   /*!
    * \param name Name of parameter
@@ -89,7 +69,7 @@ public:
    * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
    * \param default_value Default value
    */
-  tStructureParameter(const util::tString& name, tDataType* type, bool constructor_prototype, const util::tString& default_value);
+  tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type, bool constructor_prototype, const util::tString& default_value);
 
   /*!
    * Typical constructor for modules with empty constructor
@@ -99,13 +79,13 @@ public:
    * \param type DataType of parameter
    * \param default_value Default value
    */
-  tStructureParameter(const util::tString& name, tDataType* type, const util::tString& default_value);
+  tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type, const util::tString& default_value);
 
   /*!
    * \param name Name of parameter
    * \param type DataType of parameter
    */
-  tStructureParameter(const util::tString& name, tDataType* type);
+  tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type);
 
   virtual ::finroc::core::tStructureParameterBase* DeepCopy()
   {
@@ -118,7 +98,8 @@ public:
    */
   inline T* GetValue()
   {
-    return tHelper::Get(value, cc_value);
+    rrlib::serialization::tGenericObject* go = ::finroc::core::tStructureParameterBase::ValPointer();
+    return go->GetData<T>();
   }
 
 };
@@ -128,4 +109,4 @@ public:
 
 #include "core/parameter/tStructureParameter.hpp"
 
-#endif // CORE__PARAMETER__TSTRUCTUREPARAMETER_H
+#endif // core__parameter__tStructureParameter_h__

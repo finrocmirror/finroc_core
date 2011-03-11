@@ -21,10 +21,10 @@
  */
 #include "core/port/net/tRemoteTypes.h"
 #include "core/buffers/tCoreInput.h"
-#include "core/portdatabase/tDataTypeRegister.h"
 #include "core/parameter/tParameterNumeric.h"
 #include "core/tRuntimeSettings.h"
 #include "core/buffers/tCoreOutput.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 
 namespace finroc
 {
@@ -42,7 +42,7 @@ void tRemoteTypes::Deserialize(tCoreInput* ci)
   assert(((!Initialized())) && "Already initialized");
   global_default = ci->ReadShort();
   types = new ::finroc::util::tArrayWrapper<tEntry>(ci->ReadShort());
-  int max_types = tDataTypeRegister::GetInstance()->GetMaxTypeIndex();
+  int max_types = types->length + rrlib::serialization::tDataTypeBase::GetTypeCount();
   types_by_local_uid = new ::finroc::util::tArrayWrapper<tEntry>(max_types);
   int16 next = ci->ReadShort();
   rrlib::logging::tLogStream ls = FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain);
@@ -51,21 +51,21 @@ void tRemoteTypes::Deserialize(tCoreInput* ci)
   {
     int16 time = ci->ReadShort();
     util::tString name = ci->ReadString();
-    tDataType* local = tDataTypeRegister::GetInstance()->GetDataType(name);
+    rrlib::serialization::tDataTypeBase local = rrlib::serialization::tDataTypeBase::FindType(name);
     ls << "- " << name << " (" << next << ") - " << (local != NULL ? "available here, too" : "not available here") << std::endl;
     tEntry e(time, local);
     (*(types))[next] = e;
 
     if (local != NULL)
     {
-      (*(types_by_local_uid))[local->GetUid()] = e;
+      (*(types_by_local_uid))[local.GetUid()] = e;
     }
     next = ci->ReadShort();
   }
   ;
 }
 
-tDataType* tRemoteTypes::GetLocalType(int16 uid)
+rrlib::serialization::tDataTypeBase tRemoteTypes::GetLocalType(int16 uid)
 {
   assert(((Initialized())) && "Not initialized");
   tEntry e = (*(types))[uid];
@@ -77,20 +77,18 @@ tDataType* tRemoteTypes::GetLocalType(int16 uid)
   return e.local_data_type;
 }
 
-void tRemoteTypes::SerializeLocalDataTypes(tDataTypeRegister* dtr, tCoreOutput* co)
+void tRemoteTypes::SerializeLocalDataTypes(tCoreOutput* co)
 {
-  int t = tRuntimeSettings::cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME->Get();
+  int t = tRuntimeSettings::cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME->GetValue();
   co->WriteShort(static_cast<int16>(t));
-  co->WriteShort(dtr->GetMaxTypeIndex());
-  for (int16 i = 0, n = static_cast<int16>(dtr->GetMaxTypeIndex()); i < n; i++)
+  int16 type_count = rrlib::serialization::tDataTypeBase::GetTypeCount();
+  co->WriteShort(type_count);
+  for (int16 i = 0, n = type_count; i < n; i++)
   {
-    tDataType* dt = dtr->GetDataType(i);
-    if (dt != NULL)
-    {
-      co->WriteShort(dt->GetUid());
-      co->WriteShort(dt->GetUpdateTime());
-      co->WriteString(dt->GetName());
-    }
+    rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::GetType(i);
+    co->WriteShort(dt.GetUid());
+    co->WriteShort(tFinrocTypeInfo::Get(i).GetUpdateTime());
+    co->WriteString(dt.GetName());
   }
   co->WriteShort(-1);  // terminator
 }
@@ -114,7 +112,7 @@ tRemoteTypes::tEntry::tEntry() :
     local_data_type(NULL)
 {}
 
-tRemoteTypes::tEntry::tEntry(int16 time, tDataType* local) :
+tRemoteTypes::tEntry::tEntry(int16 time, rrlib::serialization::tDataTypeBase local) :
     update_time(time),
     local_data_type(local)
 {

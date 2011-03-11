@@ -19,11 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__THREAD__TPERIODICFRAMEWORKELEMENTTASK_H
-#define CORE__THREAD__TPERIODICFRAMEWORKELEMENTTASK_H
+#ifndef core__thread__tPeriodicFrameworkElementTask_h__
+#define core__thread__tPeriodicFrameworkElementTask_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/port/tEdgeAggregator.h"
 #include "core/tFinrocAnnotation.h"
@@ -40,8 +42,6 @@ namespace finroc
 {
 namespace core
 {
-class tDataType;
-
 /*!
  * \author Max Reichardt
  *
@@ -54,7 +54,7 @@ struct tPeriodicFrameworkElementTask : public tFinrocAnnotation
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tPeriodicFrameworkElementTask> cTYPE;
 
   /*! Task to execute */
   util::tTask* task;
@@ -79,6 +79,11 @@ public:
   tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, util::tTask* task_);
 
   /*!
+   * Dummy constructor. Generic instantiation is not supported.
+   */
+  tPeriodicFrameworkElementTask();
+
+  /*!
    * \return Is this a sensor task?
    */
   inline bool IsSenseTask()
@@ -91,4 +96,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__THREAD__TPERIODICFRAMEWORKELEMENTTASK_H
+#endif // core__thread__tPeriodicFrameworkElementTask_h__

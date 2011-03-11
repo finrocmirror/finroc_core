@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__FINSTRUCTABLE__TFINSTRUCTABLEGROUP_H
-#define CORE__FINSTRUCTABLE__TFINSTRUCTABLEGROUP_H
+#ifndef core__finstructable__tFinstructableGroup_h__
+#define core__finstructable__tFinstructableGroup_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/parameter/tStructureParameterString.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
@@ -162,11 +163,11 @@ public:
 
   virtual void StructureParametersChanged();
 
-  void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode& root);
+  void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode* root);
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__FINSTRUCTABLE__TFINSTRUCTABLEGROUP_H
+#endif // core__finstructable__tFinstructableGroup_h__

@@ -19,15 +19,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
-#include "core/portdatabase/tDataType.h"
 
-#ifndef CORE__PORT__RPC__TINTERFACEPORT_H
-#define CORE__PORT__RPC__TINTERFACEPORT_H
+#ifndef core__port__rpc__tInterfacePort_h__
+#define core__port__rpc__tInterfacePort_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tAbstractPort.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
+#include "rrlib/serialization/tDataTypeBase.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tThreadLocalCache.h"
 
 namespace finroc
@@ -35,7 +36,8 @@ namespace finroc
 namespace core
 {
 class tMultiTypePortDataBufferPool;
-class tPortData;
+class tPortDataManager;
+class tCCPortDataManager;
 
 /*!
  * \author Max Reichardt
@@ -54,6 +56,7 @@ public:
 
   enum tType { eServer, eClient, eNetwork, eRouting };
 
+  friend class tInterfaceClientPort;
 private:
 
   /*! Type of interface port */
@@ -84,6 +87,21 @@ protected:
     // do nothing in interface port
   }
 
+  /*!
+   * Get buffer to use in method call or return (has one lock)
+   *
+   * (for non-cc types only)
+   * \param dt Data type of object to get buffer of
+   * \return Unused buffer of type
+   */
+  template <typename T>
+  inline ::std::shared_ptr<T> GetBufferForCall(const rrlib::serialization::tDataTypeBase& dt = NULL)
+  {
+    tPortDataManager* mgr = GetUnusedBufferRaw(rrlib::serialization::tDataType<T>());
+    mgr->GetCurrentRefCounter()->SetOrAddLocks((int8_t)1);
+    return std::shared_ptr<T>(mgr->GetObject()->GetData<T>(), tSharedPtrDeleteHandler<tPortDataManager>(mgr));
+  }
+
   virtual int GetMaxQueueLengthImpl() const
   {
     // do nothing in interface port
@@ -109,11 +127,11 @@ protected:
 
 public:
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_);
+  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_);
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_, int custom_flags);
+  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, int custom_flags);
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, tDataType* data_type, tInterfacePort::tType type_, int custom_flags, int lock_level);
+  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, int custom_flags, int lock_level);
 
   tInterfacePort(tPortCreationInfo pci, tInterfacePort::tType type_, int lock_level);
 
@@ -144,16 +162,16 @@ public:
    * \param dt Data type of object to get buffer of
    * \return Unused buffer of type
    */
-  virtual tPortData* GetUnusedBuffer(tDataType* dt);
+  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::serialization::tDataTypeBase dt);
 
   /*!
    * (for cc types only)
    * \param dt Data type of object to get buffer of
    * \return Unused buffer of type
    */
-  inline tCCInterThreadContainer<>* GetUnusedCCBuffer(tDataType* dt)
+  inline tCCPortDataManager* GetUnusedCCBuffer(const rrlib::serialization::tDataTypeBase& dt)
   {
-    assert((dt->IsCCType()));
+    assert((tFinrocTypeInfo::IsCCType(dt)));
     return tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(dt);
   }
 
@@ -171,4 +189,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__RPC__TINTERFACEPORT_H
+#endif // core__port__rpc__tInterfacePort_h__

@@ -19,14 +19,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETERENUM_H
-#define CORE__PARAMETER__TSTRUCTUREPARAMETERENUM_H
+#ifndef core__parameter__tStructureParameterEnum_h__
+#define core__parameter__tStructureParameterEnum_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/parameter/tStructureParameterBase.h"
 #include "core/datatype/tEnumValue.h"
+#include "rrlib/serialization/tDataType.h"
 #include "core/parameter/tStructureParameter.h"
 
 namespace finroc
@@ -58,7 +60,7 @@ private:
 public:
 
   tStructureParameterEnum(const util::tString& name, bool constructor_prototype = false) :
-      tStructureParameter<tEnumValue>(name, tDataTypeRegister::GetInstance()->GetDataType<tEnumValue>(), constructor_prototype),
+      tStructureParameter<tEnumValue>(name, GetDataType(), constructor_prototype),
       string_constants()
   {}
 
@@ -89,6 +91,12 @@ public:
     return GetValueForInt(::finroc::core::tStructureParameter<tEnumValue>::GetValue()->Get());
   }
 
+  /*! Helper to get this safely during static initialization */
+  inline static rrlib::serialization::tDataType<tEnumValue> GetDataType()
+  {
+    return rrlib::serialization::tDataType<tEnumValue>();
+  }
+
   /*!
    * \param default_value new value
    */
@@ -101,4 +109,4 @@ public:
 
 #include "core/parameter/tStructureParameterEnum.hpp"
 
-#endif // CORE__PARAMETER__TSTRUCTUREPARAMETERENUM_H
+#endif // core__parameter__tStructureParameterEnum_h__

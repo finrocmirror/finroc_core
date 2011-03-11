@@ -19,16 +19,25 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
-#include "core/portdatabase/tDataType.h"
 
-#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETERBASE_H
-#define CORE__PARAMETER__TSTRUCTUREPARAMETERBASE_H
+#ifndef core__parameter__tStructureParameterBase_h__
+#define core__parameter__tStructureParameterBase_h__
 
-#include "core/port/cc/tCCInterThreadContainer.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/portdatabase/sSerializationHelper.h"
-#include "core/portdatabase/tTypedObject.h"
-#include "core/portdatabase/tCoreSerializable.h"
+#include "core/port/std/tPortDataManager.h"
+#include "core/port/cc/tCCPortDataManager.h"
+#include "rrlib/serialization/tSerializable.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
 
 namespace rrlib
 {
@@ -42,17 +51,13 @@ namespace finroc
 {
 namespace core
 {
-class tPortData;
-class tCoreInput;
-class tCoreOutput;
-
 /*!
  * \author Max Reichardt
  *
  * Structure Parameter class
  * (Generic base class without template type)
  */
-class tStructureParameterBase : public tCoreSerializable
+class tStructureParameterBase : public rrlib::serialization::tSerializable
 {
   friend class tStructureParameterList;
 private:
@@ -61,15 +66,15 @@ private:
   util::tString name;
 
   /*! DataType of parameter */
-  tDataType* type;
+  rrlib::serialization::tDataTypeBase type;
 
 protected:
 
   /*! Current parameter value (in CreateModuleAction-prototypes this is null) - Standard type */
-  tPortData* value;
+  tPortDataManager* value;
 
   /*! Current parameter value (in CreateModuleAction-prototypes this is null) - CC type */
-  tCCInterThreadContainer<>* cc_value;
+  tCCPortDataManager* cc_value;
 
   /*! Index in parameter list */
   int list_index;
@@ -87,15 +92,7 @@ private:
    *
    * \param type Type
    */
-  void CreateBuffer(tDataType* type_);
-
-  /*!
-   * \return Log description
-   */
-  inline util::tString GetLogDescription()
-  {
-    return name;
-  }
+  void CreateBuffer(rrlib::serialization::tDataTypeBase type_);
 
   /*!
    * \return Is this a remote parameter?
@@ -103,16 +100,6 @@ private:
   inline bool RemoteValue()
   {
     return false;
-  }
-
-  /*!
-   * (Internal helper function to make expressions shorter)
-   *
-   * \return value or ccValue, depending on data type
-   */
-  inline tTypedObject* ValPointer() const
-  {
-    return type->IsStdType() ? static_cast<tTypedObject*>(value) : static_cast<tTypedObject*>(cc_value);
   }
 
 protected:
@@ -129,7 +116,7 @@ public:
    * \param type DataType of parameter
    * \param constructor_prototype Is this a CreteModuleActionPrototype (no buffer will be allocated)
    */
-  tStructureParameterBase(const util::tString& name_, tDataType* type_, bool constructor_prototype);
+  tStructureParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype);
 
   /*!
    * (should be overridden by subclasses)
@@ -145,9 +132,14 @@ public:
     DeleteBuffer();
   }
 
-  virtual void Deserialize(tCoreInput& is);
+  virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
   virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
+
+  const char* GetLogDescription()
+  {
+    return name.GetCString();
+  }
 
   /*!
    * \return Name of parameter
@@ -160,12 +152,12 @@ public:
   /*!
    * \return DataType of parameter
    */
-  inline tDataType* GetType()
+  inline rrlib::serialization::tDataTypeBase GetType()
   {
     return type;
   }
 
-  virtual void Serialize(tCoreOutput& os) const;
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 
   virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
 
@@ -182,9 +174,19 @@ public:
    */
   virtual void Set(const util::tString& s);
 
+  /*!
+   * (Internal helper function to make expressions shorter)
+   *
+   * \return value or ccValue, depending on data type
+   */
+  inline rrlib::serialization::tGenericObject* ValPointer() const
+  {
+    return value != NULL ? value->GetObject() : cc_value->GetObject();
+  }
+
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TSTRUCTUREPARAMETERBASE_H
+#endif // core__parameter__tStructureParameterBase_h__

@@ -19,20 +19,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__CC__TCCPORTQUEUE_H
-#define CORE__PORT__CC__TCCPORTQUEUE_H
+#ifndef core__port__cc__tCCPortQueue_h__
+#define core__port__cc__tCCPortQueue_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tThreadLocalCache.h"
 #include "rrlib/finroc_core_utils/container/tWonderQueueBounded.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
 
 namespace finroc
 {
 namespace core
 {
 class tCCPortQueueElement;
+class tCCPortDataManager;
 
 /*!
  * \author Max Reichardt
@@ -44,8 +45,7 @@ class tCCPortQueueElement;
  *
  * Use concurrentDequeue, with threads reading from this queue concurrently.
  */
-template < typename T = tCCPortData >
-class tCCPortQueue : public util::tWonderQueueBounded<tCCInterThreadContainer<T>, tCCPortQueueElement>
+class tCCPortQueue : public util::tWonderQueueBounded<tCCPortDataManager, tCCPortQueueElement>
 {
   inline tCCPortQueueElement* GetEmptyContainer2()
   {
@@ -62,13 +62,13 @@ protected:
 public:
 
   tCCPortQueue(int max_length) :
-      util::tWonderQueueBounded<tCCInterThreadContainer<T>, tCCPortQueueElement>(max_length)
+      util::tWonderQueueBounded<tCCPortDataManager, tCCPortQueueElement>(max_length)
   {
   }
 
   virtual ~tCCPortQueue()
   {
-    ::finroc::util::tWonderQueueBounded<tCCInterThreadContainer<T>, tCCPortQueueElement>::Clear(true);
+    ::finroc::util::tWonderQueueBounded<tCCPortDataManager, tCCPortQueueElement>::Clear(true);
     ;
   }
 
@@ -77,4 +77,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__CC__TCCPORTQUEUE_H
+#endif // core__port__cc__tCCPortQueue_h__

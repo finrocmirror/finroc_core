@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TRUNTIMELISTENER_H
-#define CORE__TRUNTIMELISTENER_H
+#ifndef core__tRuntimeListener_h__
+#define core__tRuntimeListener_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tAbstractPort.h"
 #include "rrlib/finroc_core_utils/tListenerManager.h"
@@ -103,4 +104,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TRUNTIMELISTENER_H
+#endif // core__tRuntimeListener_h__

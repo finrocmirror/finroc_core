@@ -19,11 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__THREAD__TEXECUTIONCONTROL_H
-#define CORE__THREAD__TEXECUTIONCONTROL_H
+#ifndef core__thread__tExecutionControl_h__
+#define core__thread__tExecutionControl_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
 #include "core/tFinrocAnnotation.h"
 #include "core/thread/tStartAndPausable.h"
 
@@ -31,7 +33,6 @@ namespace finroc
 {
 namespace core
 {
-class tDataType;
 class tFrameworkElement;
 
 /*!
@@ -44,12 +45,17 @@ class tExecutionControl : public tFinrocAnnotation
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tExecutionControl> cTYPE;
 
   /*! Wrapped StartAndPausable */
   tStartAndPausable* implementation;
 
   tExecutionControl(tStartAndPausable& implementation_);
+
+  /*!
+   * Dummy constructor. Generic instantiation is not supported.
+   */
+  tExecutionControl();
 
   /*!
    * Find StartAndPausable that is responsible for executing specified object
@@ -91,4 +97,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__THREAD__TEXECUTIONCONTROL_H
+#endif // core__thread__tExecutionControl_h__

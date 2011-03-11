@@ -21,10 +21,9 @@
  */
 #include "core/port/tPortFlags.h"
 #include "core/port/stream/tNewConnectionHandler.h"
+#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/std/tPortDataReference.h"
 #include "core/tFrameworkElement.h"
-#include "core/port/std/tPortData.h"
-#include "core/port/std/tPortDataManager.h"
 
 namespace finroc
 {
@@ -68,7 +67,7 @@ void tInputStreamPort<T>::tPortImpl<T>::NewConnection(tAbstractPort* partner)
 template<typename T>
 void tInputStreamPort<T>::tPortImpl<T>::NonStandardAssign(tPublishCache& pc)
 {
-  if (user == NULL || ProcessPacket(static_cast<T*>(pc.cur_ref->GetData())))
+  if (user == NULL || ProcessPacket(static_cast<T*>(pc.cur_ref->GetData()->GetData())))
   {
     ::finroc::core::tPortBase::NonStandardAssign(pc);  // enqueue
   }
@@ -92,12 +91,12 @@ template<typename T>
 void tInputStreamPort<T>::tPortImpl<T>::ProcessPackets()
 {
   DequeueAllRaw(dequeue_buffer);
-  tPortData* pdr = NULL;
-  while ((pdr = dequeue_buffer.DequeueUnsafe()) != NULL)
+  rrlib::serialization::tGenericObject* pdr = NULL;
+  while ((pdr = dequeue_buffer.DequeueAutoLocked()) != NULL)
   {
-    user->ProcessPacket(static_cast<T*>(pdr));
-    pdr->GetManager()->ReleaseLock();
+    user->ProcessPacket(pdr->GetData<T>());
   }
+  ReleaseAutoLocks();
 }
 
 } // namespace finroc

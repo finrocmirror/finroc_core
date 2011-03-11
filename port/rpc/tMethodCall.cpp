@@ -19,10 +19,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
 #include "core/port/rpc/tMethodCall.h"
 #include "core/buffers/tCoreInput.h"
 #include "core/port/rpc/method/tPortInterface.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
 #include "core/port/rpc/method/tAbstractMethod.h"
 #include "core/buffers/tCoreOutput.h"
@@ -43,12 +43,12 @@ tMethodCall::tMethodCall() :
 {
 }
 
-void tMethodCall::DeserializeCall(tCoreInput* is, tDataType* dt, bool skip_parameters)
+void tMethodCall::DeserializeCall(tCoreInput* is, const rrlib::serialization::tDataTypeBase& dt, bool skip_parameters)
 {
   //assert(skipParameters || (dt != null && dt.isMethodType())) : "Method type required here";
   port_interface_type = dt;
   int8 b = is->ReadByte();
-  method = (dt == NULL) ? NULL : dt->GetPortInterface()->GetMethod(b);
+  method = (dt == NULL) ? NULL : tFinrocTypeInfo::Get(dt).GetPortInterface()->GetMethod(b);
   net_timeout = is->ReadInt();
   ::finroc::core::tAbstractCall::DeserializeImpl(is, skip_parameters);
 }
@@ -78,7 +78,7 @@ void tMethodCall::ExecuteTask()
   }
 }
 
-void tMethodCall::PrepareExecution(tAbstractMethod* method_, tDataType* port_interface, tAbstractMethodCallHandler* handler_, tAbstractAsyncReturnHandler* ret_handler_)
+void tMethodCall::PrepareExecution(tAbstractMethod* method_, const rrlib::serialization::tDataTypeBase& port_interface, tAbstractMethodCallHandler* handler_, tAbstractAsyncReturnHandler* ret_handler_)
 {
   assert((this->method == NULL && this->handler == NULL && method_ != NULL));
   this->method = method_;
@@ -103,7 +103,7 @@ void tMethodCall::PrepareForwardSyncRemoteExecution(tInterfaceNetPort* source, t
   this->net_port = dest;
 }
 
-void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, tDataType* port_interface, tAbstractAsyncReturnHandler* ret_handler_, tInterfaceNetPort* net_port_, int net_timeout_)
+void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::serialization::tDataTypeBase& port_interface, tAbstractAsyncReturnHandler* ret_handler_, tInterfaceNetPort* net_port_, int net_timeout_)
 {
   assert((this->method == NULL && this->handler == NULL && method_ != NULL));
   this->method = method_;
@@ -114,7 +114,7 @@ void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, tDataType
   this->net_timeout = net_timeout_;
 }
 
-void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, tDataType* port_interface, int net_timeout_)
+void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::serialization::tDataTypeBase& port_interface, int net_timeout_)
 {
   assert((this->method == NULL && this->handler == NULL && method_ != NULL));
   this->method = method_;
@@ -142,7 +142,7 @@ void tMethodCall::Serialize(tCoreOutput& oos) const
   ::finroc::core::tAbstractCall::Serialize(oos);
 }
 
-void tMethodCall::SetMethod(tAbstractMethod* m, tDataType* port_interface)
+void tMethodCall::SetMethod(tAbstractMethod* m, const rrlib::serialization::tDataTypeBase& port_interface)
 {
   method = m;
   port_interface_type = port_interface;
@@ -151,7 +151,7 @@ void tMethodCall::SetMethod(tAbstractMethod* m, tDataType* port_interface)
 
 bool tMethodCall::TypeCheck()
 {
-  return method != NULL && port_interface_type != NULL && port_interface_type->GetPortInterface() != NULL && port_interface_type->GetPortInterface()->ContainsMethod(method);
+  return method != NULL && port_interface_type != NULL && tFinrocTypeInfo::Get(port_interface_type).GetPortInterface() != NULL && tFinrocTypeInfo::Get(port_interface_type).GetPortInterface()->ContainsMethod(method);
 }
 
 } // namespace finroc

@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PLUGIN__TCONNECTIONLISTENER_H
-#define CORE__PLUGIN__TCONNECTIONLISTENER_H
+#ifndef core__plugin__tConnectionListener_h__
+#define core__plugin__tConnectionListener_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/tListenerManager.h"
 
@@ -74,4 +75,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PLUGIN__TCONNECTIONLISTENER_H
+#endif // core__plugin__tConnectionListener_h__

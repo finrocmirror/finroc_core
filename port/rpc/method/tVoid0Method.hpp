@@ -47,7 +47,6 @@ void tVoid0Method<HANDLER>::Call(tInterfaceClientPort port, bool force_same_thre
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
 
-    mc->SendParametersComplete();
     mc->SetMethod(this, port.GetDataType());
     (static_cast<tInterfaceNetPort*>(ip))->SendAsyncCall(mc);
   }

@@ -20,18 +20,18 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tBoolean.h"
-#include "core/portdatabase/tDataTypeRegister.h"
 
 namespace finroc
 {
 namespace core
 {
-tDataType* tBoolean::cTYPE = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tBoolean>(), "Boolean");
+rrlib::serialization::tDataType<tBoolean> tBoolean::cTYPE("Boolean");
 const tBoolean tBoolean::cTRUE(true), tBoolean::cFALSE(false);
 
 tBoolean::tBoolean() :
     value(false)
-{}
+{
+}
 
 tBoolean::tBoolean(bool value_) :
     value(value_)

@@ -50,9 +50,8 @@ void tVoid2Method<HANDLER, P1, P2>::Call(tInterfaceClientPort port, P1 p1, P2 p2
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
-    mc->AddParamForSending(p1);  //2
-    mc->AddParamForSending(p2);
-    mc->SendParametersComplete();
+    mc->AddParam(0, p1);  //2
+    mc->AddParam(1, p2);
     mc->SetMethod(this, port.GetDataType());
     (static_cast<tInterfaceNetPort*>(ip))->SendAsyncCall(mc);
   }
@@ -74,8 +73,8 @@ void tVoid2Method<HANDLER, P1, P2>::Call(tInterfaceClientPort port, P1 p1, P2 p2
     {
       tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
       //1
-      mc->AddParamForLocalCall(0, p1);  //2
-      mc->AddParamForLocalCall(1, p2);
+      mc->AddParam(0, p1);  //2
+      mc->AddParam(1, p2);
       mc->PrepareExecution(this, port.GetDataType(), handler, NULL);
       tRPCThreadPool::GetInstance()->ExecuteTask(mc);
     }

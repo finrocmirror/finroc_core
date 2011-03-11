@@ -19,35 +19,50 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__DATATYPE__TNUMBER_H
-#define CORE__DATATYPE__TNUMBER_H
+#ifndef core__datatype__tNumber_h__
+#define core__datatype__tNumber_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
 #include "core/datatype/tUnit.h"
-#include "core/portdatabase/tTypedObject.h"
+#include "rrlib/serialization/tStringOutputStream.h"
+#include "rrlib/serialization/tTypedObject.h"
+#include "core/portdatabase/tCCType.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-class tCoreInput;
 class tConstant;
-class tCoreOutput;
 
 /*!
  * \author Max Reichardt
  *
  * This class stores numbers (with units) of different types.
  */
-class tNumber : public tTypedObject, public util::tUncopyableObject
+class tNumber : public rrlib::serialization::tTypedObject, public util::tObject, public tCCType
 {
 public:
 
   enum tType { eINT, eLONG, eFLOAT, eDOUBLE, eCONSTANT };
 
 private:
+
+  template <typename T>
+  friend struct tCoreNumberPointerGetter;
+
+  template <typename T, size_t S>
+  friend struct tCoreNumberPointerGetterBase;
 
   /*! Current numerical data */
   union
@@ -70,7 +85,7 @@ public:
   static tNumber cZERO;
 
   /*! Register Data type */
-  static tDataType* const cTYPE;
+  static const rrlib::serialization::tDataType<tNumber> cTYPE;
 
   // number serialization:
   // (1st type byte) - last bit unit
@@ -93,7 +108,7 @@ private:
   inline int8 PrepFirstByte(int8 value2) const
   {
     int tmp = (value2 << 1);
-    return static_cast<int8>(((unit == &(tUnit::cNO_UNIT) || num_type == tNumber::eCONSTANT) ? tmp : (tmp | 1)));
+    return static_cast<int8>(((unit == &(tUnit::cNO_UNIT) || num_type == eCONSTANT) ? tmp : (tmp | 1)));
   }
 
 public:
@@ -164,11 +179,11 @@ public:
     SetValue(value_, unit_);
   }
 
-  virtual void CopyFrom(const tNumber& source);
+  void CopyFrom(const tNumber& source);
 
-  virtual void Deserialize(tCoreInput& ois);
+  virtual void Deserialize(rrlib::serialization::tInputStream& ois);
 
-  virtual void Deserialize(const util::tString& s);
+  virtual void Deserialize(rrlib::serialization::tStringInputStream& is);
 
   // returns raw numeric value
   template <typename T>
@@ -204,7 +219,20 @@ public:
     return Value<float>();
   }
 
-  inline static tDataType* GetDataType()
+  //    // CCPortData standard implementation
+  //    @JavaOnly @Override public void assign(CCPortData other) {
+  //        CoreNumber cn = (CoreNumber)other;
+  //        numType = cn.numType;
+  //        value = cn.value;
+  //        unit = cn.unit;
+  //    }
+  //
+  //    @Override @JavaOnly
+  //    public DataType<CoreNumber> getType() {
+  //        return TYPE;
+  //    }
+
+  inline static rrlib::serialization::tDataType<tNumber> GetDataType()
   {
     assert((cTYPE != NULL));
     return cTYPE;
@@ -235,7 +263,7 @@ public:
    */
   inline bool IsFloatingPoint()
   {
-    return num_type == tNumber::eFLOAT || num_type == tNumber::eDOUBLE;
+    return num_type == eFLOAT || num_type == eDOUBLE;
   }
 
   inline bool IsInt(int i, tUnit* unit_) const
@@ -253,11 +281,11 @@ public:
     return Value<int64>();
   }
 
-  virtual void Serialize(tCoreOutput& oos) const;
+  virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;
 
-  virtual util::tString Serialize() const
+  virtual void Serialize(rrlib::serialization::tStringOutputStream& os) const
   {
-    return ToString();
+    os.Append(ToString());
   }
 
   /*!
@@ -342,9 +370,62 @@ public:
 
   virtual const util::tString ToString() const;
 
+  template <typename T>
+  T* GetValuePtr();
+};
+
+template <typename T, size_t cSIZE>
+struct tCoreNumberPointerGetterBase
+{
+  static T* GetDataPtr(tNumber* num)
+  {
+    num->SetValue(num->Value<T>());
+    return static_cast<T*>(&num->ival);
+  }
+};
+
+template <typename T>
+struct tCoreNumberPointerGetterBase<T, 8>
+{
+  static T* GetDataPtr(tNumber* num)
+  {
+    num->SetValue(num->Value<T>());
+    return static_cast<T*>(&num->lval);
+  }
+};
+
+template <typename T>
+struct tCoreNumberPointerGetter : tCoreNumberPointerGetterBase < T, sizeof(T) > {};
+
+template <>
+struct tCoreNumberPointerGetter<float>
+{
+  static float* GetDataPtr(tNumber* num)
+  {
+    num->SetValue(num->Value<float>());
+    return &num->fval;
+  }
+};
+
+template <>
+struct tCoreNumberPointerGetter<double>
+{
+  static double* GetDataPtr(tNumber* num)
+  {
+    num->SetValue(num->Value<double>());
+    return &num->dval;
+  }
+};
+
+// Get Pointer to current value (that can also be used to set value)
+template <typename T>
+T* tNumber::GetValuePtr()
+{
+  return tCoreNumberPointerGetter<T>::GetDataPtr(this);
+
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__DATATYPE__TNUMBER_H
+#endif // core__datatype__tNumber_h__

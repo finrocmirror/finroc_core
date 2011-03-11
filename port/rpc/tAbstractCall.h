@@ -19,19 +19,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__RPC__TABSTRACTCALL_H
-#define CORE__PORT__RPC__TABSTRACTCALL_H
+#ifndef core__port__rpc__tAbstractCall_h__
+#define core__port__rpc__tAbstractCall_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/rpc/tMethodCallException.h"
-#include "core/portdatabase/tDataTypeRegister.h"
-#include "rrlib/finroc_core_utils/stream/tMemoryBuffer.h"
 #include "core/port/rpc/tCallParameter.h"
-#include "core/buffers/tCoreOutput.h"
-#include "core/buffers/tCoreInput.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
+#include "rrlib/serialization/tGenericObject.h"
 #include "core/portdatabase/tSerializableReusable.h"
 
 #include "core/port/rpc/tParameterUtil.h"
@@ -40,8 +36,8 @@ namespace finroc
 {
 namespace core
 {
-class tPortData;
-class tDataType;
+class tCoreInput;
+class tCoreOutput;
 class tMethodCallSyncher;
 
 /*!
@@ -79,23 +75,8 @@ private:
   /*! Maximum number of parameters */
   static const size_t cMAX_PARAMS = 4u;
 
-  /*! Storage buffer for any (serialized) parameters or return values - for sending over the network */
-  util::tMemoryBuffer param_storage;
-
   /*! Storage for parameters that are used in call - for usage in local runtime (fixed size, since this is smaller & less hassle than dynamic array) */
   tCallParameter params[cMAX_PARAMS];
-
-  /*! To write to paramStorage... */
-  tCoreOutput os;
-
-  /*! To read from paramStorage... */
-  tCoreInput is;
-
-  /*! Any (usually big) buffers that call is currently in charge of recycling */
-  util::tSimpleList<const tPortData*> responsibilities;
-
-  /*! For incoming commands: Is it possible to deserialize parameters in paramStorage? */
-  bool deserializable_parameters;
 
 protected:
 
@@ -145,44 +126,17 @@ public:
    */
   tAbstractCall();
 
-  virtual void Deserialize(tCoreInput& is_)
+  virtual void Deserialize(tCoreInput& is)
   {
-    DeserializeImpl(&(is_), false);
+    DeserializeImpl(&(is), false);
   }
 
-  void DeserializeImpl(tCoreInput* is_, bool skip_parameters);
-
-  template <typename T>
-  void AddParamForSending(T t)
-  {
-    tParameterUtil<T>::AddParamForSending(responsibilities, os, t);
-  }
-
-  template <typename T>
-  void GetParam(int index, T& pd)
-  {
-    tParameterUtil<T>::GetParam(&(params[index]), pd);
-  }
-
-  template <typename T>
-  void AddParamForLocalCall(int index, T pd)
-  {
-    tParameterUtil<T>::AddParamForLocalCall(&(params[index]), pd);
-  }
-
-  /*!
-   * Prepare method call received from the net for local call.
-   *
-   * Deserializes parameters from storage to param objects
-   */
-  void DeserializeParamaters();
+  void DeserializeImpl(tCoreInput* is, bool skip_parameters);
 
   virtual void GenericRecycle()
   {
     Recycle();
   }
-
-  tCCInterThreadContainer<>* GetInterThreadBuffer(tDataType* dt);
 
   /*!
    * \return Local port handle - only used while call is enqueued in network queue
@@ -191,6 +145,8 @@ public:
   {
     return local_port_handle;
   }
+
+  ::std::shared_ptr<rrlib::serialization::tGenericObject> GetParamGeneric(int index);
 
   /*!
    * \return Destination port handle - only used while call is enqueued in network queue
@@ -238,15 +194,24 @@ public:
    */
   void RecycleParameters();
 
-  /*!
-   * When sending parameters over the network: Call this when all parameters have been added
-   */
-  inline void SendParametersComplete()
+  virtual void Serialize(tCoreOutput& oos) const;
+
+  template <typename T>
+  void GetParam(int index, T& pd)
   {
-    os.Close();
+    tParameterUtil<T>::GetParam(&(params[index]), pd);
   }
 
-  virtual void Serialize(tCoreOutput& oos) const;
+  template <typename T>
+  void AddParam(int index, T pd)
+  {
+    tParameterUtil<T>::AddParam(&(params[index]), pd);
+  }
+
+  inline void SetExceptionStatus(tMethodCallException::tType type)
+  {
+    SetExceptionStatus((int8)type);
+  }
 
   /*!
    * Clear parameters and set method call status to exception
@@ -254,11 +219,6 @@ public:
    * \param type_id Type of exception
    */
   void SetExceptionStatus(int8 type_id);
-
-  inline void SetExceptionStatus(tMethodCallException::tType type)
-  {
-    SetExceptionStatus((int8)type);
-  }
 
   /*!
    * \param local_port_handle Local port handle - only used while call is enqueued in network queue
@@ -311,4 +271,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__RPC__TABSTRACTCALL_H
+#endif // core__port__rpc__tAbstractCall_h__

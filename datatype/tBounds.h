@@ -19,30 +19,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__DATATYPE__TBOUNDS_H
-#define CORE__DATATYPE__TBOUNDS_H
+#ifndef core__datatype__tBounds_h__
+#define core__datatype__tBounds_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/datatype/tNumber.h"
-#include "core/portdatabase/tCoreSerializable.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-class tConstant;
-class tCoreInput;
-class tCoreOutput;
-
 /*!
  * \author Max Reichardt
  *
  * Information about bounds used, for instance, in bounded port or numerical setting
  * (Not meant to be used as port data)
  */
-class tBounds : public tCoreSerializable
+template<typename T>
+class tBounds : public util::tObject
 {
 public:
 
@@ -51,54 +47,73 @@ public:
 private:
 
   /*! Minimum and maximum bounds - Double for simplicity & efficiency reasons */
-  double min, max;
+  T min, max;
 
-  tBounds::tOutOfBoundsAction action;
+  tOutOfBoundsAction action;
 
   /*! Default value when value is out of bounds */
-  tNumber out_of_bounds_default;
+  T out_of_bounds_default;
 
 public:
 
-  /*! Data Type */
-  static tDataType* cTYPE;
+  //    /** Data Type */
+  //    public final static DataType<Bounds> TYPE = new DataType<Bounds>(Bounds.class);
 
   /*! dummy constructor for no bounds */
-  tBounds();
+  tBounds() :
+      min(0),
+      max(0),
+      action(eNONE),
+      out_of_bounds_default()
+  {
+  }
 
   /*!
    * \param min Minimum bound
    * \param max Maximum bound
    */
-  tBounds(double min_, double max_);
+  tBounds(T min_, T max_) :
+      min(min_),
+      max(max_),
+      action(true ? eADJUST_TO_RANGE : eDISCARD),
+      out_of_bounds_default()
+  {
+    // this(min,max,true);
+  }
 
   /*!
    * \param min Minimum bound
    * \param max Maximum bound
    * \param adjust_to_range Adjust values lying outside to range (or rather discard them)?
    */
-  tBounds(double min_, double max_, bool adjust_to_range);
+  tBounds(T min_, T max_, bool adjust_to_range) :
+      min(min_),
+      max(max_),
+      action(adjust_to_range ? eADJUST_TO_RANGE : eDISCARD),
+      out_of_bounds_default()
+  {
+  }
 
   /*!
    * \param min Minimum bound
    * \param max Maximum bound
    * \param out_of_bounds_default Default value when value is out of bounds
    */
-  tBounds(double min_, double max_, tNumber* out_of_bounds_default_);
-
-  /*!
-   * \param min Minimum bound
-   * \param max Maximum bound
-   * \param out_of_bounds_default Default value when value is out of bounds
-   */
-  tBounds(double min_, double max_, tConstant* out_of_bounds_default_);
+  tBounds(T min_, T max_, tNumber out_of_bounds_default_) :
+      min(min_),
+      max(max_),
+      action(eAPPLY_DEFAULT),
+      out_of_bounds_default()
+  {
+    this->out_of_bounds_default = out_of_bounds_default_.Value<T>();
+  }
 
   /*!
    * \return Adjust value to range?
    */
   inline bool AdjustToRange() const
   {
-    return action == tBounds::eADJUST_TO_RANGE;
+    return action == eADJUST_TO_RANGE;
   }
 
   /*!
@@ -106,23 +121,21 @@ public:
    */
   inline bool ApplyDefault() const
   {
-    return action == tBounds::eAPPLY_DEFAULT;
+    return action == eAPPLY_DEFAULT;
   }
-
-  virtual void Deserialize(tCoreInput& is);
 
   /*!
    * \return Discard values which are out of bounds?
    */
   inline bool Discard() const
   {
-    return action == tBounds::eDISCARD;
+    return action == eDISCARD;
   }
 
   /*!
    * \return Maximum value
    */
-  inline double GetMax() const
+  inline T GetMax() const
   {
     return max;
   }
@@ -130,7 +143,7 @@ public:
   /*!
    * \return Minimum value
    */
-  inline double GetMin() const
+  inline T GetMin() const
   {
     return min;
   }
@@ -138,14 +151,9 @@ public:
   /*!
    * \return Default value when value is out of bounds
    */
-  inline const tNumber* GetOutOfBoundsDefault() const
+  inline const T GetOutOfBoundsDefault() const
   {
-    return &(out_of_bounds_default);
-  }
-
-  inline tDataType* GetType()
-  {
-    return cTYPE;
+    return out_of_bounds_default;
   }
 
   /*!
@@ -154,29 +162,45 @@ public:
    * \param val Value
    * \return Answer
    */
-  inline bool InBounds(double val) const
+  inline bool InBounds(T val) const
   {
-    return val >= min && val <= max;
+    return (!(val < min)) && (!(max < val));
   }
-
-  virtual void Serialize(tCoreOutput& os) const;
 
   /*!
    * Sets bounds to new value
    *
    * \param new_bounds new value
    */
-  void Set(const tBounds& new_bounds);
+  inline void Set(const tBounds<T>& new_bounds)
+  {
+    action = new_bounds.action;
+    max = new_bounds.max;
+    min = new_bounds.min;
+    out_of_bounds_default.SetValue(new_bounds.out_of_bounds_default);
+  }
 
   /*!
    * \param val Value to adjust to range
    * \return Adjusted value
    */
-  double ToBounds(double val) const;
+  inline T ToBounds(T val) const
+  {
+    if (val < min)
+    {
+      return min;
+    }
+    else if (max < val)
+    {
+      return max;
+    }
+    return val;
+
+  }
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__DATATYPE__TBOUNDS_H
+#endif // core__datatype__tBounds_h__

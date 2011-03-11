@@ -19,28 +19,36 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__TABSTRACTPORT_H
-#define CORE__PORT__TABSTRACTPORT_H
+#ifndef core__port__tAbstractPort_h__
+#define core__port__tAbstractPort_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/tRuntimeSettings.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/port/tPortFlags.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/tFrameworkElement.h"
 
+namespace rrlib
+{
+namespace serialization
+{
+class tGenericObject;
+} // namespace rrlib
+} // namespace serialization
+
 namespace finroc
 {
 namespace core
 {
-class tDataType;
 class tLinkEdge;
 class tNetPort;
-class tPortData;
+class tPortDataManager;
 class tCoreOutput;
-class tTypedObject;
 
 /*!
  * \author Max Reichardt
@@ -101,7 +109,7 @@ private:
 protected:
 
   /*! Type of port data */
-  tDataType* const data_type;
+  const rrlib::serialization::tDataTypeBase data_type;
 
   /*! Minimum network update interval. Value < 0 means default for this type */
   int16 min_net_update_time;
@@ -256,7 +264,7 @@ protected:
    * \param target Target port
    * \param data Data that was sent
    */
-  void UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, tTypedObject* data);
+  void UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, rrlib::serialization::tGenericObject* data);
 
   template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   /*!
@@ -416,7 +424,7 @@ public:
   /*!
    * \return Type of port data
    */
-  inline tDataType* GetDataType() const
+  inline const rrlib::serialization::tDataTypeBase GetDataType() const
   {
     return data_type;
   }
@@ -478,7 +486,7 @@ public:
    *
    * This method is only supported by a subset of ports that have a MultiTypePortDataBufferPool
    */
-  virtual tPortData* GetUnusedBuffer(tDataType* dt)
+  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::serialization::tDataTypeBase dt)
   {
     throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
   }
@@ -677,4 +685,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__TABSTRACTPORT_H
+#endif // core__port__tAbstractPort_h__

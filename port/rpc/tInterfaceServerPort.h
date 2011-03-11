@@ -19,19 +19,27 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__RPC__TINTERFACESERVERPORT_H
-#define CORE__PORT__RPC__TINTERFACESERVERPORT_H
+#ifndef core__port__rpc__tInterfaceServerPort_h__
+#define core__port__rpc__tInterfaceServerPort_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/rpc/tInterfacePort.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tDataTypeBase;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
 class tAbstractMethodCallHandler;
-class tDataType;
 
 /*! Base class for server implementation of interface */
 class tInterfaceServerPort : public tInterfacePort
@@ -50,24 +58,37 @@ protected:
 
 public:
 
-  tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, tDataType* type) :
+  tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type) :
       tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer),
       handler(NULL)
   {
   }
 
-  tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, tDataType* type, tAbstractMethodCallHandler* ch, int custom_flags = 0) :
+  tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type, tAbstractMethodCallHandler* ch, int custom_flags = 0) :
       tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags),
       handler(NULL)
   {
     SetCallHandler(ch);
   }
 
-  tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, tDataType* type, tAbstractMethodCallHandler* ch, int custom_flags, int lock_level) :
+  tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type, tAbstractMethodCallHandler* ch, int custom_flags, int lock_level) :
       tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags, lock_level),
       handler(NULL)
   {
     SetCallHandler(ch);
+  }
+
+  /*!
+   * Get buffer to use in method return (has one lock)
+   *
+   * (for non-cc types only)
+   * \param dt Data type of object to get buffer of
+   * \return Unused buffer of type
+   */
+  template <typename T>
+  inline ::std::shared_ptr<T> GetBufferForReturn(const rrlib::serialization::tDataTypeBase& dt = NULL)
+  {
+    return GetBufferForCall<T>(dt);
   }
 
   /*!
@@ -83,4 +104,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__RPC__TINTERFACESERVERPORT_H
+#endif // core__port__rpc__tInterfaceServerPort_h__

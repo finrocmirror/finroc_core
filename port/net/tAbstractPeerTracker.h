@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__NET__TABSTRACTPEERTRACKER_H
-#define CORE__PORT__NET__TABSTRACTPEERTRACKER_H
+#ifndef core__port__net__tAbstractPeerTracker_h__
+#define core__port__net__tAbstractPeerTracker_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
@@ -204,4 +205,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__NET__TABSTRACTPEERTRACKER_H
+#endif // core__port__net__tAbstractPeerTracker_h__

@@ -19,11 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
-#include "core/plugin/tConstructorCreateModuleAction.h"
+#ifndef core__plugin__tConstructorCreateModuleActionImpl_h__
+#define core__plugin__tConstructorCreateModuleActionImpl_h__
 
-#ifndef CORE__PLUGIN__TCONSTRUCTORCREATEMODULEACTIONIMPL_H
-#define CORE__PLUGIN__TCONSTRUCTORCREATEMODULEACTIONIMPL_H
+#include "rrlib/finroc_core_utils/definitions.h"
+#include "core/plugin/tConstructorCreateModuleAction.h"
 
 namespace finroc
 {
@@ -147,4 +147,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PLUGIN__TCONSTRUCTORCREATEMODULEACTIONIMPL_H
+#endif // core__plugin__tConstructorCreateModuleActionImpl_h__

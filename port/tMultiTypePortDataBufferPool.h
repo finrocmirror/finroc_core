@@ -19,21 +19,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__TMULTITYPEPORTDATABUFFERPOOL_H
-#define CORE__PORT__TMULTITYPEPORTDATABUFFERPOOL_H
+#ifndef core__port__tMultiTypePortDataBufferPool_h__
+#define core__port__tMultiTypePortDataBufferPool_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tLockOrderLevels.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/port/std/tPortDataBufferPool.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-class tPortData;
+class tPortDataManager;
 
 /*!
  * \author Max Reichardt
@@ -60,7 +61,7 @@ private:
    * \param data_type DataType of buffer to create
    * \return Returns unused buffer of possibly newly created pool
    */
-  tPortData* PossiblyCreatePool(tDataType* data_type);
+  tPortDataManager* PossiblyCreatePool(rrlib::serialization::tDataTypeBase data_type);
 
 public:
 
@@ -73,7 +74,7 @@ public:
    * \param data_type DataType of returned buffer.
    * \return Returns unused buffer. If there are no buffers that can be reused, a new buffer is allocated.
    */
-  inline tPortData* GetUnusedBuffer(tDataType* data_type)
+  inline tPortDataManager* GetUnusedBuffer(rrlib::serialization::tDataTypeBase data_type)
   {
     // search for correct pool
     for (size_t i = 0u, n = pools.Size(); i < n; i++)
@@ -110,4 +111,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__TMULTITYPEPORTDATABUFFERPOOL_H
+#endif // core__port__tMultiTypePortDataBufferPool_h__

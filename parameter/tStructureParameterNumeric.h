@@ -19,15 +19,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TSTRUCTUREPARAMETERNUMERIC_H
-#define CORE__PARAMETER__TSTRUCTUREPARAMETERNUMERIC_H
+#ifndef core__parameter__tStructureParameterNumeric_h__
+#define core__parameter__tStructureParameterNumeric_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tBounds.h"
 #include "core/parameter/tStructureParameterBase.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
+#include "core/port/cc/tCCPortDataManager.h"
+#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/serialization/tDataType.h"
 #include "core/datatype/tNumber.h"
 #include "core/parameter/tStructureParameter.h"
 
@@ -49,7 +52,7 @@ private:
   tUnit* unit;
 
   /*! Bounds of this parameter */
-  tBounds bounds;
+  tBounds<T> bounds;
 
   /*! Default value */
   T default_val;
@@ -59,7 +62,8 @@ private:
    */
   inline tNumber* GetBuffer()
   {
-    return (reinterpret_cast<tCCInterThreadContainer<tNumber>*>(this->cc_value))->GetData();
+    rrlib::serialization::tGenericObject* go = this->cc_value->GetObject();
+    return go->GetData<tNumber>();
   }
 
   /*!
@@ -67,7 +71,7 @@ private:
    *
    * \param cCurrent CoreNumber buffer
    */
-  void Set(tNumber* cn);
+  void Set(tNumber cn);
 
 public:
 
@@ -75,9 +79,9 @@ public:
 
   tStructureParameterNumeric(const util::tString& name, T default_value);
 
-  tStructureParameterNumeric(const util::tString& name, T default_value, bool constructor_prototype, tBounds bounds_);
+  tStructureParameterNumeric(const util::tString& name, T default_value, bool constructor_prototype, tBounds<T> bounds_);
 
-  tStructureParameterNumeric(const util::tString& name, T default_value, tBounds bounds2);
+  tStructureParameterNumeric(const util::tString& name, T default_value, tBounds<T> bounds2);
 
   virtual ::finroc::core::tStructureParameterBase* DeepCopy()
   {
@@ -97,9 +101,15 @@ public:
   /*!
    * \return Bounds of this paramete
    */
-  inline tBounds GetBounds()
+  inline tBounds<T> GetBounds()
   {
     return bounds;
+  }
+
+  /*! Helper to get this safely during static initialization */
+  inline static rrlib::serialization::tDataType<tNumber> GetDataType()
+  {
+    return rrlib::serialization::tDataType<tNumber>();
   }
 
   virtual void Set(const util::tString& new_value);
@@ -110,7 +120,7 @@ public:
   inline void Set(T new_value)
   {
     tNumber cn(new_value);
-    Set(&(cn));
+    Set(cn);
   }
 
 };
@@ -120,4 +130,4 @@ public:
 
 #include "core/parameter/tStructureParameterNumeric.hpp"
 
-#endif // CORE__PARAMETER__TSTRUCTUREPARAMETERNUMERIC_H
+#endif // core__parameter__tStructureParameterNumeric_h__

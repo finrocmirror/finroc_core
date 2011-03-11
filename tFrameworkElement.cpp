@@ -602,6 +602,8 @@ void tFrameworkElement::InitImpl()
       util::tLock lock3(flag_mutex);
       flags |= tCoreFlags::cREADY;
     }
+
+    NotifyAnnotationsInitialized();
   }
 
 }
@@ -677,6 +679,8 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
       // synchronizes on runtime - so no elements will be deleted while runtime is locked
       {
         util::tLock lock4(GetRegistryLock());
+
+        NotifyAnnotationsDelete();
 
         FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Deleting");
         //System.out.println("Deleting " + toString() + " (" + hashCode() + ")");

@@ -19,13 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__STREAM__TSINGLETONPORT_H
-#define CORE__PORT__STREAM__TSINGLETONPORT_H
+#ifndef core__port__stream__tSingletonPort_h__
+#define core__port__stream__tSingletonPort_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/std/tPort.h"
+#include "core/port/tPort.h"
 #include "core/port/std/tPortBase.h"
 
 namespace finroc
@@ -79,7 +80,7 @@ public:
    * \param pci Bundled creation information about port
    * \param singleton The Singleton object that is contained in this port
    */
-  tSingletonPort(tPortCreationInfo pci, T* singleton);
+  tSingletonPort(tPortCreationInfo pci, T& singleton);
 
 };
 
@@ -88,4 +89,4 @@ public:
 
 #include "core/port/stream/tSingletonPort.hpp"
 
-#endif // CORE__PORT__STREAM__TSINGLETONPORT_H
+#endif // core__port__stream__tSingletonPort_h__

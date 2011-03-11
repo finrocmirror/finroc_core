@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tInterfaceNetPort.h"
-#include "core/port/rpc/tMethodCall.h"
 #include "core/port/rpc/method/tAbstractMethod.h"
+#include "core/port/rpc/tMethodCall.h"
 #include "core/port/rpc/tMethodCallException.h"
 #include "core/port/rpc/tRPCThreadPool.h"
 #include "core/port/rpc/method/tAbstractMethodCallHandler.h"
@@ -38,7 +38,6 @@ tInterfaceNetPort::tInterfaceNetPort(tPortCreationInfo pci) :
 
 void tInterfaceNetPort::ExecuteCallFromNetwork(tMethodCall* mc, tAbstractMethodCallHandler* mhandler)
 {
-  mc->DeserializeParamaters();
   mc->GetMethod()->ExecuteFromMethodCallObject(mc, mhandler, NULL);
   if (!mc->GetMethod()->IsVoidMethod())
   {
@@ -102,7 +101,6 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall* mc)
       }
       else
       {
-        mc->DeserializeParamaters();
         mc->GetMethod()->ExecuteFromMethodCallObject(mc, mhandler, NULL);
         if (!m->IsVoidMethod())
         {

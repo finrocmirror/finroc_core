@@ -45,7 +45,7 @@
 // Internal includes with ""
 //----------------------------------------------------------------------
 #include "core/port/tEdgeAggregator.h"
-#include "core/port/cc/tPortNumeric.h"
+#include "core/port/tPort.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 
 //----------------------------------------------------------------------
@@ -86,32 +86,32 @@ class tGroup : public tFinstructableGroup
 //----------------------------------------------------------------------
 public:
 
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tCI : public TPort
+  template < typename T = double >
+  struct tCI : public tPort<T>
   {
     tCI(tGroup *parent, const finroc::util::tString &name)
-        : TPort(tPortCreationInfo(name, parent->controller_input, tPortFlags::cINPUT_PROXY))
+        : tPort<T>(tPortCreationInfo(name, parent->controller_input, tPortFlags::cINPUT_PROXY))
     {}
   };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tCO : public TPort
+  template < typename T = double >
+  struct tCO : public tPort<T>
   {
     tCO(tGroup *parent, const finroc::util::tString &name)
-        : TPort(tPortCreationInfo(name, parent->controller_output, tPortFlags::cOUTPUT_PROXY))
+        : tPort<T>(tPortCreationInfo(name, parent->controller_output, tPortFlags::cOUTPUT_PROXY))
     {}
   };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tSI : public TPort
+  template < typename T = double >
+  struct tSI : public tPort<T>
   {
     tSI(tGroup *parent, const finroc::util::tString &name)
-        : TPort(tPortCreationInfo(name, parent->sensor_input, tPortFlags::cINPUT_PROXY))
+        : tPort<T>(tPortCreationInfo(name, parent->sensor_input, tPortFlags::cINPUT_PROXY))
     {}
   };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tSO : public TPort
+  template < typename T = double >
+  struct tSO : public tPort<T>
   {
     tSO(tGroup *parent, const finroc::util::tString &name)
-        : TPort(tPortCreationInfo(name, parent->sensor_output, tPortFlags::cOUTPUT_PROXY))
+        : tPort<T>(tPortCreationInfo(name, parent->sensor_output, tPortFlags::cOUTPUT_PROXY))
     {}
   };
 

@@ -45,7 +45,7 @@
 // Internal includes with ""
 //----------------------------------------------------------------------
 #include "core/port/tEdgeAggregator.h"
-#include "core/port/cc/tPortNumeric.h"
+#include "core/port/tPort.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 
 //----------------------------------------------------------------------
@@ -99,18 +99,18 @@ protected:
 //----------------------------------------------------------------------
 public:
 
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tInput : public TPort
+  template < typename T = double >
+  struct tInput : public tPort<T>
   {
     tInput(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->input, false)
+        : tPort<T>(name, parent->input, false)
     {}
   };
-  template < typename TPort = finroc::core::tPortNumeric >
-  struct tOutput : public TPort
+  template < typename T = double >
+  struct tOutput : public tPort<T>
   {
     tOutput(tModule *parent, const finroc::util::tString &name)
-        : TPort(name, parent->output, true)
+        : tPort<T>(name, parent->output, true)
     {}
   };
 

@@ -19,11 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tDataType.h"
 #include "core/port/std/tPortDataManager.h"
-#include "core/port/std/tPortData.h"
-#include "core/port/std/tPortDataCreationInfo.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {
@@ -31,56 +27,43 @@ namespace core
 {
 tPortDataManager tPortDataManager::cPROTOTYPE;
 size_t tPortDataManager::cREF_COUNTERS_OFFSET = ((char*)&(tPortDataManager::cPROTOTYPE.ref_counters[0])) - ((char*)&(tPortDataManager::cPROTOTYPE));
-
-tPortDataManager::~tPortDataManager()
-{
-  if (data != NULL)
-  {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Deleting Manager - data:", data);
-  }
-  else
-  {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Deleting Manager - data: null");
-  }
-  delete data;
-}
 rrlib::logging::tLogDomainSharedPointer init_domain_dummy = tPortDataManager::log_domain();
 
 const size_t tPortDataManager::cNUMBER_OF_REFERENCES;
 const size_t tPortDataManager::cREF_INDEX_MASK;
 
-tPortDataManager::tPortDataManager(tDataType* dt, const tPortData* port_data) :
+tPortDataManager::tPortDataManager() :
     ref_counters(),
     unused(true),
-    data(NULL),
-    reuse_counter(0)
+    derived_from(NULL),
+    reuse_counter(0),
+    lock_iD(0)
 {
-  assert((port_data == NULL || port_data->GetType() == dt || dt->IsTransactionType()) && "Prototype needs same data type");
-
-  //System.out.println("New port data manager");
-
-  tPortDataCreationInfo* pdci = tPortDataCreationInfo::Get();
-  pdci->SetManager(this);
-  pdci->SetPrototype(port_data);
-
-  data = (tPortData*)dt->CreateInstance();
-
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating PortDataManager - data: ", (*data));
-
-  pdci->Reset();
-  pdci->InitUnitializedObjects();
+  //log(LogLevel.LL_DEBUG_VERBOSE_1, logDomain, "Creating PortDataManager"); //<" + dt.getName() + "> - data: " + data);
 }
 
 void tPortDataManager::DangerousDirectRecycle()
 {
-  data->HandleRecycle();
+  if (derived_from != NULL)
+  {
+    derived_from->GetCurrentRefCounter()->ReleaseLock();
+    derived_from = NULL;
+
+    //TODO:
+    //type = null;
+    //data = null;
+  }
+  else
+  {
+    GetObject()->Clear();
+  }
   reuse_counter++;
   ::finroc::util::tReusable::Recycle();
 }
 
 const util::tString tPortDataManager::ToString() const
 {
-  return util::tStringBuilder("PortDataManager for ") + (data != NULL ? data->ToString() : "null content") + " (Locks: " + GetCurrentRefCounter()->GetLocks() + ")";
+  return util::tStringBuilder("PortDataManager for ") + GetContentString() + " (Locks: " + GetCurrentRefCounter()->GetLocks() + ")";
 }
 
 } // namespace finroc

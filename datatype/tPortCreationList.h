@@ -19,17 +19,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__DATATYPE__TPORTCREATIONLIST_H
-#define CORE__DATATYPE__TPORTCREATIONLIST_H
+#ifndef core__datatype__tPortCreationList_h__
+#define core__datatype__tPortCreationList_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/tCoreFlags.h"
 #include "core/port/tPortFlags.h"
+#include "rrlib/serialization/tDataType.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/tFrameworkElement.h"
-#include "core/port/std/tPortData.h"
+#include "rrlib/serialization/tSerializable.h"
 #include "core/datatype/tDataTypeReference.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
 
 namespace rrlib
 {
@@ -43,10 +54,7 @@ namespace finroc
 {
 namespace core
 {
-class tDataType;
 class tAbstractPort;
-class tCoreInput;
-class tCoreOutput;
 
 /*!
  * \author Max Reichardt
@@ -55,7 +63,7 @@ class tCoreOutput;
  * Is only meant to be used in StructureParameters
  * For this reason, it is not real-time capable and a little more memory-efficient.
  */
-class tPortCreationList : public tPortData
+class tPortCreationList : public rrlib::serialization::tSerializable
 {
 public:
 
@@ -70,7 +78,7 @@ public:
     util::tString name;
 
     /*! Port type - as string (used remote) */
-    tDataTypeReference* type;
+    tDataTypeReference type;
 
     /*! Output port? */
     bool output_port;
@@ -121,7 +129,10 @@ private:
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tPortCreationList> cTYPE;
+
+  /*! Log domain for edges */
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "port_creation_list");
 
 private:
 
@@ -136,7 +147,7 @@ private:
    * \param output output port
    * \param prototype Port prototype (only interesting for listener)
    */
-  void CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, int flags_, const util::tString& name, tDataType* dt, bool output, tAbstractPort* prototype);
+  void CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, int flags_, const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output, tAbstractPort* prototype);
 
   /*!
    * Returns all child ports of specified framework element
@@ -157,7 +168,7 @@ public:
    * \param dt Data type
    * \param output Output port? (possibly irrelevant)
    */
-  void Add(const util::tString& name, tDataType* dt, bool output);
+  void Add(const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output);
 
   /*!
    * Applies changes to another IO vector
@@ -167,7 +178,7 @@ public:
    */
   void ApplyChanges(tFrameworkElement* io_vector_, int flags_);
 
-  virtual void Deserialize(tCoreInput& is);
+  virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
   virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
 
@@ -196,7 +207,7 @@ public:
    */
   void InitialSetup(tFrameworkElement* managed_io_vector, int port_creation_flags, bool show_output_port_selection_);
 
-  virtual void Serialize(tCoreOutput& os) const;
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 
   virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
 
@@ -213,4 +224,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__DATATYPE__TPORTCREATIONLIST_H
+#endif // core__datatype__tPortCreationList_h__

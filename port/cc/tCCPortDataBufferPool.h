@@ -19,23 +19,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__CC__TCCPORTDATABUFFERPOOL_H
-#define CORE__PORT__CC__TCCPORTDATABUFFERPOOL_H
+#ifndef core__port__cc__tCCPortDataBufferPool_h__
+#define core__port__cc__tCCPortDataBufferPool_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "core/port/cc/tCCPortDataManager.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/container/tWonderQueue.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPool.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
-#include "core/port/cc/tCCPortDataContainer.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPoolTL.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
 class tCCPortQueueElement;
+class tCCPortDataManagerTL;
 
 /*!
  * \author Max Reichardt
@@ -45,34 +46,34 @@ class tCCPortQueueElement;
  * Otherwise the application becomes real-time-capable later - after enough buffers
  * have been allocated.
  */
-class tCCPortDataBufferPool : public util::tReusablesPoolTL<tCCPortDataContainer<> >
+class tCCPortDataBufferPool : public util::tReusablesPoolTL<tCCPortDataManagerTL>
 {
 private:
 
-  ::std::shared_ptr<util::tObject> thread_local_cache_infos;
+  std::shared_ptr<util::tObject> thread_local_cache_infos;
 
   /*! List/Queue with buffers returned by other threads */
   util::tWonderQueue<tCCPortQueueElement> returned_buffers;
 
   /*! Pool with "inter-thread" buffers */
-  util::tReusablesPool<tCCInterThreadContainer<> >* inter_threads;
+  util::tReusablesPool<tCCPortDataManager>* inter_threads;
 
 public:
 
   /*! Data Type of buffers in pool */
-  tDataType* data_type;
+  const rrlib::serialization::tDataTypeBase data_type;
 
 private:
 
   /*!
    * \return Create new buffer/instance of port data and add to pool
    */
-  tCCPortDataContainer<>* CreateBuffer();
+  tCCPortDataManagerTL* CreateBuffer();
 
   /*!
    * \return Create new buffer/instance of port data and add to pool
    */
-  tCCInterThreadContainer<>* CreateInterThreadBuffer();
+  tCCPortDataManager* CreateInterThreadBuffer();
 
   /*!
    * Helper method for getting lock for above method
@@ -90,7 +91,7 @@ public:
   /*!
    * \param data_type Type of buffers in pool
    */
-  tCCPortDataBufferPool(tDataType* data_type_, int initial_size);
+  tCCPortDataBufferPool(const rrlib::serialization::tDataTypeBase& data_type_, int initial_size);
 
   virtual void AutoDelete()
   {
@@ -100,11 +101,7 @@ public:
   /* (non-Javadoc)
    * @see jc.container.ReusablesPoolTL#controlledDelete()
    */
-  virtual void ControlledDelete()
-  {
-    inter_threads->ControlledDelete();
-    ::finroc::util::tReusablesPoolTL<tCCPortDataContainer<> >::ControlledDelete();
-  }
+  virtual void ControlledDelete();
 
   /*!
    * (Is final so it is not used polymorphically.
@@ -113,9 +110,9 @@ public:
    *
    * \return Returns unused buffer. If there are no buffers that can be reused, a new buffer is allocated.
    */
-  inline tCCPortDataContainer<>* GetUnusedBuffer()
+  inline tCCPortDataManagerTL* GetUnusedBuffer()
   {
-    tCCPortDataContainer<>* pc = GetUnused();
+    tCCPortDataManagerTL* pc = GetUnused();
     if (pc != NULL)
     {
       return pc;
@@ -126,9 +123,9 @@ public:
   /*!
    * \return Returns unused "inter-thread" buffer. If there are no buffers that can be reused, a new buffer is allocated.
    */
-  inline tCCInterThreadContainer<>* GetUnusedInterThreadBuffer()
+  inline tCCPortDataManager* GetUnusedInterThreadBuffer()
   {
-    tCCInterThreadContainer<>* pc = inter_threads->GetUnused();
+    tCCPortDataManager* pc = inter_threads->GetUnused();
     if (pc != NULL)
     {
       return pc;
@@ -141,11 +138,11 @@ public:
    *
    * \param pd Port data to release lock of
    */
-  void ReleaseLock(tCCPortDataContainer<>* pd);
+  void ReleaseLock(tCCPortDataManagerTL* pd);
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__CC__TCCPORTDATABUFFERPOOL_H
+#endif // core__port__cc__tCCPortDataBufferPool_h__

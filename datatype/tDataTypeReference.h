@@ -19,14 +19,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
-#include "core/portdatabase/tDataType.h"
 
-#ifndef CORE__DATATYPE__TDATATYPEREFERENCE_H
-#define CORE__DATATYPE__TDATATYPEREFERENCE_H
+#ifndef core__datatype__tDataTypeReference_h__
+#define core__datatype__tDataTypeReference_h__
 
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
 #include "core/datatype/tNumber.h"
-#include "core/portdatabase/tDataTypeRegister.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/datatype/tCoreString.h"
 
 namespace finroc
@@ -43,7 +44,7 @@ class tDataTypeReference : public tCoreString
 public:
 
   /*! Data Type */
-  static tDataType* cTYPE;
+  static rrlib::serialization::tDataType<tDataTypeReference> cTYPE;
 
   tDataTypeReference() {}
 
@@ -55,17 +56,17 @@ public:
   /*!
    * \return Referenced data type - null if it doesn't exist in this runtime
    */
-  inline tDataType* Get()
+  inline rrlib::serialization::tDataTypeBase Get()
   {
-    return tDataTypeRegister::GetInstance()->GetDataType(GetBuffer().ToString());
+    return rrlib::serialization::tDataTypeBase::FindType(GetBuffer().ToString());
   }
 
   /*!
    * \param dt new DataType to reference
    */
-  inline void Set(tDataType* dt)
+  inline void Set(rrlib::serialization::tDataTypeBase dt)
   {
-    ::finroc::core::tCoreString::Set(dt->GetName());
+    ::finroc::core::tCoreString::Set(dt.GetName());
   }
 
 };
@@ -73,4 +74,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__DATATYPE__TDATATYPEREFERENCE_H
+#endif // core__datatype__tDataTypeReference_h__

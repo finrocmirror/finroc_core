@@ -19,10 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PORT__TPORTFLAGS_H
-#define CORE__PORT__TPORTFLAGS_H
+#ifndef core__port__tPortFlags_h__
+#define core__port__tPortFlags_h__
+
+#include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/tCoreFlags.h"
 
@@ -130,4 +131,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PORT__TPORTFLAGS_H
+#endif // core__port__tPortFlags_h__

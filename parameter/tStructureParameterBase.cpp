@@ -20,19 +20,19 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/parameter/tStructureParameterBase.h"
-#include "core/port/std/tPortDataManager.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tThreadLocalCache.h"
-#include "core/port/std/tPortData.h"
-#include "core/buffers/tCoreInput.h"
+#include "rrlib/serialization/tInputStream.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "core/portdatabase/tDataTypeRegister.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tTypedObject.h"
+#include "rrlib/serialization/tOutputStream.h"
+#include "rrlib/serialization/tStringInputStream.h"
 
 namespace finroc
 {
 namespace core
 {
-tStructureParameterBase::tStructureParameterBase(const util::tString& name_, tDataType* type_, bool constructor_prototype) :
+tStructureParameterBase::tStructureParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype) :
     name(name_),
     type(type_),
     value(NULL),
@@ -45,14 +45,14 @@ tStructureParameterBase::tStructureParameterBase(const util::tString& name_, tDa
   }
 }
 
-void tStructureParameterBase::CreateBuffer(tDataType* type_)
+void tStructureParameterBase::CreateBuffer(rrlib::serialization::tDataTypeBase type_)
 {
   DeleteBuffer();
-  if (type_->IsStdType())
+  if (tFinrocTypeInfo::IsStdType(type_))
   {
-    tPortDataManager* pdm = new tPortDataManager(type_, NULL);
+    tPortDataManager* pdm = tPortDataManager::Create(type_);  //new PortDataManagerRaw(type, null);
     pdm->GetCurrentRefCounter()->SetOrAddLocks(static_cast<int8>(1));
-    value = pdm->GetData();
+    value = pdm;
     assert((value != NULL));
   }
   else
@@ -65,7 +65,7 @@ void tStructureParameterBase::DeleteBuffer()
 {
   if (value != NULL)
   {
-    value->GetManager()->ReleaseLock();
+    value->ReleaseLock();
   }
   if (cc_value != NULL)
   {
@@ -73,7 +73,7 @@ void tStructureParameterBase::DeleteBuffer()
   }
 }
 
-void tStructureParameterBase::Deserialize(tCoreInput& is)
+void tStructureParameterBase::Deserialize(rrlib::serialization::tInputStream& is)
 {
   if (RemoteValue())
   {
@@ -99,12 +99,12 @@ void tStructureParameterBase::Deserialize(tCoreInput& is)
 
 void tStructureParameterBase::Deserialize(const rrlib::xml2::tXMLNode& node)
 {
-  tDataType* dt = type;
+  rrlib::serialization::tDataTypeBase dt = type;
   if (node.HasAttribute("type"))
   {
-    dt = tDataTypeRegister::GetInstance()->GetDataType(node.GetStringAttribute("type"));
+    dt = rrlib::serialization::tDataTypeBase::FindType(node.GetStringAttribute("type"));
   }
-  tTypedObject* val = ValPointer();
+  rrlib::serialization::tTypedObject* val = ValPointer();
   if (val == NULL || val->GetType() != dt)
   {
     CreateBuffer(dt);
@@ -113,11 +113,11 @@ void tStructureParameterBase::Deserialize(const rrlib::xml2::tXMLNode& node)
   val->Deserialize(node);
 }
 
-void tStructureParameterBase::Serialize(tCoreOutput& os) const
+void tStructureParameterBase::Serialize(rrlib::serialization::tOutputStream& os) const
 {
   os.WriteString(name);
-  os.WriteString(type->GetName());
-  tTypedObject* val = ValPointer();
+  os.WriteString(type.GetName());
+  rrlib::serialization::tTypedObject* val = ValPointer();
 
   os.WriteBoolean(val != NULL);
   if (val != NULL)
@@ -128,10 +128,10 @@ void tStructureParameterBase::Serialize(tCoreOutput& os) const
 
 void tStructureParameterBase::Serialize(rrlib::xml2::tXMLNode& node) const
 {
-  tTypedObject* val = ValPointer();
+  rrlib::serialization::tTypedObject* val = ValPointer();
   if (val->GetType() != type)
   {
-    node.SetAttribute("type", val->GetType()->GetName());
+    node.SetAttribute("type", val->GetType().GetName());
   }
   val->Serialize(node);
 }
@@ -144,14 +144,16 @@ void tStructureParameterBase::Set(const util::tString& s)
   else
   {
     assert((type != NULL));
-    tDataType* dt = sSerializationHelper::GetTypedStringDataType(type, s);
-    tTypedObject* val = ValPointer();
+    rrlib::serialization::tDataTypeBase dt = sSerializationHelper::GetTypedStringDataType(type, s);
+    rrlib::serialization::tTypedObject* val = ValPointer();
     if (val->GetType() != dt)
     {
       CreateBuffer(dt);
       val = ValPointer();
     }
-    val->Deserialize(s);
+
+    rrlib::serialization::tStringInputStream sis(s);
+    val->Deserialize(sis);
   }
 }
 

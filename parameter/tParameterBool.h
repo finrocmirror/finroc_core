@@ -19,81 +19,91 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__PARAMETER__TPARAMETERBOOL_H
-#define CORE__PARAMETER__TPARAMETERBOOL_H
+#ifndef core__parameter__tParameterBool_h__
+#define core__parameter__tParameterBool_h__
 
-#include "core/port/cc/tCCPort.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "rrlib/serialization/tDataType.h"
 #include "core/datatype/tBoolean.h"
-#include "core/parameter/tParameterInfo.h"
-#include "core/port/cc/tCCPortDataContainer.h"
-#include "core/parameter/tCCParameter.h"
-#include "core/port/tPortCreationInfo.h"
-#include "core/port/tPortFlags.h"
+#include "core/port/tPort.h"
+#include "core/parameter/tParameter.h"
+#include "core/port/tThreadLocalCache.h"
+#include "rrlib/serialization/tGenericObject.h"
+#include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/cc/tCCPortBase.h"
-#include "core/port/cc/tCCPortListener.h"
+#include "core/port/tPortListener.h"
 
 namespace finroc
 {
 namespace core
 {
 class tFrameworkElement;
-class tCCPortData;
+class tAbstractPort;
 
 /*!
  * \author Max Reichardt
  *
  * Parameter template class for cc types
  */
-class tParameterBool : public tCCParameter<tBoolean>
+class tParameterBool : public tParameter<tBoolean>
 {
-  /*! Special Port class to load value when initialized */
-  class tPortImpl2 : public tCCParameter< ::finroc::core::tBoolean>::tPortImpl, public tCCPortListener<>
+  /*!
+   * Caches bool value of parameter port (optimization)
+   */
+  class tBoolCache : public util::tUncopyableObject, public tPortListener<tBoolean>
   {
   public:
 
-    /*! Cached current value (we will much more often that it will be changed) */
+    /*! Cached current value (we will much more often read than it will be changed) */
     volatile bool current_value;
 
-    tPortImpl2(const util::tString& description, tFrameworkElement* parent) :
-        tCCParameter< ::finroc::core::tBoolean>::tPortImpl(tPortCreationInfo(description, parent, tBoolean::cTYPE, tPortFlags::cINPUT_PORT)),
+    tBoolCache() :
         current_value(false)
-    {
-      AddPortListenerRaw(this);
-    }
+    {}
 
-    virtual void PortChanged(tCCPortBase* origin, const tCCPortData* value)
+    virtual void PortChanged(tAbstractPort* origin, const tBoolean& value)
     {
-      current_value = (reinterpret_cast<const tBoolean*>(value))->Get();
+      current_value = (static_cast<const tBoolean&>(value)).Get();
     }
 
   };
 
 public:
 
-  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, const util::tString& config_entry)
+  /*! Bool cache instance used for this parameter */
+  ::std::shared_ptr<tBoolCache> cache;
+
+  /*! Data Type */
+  static rrlib::serialization::tDataType<tBoolCache> cTYPE;
+
+  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, const util::tString& config_entry) :
+      tParameter<tBoolean>(description, parent, tBoolean::cTYPE),
+      cache(new tBoolCache())
   {
     // this(description,parent,defaultValue);
-    this->wrapped = new tPortImpl2(description, parent);
-    (static_cast<tPortImpl2*>(this->wrapped))->current_value = default_value;
-    SetDefault(*tBoolean::GetInstance(default_value));
-    (static_cast<tPortImpl2*>(this->wrapped))->info->SetConfigEntry(config_entry);
+    this->AddPortListener(cache.get());
+    cache->current_value = default_value;
+    SetDefault(tBoolean::GetInstance(default_value));
+    SetConfigEntry(config_entry);
   }
 
-  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value)
+  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value) :
+      tParameter<tBoolean>(description, parent, tBoolean::cTYPE),
+      cache(new tBoolCache())
   {
-    this->wrapped = new tPortImpl2(description, parent);
-    (static_cast<tPortImpl2*>(this->wrapped))->current_value = default_value;
-    SetDefault(*tBoolean::GetInstance(default_value));
+    this->AddPortListener(cache.get());
+    cache->current_value = default_value;
+    SetDefault(tBoolean::GetInstance(default_value));
   }
 
   /*!
    * \return Current parameter value
    */
-  inline bool Get() const
+  inline bool GetValue() const
   {
-    return (static_cast<tPortImpl2*>(this->wrapped))->current_value;
+    return cache->current_value;
   }
 
   /*!
@@ -101,19 +111,10 @@ public:
    */
   inline void Set(bool b)
   {
-    tCCPortDataContainer<tBoolean>* cb = GetUnusedBuffer();
-    cb->GetData()->Set(b);
-    BrowserPublish(cb);
-    (static_cast<tPortImpl2*>(this->wrapped))->current_value = b;
-  }
-
-  /*!
-   * Set parameter to value in config file that is associated with given string
-   * \param config_entry name of parameter entry in config value
-   */
-  void SetConfigEntry(const util::tString& config_entry)
-  {
-    (static_cast<tPortImpl2*>(this->wrapped))->info->SetConfigEntry(config_entry);
+    tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(tBoolean::cTYPE);
+    cb->GetObject()->GetData<tBoolean>()->Set(b);
+    (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
+    cache->current_value = b;
   }
 
 };
@@ -121,4 +122,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__PARAMETER__TPARAMETERBOOL_H
+#endif // core__parameter__tParameterBool_h__
