@@ -19,15 +19,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef core__port__cc__tCCQueueFragment_h__
-#define core__port__cc__tCCQueueFragment_h__
+
+#ifndef core__port__cc__tCCQueueFragmentRaw_h__
+#define core__port__cc__tCCQueueFragmentRaw_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tThreadLocalCache.h"
-#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/cc/tCCPortDataManager.h"
 #include "rrlib/finroc_core_utils/container/tQueueFragment.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tGenericObject;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
@@ -40,12 +48,11 @@ class tCCPortQueueElement;
  *
  * Fragment for dequeueing bunch of values
  */
-template<typename T>
-class tCCQueueFragment : public util::tQueueFragment<tCCPortDataManager, tCCPortQueueElement>
+class tCCQueueFragmentRaw : public util::tQueueFragment<tCCPortDataManager, tCCPortQueueElement>
 {
 public:
 
-  tCCQueueFragment() {}
+  tCCQueueFragmentRaw() {}
 
   /*!
    * Dequeue one queue element.
@@ -53,7 +60,7 @@ public:
    *
    * \return Next element in QueueFragment
    */
-  inline T* DequeueAutoLocked()
+  inline rrlib::serialization::tGenericObject* DequeueAutoLocked()
   {
     tCCPortDataManager* tmp = ::finroc::util::tQueueFragment<tCCPortDataManager, tCCPortQueueElement>::Dequeue();
     if (tmp == NULL)
@@ -61,7 +68,7 @@ public:
       return NULL;
     }
     tThreadLocalCache::Get()->AddAutoLock(tmp);
-    return tmp->GetObject()->GetData<T>();
+    return tmp->GetObject();
   }
 
   /*!
@@ -80,4 +87,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // core__port__cc__tCCQueueFragment_h__
+#endif // core__port__cc__tCCQueueFragmentRaw_h__
