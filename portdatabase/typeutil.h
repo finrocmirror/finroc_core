@@ -160,7 +160,7 @@ template <typename T>
 inline static void ApplyChange(T& obj, const T& transaction, int64_t param1, int64_t param2)
 {
   //obj = transaction;
-  rrlib::serialization::deepcopy::Copy(transaction, obj, NULL);
+  rrlib::serialization::sSerialization::DeepCopy(transaction, obj, NULL);
 }
 
 void InitCCTypes();

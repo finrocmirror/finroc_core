@@ -35,7 +35,6 @@
 #include "plugins/blackboard/tSingleBufferedBlackboardServer.h"
 #include "rrlib/serialization/tMemoryBuffer.h"
 #include "plugins/blackboard/tBlackboardClient.h"
-#include "plugins/blackboard/tRawBlackboardClient.h"
 #include "plugins/blackboard/tBlackboardWriteAccess.h"
 #include "plugins/blackboard/tBBLockException.h"
 #include "core/port/rpc/tMethodCallException.h"
@@ -172,7 +171,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
   blackboard::tBlackboardManager::GetInstance();
   __attribute__((unused))
   blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>* server2 = new blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>("testbb");
-  blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> client(blackboard::tRawBlackboardClient::GetDefaultPci().Derive("testbb"), true, -1);
+  blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> client("testbb", NULL);
   //client.autoConnect();
   tFrameworkElement::InitAll();
 
@@ -186,7 +185,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
   }
 
   std::shared_ptr<std::vector<tMemoryBuffer> > buf = client.GetUnusedChangeBuffer();
-  buf->resize(1);
+  rrlib::serialization::sSerialization::ResizeVector(*buf, 1);
   tCoreOutput co(&buf->at(0));
   co.WriteInt(0x4BCDEF12);
   co.Close();

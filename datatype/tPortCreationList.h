@@ -31,8 +31,10 @@
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "core/tFrameworkElement.h"
-#include "rrlib/serialization/tSerializable.h"
 #include "core/datatype/tDataTypeReference.h"
+
+#include "rrlib/serialization/tSerializable.h"
+#include "rrlib/serialization/tStlContainerSuitable.h"
 
 namespace rrlib
 {
@@ -63,7 +65,7 @@ class tAbstractPort;
  * Is only meant to be used in StructureParameters
  * For this reason, it is not real-time capable and a little more memory-efficient.
  */
-class tPortCreationList : public rrlib::serialization::tSerializable
+class tPortCreationList : public rrlib::serialization::tSerializable, public rrlib::serialization::tStlUnsuitable
 {
 public:
 

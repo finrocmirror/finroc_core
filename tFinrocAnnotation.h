@@ -26,6 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/serialization/tTypedObject.h"
+#include "rrlib/serialization/tStlContainerSuitable.h"
 
 namespace rrlib
 {
@@ -50,7 +51,7 @@ class tFrameworkElement;
  * If annotation should be available over the net (e.g. in finstruct),
  * the serialization methods need to be overridden.
  */
-class tFinrocAnnotation : public rrlib::serialization::tTypedObject
+class tFinrocAnnotation : public rrlib::serialization::tTypedObject, public rrlib::serialization::tStlUnsuitable
 {
   friend class tFrameworkElement;
   friend class tAnnotatable;
