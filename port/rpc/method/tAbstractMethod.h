@@ -129,13 +129,13 @@ public:
   }
 
   template <typename T>
-  bool HasLock(T t)
+  bool HasLock(const T& t)
   {
     return tParameterUtil<T>::HasLock(t);
   }
 
   template <typename T>
-  void Cleanup(T t)
+  void Cleanup(const T& t)
   {
     tParameterUtil<T>::Cleanup(t);
   }
@@ -149,6 +149,18 @@ public:
    * \return Is this a void method?
    */
   virtual bool IsVoidMethod() = 0;
+
+  template <typename T>
+  struct tArg
+  {
+    typedef T type;
+  };
+
+  template <typename T>
+  struct tArg<tPortDataPtr<T> >
+  {
+    typedef tPortDataPtr<T>& type;
+  };
 
 };
 

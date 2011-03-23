@@ -39,7 +39,7 @@ tVoid4Method<HANDLER, P1, P2, P3, P4>::tVoid4Method(tPortInterface& port_interfa
 }
 
 template<typename HANDLER, typename P1, typename P2, typename P3, typename P4>
-void tVoid4Method<HANDLER, P1, P2, P3, P4>::Call(tInterfaceClientPort port, P1 p1, P2 p2, P3 p3, P4 p4, bool force_same_thread)
+void tVoid4Method<HANDLER, P1, P2, P3, P4>::Call(tInterfaceClientPort port, tP1Arg p1, tP2Arg p2, tP3Arg p3, tP4Arg p4, bool force_same_thread)
 {
   //1
   assert((HasLock(p1)));  //2

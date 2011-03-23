@@ -47,8 +47,8 @@ void tCallParameter::Deserialize(tCoreInput& is)
   else if (type == cOBJECT)
   {
     assert((value == NULL));
-    value = std::shared_ptr<rrlib::serialization::tGenericObject>(is.ReadObjectInInterThreadContainer());
-    tPortDataManager* pdm = tPortDataManager::GetManager(value);
+    value = tPortDataPtr<rrlib::serialization::tGenericObject>(is.ReadObjectInInterThreadContainer());
+    tPortDataManager* pdm = value.GetManagerT<tPortDataManager>();
     if (pdm != NULL)
     {
       pdm->lock_iD = is.ReadInt();
@@ -71,7 +71,7 @@ void tCallParameter::Serialize(tCoreOutput& oos) const
   else if (type == cOBJECT)
   {
     oos.WriteObject(value.get());
-    tPortDataManager* pdm = tPortDataManager::GetManager(value);
+    tPortDataManager* pdm = value.GetManagerT<tPortDataManager>();
     if (pdm != NULL)
     {
       oos.WriteInt(pdm->lock_iD);

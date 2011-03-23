@@ -95,11 +95,11 @@ protected:
    * \return Unused buffer of type
    */
   template <typename T>
-  inline ::std::shared_ptr<T> GetBufferForCall(const rrlib::serialization::tDataTypeBase& dt = NULL)
+  inline tPortDataPtr<T> GetBufferForCall(const rrlib::serialization::tDataTypeBase& dt = NULL)
   {
     tPortDataManager* mgr = GetUnusedBufferRaw(rrlib::serialization::tDataType<T>());
     mgr->GetCurrentRefCounter()->SetOrAddLocks((int8_t)1);
-    return std::shared_ptr<T>(mgr->GetObject()->GetData<T>(), tSharedPtrDeleteHandler<tPortDataManager>(mgr));
+    return tPortDataPtr<T>(mgr);
   }
 
   virtual int GetMaxQueueLengthImpl() const

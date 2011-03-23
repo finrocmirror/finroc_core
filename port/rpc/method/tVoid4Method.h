@@ -43,6 +43,12 @@ class tVoid4Method : public tAbstractVoidMethod
 {
 public:
 
+  //1
+  typedef typename tArg<P1>::type tP1Arg; //2
+  typedef typename tArg<P2>::type tP2Arg; //3
+  typedef typename tArg<P3>::type tP3Arg; //4
+  typedef typename tArg<P4>::type tP4Arg; //n
+
   /*!
    * \param port_interface PortInterface that method belongs to
    * \param name Name of method        //1
@@ -65,7 +71,7 @@ public:
    * \param p4 Parameter 4 (with one lock for call - typically server will release it) //n
    * \param force_same_thread Force that method call is performed by this thread on local machine (even if method call default is something else)
    */
-  void Call(tInterfaceClientPort port, P1 p1, P2 p2, P3 p3, P4 p4, bool force_same_thread = false);
+  void Call(tInterfaceClientPort port, tP1Arg p1, tP2Arg p2, tP3Arg p3, tP4Arg p4, bool force_same_thread = false);
 
   virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall* call, tInterfaceNetPort* net_port, tAbstractAsyncReturnHandler* ret_handler, int net_timeout)
   {

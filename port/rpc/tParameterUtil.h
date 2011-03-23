@@ -28,7 +28,6 @@
 #include <boost/type_traits/is_enum.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
 #include <boost/type_traits/is_integral.hpp>
-#include "core/portdatabase/tSharedPtrDeleteHandler.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
@@ -55,12 +54,12 @@ class tParameterUtilBase
 {
 public:
 
-  static void Cleanup(T t)
+  static void Cleanup(const T& t)
   {
     // do nothing
   }
 
-  static bool HasLock(T t)
+  static bool HasLock(const T& t)
   {
     return true;
   }
@@ -76,54 +75,44 @@ public:
     p->type = tCallParameter::cOBJECT;
     static_assert(typeutil::tIsCCType<T>::value, "Only CC types may be passed by value");
     tCCPortDataManager* mgr = tParamaterUtilHelper::GetInterThreadBuffer(rrlib::serialization::tDataType<T>());
-    p->value.reset(mgr->GetObject(), tSharedPtrDeleteHandler<tCCPortDataManager>(mgr));
+    p->value = tPortDataPtr<rrlib::serialization::tGenericObject>(mgr->GetObject(), mgr);
   }
 };
 
 // Variant for shared_pointers
 template <typename T, bool NUM>
-class tParameterUtilBase<std::shared_ptr<T>, NUM>
+class tParameterUtilBase<tPortDataPtr<T>, NUM>
 {
 public:
-  static void Cleanup(const std::shared_ptr<T>& t)
+  static void Cleanup(const tPortDataPtr<T>& t)
   {
     // do nothing
   }
 
-  static bool HasLock(const std::shared_ptr<T>& t)
+  static bool HasLock(const tPortDataPtr<T>& t)
   {
     return true;
   }
 
-  static void GetParam(tCallParameter* p, std::shared_ptr<T>& val)
+  static void GetParam(tCallParameter* p, tPortDataPtr<T>& val)
   {
     //val.reset(p->value, p->value->GetData<T>());
-    val = std::shared_ptr<T>(p->value, p->value->GetData<T>());
+    val = std::move(p->value);
     p->Clear();
   }
 
-  static void AddParam(tCallParameter* p, std::shared_ptr<T>& val)
+  static void AddParam(tCallParameter* p, tPortDataPtr<T>& val)
   {
     p->type = tCallParameter::cOBJECT;
-    tPortDataManager* mgr = tSharedPtrDeleteHandler<tPortDataManager>::GetManager(val);
+    typename tPortDataPtr<T>::tManager* mgr = val.GetManager();
     if (mgr != NULL)
     {
-      p->value = std::shared_ptr<rrlib::serialization::tGenericObject>(val, mgr->GetObject());
-      return;
+      p->value = std::move(val);
     }
-    tCCPortDataManager* cmgr = tSharedPtrDeleteHandler<tCCPortDataManager>::GetManager(val);
-    if (cmgr != NULL)
+    else
     {
-      p->value = std::shared_ptr<rrlib::serialization::tGenericObject>(val, cmgr->GetObject());
-      return;
+      p->value = tPortDataPtr<T>();
     }
-    tCCPortDataManagerTL* cmgrtl = tSharedPtrDeleteHandler<tCCPortDataManagerTL>::GetManager(val);
-    if (cmgrtl != NULL)
-    {
-      p->value = std::shared_ptr<rrlib::serialization::tGenericObject>(val, cmgrtl->GetObject());
-      return;
-    }
-    throw new util::tRuntimeException("No manager found");
   }
 };
 
@@ -132,12 +121,12 @@ template <typename T>
 class tParameterUtilBase<T, true>
 {
 public:
-  static void Cleanup(T t)
+  static void Cleanup(const T& t)
   {
     // do nothing
   }
 
-  static bool HasLock(T t)
+  static bool HasLock(const T& t)
   {
     return true;
   }
@@ -148,7 +137,7 @@ public:
     p->Clear();
   }
 
-  static void AddParam(tCallParameter* p, T val)
+  static void AddParam(tCallParameter* p, const T& val)
   {
     p->type = tCallParameter::cNUMBER;
     p->number.SetValue(val);

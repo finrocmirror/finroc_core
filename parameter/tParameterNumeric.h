@@ -69,7 +69,7 @@ class tParameterNumeric : public tParameter<T>
 public:
 
   /*! Number cache instance used for this parameter */
-  ::std::shared_ptr<tNumberCache> cache;
+  std::shared_ptr<tNumberCache> cache;
 
   tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds<T> b, const util::tString& config_entry);
 

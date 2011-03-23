@@ -46,7 +46,7 @@ class tPortInterface : public util::tUncopyableObject
 private:
 
   /*! List of methods in interface */
-  ::std::auto_ptr<util::tSimpleList<tAbstractMethod*> > methods;
+  util::tSimpleList<tAbstractMethod*> methods;
 
 public:
 
@@ -66,7 +66,7 @@ public:
    */
   inline bool ContainsMethod(tAbstractMethod* method)
   {
-    return methods->Contains(method);
+    return methods.Contains(method);
   }
 
   /*!
@@ -84,8 +84,8 @@ public:
    */
   inline tAbstractMethod* GetMethod(size_t id)
   {
-    assert((id < methods->Size()));
-    return methods->Get(id);
+    assert((id < methods.Size()));
+    return methods.Get(id);
   }
 
   /*!

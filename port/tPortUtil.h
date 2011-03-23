@@ -24,13 +24,24 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/serialization/tGenericObjectWrapper.h"
-#include "core/portdatabase/tSharedPtrDeleteHandler.h"
 #include "core/port/tPortTypeMap.h"
+#include "core/port/tPortDataPtr.h"
 
 namespace finroc
 {
 namespace core
 {
+
+// is friend of tPortDatatPtr
+class tPortUtilHelper
+{
+public:
+  template <typename T>
+  static void ResetManager(tPortDataPtr<T>& data)
+  {
+    data.manager = NULL;
+  }
+};
 
 /*!
  * \author Max Reichardt
@@ -44,32 +55,28 @@ class tPortUtilBase
 public:
   typedef tPortDataManager tManager;
   typedef tPortDataManager tManagerTL;
-  typedef tSharedPtrDeleteHandler<tManagerTL> tDeleteHandlerTL;
-  typedef tSharedPtrDeleteHandler<tManager> tDeleteHandler;
   typedef tPortBase tPortType;
+  typedef tPortDataPtr<T> tDataPtr;
+  typedef tPortDataPtr<const T> tConstDataPtr;
 
-  static std::shared_ptr<T> GetUnusedBuffer(tPortType* port)
+  static tDataPtr GetUnusedBuffer(tPortType* port)
   {
-    tManagerTL* mgr = port->GetUnusedBufferRaw();
-    return std::shared_ptr<T>(mgr->GetObject()->GetData<T>(), tDeleteHandlerTL(mgr));
+    return tDataPtr(port->GetUnusedBufferRaw(), tPortDataPtrBase::eUNUSED);
   }
 
-  static std::shared_ptr<const T> GetValueWithLock(tPortType* port)
+  static tConstDataPtr GetValueWithLock(tPortType* port)
   {
-    tManager* mgr = port->GetLockedUnsafeRaw();
-    return std::shared_ptr<const T>(mgr->GetObject()->GetData<T>(), tDeleteHandler(mgr));
+    return tConstDataPtr(port->GetLockedUnsafeRaw());
   }
 
-  static std::shared_ptr<const T> DequeueSingle(tPortType* port)
+  static tConstDataPtr DequeueSingle(tPortType* port)
   {
-    tManager* mgr = port->DequeueSingleUnsafeRaw();
-    return std::shared_ptr<const T>(mgr->GetObject()->GetData<T>(), tDeleteHandler(mgr));
+    return tConstDataPtr(port->DequeueSingleUnsafeRaw());
   }
 
-  static std::shared_ptr<const T> GetPull(tPortType* port, bool intermediate_assign)
+  static tConstDataPtr GetPull(tPortType* port, bool intermediate_assign)
   {
-    tManager* mgr = port->GetPullLockedUnsafe(intermediate_assign);
-    return std::shared_ptr<const T>(mgr->GetObject()->GetData<T>(), tDeleteHandler(mgr));
+    return tConstDataPtr(port->GetPullLockedUnsafe(intermediate_assign));
   }
 
   static void GetValue(tPortType* port, T& result)
@@ -103,16 +110,23 @@ public:
     rrlib::serialization::sSerialization::DeepCopy(t, *(go->GetData<T>()), NULL);
   }
 
-  static void Publish(tPortType* port, std::shared_ptr<const T>& t)
+  static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    tManagerTL* mgr = tDeleteHandlerTL::GetManager(t, true);
-    assert(mgr != NULL && "You should acquire buffers to publish large data with getUnusedBuffer()");
+    tManagerTL* mgr = t.GetManager();
+    tPortUtilHelper::ResetManager(t);
+    port->Publish(mgr);
+  }
+
+  static void Publish(tPortType* port, tDataPtr& t)
+  {
+    tManagerTL* mgr = t.GetManager();
+    tPortUtilHelper::ResetManager(t);
     port->Publish(mgr);
   }
 
   static void CopyAndPublish(tPortType* port, const T& t)
   {
-    std::shared_ptr<T> buf = GetUnusedBuffer(port);
+    tDataPtr buf = GetUnusedBuffer(port);
     rrlib::serialization::sSerialization::DeepCopy(t, *buf);
     Publish(port, buf);
   }
@@ -130,17 +144,17 @@ class tPortUtilBaseNumeric
 public:
   typedef tCCPortDataManager tManager;
   typedef tCCPortDataManagerTL tManagerTL;
-  typedef tSharedPtrDeleteHandler<tManagerTL> tDeleteHandlerTL;
-  typedef tSharedPtrDeleteHandler<tManager> tDeleteHandler;
   typedef tCCPortBase tPortType;
+  typedef tPortDataPtr<T> tDataPtr;
+  typedef tPortDataPtr<const T> tConstDataPtr;
 
-  static std::shared_ptr<T> GetUnusedBuffer(tPortType* port)
+  static tDataPtr GetUnusedBuffer(tPortType* port)
   {
     tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
-    return std::shared_ptr<T>(mgr->GetObject()->GetData<tNumber>()->GetValuePtr<T>(), tDeleteHandlerTL(mgr));
+    return tDataPtr(mgr->GetObject()->GetData<tNumber>()->GetValuePtr<T>(), mgr);
   }
 
-  static std::shared_ptr<const T> GetValueWithLock(tPortType* port)
+  static tConstDataPtr GetValueWithLock(tPortType* port)
   {
 
     // copy value and possibly convert number to correct type (a little inefficient, but should be used scarcely anyway)
@@ -149,20 +163,20 @@ public:
     tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
     tNumber* new_num = c->GetObject()->GetData<tNumber>();
     new_num->SetValue(val, port->GetUnit());
-    return std::shared_ptr<const T>(new_num->GetValuePtr<T>(), tDeleteHandler(c));
+    return tConstDataPtr(new_num->GetValuePtr<T>(), c);
   }
 
-  static std::shared_ptr<const T> DequeueSingle(tPortType* port)
+  static tConstDataPtr DequeueSingle(tPortType* port)
   {
     T val;
     DequeueSingle(port, val);
     tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
     tNumber* new_num = c->GetObject()->GetData<tNumber>();
     new_num->SetValue(val, port->GetUnit());
-    return std::shared_ptr<const T>(new_num->GetValuePtr<T>(), tDeleteHandler(c));
+    return tConstDataPtr(new_num->GetValuePtr<T>(), c);
   }
 
-  static std::shared_ptr<const T> GetPull(tPortType* port, bool intermediate_assign)
+  static tConstDataPtr GetPull(tPortType* port, bool intermediate_assign)
   {
     tManager* mgr = port->GetPullInInterthreadContainerRaw(intermediate_assign);
     tNumber* num = mgr->GetObject()->GetData<tNumber>();
@@ -170,7 +184,7 @@ public:
     {
       num->SetValue(static_cast<T>(num->GetUnit()->ConvertTo(num->Value<double>(), port->GetUnit())));
     }
-    return std::shared_ptr<const T>(num->GetValuePtr<T>(), tDeleteHandler(mgr));
+    return tConstDataPtr(num->GetValuePtr<T>(), mgr);
   }
 
   static void GetValue(tPortType* port, T& result)
@@ -230,10 +244,17 @@ public:
     port->BrowserPublishRaw(mgr);
   }
 
-  static void Publish(tPortType* port, std::shared_ptr<const T>& t)
+  static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    tManagerTL* mgr = tDeleteHandlerTL::GetManager(t, true);
-    assert(mgr != NULL && "You should acquire buffers to publish large data with getUnusedBuffer()");
+    tManagerTL* mgr = t.GetManager();
+    tPortUtilHelper::ResetManager(t);
+    port->Publish(mgr);
+  }
+
+  static void Publish(tPortType* port, tDataPtr& t)
+  {
+    tManagerTL* mgr = t.GetManager();
+    tPortUtilHelper::ResetManager(t);
     port->Publish(mgr);
   }
 
@@ -268,32 +289,28 @@ class tPortUtilBase<T, true, ENUM, NUM>
 public:
   typedef tCCPortDataManager tManager;
   typedef tCCPortDataManagerTL tManagerTL;
-  typedef tSharedPtrDeleteHandler<tManagerTL> tDeleteHandlerTL;
-  typedef tSharedPtrDeleteHandler<tManager> tDeleteHandler;
   typedef tCCPortBase tPortType;
+  typedef tPortDataPtr<T> tDataPtr;
+  typedef tPortDataPtr<const T> tConstDataPtr;
 
-  static std::shared_ptr<T> GetUnusedBuffer(tPortType* port)
+  static tDataPtr GetUnusedBuffer(tPortType* port)
   {
-    tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
-    return std::shared_ptr<T>(mgr->GetObject()->GetData<T>(), tDeleteHandlerTL(mgr));
+    return tDataPtr(tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType()));
   }
 
-  static std::shared_ptr<const T> GetValueWithLock(tPortType* port)
+  static tConstDataPtr GetValueWithLock(tPortType* port)
   {
-    tManager* mgr = port->GetInInterThreadContainer();
-    return std::shared_ptr<const T>(mgr->GetObject()->GetData<T>(), tDeleteHandler(mgr));
+    return tConstDataPtr(port->GetInInterThreadContainer());
   }
 
-  static std::shared_ptr<const T> DequeueSingle(tPortType* port)
+  static tConstDataPtr DequeueSingle(tPortType* port)
   {
-    tManager* mgr = port->DequeueSingleUnsafeRaw();
-    return std::shared_ptr<const T>(mgr->GetObject()->GetData<T>(), tDeleteHandler(mgr));
+    return tConstDataPtr(port->DequeueSingleUnsafeRaw());
   }
 
-  static std::shared_ptr<const T> GetPull(tPortType* port, bool intermediate_assign)
+  static tConstDataPtr GetPull(tPortType* port, bool intermediate_assign)
   {
-    tManager* mgr = port->GetPullInInterthreadContainerRaw(intermediate_assign);
-    return std::shared_ptr<const T>(mgr->GetObject()->GetData<T>(), tDeleteHandler(mgr));
+    return tConstDataPtr(port->GetPullInInterthreadContainerRaw(intermediate_assign));
   }
 
   static void GetValue(tPortType* port, T& result)
@@ -330,10 +347,17 @@ public:
     port->BrowserPublishRaw(mgr);
   }
 
-  static void Publish(tPortType* port, std::shared_ptr<const T>& t)
+  static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    tManagerTL* mgr = tDeleteHandlerTL::GetManager(t, true);
-    assert(mgr != NULL && "You should acquire buffers to publish large data with getUnusedBuffer()");
+    tManagerTL* mgr = t.GetManager();
+    tPortUtilHelper::ResetManager(t);
+    port->Publish(mgr);
+  }
+
+  static void Publish(tPortType* port, tDataPtr& t)
+  {
+    tManagerTL* mgr = t.GetManager();
+    tPortUtilHelper::ResetManager(t);
     port->Publish(mgr);
   }
 
@@ -378,7 +402,7 @@ public:
 };
 
 template<typename T>
-class tPortParent : public tPortParentBase < T, typeutil::tIsCCType<T>::value || boost::is_enum<T>::value || boost::is_integral<T>::value || boost::is_floating_point<T>::value >
+class tPortParent : public tPortParentBase < T, typeutil::tUseCCType<T>::value >
   {};
 
 } // namespace finroc

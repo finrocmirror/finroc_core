@@ -134,12 +134,9 @@ public:
     return memcmp(GetObject()->GetRawDataPtr(), other, GetObject()->GetType().GetSize()) == 0;
   }
 
-  inline static void SharedPointerRelease(tCCPortDataManagerTL* manager, bool active)
+  inline void HandlePointerRelease()
   {
-    if (active)
-    {
-      manager->ReleaseLock();
-    }
+    ReleaseLock();
   }
 
   /*!

@@ -32,7 +32,7 @@ tCoreOutput::tCoreOutput() :
 {
 }
 
-tCoreOutput::tCoreOutput(::std::shared_ptr<rrlib::serialization::tSink> sink) :
+tCoreOutput::tCoreOutput(std::shared_ptr<rrlib::serialization::tSink> sink) :
     rrlib::serialization::tOutputStream(sink)
 {
 }

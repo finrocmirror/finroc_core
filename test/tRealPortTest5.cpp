@@ -47,7 +47,7 @@ using rrlib::serialization::tMemoryBuffer;
 
 const int tRealPortTest5::cNUM_OF_PORTS;
 const int tRealPortTest5::cCYCLE_TIME;
-::std::shared_ptr<tPort<int> > tRealPortTest5::input, tRealPortTest5::output, tRealPortTest5::p1, tRealPortTest5::p2, tRealPortTest5::p3;
+std::shared_ptr<tPort<int> > tRealPortTest5::input, tRealPortTest5::output, tRealPortTest5::p1, tRealPortTest5::p2, tRealPortTest5::p3;
 tRuntimeEnvironment* tRealPortTest5::re;
 const int tRealPortTest5::cCYCLES;
 
@@ -56,12 +56,12 @@ void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // set up
   //RuntimeEnvironment.initialInit(/*new ByteArrayInputStream(new byte[0])*/);
   re = tRuntimeEnvironment::GetInstance();
-  output = ::std::shared_ptr<tPort<int> >(new tPort<int>("test1", NULL, true));
-  input = ::std::shared_ptr<tPort<int> >(new tPort<int>("test2", NULL, false));
+  output = std::shared_ptr<tPort<int> >(new tPort<int>("test1", NULL, true));
+  input = std::shared_ptr<tPort<int> >(new tPort<int>("test2", NULL, false));
   output->ConnectToTarget(*input);
-  p1 = ::std::shared_ptr<tPort<int> >(new tPort<int>("p1", NULL, false));
-  p2 = ::std::shared_ptr<tPort<int> >(new tPort<int>("p2", NULL, false));
-  p3 = ::std::shared_ptr<tPort<int> >(new tPort<int>("p3", NULL, false));
+  p1 = std::shared_ptr<tPort<int> >(new tPort<int>("p1", NULL, false));
+  p2 = std::shared_ptr<tPort<int> >(new tPort<int>("p2", NULL, false));
+  p3 = std::shared_ptr<tPort<int> >(new tPort<int>("p3", NULL, false));
   p3->GetWrapped()->Link(tRuntimeEnvironment::GetInstance(), "portlink");
   tFrameworkElement::InitAll();
   //output.std11CaseReceiver = input;
@@ -128,8 +128,8 @@ void tRealPortTest5::TestSimpleEdge2()
   output.ConnectToTarget(input);
   tFrameworkElement::InitAll();
 
-  ::std::shared_ptr<blackboard::tBlackboardBuffer> buf = output.GetUnusedBuffer();
-  tCoreOutput co(buf);
+  tPortDataPtr<blackboard::tBlackboardBuffer> buf = output.GetUnusedBuffer();
+  tCoreOutput co(std::shared_ptr<rrlib::serialization::tSink>(buf.get()));
   co.WriteInt(42);
   co.Close();
   output.Publish(buf);
@@ -184,7 +184,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
   {
   }
 
-  std::shared_ptr<std::vector<tMemoryBuffer> > buf = client.GetUnusedChangeBuffer();
+  tPortDataPtr<std::vector<tMemoryBuffer> > buf = client.GetUnusedChangeBuffer();
   rrlib::serialization::sSerialization::ResizeVector(*buf, 1);
   tCoreOutput co(&buf->at(0));
   co.WriteInt(0x4BCDEF12);
@@ -200,7 +200,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
 
   buf.reset();
 
-  std::shared_ptr<const std::vector<tMemoryBuffer> > cbuf = client.Read();
+  tPortDataPtr<const std::vector<tMemoryBuffer> > cbuf = client.Read();
   tCoreInput ci(&cbuf->at(0));
   util::tSystem::out.Println(ci.ReadInt());
 
@@ -211,15 +211,15 @@ void tRealPortTest5::TestSimpleEdgeBB()
   int64 size = 0;
   for (int i = 0; i < cCYCLES; i++)
   {
-    buf = client.WriteLock(300000000);
+    std::vector<tMemoryBuffer>* buf3 = client.WriteLock(300000000);
 
-    co.Reset(&buf->at(0));
+    co.Reset(&buf3->at(0));
 
     co.WriteInt(i);
     co.WriteInt(45);
     co.Close();
 
-    size = buf->at(0).GetSize();
+    size = buf3->at(0).GetSize();
 
     client.Unlock();
 

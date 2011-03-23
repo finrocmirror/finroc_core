@@ -48,7 +48,7 @@ tRuntimeEnvironment::tStaticDeleter::~tStaticDeleter()
   tRuntimeEnvironment::Shutdown();
 }
 
-::std::shared_ptr<tRuntimeEnvironment> tRuntimeEnvironment::instance;
+std::shared_ptr<tRuntimeEnvironment> tRuntimeEnvironment::instance;
 tRuntimeEnvironment* tRuntimeEnvironment::instance_raw_ptr = NULL;
 bool tRuntimeEnvironment::active = false;
 util::tMutexLockOrder tRuntimeEnvironment::static_class_mutex(tLockOrderLevels::cFIRST);
@@ -60,7 +60,7 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
     unrelated(NULL)
 {
   assert(instance == NULL);
-  instance = ::std::shared_ptr<tRuntimeEnvironment>(this);
+  instance = std::shared_ptr<tRuntimeEnvironment>(this);
   instance_raw_ptr = this;
   active = true;
 }
@@ -186,7 +186,7 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   tConstant::StaticInit();  // needs to be done after unit
   util::tTime::GetInstance();  // (possibly) init timing thread
   util::tGarbageCollector::CreateAndStartInstance();
-  ::std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock = tThreadLocalCache::StaticInit();  // can safely be done first
+  std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock = tThreadLocalCache::StaticInit();  // can safely be done first
   tMethodCallSyncher::StaticInit();  // dito
   util::tBoundedQElementContainer::StaticInit();
   util::tChunkedBuffer::StaticInit();

@@ -62,10 +62,10 @@ private:
   static const int8 cDISCOVERED = 0, cREMOVED = 1;
 
   /*! Peer tracker instances that are used - can be multiple */
-  static ::std::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > instances;
+  static std::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > instances;
 
   /*! "Lock" to above - for safe deinitialization */
-  ::std::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > instances_lock;
+  std::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > instances_lock;
 
 protected:
 

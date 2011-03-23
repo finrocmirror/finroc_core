@@ -102,7 +102,7 @@ public:
    * \return Unused buffer of type
    */
   template <typename T>
-  inline ::std::shared_ptr<T> GetBufferForCall(const rrlib::serialization::tDataTypeBase& dt = NULL)
+  inline tPortDataPtr<T> GetBufferForCall(const rrlib::serialization::tDataTypeBase& dt = NULL)
   {
     return this->wrapped->GetBufferForCall<T>(dt);
   }

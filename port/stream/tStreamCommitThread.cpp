@@ -27,7 +27,7 @@ namespace finroc
 {
 namespace core
 {
-::std::shared_ptr<tStreamCommitThread> tStreamCommitThread::instance;
+std::shared_ptr<tStreamCommitThread> tStreamCommitThread::instance;
 
 tStreamCommitThread::tStreamCommitThread() :
     tCoreLoopThreadBase(tRuntimeSettings::cSTREAM_THREAD_CYCLE_TIME->GetValue(), false),

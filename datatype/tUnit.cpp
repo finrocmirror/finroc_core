@@ -94,7 +94,7 @@ void tUnit::CalculateFactors(util::tSimpleList<tUnit*>& units)
   for (size_t j = 0u; j < units.Size(); j++)
   {
     tUnit* unit = units.Get(j);
-    unit->factors = ::std::auto_ptr< ::finroc::util::tArrayWrapper<double> >(new ::finroc::util::tArrayWrapper<double>(units.Size()));
+    unit->factors = std::shared_ptr< ::finroc::util::tArrayWrapper<double> >(new ::finroc::util::tArrayWrapper<double>(units.Size()));
     for (size_t i = 0u; i < units.Size(); i++)
     {
       (*(unit->factors))[i] = unit->GetConversionFactor(units.Get(i));

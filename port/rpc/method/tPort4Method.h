@@ -44,6 +44,12 @@ class tPort4Method : public tAbstractNonVoidMethod
 {
 public:
 
+  //1
+  typedef typename tArg<P1>::type tP1Arg; //2
+  typedef typename tArg<P2>::type tP2Arg; //3
+  typedef typename tArg<P3>::type tP3Arg; //4
+  typedef typename tArg<P4>::type tP4Arg; //n
+
   /*!
    * \param port_interface PortInterface that method belongs to
    * \param name Name of method        //1
@@ -60,15 +66,15 @@ public:
    * Call method and wait for return value.
    * (is performed in same thread and blocks)
    *
-   * \param port Port that call is performed from (typically 'this')
-   * \param p1 Parameter 1 (with one lock for call - typically server will release it)
-   * \param p2 Parameter 2 (with one lock for call - typically server will release it)
-   * \param p3 Parameter 3 (with one lock for call - typically server will release it)
-   * \param p4 Parameter 4 (with one lock for call - typically server will release it)//
+   * \param port Port that call is performed from (typically 'this')                   //1
+   * \param p1 Parameter 1 (with one lock for call - typically server will release it) //2
+   * \param p2 Parameter 2 (with one lock for call - typically server will release it) //3
+   * \param p3 Parameter 3 (with one lock for call - typically server will release it) //4
+   * \param p4 Parameter 4 (with one lock for call - typically server will release it) //n
    * \param net_timout Network timeout in ms (value <= 0 means method default)
    * \return return value of method
    */
-  R Call(tInterfaceClientPort port, P1 p1, P2 p2, P3 p3, P4 p4, int net_timeout = -1);
+  R Call(tInterfaceClientPort port, tP1Arg p1, tP2Arg p2, tP3Arg p3, tP4Arg p4, int net_timeout = -1);
 
   /*!
    * Asynchronously call method.
@@ -84,7 +90,7 @@ public:
    * \param net_timout Network timeout in ms (value <= 0 means method default)
    * \param force_same_thread Force that method call is performed by this thread on local machine (even if method call default is something else)
    */
-  void CallAsync(const tInterfaceClientPort* port, tAsyncReturnHandler<R>* handler, P1 p1, P2 p2, P3 p3, P4 p4, int net_timeout = -1, bool force_same_thread = false);
+  void CallAsync(const tInterfaceClientPort* port, tAsyncReturnHandler<R>* handler, tP1Arg p1, tP2Arg p2, tP3Arg p3, tP4Arg p4, int net_timeout = -1, bool force_same_thread = false);
 
   virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall* mc, tInterfaceNetPort* net_port, tAbstractAsyncReturnHandler* ret_handler, int net_timeout);
 

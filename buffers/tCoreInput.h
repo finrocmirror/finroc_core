@@ -32,7 +32,7 @@
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "rrlib/serialization/tInputStream.h"
 
-#include "core/portdatabase/tSharedPtrDeleteHandler.h"
+#include "core/port/tPortDataPtr.h"
 
 namespace finroc
 {
@@ -110,7 +110,7 @@ public:
    *
    * \return Buffer with read object (no locks)
    */
-  inline ::std::shared_ptr<rrlib::serialization::tGenericObject> ReadObjectInInterThreadContainer()
+  inline tPortDataPtr<rrlib::serialization::tGenericObject> ReadObjectInInterThreadContainer()
   {
     rrlib::serialization::tGenericObject* tmp = ReadObject(true);
     bool cc_type = tFinrocTypeInfo::IsCCType(tmp->GetType());
@@ -118,13 +118,13 @@ public:
     if (cc_type)
     {
       tCCPortDataManager* mgr = (tCCPortDataManager*)tmp->GetManager();
-      return std::shared_ptr<rrlib::serialization::tGenericObject>(tmp, tSharedPtrDeleteHandler<tCCPortDataManager>(mgr));
+      return tPortDataPtr<rrlib::serialization::tGenericObject>(tmp, mgr);
     }
     else
     {
       tPortDataManager* mgr = (tPortDataManager*)tmp->GetManager();
       mgr->GetCurrentRefCounter()->SetOrAddLocks(1);
-      return std::shared_ptr<rrlib::serialization::tGenericObject>(tmp, tSharedPtrDeleteHandler<tPortDataManager>(mgr));
+      return tPortDataPtr<rrlib::serialization::tGenericObject>(tmp, mgr);
     }
 
   }

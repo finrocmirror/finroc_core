@@ -73,7 +73,7 @@ class tParameterBool : public tParameter<tBoolean>
 public:
 
   /*! Bool cache instance used for this parameter */
-  ::std::shared_ptr<tBoolCache> cache;
+  std::shared_ptr<tBoolCache> cache;
 
   /*! Data Type */
   static rrlib::serialization::tDataType<tBoolCache> cTYPE;

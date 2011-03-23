@@ -66,18 +66,16 @@ void tAbstractCall::DeserializeImpl(tCoreInput* is, bool skip_parameters)
   }
 }
 
-::std::shared_ptr<rrlib::serialization::tGenericObject> tAbstractCall::GetParamGeneric(int index)
+tPortDataPtr<rrlib::serialization::tGenericObject> tAbstractCall::GetParamGeneric(int index)
 {
-  tCallParameter p = params[index];
+  tCallParameter& p = params[index];
   if (p.type == tCallParameter::cNULLPARAM || p.value == NULL)
   {
-    return std::shared_ptr<rrlib::serialization::tGenericObject>();
+    return tPortDataPtr<rrlib::serialization::tGenericObject>();
   }
   else
   {
-    ::std::shared_ptr<rrlib::serialization::tGenericObject> go = p.value;
-    p.Clear();
-    return go;
+    return std::move(p.value);
   }
 }
 

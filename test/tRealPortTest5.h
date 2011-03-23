@@ -42,11 +42,11 @@ private:
 
   static const int cCYCLE_TIME = 3;
 
-  static const int cCYCLES = 10000000;
+  static const int cCYCLES = 1000;
 
 public:
 
-  static ::std::shared_ptr<tPort<int> > input, output, p1, p2, p3;
+  static std::shared_ptr<tPort<int> > input, output, p1, p2, p3;
 
   static tRuntimeEnvironment* re;
 

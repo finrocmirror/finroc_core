@@ -52,12 +52,12 @@ tPortInterface tAdminServer::cMETHODS("Admin Interface");
 tVoid2Method<tAdminServer*, int, int> tAdminServer::cCONNECT(tAdminServer::cMETHODS, "Connect", "source port handle", "destination port handle", false);
 tVoid2Method<tAdminServer*, int, int> tAdminServer::cDISCONNECT(tAdminServer::cMETHODS, "Disconnect", "source port handle", "destination port handle", false);
 tVoid2Method<tAdminServer*, int, int> tAdminServer::cDISCONNECT_ALL(tAdminServer::cMETHODS, "DisconnectAll", "source port handle", "dummy", false);
-tVoid3Method<tAdminServer*, int, std::shared_ptr<const rrlib::serialization::tMemoryBuffer>, int> tAdminServer::cSET_PORT_VALUE(tAdminServer::cMETHODS, "SetPortValue", "port handle", "data", "dummy", false);
-tPort0Method<tAdminServer*, std::shared_ptr<rrlib::serialization::tMemoryBuffer> > tAdminServer::cGET_CREATE_MODULE_ACTIONS(tAdminServer::cMETHODS, "GetCreateModuleActions", false);
-tVoid4Method<tAdminServer*, int, std::shared_ptr<tCoreString>, int, std::shared_ptr<const rrlib::serialization::tMemoryBuffer> > tAdminServer::cCREATE_MODULE(tAdminServer::cMETHODS, "CreateModule", "create action index", "module name", "parent handle", "module creation parameters", false);
+tVoid3Method<tAdminServer*, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> tAdminServer::cSET_PORT_VALUE(tAdminServer::cMETHODS, "SetPortValue", "port handle", "data", "dummy", false);
+tPort0Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer> > tAdminServer::cGET_CREATE_MODULE_ACTIONS(tAdminServer::cMETHODS, "GetCreateModuleActions", false);
+tVoid4Method<tAdminServer*, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > tAdminServer::cCREATE_MODULE(tAdminServer::cMETHODS, "CreateModule", "create action index", "module name", "parent handle", "module creation parameters", false);
 tVoid1Method<tAdminServer*, int> tAdminServer::cSAVE_FINSTRUCTABLE_GROUP(tAdminServer::cMETHODS, "Save Finstructable Group", "finstructable handle", false);
-tPort2Method<tAdminServer*, std::shared_ptr<rrlib::serialization::tMemoryBuffer>, int, std::shared_ptr<tCoreString> > tAdminServer::cGET_ANNOTATION(tAdminServer::cMETHODS, "Get Annotation", "handle", "annotation type", false);
-tVoid4Method<tAdminServer*, int, std::shared_ptr<tCoreString>, int, std::shared_ptr<const rrlib::serialization::tMemoryBuffer> > tAdminServer::cSET_ANNOTATION(tAdminServer::cMETHODS, "Set Annotation", "handle", "dummy", "dummy", "annotation", false);
+tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > tAdminServer::cGET_ANNOTATION(tAdminServer::cMETHODS, "Get Annotation", "handle", "annotation type", false);
+tVoid4Method<tAdminServer*, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > tAdminServer::cSET_ANNOTATION(tAdminServer::cMETHODS, "Set Annotation", "handle", "dummy", "dummy", "annotation", false);
 tVoid1Method<tAdminServer*, int> tAdminServer::cDELETE_ELEMENT(tAdminServer::cMETHODS, "Delete Framework element", "handle", false);
 tVoid0Method<tAdminServer*> tAdminServer::cSTART_EXECUTION(tAdminServer::cMETHODS, "Start execution", false);
 tVoid0Method<tAdminServer*> tAdminServer::cPAUSE_EXECUTION(tAdminServer::cMETHODS, "Pause execution", false);
@@ -88,32 +88,32 @@ void tAdminServer::Connect(tAbstractPort* src, tAbstractPort* dest)
   }
 }
 
-::std::shared_ptr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbstractMethod* method)
+tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbstractMethod* method)
 {
   assert((method == &(cGET_CREATE_MODULE_ACTIONS)));
 
-  ::std::shared_ptr<rrlib::serialization::tMemoryBuffer> mb = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
-  tCoreOutput* co = new tCoreOutput(mb);
+  tPortDataPtr<rrlib::serialization::tMemoryBuffer> mb = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
+  tCoreOutput co(mb.get());
   const util::tSimpleList<tCreateFrameworkElementAction*>& module_types = tPlugins::GetInstance()->GetModuleTypes();
   for (size_t i = 0u; i < module_types.Size(); i++)
   {
     const tCreateFrameworkElementAction& cma = *module_types.Get(i);
-    co->WriteString(cma.GetName());
-    co->WriteString(cma.GetModuleGroup());
+    co.WriteString(cma.GetName());
+    co.WriteString(cma.GetModuleGroup());
     if (cma.GetParameterTypes() != NULL)
     {
-      cma.GetParameterTypes()->Serialize(*co);
+      cma.GetParameterTypes()->Serialize(co);
     }
     else
     {
-      tStructureParameterList::cEMPTY.Serialize(*co);
+      tStructureParameterList::cEMPTY.Serialize(co);
     }
   }
-  co->Close();
+  co.Close();
   return mb;
 }
 
-::std::shared_ptr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbstractMethod* method, int handle, ::std::shared_ptr<tCoreString> type)
+tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbstractMethod* method, int handle, tPortDataPtr<tCoreString>& type)
 {
   assert((method == &(cGET_ANNOTATION)));
   ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
@@ -130,15 +130,15 @@ void tAdminServer::Connect(tAbstractPort* src, tAbstractPort* dest)
 
   if (result == NULL)
   {
-    return std::shared_ptr<rrlib::serialization::tMemoryBuffer>();
+    return tPortDataPtr<rrlib::serialization::tMemoryBuffer>();
   }
   else
   {
-    ::std::shared_ptr<rrlib::serialization::tMemoryBuffer> buf = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
-    tCoreOutput* co = new tCoreOutput(buf);
-    co->WriteString(result->GetType().GetName());
-    result->Serialize(*co);
-    co->Close();
+    tPortDataPtr<rrlib::serialization::tMemoryBuffer> buf = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
+    tCoreOutput co(buf.get());
+    co.WriteString(result->GetType().GetName());
+    result->Serialize(co);
+    co.Close();
     return buf;
   }
 }
@@ -227,7 +227,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int p1, int p2)
   }
 }
 
-void tAdminServer::HandleVoidCall(tAbstractMethod* method, int port_handle, ::std::shared_ptr<const rrlib::serialization::tMemoryBuffer> buf, int dummy)
+void tAdminServer::HandleVoidCall(tAbstractMethod* method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int dummy)
 {
   assert((method == &(cSET_PORT_VALUE)));
   ::finroc::core::tAbstractPort* port = tRuntimeEnvironment::GetInstance()->GetPort(port_handle);
@@ -237,7 +237,7 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int port_handle, ::st
       util::tLock lock3(port);
       if (port->IsReady())
       {
-        tCoreInput ci(buf);
+        tCoreInput ci(buf.get());
         rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::FindType(ci.ReadString());
         if (tFinrocTypeInfo::IsCCType(port->GetDataType()) && tFinrocTypeInfo::IsCCType(dt))
         {
@@ -259,7 +259,7 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int port_handle, ::st
   }
 }
 
-void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, ::std::shared_ptr<tCoreString> name, int parent_handle, ::std::shared_ptr<const rrlib::serialization::tMemoryBuffer> params_buffer)
+void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortDataPtr<tCoreString>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer)
 {
   tConstructorParameters* params = NULL;
   if (method == &(cSET_ANNOTATION))
@@ -272,7 +272,7 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, ::std:
     }
     else
     {
-      tCoreInput ci(params_buffer);
+      tCoreInput ci(params_buffer.get());
       rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::FindType(ci.ReadString());
       if (dt == NULL)
       {
@@ -317,7 +317,7 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, ::std:
           if (cma->GetParameterTypes() != NULL && cma->GetParameterTypes()->Size() > 0)
           {
             params = cma->GetParameterTypes()->Instantiate();
-            tCoreInput ci(params_buffer);
+            tCoreInput ci(params_buffer.get());
             for (size_t i = 0u; i < params->Size(); i++)
             {
               tStructureParameterBase* param = params->Get(i);

@@ -29,6 +29,8 @@
 #include "core/datatype/tNumber.h"
 #include "rrlib/serialization/tGenericObject.h"
 
+#include "core/port/tPortDataPtr.h"
+
 namespace finroc
 {
 namespace core
@@ -55,7 +57,7 @@ public:
   tNumber number;
 
   /*! Object Parameter */
-  ::std::shared_ptr<rrlib::serialization::tGenericObject> value;
+  tPortDataPtr<rrlib::serialization::tGenericObject> value;
 
   /*! Type of parameter (see constants at beginning of class) */
   int8 type;

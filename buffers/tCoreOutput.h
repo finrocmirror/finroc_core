@@ -52,7 +52,7 @@ public:
 
   tCoreOutput();
 
-  tCoreOutput(::std::shared_ptr<rrlib::serialization::tSink> sink);
+  tCoreOutput(std::shared_ptr<rrlib::serialization::tSink> sink);
 
   tCoreOutput(rrlib::serialization::tSink* sink);
 

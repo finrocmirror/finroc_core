@@ -320,7 +320,7 @@ void tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
     }
     else
     {
-      ::std::shared_ptr<rrlib::serialization::tGenericObject> o = pc->GetParamGeneric(0);
+      tPortDataPtr<rrlib::serialization::tGenericObject> o = pc->GetParamGeneric(0);
       tCCPortDataManager* c = static_cast<tCCPortDataManager*>(o->GetManager());
       result_buffer->GetObject()->DeepCopyFrom(c->GetObject(), NULL);
     }
@@ -426,7 +426,7 @@ const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, in
     }
     else
     {
-      ::std::shared_ptr<rrlib::serialization::tGenericObject> o = pc->GetParamGeneric(0);
+      tPortDataPtr<rrlib::serialization::tGenericObject> o = pc->GetParamGeneric(0);
       tPortDataManager* pd = static_cast<tPortDataManager*>(o->GetManager());
       int locks = 0;  // Java: we already have one lock
       pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - locks)));

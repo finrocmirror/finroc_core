@@ -64,7 +64,7 @@ private:
   int8 uid;
 
   /*! factors for conversion to other units in group */
-  ::std::auto_ptr< ::finroc::util::tArrayWrapper<double> > factors;
+  std::shared_ptr< ::finroc::util::tArrayWrapper<double> > factors;
 
   /*! Is this class a constant? */
   bool is_aConstant;

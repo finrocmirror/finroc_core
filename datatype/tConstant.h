@@ -61,9 +61,9 @@ public:
   //private CoreNumber2.Type type;
 
   /*! Constants */
-  static ::std::shared_ptr<tConstant> cNO_MIN_TIME_LIMIT;
+  static std::shared_ptr<tConstant> cNO_MIN_TIME_LIMIT;
 
-  static ::std::shared_ptr<tConstant> cNO_MAX_TIME_LIMIT;
+  static std::shared_ptr<tConstant> cNO_MAX_TIME_LIMIT;
 
   /*! Unit of constant */
   ::finroc::core::tUnit* unit;
@@ -102,8 +102,8 @@ public:
 
   inline static void StaticInit()
   {
-    cNO_MIN_TIME_LIMIT = ::std::shared_ptr<tConstant>(new tConstant("No Limit", tNumber(-1, &(::finroc::core::tUnit::ms))));
-    cNO_MAX_TIME_LIMIT = ::std::shared_ptr<tConstant>(new tConstant("No Limit", tNumber(util::tInteger::cMAX_VALUE, &(::finroc::core::tUnit::ms))));
+    cNO_MIN_TIME_LIMIT = std::shared_ptr<tConstant>(new tConstant("No Limit", tNumber(-1, &(::finroc::core::tUnit::ms))));
+    cNO_MAX_TIME_LIMIT = std::shared_ptr<tConstant>(new tConstant("No Limit", tNumber(util::tInteger::cMAX_VALUE, &(::finroc::core::tUnit::ms))));
   }
 
 };

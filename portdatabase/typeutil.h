@@ -25,6 +25,9 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 #include <boost/type_traits/has_virtual_destructor.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
+#include <boost/type_traits/is_integral.hpp>
+#include <boost/type_traits/is_floating_point.hpp>
+#include <boost/type_traits/is_enum.hpp>
 #include "core/portdatabase/tCCType.h"
 #include "rrlib/serialization/tGenericChangeable.h"
 #include "rrlib/serialization/deepcopy.h"
@@ -91,7 +94,17 @@ struct tIsCCTypeBase<B, rrlib::util::tTime>
  * In this case 'value' is true.
  */
 template <typename T>
-struct tIsCCType : tIsCCTypeBase<boost::is_base_of<tCCType, T>::value, T> {};
+struct tIsCCType : public tIsCCTypeBase<boost::is_base_of<tCCType, T>::value, T> {};
+
+/*!
+ * This struct is used to determine whether a "cheap copy" type should be used in Port.
+ * In this case 'value' is true.
+ */
+template <typename T>
+struct tUseCCType
+{
+  enum { value = tIsCCType<T>::value || boost::is_integral<T>::value || boost::is_floating_point<T>::value || boost::is_enum<T>::value };
+};
 
 /*!
  * This struct is used to determine the transaction-based change class for a type

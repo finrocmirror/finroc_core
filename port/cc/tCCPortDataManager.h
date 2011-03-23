@@ -76,9 +76,9 @@ public:
     return memcmp(GetObject()->GetRawDataPtr(), other, GetObject()->GetType().GetSize()) == 0;
   }
 
-  inline static void SharedPointerRelease(tCCPortDataManager* manager, bool active)
+  inline void HandlePointerRelease()
   {
-    manager->Recycle2();
+    Recycle2();
   }
 
   /*!

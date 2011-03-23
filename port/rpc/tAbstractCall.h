@@ -146,7 +146,7 @@ public:
     return local_port_handle;
   }
 
-  ::std::shared_ptr<rrlib::serialization::tGenericObject> GetParamGeneric(int index);
+  tPortDataPtr<rrlib::serialization::tGenericObject> GetParamGeneric(int index);
 
   /*!
    * \return Destination port handle - only used while call is enqueued in network queue
@@ -203,7 +203,7 @@ public:
   }
 
   template <typename T>
-  void AddParam(int index, T pd)
+  void AddParam(int index, T& pd)
   {
     tParameterUtil<T>::AddParam(&(params[index]), pd);
   }

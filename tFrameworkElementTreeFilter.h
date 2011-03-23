@@ -60,7 +60,7 @@ private:
   int flag_result;
 
   /*! Qualified names of framework elements need to start with one of these in order to be published */
-  ::std::shared_ptr<util::tSimpleList<util::tString> > paths;
+  std::shared_ptr<util::tSimpleList<util::tString> > paths;
 
   /*! Constant for empty string - to allow this-constructor in c++ */
   static const util::tString& GetEmptyString();

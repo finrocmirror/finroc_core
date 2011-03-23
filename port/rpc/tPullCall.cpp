@@ -68,7 +68,8 @@ void tPullCall::ExecuteTask()
       tCCPortDataManager* cpd = cp->GetPullInInterthreadContainerRaw(true);
       RecycleParameters();
 
-      AddParam(0, std::shared_ptr<rrlib::serialization::tGenericObject>(cpd->GetObject(), tSharedPtrDeleteHandler<tCCPortDataManager>(cpd)));
+      tPortDataPtr<rrlib::serialization::tGenericObject> tmp(cpd->GetObject(), cpd);
+      AddParam(0, tmp);
 
       SetStatusReturn();
       port->SendCallReturn(this);
@@ -79,7 +80,8 @@ void tPullCall::ExecuteTask()
       tPortDataManager* pd = p->GetPullLockedUnsafe(true);
       RecycleParameters();
 
-      AddParam(0, std::shared_ptr<rrlib::serialization::tGenericObject>(pd->GetObject(), tSharedPtrDeleteHandler<tPortDataManager>(pd)));
+      tPortDataPtr<rrlib::serialization::tGenericObject> tmp(pd->GetObject(), pd);
+      AddParam(0, tmp);
 
       SetStatusReturn();
       port->SendCallReturn(this);

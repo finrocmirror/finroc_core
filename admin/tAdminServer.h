@@ -68,22 +68,22 @@ public:
   static tVoid2Method<tAdminServer*, int, int> cDISCONNECT_ALL;
 
   /*! Set a port's value */
-  static tVoid3Method<tAdminServer*, int, std::shared_ptr<const rrlib::serialization::tMemoryBuffer>, int> cSET_PORT_VALUE;
+  static tVoid3Method<tAdminServer*, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> cSET_PORT_VALUE;
 
   /*! Get module types */
-  static tPort0Method<tAdminServer*, std::shared_ptr<rrlib::serialization::tMemoryBuffer> > cGET_CREATE_MODULE_ACTIONS;
+  static tPort0Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer> > cGET_CREATE_MODULE_ACTIONS;
 
   /*! Create a module */
-  static tVoid4Method<tAdminServer*, int, std::shared_ptr<tCoreString>, int, std::shared_ptr<const rrlib::serialization::tMemoryBuffer> > cCREATE_MODULE;
+  static tVoid4Method<tAdminServer*, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > cCREATE_MODULE;
 
   /*! Save finstructable group */
   static tVoid1Method<tAdminServer*, int> cSAVE_FINSTRUCTABLE_GROUP;
 
   /*! Get annotation */
-  static tPort2Method<tAdminServer*, std::shared_ptr<rrlib::serialization::tMemoryBuffer>, int, std::shared_ptr<tCoreString> > cGET_ANNOTATION;
+  static tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > cGET_ANNOTATION;
 
   /*! Set annotation */
-  static tVoid4Method<tAdminServer*, int, std::shared_ptr<tCoreString>, int, std::shared_ptr<const rrlib::serialization::tMemoryBuffer> > cSET_ANNOTATION;
+  static tVoid4Method<tAdminServer*, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > cSET_ANNOTATION;
 
   /*! Delete element */
   static tVoid1Method<tAdminServer*, int> cDELETE_ELEMENT;
@@ -120,17 +120,17 @@ public:
 
   tAdminServer();
 
-  ::std::shared_ptr<rrlib::serialization::tMemoryBuffer> HandleCall(tAbstractMethod* method);
+  tPortDataPtr<rrlib::serialization::tMemoryBuffer> HandleCall(tAbstractMethod* method);
 
-  ::std::shared_ptr<rrlib::serialization::tMemoryBuffer> HandleCall(tAbstractMethod* method, int handle, ::std::shared_ptr<tCoreString> type);
+  tPortDataPtr<rrlib::serialization::tMemoryBuffer> HandleCall(tAbstractMethod* method, int handle, tPortDataPtr<tCoreString>& type);
 
   int HandleCall(const tAbstractMethod* method, int handle);
 
   void HandleVoidCall(const tAbstractMethod* method, int p1, int p2);
 
-  void HandleVoidCall(tAbstractMethod* method, int port_handle, ::std::shared_ptr<const rrlib::serialization::tMemoryBuffer> buf, int dummy);
+  void HandleVoidCall(tAbstractMethod* method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int dummy);
 
-  void HandleVoidCall(tAbstractMethod* method, int cma_index, ::std::shared_ptr<tCoreString> name, int parent_handle, ::std::shared_ptr<const rrlib::serialization::tMemoryBuffer> params_buffer);
+  void HandleVoidCall(tAbstractMethod* method, int cma_index, tPortDataPtr<tCoreString>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer);
 
   void HandleVoidCall(const tAbstractMethod* method, int handle);
 

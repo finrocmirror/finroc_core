@@ -29,7 +29,6 @@
 #include "rrlib/serialization/tGenericObject.h"
 #include "core/portdatabase/tReusableGenericObjectManager.h"
 
-#include "core/portdatabase/tSharedPtrDeleteHandler.h"
 #include "core/port/tCombinedPointer.h"
 
 namespace finroc
@@ -336,35 +335,6 @@ public:
     return GetRefCounter(reuse_counter & cREF_INDEX_MASK);
   }
 
-  //    /**
-  //     * \return Pointer to managed object/buffer
-  //     */
-  //    @OrgWrapper @ConstMethod @Inline public @Const @VoidPtr Object getDataRaw() {
-  //        return data;
-  //    }
-
-  inline static void SharedPointerRelease(tPortDataManager* manager, bool active)
-  {
-    if (active)
-    {
-      assert((!manager->IsUnused()) && ("Unused buffers retrieved from ports must be published"));
-      manager->ReleaseLock();
-    }
-  }
-
-  /*!
-   * Retrieve manager for port data
-   *
-   * \param data Port data
-   * \param reset_active_flag Reset active flag (set when unused buffers are handed to user)
-   * \return Manager for port data - or null if it does not exist
-   */
-  template <typename T>
-  inline static tPortDataManager* GetManager(::std::shared_ptr<T> data, bool reset_active_flag = false)
-  {
-    return tSharedPtrDeleteHandler<tPortDataManager>::GetManager(data, reset_active_flag);
-  }
-
   /*!
    * (Only meant for debugging purposes)
    *
@@ -391,6 +361,12 @@ public:
   inline rrlib::serialization::tDataTypeBase GetType() const
   {
     return GetObject()->GetType();
+  }
+
+  inline void HandlePointerRelease()
+  {
+    assert((!IsUnused()) && ("Unused buffers retrieved from ports must be published"));
+    ReleaseLock();
   }
 
   /*! Is port data currently locked (convenience method)? */

@@ -39,7 +39,7 @@ tPort2Method<HANDLER, R, P1, P2>::tPort2Method(tPortInterface& port_interface, c
 }
 
 template<typename HANDLER, typename R, typename P1, typename P2>
-R tPort2Method<HANDLER, R, P1, P2>::Call(tInterfaceClientPort port, P1 p1, P2 p2, int net_timeout)
+R tPort2Method<HANDLER, R, P1, P2>::Call(tInterfaceClientPort port, tP1Arg p1, tP2Arg p2, int net_timeout)
 {
   //1
   assert((HasLock(p1)));  //2
@@ -106,7 +106,7 @@ R tPort2Method<HANDLER, R, P1, P2>::Call(tInterfaceClientPort port, P1 p1, P2 p2
 }
 
 template<typename HANDLER, typename R, typename P1, typename P2>
-void tPort2Method<HANDLER, R, P1, P2>::CallAsync(const tInterfaceClientPort* port, tAsyncReturnHandler<R>* handler, P1 p1, P2 p2, int net_timeout, bool force_same_thread)
+void tPort2Method<HANDLER, R, P1, P2>::CallAsync(const tInterfaceClientPort* port, tAsyncReturnHandler<R>* handler, tP1Arg p1, tP2Arg p2, int net_timeout, bool force_same_thread)
 {
   //1
   assert((HasLock(p1)));  //2

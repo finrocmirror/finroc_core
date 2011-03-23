@@ -70,14 +70,14 @@ public:
    */
   inline void CommitDataBuffer(T* data)
   {
-    Publish(::std::shared_ptr<T>(data));
+    Publish(tPortDataPtr<T>(data));
   }
 
-  virtual ::std::shared_ptr<T> GetUnusedBuffer()
+  inline tPortDataPtr<T> GetUnusedBuffer()
   {
     T* result = ::finroc::core::tPort<T>::GetUnusedBuffer().get();
     result->Clear();
-    return ::std::shared_ptr<T>(result);
+    return tPortDataPtr<T>(result);
   }
 
 };

@@ -38,7 +38,7 @@ tPort4Method<HANDLER, R, P1, P2, P3, P4>::tPort4Method(tPortInterface& port_inte
 }
 
 template<typename HANDLER, typename R, typename P1, typename P2, typename P3, typename P4>
-R tPort4Method<HANDLER, R, P1, P2, P3, P4>::Call(tInterfaceClientPort port, P1 p1, P2 p2, P3 p3, P4 p4, int net_timeout)
+R tPort4Method<HANDLER, R, P1, P2, P3, P4>::Call(tInterfaceClientPort port, tP1Arg p1, tP2Arg p2, tP3Arg p3, tP4Arg p4, int net_timeout)
 {
   //1
   assert((HasLock(p1)));  //2
@@ -117,7 +117,7 @@ R tPort4Method<HANDLER, R, P1, P2, P3, P4>::Call(tInterfaceClientPort port, P1 p
 }
 
 template<typename HANDLER, typename R, typename P1, typename P2, typename P3, typename P4>
-void tPort4Method<HANDLER, R, P1, P2, P3, P4>::CallAsync(const tInterfaceClientPort* port, tAsyncReturnHandler<R>* handler, P1 p1, P2 p2, P3 p3, P4 p4, int net_timeout, bool force_same_thread)
+void tPort4Method<HANDLER, R, P1, P2, P3, P4>::CallAsync(const tInterfaceClientPort* port, tAsyncReturnHandler<R>* handler, tP1Arg p1, tP2Arg p2, tP3Arg p3, tP4Arg p4, int net_timeout, bool force_same_thread)
 {
   //1
   assert((HasLock(p1)));  //2

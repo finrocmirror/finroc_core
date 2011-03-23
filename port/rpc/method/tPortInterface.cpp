@@ -27,7 +27,7 @@ namespace finroc
 namespace core
 {
 tPortInterface::tPortInterface(const util::tString& name_) :
-    methods(new util::tSimpleList<tAbstractMethod*>()),
+    methods(),
     my_type(NULL),
     name(name_)
 {
@@ -35,10 +35,10 @@ tPortInterface::tPortInterface(const util::tString& name_) :
 
 void tPortInterface::AddMethod(tAbstractMethod* m)
 {
-  assert(((methods->Size() <= 127)) && "too many methods");
-  m->method_id = static_cast<int8>(methods->Size());
+  assert(((methods.Size() <= 127)) && "too many methods");
+  m->method_id = static_cast<int8>(methods.Size());
   m->type = this;
-  methods->Add(m);
+  methods.Add(m);
 }
 
 } // namespace finroc

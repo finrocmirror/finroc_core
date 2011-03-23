@@ -74,6 +74,7 @@ protected:
 public:
 
   // typedefs
+  typedef tPortDataPtr<T> tDataPtr;
   typedef typename tPortTypeMap<T>::tPortBaseType tPortBaseType;
   using tPortWrapperBase<tPortBaseType>::wrapped;
 
@@ -103,7 +104,7 @@ public:
     wrapped = new tPortBaseType(ProcessPci(tPortCreationInfo(description, parent, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT)));
   }
 
-  void AddPortListener(tPortListener<std::shared_ptr<const T> >* listener)
+  void AddPortListener(tPortListener<tPortDataPtr<const T> >* listener)
   {
     wrapped->AddPortListenerRaw(listener);
   }
@@ -138,11 +139,11 @@ public:
    * Use dequeueAll if a continuous set of values is required.
    *
    * (Use only with ports that have a input queue)
-   * (in Java lock will need to be released manually, in C++ shared_ptr takes care of this)
+   * (in Java lock will need to be released manually, in C++ tPortDataPtr takes care of this)
    *
    * \return Dequeued first/oldest element in queue
    */
-  inline ::std::shared_ptr<const T> DequeueSingle()
+  inline tPortDataPtr<const T> DequeueSingle()
   {
     return tPortUtil<T>::DequeueSingle(wrapped);
   }
@@ -181,10 +182,10 @@ public:
    * Gets Port's current value
    *
    * \return Port's current value with read lock.
-   * (in Java lock will need to be released manually, in C++ shared_ptr takes care of this)
+   * (in Java lock will need to be released manually, in C++ tPortDataPtr takes care of this)
    * (Using get with parameter T& is more efficient when using CC types - shouldn't matter usually)
    */
-  inline ::std::shared_ptr<const T> Get()
+  inline tPortDataPtr<const T> Get()
   {
     return tPortUtil<T>::GetValueWithLock(wrapped);
   }
@@ -242,7 +243,7 @@ public:
    * be cleared prior to using. Using this method with CC-types is not required and less
    * efficient than publishing values directly (factor 2, shouldn't matter usually).
    */
-  inline virtual ::std::shared_ptr<T> GetUnusedBuffer()
+  inline tPortDataPtr<T> GetUnusedBuffer()
   {
     return tPortUtil<T>::GetUnusedBuffer(wrapped);
   }
@@ -255,6 +256,21 @@ public:
     return typeutil::tIsCCType<T>::value; // compile-time constant
   }
 
+  // Publish Data Buffer. This data will be forwarded to any connected ports.
+  // Should only be called on output ports.
+  //
+  // \param data Data to publish. It will be deep-copied.
+  // This publish()-variant is efficient when using CC types, but can be extremely costly with large data types)
+  void Publish(const T& data)
+  {
+    tPortUtil<T>::CopyAndPublish(wrapped, data);
+  }
+
+  inline void Publish(tPortDataPtr<T>& data)
+  {
+    tPortUtil<T>::Publish(wrapped, data);
+  }
+
   /*!
    * Publish Data Buffer. This data will be forwarded to any connected ports.
    * It should not be modified thereafter.
@@ -262,12 +278,12 @@ public:
    *
    * \param data Data buffer acquired from a port using getUnusedBuffer (or locked data received from another port)
    */
-  inline void Publish(::std::shared_ptr<const T> data)
+  inline void Publish(tPortDataPtr<const T>& data)
   {
     tPortUtil<T>::Publish(wrapped, data);
   }
 
-  void RemovePortListener(tPortListener<std::shared_ptr<const T> >* listener)
+  void RemovePortListener(tPortListener<tPortDataPtr<const T> >* listener)
   {
     wrapped->RemovePortListenerRaw(listener);
   }
@@ -334,17 +350,6 @@ public:
   {
     assert(!this->IsReady() && "please set default value _before_ initializing port");
     tPortUtil<T>::SetDefault(wrapped, t);
-  }
-
-  // Publish Data Buffer. This data will be forwarded to any connected ports.
-  // It should not be modified thereafter.
-  // Should only be called on output ports.
-  //
-  // \param data Data to publish. It will be deep-copied.
-  // This publish()-variant is efficient when using CC types, but can be extremely costly with large data types)
-  void Publish(const T& data)
-  {
-    tPortUtil<T>::CopyAndPublish(wrapped, data);
   }
 
 };

@@ -73,24 +73,24 @@ public:
 
 /*! variant for shared_ptr with auto-lock-release */
 template < typename T >
-class tPortListenerAdapter<std::shared_ptr<const T>, false, false> : public tPortListenerRaw
+class tPortListenerAdapter<tPortDataPtr<const T>, false, false> : public tPortListenerRaw
 {
 public:
 
-  virtual void PortChanged(tAbstractPort* origin, const std::shared_ptr<const T>& value) = 0;
+  virtual void PortChanged(tAbstractPort* origin, const tPortDataPtr<const T>& value) = 0;
 
   virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
   {
     assert(typeid(*value).name() == typeid(tPortDataManager).name());
     tPortDataManager* mgr = static_cast<tPortDataManager*>(value);
     mgr->AddLock();
-    PortChanged(origin, std::shared_ptr<const T>(mgr->GetObject()->GetData<T>(), tSharedPtrDeleteHandler<tPortDataManager>(mgr)));
+    PortChanged(origin, tPortDataPtr<const T>(mgr));
   }
 };
 
 /*! variant for shared_ptr with auto-lock-release (CC type - slightly inefficient) */
 template < typename T >
-class tPortListenerAdapter<std::shared_ptr<const T>, true, false> : public tPortListenerRaw
+class tPortListenerAdapter<tPortDataPtr<const T>, true, false> : public tPortListenerRaw
 {
 public:
 
@@ -100,7 +100,7 @@ public:
   {
     tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(value->GetObject()->GetType());
     c->GetObject()->DeepCopyFrom(value->GetObject());
-    PortChanged(origin, std::shared_ptr<const T>(c->GetObject()->GetData<T>(), tSharedPtrDeleteHandler<tCCPortDataManager>(c)));
+    PortChanged(origin, tPortDataPtr<const T>(c));
   }
 };
 
@@ -129,7 +129,7 @@ public:
 
 /*! variant for numbers in shared_pointers (possibly required for weird templates ;-) ) */
 template < typename T, bool CC>
-class tPortListenerAdapter<std::shared_ptr<const T>, CC, true> : public tPortListenerRaw
+class tPortListenerAdapter<tPortDataPtr<const T>, CC, true> : public tPortListenerRaw
 {
 public:
 
@@ -149,7 +149,7 @@ public:
     {
       new_num->SetValue(num->Value<T>(), num->GetUnit());
     }
-    PortChanged(origin, std::shared_ptr<const T>(new_num->GetValuePtr<T>(), tSharedPtrDeleteHandler<tCCPortDataManager>(c)));
+    PortChanged(origin, tPortDataPtr<const T>(new_num->GetValuePtr<T>(), c));
   }
 };
 

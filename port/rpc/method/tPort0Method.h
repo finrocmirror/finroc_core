@@ -63,10 +63,6 @@ public:
    * (is performed in same thread and blocks)
    *
    * \param port Port that call is performed from (typically 'this')
-   * \param p1 Parameter 1 (with one lock for call - typically server will release it)
-   * \param p2 Parameter 2 (with one lock for call - typically server will release it)
-   * \param p3 Parameter 3 (with one lock for call - typically server will release it)
-   * \param p4 Parameter 4 (with one lock for call - typically server will release it)//
    * \param net_timout Network timeout in ms (value <= 0 means method default)
    * \return return value of method
    */

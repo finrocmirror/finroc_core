@@ -46,7 +46,7 @@ class tStructureParameterEnum : public tStructureParameter<tEnumValue>
 private:
 
   /*! String constants for enum values */
-  ::std::shared_ptr<util::tSimpleList<util::tString> > string_constants;
+  std::shared_ptr<util::tSimpleList<util::tString> > string_constants;
 
   /*!
    * \param i integer
@@ -69,7 +69,7 @@ public:
    * \param default_value Default Value
    * \param string_constants String constants for enum values (comma-separated string)
    */
-  tStructureParameterEnum(const util::tString& name, E default_value, bool constructor_prototype, ::std::shared_ptr<util::tSimpleList<util::tString> > string_constants_);
+  tStructureParameterEnum(const util::tString& name, E default_value, bool constructor_prototype, std::shared_ptr<util::tSimpleList<util::tString> >& string_constants_);
 
   /*!
    * \param name Parameter name
