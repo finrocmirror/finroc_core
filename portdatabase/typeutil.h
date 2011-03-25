@@ -162,7 +162,7 @@ inline static void ApplyChange(rrlib::serialization::tGenericChangeable<C>& obj,
 template <typename T>
 inline static void ApplyChange(std::vector<T>& obj, const std::vector<T>& transaction, int64_t offset, int64_t param2)
 {
-  size_t end_index = std::min(obj.size(), transaction.size() + offset);
+  size_t end_index = std::min<size_t>(obj.size(), transaction.size() + offset);
   for (size_t i = offset; i < end_index; i++)
   {
     ApplyChange(obj[i], transaction[i - offset], param2, 0);
