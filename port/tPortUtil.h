@@ -36,10 +36,12 @@ namespace core
 class tPortUtilHelper
 {
 public:
-  template <typename T>
-  static void ResetManager(tPortDataPtr<T>& data)
+  template <typename M, typename T>
+  static M* ResetManager(tPortDataPtr<T>& data)
   {
+    M* mgr = data.manager;
     data.manager = NULL;
+    return mgr;
   }
 };
 
@@ -112,16 +114,12 @@ public:
 
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    tManagerTL* mgr = t.GetManager();
-    tPortUtilHelper::ResetManager(t);
-    port->Publish(mgr);
+    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
-    tManagerTL* mgr = t.GetManager();
-    tPortUtilHelper::ResetManager(t);
-    port->Publish(mgr);
+    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
   }
 
   static void CopyAndPublish(tPortType* port, const T& t)
@@ -246,16 +244,12 @@ public:
 
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    tManagerTL* mgr = t.GetManager();
-    tPortUtilHelper::ResetManager(t);
-    port->Publish(mgr);
+    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
-    tManagerTL* mgr = t.GetManager();
-    tPortUtilHelper::ResetManager(t);
-    port->Publish(mgr);
+    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
   }
 
   static void CopyAndPublish(tPortType* port, const T& t)
@@ -349,16 +343,12 @@ public:
 
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    tManagerTL* mgr = t.GetManager();
-    tPortUtilHelper::ResetManager(t);
-    port->Publish(mgr);
+    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
-    tManagerTL* mgr = t.GetManager();
-    tPortUtilHelper::ResetManager(t);
-    port->Publish(mgr);
+    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
   }
 
   static void CopyAndPublish(tPortType* port, const T& t)

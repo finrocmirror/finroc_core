@@ -129,7 +129,7 @@ void tRealPortTest5::TestSimpleEdge2()
   tFrameworkElement::InitAll();
 
   tPortDataPtr<blackboard::tBlackboardBuffer> buf = output.GetUnusedBuffer();
-  tCoreOutput co(std::shared_ptr<rrlib::serialization::tSink>(buf.get()));
+  tCoreOutput co(buf.Get());
   co.WriteInt(42);
   co.Close();
   output.Publish(buf);
