@@ -43,6 +43,7 @@ protected:
 
   virtual void DeleteThis()
   {
+    this->~tReusableGenericObjectManager();
     delete GetObject();
   }
 

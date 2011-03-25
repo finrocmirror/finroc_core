@@ -94,6 +94,11 @@ public:
     return util::tStringBuilder("PullCall (") + GetStatusString() + ", callid: " + ::finroc::core::tAbstractCall::GetMethodCallIndex() + ", threaduid: " + ::finroc::core::tAbstractCall::GetThreadUid() + ")";
   }
 
+  virtual void CustomDelete(bool b)
+  {
+    tReusable::CustomDelete(b);
+  }
+
 };
 
 } // namespace finroc

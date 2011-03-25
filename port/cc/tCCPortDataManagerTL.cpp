@@ -56,9 +56,10 @@ void tCCPortDataManagerTL::PostThreadReleaseLock()
 {
   ref_counter--;
   assert((ref_counter >= 0));
-  if (ref_counter == 0)
+  if (ref_counter == 0)     // my favourite statement :-)
   {
-    delete this;  // my favourite statement :-)
+
+    this->CustomDelete(false);
   }
 }
 

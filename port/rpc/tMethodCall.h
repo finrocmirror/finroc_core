@@ -197,6 +197,11 @@ public:
    */
   void SetMethod(tAbstractMethod* m, const rrlib::serialization::tDataTypeBase& port_interface);
 
+  virtual void CustomDelete(bool b)
+  {
+    tReusable::CustomDelete(b);
+  }
+
 };
 
 } // namespace finroc

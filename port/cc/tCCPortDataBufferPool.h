@@ -93,9 +93,16 @@ public:
    */
   tCCPortDataBufferPool(const rrlib::serialization::tDataTypeBase& data_type_, int initial_size);
 
-  virtual void AutoDelete()
+  virtual void CustomDelete(bool called_from_gc)
   {
-    ControlledDelete();
+    if (called_from_gc)
+    {
+      tSafeDestructible::CustomDelete(called_from_gc);
+    }
+    else
+    {
+      ControlledDelete();
+    }
   }
 
   /* (non-Javadoc)

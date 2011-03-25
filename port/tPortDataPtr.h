@@ -184,6 +184,7 @@ public:
       {
         manager->HandlePointerRelease();
         manager = NULL;
+        data = NULL;
       }
     }
     else
@@ -206,6 +207,7 @@ public:
       {
         manager->HandlePointerRelease();
         manager = NULL;
+        data = NULL;
       }
     }
     else
@@ -338,6 +340,7 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
     {
       manager->GenericLockRelease();
       manager = NULL;
+      data = NULL;
     }
   }
 
@@ -353,6 +356,7 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
     {
       manager->GenericLockRelease();
       manager = NULL;
+      data = NULL;
     }
   }
 

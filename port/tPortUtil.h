@@ -41,6 +41,7 @@ public:
   {
     M* mgr = data.manager;
     data.manager = NULL;
+    data.data = NULL;
     return mgr;
   }
 };

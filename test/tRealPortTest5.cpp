@@ -179,6 +179,10 @@ void tRealPortTest5::TestSimpleEdgeBB()
   {
     blackboard::tBlackboardWriteAccess<rrlib::serialization::tMemoryBuffer> bbw(client, 4000000);
     bbw.Resize(8u);
+
+    tCoreOutput co(&(bbw[0]));
+    co.WriteLong(0);
+    co.Close();
   }
   catch (const blackboard::tBBLockException& ex)
   {
