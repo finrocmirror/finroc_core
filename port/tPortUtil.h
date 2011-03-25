@@ -40,8 +40,11 @@ public:
   static M* ResetManager(tPortDataPtr<T>& data)
   {
     M* mgr = data.manager;
-    data.manager = NULL;
-    data.data = NULL;
+    if (data.mode == tPortDataPtrBase::eUNUSED)
+    {
+      data.manager = NULL;
+      data.data = NULL;
+    }
     return mgr;
   }
 };
@@ -116,11 +119,13 @@ public:
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
     port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+    t.reset();
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
     port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+    t.reset();
   }
 
   static void CopyAndPublish(tPortType* port, const T& t)
@@ -246,11 +251,13 @@ public:
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
     port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+    t.reset();
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
     port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+    t.reset();
   }
 
   static void CopyAndPublish(tPortType* port, const T& t)
@@ -345,11 +352,13 @@ public:
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
     port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+    t.reset();
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
     port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+    t.reset();
   }
 
   static void CopyAndPublish(tPortType* port, const T& t)
