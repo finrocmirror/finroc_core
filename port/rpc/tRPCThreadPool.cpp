@@ -20,13 +20,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tRPCThreadPool.h"
+#include "rrlib/finroc_core_utils/tAutoDeleter.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 
 namespace finroc
 {
 namespace core
 {
-tRPCThreadPool tRPCThreadPool::instance;
+tRPCThreadPool* tRPCThreadPool::instance = util::tAutoDeleter::AddStatic(new tRPCThreadPool());
 
 tRPCThreadPool::tRPCThreadPool() :
     unused_threads(),

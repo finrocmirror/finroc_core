@@ -56,7 +56,10 @@ public:
   /*! Name of port interface */
   util::tString name;
 
-  tPortInterface(const util::tString& name_);
+  /*! Shutdown runtime when this port interface is deleted? - resolves issues with static deinitialization */
+  bool shutdown_runtime_on_delete;
+
+  tPortInterface(const util::tString& name_, bool shutdown_runtime_on_delete_);
 
   void AddMethod(tAbstractMethod* m);
 
@@ -68,6 +71,8 @@ public:
   {
     return methods.Contains(method);
   }
+
+  virtual ~tPortInterface();
 
   /*!
    * \return Data type of this port interface (must have been set before)

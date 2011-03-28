@@ -92,6 +92,7 @@ public:
   virtual ~tRemoteTypes()
   {
     delete types;
+    delete types_by_local_uid;
   }
 
   /*!

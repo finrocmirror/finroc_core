@@ -19,67 +19,55 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TEST__TNETWORKTESTSUITE_H
-#define CORE__TEST__TNETWORKTESTSUITE_H
+#ifndef core__test__tNetworkTestSuite_h__
+#define core__test__tNetworkTestSuite_h__
 
-#include "core/port/cc/tPortNumeric.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "core/port/tPort.h"
+#include "plugins/blackboard/tBlackboardClient.h"
+#include "plugins/blackboard/tBlackboardServer.h"
+#include "plugins/blackboard/tSingleBufferedBlackboardServer.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
-#include "core/portdatabase/tDataTypeRegister.h"
-#include "core/buffers/tMemBuffer.h"
+#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/serialization/tMemoryBuffer.h"
 #include "plugins/blackboard/tBlackboardManager.h"
-#include "plugins/blackboard/tSingleBufferedBlackboardServer.h"
-#include "plugins/blackboard/tRawBlackboardClient.h"
-#include "rrlib/finroc_core_utils/stream/tInputStreamBuffer.h"
-#include "rrlib/finroc_core_utils/stream/tOutputStreamBuffer.h"
+#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/serialization/tOutputStream.h"
 #include "core/datatype/tNumber.h"
-#include "plugins/blackboard/tBlackboardBuffer.h"
-#include "core/port/std/tPort.h"
-#include "core/port/std/tPortDataManager.h"
-
-namespace finroc
-{
-namespace blackboard
-{
-class tBlackboardServer;
-} // namespace finroc
-} // namespace blackboard
+#include "plugins/blackboard/tBlackboardWriteAccess.h"
+#include "plugins/blackboard/tBBLockException.h"
+#include "plugins/blackboard/tBlackboardReadAccess.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "core/port/tPortWrapperBase.h"
 
 namespace finroc
 {
 namespace core
 {
-class tDataType;
-
 /*!
  * \author Max Reichardt
  *
  *
  */
-class tNetworkTestSuite : public util::tObject
+class tNetworkTestSuite : public util::tLogUser
 {
 public:
 
-  class tTestStdPort : public tPort<tMemBuffer>
+  class tTestStdPort : public tPort<rrlib::serialization::tMemoryBuffer>
   {
-  private:
-
-    // Outer class NetworkTestSuite
-    tNetworkTestSuite* const outer_class_ptr;
-
   public:
 
-    util::tOutputStreamBuffer os;
+    rrlib::serialization::tOutputStream os;
 
-    util::tInputStreamBuffer is;
+    rrlib::serialization::tInputStream is;
 
-    tTestStdPort(tNetworkTestSuite* const outer_class_ptr_, tPortCreationInfo pci) :
-        tPort<tMemBuffer>(pci),
-        outer_class_ptr(outer_class_ptr_),
+    tTestStdPort(tPortCreationInfo pci) :
+        tPort<rrlib::serialization::tMemoryBuffer>(pci),
         os(),
         is()
     {
@@ -87,7 +75,7 @@ public:
 
     inline int GetIntRaw()
     {
-      const tMemBuffer* mb = GetLockedUnsafe();
+      const rrlib::serialization::tMemoryBuffer* mb = GetAutoLocked();
       is.Reset(mb);
       int result = -1;
       if (is.MoreDataAvailable())
@@ -95,22 +83,25 @@ public:
         result = is.ReadInt();
       }
       is.Close();
-      mb->GetManager()->ReleaseLock();
+      ReleaseAutoLocks();
       return result;
     }
 
     inline void Publish(int i)
     {
-      tMemBuffer* mb = GetUnusedBuffer();
-      os.Reset(mb);
+      tPortDataPtr<rrlib::serialization::tMemoryBuffer> mb = GetUnusedBuffer();
+      os.Reset(mb.get());
       os.WriteInt(i);
       os.Close();
-      ::finroc::core::tPort<tMemBuffer>::Publish(mb);
+      ::finroc::core::tPort<rrlib::serialization::tMemoryBuffer>::Publish(mb);
     }
 
   };
 
 public:
+
+  /*! Log domain for this class */
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "test");
 
   static const bool cCC_TESTS = false, cSTD_TESTS = false;
 
@@ -124,22 +115,22 @@ public:
 
   int stop_cycle;
 
-  ::std::shared_ptr<tPortNumeric> cc_push_out, cc_pull_push_out, cc_rev_push_out, cc_rev_push_out_local, cc_qOut;
+  std::shared_ptr<tPort<int> > cc_push_out, cc_pull_push_out, cc_rev_push_out, cc_rev_push_out_local, cc_qOut;
 
-  ::std::shared_ptr<tPortNumeric> cc_push_in, cc_pull_push_in, cc_rev_push_in, cc_qIn;
+  std::shared_ptr<tPort<int> > cc_push_in, cc_pull_push_in, cc_rev_push_in, cc_qIn;
 
-  ::std::shared_ptr<tTestStdPort> std_push_out, std_pull_push_out, std_rev_push_out, std_rev_push_out_local, std_qOut;
+  std::shared_ptr<tTestStdPort> std_push_out, std_pull_push_out, std_rev_push_out, std_rev_push_out_local, std_qOut;
 
-  ::std::shared_ptr<tTestStdPort> std_push_in, std_pull_push_in, std_rev_push_in, std_qIn;
+  std::shared_ptr<tTestStdPort> std_push_in, std_pull_push_in, std_rev_push_in, std_qIn;
 
-  blackboard::tRawBlackboardClient* bb_client, * local_bb_client;
+  std::shared_ptr<blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> > bb_client, local_bb_client;
 
-  blackboard::tBlackboardServer* bb_server;
+  blackboard::tBlackboardServer<rrlib::serialization::tMemoryBuffer>* bb_server;
 
-  blackboard::tSingleBufferedBlackboardServer* sbb_server;
+  blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>* sbb_server;
 
   tNetworkTestSuite(const util::tString& bb_name, const util::tString& partner_bBName, int stop_cycle_) :
-      util::tObject(),
+      util::tLogUser(),
       blackboard_name(bb_name),
       partner_blackboard_name(partner_bBName),
       stop_cycle(stop_cycle_),
@@ -161,8 +152,8 @@ public:
       std_pull_push_in(),
       std_rev_push_in(),
       std_qIn(),
-      bb_client(NULL),
-      local_bb_client(NULL),
+      bb_client(),
+      local_bb_client(),
       bb_server(NULL),
       sbb_server(NULL)
   {
@@ -173,60 +164,60 @@ public:
     {
       if (cPUSH_TESTS)
       {
-        cc_push_out = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Output", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_push_in = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Input", tPortFlags::cSHARED_INPUT_PORT)));
+        cc_push_out = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPush Output", tPortFlags::cSHARED_OUTPUT_PORT)));
+        cc_push_in = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPush Input", tPortFlags::cSHARED_INPUT_PORT)));
         cc_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
       }
       if (cPULL_PUSH_TESTS)
       {
-        cc_pull_push_out = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPullPush Output", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_pull_push_in = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPullPush Input", tPortFlags::cSHARED_INPUT_PORT)));
+        cc_pull_push_out = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPullPush Output", tPortFlags::cSHARED_OUTPUT_PORT)));
+        cc_pull_push_in = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPullPush Input", tPortFlags::cSHARED_INPUT_PORT)));
         cc_pull_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         cc_pull_push_in->SetPushStrategy(false);
       }
       if (cREVERSE_PUSH_TESTS)
       {
-        cc_rev_push_out = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCRevPush Output", tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH)));
-        cc_rev_push_out_local = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_rev_push_in = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCRevPush Input", tPortFlags::cSHARED_INPUT_PORT)));
+        cc_rev_push_out = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCRevPush Output", tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH)));
+        cc_rev_push_out_local = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT)));
+        cc_rev_push_in = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCRevPush Input", tPortFlags::cSHARED_INPUT_PORT)));
         cc_rev_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         cc_rev_push_out_local->ConnectToTarget(*cc_rev_push_in);
       }
       if (cQ_TESTS)
       {
-        cc_qOut = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Queue Output", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_qIn = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("CCPush Queue Input", tPortFlags::cSHARED_INPUT_PORT, 0)));
+        cc_qOut = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPush Queue Output", tPortFlags::cSHARED_OUTPUT_PORT)));
+        cc_qIn = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPush Queue Input", tPortFlags::cSHARED_INPUT_PORT, 0)));
         cc_qIn->SetMinNetUpdateInterval(cRECV_FREQ);
       }
     }
     if (cSTD_TESTS)
     {
-      tDataType* bt = tDataTypeRegister::GetInstance()->GetDataType(util::tTypedClass<tMemBuffer>());
+      rrlib::serialization::tDataTypeBase bt = rrlib::serialization::tMemoryBuffer::cTYPE;
       if (cPUSH_TESTS)
       {
-        std_push_out = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_push_in = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
+        std_push_out = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
+        std_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
         std_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
       }
       if (cPULL_PUSH_TESTS)
       {
-        std_pull_push_out = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPullPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_pull_push_in = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPullPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
+        std_pull_push_out = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPullPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
+        std_pull_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPullPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
         std_pull_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         std_pull_push_in->SetPushStrategy(false);
       }
       if (cREVERSE_PUSH_TESTS)
       {
-        std_rev_push_out = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdRevPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH)));
-        std_rev_push_out_local = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdRevPush Output Local", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_rev_push_in = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdRevPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
+        std_rev_push_out = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdRevPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH)));
+        std_rev_push_out_local = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdRevPush Output Local", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
+        std_rev_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdRevPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
         std_rev_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         std_rev_push_out_local->ConnectToTarget(*std_rev_push_in);
       }
       if (cQ_TESTS)
       {
-        std_qOut = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Queue Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_qIn = ::std::shared_ptr<tTestStdPort>(new tTestStdPort(this, tPortCreationInfo("StdPush Queue Input", bt, tPortFlags::cSHARED_INPUT_PORT, 0)));
+        std_qOut = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPush Queue Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
+        std_qIn = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPush Queue Input", bt, tPortFlags::cSHARED_INPUT_PORT, 0)));
         std_qIn->SetMinNetUpdateInterval(cRECV_FREQ);
       }
     }
@@ -236,9 +227,9 @@ public:
       blackboard::tBlackboardManager::GetInstance();
       //Plugins.getInstance().addPlugin(new Blackboard2Plugin());
       //bbServer = new BlackboardServer(blackboardName);
-      sbb_server = new blackboard::tSingleBufferedBlackboardServer(blackboard_name);
-      bb_client = new blackboard::tRawBlackboardClient(blackboard::tRawBlackboardClient::GetDefaultPci().Derive(partner_blackboard_name));
-      local_bb_client = new blackboard::tRawBlackboardClient(blackboard::tRawBlackboardClient::GetDefaultPci().Derive(blackboard_name));
+      sbb_server = new blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>(blackboard_name);
+      bb_client = std::shared_ptr<blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> >(new blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer>(partner_blackboard_name, NULL));
+      local_bb_client = std::shared_ptr<blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> >(new blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer>(blackboard_name, NULL));
     }
   }
 
@@ -246,8 +237,8 @@ public:
   {
     // write new values to ports and read input ports
     int i = 0;
-    util::tInputStreamBuffer is;
-    util::tOutputStreamBuffer os;
+    rrlib::serialization::tInputStream is;
+    rrlib::serialization::tOutputStream os;
 
     while (true)
     {
@@ -263,7 +254,7 @@ public:
           if (cc_push_in->HasChanged())
           {
             cc_push_in->ResetChanged();
-            util::tSystem::out.Println(util::tStringBuilder("ccPushIn received: ") + cc_push_in->GetIntRaw());
+            util::tSystem::out.Println(util::tStringBuilder("ccPushIn received: ") + cc_push_in->GetValue());
           }
         }
 
@@ -275,7 +266,7 @@ public:
           if (cc_pull_push_in->HasChanged())
           {
             cc_pull_push_in->ResetChanged();
-            util::tSystem::out.Println(util::tStringBuilder("ccPullPushIn received: ") + cc_pull_push_in->GetIntRaw());
+            util::tSystem::out.Println(util::tStringBuilder("ccPullPushIn received: ") + cc_pull_push_in->GetValue());
           }
 
           // do some stuff with push strategy
@@ -289,7 +280,7 @@ public:
           }
           else if (period_idx < 10 && (period_idx % 3) == 0)
           {
-            util::tSystem::out.Println(util::tStringBuilder("Pulling ccPullPushIn: ") + cc_pull_push_in->GetIntRaw());
+            util::tSystem::out.Println(util::tStringBuilder("Pulling ccPullPushIn: ") + cc_pull_push_in->GetValue());
           }
         }
 
@@ -297,7 +288,7 @@ public:
         {
           if (cc_rev_push_in->HasChanged())
           {
-            int val = cc_rev_push_in->GetIntRaw();
+            int val = cc_rev_push_in->GetValue();
             if (val < 0)
             {
               util::tSystem::out.Println(util::tStringBuilder("ccRevPushIn received: ") + val);
@@ -309,7 +300,7 @@ public:
           if (cc_rev_push_out->HasChanged())
           {
             cc_rev_push_out->ResetChanged();
-            util::tSystem::out.Println(util::tStringBuilder("ccRevPushOut received: ") + cc_rev_push_out->GetIntRaw());
+            util::tSystem::out.Println(util::tStringBuilder("ccRevPushOut received: ") + cc_rev_push_out->GetValue());
           }
           if (period_idx == 17)
           {
@@ -326,10 +317,10 @@ public:
           {
             cc_qIn->ResetChanged();
             util::tSystem::out.Print("ccPushIn received: ");
-            tNumber* cn = NULL;
-            while ((cn = cc_qIn->DequeueSingleAutoLocked()) != NULL)
+            int cn = 0;
+            while (cc_qIn->DequeueSingle(cn))
             {
-              util::tSystem::out.Print(util::tStringBuilder(" ") + cn->IntValue());
+              util::tSystem::out.Print(util::tStringBuilder(" ") + cn);
             }
             tThreadLocalCache::GetFast()->ReleaseAllLocks();
             util::tSystem::out.Println();
@@ -415,7 +406,7 @@ public:
           {
             std_qIn->ResetChanged();
             util::tSystem::out.Print("stdPushIn received: ");
-            tMemBuffer* cn = NULL;
+            const rrlib::serialization::tMemoryBuffer* cn = NULL;
             while ((cn = std_qIn->DequeueSingleAutoLocked()) != NULL)
             {
               is.Reset(cn);
@@ -444,30 +435,41 @@ public:
       if (cBB_TESTS)
       {
         // write to remote blackboard
-        blackboard::tBlackboardBuffer* bb = bb_client->WriteLock(2000);
-        if (bb != NULL)
+        try
         {
-          if (bb->GetElements() == 0)
+          blackboard::tBlackboardWriteAccess<rrlib::serialization::tMemoryBuffer> bb(*bb_client, 2000);
+          if (bb.Size() == 0)
           {
-            bb->Resize(1, 1, 4, false);
+            bb.Resize(1u);
           }
-          os.Reset(bb);
+          os.Reset(&(bb.Get(0u)));
           os.WriteInt(i);
           os.Close();
-          bb_client->Unlock();
+
+        }
+        catch (const blackboard::tBBLockException& ex)
+        {
+          //log(LogLevel.LL_WARNING, logDomain, "Write-locking blackboard failed");
         }
 
         // read local blackboard
-        const blackboard::tBlackboardBuffer* bb2 = local_bb_client->ReadLock(2000);
-        if (bb2 != NULL)
+        try
         {
-          is.Reset(bb2);
-          if (is.MoreDataAvailable())
+          blackboard::tBlackboardReadAccess<rrlib::serialization::tMemoryBuffer> bb(*local_bb_client, 2000);
+          if (bb.Size() > 0)
           {
-            util::tSystem::out.Println(util::tStringBuilder("Reading Blackboard: ") + is.ReadInt());
+            is.Reset(&(bb.Get(0u)));
+            if (is.MoreDataAvailable())
+            {
+              util::tSystem::out.Println(util::tStringBuilder("Reading Blackboard: ") + is.ReadInt());
+            }
+            is.Close();
           }
-          is.Close();
-          local_bb_client->Unlock();
+
+        }
+        catch (const blackboard::tBBLockException& ex)
+        {
+          FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Read-locking blackboard failed");
         }
       }
 
@@ -497,4 +499,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TEST__TNETWORKTESTSUITE_H
+#endif // core__test__tNetworkTestSuite_h__

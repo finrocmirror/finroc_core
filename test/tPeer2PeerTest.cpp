@@ -23,10 +23,10 @@
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/tFrameworkElement.h"
-#include "core/port/cc/tPortNumeric.h"
+#include "core/port/tPort.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
-#include "core/port/cc/tCCPortBase.h"
+#include "core/port/tAbstractPort.h"
 #include "core/tCoreFlags.h"
 #include "plugins/tcp/tTCPPeer.h"
 
@@ -41,10 +41,10 @@ void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 
   // Create two ports
   tFrameworkElement* link_test = new tFrameworkElement(NULL, "linkTest");
-  tPortNumeric output(tPortCreationInfo("testOut", tPortFlags::cSHARED_OUTPUT_PORT));
+  tPort<int> output(tPortCreationInfo("testOut", tPortFlags::cSHARED_OUTPUT_PORT));
   output.GetWrapped()->Link(link_test, "linkTestPort");
-  tPortNumeric output2(tPortCreationInfo("testOutGlobal", tPortFlags::cSHARED_OUTPUT_PORT | tCoreFlags::cGLOBALLY_UNIQUE_LINK));
-  tPortNumeric input(tPortCreationInfo("testIn", tPortFlags::cINPUT_PORT));
+  tPort<int> output2(tPortCreationInfo("testOutGlobal", tPortFlags::cSHARED_OUTPUT_PORT | tCoreFlags::cGLOBALLY_UNIQUE_LINK));
+  tPort<int> input(tPortCreationInfo("testIn", tPortFlags::cINPUT_PORT));
   input.ConnectToSource("/TCP/localhost:4444/Unrelated/testOut");
   input.ConnectToSource("/Unrelated/testOutGlobal");
 

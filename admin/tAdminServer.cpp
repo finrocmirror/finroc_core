@@ -48,7 +48,7 @@ namespace finroc
 {
 namespace core
 {
-tPortInterface tAdminServer::cMETHODS("Admin Interface");
+tPortInterface tAdminServer::cMETHODS("Admin Interface", true);
 tVoid2Method<tAdminServer*, int, int> tAdminServer::cCONNECT(tAdminServer::cMETHODS, "Connect", "source port handle", "destination port handle", false);
 tVoid2Method<tAdminServer*, int, int> tAdminServer::cDISCONNECT(tAdminServer::cMETHODS, "Disconnect", "source port handle", "destination port handle", false);
 tVoid2Method<tAdminServer*, int, int> tAdminServer::cDISCONNECT_ALL(tAdminServer::cMETHODS, "DisconnectAll", "source port handle", "dummy", false);

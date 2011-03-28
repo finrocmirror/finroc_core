@@ -110,6 +110,10 @@ private:
   template < typename Q = tManagerTL >
   static inline T* GetData(typename boost::enable_if_c<typeutil::tUseCCType<T>::value, Q>::type* mgr)
   {
+    if (mgr == NULL)
+    {
+      return NULL;
+    }
     rrlib::serialization::tGenericObject* go = mgr->GetObject();
     return go->GetData<T>();
   }
@@ -293,7 +297,7 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
   {}
 
   // Standard constructor
-  tPortDataPtr(tManager* manager_) : data(manager_->GetObject()), manager(manager_), mode(eNORMAL)
+  tPortDataPtr(tManager* manager_) : data(manager_ == NULL ? NULL : manager_->GetObject()), manager(manager_), mode(eNORMAL)
   {}
 
   // Move constructor

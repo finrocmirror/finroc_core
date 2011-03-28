@@ -21,15 +21,17 @@
  */
 #include "core/port/rpc/method/tPortInterface.h"
 #include "core/port/rpc/method/tAbstractMethod.h"
+#include "core/tRuntimeEnvironment.h"
 
 namespace finroc
 {
 namespace core
 {
-tPortInterface::tPortInterface(const util::tString& name_) :
+tPortInterface::tPortInterface(const util::tString& name_, bool shutdown_runtime_on_delete_) :
     methods(),
     my_type(NULL),
-    name(name_)
+    name(name_),
+    shutdown_runtime_on_delete(shutdown_runtime_on_delete_)
 {
 }
 
@@ -39,6 +41,14 @@ void tPortInterface::AddMethod(tAbstractMethod* m)
   m->method_id = static_cast<int8>(methods.Size());
   m->type = this;
   methods.Add(m);
+}
+
+tPortInterface::~tPortInterface()
+{
+  if (shutdown_runtime_on_delete)
+  {
+    tRuntimeEnvironment::Shutdown();
+  }
 }
 
 } // namespace finroc

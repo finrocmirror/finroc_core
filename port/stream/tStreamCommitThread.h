@@ -81,7 +81,7 @@ public:
 
   virtual void StopThread()
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain, "Stopping StreamCommitThread");
+    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Stopping StreamCommitThread");
     ::finroc::util::tLoopThread::StopThread();
   }
 

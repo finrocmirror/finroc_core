@@ -26,6 +26,7 @@ tThreadContainerThread::tThreadContainerThread(tThreadContainer* thread_containe
     filter(),
     tmp()
 {
+  this->SetName(util::tStringBuilder("ThreadContainer ") + thread_container_->GetDescription());
 }
 
 void tThreadContainerThread::MainLoopCallback()

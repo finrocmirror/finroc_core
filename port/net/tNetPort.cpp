@@ -323,7 +323,9 @@ void tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
       tPortDataPtr<rrlib::serialization::tGenericObject> o = pc->GetParamGeneric(0);
       tCCPortDataManager* c = static_cast<tCCPortDataManager*>(o->GetManager());
       result_buffer->GetObject()->DeepCopyFrom(c->GetObject(), NULL);
+
     }
+    pc->Recycle();
 
   }
   catch (const tMethodCallException& e)

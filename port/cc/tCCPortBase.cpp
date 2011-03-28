@@ -250,8 +250,9 @@ void tCCPortBase::PullValueRawImpl(tThreadLocalCache* tc, bool intermediate_assi
   util::tArrayWrapper<tCCPortBase*>* sources = edges_dest.GetIterable();
   if ((!first) && pull_request_handler != NULL)    // for network port pulling it's good if pullRequestHandler is not called on first port - and there aren't any scenarios where this would make sense
   {
-    tc->data = tc->GetUnusedBuffer(this->data_type);
-    pull_request_handler->PullRequest(this, tc->data);
+    tCCPortDataManagerTL* res_buf = tc->GetUnusedBuffer(this->data_type);
+    pull_request_handler->PullRequest(this, res_buf);
+    tc->data = res_buf;
     tc->data->SetRefCounter(1);  // one lock for caller
     tc->ref = tc->data->GetCurrentRef();
     Assign(tc);

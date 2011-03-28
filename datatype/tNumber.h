@@ -125,7 +125,7 @@ public:
 
   tNumber() :
       lval(0),
-      num_type(),
+      num_type(eINT),
       unit(&tUnit::cNO_UNIT)
   {
     type = cTYPE;

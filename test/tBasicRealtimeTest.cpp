@@ -22,6 +22,7 @@
 #include "core/test/tBasicRealtimeTest.h"
 #include "core/tRuntimeEnvironment.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
+#include "core/port/tThreadLocalCache.h"
 #include "rrlib/finroc_core_utils/tTime.h"
 
 namespace finroc
@@ -31,7 +32,7 @@ namespace core
 const int tBasicRealtimeTest::cINTERVAL;
 
 tBasicRealtimeTest::tBasicRealtimeTest(const util::tString& name) :
-    port(name + "-port", true),
+    port(name + "-port", NULL, true),
     max_latency(),
     total_latency(),
     cycles()
@@ -44,8 +45,8 @@ void tBasicRealtimeTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
 {
   tRuntimeEnvironment::GetInstance();
 
-  ::std::shared_ptr<tBasicRealtimeTest> rt = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("RT-Thread"));
-  ::std::shared_ptr<tBasicRealtimeTest> t = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("non-RT-Thread"));
+  std::shared_ptr<tBasicRealtimeTest> rt = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("RT-Thread"));
+  std::shared_ptr<tBasicRealtimeTest> t = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("non-RT-Thread"));
   util::sThreadUtil::MakeThreadRealtime(rt);
   rt->Start();
   t->Start();
@@ -66,6 +67,7 @@ void tBasicRealtimeTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
 
 void tBasicRealtimeTest::Run()
 {
+  tThreadLocalCache::Get();  // init ThreadLocalCache
   port.Publish(40);
   port.Publish(42);
 

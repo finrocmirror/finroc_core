@@ -157,10 +157,11 @@ public:
    *
    * \param result Buffer to (deep) copy dequeued value to
    * (Using this dequeueSingle()-variant is more efficient when using CC types, but can be extremely costly with large data types)
+   * \return true if element was dequeued - false if queue was empty
    */
-  inline void DequeueSingle(T& result)
+  inline bool DequeueSingle(T& result)
   {
-    tPortUtil<T>::DequeueSingle(wrapped, result);
+    return tPortUtil<T>::DequeueSingle(wrapped, result);
   }
 
   /*!

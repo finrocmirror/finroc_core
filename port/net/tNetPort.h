@@ -239,7 +239,7 @@ public:
     GetPort()->ManagedDelete();
   }
 
-  virtual void PortChanged(tAbstractPort* origin, void* const& value)
+  virtual void PortChanged(tAbstractPort* origin, const void* const& value)
   {
     PortChanged();
   }

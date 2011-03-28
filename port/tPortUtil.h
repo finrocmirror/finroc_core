@@ -92,11 +92,16 @@ public:
     mgr->ReleaseLock();
   }
 
-  static void DequeueSingle(tPortType* port, T& result)
+  static bool DequeueSingle(tPortType* port, T& result)
   {
     tManager* mgr = port->DequeueSingleUnsafeRaw();
-    rrlib::serialization::sSerialization::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
-    mgr->ReleaseLock();
+    if (mgr != NULL)
+    {
+      rrlib::serialization::sSerialization::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
+      mgr->ReleaseLock();
+      return true;
+    }
+    return false;
   }
 
   static const T* GetAutoLocked(tPortType* port)
@@ -106,7 +111,12 @@ public:
 
   static const T* DequeueSingleAutoLocked(tPortType* port)
   {
-    rrlib::serialization::tGenericObject* go = port->DequeueSingleAutoLockedRaw();
+    tManager* mgr = port->DequeueSingleAutoLockedRaw();
+    if (mgr == NULL)
+    {
+      return NULL;
+    }
+    rrlib::serialization::tGenericObject* go = mgr->GetObject();
     return go->GetData<T>();
   }
 
@@ -173,11 +183,17 @@ public:
   static tConstDataPtr DequeueSingle(tPortType* port)
   {
     T val;
-    DequeueSingle(port, val);
-    tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
-    tNumber* new_num = c->GetObject()->GetData<tNumber>();
-    new_num->SetValue(val, port->GetUnit());
-    return tConstDataPtr(new_num->GetValuePtr<T>(), c);
+    if (DequeueSingle(port, val))
+    {
+      tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
+      tNumber* new_num = c->GetObject()->GetData<tNumber>();
+      new_num->SetValue(val, port->GetUnit());
+      return tConstDataPtr(new_num->GetValuePtr<T>(), c);
+    }
+    else
+    {
+      return tConstDataPtr();
+    }
   }
 
   static tConstDataPtr GetPull(tPortType* port, bool intermediate_assign)
@@ -206,19 +222,24 @@ public:
     }
   }
 
-  static void DequeueSingle(tPortType* port, T& result)
+  static bool DequeueSingle(tPortType* port, T& result)
   {
     tManager* mgr = port->DequeueSingleUnsafeRaw();
-    tNumber* num = mgr->GetObject()->GetData<tNumber>();
-    if (port->GetUnit() != num->GetUnit() && port->GetUnit() != &tUnit::cNO_UNIT && num->GetUnit() != &tUnit::cNO_UNIT)
+    if (mgr != NULL)
     {
-      result = static_cast<T>(num->GetUnit()->ConvertTo(num->Value<double>(), port->GetUnit()));
+      tNumber* num = mgr->GetObject()->GetData<tNumber>();
+      if (port->GetUnit() != num->GetUnit() && port->GetUnit() != &tUnit::cNO_UNIT && num->GetUnit() != &tUnit::cNO_UNIT)
+      {
+        result = static_cast<T>(num->GetUnit()->ConvertTo(num->Value<double>(), port->GetUnit()));
+      }
+      else
+      {
+        result = num->Value<T>();
+      }
+      mgr->Recycle2();
+      return true;
     }
-    else
-    {
-      result = num->Value<T>();
-    }
-    mgr->Recycle2();
+    return false;
   }
 
   static const T* GetAutoLocked(tPortType* port)
@@ -229,12 +250,18 @@ public:
   static const T* DequeueSingleAutoLocked(tPortType* port)
   {
     T val;
-    DequeueSingle(port, val);
-    tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
-    tNumber* new_num = c->GetObject()->GetData<tNumber>();
-    new_num->SetValue(val, port->GetUnit());
-    tThreadLocalCache::GetFast()->AddAutoLock(c);
-    return new_num;
+    if (DequeueSingle(port, val))
+    {
+      tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
+      tNumber* new_num = c->GetObject()->GetData<tNumber>();
+      new_num->SetValue(val, port->GetUnit());
+      tThreadLocalCache::GetFast()->AddAutoLock(c);
+      return new_num;
+    }
+    else
+    {
+      return NULL;
+    }
   }
 
   static void SetDefault(tPortType* port, const T& t)
@@ -321,11 +348,16 @@ public:
     port->GetRaw(&tmp);
   }
 
-  static void DequeueSingle(tPortType* port, T& result)
+  static bool DequeueSingle(tPortType* port, T& result)
   {
     tManager* mgr = port->DequeueSingleUnsafeRaw();
-    rrlib::serialization::sSerialization::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
-    mgr->Recycle2();
+    if (mgr != NULL)
+    {
+      rrlib::serialization::sSerialization::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
+      mgr->Recycle2();
+      return true;
+    }
+    return false;
   }
 
   static const T* GetAutoLocked(tPortType* port)
@@ -335,7 +367,12 @@ public:
 
   static const T* DequeueSingleAutoLocked(tPortType* port)
   {
-    return port->DequeueSingleAutoLockedRaw()->GetData<T>();
+    rrlib::serialization::tGenericObject* go = port->DequeueSingleAutoLockedRaw();
+    if (go == NULL)
+    {
+      return NULL;
+    }
+    return go->GetData<T>();
   }
 
   static void SetDefault(tPortType* port, const T& t)

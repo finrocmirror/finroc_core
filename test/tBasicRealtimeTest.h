@@ -19,12 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TEST__TBASICREALTIMETEST_H
-#define CORE__TEST__TBASICREALTIMETEST_H
+#ifndef core__test__tBasicRealtimeTest_h__
+#define core__test__tBasicRealtimeTest_h__
 
-#include "core/port/cc/tPortNumeric.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "core/port/tPort.h"
 
 namespace finroc
 {
@@ -42,7 +43,7 @@ class tBasicRealtimeTest : public util::tThread
 {
 public:
 
-  tPortNumeric port;
+  tPort<int> port;
 
   util::tAtomicInt64 max_latency;
 
@@ -70,4 +71,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TEST__TBASICREALTIMETEST_H
+#endif // core__test__tBasicRealtimeTest_h__

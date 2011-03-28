@@ -25,6 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
+#include "core/tRuntimeEnvironment.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 
 #include "core/port/rpc/tParameterUtil.h"
@@ -85,6 +86,11 @@ public:
   RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "rpc");
 
   tAbstractMethod(tPortInterface& port_interface, const util::tString& name_, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread_);
+
+  virtual ~tAbstractMethod()
+  {
+    tRuntimeEnvironment::Shutdown();
+  }
 
   /*!
    * (only for async non-void calls)

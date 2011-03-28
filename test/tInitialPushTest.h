@@ -19,12 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TEST__TINITIALPUSHTEST_H
-#define CORE__TEST__TINITIALPUSHTEST_H
+#ifndef core__test__tInitialPushTest_h__
+#define core__test__tInitialPushTest_h__
 
-#include "core/port/cc/tPortNumeric.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "core/port/tPort.h"
 
 namespace finroc
 {
@@ -36,9 +37,9 @@ namespace core
  */
 class tInitialPushTest : public util::tUncopyableObject
 {
-  inline static void Print(tPortNumeric& o2, int i)
+  inline static void Print(tPort<int>& o2, int i)
   {
-    util::tSystem::out.Println(util::tStringBuilder("Port ") + o2.GetDescription() + ": " + o2.GetIntRaw() + " (expected: " + i + ")");
+    util::tSystem::out.Println(util::tStringBuilder("Port ") + o2.GetDescription() + ": " + o2.GetValue() + " (expected: " + i + ")");
   }
 
 public:
@@ -55,4 +56,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TEST__TINITIALPUSHTEST_H
+#endif // core__test__tInitialPushTest_h__

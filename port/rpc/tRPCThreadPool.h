@@ -51,7 +51,7 @@ class tRPCThreadPool : public util::tUncopyableObject
 private:
 
   /*! Singleton instance */
-  static tRPCThreadPool instance;
+  static tRPCThreadPool* instance;
 
   /*! Pool of unused threads */
   util::tWonderQueue<tRPCThread> unused_threads;
@@ -90,7 +90,7 @@ public:
    */
   inline static tRPCThreadPool* GetInstance()
   {
-    return &(instance);
+    return instance;
   }
 
 };

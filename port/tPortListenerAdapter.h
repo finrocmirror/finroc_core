@@ -153,6 +153,20 @@ public:
   }
 };
 
+/*! variant for void* */
+template < bool CC, bool NUM>
+class tPortListenerAdapter<const void*, CC, NUM> : public tPortListenerRaw
+{
+public:
+
+  virtual void PortChanged(tAbstractPort* origin, const void* const& value) = 0;
+
+  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
+  {
+    PortChanged(origin, value->GetObject()->GetRawDataPtr());
+  }
+};
+
 } // namespace finroc
 } // namespace core
 
