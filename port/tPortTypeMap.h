@@ -25,9 +25,11 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "core/port/std/tPortBase.h"
+#include "core/port/std/tPortQueueFragmentRaw.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCPortBounded.h"
 #include "core/port/cc/tCCPortBoundedNumeric.h"
+#include "core/port/cc/tCCQueueFragmentRaw.h"
 #include "core/datatype/tCoreString.h"
 
 #include <boost/type_traits/remove_pointer.hpp>
@@ -49,6 +51,7 @@
  * tManagerType:   Type of port data manager to handle this type (possibly in between threads)
  * tListType:      Type for list of T objects
  * tGenericChange: Type that can be used for generic (transaction-like) changes (e.g. in blackboards)
+ * tQueueFragment: Type for port queue fragment (to dequeue several elements at once)
  *
  * //tPortType:      Type of port to handle this type
  * //tValueVar:      Type to use for function and class variables operating with non-const port values.
@@ -78,6 +81,7 @@ struct tStdPortTypeMap
   typedef T tPortDataType;
   typedef tDummyBoundedPortBaseType tBoundedPortBaseType;
   typedef tPortDataManager tManagerType;
+  typedef tPortQueueFragmentRaw tQueueFragment;
 
 //  typedef tPort<T> tPortType;
 //  typedef shared_ptr<T> tValueVar;
@@ -94,6 +98,7 @@ struct tCCPortTypeMap
   typedef T tPortDataType;
   typedef tCCPortBounded<T> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
+  typedef tCCQueueFragmentRaw tQueueFragment;
 
 //  typedef tCCPort<T> tPortType;
 //  typedef T tValueVar;
@@ -115,6 +120,7 @@ struct tPortTypeMapBase<tNumber, true, ENUM, INT>
   typedef tNumber tPortDataType;
   typedef tCCPortBoundedNumeric<double> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
+  typedef tCCQueueFragmentRaw tQueueFragment;
 
 //  typedef tPortNumeric tPortType;
 //  typedef T tValueVar;
@@ -131,6 +137,7 @@ struct tPortTypeMapBase<T, CC, ENUM, true>
   typedef tNumber tPortDataType;
   typedef tCCPortBoundedNumeric<T> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
+  typedef tCCQueueFragmentRaw tQueueFragment;
 
 //  typedef tPortNumeric tPortType;
 //  typedef T tValueVar;
@@ -146,6 +153,7 @@ struct tPortTypeMapBase<T, CC, true, INT>
   typedef tNumber tPortDataType;
   typedef tCCPortBoundedNumeric<int> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
+  typedef tCCQueueFragmentRaw tQueueFragment;
 
 //  typedef tPortNumeric tPortType;
 //  typedef T tValueVar;

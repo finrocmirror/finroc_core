@@ -26,16 +26,14 @@
 #include "core/port/tPortFlags.h"
 #include "core/tFrameworkElement.h"
 #include "core/datatype/tNumber.h"
-#include "core/port/cc/tCCQueueFragment.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
-#include "core/port/cc/tCCInterThreadContainer.h"
 
 namespace finroc
 {
 namespace core
 {
 int tRealPortQueueTest::cCYCLES = 10000000;
-::std::shared_ptr<tPortNumeric> tRealPortQueueTest::output;
+std::shared_ptr<tPort<int> > tRealPortQueueTest::output;
 volatile int tRealPortQueueTest::cPUBLISH_LIMIT;
 util::tAtomicInt tRealPortQueueTest::finished(0);
 
@@ -49,13 +47,13 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   // Create number output port and input port with queue
   tRuntimeEnvironment::GetInstance();
   tThreadLocalCache::Get();
-  output = ::std::shared_ptr<tPortNumeric>(new tPortNumeric(tPortCreationInfo("output", tPortFlags::cOUTPUT_PORT)));
+  output = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("output", tPortFlags::cOUTPUT_PORT)));
   tPortCreationInfo input_pCI("input", tPortFlags::cINPUT_PORT | tPortFlags::cHAS_AND_USES_QUEUE | tPortFlags::cPUSH_STRATEGY);
   input_pCI.max_queue_size = 10;
-  tPortNumeric input(input_pCI);
+  tPort<int> input(input_pCI);
   input_pCI.max_queue_size = 0;
-  tPortNumeric unlimited_input(input_pCI);
-  tPortNumeric unlimited_input2(input_pCI);
+  tPort<int> unlimited_input(input_pCI);
+  tPort<int> unlimited_input2(input_pCI);
   output->ConnectToTarget(input);
   tFrameworkElement::InitAll();
   tRuntimeEnvironment::GetInstance()->PrintStructure();
@@ -70,12 +68,11 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   util::tSystem::out.Println(time);
 
   util::tSystem::out.Println("Reading contents of queue (single dq)...");
-  tNumber* cn = NULL;
-  while ((cn = input.DequeueSingleAutoLocked()) != NULL)
+  int cn = 0;
+  while ((input.DequeueSingle(cn)))
   {
-    util::tSystem::out.Println(cn->DoubleValue());
+    PrintNum(cn);
   }
-  tThreadLocalCache::Get()->ReleaseAllLocks();
 
   util::tSystem::out.Println("Writing two entries to queue...");
   for (int i = 0; i < 2; i++)
@@ -84,11 +81,10 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   }
 
   util::tSystem::out.Println("Reading contents of queue (single dq)...");
-  while ((cn = input.DequeueSingleAutoLocked()) != NULL)
+  while ((input.DequeueSingle(cn)))
   {
-    util::tSystem::out.Println(cn->DoubleValue());
+    PrintNum(cn);
   }
-  tThreadLocalCache::Get()->ReleaseAllLocks();
 
   util::tSystem::out.Println("Writing 20 entries to queue...");
   for (int i = 0; i < 20; i++)
@@ -97,19 +93,19 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   }
 
   util::tSystem::out.Println("Read contents of queue in fragment...");
-  tCCQueueFragment<tNumber> frag;
+  tPortQueueFragment<int> frag;
   input.DequeueAll(frag);
-  while ((cn = frag.DequeueAutoLocked()) != NULL)
+  while (frag.Dequeue(cn))
   {
-    util::tSystem::out.Println(cn->ToString());
+    PrintNum(cn);
   }
   tThreadLocalCache::Get()->ReleaseAllLocks();
 
   util::tSystem::out.Println("Read contents of queue in fragment again...");
   input.DequeueAll(frag);
-  while ((cn = frag.DequeueAutoLocked()) != NULL)
+  while (frag.Dequeue(cn))
   {
-    util::tSystem::out.Println(cn->ToString());
+    PrintNum(cn);
   }
   tThreadLocalCache::Get()->ReleaseAllLocks();
 
@@ -121,9 +117,9 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
 
   util::tSystem::out.Println("Read contents of queue in fragment...");
   input.DequeueAll(frag);
-  while ((cn = frag.DequeueAutoLocked()) != NULL)
+  while (frag.Dequeue(cn))
   {
-    util::tSystem::out.Println(cn->ToString());
+    PrintNum(cn);
   }
   tThreadLocalCache::Get()->ReleaseAllLocks();
 
@@ -140,8 +136,8 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   tThreadLocalCache::GetFast()->ReleaseAllLocks();
 
   // start writer threads
-  ::std::shared_ptr<tRealPortQueueTest> thread1 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(true));
-  ::std::shared_ptr<tRealPortQueueTest> thread2 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(false));
+  std::shared_ptr<tRealPortQueueTest> thread1 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(true));
+  std::shared_ptr<tRealPortQueueTest> thread2 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(false));
   printf("Created threads %p and %p\n", thread1.get(), thread2.get());
   thread1->Start();
   thread2->Start();
@@ -154,9 +150,9 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   int last_neg_unlimited_f = 0;
 
   int e = cCYCLES - 1;
-  tCCInterThreadContainer<tNumber>* cc;
   start = util::tSystem::CurrentTimeMillis();
   cPUBLISH_LIMIT = cCYCLES;
+  int cc = 0;
   while (true)
   {
     if ((last_pos_unlimited & 0xFFFF) == 0)
@@ -165,11 +161,9 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
     }
 
     // Dequeue from bounded queue
-    cc = input.DequeueSingleUnsafe();
-    if (cc != NULL)
+    if (input.DequeueSingle(cc))
     {
-      int val = cc->GetData()->IntValue();
-      cc->Recycle2();
+      int val = cc;
       if (val >= 0)
       {
         assert((val > last_pos_limited));
@@ -183,11 +177,9 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
     }
 
     // Dequeue from unlimited queue (single dq)
-    cc = unlimited_input.DequeueSingleUnsafe();
-    if (cc != NULL)
+    if (unlimited_input.DequeueSingle(cc))
     {
-      int val = cc->GetData()->IntValue();
-      cc->Recycle2();
+      int val = cc;
       if (val >= 0)
       {
         assert((val == last_pos_unlimited + 1));
@@ -208,9 +200,9 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
     // Dequeue from unlimited queue (fragment-wise)
     //System.out.println("Iteratorion");
     unlimited_input2.DequeueAll(frag);
-    while ((cc = frag.DequeueUnsafe()) != NULL)
+    while (frag.Dequeue(cc))
     {
-      int val = cc->GetData()->IntValue();
+      int val = cc;
       if (val >= 0)
       {
         assert((val == last_pos_unlimited_f + 1));
@@ -221,7 +213,6 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
         assert((val == last_neg_unlimited_f - 1));
         last_neg_unlimited_f = val;
       }
-      cc->Recycle2();
     }
 
     if ((last_pos_limited == e || last_neg_limited == -e) && last_pos_unlimited == e && last_neg_unlimited == -e && last_pos_unlimited_f == e && last_neg_unlimited_f == -e)
@@ -237,6 +228,7 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
 
 void tRealPortQueueTest::Run()
 {
+  tThreadLocalCache::Get();
   for (int i = 1; i < cCYCLES; i++)
   {
     while (i > cPUBLISH_LIMIT)

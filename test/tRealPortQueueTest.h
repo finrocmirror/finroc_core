@@ -19,12 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tJCBase.h"
 
-#ifndef CORE__TEST__TREALPORTQUEUETEST_H
-#define CORE__TEST__TREALPORTQUEUETEST_H
+#ifndef core__test__tRealPortQueueTest_h__
+#define core__test__tRealPortQueueTest_h__
 
-#include "core/port/cc/tPortNumeric.h"
+#include "rrlib/finroc_core_utils/definitions.h"
+
+#include "core/port/tPort.h"
 
 namespace finroc
 {
@@ -42,7 +43,7 @@ public:
   // Number of iterations
   static int cCYCLES;
 
-  static ::std::shared_ptr<tPortNumeric> output;
+  static std::shared_ptr<tPort<int> > output;
 
   static volatile int cPUBLISH_LIMIT;
 
@@ -50,6 +51,15 @@ public:
   bool positive_count;
 
   static util::tAtomicInt finished;
+
+private:
+
+  inline static void PrintNum(int cn)
+  {
+    std::cout << cn << std::endl;
+  }
+
+public:
 
   tRealPortQueueTest(bool pos);
 
@@ -62,4 +72,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // CORE__TEST__TREALPORTQUEUETEST_H
+#endif // core__test__tRealPortQueueTest_h__

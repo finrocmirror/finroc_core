@@ -244,7 +244,13 @@ public:
 
   static const T* GetAutoLocked(tPortType* port)
   {
-    port->GetAutoLockedRaw()->GetData<tNumber>()->GetValuePtr<T>();
+    T val;
+    GetValue(port, val);
+    tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
+    tNumber* new_num = c->GetObject()->GetData<tNumber>();
+    new_num->SetValue(val, port->GetUnit());
+    tThreadLocalCache::GetFast()->AddAutoLock(c);
+    return new_num->GetValuePtr<T>();
   }
 
   static const T* DequeueSingleAutoLocked(tPortType* port)
@@ -256,7 +262,7 @@ public:
       tNumber* new_num = c->GetObject()->GetData<tNumber>();
       new_num->SetValue(val, port->GetUnit());
       tThreadLocalCache::GetFast()->AddAutoLock(c);
-      return new_num;
+      return new_num->GetValuePtr<T>();
     }
     else
     {

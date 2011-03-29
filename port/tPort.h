@@ -32,6 +32,7 @@
 
 #include "core/port/tPortTypeMap.h"
 #include "core/port/tPortUtil.h"
+#include "core/port/tPortQueueFragment.h"
 
 namespace finroc
 {
@@ -122,16 +123,15 @@ public:
     wrapped->AddPortListenerRaw(listener);
   }
 
-  // TODO: implement safely
-  //    /**
-  //     * Dequeue all elements currently in queue
-  //     *
-  //     * \param fragment Fragment to store all dequeued values in
-  //     */
-  //    @SuppressWarnings("unchecked")
-  //    public void dequeueAll(@Ref PortQueueFragment<T> fragment) {
-  //        wrapped.dequeueAllRaw((PortQueueFragment<PortData>) fragment);
-  //    }
+  /*!
+   * Dequeue all elements currently in queue
+   *
+   * \param fragment Fragment to store all dequeued values in
+   */
+  inline void DequeueAll(tPortQueueFragment<T>& fragment)
+  {
+    fragment.DequeueFromPort(wrapped);
+  }
 
   /*!
    * Dequeue first/oldest element in queue.
