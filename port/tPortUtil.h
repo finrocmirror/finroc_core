@@ -145,6 +145,11 @@ public:
     Publish(port, buf);
   }
 
+  static const tBounds<T> GetBounds(tPortType* port)
+  {
+    assert(false && "Bounds can only be used with CC types");
+  }
+
   static void SetBounds(tPortType* port, const tBounds<T>& b)
   {
     assert(false && "Bounds can only be used with CC types");
@@ -300,8 +305,15 @@ public:
     port->Publish(mgr);
   }
 
+  static const tBounds<T> GetBounds(const tPortType* port)
+  {
+    assert(typeid(*port).name() == typeid(tCCPortBoundedNumeric<T>*).name());
+    return static_cast<const tCCPortBoundedNumeric<T>*>(port)->GetBounds();
+  }
+
   static void SetBounds(tPortType* port, const tBounds<T>& b)
   {
+    assert(typeid(*port).name() == typeid(tCCPortBoundedNumeric<T>*).name());
     static_cast<tCCPortBoundedNumeric<T>*>(port)->SetBounds(b);
   }
 
@@ -411,8 +423,15 @@ public:
     port->Publish(mgr);
   }
 
+  static const tBounds<T> GetBounds(const tPortType* port)
+  {
+    assert(typeid(*port).name() == typeid(typename tPortTypeMap<T>::tBoundedPortBaseType).name());
+    return static_cast<const typename tPortTypeMap<T>::tBoundedPortBaseType*>(port)->GetBounds();
+  }
+
   static void SetBounds(tPortType* port, const tBounds<T>& b)
   {
+    assert(typeid(*port).name() == typeid(typename tPortTypeMap<T>::tBoundedPortBaseType).name());
     static_cast<typename tPortTypeMap<T>::tBoundedPortBaseType*>(port)->SetBounds(b);
   }
 };

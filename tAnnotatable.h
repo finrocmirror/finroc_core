@@ -90,10 +90,18 @@ public:
 
   virtual ~tAnnotatable();
 
+  //! Convenience method for below
+  template <typename A>
+  A* GetAnnotation()
+  {
+    return static_cast<A*>(GetAnnotation(rrlib::serialization::tDataType<A>()));
+  }
+
   /*!
    * Get annotation of specified type
    *
    * \param type Data type of annotation we're looking for
+   * \return Annotation. Null if framework element has no annotation of this type.
    */
   tFinrocAnnotation* GetAnnotation(const rrlib::serialization::tDataTypeBase& dt);
 

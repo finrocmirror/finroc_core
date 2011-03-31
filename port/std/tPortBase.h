@@ -555,7 +555,7 @@ public:
    */
   inline bool ValueIs(const void* pd) const
   {
-    return value.Get()->GetData() == pd;
+    return value.Get()->GetData()->GetRawDataPtr() == pd;
   }
 
 };

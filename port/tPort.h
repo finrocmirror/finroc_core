@@ -110,7 +110,7 @@ public:
     wrapped->AddPortListenerRaw(listener);
   }
 
-  void AddPortListener(tPortListener<void*>* listener)
+  void AddPortListener(tPortListener<>* listener)
   {
     wrapped->AddPortListenerRaw(listener);
   }
@@ -214,6 +214,47 @@ public:
     return tPortUtil<T>::GetAutoLocked(wrapped);
   }
 
+  //    /**
+  //     * \param pullRequestHandler Object that handles pull requests - null if there is none (typical case)
+  //     */
+  //    public void setPullRequestHandler(PullRequestHandler pullRequestHandler) {
+  //        wrapped.setPullRequestHandler(pullRequestHandler);
+  //    }
+
+  //    /**
+  //     * Does port (still) have this value?
+  //     * (calling this is only safe, when pd is locked)
+  //     *
+  //     * \param pd Port value
+  //     * \return Answer
+  //     */
+  //    @InCpp("return getHelper(PortUtil<T>::publish(wrapped));")
+  //    @ConstMethod public boolean valueIs(@Const @Ptr T pd) {
+  //        if (hasCCType()) {
+  //            return ((CCPortBase)wrapped).valueIs(pd);
+  //        } else {
+  //            return ((PortBase)wrapped).valueIs(pd);
+  //        }
+  //    }
+  //
+  //
+  //    boolean valueIs(std::shared_ptr<const T>& pd) const {
+  //        return valueIs(pd._get());
+  //    }
+  //
+  //    boolean valueIs(const T& pd) const {
+  //        return value
+  //    }
+  //
+
+  /*!
+   * \return Bounds as they are currently set
+   */
+  inline const tBounds<T> GetBounds() const
+  {
+    return tPortUtil<T>::GetBounds(wrapped);
+  }
+
   /*!
    * \return Buffer with default value. Can be used to change default value
    * for port. However, this should be done before the port is used.
@@ -296,39 +337,6 @@ public:
   {
     wrapped->RemovePortListenerRaw(listener);
   }
-
-  //    /**
-  //     * \param pullRequestHandler Object that handles pull requests - null if there is none (typical case)
-  //     */
-  //    public void setPullRequestHandler(PullRequestHandler pullRequestHandler) {
-  //        wrapped.setPullRequestHandler(pullRequestHandler);
-  //    }
-
-  //    /**
-  //     * Does port (still) have this value?
-  //     * (calling this is only safe, when pd is locked)
-  //     *
-  //     * \param pd Port value
-  //     * \return Answer
-  //     */
-  //    @InCpp("return getHelper(PortUtil<T>::publish(wrapped));")
-  //    @ConstMethod public boolean valueIs(@Const @Ptr T pd) {
-  //        if (hasCCType()) {
-  //            return ((CCPortBase)wrapped).valueIs(pd);
-  //        } else {
-  //            return ((PortBase)wrapped).valueIs(pd);
-  //        }
-  //    }
-  //
-  //
-  //    boolean valueIs(std::shared_ptr<const T>& pd) const {
-  //        return valueIs(pd._get());
-  //    }
-  //
-  //    boolean valueIs(const T& pd) const {
-  //        return value
-  //    }
-  //
 
   /*!
    * Set new bounds

@@ -33,6 +33,7 @@ namespace finroc
 {
 namespace core
 {
+class tFinrocAnnotation;
 class tAbstractPort;
 
 /*!
@@ -61,6 +62,16 @@ public:
   tPortWrapperBase() :
       wrapped(NULL)
   {}
+
+  /*!
+   * Add annotation to this port
+   *
+   * \param ann Annotation
+   */
+  inline void AddAnnotation(tFinrocAnnotation* ann)
+  {
+    wrapped->AddAnnotation(ann);
+  }
 
   /*!
    * Connect port to specified source port
@@ -139,6 +150,18 @@ public:
   inline bool DescriptionEquals(const util::tString& other) const
   {
     return wrapped->DescriptionEquals(other);
+  }
+
+  /*!
+   * Get annotation of specified type
+   *
+   * \param type Data type of annotation we're looking for
+   * \return Annotation. Null if port has no annotation of this type.
+   */
+  template <typename A>
+  inline A* GetAnnotation(rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataType<A>())
+  {
+    return static_cast<A*>(wrapped->GetAnnotation(dt));
   }
 
   /*!
