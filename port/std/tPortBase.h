@@ -325,7 +325,7 @@ protected:
    */
   inline tPortDataManager* PullValueRaw()
   {
-    return PullValueRaw(true);
+    return PullValueRaw(true, false);
   }
 
   /*!
@@ -333,9 +333,10 @@ protected:
    * When multiple source ports are available an arbitrary one of them is used.
    *
    * \param intermediate_assign Assign pulled value to ports in between?
+   * \param ignore_pull_request_handler_on_this_port Ignore pull request handler on first port? (for network port pulling it's good if pullRequestHandler is not called on first port)
    * \return Locked port data
    */
-  tPortDataManager* PullValueRaw(bool intermediate_assign);
+  tPortDataManager* PullValueRaw(bool intermediate_assign, bool ignore_pull_request_handler_on_this_port);
 
   template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   /*!
@@ -488,7 +489,7 @@ public:
     }
     else
     {
-      return PullValueRaw(true);
+      return PullValueRaw();
     }
   }
 
@@ -499,9 +500,9 @@ public:
    *
    * \return Pulled locked data
    */
-  inline tPortDataManager* GetPullLockedUnsafe(bool intermediate_assign)
+  inline tPortDataManager* GetPullLockedUnsafe(bool intermediate_assign, bool ignore_pull_request_handler_on_this_port)
   {
-    return PullValueRaw(intermediate_assign);
+    return PullValueRaw(intermediate_assign, ignore_pull_request_handler_on_this_port);
   }
 
   /*!

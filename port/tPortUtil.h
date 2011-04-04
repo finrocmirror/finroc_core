@@ -82,7 +82,7 @@ public:
 
   static tConstDataPtr GetPull(tPortType* port, bool intermediate_assign)
   {
-    return tConstDataPtr(port->GetPullLockedUnsafe(intermediate_assign));
+    return tConstDataPtr(port->GetPullLockedUnsafe(intermediate_assign, false));
   }
 
   static void GetValue(tPortType* port, T& result)
@@ -203,7 +203,7 @@ public:
 
   static tConstDataPtr GetPull(tPortType* port, bool intermediate_assign)
   {
-    tManager* mgr = port->GetPullInInterthreadContainerRaw(intermediate_assign);
+    tManager* mgr = port->GetPullInInterthreadContainerRaw(intermediate_assign, false);
     tNumber* num = mgr->GetObject()->GetData<tNumber>();
     if (port->GetUnit() != num->GetUnit() && port->GetUnit() != &tUnit::cNO_UNIT && num->GetUnit() != &tUnit::cNO_UNIT)
     {
@@ -357,7 +357,7 @@ public:
 
   static tConstDataPtr GetPull(tPortType* port, bool intermediate_assign)
   {
-    return tConstDataPtr(port->GetPullInInterthreadContainerRaw(intermediate_assign));
+    return tConstDataPtr(port->GetPullInInterthreadContainerRaw(intermediate_assign, false));
   }
 
   static void GetValue(tPortType* port, T& result)

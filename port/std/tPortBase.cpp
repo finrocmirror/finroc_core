@@ -201,7 +201,7 @@ tPortCreationInfo& tPortBase::ProcessPci(tPortCreationInfo& pci)
   return pci;
 }
 
-tPortDataManager* tPortBase::PullValueRaw(bool intermediate_assign)
+tPortDataManager* tPortBase::PullValueRaw(bool intermediate_assign, bool ignore_pull_request_handler_on_this_port)
 {
   // prepare publish cache
   tPublishCache pc;
@@ -210,7 +210,7 @@ tPortDataManager* tPortBase::PullValueRaw(bool intermediate_assign)
   pc.set_locks = 0;
 
   // pull value
-  PullValueRawImpl(pc, intermediate_assign, true);
+  PullValueRawImpl(pc, intermediate_assign, ignore_pull_request_handler_on_this_port);
 
   // lock value and return
   pc.ReleaseObsoleteLocks();
@@ -220,7 +220,7 @@ tPortDataManager* tPortBase::PullValueRaw(bool intermediate_assign)
 const void tPortBase::PullValueRawImpl(tPublishCache& pc, bool intermediate_assign, bool first)
 {
   util::tArrayWrapper<tPortBase*>* sources = edges_dest.GetIterable();
-  if ((!first) && pull_request_handler != NULL)    // for network port pulling it's good if pullRequestHandler is not called on first port - and there aren't any scenarios where this would make sense
+  if ((!first) && pull_request_handler != NULL)
   {
     pc.lock_estimate++;  // for local assign
     tPortDataReference* pdr = pull_request_handler->PullRequest(this, static_cast<int8>(pc.lock_estimate))->GetCurReference();

@@ -61,7 +61,7 @@ public:
 
   tBoolean(bool value_);
 
-  inline void CopyFrom(tBoolean& source)
+  inline void CopyFrom(const tBoolean& source)
   {
     value = source.value;
   }

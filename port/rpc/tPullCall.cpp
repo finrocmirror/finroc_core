@@ -65,7 +65,7 @@ void tPullCall::ExecuteTask()
     if (tFinrocTypeInfo::IsCCType(port->GetPort()->GetDataType()))
     {
       tCCPortBase* cp = static_cast<tCCPortBase*>(port->GetPort());
-      tCCPortDataManager* cpd = cp->GetPullInInterthreadContainerRaw(true);
+      tCCPortDataManager* cpd = cp->GetPullInInterthreadContainerRaw(true, true);
       RecycleParameters();
 
       tPortDataPtr<rrlib::serialization::tGenericObject> tmp(cpd->GetObject(), cpd);
@@ -77,7 +77,7 @@ void tPullCall::ExecuteTask()
     else if (tFinrocTypeInfo::IsStdType(port->GetPort()->GetDataType()))
     {
       tPortBase* p = static_cast<tPortBase*>(port->GetPort());
-      tPortDataManager* pd = p->GetPullLockedUnsafe(true);
+      tPortDataManager* pd = p->GetPullLockedUnsafe(true, true);
       RecycleParameters();
 
       tPortDataPtr<rrlib::serialization::tGenericObject> tmp(pd->GetObject(), pd);

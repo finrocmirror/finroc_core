@@ -163,9 +163,9 @@ tCCPortDataManagerTL* tCCPortBase::GetLockedUnsafeInContainer()
   }
 }
 
-tCCPortDataManager* tCCPortBase::GetPullInInterthreadContainerRaw(bool intermediate_assign)
+tCCPortDataManager* tCCPortBase::GetPullInInterthreadContainerRaw(bool intermediate_assign, bool ignore_pull_request_handler_on_this_port)
 {
-  tCCPortDataManagerTL* tmp = PullValueRaw(intermediate_assign);
+  tCCPortDataManagerTL* tmp = PullValueRaw(intermediate_assign, ignore_pull_request_handler_on_this_port);
   tCCPortDataManager* ret = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(this->data_type);
   ret->GetObject()->DeepCopyFrom(tmp->GetObject(), NULL);
   tmp->ReleaseLock();
@@ -234,12 +234,12 @@ void tCCPortBase::NotifyDisconnect()
   }
 }
 
-tCCPortDataManagerTL* tCCPortBase::PullValueRaw(bool intermediate_assign)
+tCCPortDataManagerTL* tCCPortBase::PullValueRaw(bool intermediate_assign, bool ignore_pull_request_handler_on_this_port)
 {
   tThreadLocalCache* tc = tThreadLocalCache::GetFast();
 
   // pull value
-  PullValueRawImpl(tc, intermediate_assign, true);
+  PullValueRawImpl(tc, intermediate_assign, ignore_pull_request_handler_on_this_port);
 
   // return locked data
   return tc->data;

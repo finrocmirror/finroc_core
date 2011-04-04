@@ -298,7 +298,7 @@ protected:
    */
   inline tCCPortDataManagerTL* PullValueRaw()
   {
-    return PullValueRaw(true);
+    return PullValueRaw(true, false);
   }
 
   /*!
@@ -306,9 +306,10 @@ protected:
    * When multiple source ports are available, an arbitrary one of them is used.
    *
    * \param intermediate_assign Assign pulled value to ports in between?
+   * \param ignore_pull_request_handler_on_this_port Ignore pull request handler on first port? (for network port pulling it's good if pullRequestHandler is not called on first port)
    * \return Locked port data (current thread is owner; there is one additional lock for caller; non-const(!))
    */
-  tCCPortDataManagerTL* PullValueRaw(bool intermediate_assign);
+  tCCPortDataManagerTL* PullValueRaw(bool intermediate_assign, bool ignore_pull_request_handler_on_this_port);
 
   template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   /*!
@@ -507,10 +508,11 @@ public:
    * Pulls port data (regardless of strategy) and returns it in interhread container
    * (careful: no auto-release of lock)
    * \param intermediate_assign Assign pulled value to ports in between?
+   * \param ignore_pull_request_handler_on_this_port Ignore pull request handler on first port? (for network port pulling it's good if pullRequestHandler is not called on first port)
    *
    * \return Pulled locked data
    */
-  tCCPortDataManager* GetPullInInterthreadContainerRaw(bool intermediate_assign);
+  tCCPortDataManager* GetPullInInterthreadContainerRaw(bool intermediate_assign, bool ignore_pull_request_handler_on_this_port);
 
   /*!
    * Copy current value to buffer (Most efficient get()-version)

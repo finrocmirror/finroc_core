@@ -85,7 +85,7 @@ public:
       string_constants(new util::tSimpleList<util::tString>())
   {}
 
-  inline void CopyFrom(tEnumValue& source)
+  inline void CopyFrom(const tEnumValue& source)
   {
     value = source.value;
     string_constants = source.string_constants;
