@@ -22,6 +22,7 @@
 #include "core/port/tPort.h"
 #include "core/datatype/tBoolean.h"
 #include "core/datatype/tEnumValue.h"
+#include "core/parameter/tParameterNumeric.h"
 
 namespace finroc
 {
@@ -29,16 +30,8 @@ namespace core
 {
 
 // diverse explicit template instantiations
-template class tPort<int8_t>;
-template class tPort<int16_t>;
 template class tPort<int>;
-template class tPort<long int>;
 template class tPort<long long int>;
-template class tPort<uint8_t>;
-template class tPort<uint16_t>;
-template class tPort<unsigned int>;
-template class tPort<unsigned long int>;
-template class tPort<unsigned long long int>;
 template class tPort<float>;
 template class tPort<double>;
 template class tPort<tNumber>;
@@ -46,6 +39,21 @@ template class tPort<tCoreString>;
 template class tPort<tBoolean>;
 template class tPort<tEnumValue>;
 template class tPort<rrlib::serialization::tMemoryBuffer>;
+
+template class tParameter<int>;
+template class tParameter<long long int>;
+template class tParameter<float>;
+template class tParameter<double>;
+template class tParameter<tNumber>;
+template class tParameter<tCoreString>;
+template class tParameter<tBoolean>;
+template class tParameter<tEnumValue>;
+template class tParameter<rrlib::serialization::tMemoryBuffer>;
+
+template class tParameterNumeric<int>;
+template class tParameterNumeric<long long int>;
+template class tParameterNumeric<float>;
+template class tParameterNumeric<double>;
 
 } // namespace finroc
 } // namespace core

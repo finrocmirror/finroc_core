@@ -97,4 +97,16 @@ public:
 
 #include "core/parameter/tParameterNumeric.hpp"
 
+namespace finroc
+{
+namespace core
+{
+extern template class tParameterNumeric<int>;
+extern template class tParameterNumeric<long long int>;
+extern template class tParameterNumeric<float>;
+extern template class tParameterNumeric<double>;
+
+} // namespace finroc
+} // namespace core
+
 #endif // core__parameter__tParameterNumeric_h__

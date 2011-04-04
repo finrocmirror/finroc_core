@@ -29,7 +29,6 @@
 #include "core/port/tPortFlags.h"
 #include "core/port/tAbstractPort.h"
 #include "core/parameter/tParameterInfo.h"
-#include "core/datatype/tBounds.h"
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "core/port/tPort.h"
 
@@ -69,7 +68,8 @@ public:
     this->wrapped->AddAnnotation(new tParameterInfo());
   }
 
-  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry, tBounds<T> b, const rrlib::serialization::tDataTypeBase& dt = NULL, tUnit* u = NULL) :
+  template < typename Q = T >
+  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry, const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b, const rrlib::serialization::tDataTypeBase& dt = NULL, tUnit* u = NULL) :
       tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u), b)
   {
     // this(description,parent,b,dt,u);
@@ -77,7 +77,8 @@ public:
     SetConfigEntry(config_entry);
   }
 
-  tParameter(const util::tString& description, tFrameworkElement* parent, tBounds<T> b, const rrlib::serialization::tDataTypeBase& dt = NULL, tUnit* u = NULL) :
+  template < typename Q = T >
+  tParameter(const util::tString& description, tFrameworkElement* parent, const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b, const rrlib::serialization::tDataTypeBase& dt = NULL, tUnit* u = NULL) :
       tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u), b)
   {
     this->wrapped->AddAnnotation(new tParameterInfo());
@@ -93,6 +94,23 @@ public:
   }
 
 };
+
+} // namespace finroc
+} // namespace core
+
+namespace finroc
+{
+namespace core
+{
+extern template class tParameter<int>;
+extern template class tParameter<long long int>;
+extern template class tParameter<float>;
+extern template class tParameter<double>;
+extern template class tParameter<tNumber>;
+extern template class tParameter<tCoreString>;
+extern template class tParameter<tBoolean>;
+extern template class tParameter<tEnumValue>;
+extern template class tParameter<rrlib::serialization::tMemoryBuffer>;
 
 } // namespace finroc
 } // namespace core

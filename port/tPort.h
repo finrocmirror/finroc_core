@@ -374,16 +374,8 @@ namespace finroc
 {
 namespace core
 {
-extern template class tPort<int8_t>;
-extern template class tPort<int16_t>;
 extern template class tPort<int>;
-extern template class tPort<long int>;
 extern template class tPort<long long int>;
-extern template class tPort<uint8_t>;
-extern template class tPort<uint16_t>;
-extern template class tPort<unsigned int>;
-extern template class tPort<unsigned long int>;
-extern template class tPort<unsigned long long int>;
 extern template class tPort<float>;
 extern template class tPort<double>;
 extern template class tPort<tNumber>;
