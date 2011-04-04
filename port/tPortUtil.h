@@ -39,10 +39,10 @@ public:
   template <typename M, typename T>
   static M* ResetManager(tPortDataPtr<T>& data)
   {
-    M* mgr = data.manager;
+    M* mgr = data.manager_tl;
     if (data.mode == tPortDataPtrBase::eUNUSED)
     {
-      data.manager = NULL;
+      data.manager_tl = NULL;
       data.data = NULL;
     }
     return mgr;

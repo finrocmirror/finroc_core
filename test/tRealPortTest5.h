@@ -42,7 +42,7 @@ private:
 
   static const int cCYCLE_TIME = 3;
 
-  static const int cCYCLES = 1000;
+  static const int cCYCLES = 10000000;
 
 public:
 

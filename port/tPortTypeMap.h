@@ -62,16 +62,6 @@ namespace finroc
 namespace core
 {
 
-class tDummyBoundedPortBaseType : public tPortBase
-{
-public:
-  template <typename T>
-  tDummyBoundedPortBaseType(tPortCreationInfo pci, tBounds<T> t)
-  {
-    assert(false && "Setting bounds is only possible with cc types");
-  }
-};
-
 // Standard port of type T
 template <typename T>
 struct tStdPortTypeMap
@@ -79,9 +69,9 @@ struct tStdPortTypeMap
 
   typedef tPortBase tPortBaseType;
   typedef T tPortDataType;
-  typedef tDummyBoundedPortBaseType tBoundedPortBaseType;
   typedef tPortDataManager tManagerType;
   typedef tPortQueueFragmentRaw tQueueFragment;
+  enum { boundable = 0 };
 
 //  typedef tPort<T> tPortType;
 //  typedef shared_ptr<T> tValueVar;
@@ -99,6 +89,7 @@ struct tCCPortTypeMap
   typedef tCCPortBounded<T> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
   typedef tCCQueueFragmentRaw tQueueFragment;
+  enum { boundable = 1 };
 
 //  typedef tCCPort<T> tPortType;
 //  typedef T tValueVar;
@@ -118,9 +109,10 @@ struct tPortTypeMapBase<tNumber, true, ENUM, INT>
 
   typedef tCCPortBase tPortBaseType;
   typedef tNumber tPortDataType;
-  typedef tCCPortBoundedNumeric<double> tBoundedPortBaseType;
+  typedef tCCPortBoundedNumeric<tNumber> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
   typedef tCCQueueFragmentRaw tQueueFragment;
+  enum { boundable = 1 };
 
 //  typedef tPortNumeric tPortType;
 //  typedef T tValueVar;
@@ -138,6 +130,7 @@ struct tPortTypeMapBase<T, CC, ENUM, true>
   typedef tCCPortBoundedNumeric<T> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
   typedef tCCQueueFragmentRaw tQueueFragment;
+  enum { boundable = 1 };
 
 //  typedef tPortNumeric tPortType;
 //  typedef T tValueVar;
@@ -154,6 +147,7 @@ struct tPortTypeMapBase<T, CC, true, INT>
   typedef tCCPortBoundedNumeric<int> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
   typedef tCCQueueFragmentRaw tQueueFragment;
+  enum { boundable = 1 };
 
 //  typedef tPortNumeric tPortType;
 //  typedef T tValueVar;

@@ -26,8 +26,9 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tPortWrapperBase.h"
+#include "core/datatype/tBoolean.h"
+#include "core/datatype/tEnumValue.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/datatype/tBounds.h"
 #include "core/port/tPortListener.h"
 
 #include "core/port/tPortTypeMap.h"
@@ -87,10 +88,11 @@ public:
     wrapped = new tPortBaseType(ProcessPci(pci));
   }
 
+  template < typename Q = T >
   /*!
    * \param pci Construction parameters in Port Creation Info Object
    */
-  tPort(tPortCreationInfo pci, const tBounds<T>& bounds)
+  tPort(tPortCreationInfo pci, const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type& bounds)
   {
     wrapped = new typename tPortTypeMap<T>::tBoundedPortBaseType(ProcessPci(pci), bounds);
   }
@@ -247,10 +249,11 @@ public:
   //    }
   //
 
+  template < typename Q = T >
   /*!
    * \return Bounds as they are currently set
    */
-  inline const tBounds<T> GetBounds() const
+  inline const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type GetBounds() const
   {
     return tPortUtil<T>::GetBounds(wrapped);
   }
@@ -273,7 +276,7 @@ public:
    *
    * \return Pulled locked data
    */
-  inline const T GetPull(bool intermediate_assign)
+  inline tPortDataPtr<const T> GetPull(bool intermediate_assign)
   {
     return tPortUtil<T>::GetPull(wrapped, intermediate_assign);
   }
@@ -303,7 +306,7 @@ public:
   //
   // \param data Data to publish. It will be deep-copied.
   // This publish()-variant is efficient when using CC types, but can be extremely costly with large data types)
-  void Publish(const T& data)
+  inline void Publish(const T& data)
   {
     tPortUtil<T>::CopyAndPublish(wrapped, data);
   }
@@ -338,13 +341,14 @@ public:
     wrapped->RemovePortListenerRaw(listener);
   }
 
+  template < typename Q = T >
   /*!
    * Set new bounds
    * (This is not thread-safe and must only be done in "pause mode")
    *
    * \param b New Bounds
    */
-  inline void SetBounds(tBounds<T> b)
+  inline void SetBounds(const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b)
   {
     tPortUtil<T>::SetBounds(wrapped, b);
   }
@@ -362,6 +366,31 @@ public:
   }
 
 };
+
+} // namespace finroc
+} // namespace core
+
+namespace finroc
+{
+namespace core
+{
+extern template class tPort<int8_t>;
+extern template class tPort<int16_t>;
+extern template class tPort<int>;
+extern template class tPort<long int>;
+extern template class tPort<long long int>;
+extern template class tPort<uint8_t>;
+extern template class tPort<uint16_t>;
+extern template class tPort<unsigned int>;
+extern template class tPort<unsigned long int>;
+extern template class tPort<unsigned long long int>;
+extern template class tPort<float>;
+extern template class tPort<double>;
+extern template class tPort<tNumber>;
+extern template class tPort<tCoreString>;
+extern template class tPort<tBoolean>;
+extern template class tPort<tEnumValue>;
+extern template class tPort<rrlib::serialization::tMemoryBuffer>;
 
 } // namespace finroc
 } // namespace core

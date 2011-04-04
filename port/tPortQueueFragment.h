@@ -53,7 +53,7 @@ class tPortQueueFragmentBase : public util::tUncopyableObject
 
   void DequeueFromPort(tPortType* port)
   {
-    port->dequeueAllRaw(wrapped);
+    port->DequeueAllRaw(wrapped);
   }
 
 public:

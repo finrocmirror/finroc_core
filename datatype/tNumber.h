@@ -365,10 +365,73 @@ public:
   {
     SetValue((int32_t)t, u);
   }
+  void SetValue(long int t)
+  {
+    if (sizeof(long int) == 4)
+    {
+      SetValue((int32_t)t);
+    }
+    else
+    {
+      SetValue((int64_t)t);
+    }
+  }
+  void SetValue(long int t, tUnit* u)
+  {
+    if (sizeof(long int) == 4)
+    {
+      SetValue((int32_t)t, u);
+    }
+    else
+    {
+      SetValue((int64_t)t, u);
+    }
+  }
+  void SetValue(unsigned long int t)
+  {
+    SetValue((long int)t);
+  }
+  void SetValue(unsigned long int t, tUnit* u)
+  {
+    SetValue((long int)t, u);
+  }
+  void SetValue(uint64_t t)
+  {
+    SetValue((int64_t)t);
+  }
+  void SetValue(uint64_t t, tUnit* u)
+  {
+    SetValue((int64_t)t, u);
+  }
 
   void SetValue(const tNumber& value_);
 
   virtual const util::tString ToString() const;
+
+  bool operator<(const tNumber& other) const
+  {
+    if (unit != &(tUnit::cNO_UNIT) && other.unit != &(tUnit::cNO_UNIT))
+    {
+      double o = other.unit->ConvertTo(other.dval, unit);
+      return o < dval;
+    }
+    switch (num_type)
+    {
+    case eINT:
+      return ival < other.Value<int>();
+    case eLONG:
+      return lval < other.Value<int64_t>();
+    case eDOUBLE:
+      return dval < other.Value<double>();
+    case eFLOAT:
+      return fval < other.Value<float>();
+    case eCONSTANT:
+      return unit->GetValue() < other;
+    default:
+      assert(false && "Possibly not a Number at this memory address?");
+      return 0;
+    }
+  }
 
   template <typename T>
   T* GetValuePtr();
@@ -380,7 +443,7 @@ struct tCoreNumberPointerGetterBase
   static T* GetDataPtr(tNumber* num)
   {
     num->SetValue(num->Value<T>());
-    return static_cast<T*>(&num->ival);
+    return (T*)(&num->ival);  // TODO: this only works on little endian
   }
 };
 
@@ -390,7 +453,7 @@ struct tCoreNumberPointerGetterBase<T, 8>
   static T* GetDataPtr(tNumber* num)
   {
     num->SetValue(num->Value<T>());
-    return static_cast<T*>(&num->lval);
+    return (T*)(&num->lval);
   }
 };
 
