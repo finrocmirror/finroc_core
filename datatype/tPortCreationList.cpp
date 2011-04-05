@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tPortCreationList.h"
+#include "rrlib/serialization/tDataType.h"
 #include "core/port/tAbstractPort.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
@@ -37,7 +38,7 @@ namespace finroc
 namespace core
 {
 const int tPortCreationList::cRELEVANT_FLAGS;
-rrlib::serialization::tDataType<tPortCreationList> tPortCreationList::cTYPE;
+rrlib::serialization::tDataTypeBase tPortCreationList::cTYPE = rrlib::serialization::tDataType<tPortCreationList>();
 
 tPortCreationList::tPortCreationList() :
     show_output_port_selection(false),

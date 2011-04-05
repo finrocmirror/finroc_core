@@ -20,12 +20,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tBoolean.h"
+#include "rrlib/serialization/tDataType.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataType<tBoolean> tBoolean::cTYPE("Boolean");
+rrlib::serialization::tDataTypeBase tBoolean::cTYPE = rrlib::serialization::tDataType<tBoolean>("Boolean");
 const tBoolean tBoolean::cTRUE(true), tBoolean::cFALSE(false);
 
 tBoolean::tBoolean() :

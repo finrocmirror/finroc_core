@@ -28,7 +28,7 @@
 #include "core/parameter/tStructureParameterBase.h"
 #include "core/datatype/tCoreString.h"
 #include "core/parameter/tStructureParameter.h"
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 
 namespace finroc
 {
@@ -83,7 +83,7 @@ public:
   }
 
   /*! Helper to get this safely during static initialization */
-  inline static rrlib::serialization::tDataType<tCoreString> GetDataType()
+  inline static rrlib::serialization::tDataTypeBase GetDataType()
   {
     return rrlib::serialization::tDataType<tCoreString>();
   }

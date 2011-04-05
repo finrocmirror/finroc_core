@@ -43,6 +43,12 @@ int tFinrocTypeInfo::EstimateDataSize(rrlib::serialization::tGenericObject* data
   }
 }
 
+tFinrocTypeInfo* tFinrocTypeInfo::InfoArray()
+{
+  static tFinrocTypeInfo info[cMAX_TYPES];
+  return info;
+}
+
 void tFinrocTypeInfo::Init(tFinrocTypeInfo::tType type_)
 {
   if (this->type != eSTD)

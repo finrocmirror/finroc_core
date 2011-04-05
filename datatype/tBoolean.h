@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "rrlib/serialization/tInputStream.h"
 #include "rrlib/serialization/tStringInputStream.h"
 #include "rrlib/serialization/tOutputStream.h"
@@ -52,7 +52,7 @@ private:
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataType<tBoolean> cTYPE;
+  static rrlib::serialization::tDataTypeBase cTYPE;
 
   /*! Instances for True and false */
   static const tBoolean cTRUE, cFALSE;
@@ -112,5 +112,9 @@ public:
 
 } // namespace finroc
 } // namespace core
+
+#include "rrlib/serialization/tDataType.h"
+
+extern template class ::rrlib::serialization::tDataType<finroc::core::tBoolean>;
 
 #endif // core__datatype__tBoolean_h__

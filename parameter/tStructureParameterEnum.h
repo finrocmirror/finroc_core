@@ -28,7 +28,7 @@
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/parameter/tStructureParameterBase.h"
 #include "core/datatype/tEnumValue.h"
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/parameter/tStructureParameter.h"
 
 namespace finroc
@@ -92,7 +92,7 @@ public:
   }
 
   /*! Helper to get this safely during static initialization */
-  inline static rrlib::serialization::tDataType<tEnumValue> GetDataType()
+  inline static rrlib::serialization::tDataTypeBase GetDataType()
   {
     return rrlib::serialization::tDataType<tEnumValue>();
   }

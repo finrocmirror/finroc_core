@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tEnumValue.h"
+#include "rrlib/serialization/tDataType.h"
 #include "rrlib/serialization/tStringInputStream.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "rrlib/serialization/tStringOutputStream.h"
@@ -28,7 +29,7 @@ namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataType<tEnumValue> tEnumValue::cTYPE;
+rrlib::serialization::tDataTypeBase tEnumValue::cTYPE = rrlib::serialization::tDataType<tEnumValue>();
 
 void tEnumValue::Deserialize(rrlib::serialization::tStringInputStream& is)
 {

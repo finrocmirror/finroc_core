@@ -202,4 +202,8 @@ public:
 } // namespace finroc
 } // namespace core
 
+#include "rrlib/serialization/tDataType.h"
+
+extern template class ::rrlib::serialization::tDataType<finroc::core::tStructureParameterList>;
+
 #endif // core__parameter__tStructureParameterList_h__

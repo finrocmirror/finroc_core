@@ -30,7 +30,7 @@
 #include "core/parameter/tStructureParameterBase.h"
 #include "core/port/cc/tCCPortDataManager.h"
 #include "rrlib/serialization/tGenericObject.h"
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/datatype/tNumber.h"
 #include "core/parameter/tStructureParameter.h"
 
@@ -99,7 +99,7 @@ public:
   }
 
   /*!
-   * \return Bounds of this paramete
+   * \return Bounds of this parameter
    */
   inline tBounds<T> GetBounds()
   {
@@ -107,7 +107,7 @@ public:
   }
 
   /*! Helper to get this safely during static initialization */
-  inline static rrlib::serialization::tDataType<tNumber> GetDataType()
+  inline static rrlib::serialization::tDataTypeBase GetDataType()
   {
     return rrlib::serialization::tDataType<tNumber>();
   }

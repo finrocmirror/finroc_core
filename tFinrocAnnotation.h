@@ -51,7 +51,7 @@ class tFrameworkElement;
  * If annotation should be available over the net (e.g. in finstruct),
  * the serialization methods need to be overridden.
  */
-class tFinrocAnnotation : public rrlib::serialization::tTypedObject, public rrlib::serialization::tStlUnsuitable
+class tFinrocAnnotation : public rrlib::serialization::tTypedObject, public rrlib::serialization::tStlUnsuitable, public rrlib::serialization::tNoSharedPtrListType
 {
   friend class tFrameworkElement;
   friend class tAnnotatable;

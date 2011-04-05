@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "rrlib/serialization/tStringInputStream.h"
 #include "rrlib/serialization/tStringOutputStream.h"
 #include "rrlib/serialization/tSerializable.h"
@@ -58,7 +58,7 @@ private:
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataType<tCoreString> cTYPE;
+  static rrlib::serialization::tDataTypeBase cTYPE;
 
   tCoreString();
 
@@ -119,5 +119,9 @@ public:
 
 } // namespace finroc
 } // namespace core
+
+#include "rrlib/serialization/tDataType.h"
+
+extern template class ::rrlib::serialization::tDataType<finroc::core::tCoreString>;
 
 #endif // core__datatype__tCoreString_h__

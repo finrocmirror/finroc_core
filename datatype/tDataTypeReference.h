@@ -25,9 +25,8 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataType.h"
-#include "core/datatype/tNumber.h"
 #include "rrlib/serialization/tDataTypeBase.h"
+#include "core/datatype/tNumber.h"
 #include "core/datatype/tCoreString.h"
 
 namespace finroc
@@ -44,7 +43,7 @@ class tDataTypeReference : public tCoreString
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataType<tDataTypeReference> cTYPE;
+  static rrlib::serialization::tDataTypeBase cTYPE;
 
   tDataTypeReference() {}
 
@@ -73,5 +72,7 @@ public:
 
 } // namespace finroc
 } // namespace core
+
+extern template class ::rrlib::serialization::tDataType<finroc::core::tDataTypeReference>;
 
 #endif // core__datatype__tDataTypeReference_h__

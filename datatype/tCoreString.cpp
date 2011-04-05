@@ -20,12 +20,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tCoreString.h"
+#include "rrlib/serialization/tDataType.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataType<tCoreString> tCoreString::cTYPE;
+rrlib::serialization::tDataTypeBase tCoreString::cTYPE = rrlib::serialization::tDataType<tCoreString>();
 
 tCoreString::tCoreString() :
     buffer(128)

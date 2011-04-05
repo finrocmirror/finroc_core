@@ -84,11 +84,7 @@ private:
   /*!
    * \return Global storage for finroc type info
    */
-  inline static tFinrocTypeInfo* InfoArray()
-  {
-    static tFinrocTypeInfo info[cMAX_TYPES];
-    return info;
-  }
+  static tFinrocTypeInfo* InfoArray();
 
 public:
 

@@ -20,12 +20,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/thread/tExecutionControl.h"
+#include "rrlib/serialization/tDataType.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataType<tExecutionControl> tExecutionControl::cTYPE;
+rrlib::serialization::tDataTypeBase tExecutionControl::cTYPE = rrlib::serialization::tDataType<tExecutionControl>();
 
 tExecutionControl::tExecutionControl(tStartAndPausable& implementation_) :
     implementation(&(implementation_))

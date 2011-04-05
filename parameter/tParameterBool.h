@@ -25,14 +25,8 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataType.h"
-#include "core/datatype/tBoolean.h"
-#include "core/port/tPort.h"
 #include "core/parameter/tParameter.h"
-#include "core/port/tThreadLocalCache.h"
-#include "rrlib/serialization/tGenericObject.h"
-#include "core/port/cc/tCCPortDataManagerTL.h"
-#include "core/port/cc/tCCPortBase.h"
+#include "core/datatype/tBoolean.h"
 #include "core/port/tPortListener.h"
 
 namespace finroc
@@ -75,28 +69,9 @@ public:
   /*! Bool cache instance used for this parameter */
   std::shared_ptr<tBoolCache> cache;
 
-  /*! Data Type */
-  static rrlib::serialization::tDataType<tBoolCache> cTYPE;
+  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, const util::tString& config_entry);
 
-  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, const util::tString& config_entry) :
-      tParameter<tBoolean>(description, parent, tBoolean::cTYPE),
-      cache(new tBoolCache())
-  {
-    // this(description,parent,defaultValue);
-    this->AddPortListener(cache.get());
-    cache->current_value = default_value;
-    SetDefault(tBoolean::GetInstance(default_value));
-    SetConfigEntry(config_entry);
-  }
-
-  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value) :
-      tParameter<tBoolean>(description, parent, tBoolean::cTYPE),
-      cache(new tBoolCache())
-  {
-    this->AddPortListener(cache.get());
-    cache->current_value = default_value;
-    SetDefault(tBoolean::GetInstance(default_value));
-  }
+  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value);
 
   /*!
    * \return Current parameter value
@@ -109,13 +84,7 @@ public:
   /*!
    * \param b new value
    */
-  inline void Set(bool b)
-  {
-    tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(tBoolean::cTYPE);
-    cb->GetObject()->GetData<tBoolean>()->Set(b);
-    (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
-    cache->current_value = b;
-  }
+  void Set(bool b);
 
 };
 

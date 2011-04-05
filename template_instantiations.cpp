@@ -22,7 +22,25 @@
 #include "core/port/tPort.h"
 #include "core/datatype/tBoolean.h"
 #include "core/datatype/tEnumValue.h"
+#include "core/datatype/tPortCreationList.h"
+#include "core/datatype/tDataTypeReference.h"
 #include "core/parameter/tParameterNumeric.h"
+#include "core/parameter/tConfigFile.h"
+#include "core/parameter/tStructureParameterList.h"
+#include "core/thread/tExecutionControl.h"
+#include "core/thread/tPeriodicFrameworkElementTask.h"
+
+template class rrlib::serialization::tDataType<finroc::core::tNumber>;
+template class rrlib::serialization::tDataType<finroc::core::tBoolean>;
+template class rrlib::serialization::tDataType<finroc::core::tCoreString>;
+template class rrlib::serialization::tDataType<finroc::core::tDataTypeReference>;
+template class rrlib::serialization::tDataType<finroc::core::tEnumValue>;
+template class rrlib::serialization::tDataType<finroc::core::tPortCreationList>;
+template class rrlib::serialization::tDataType<finroc::core::tConfigFile>;
+template class rrlib::serialization::tDataType<finroc::core::tParameterInfo>;
+template class rrlib::serialization::tDataType<finroc::core::tStructureParameterList>;
+template class rrlib::serialization::tDataType<finroc::core::tExecutionControl>;
+template class rrlib::serialization::tDataType<finroc::core::tPeriodicFrameworkElementTask>;
 
 namespace finroc
 {

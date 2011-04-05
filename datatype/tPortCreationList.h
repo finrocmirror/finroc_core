@@ -27,9 +27,8 @@
 
 #include "core/tCoreFlags.h"
 #include "core/port/tPortFlags.h"
-#include "rrlib/serialization/tDataType.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tFrameworkElement.h"
 #include "core/datatype/tDataTypeReference.h"
 
@@ -131,7 +130,7 @@ private:
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataType<tPortCreationList> cTYPE;
+  static rrlib::serialization::tDataTypeBase cTYPE;
 
   /*! Log domain for edges */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "port_creation_list");
@@ -225,5 +224,9 @@ public:
 
 } // namespace finroc
 } // namespace core
+
+#include "rrlib/serialization/tDataType.h"
+
+extern template class ::rrlib::serialization::tDataType<finroc::core::tPortCreationList>;
 
 #endif // core__datatype__tPortCreationList_h__

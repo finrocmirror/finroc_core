@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/serialization/tDataTypeBase.h"
 #include "rrlib/xml2_wrapper/tXMLDocument.h"
 #include "core/tFinrocAnnotation.h"
 
@@ -73,7 +73,7 @@ private:
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataType<tConfigFile> cTYPE;
+  static rrlib::serialization::tDataTypeBase cTYPE;
 
   /*! Log domain */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(edge_log, "parameter");
@@ -141,5 +141,9 @@ public:
 
 } // namespace finroc
 } // namespace core
+
+#include "rrlib/serialization/tDataType.h"
+
+extern template class ::rrlib::serialization::tDataType<finroc::core::tConfigFile>;
 
 #endif // core__parameter__tConfigFile_h__
