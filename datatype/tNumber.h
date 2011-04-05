@@ -312,12 +312,12 @@ public:
     num_type = eINT;
   }
 
-  inline void SetValue(int64 value_)
+  inline void SetValue(long long int value_)
   {
     SetValue(value_, &(tUnit::cNO_UNIT));
   }
 
-  inline void SetValue(int64 value_, tUnit* unit_)
+  inline void SetValue(long long int value_, tUnit* unit_)
   {
     lval = value_;
     this->unit = unit_;
@@ -373,7 +373,7 @@ public:
     }
     else
     {
-      SetValue((int64_t)t);
+      SetValue((long long int)t);
     }
   }
   void SetValue(long int t, tUnit* u)
@@ -384,7 +384,7 @@ public:
     }
     else
     {
-      SetValue((int64_t)t, u);
+      SetValue((long long int)t, u);
     }
   }
   void SetValue(unsigned long int t)
@@ -395,11 +395,11 @@ public:
   {
     SetValue((long int)t, u);
   }
-  void SetValue(uint64_t t)
+  void SetValue(unsigned long long int t)
   {
     SetValue((int64_t)t);
   }
-  void SetValue(uint64_t t, tUnit* u)
+  void SetValue(unsigned long long int t, tUnit* u)
   {
     SetValue((int64_t)t, u);
   }
