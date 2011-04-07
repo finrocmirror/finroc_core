@@ -19,8 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/parameter/tParameterBool.h"
-#include "core/parameter/tParameterNumeric.h"
+#include "core/parameter/tParameter.h"
 
 #include "core/tRuntimeSettings.h"
 #include "core/tRuntimeEnvironment.h"
@@ -34,24 +33,24 @@ namespace finroc
 namespace core
 {
 tRuntimeSettings* tRuntimeSettings::inst = NULL;
-tParameterBool* tRuntimeSettings::cWARN_ON_CYCLE_TIME_EXCEED;
-tParameterNumeric<int64>* tRuntimeSettings::cDEFAULT_CYCLE_TIME;
-tParameterNumeric<int>* tRuntimeSettings::cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME;
+tParameter<bool>* tRuntimeSettings::cWARN_ON_CYCLE_TIME_EXCEED;
+tParameter<long long int>* tRuntimeSettings::cDEFAULT_CYCLE_TIME;
+tParameter<int>* tRuntimeSettings::cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME;
 const int tRuntimeSettings::cEDGE_LIST_DEFAULT_SIZE;
 const int tRuntimeSettings::cEDGE_LIST_SIZE_INCREASE_FACTOR;
-tParameterNumeric<int>* tRuntimeSettings::cSTREAM_THREAD_CYCLE_TIME;
-tParameterNumeric<int>* tRuntimeSettings::cGARBAGE_COLLECTOR_SAFETY_PERIOD;
+tParameter<int>* tRuntimeSettings::cSTREAM_THREAD_CYCLE_TIME;
+tParameter<int>* tRuntimeSettings::cGARBAGE_COLLECTOR_SAFETY_PERIOD;
 const bool tRuntimeSettings::cCOLLECT_EDGE_STATISTICS;
 
 tRuntimeSettings::tRuntimeSettings() :
     tFrameworkElement(tRuntimeEnvironment::GetInstance(), "Settings"),
     update_time_listener()
 {
-  cWARN_ON_CYCLE_TIME_EXCEED = util::tAutoDeleter::AddStatic(new tParameterBool("WARN_ON_CYCLE_TIME_EXCEED", this, true));
-  cDEFAULT_CYCLE_TIME = util::tAutoDeleter::AddStatic(new tParameterNumeric<int64>("DEFAULT_CYCLE_TIME", this, 50LL, tBounds<int64>(1, 2000)));
-  cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME = util::tAutoDeleter::AddStatic(new tParameterNumeric<int>("DEFAULT_MINIMUM_NETWORK_UPDATE_TIME", this, 40, tBounds<int>(1, 2000)));
-  cSTREAM_THREAD_CYCLE_TIME = util::tAutoDeleter::AddStatic(new tParameterNumeric<int>("STREAM_THREAD_CYCLE_TIME", this, 200, tBounds<int>(1, 2000)));
-  cGARBAGE_COLLECTOR_SAFETY_PERIOD = util::tAutoDeleter::AddStatic(new tParameterNumeric<int>("GARBAGE_COLLECTOR_SAFETY_PERIOD", this, 5000, tBounds<int>(500, 50000)));
+  cWARN_ON_CYCLE_TIME_EXCEED = util::tAutoDeleter::AddStatic(new tParameter<bool>("WARN_ON_CYCLE_TIME_EXCEED", this, true));
+  cDEFAULT_CYCLE_TIME = util::tAutoDeleter::AddStatic(new tParameter<long long int>("DEFAULT_CYCLE_TIME", this, 50LL, tBounds<long long int>(1, 2000)));
+  cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME = util::tAutoDeleter::AddStatic(new tParameter<int>("DEFAULT_MINIMUM_NETWORK_UPDATE_TIME", this, 40, tBounds<int>(1, 2000)));
+  cSTREAM_THREAD_CYCLE_TIME = util::tAutoDeleter::AddStatic(new tParameter<int>("STREAM_THREAD_CYCLE_TIME", this, 200, tBounds<int>(1, 2000)));
+  cGARBAGE_COLLECTOR_SAFETY_PERIOD = util::tAutoDeleter::AddStatic(new tParameter<int>("GARBAGE_COLLECTOR_SAFETY_PERIOD", this, 5000, tBounds<int>(500, 50000)));
 
   // add ports with update times
   //addChild(DataTypeRegister2.getInstance());

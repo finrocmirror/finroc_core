@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/parameter/tParameter.h"
+#include "core/parameter/tParameterBase.h"
 #include "core/datatype/tBoolean.h"
 #include "core/port/tPortListener.h"
 
@@ -41,12 +41,12 @@ class tAbstractPort;
  *
  * Parameter template class for cc types
  */
-class tParameterBool : public tParameter<tBoolean>
+class tParameterBool : public tParameterBase<bool>
 {
   /*!
    * Caches bool value of parameter port (optimization)
    */
-  class tBoolCache : public util::tUncopyableObject, public tPortListener<tBoolean>
+  class tBoolCache : public util::tUncopyableObject, public tPortListener<bool>
   {
   public:
 
@@ -57,9 +57,9 @@ class tParameterBool : public tParameter<tBoolean>
         current_value(false)
     {}
 
-    virtual void PortChanged(tAbstractPort* origin, const tBoolean& value)
+    virtual void PortChanged(tAbstractPort* origin, const bool& value)
     {
-      current_value = (static_cast<const tBoolean&>(value)).Get();
+      current_value = value;
     }
 
   };

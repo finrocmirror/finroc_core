@@ -30,6 +30,7 @@
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tNumber.h"
+#include "core/datatype/tBoolean.h"
 #include "rrlib/serialization/tGenericObjectManager.h"
 
 namespace finroc
@@ -94,7 +95,7 @@ class tPortListenerAdapter<tPortDataPtr<const T>, true, false> : public tPortLis
 {
 public:
 
-  virtual void PortChanged(tAbstractPort* origin, const std::shared_ptr<const T>& value) = 0;
+  virtual void PortChanged(tAbstractPort* origin, const tPortDataPtr<const T>& value) = 0;
 
   virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
   {
@@ -165,6 +166,56 @@ public:
   {
     PortChanged(origin, value->GetObject()->GetRawDataPtr());
   }
+};
+
+/*! variant for bool */
+template < bool CC >
+class tPortListenerAdapter<bool, CC, true> : public tPortListenerRaw
+{
+public:
+
+  virtual void PortChanged(tAbstractPort* origin, const bool& value) = 0;
+
+  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
+  {
+    const rrlib::serialization::tGenericObject* go = value->GetObject();
+    PortChanged(origin, go->GetData<tBoolean>()->Get());
+  }
+};
+
+/*! variant for tPortDataPtr<bool> */
+template < bool CC >
+class tPortListenerAdapter<tPortDataPtr<const bool>, CC, true> : public tPortListenerRaw
+{
+public:
+
+  virtual void PortChanged(tAbstractPort* origin,  const tPortDataPtr<const bool>& value) = 0;
+
+  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
+  {
+    const tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(value->GetObject()->GetType());
+    rrlib::serialization::tGenericObject* go = c->GetObject();
+    go->DeepCopyFrom(value->GetObject());
+    PortChanged(origin, tPortDataPtr<const bool>(go->GetData<tBoolean>()->GetPointer(), c));
+  }
+};
+
+template <typename T>
+struct tRawType
+{
+  typedef T t;
+};
+
+template <typename T>
+struct tRawType<tPortDataPtr<T>>
+{
+  typedef T t;
+};
+
+template <typename T>
+struct tRawType<tPortDataPtr<const T>>
+{
+  typedef T t;
 };
 
 } // namespace finroc

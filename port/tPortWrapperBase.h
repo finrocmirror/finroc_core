@@ -175,7 +175,7 @@ public:
 
   // using this operator, it can be checked conveniently in PortListener's portChanged()
   // whether origin port is the same port as this object wraps
-  bool operator ==(const T* p) const
+  bool operator ==(const tAbstractPort* p) const
   {
     return wrapped == p;
   }
@@ -360,6 +360,18 @@ public:
   }
 
 };
+
+} // namespace finroc
+} // namespace core
+
+namespace finroc
+{
+namespace core
+{
+template <typename T> inline bool operator==(const tAbstractPort* p, tPortWrapperBase<T> pw)
+{
+  return pw == p;
+}
 
 } // namespace finroc
 } // namespace core

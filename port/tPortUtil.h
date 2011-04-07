@@ -319,6 +319,146 @@ public:
 
 };
 
+template <>
+class tPortUtilBaseNumeric<bool>
+{
+
+public:
+  typedef tCCPortDataManager tManager;
+  typedef tCCPortDataManagerTL tManagerTL;
+  typedef tCCPortBase tPortType;
+  typedef tPortDataPtr<bool> tDataPtr;
+  typedef tPortDataPtr<const bool> tConstDataPtr;
+
+  static tDataPtr GetUnusedBuffer(tPortType* port)
+  {
+    tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
+    return tDataPtr(mgr->GetObject()->GetData<tBoolean>()->GetPointer(), mgr);
+  }
+
+  static tConstDataPtr GetValueWithLock(tPortType* port)
+  {
+    // copy value and possibly convert number to correct type (a little inefficient, but should be used scarcely anyway)
+    bool val;
+    GetValue(port, val);
+    tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tBoolean::cTYPE);
+    tBoolean* new_num = c->GetObject()->GetData<tBoolean>();
+    new_num->Set(val);
+    return tConstDataPtr(new_num->GetPointer(), c);
+  }
+
+  static tConstDataPtr DequeueSingle(tPortType* port)
+  {
+    bool val;
+    if (DequeueSingle(port, val))
+    {
+      tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tBoolean::cTYPE);
+      tBoolean* new_num = c->GetObject()->GetData<tBoolean>();
+      new_num->Set(val);
+      return tConstDataPtr(new_num->GetPointer(), c);
+    }
+    else
+    {
+      return tConstDataPtr();
+    }
+  }
+
+  static tConstDataPtr GetPull(tPortType* port, bool intermediate_assign)
+  {
+    tManager* mgr = port->GetPullInInterthreadContainerRaw(intermediate_assign, false);
+    return tConstDataPtr(mgr->GetObject()->GetData<tBoolean>()->GetPointer(), mgr);
+  }
+
+  static void GetValue(tPortType* port, bool& result)
+  {
+    tBoolean b;
+    rrlib::serialization::tGenericObjectWrapper<tBoolean> tmp(&b);
+    port->GetRaw(&tmp);
+    result = b.Get();
+  }
+
+  static bool DequeueSingle(tPortType* port, bool& result)
+  {
+    tManager* mgr = port->DequeueSingleUnsafeRaw();
+    if (mgr != NULL)
+    {
+      result = mgr->GetObject()->GetData<tBoolean>()->Get();
+      mgr->Recycle2();
+      return true;
+    }
+    return false;
+  }
+
+  static const bool* GetAutoLocked(tPortType* port)
+  {
+    bool val;
+    GetValue(port, val);
+    tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tBoolean::cTYPE);
+    tBoolean* new_b = c->GetObject()->GetData<tBoolean>();
+    new_b->Set(val);
+    tThreadLocalCache::GetFast()->AddAutoLock(c);
+    return new_b->GetPointer();
+  }
+
+  static const bool* DequeueSingleAutoLocked(tPortType* port)
+  {
+    bool val;
+    if (DequeueSingle(port, val))
+    {
+      tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tBoolean::cTYPE);
+      tBoolean* new_b = c->GetObject()->GetData<tBoolean>();
+      new_b->Set(val);
+      tThreadLocalCache::GetFast()->AddAutoLock(c);
+      return new_b->GetPointer();
+    }
+    else
+    {
+      return NULL;
+    }
+  }
+
+  static void SetDefault(tPortType* port, const bool& t)
+  {
+    rrlib::serialization::tGenericObject* go = port->GetDefaultBufferRaw();
+    go->GetData<tBoolean>()->Set(t);
+
+    // publish for value caching in Parameter classes
+    tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(tBoolean::cTYPE);
+    mgr->GetObject()->GetData<tBoolean>()->Set(t);
+    port->BrowserPublishRaw(mgr);
+  }
+
+  static void Publish(tPortType* port, tConstDataPtr& t)
+  {
+    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+    t.reset();
+  }
+
+  static void Publish(tPortType* port, tDataPtr& t)
+  {
+    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+    t.reset();
+  }
+
+  static void CopyAndPublish(tPortType* port, const bool& t)
+  {
+    tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
+    mgr->GetObject()->GetData<tBoolean>()->Set(t);
+    port->Publish(mgr);
+  }
+
+  static const tBounds<bool> GetBounds(tPortType* port)
+  {
+    assert(false && "Bounds don't make sense with boolean values");
+  }
+
+  static void SetBounds(tPortType* port, const tBounds<bool>& b)
+  {
+    assert(false && "Bounds don't make sense with boolean values");
+  }
+
+};
+
 template <typename T, bool CC, bool ENUM>
 class tPortUtilBase<T, CC, ENUM, true> : public tPortUtilBaseNumeric<T>
 {

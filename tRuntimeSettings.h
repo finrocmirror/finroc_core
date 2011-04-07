@@ -34,9 +34,12 @@ namespace finroc
 {
 namespace core
 {
-class tParameterBool;
 template<typename T>
 class tParameterNumeric;
+class tParameterBool;
+
+template <typename T>
+class tParameter;
 
 /*!
  * \author Max Reichardt
@@ -60,16 +63,16 @@ private:
 public:
 
   /*! Display warning, if loop times of CoreLoopThreads are exceeded? */
-  static tParameterBool* cWARN_ON_CYCLE_TIME_EXCEED;
+  static tParameter<bool>* cWARN_ON_CYCLE_TIME_EXCEED;
 
   /*! Default cycle time of CoreLoopThreads in ms*/
-  static tParameterNumeric<int64>* cDEFAULT_CYCLE_TIME;
+  static tParameter<long long int>* cDEFAULT_CYCLE_TIME;
 
   /*! Default number of event threads */
   //public static final IntSetting NUM_OF_EVENT_THREADS = inst.add("NUM_OF_EVENT_THREADS", 2, false);
 
   /*! Default minimum network update time (ms) */
-  static tParameterNumeric<int>* cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME;
+  static tParameter<int>* cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME;
 
   static const int cEDGE_LIST_DEFAULT_SIZE = 0;
 
@@ -79,7 +82,7 @@ public:
   //public static final IntSetting BUFFER_TRACKER_LOOP_TIME = inst.add("BUFFER_TRACKER_LOOP_TIME", 140, true);
 
   /*! Cycle time for stream thread */
-  static tParameterNumeric<int>* cSTREAM_THREAD_CYCLE_TIME;
+  static tParameter<int>* cSTREAM_THREAD_CYCLE_TIME;
 
   /*! > 0 if Runtime is instantiated in Java Applet - contains bit size of server CPU */
   //public static final IntSetting runningInApplet = inst.add("RUNNING_IN_APPLET", 0, false);
@@ -88,7 +91,7 @@ public:
    * Period in ms after which garbage collector will delete objects... any threads
    * still working on objects while creating deletion task should be finished by then
    */
-  static tParameterNumeric<int>* cGARBAGE_COLLECTOR_SAFETY_PERIOD;
+  static tParameter<int>* cGARBAGE_COLLECTOR_SAFETY_PERIOD;
 
   /*! Collect edge statistics ? */
   static const bool cCOLLECT_EDGE_STATISTICS = false;

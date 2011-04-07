@@ -77,6 +77,16 @@ public:
     value = s.ToLowerCase().Equals("true");
   }
 
+  const bool* GetPointer() const
+  {
+    return &value;
+  }
+
+  bool* GetPointer()
+  {
+    return &value;
+  }
+
   /*!
    * \return Current value
    */

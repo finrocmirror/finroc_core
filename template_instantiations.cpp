@@ -24,7 +24,7 @@
 #include "core/datatype/tEnumValue.h"
 #include "core/datatype/tPortCreationList.h"
 #include "core/datatype/tDataTypeReference.h"
-#include "core/parameter/tParameterNumeric.h"
+#include "core/parameter/tParameter.h"
 #include "core/parameter/tConfigFile.h"
 #include "core/parameter/tStructureParameterList.h"
 #include "core/thread/tExecutionControl.h"
@@ -54,9 +54,19 @@ template class tPort<float>;
 template class tPort<double>;
 template class tPort<tNumber>;
 template class tPort<tCoreString>;
-template class tPort<tBoolean>;
+template class tPort<bool>;
 template class tPort<tEnumValue>;
 template class tPort<rrlib::serialization::tMemoryBuffer>;
+
+template class tParameterBase<int>;
+template class tParameterBase<long long int>;
+template class tParameterBase<float>;
+template class tParameterBase<double>;
+template class tParameterBase<tNumber>;
+template class tParameterBase<tCoreString>;
+template class tParameterBase<bool>;
+template class tParameterBase<tEnumValue>;
+template class tParameterBase<rrlib::serialization::tMemoryBuffer>;
 
 template class tParameter<int>;
 template class tParameter<long long int>;
@@ -64,7 +74,7 @@ template class tParameter<float>;
 template class tParameter<double>;
 template class tParameter<tNumber>;
 template class tParameter<tCoreString>;
-template class tParameter<tBoolean>;
+template class tParameter<bool>;
 template class tParameter<tEnumValue>;
 template class tParameter<rrlib::serialization::tMemoryBuffer>;
 

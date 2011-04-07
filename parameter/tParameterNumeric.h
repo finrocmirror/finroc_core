@@ -25,8 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/parameter/tParameter.h"
-#include "core/datatype/tBounds.h"
+#include "core/parameter/tParameterBase.h"
 
 namespace finroc
 {
@@ -41,7 +40,7 @@ class tUnit;
  * Parameter template class for numeric types
  */
 template<typename T>
-class tParameterNumeric : public tParameter<T>
+class tParameterNumeric : public tParameterBase<T>
 {
   using tPortWrapperBase<tCCPortBase>::log_domain;
 
@@ -55,9 +54,7 @@ class tParameterNumeric : public tParameter<T>
     /*! Cached current value (we will much more often read than it will be changed) */
     volatile T current_value;
 
-    tNumberCache() :
-        current_value()
-    {}
+    tNumberCache();
 
     virtual void PortChanged(tAbstractPort* origin, const T& value)
     {
@@ -71,11 +68,20 @@ public:
   /*! Number cache instance used for this parameter */
   std::shared_ptr<tNumberCache> cache;
 
-  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds<T> b, const util::tString& config_entry);
+private:
 
-  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds<T> b);
+  inline static T GetDefaultValue(T default_value)
+  {
+    return default_value;
+  }
 
-  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, tUnit* u, const T& default_value, tBounds<T> b);
+public:
+
+  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry);
+
+  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* u, const util::tString& config_entry);
+
+  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds<T> b, tUnit* u, const util::tString& config_entry);
 
   /*!
    * \return Current parameter value

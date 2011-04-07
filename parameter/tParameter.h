@@ -25,73 +25,72 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/port/tPortCreationInfo.h"
-#include "core/port/tPortFlags.h"
-#include "core/port/tAbstractPort.h"
-#include "core/parameter/tParameterInfo.h"
-#include "rrlib/serialization/tDataTypeBase.h"
-#include "core/port/tPort.h"
+#include "core/parameter/tParameterBool.h"
+#include "core/parameter/tParameterNumeric.h"
 
 namespace finroc
 {
 namespace core
 {
-class tFrameworkElement;
-class tUnit;
+
+template <typename T, bool NUMERIC>
+class tParameterParent : public tParameterBase<T>
+{
+
+  typedef tParameterBase<T> tParent;
+
+public:
+
+  tParameterParent(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry = "") : tParent(description, parent, config_entry) {}
+
+  tParameterParent(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, unit, config_entry) {}
+
+  template < typename Q = T >
+  tParameterParent(const util::tString& description, tFrameworkElement* parent, const T& default_value, typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type b, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, b, unit, config_entry) {}
+};
+
+template <typename T>
+class tParameterParent<T, true> : public tParameterNumeric<T>
+{
+
+  typedef tParameterNumeric<T> tParent;
+
+public:
+
+  tParameterParent(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry = "") : tParent(description, parent, config_entry) {}
+
+  tParameterParent(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, unit, config_entry) {}
+
+  tParameterParent(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds<T> b, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, b, unit, config_entry) {}
+};
 
 /*!
  * \author Max Reichardt
  *
- * Parameter template class for standard types
+ * Parameter template class for all types
  */
-template<typename T>
-class tParameter : public tPort<T>
+template <typename T>
+class tParameter : public tParameterParent < T, boost::is_integral<T>::value || boost::is_floating_point<T>::value || boost::is_enum<T>::value >
 {
-  inline static rrlib::serialization::tDataTypeBase GetType(const rrlib::serialization::tDataTypeBase& dt)
-  {
-    return dt != NULL ? dt : rrlib::serialization::tDataType<T>();
-  }
+  typedef tParameterParent < T, boost::is_integral<T>::value || boost::is_floating_point<T>::value || boost::is_enum<T>::value > tParent;
 
 public:
 
-  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry, const rrlib::serialization::tDataTypeBase& dt = NULL) :
-      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT))
-  {
-    // this(description,parent,dt);
-    this->wrapped->AddAnnotation(new tParameterInfo());
-    SetConfigEntry(config_entry);
-  }
+  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry = "") : tParent(description, parent, config_entry) {}
 
-  tParameter(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& dt = NULL) :
-      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT))
-  {
-    this->wrapped->AddAnnotation(new tParameterInfo());
-  }
+  tParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, unit, config_entry) {}
 
   template < typename Q = T >
-  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry, const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b, const rrlib::serialization::tDataTypeBase& dt = NULL, tUnit* u = NULL) :
-      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u), b)
-  {
-    // this(description,parent,b,dt,u);
-    this->wrapped->AddAnnotation(new tParameterInfo());
-    SetConfigEntry(config_entry);
-  }
+  tParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type b, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, b, unit, config_entry) {}
 
-  template < typename Q = T >
-  tParameter(const util::tString& description, tFrameworkElement* parent, const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b, const rrlib::serialization::tDataTypeBase& dt = NULL, tUnit* u = NULL) :
-      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u), b)
-  {
-    this->wrapped->AddAnnotation(new tParameterInfo());
-  }
+};
 
-  /*!
-   * \param config_entry New Place in Configuration tree, this parameter is configured from (nodes are separated with dots)
-   */
-  inline void SetConfigEntry(const util::tString& config_entry)
-  {
-    tParameterInfo* info = static_cast<tParameterInfo*>(this->wrapped->GetAnnotation(tParameterInfo::cTYPE));
-    info->SetConfigEntry(config_entry);
-  }
+template <>
+class tParameter<bool> : public tParameterBool
+{
+public:
+
+  tParameter(const util::tString& description, tFrameworkElement* parent, const bool& default_value = false, const util::tString& config_entry = "") : tParameterBool(description, parent, default_value, config_entry) {}
 
 };
 
@@ -108,7 +107,7 @@ extern template class tParameter<float>;
 extern template class tParameter<double>;
 extern template class tParameter<tNumber>;
 extern template class tParameter<tCoreString>;
-extern template class tParameter<tBoolean>;
+extern template class tParameter<bool>;
 extern template class tParameter<tEnumValue>;
 extern template class tParameter<rrlib::serialization::tMemoryBuffer>;
 

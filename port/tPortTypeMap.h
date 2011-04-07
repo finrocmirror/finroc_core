@@ -178,6 +178,20 @@ struct tPortTypeMap : tPortTypeMapBase < T, typeutil::tIsCCType<T>::value, boost
   typedef std::vector<T> tListType;
 };
 
+// bool
+template<>
+struct tPortTypeMap<bool>
+{
+  typedef typeutil::tGenericChangeType<bool>::type tGenericChange;
+  typedef std::vector<bool> tListType;
+  typedef tCCPortBase tPortBaseType;
+  typedef tBoolean tPortDataType;
+  typedef tCCPortDataManager tManagerType;
+  typedef tCCQueueFragmentRaw tQueueFragment;
+  enum { boundable = 0 };
+};
+
+
 } // namespace finroc
 } // namespace core
 

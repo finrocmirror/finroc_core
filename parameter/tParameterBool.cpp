@@ -31,23 +31,23 @@ namespace finroc
 namespace core
 {
 tParameterBool::tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, const util::tString& config_entry) :
-    tParameter<tBoolean>(description, parent, tBoolean::cTYPE),
+    tParameterBase<bool>(description, parent),
     cache(new tBoolCache())
 {
   // this(description,parent,defaultValue);
   this->AddPortListener(cache.get());
   cache->current_value = default_value;
-  SetDefault(tBoolean::GetInstance(default_value));
+  SetDefault(default_value);
   SetConfigEntry(config_entry);
 }
 
 tParameterBool::tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value) :
-    tParameter<tBoolean>(description, parent, tBoolean::cTYPE),
+    tParameterBase<bool>(description, parent),
     cache(new tBoolCache())
 {
   this->AddPortListener(cache.get());
   cache->current_value = default_value;
-  SetDefault(tBoolean::GetInstance(default_value));
+  SetDefault(default_value);
 }
 
 void tParameterBool::Set(bool b)
