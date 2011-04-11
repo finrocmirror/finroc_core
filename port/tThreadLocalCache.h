@@ -163,12 +163,16 @@ private:
 
   inline tCCPortDataBufferPool* GetCCPool(const rrlib::serialization::tDataTypeBase& data_type)
   {
-    int16 uid = tFinrocTypeInfo::Get(data_type.GetUid()).GetCCIndex();
-    assert((uid >= 0));
-    tCCPortDataBufferPool* pool = cc_type_pools[uid];
+    return GetCCPool(tFinrocTypeInfo::Get(data_type.GetUid()).GetCCIndex());
+  }
+
+  inline tCCPortDataBufferPool* GetCCPool(int16 cc_type_index)
+  {
+    assert((cc_type_index >= 0));
+    tCCPortDataBufferPool* pool = cc_type_pools[cc_type_index];
     if (pool == NULL)
     {
-      pool = CreateCCPool(data_type, uid);
+      pool = CreateCCPool(tFinrocTypeInfo::GetFromCCIndex(cc_type_index), cc_type_index);
     }
     return pool;
   }
@@ -275,6 +279,11 @@ public:
   inline int GetThreadUid()
   {
     return thread_uid;
+  }
+
+  inline tCCPortDataManagerTL* GetUnusedBuffer(int16 cc_type_index)
+  {
+    return GetCCPool(cc_type_index)->GetUnusedBuffer();
   }
 
   inline tCCPortDataManagerTL* GetUnusedBuffer(const rrlib::serialization::tDataTypeBase& data_type)

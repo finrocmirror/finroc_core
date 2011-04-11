@@ -34,8 +34,10 @@
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/tFrameworkElement.h"
 #include "rrlib/serialization/tGenericObjectManager.h"
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
+#include "rrlib/serialization/sSerialization.h"
 #include "rrlib/serialization/tGenericObject.h"
+#include "core/port/cc/tCCPortDataRef.h"
+#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "core/tRuntimeSettings.h"
 
 namespace rrlib
@@ -50,7 +52,6 @@ namespace finroc
 {
 namespace core
 {
-class tCCPortDataRef;
 class tCCPullRequestHandler;
 class tUnit;
 class tCCQueueFragmentRaw;
@@ -77,6 +78,9 @@ protected:
 
   /*! Edges ending at this port */
   tAbstractPort::tEdgeList<tCCPortBase*> edges_dest;
+
+  /*! CC type index of data type (optimization) */
+  int16 cc_type_index;
 
   /*! default value - invariant: must never be null if used (must always be copied, too) */
   tCCPortDataManager* default_value;
@@ -230,7 +234,7 @@ protected:
    */
   inline tCCPortDataManagerTL* GetUnusedBuffer(tThreadLocalCache* tc)
   {
-    return tc->GetUnusedBuffer(this->data_type);
+    return tc->GetUnusedBuffer(cc_type_index);
   }
 
   virtual void InitialPushTo(tAbstractPort* target, bool reverse);
@@ -242,17 +246,6 @@ protected:
    * \param tc ThreadLocalCache with tc.data set
    */
   virtual void NonStandardAssign(tThreadLocalCache* tc);
-
-  /*!
-   * Publish data
-   *
-   * \param tc ThreadLocalCache
-   * \param data Data to publish
-   */
-  inline void Publish(tThreadLocalCache* tc, tCCPortDataManagerTL* data)
-  {
-    PublishImpl<false, cCHANGED, false>(tc, data);
-  }
 
   /*!
    * Publish data
@@ -490,6 +483,14 @@ public:
   }
 
   /*!
+   * \return Returns data type cc index directly (faster than acquiring using FinrocTypeInfo and DataTypeBase)
+   */
+  inline int16 GetDataTypeCCIndex()
+  {
+    return cc_type_index;
+  }
+
+  /*!
    * \return Buffer with default value. Can be used to change default value
    * for port. However, this should be done before the port is used.
    */
@@ -532,6 +533,34 @@ public:
   void GetRaw(rrlib::serialization::tGenericObject* buffer);
 
   /*!
+   * Copy current value to buffer (Most efficient get()-version)
+   *
+   * \param buffer Buffer to copy current data to
+   */
+  template <typename T>
+  inline void GetRaw(T& buffer)
+  {
+    if (PushStrategy())
+    {
+      for (; ;)
+      {
+        tCCPortDataRef* val = value;
+        rrlib::serialization::sSerialization::DeepCopy(*val->GetData()->GetData<T>(), buffer, NULL);
+        if (val == value)    // still valid??
+        {
+          return;
+        }
+      }
+    }
+    else
+    {
+      tCCPortDataManagerTL* dc = PullValueRaw();
+      rrlib::serialization::sSerialization::DeepCopy(*dc->GetObject()->GetData<T>(), buffer, NULL);
+      dc->ReleaseLock();
+    }
+  }
+
+  /*!
    * \return Unit of port
    */
   inline tUnit* GetUnit()
@@ -540,6 +569,17 @@ public:
   }
 
   virtual void NotifyDisconnect();
+
+  /*!
+   * Publish data
+   *
+   * \param tc ThreadLocalCache
+   * \param data Data to publish
+   */
+  inline void Publish(tThreadLocalCache* tc, tCCPortDataManagerTL* data)
+  {
+    PublishImpl<false, cCHANGED, false>(tc, data);
+  }
 
   /*!
    * Publish buffer through port

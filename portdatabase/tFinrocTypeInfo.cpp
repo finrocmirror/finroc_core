@@ -43,6 +43,18 @@ int tFinrocTypeInfo::EstimateDataSize(rrlib::serialization::tGenericObject* data
   }
 }
 
+rrlib::serialization::tDataTypeBase tFinrocTypeInfo::GetFromCCIndex(int16 cc_type_index)
+{
+  for (int16 i = 0; i < cMAX_TYPES; i++)
+  {
+    if (Get(i).GetType() == eCC && Get(i).cc_index == cc_type_index)
+    {
+      return rrlib::serialization::tDataTypeBase::GetType(i);
+    }
+  }
+  throw util::tRuntimeException("Type not found", CODE_LOCATION_MACRO);
+}
+
 tFinrocTypeInfo* tFinrocTypeInfo::InfoArray()
 {
   static tFinrocTypeInfo info[cMAX_TYPES];

@@ -34,14 +34,6 @@ tNumber tNumber::cZERO(0);
 const rrlib::serialization::tDataTypeBase tNumber::cTYPE = rrlib::serialization::tDataType<tNumber>("Number");
 const int8 tNumber::cINT64, tNumber::cINT32, tNumber::cINT16, tNumber::cFLOAT64, tNumber::cFLOAT32, tNumber::cCONST, tNumber::cMIN_BARRIER;
 
-void tNumber::CopyFrom(const tNumber& source)
-{
-  num_type = source.num_type;
-  unit = source.unit;
-
-  lval = source.lval;
-}
-
 void tNumber::Deserialize(rrlib::serialization::tInputStream& ois)
 {
   int8 first_byte = ois.ReadByte();
@@ -144,11 +136,6 @@ bool tNumber::Equals(const util::tObject& other) const
 tConstant* tNumber::GetConstant() const
 {
   return (static_cast<tConstant*>(unit));
-}
-
-tUnit* tNumber::GetUnit() const
-{
-  return num_type == eCONSTANT ? GetConstant()->unit : unit;
 }
 
 void tNumber::Serialize(rrlib::serialization::tOutputStream& oos) const

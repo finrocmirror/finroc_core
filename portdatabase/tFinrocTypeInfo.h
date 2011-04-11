@@ -139,6 +139,12 @@ public:
   }
 
   /*!
+   * \param cc_type_index CC Index
+   * \return Data type with this index
+   */
+  static rrlib::serialization::tDataTypeBase GetFromCCIndex(int16 cc_type_index);
+
+  /*!
    * \return the portInterface
    */
   inline tPortInterface* GetPortInterface()

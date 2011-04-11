@@ -28,7 +28,7 @@
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "core/datatype/tUnit.h"
 #include "rrlib/serialization/tStringOutputStream.h"
-#include "rrlib/serialization/tTypedObject.h"
+#include "rrlib/serialization/tSerializable.h"
 #include "core/portdatabase/tCCType.h"
 
 namespace rrlib
@@ -50,7 +50,7 @@ class tConstant;
  *
  * This class stores numbers (with units) of different types.
  */
-class tNumber : public rrlib::serialization::tTypedObject, public util::tObject, public tCCType
+class tNumber : public rrlib::serialization::tSerializable, public util::tObject, public tCCType
 {
 public:
 
@@ -120,7 +120,6 @@ public:
     unit = from.unit;
     num_type = from.num_type;
     lval = from.lval; // will copy any type of value
-    type = cTYPE;
   }
 
   tNumber() :
@@ -128,7 +127,6 @@ public:
       num_type(eINT),
       unit(&tUnit::cNO_UNIT)
   {
-    type = cTYPE;
   }
 
   tNumber(uint32_t value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
@@ -136,7 +134,6 @@ public:
       num_type(eINT),
       unit(unit_)
   {
-    type = cTYPE;
   }
 
   tNumber(int value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
@@ -144,7 +141,6 @@ public:
       num_type(eINT),
       unit(unit_)
   {
-    type = cTYPE;
   }
 
   tNumber(int64 value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
@@ -152,7 +148,6 @@ public:
       num_type(eLONG),
       unit(unit_)
   {
-    type = cTYPE;
   }
 
   tNumber(double value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
@@ -160,7 +155,6 @@ public:
       num_type(eDOUBLE),
       unit(unit_)
   {
-    type = cTYPE;
   }
 
   tNumber(float value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
@@ -168,18 +162,22 @@ public:
       num_type(eFLOAT),
       unit(unit_)
   {
-    type = cTYPE;
   }
 
   tNumber(const util::tNumber& value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
       num_type(),
       unit(NULL)
   {
-    type = cTYPE;
     SetValue(value_, unit_);
   }
 
-  void CopyFrom(const tNumber& source);
+  inline void CopyFrom(const tNumber& source)
+  {
+    num_type = source.num_type;
+    unit = source.unit;
+
+    lval = source.lval;
+  }
 
   virtual void Deserialize(rrlib::serialization::tInputStream& ois);
 
@@ -241,7 +239,7 @@ public:
   /*!
    * \return Unit of data
    */
-  tUnit* GetUnit() const;
+  inline tUnit* GetUnit() const;
 
   inline virtual int IntValue() const
   {
@@ -492,7 +490,20 @@ T* tNumber::GetValuePtr()
 } // namespace core
 
 #include "rrlib/serialization/tDataType.h"
+#include "core/datatype/tConstant.h"
 
 extern template class ::rrlib::serialization::tDataType<finroc::core::tNumber>;
+
+namespace finroc
+{
+namespace core
+{
+tUnit* tNumber::GetUnit() const
+{
+  return num_type == eCONSTANT ? GetConstant()->unit : unit;
+}
+
+} // namespace finroc
+} // namespace core
 
 #endif // core__datatype__tNumber_h__

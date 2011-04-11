@@ -25,8 +25,6 @@
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/tCoreRegister.h"
 #include "core/port/tPortFlags.h"
-#include "rrlib/serialization/sSerialization.h"
-#include "core/port/cc/tCCPortDataRef.h"
 #include "core/port/cc/tCCPullRequestHandler.h"
 
 namespace finroc
@@ -37,6 +35,7 @@ tCCPortBase::tCCPortBase(tPortCreationInfo pci) :
     tAbstractPort(pci),
     edges_src(),
     edges_dest(),
+    cc_type_index(tFinrocTypeInfo::Get(GetDataType()).GetCCIndex()),
     default_value(CreateDefaultValue(pci.data_type)),
     value(NULL),
     owned_data(NULL),

@@ -148,6 +148,7 @@ public:
   static const tBounds<T> GetBounds(tPortType* port)
   {
     assert(false && "Bounds can only be used with CC types");
+    return *((tBounds<T>*)NULL); // dummy statement to make compiler happy
   }
 
   static void SetBounds(tPortType* port, const tBounds<T>& b)
@@ -215,8 +216,7 @@ public:
   static void GetValue(tPortType* port, T& result)
   {
     tNumber num;
-    rrlib::serialization::tGenericObjectWrapper<tNumber> tmp(&num);
-    port->GetRaw(&tmp);
+    port->GetRaw(num);
     if (port->GetUnit() != num.GetUnit() && port->GetUnit() != &tUnit::cNO_UNIT && num.GetUnit() != &tUnit::cNO_UNIT)
     {
       result = static_cast<T>(num.GetUnit()->ConvertTo(num.Value<double>(), port->GetUnit()));
@@ -300,9 +300,10 @@ public:
 
   static void CopyAndPublish(tPortType* port, const T& t)
   {
-    tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
+    tThreadLocalCache* tc = tThreadLocalCache::GetFast();
+    tManagerTL* mgr = tc->GetUnusedBuffer(port->GetDataTypeCCIndex());
     mgr->GetObject()->GetData<tNumber>()->SetValue(t, port->GetUnit());
-    port->Publish(mgr);
+    port->Publish(tc, mgr);
   }
 
   static const tBounds<T> GetBounds(const tPortType* port)
@@ -450,6 +451,7 @@ public:
   static const tBounds<bool> GetBounds(tPortType* port)
   {
     assert(false && "Bounds don't make sense with boolean values");
+    return *((tBounds<bool>*)NULL); // dummy statement to make compiler happy
   }
 
   static void SetBounds(tPortType* port, const tBounds<bool>& b)
@@ -594,7 +596,7 @@ public:
   /*!
    * \return Port's current value
    */
-  T GetValue()
+  inline T GetValue()
   {
     T t;
     tPortUtil<T>::GetValue(this->wrapped, t);
