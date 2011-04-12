@@ -45,7 +45,7 @@ tThreadContainer::tThreadContainer(tFrameworkElement* parent, const util::tStrin
 
 tThreadContainer::~tThreadContainer()
 {
-  if (thread != NULL)
+  if (thread.get() != NULL)
   {
     StopThread();
     JoinThread();
@@ -56,7 +56,7 @@ tThreadContainer::~tThreadContainer()
 bool tThreadContainer::IsExecuting()
 {
   std::shared_ptr<tThreadContainerThread> t = thread;
-  if (t != NULL)
+  if (t.get() != NULL)
   {
     return t->IsRunning();
   }
@@ -65,7 +65,7 @@ bool tThreadContainer::IsExecuting()
 
 void tThreadContainer::JoinThread()
 {
-  if (thread != NULL)
+  if (thread.get() != NULL)
   {
     try
     {
@@ -81,7 +81,7 @@ void tThreadContainer::JoinThread()
 
 void tThreadContainer::StartExecution()
 {
-  assert((thread == NULL));
+  assert((thread.get() == NULL));
   thread = util::sThreadUtil::GetThreadSharedPtr(new tThreadContainerThread(this, cycle_time->Get(), warn_on_cycle_time_exceed->Get()));
   if (rt_thread->Get())
   {
@@ -92,7 +92,7 @@ void tThreadContainer::StartExecution()
 
 void tThreadContainer::StopThread()
 {
-  if (thread != NULL)
+  if (thread.get() != NULL)
   {
     thread->StopThread();
   }

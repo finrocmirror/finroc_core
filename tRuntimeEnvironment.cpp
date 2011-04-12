@@ -59,7 +59,7 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
     creation_time(util::tTime::GetPrecise()),
     unrelated(NULL)
 {
-  assert(instance == NULL);
+  assert(instance.get() == NULL);
   instance = std::shared_ptr<tRuntimeEnvironment>(this);
   instance_raw_ptr = this;
   active = true;
