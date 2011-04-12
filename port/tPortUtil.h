@@ -308,13 +308,13 @@ public:
 
   static const tBounds<T> GetBounds(const tPortType* port)
   {
-    assert(typeid(*port).name() == typeid(tCCPortBoundedNumeric<T>*).name());
+    assert(typeid(*port).name() == typeid(tCCPortBoundedNumeric<T>).name());
     return static_cast<const tCCPortBoundedNumeric<T>*>(port)->GetBounds();
   }
 
   static void SetBounds(tPortType* port, const tBounds<T>& b)
   {
-    assert(typeid(*port).name() == typeid(tCCPortBoundedNumeric<T>*).name());
+    assert(typeid(*port).name() == typeid(tCCPortBoundedNumeric<T>).name());
     static_cast<tCCPortBoundedNumeric<T>*>(port)->SetBounds(b);
   }
 

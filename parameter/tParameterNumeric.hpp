@@ -72,7 +72,7 @@ tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrame
 template<typename T>
 void tParameterNumeric<T>::Set(T v)
 {
-  tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(tBoolean::cTYPE);
+  tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(tNumber::cTYPE);
   cb->GetObject()->GetData<tNumber>()->SetValue(v, (static_cast<tCCPortBase*>(this->wrapped))->GetUnit());
   (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
   cache->current_value = v;
