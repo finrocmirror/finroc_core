@@ -216,7 +216,7 @@ public:
   static void GetValue(tPortType* port, T& result)
   {
     tNumber num;
-    port->GetRaw(num);
+    port->GetRawT(num);
     if (port->GetUnit() != num.GetUnit() && port->GetUnit() != &tUnit::cNO_UNIT && num.GetUnit() != &tUnit::cNO_UNIT)
     {
       result = static_cast<T>(num.GetUnit()->ConvertTo(num.Value<double>(), port->GetUnit()));
@@ -373,8 +373,7 @@ public:
   static void GetValue(tPortType* port, bool& result)
   {
     tBoolean b;
-    rrlib::serialization::tGenericObjectWrapper<tBoolean> tmp(&b);
-    port->GetRaw(&tmp);
+    port->GetRawT(b);
     result = b.Get();
   }
 
@@ -504,8 +503,7 @@ public:
 
   static void GetValue(tPortType* port, T& result)
   {
-    rrlib::serialization::tGenericObjectWrapper<T> tmp(&result);
-    port->GetRaw(&tmp);
+    port->GetRawT(result);
   }
 
   static bool DequeueSingle(tPortType* port, T& result)

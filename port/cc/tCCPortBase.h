@@ -538,7 +538,7 @@ public:
    * \param buffer Buffer to copy current data to
    */
   template <typename T>
-  inline void GetRaw(T& buffer)
+  inline void GetRawT(T& buffer)
   {
     if (PushStrategy())
     {
