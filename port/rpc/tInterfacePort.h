@@ -97,7 +97,7 @@ protected:
   template <typename T>
   inline tPortDataPtr<T> GetBufferForCall(const rrlib::serialization::tDataTypeBase& dt = NULL)
   {
-    tPortDataManager* mgr = GetUnusedBufferRaw(rrlib::serialization::tDataType<T>());
+    tPortDataManager* mgr = GetUnusedBufferRaw(dt != NULL ? dt : rrlib::serialization::tDataType<T>());
     mgr->GetCurrentRefCounter()->SetOrAddLocks((int8_t)1);
     return tPortDataPtr<T>(mgr);
   }

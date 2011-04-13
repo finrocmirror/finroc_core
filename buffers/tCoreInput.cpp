@@ -36,7 +36,7 @@ tCoreInput::tCoreInput() :
 {
 }
 
-rrlib::serialization::tGenericObject* tCoreInput::ReadObject(bool in_inter_thread_container)
+rrlib::serialization::tGenericObject* tCoreInput::ReadObject(bool in_inter_thread_container, const rrlib::serialization::tDataTypeBase& expected_type)
 {
   //readSkipOffset();
   rrlib::serialization::tDataTypeBase dt = ReadType();
@@ -44,6 +44,7 @@ rrlib::serialization::tGenericObject* tCoreInput::ReadObject(bool in_inter_threa
   {
     return NULL;
   }
+
   if (buffer_source == NULL && tFinrocTypeInfo::IsStdType(dt))    // skip object?
   {
     //toSkipTarget();

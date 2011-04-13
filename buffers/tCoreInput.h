@@ -63,9 +63,10 @@ private:
    * Deserialize object with variable type from stream
    *
    * \param in_inter_thread_container Deserialize "cheap copy" data in interthread container?
+   * \param expected_type expected type (optional, may be null)
    * \return Buffer with read object
    */
-  rrlib::serialization::tGenericObject* ReadObject(bool in_inter_thread_container);
+  rrlib::serialization::tGenericObject* ReadObject(bool in_inter_thread_container, const rrlib::serialization::tDataTypeBase& expected_type = NULL);
 
 public:
 
@@ -100,19 +101,20 @@ public:
    *
    * \return Buffer with read object (no locks)
    */
-  inline rrlib::serialization::tGenericObject* ReadObject()
+  inline rrlib::serialization::tGenericObject* ReadObject(const rrlib::serialization::tDataTypeBase& expected_type = NULL)
   {
-    return ReadObject(false);
+    return ReadObject(false, expected_type);
   }
 
   /*!
    * Deserialize object with variable type from stream - and place "cheap copy" data in "interthread container"
    *
+   * \param expected_type expected type (optional, may be null)
    * \return Buffer with read object (no locks)
    */
-  inline tPortDataPtr<rrlib::serialization::tGenericObject> ReadObjectInInterThreadContainer()
+  inline tPortDataPtr<rrlib::serialization::tGenericObject> ReadObjectInInterThreadContainer(const rrlib::serialization::tDataTypeBase& expected_type = NULL)
   {
-    rrlib::serialization::tGenericObject* tmp = ReadObject(true);
+    rrlib::serialization::tGenericObject* tmp = ReadObject(true, expected_type);
     bool cc_type = tFinrocTypeInfo::IsCCType(tmp->GetType());
 
     if (cc_type)

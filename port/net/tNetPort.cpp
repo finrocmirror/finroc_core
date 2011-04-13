@@ -97,7 +97,7 @@ void tNetPort::ReceiveDataFromStream(tCoreInput* ci, int64 timestamp, int8 chang
     ci->SetBufferSource(pb);
     do
     {
-      pb->PublishFromNet(static_cast<tPortDataManager*>(ci->ReadObject()->GetManager()), changed_flag);
+      pb->PublishFromNet(static_cast<tPortDataManager*>(ci->ReadObject(wrapped->GetDataType())->GetManager()), changed_flag);
     }
     while (ci->ReadBoolean());
     ci->SetBufferSource(NULL);
@@ -107,7 +107,7 @@ void tNetPort::ReceiveDataFromStream(tCoreInput* ci, int64 timestamp, int8 chang
     tCCNetPort* pb = static_cast<tCCNetPort*>(wrapped);
     do
     {
-      pb->PublishFromNet(static_cast<tCCPortDataManagerTL*>(ci->ReadObject()->GetManager()), changed_flag);
+      pb->PublishFromNet(static_cast<tCCPortDataManagerTL*>(ci->ReadObject(wrapped->GetDataType())->GetManager()), changed_flag);
     }
     while (ci->ReadBoolean());
   }

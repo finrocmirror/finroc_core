@@ -47,7 +47,7 @@ void tCallParameter::Deserialize(tCoreInput& is)
   else if (type == cOBJECT)
   {
     assert((value == NULL));
-    value = tPortDataPtr<rrlib::serialization::tGenericObject>(is.ReadObjectInInterThreadContainer());
+    value = tPortDataPtr<rrlib::serialization::tGenericObject>(is.ReadObjectInInterThreadContainer(NULL));
     tPortDataManager* pdm = value.GetManagerT<tPortDataManager>();
     if (pdm != NULL)
     {
