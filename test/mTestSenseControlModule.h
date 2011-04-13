@@ -84,10 +84,10 @@ public:
 
   mTestSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name = "TestModule");
 
-  tCI<int> ci_signal_1;
-  tCO<int> co_signal_2;
-  tSI<int> si_signal_3;
-  tSO<int> so_signal_4;
+  tControllerInput<int> ci_signal_1;
+  tControllerOutput<int> co_signal_2;
+  tSensorInput<int> si_signal_3;
+  tSensorOutput<int> so_signal_4;
 
 };
 

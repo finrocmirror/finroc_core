@@ -23,6 +23,7 @@
  *
  * \author  Tobias Foehst
  * \author  Bernd-Helge Schaefer
+ * \author  Max Reichardt
  *
  * \date    2010-12-17
  *
@@ -35,7 +36,7 @@
 #ifndef _core__structure__tModule_h_
 #define _core__structure__tModule_h_
 
-#include "core/tFrameworkElement.h"
+#include "core/structure/tModuleBase.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -45,8 +46,6 @@
 // Internal includes with ""
 //----------------------------------------------------------------------
 #include "core/port/tEdgeAggregator.h"
-#include "core/port/tPort.h"
-#include "core/plugin/tStandardCreateModuleAction.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -73,7 +72,7 @@ namespace structure
 /*!
  *
  */
-class tModule : public finroc::core::tFrameworkElement
+class tModule : public tModuleBase
 {
   class UpdateTask : public finroc::util::tTask
   {
@@ -102,15 +101,15 @@ public:
   template < typename T = double >
   struct tInput : public tPort<T>
   {
-    tInput(tModule *parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->input, false)
+    tInput(const finroc::util::tString &name)
+        : tPort<T>(name, static_cast<tModule*>(tStructureElementRegister::FindParent(this))->input, false)
     {}
   };
   template < typename T = double >
   struct tOutput : public tPort<T>
   {
-    tOutput(tModule *parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->output, true)
+    tOutput(const finroc::util::tString &name)
+        : tPort<T>(name, static_cast<tModule*>(tStructureElementRegister::FindParent(this))->output, true)
     {}
   };
 

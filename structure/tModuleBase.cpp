@@ -19,15 +19,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    mTestModule.cpp
+/*!\file    tModuleBase.cpp
  *
- * \author  Tobias Foehst
+ * \author  Max Reichardt
  *
- * \date    2010-12-09
+ * \date    2011-04-12
  *
  */
 //----------------------------------------------------------------------
-#include "core/test/mTestModule.h"
+#include "core/structure/tModuleBase.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -45,7 +45,7 @@
 //----------------------------------------------------------------------
 // Namespace usage
 //----------------------------------------------------------------------
-using namespace rrlib::logging;
+using namespace finroc::core::structure;
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
@@ -54,30 +54,33 @@ using namespace rrlib::logging;
 //----------------------------------------------------------------------
 // Const values
 //----------------------------------------------------------------------
-finroc::core::tStandardCreateModuleAction<mTestModule> mTestModule::cCREATE_ACTION("TestModule");
 
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// mTestModule constructors
+// tModuleBase constructors
 //----------------------------------------------------------------------
-mTestModule::mTestModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name)
-    : tModule(parent, name),
-
-    counter(0),
-
-    signal_1("Signal 1"),
-    signal_2("Signal 2")
-{}
-
-//----------------------------------------------------------------------
-// mTestModule Update
-//----------------------------------------------------------------------
-void mTestModule::Update()
+tModuleBase::tModuleBase(tFrameworkElement *parent, const util::tString &name)
+    : tFrameworkElement(parent, name),
+    parameters(new tFrameworkElement(this, "Parameters")),
+    parameters_changed(true)
 {
-  this->signal_2.Publish(this->counter);
-  FINROC_LOG_STREAM(eLL_DEBUG) << this->counter;
-  this->counter++;
+  tStructureElementRegister::GetRegister().push_back(this);
 }
+
+void tModuleBase::CheckParameters()
+{
+  if (parameters_changed)
+  {
+    parameters_changed = false;
+    ParametersChanged();
+  }
+}
+
+void tModuleBase::PortChanged(tAbstractPort* origin, const void* const& value)
+{
+  parameters_changed = true;
+}
+

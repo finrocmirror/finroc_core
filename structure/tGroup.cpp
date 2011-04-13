@@ -76,7 +76,9 @@ tGroup::tGroup(tFrameworkElement *parent, const util::tString &name, const util:
 
     sensor_input(new tEdgeAggregator(this, "Sensor Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
     sensor_output(new tEdgeAggregator(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA))
-{}
+{
+  tStructureElementRegister::GetRegister().push_back(this);
+}
 
 ////----------------------------------------------------------------------
 //// tGroup SetParameter

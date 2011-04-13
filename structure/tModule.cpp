@@ -65,7 +65,7 @@ using namespace finroc::core::structure;
 // tModule constructors
 //----------------------------------------------------------------------
 tModule::tModule(tFrameworkElement *parent, const util::tString &name)
-    : tFrameworkElement(parent, name),
+    : tModuleBase(parent, name),
 
     input(new tEdgeAggregator(this, "Input", tEdgeAggregator::cIS_INTERFACE)),
     output(new tEdgeAggregator(this, "Output", tEdgeAggregator::cIS_INTERFACE)),
@@ -92,5 +92,6 @@ tModule::UpdateTask::UpdateTask(tModule *module)
 //----------------------------------------------------------------------
 void tModule::UpdateTask::ExecuteTask()
 {
+  this->module->CheckParameters();
   this->module->Update();
 }

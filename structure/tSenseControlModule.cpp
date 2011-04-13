@@ -65,7 +65,7 @@ using namespace finroc::core::structure;
 // tSenseControlModule constructors
 //----------------------------------------------------------------------
 tSenseControlModule::tSenseControlModule(tFrameworkElement *parent, const util::tString &name)
-    : tFrameworkElement(parent, name),
+    : tModuleBase(parent, name),
 
     controller_input(new tEdgeAggregator(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
     controller_output(new tEdgeAggregator(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
@@ -103,6 +103,7 @@ tSenseControlModule::ControlTask::ControlTask(tSenseControlModule *module)
 //----------------------------------------------------------------------
 void tSenseControlModule::ControlTask::ExecuteTask()
 {
+  this->module->CheckParameters();
   this->module->Control();
 }
 
@@ -118,5 +119,6 @@ tSenseControlModule::SenseTask::SenseTask(tSenseControlModule *module)
 //----------------------------------------------------------------------
 void tSenseControlModule::SenseTask::ExecuteTask()
 {
+  this->module->CheckParameters();
   this->module->Sense();
 }

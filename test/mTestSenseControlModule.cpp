@@ -68,10 +68,10 @@ mTestSenseControlModule::mTestSenseControlModule(finroc::core::tFrameworkElement
 
     counter(0),
 
-    ci_signal_1(this, "Signal 1"),
-    co_signal_2(this, "Signal 2"),
-    si_signal_3(this, "Signal 3"),
-    so_signal_4(this, "Signal 4")
+    ci_signal_1("Signal 1"),
+    co_signal_2("Signal 2"),
+    si_signal_3("Signal 3"),
+    so_signal_4("Signal 4")
 {}
 
 //----------------------------------------------------------------------

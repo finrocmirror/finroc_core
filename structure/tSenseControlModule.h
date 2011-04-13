@@ -23,6 +23,7 @@
  *
  * \author  Tobias Foehst
  * \author  Bernd-Helge Schaefer
+ * \author  Max Reichardt
  *
  * \date    2010-12-09
  *
@@ -35,7 +36,7 @@
 #ifndef _core__structure__tSenseControlModule_h_
 #define _core__structure__tSenseControlModule_h_
 
-#include "core/tFrameworkElement.h"
+#include "core/structure/tModuleBase.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -45,8 +46,6 @@
 // Internal includes with ""
 //----------------------------------------------------------------------
 #include "core/port/tEdgeAggregator.h"
-#include "core/port/tPort.h"
-#include "core/plugin/tStandardCreateModuleAction.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -73,7 +72,7 @@ namespace structure
 /*!
  *
  */
-class tSenseControlModule : public finroc::core::tFrameworkElement
+class tSenseControlModule : public tModuleBase
 {
   class ControlTask : public finroc::util::tTask
   {
@@ -114,31 +113,31 @@ protected:
 public:
 
   template < typename T = double >
-  struct tCI : public tPort<T>
+  struct tControllerInput : public tPort<T>
   {
-    tCI(tSenseControlModule *parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->controller_input, false)
+    tControllerInput(const finroc::util::tString &name)
+        : tPort<T>(name, static_cast<tSenseControlModule*>(tStructureElementRegister::FindParent(this))->controller_input, false)
     {}
   };
   template < typename T = double >
-  struct tCO : public tPort<T>
+  struct tControllerOutput : public tPort<T>
   {
-    tCO(tSenseControlModule *parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->controller_output, true)
+    tControllerOutput(const finroc::util::tString &name)
+        : tPort<T>(name, static_cast<tSenseControlModule*>(tStructureElementRegister::FindParent(this))->controller_output, true)
     {}
   };
   template < typename T = double >
-  struct tSI : public tPort<T>
+  struct tSensorInput : public tPort<T>
   {
-    tSI(tSenseControlModule *parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->sensor_input, false)
+    tSensorInput(const finroc::util::tString &name)
+        : tPort<T>(name, static_cast<tSenseControlModule*>(tStructureElementRegister::FindParent(this))->sensor_input, false)
     {}
   };
   template < typename T = double >
-  struct tSO : public tPort<T>
+  struct tSensorOutput : public tPort<T>
   {
-    tSO(tSenseControlModule *parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->sensor_output, true)
+    tSensorOutput(const finroc::util::tString &name)
+        : tPort<T>(name, static_cast<tSenseControlModule*>(tStructureElementRegister::FindParent(this))->sensor_output, true)
     {}
   };
 

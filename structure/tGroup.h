@@ -23,6 +23,7 @@
  *
  * \author  Tobias Foehst
  * \author  Bernd-Helge Schaefer
+ * \author  Max Reichardt
  *
  * \date    2010-12-09
  *
@@ -47,6 +48,7 @@
 #include "core/port/tEdgeAggregator.h"
 #include "core/port/tPort.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
+#include "core/structure/tStructureElementRegister.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -87,31 +89,31 @@ class tGroup : public tFinstructableGroup
 public:
 
   template < typename T = double >
-  struct tCI : public tPort<T>
+  struct tControllerInput : public tPort<T>
   {
-    tCI(tGroup *parent, const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, parent->controller_input, tPortFlags::cINPUT_PROXY))
+    tControllerInput(const finroc::util::tString &name)
+        : tPort<T>(tPortCreationInfo(name, static_cast<tGroup*>(tStructureElementRegister::FindParent(this))->controller_input, tPortFlags::cINPUT_PROXY))
     {}
   };
   template < typename T = double >
-  struct tCO : public tPort<T>
+  struct tControllerOutput : public tPort<T>
   {
-    tCO(tGroup *parent, const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, parent->controller_output, tPortFlags::cOUTPUT_PROXY))
+    tControllerOutput(const finroc::util::tString &name)
+        : tPort<T>(tPortCreationInfo(name, static_cast<tGroup*>(tStructureElementRegister::FindParent(this))->controller_output, tPortFlags::cOUTPUT_PROXY))
     {}
   };
   template < typename T = double >
-  struct tSI : public tPort<T>
+  struct tSensorInput : public tPort<T>
   {
-    tSI(tGroup *parent, const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, parent->sensor_input, tPortFlags::cINPUT_PROXY))
+    tSensorInput(const finroc::util::tString &name)
+        : tPort<T>(tPortCreationInfo(name, static_cast<tGroup*>(tStructureElementRegister::FindParent(this))->sensor_input, tPortFlags::cINPUT_PROXY))
     {}
   };
   template < typename T = double >
-  struct tSO : public tPort<T>
+  struct tSensorOutput : public tPort<T>
   {
-    tSO(tGroup *parent, const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, parent->sensor_output, tPortFlags::cOUTPUT_PROXY))
+    tSensorOutput(const finroc::util::tString &name)
+        : tPort<T>(tPortCreationInfo(name, static_cast<tGroup*>(tStructureElementRegister::FindParent(this))->sensor_output, tPortFlags::cOUTPUT_PROXY))
     {}
   };
 

@@ -1,6 +1,6 @@
 //
 // You received this file as part of Finroc
-// A framework for integrated robot control
+// A framework for innovative robot control
 //
 // Copyright (C) AG Robotersysteme TU Kaiserslautern
 //
@@ -19,15 +19,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    mTestModule.cpp
+/*!\file    tStructureElementRegister.h
  *
- * \author  Tobias Foehst
+ * \author  Max Reichardt
  *
- * \date    2010-12-09
+ * \date    2011-04-13
+ *
+ * \brief Contains tStructureElementRegister
+ *
+ * \b tStructureElementRegister
  *
  */
 //----------------------------------------------------------------------
-#include "core/test/mTestModule.h"
+#ifndef _core__structure__tStructureElementRegister_h_
+#define _core__structure__tStructureElementRegister_h_
+
+#include "core/tFrameworkElement.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -36,48 +43,57 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "core/port/tPort.h"
+#include "core/plugin/tStandardCreateModuleAction.h"
 
 //----------------------------------------------------------------------
 // Debugging
 //----------------------------------------------------------------------
-#include <cassert>
 
 //----------------------------------------------------------------------
-// Namespace usage
+// Namespace declaration
 //----------------------------------------------------------------------
-using namespace rrlib::logging;
+namespace finroc
+{
+namespace core
+{
+namespace structure
+{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Const values
+// Class declaration
 //----------------------------------------------------------------------
-finroc::core::tStandardCreateModuleAction<mTestModule> mTestModule::cCREATE_ACTION("TestModule");
-
-//----------------------------------------------------------------------
-// Implementation
-//----------------------------------------------------------------------
-
-//----------------------------------------------------------------------
-// mTestModule constructors
-//----------------------------------------------------------------------
-mTestModule::mTestModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name)
-    : tModule(parent, name),
-
-    counter(0),
-
-    signal_1("Signal 1"),
-    signal_2("Signal 2")
-{}
-
-//----------------------------------------------------------------------
-// mTestModule Update
-//----------------------------------------------------------------------
-void mTestModule::Update()
+//!
+/*!
+ * Internal helper class: Can be used to determine which is the parent module or group of a port
+ */
+class tStructureElementRegister : public finroc::core::tFrameworkElement
 {
-  this->signal_2.Publish(this->counter);
-  FINROC_LOG_STREAM(eLL_DEBUG) << this->counter;
-  this->counter++;
+  friend class tGroup;
+  friend class tModuleBase;
+
+  /*!
+   * \return Register containing all instantiated elements
+   */
+  static std::vector<tFrameworkElement*>& GetRegister();
+
+public:
+
+  /**
+   * \return Parent module/group of port class at address ptr
+   */
+  static tFrameworkElement* FindParent(void* ptr);
+};
+
+//----------------------------------------------------------------------
+// End of namespace declaration
+//----------------------------------------------------------------------
 }
+}
+}
+
+#endif

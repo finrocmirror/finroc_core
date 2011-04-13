@@ -90,8 +90,9 @@ class tParameter<bool> : public tParameterBool
 {
 public:
 
-  tParameter(const util::tString& description, tFrameworkElement* parent, const bool& default_value = false, const util::tString& config_entry = "") : tParameterBool(description, parent, default_value, config_entry) {}
+  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry = "") : tParameterBool(description, parent, false, config_entry) {}
 
+  tParameter(const util::tString& description, tFrameworkElement* parent, const bool& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParameterBool(description, parent, default_value, config_entry) {}
 };
 
 } // namespace finroc
