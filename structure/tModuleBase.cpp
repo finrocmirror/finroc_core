@@ -65,9 +65,10 @@ using namespace finroc::core::structure;
 tModuleBase::tModuleBase(tFrameworkElement *parent, const util::tString &name)
     : tFrameworkElement(parent, name),
     parameters(new tFrameworkElement(this, "Parameters")),
-    parameters_changed(true)
+    parameters_changed(true),
+    auto_name_port_count(0)
 {
-  tStructureElementRegister::GetRegister().push_back(this);
+  tStructureElementRegister::AddModule(this);
 }
 
 void tModuleBase::CheckParameters()

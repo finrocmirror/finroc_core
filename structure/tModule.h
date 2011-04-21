@@ -99,17 +99,28 @@ protected:
 public:
 
   template < typename T = double >
-  struct tInput : public tPort<T>
+  struct tInput : public tPort<T>, tConveniencePort<tModule>
   {
-    tInput(const finroc::util::tString &name)
-        : tPort<T>(name, static_cast<tModule*>(tStructureElementRegister::FindParent(this))->input, false)
+    tInput()
+        : tPort<T>(this->GetPortName(), this->FindParent()->input, false)
     {}
+
+    tInput(const finroc::util::tString &name)
+        : tPort<T>(name, this->FindParent()->input, false)
+    {
+
+    }
   };
+
   template < typename T = double >
-  struct tOutput : public tPort<T>
+  struct tOutput : public tPort<T>, tConveniencePort<tModule>
   {
+    tOutput()
+        : tPort<T>(this->GetPortName(), this->FindParent()->output, true)
+    {}
+
     tOutput(const finroc::util::tString &name)
-        : tPort<T>(name, static_cast<tModule*>(tStructureElementRegister::FindParent(this))->output, true)
+        : tPort<T>(name, this->FindParent()->output, true)
     {}
   };
 

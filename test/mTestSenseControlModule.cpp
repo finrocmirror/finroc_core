@@ -66,12 +66,7 @@ finroc::core::tStandardCreateModuleAction<mTestSenseControlModule> mTestSenseCon
 mTestSenseControlModule::mTestSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name)
     : tSenseControlModule(parent, name),
 
-    counter(0),
-
-    ci_signal_1("Signal 1"),
-    co_signal_2("Signal 2"),
-    si_signal_3("Signal 3"),
-    so_signal_4("Signal 4")
+    counter(0)
 {}
 
 //----------------------------------------------------------------------

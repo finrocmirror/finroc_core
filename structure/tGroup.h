@@ -48,6 +48,7 @@
 #include "core/port/tEdgeAggregator.h"
 #include "core/port/tPort.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
+#include "core/structure/tConveniencePort.h"
 #include "core/structure/tStructureElementRegister.h"
 
 //----------------------------------------------------------------------
@@ -77,11 +78,17 @@ namespace structure
  */
 class tGroup : public tFinstructableGroup
 {
+  template <typename T>
+  friend class tConveniencePort;
+
   finroc::core::tEdgeAggregator* controller_input;
   finroc::core::tEdgeAggregator* controller_output;
 
   finroc::core::tEdgeAggregator* sensor_input;
   finroc::core::tEdgeAggregator* sensor_output;
+
+  /*! Number of ports already created that have auto-generated names */
+  int auto_name_port_count;
 
 //----------------------------------------------------------------------
 // Public methods
@@ -89,31 +96,47 @@ class tGroup : public tFinstructableGroup
 public:
 
   template < typename T = double >
-  struct tControllerInput : public tPort<T>
+  struct tControllerInput : public tPort<T>, tConveniencePort<tGroup>
   {
+    tControllerInput()
+        : tPort<T>(this->GetPortName(), this->FindParent()->controller_input, tPortFlags::cINPUT_PROXY)
+    {}
+
     tControllerInput(const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, static_cast<tGroup*>(tStructureElementRegister::FindParent(this))->controller_input, tPortFlags::cINPUT_PROXY))
+        : tPort<T>(tPortCreationInfo(name, this->FindParent()->controller_input, tPortFlags::cINPUT_PROXY))
     {}
   };
   template < typename T = double >
-  struct tControllerOutput : public tPort<T>
+  struct tControllerOutput : public tPort<T>, tConveniencePort<tGroup>
   {
+    tControllerOutput()
+        : tPort<T>(this->GetPortName(), this->FindParent()->controller_output, tPortFlags::cOUTPUT_PROXY)
+    {}
+
     tControllerOutput(const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, static_cast<tGroup*>(tStructureElementRegister::FindParent(this))->controller_output, tPortFlags::cOUTPUT_PROXY))
+        : tPort<T>(tPortCreationInfo(name, this->FindParent()->controller_output, tPortFlags::cOUTPUT_PROXY))
     {}
   };
   template < typename T = double >
-  struct tSensorInput : public tPort<T>
+  struct tSensorInput : public tPort<T>, tConveniencePort<tGroup>
   {
+    tSensorInput()
+        : tPort<T>(this->GetPortName(), this->FindParent()->sensor_input, tPortFlags::cINPUT_PROXY)
+    {}
+
     tSensorInput(const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, static_cast<tGroup*>(tStructureElementRegister::FindParent(this))->sensor_input, tPortFlags::cINPUT_PROXY))
+        : tPort<T>(tPortCreationInfo(name, this->FindParent()->sensor_input, tPortFlags::cINPUT_PROXY))
     {}
   };
   template < typename T = double >
-  struct tSensorOutput : public tPort<T>
+  struct tSensorOutput : public tPort<T>, tConveniencePort<tGroup>
   {
+    tSensorOutput()
+        : tPort<T>(this->GetPortName(), this->FindParent()->sensor_output, tPortFlags::cOUTPUT_PROXY)
+    {}
+
     tSensorOutput(const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, static_cast<tGroup*>(tStructureElementRegister::FindParent(this))->sensor_output, tPortFlags::cOUTPUT_PROXY))
+        : tPort<T>(tPortCreationInfo(name, this->FindParent()->sensor_output, tPortFlags::cOUTPUT_PROXY))
     {}
   };
 

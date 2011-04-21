@@ -113,31 +113,47 @@ protected:
 public:
 
   template < typename T = double >
-  struct tControllerInput : public tPort<T>
+  struct tControllerInput : public tPort<T>, tConveniencePort<tSenseControlModule>
   {
+    tControllerInput()
+        : tPort<T>(this->GetPortName(), this->FindParent()->controller_input, false)
+    {}
+
     tControllerInput(const finroc::util::tString &name)
-        : tPort<T>(name, static_cast<tSenseControlModule*>(tStructureElementRegister::FindParent(this))->controller_input, false)
+        : tPort<T>(name, this->FindParent()->controller_input, false)
     {}
   };
   template < typename T = double >
-  struct tControllerOutput : public tPort<T>
+  struct tControllerOutput : public tPort<T>, tConveniencePort<tSenseControlModule>
   {
+    tControllerOutput()
+        : tPort<T>(this->GetPortName(), this->FindParent()->controller_output, true)
+    {}
+
     tControllerOutput(const finroc::util::tString &name)
-        : tPort<T>(name, static_cast<tSenseControlModule*>(tStructureElementRegister::FindParent(this))->controller_output, true)
+        : tPort<T>(name, this->FindParent()->controller_output, true)
     {}
   };
   template < typename T = double >
-  struct tSensorInput : public tPort<T>
+  struct tSensorInput : public tPort<T>, tConveniencePort<tSenseControlModule>
   {
+    tSensorInput()
+        : tPort<T>(this->GetPortName(), this->FindParent()->sensor_input, false)
+    {}
+
     tSensorInput(const finroc::util::tString &name)
-        : tPort<T>(name, static_cast<tSenseControlModule*>(tStructureElementRegister::FindParent(this))->sensor_input, false)
+        : tPort<T>(name, this->FindParent()->sensor_input, false)
     {}
   };
   template < typename T = double >
-  struct tSensorOutput : public tPort<T>
+  struct tSensorOutput : public tPort<T>, tConveniencePort<tSenseControlModule>
   {
+    tSensorOutput()
+        : tPort<T>(this->GetPortName(), this->FindParent()->sensor_output, true)
+    {}
+
     tSensorOutput(const finroc::util::tString &name)
-        : tPort<T>(name, static_cast<tSenseControlModule*>(tStructureElementRegister::FindParent(this))->sensor_output, true)
+        : tPort<T>(name, this->FindParent()->sensor_output, true)
     {}
   };
 

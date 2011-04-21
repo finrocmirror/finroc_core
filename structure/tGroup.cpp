@@ -75,9 +75,10 @@ tGroup::tGroup(tFrameworkElement *parent, const util::tString &name, const util:
     controller_output(new tEdgeAggregator(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA)),
 
     sensor_input(new tEdgeAggregator(this, "Sensor Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
-    sensor_output(new tEdgeAggregator(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA))
+    sensor_output(new tEdgeAggregator(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
+    auto_name_port_count(0)
 {
-  tStructureElementRegister::GetRegister().push_back(this);
+  tStructureElementRegister::AddModule(this);
 }
 
 ////----------------------------------------------------------------------
