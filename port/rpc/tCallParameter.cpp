@@ -59,6 +59,7 @@ void tCallParameter::Deserialize(tCoreInput& is)
 void tCallParameter::Recycle()
 {
   value.reset();
+  type = cNULLPARAM;
 }
 
 void tCallParameter::Serialize(tCoreOutput& oos) const

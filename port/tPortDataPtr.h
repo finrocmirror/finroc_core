@@ -172,9 +172,9 @@ public:
   tPortDataPtr& operator=(tPortDataPtr < typename boost::enable_if_c < !boost::is_same<T, G>::value, G >::type > && o)
   {
     rrlib::serialization::tGenericObject* go = o.data;
-    data = go->GetData<T>();
+    data = (go == NULL) ? NULL : go->GetData<T>();
     o.data = NULL;
-    manager = static_cast<tManager*>(o.manager);
+    manager = (o.manager == NULL) ? NULL : static_cast<tManager*>(o.manager);
     o.manager = NULL;
     std::swap(mode, o.mode);
     return *this;
