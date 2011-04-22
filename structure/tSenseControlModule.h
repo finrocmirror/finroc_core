@@ -121,7 +121,9 @@ public:
 
     tControllerInput(const finroc::util::tString &name)
         : tPort<T>(name, this->FindParent()->controller_input, false)
-    {}
+    {
+      this->UpdateCurrentPortNameIndex();
+    }
   };
   template < typename T = double >
   struct tControllerOutput : public tPort<T>, tConveniencePort<tSenseControlModule>
@@ -132,7 +134,9 @@ public:
 
     tControllerOutput(const finroc::util::tString &name)
         : tPort<T>(name, this->FindParent()->controller_output, true)
-    {}
+    {
+      this->UpdateCurrentPortNameIndex();
+    }
   };
   template < typename T = double >
   struct tSensorInput : public tPort<T>, tConveniencePort<tSenseControlModule>
@@ -143,7 +147,9 @@ public:
 
     tSensorInput(const finroc::util::tString &name)
         : tPort<T>(name, this->FindParent()->sensor_input, false)
-    {}
+    {
+      this->UpdateCurrentPortNameIndex();
+    }
   };
   template < typename T = double >
   struct tSensorOutput : public tPort<T>, tConveniencePort<tSenseControlModule>
@@ -154,7 +160,9 @@ public:
 
     tSensorOutput(const finroc::util::tString &name)
         : tPort<T>(name, this->FindParent()->sensor_output, true)
-    {}
+    {
+      this->UpdateCurrentPortNameIndex();
+    }
   };
 
   tSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);

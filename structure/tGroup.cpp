@@ -76,7 +76,8 @@ tGroup::tGroup(tFrameworkElement *parent, const util::tString &name, const util:
 
     sensor_input(new tEdgeAggregator(this, "Sensor Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
     sensor_output(new tEdgeAggregator(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA)),
-    auto_name_port_count(0)
+    auto_name_port_count(0),
+    count_for_type(NULL)
 {
   tStructureElementRegister::AddModule(this);
 }

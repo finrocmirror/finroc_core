@@ -108,7 +108,7 @@ public:
     tInput(const finroc::util::tString &name)
         : tPort<T>(name, this->FindParent()->input, false)
     {
-
+      this->UpdateCurrentPortNameIndex();
     }
   };
 
@@ -121,7 +121,9 @@ public:
 
     tOutput(const finroc::util::tString &name)
         : tPort<T>(name, this->FindParent()->output, true)
-    {}
+    {
+      this->UpdateCurrentPortNameIndex();
+    }
   };
 
   tModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);

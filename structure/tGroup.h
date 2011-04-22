@@ -90,6 +90,9 @@ class tGroup : public tFinstructableGroup
   /*! Number of ports already created that have auto-generated names */
   int auto_name_port_count;
 
+  /*! Counter should be reset for every module class in type hierarchy. This helper variable is used to detect this. */
+  const char* count_for_type;
+
 //----------------------------------------------------------------------
 // Public methods
 //----------------------------------------------------------------------
@@ -104,7 +107,9 @@ public:
 
     tControllerInput(const finroc::util::tString &name)
         : tPort<T>(tPortCreationInfo(name, this->FindParent()->controller_input, tPortFlags::cINPUT_PROXY))
-    {}
+    {
+      this->UpdateCurrentPortNameIndex();
+    }
   };
   template < typename T = double >
   struct tControllerOutput : public tPort<T>, tConveniencePort<tGroup>
@@ -115,7 +120,9 @@ public:
 
     tControllerOutput(const finroc::util::tString &name)
         : tPort<T>(tPortCreationInfo(name, this->FindParent()->controller_output, tPortFlags::cOUTPUT_PROXY))
-    {}
+    {
+      this->UpdateCurrentPortNameIndex();
+    }
   };
   template < typename T = double >
   struct tSensorInput : public tPort<T>, tConveniencePort<tGroup>
@@ -126,7 +133,9 @@ public:
 
     tSensorInput(const finroc::util::tString &name)
         : tPort<T>(tPortCreationInfo(name, this->FindParent()->sensor_input, tPortFlags::cINPUT_PROXY))
-    {}
+    {
+      this->UpdateCurrentPortNameIndex();
+    }
   };
   template < typename T = double >
   struct tSensorOutput : public tPort<T>, tConveniencePort<tGroup>
@@ -137,7 +146,9 @@ public:
 
     tSensorOutput(const finroc::util::tString &name)
         : tPort<T>(tPortCreationInfo(name, this->FindParent()->sensor_output, tPortFlags::cOUTPUT_PROXY))
-    {}
+    {
+      this->UpdateCurrentPortNameIndex();
+    }
   };
 
   tGroup(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name, const finroc::util::tString &structure_config_file);

@@ -88,6 +88,9 @@ class tModuleBase : public finroc::core::tFrameworkElement, finroc::core::tPortL
   /*! Number of ports already created that have auto-generated names */
   int auto_name_port_count;
 
+  /*! Counter should be reset for every module class in type hierarchy. This helper variable is used to detect this. */
+  const char* count_for_type;
+
 protected:
 
   /*! Called whenever parameters have changed */
@@ -116,12 +119,14 @@ public:
         : finroc::core::tParameter<T>(description, this->FindParent()->parameters, config_entry)
     {
       this->AddPortListener(this->FindParent());
+      this->UpdateCurrentPortNameIndex();
     }
 
     tParameter(const util::tString& description, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "")
         : finroc::core::tParameter<T>(description, this->FindParent()->parameters, default_value, unit, config_entry)
     {
       this->AddPortListener(this->FindParent());
+      this->UpdateCurrentPortNameIndex();
     }
 
     template < typename Q = T >
@@ -129,18 +134,21 @@ public:
         : finroc::core::tParameter<T>(description, this->FindParent()->parameters, default_value, b, unit, config_entry)
     {
       this->AddPortListener(this->FindParent());
+      this->UpdateCurrentPortNameIndex();
     }
 
     tParameter(const char* description, const util::tString& config_entry = "")
         : finroc::core::tParameter<T>(description, this->FindParent()->parameters, config_entry)
     {
       this->AddPortListener(this->FindParent());
+      this->UpdateCurrentPortNameIndex();
     }
 
     tParameter(const char* description, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "")
         : finroc::core::tParameter<T>(description, this->FindParent()->parameters, default_value, unit, config_entry)
     {
       this->AddPortListener(this->FindParent());
+      this->UpdateCurrentPortNameIndex();
     }
 
     template < typename Q = T >
@@ -148,6 +156,7 @@ public:
         : finroc::core::tParameter<T>(description, this->FindParent()->parameters, default_value, b, unit, config_entry)
     {
       this->AddPortListener(this->FindParent());
+      this->UpdateCurrentPortNameIndex();
     }
 
     tParameter(const util::tString& config_entry = "")

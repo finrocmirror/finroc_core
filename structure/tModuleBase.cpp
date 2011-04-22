@@ -66,7 +66,8 @@ tModuleBase::tModuleBase(tFrameworkElement *parent, const util::tString &name)
     : tFrameworkElement(parent, name),
     parameters(new tFrameworkElement(this, "Parameters")),
     parameters_changed(true),
-    auto_name_port_count(0)
+    auto_name_port_count(0),
+    count_for_type(NULL)
 {
   tStructureElementRegister::AddModule(this);
 }
