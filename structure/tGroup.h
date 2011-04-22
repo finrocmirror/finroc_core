@@ -102,7 +102,7 @@ public:
   struct tControllerInput : public tPort<T>, tConveniencePort<tGroup>
   {
     tControllerInput()
-        : tPort<T>(this->GetPortName(), this->FindParent()->controller_input, tPortFlags::cINPUT_PROXY)
+        : tPort<T>(tPortCreationInfo(this->GetPortName(), this->FindParent()->controller_input, tPortFlags::cINPUT_PROXY))
     {}
 
     tControllerInput(const finroc::util::tString &name)
@@ -115,7 +115,7 @@ public:
   struct tControllerOutput : public tPort<T>, tConveniencePort<tGroup>
   {
     tControllerOutput()
-        : tPort<T>(this->GetPortName(), this->FindParent()->controller_output, tPortFlags::cOUTPUT_PROXY)
+        : tPort<T>(tPortCreationInfo(this->GetPortName(), this->FindParent()->controller_output, tPortFlags::cOUTPUT_PROXY))
     {}
 
     tControllerOutput(const finroc::util::tString &name)
@@ -128,7 +128,7 @@ public:
   struct tSensorInput : public tPort<T>, tConveniencePort<tGroup>
   {
     tSensorInput()
-        : tPort<T>(this->GetPortName(), this->FindParent()->sensor_input, tPortFlags::cINPUT_PROXY)
+        : tPort<T>(tPortCreationInfo(this->GetPortName(), this->FindParent()->sensor_input, tPortFlags::cINPUT_PROXY))
     {}
 
     tSensorInput(const finroc::util::tString &name)
@@ -141,7 +141,7 @@ public:
   struct tSensorOutput : public tPort<T>, tConveniencePort<tGroup>
   {
     tSensorOutput()
-        : tPort<T>(this->GetPortName(), this->FindParent()->sensor_output, tPortFlags::cOUTPUT_PROXY)
+        : tPort<T>(tPortCreationInfo(this->GetPortName(), this->FindParent()->sensor_output, tPortFlags::cOUTPUT_PROXY))
     {}
 
     tSensorOutput(const finroc::util::tString &name)
