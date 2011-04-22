@@ -47,6 +47,7 @@ void tCoreOutput::WriteObject(const rrlib::serialization::tGenericObject* to)
   if (to == NULL)
   {
     WriteShort(-1);  // -1 means null
+    return;
   }
 
   //writeSkipOffsetPlaceholder();

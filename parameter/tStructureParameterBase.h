@@ -181,7 +181,7 @@ public:
    */
   inline rrlib::serialization::tGenericObject* ValPointer() const
   {
-    return value != NULL ? value->GetObject() : cc_value->GetObject();
+    return value != NULL ? value->GetObject() : (cc_value != NULL ? cc_value->GetObject() : NULL);
   }
 
 };
