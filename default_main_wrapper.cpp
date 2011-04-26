@@ -46,6 +46,7 @@ extern "C"
 
 #include "core/tRuntimeEnvironment.h"
 #include "plugins/tcp/tTCPServer.h"
+#include "plugins/tcp/tTCPPeer.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -119,8 +120,10 @@ int main(int argc, char **argv)
   rrlib::getopt::ProcessCommandLine(argc, argv);
 
   finroc::core::tRuntimeEnvironment *runtime_environment = finroc::core::tRuntimeEnvironment::GetInstance();
-  finroc::tcp::tTCPServer *server = new finroc::tcp::tTCPServer(4444, true, NULL);
-  server->Init();
+  //finroc::tcp::tTCPServer *server = new finroc::tcp::tTCPServer(4444, true, NULL);
+  //server->Init();
+  finroc::tcp::tTCPPeer* tcp_peer = new finroc::tcp::tTCPPeer(finroc::util::tStringBuilder("localhost:") + 4444, "", finroc::tcp::tTCPPeer::eFULL, 4444, finroc::tcp::tTCPPeer::cDEFAULT_FILTER, true);
+  tcp_peer->Init();
 
   finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread");
 
