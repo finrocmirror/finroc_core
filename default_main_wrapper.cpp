@@ -122,8 +122,18 @@ int main(int argc, char **argv)
   finroc::core::tRuntimeEnvironment *runtime_environment = finroc::core::tRuntimeEnvironment::GetInstance();
   //finroc::tcp::tTCPServer *server = new finroc::tcp::tTCPServer(4444, true, NULL);
   //server->Init();
+
+  // Create and connect TCP peer
   finroc::tcp::tTCPPeer* tcp_peer = new finroc::tcp::tTCPPeer(finroc::util::tStringBuilder("localhost:") + 4444, "", finroc::tcp::tTCPPeer::eFULL, 4444, finroc::tcp::tTCPPeer::cDEFAULT_FILTER, true);
   tcp_peer->Init();
+  try
+  {
+    tcp_peer->Connect();
+  }
+  catch (const finroc::util::tException& e1)
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING) << "Error connecting Peer" << e1;
+  }
 
   finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread");
 
