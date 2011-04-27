@@ -41,14 +41,14 @@ tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString&
 }
 
 tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString& description, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link) :
-    tEdgeAggregator(parent, description, ComputePortFlags(data_class, port_dir, shared, unique_link)),
+    tEdgeAggregator(parent, description, ComputeFlags(data_class, shared, unique_link)),
     ports(new tStructureParameter<tPortCreationList>("Ports", tPortCreationList::cTYPE))
 {
   AddAnnotation(new tStructureParameterList(ports));
-  ports->GetValue()->InitialSetup(this, 0, port_dir == eBOTH);
+  ports->GetValue()->InitialSetup(this, ComputePortFlags(port_dir, shared, unique_link), port_dir == eBOTH);
 }
 
-int tGroupInterface::ComputePortFlags(tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link)
+int tGroupInterface::ComputeFlags(tGroupInterface::tDataClassification data_class, bool shared, bool unique_link)
 {
   int flags = ::finroc::core::tEdgeAggregator::cIS_INTERFACE;
   if (data_class == eSENSOR_DATA)
@@ -59,6 +59,20 @@ int tGroupInterface::ComputePortFlags(tGroupInterface::tDataClassification data_
   {
     flags |= ::finroc::core::tEdgeAggregator::cCONTROLLER_DATA;
   }
+  if (shared)
+  {
+    flags |= tCoreFlags::cSHARED;
+  }
+  if (unique_link)
+  {
+    flags |= tCoreFlags::cGLOBALLY_UNIQUE_LINK;
+  }
+  return flags;
+}
+
+int tGroupInterface::ComputePortFlags(tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link)
+{
+  int flags = 0;
   if (shared)
   {
     flags |= tCoreFlags::cSHARED;
