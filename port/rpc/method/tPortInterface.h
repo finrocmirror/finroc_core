@@ -64,6 +64,19 @@ public:
   void AddMethod(tAbstractMethod* m);
 
   /*!
+   * Reset/clear interface. This deletes all methods from interface
+   * and allows adding methods to this interface in a custom order.
+   * (using addMethod())
+   *
+   * This can be necessary when using methods in a template class, because
+   * instantiation order of static method objects seems to be undefined.
+   */
+  inline void Clear()
+  {
+    methods.Clear();
+  }
+
+  /*!
    * \param method Method
    * \return Does port interface contain method?
    */
