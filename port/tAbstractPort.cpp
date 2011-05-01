@@ -273,7 +273,7 @@ tNetPort* tAbstractPort::FindNetPort(util::tObject* belongs_to) const
     if (port != NULL && port->GetFlag(tCoreFlags::cNETWORK_ELEMENT))
     {
       tNetPort* np = port->AsNetPort();
-      if (np->GetBelongsTo() == belongs_to)
+      if (np != NULL && np->GetBelongsTo() == belongs_to)
       {
         return np;
       }
