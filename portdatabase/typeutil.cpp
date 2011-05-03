@@ -30,6 +30,8 @@
 #ifdef _LIB_RRLIB_MATH_PRESENT_
 #include "rrlib/math/tPose3D.h"
 #include "rrlib/math/tPose2D.h"
+#include "rrlib/math/tVector.h"
+
 #endif
 
 namespace finroc
@@ -55,6 +57,22 @@ void InitCCTypes()
 #ifdef _LIB_RRLIB_MATH_PRESENT_
   InitCCType<rrlib::math::tPose3D>();
   InitCCType<rrlib::math::tPose2D>();
+  InitCCType<rrlib::math::tVector<2, double, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<3, double, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<6, double, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<2, float, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<3, float, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<6, float, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<2, int, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<3, int, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<6, int, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<2, unsigned int, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<3, unsigned int, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<6, unsigned int, rrlib::math::vector::Cartesian> >();
+  InitCCType<rrlib::math::tVector<2, double, rrlib::math::vector::Polar> >();
+  InitCCType<rrlib::math::tVector<3, double, rrlib::math::vector::Polar> >();
+  InitCCType<rrlib::math::tVector<2, float, rrlib::math::vector::Polar> >();
+  InitCCType<rrlib::math::tVector<3, float, rrlib::math::vector::Polar> >();
 #endif
 
 }

@@ -38,6 +38,7 @@ namespace math
 {
 class tPose3D;
 class tPose2D;
+template <size_t, typename, template<size_t, typename> class> class tVector;
 }
 namespace util
 {
@@ -79,6 +80,12 @@ struct tIsCCTypeBase<B, rrlib::math::tPose3D>
 
 template <bool B>
 struct tIsCCTypeBase<B, rrlib::math::tPose2D>
+{
+  enum { value = true };
+};
+
+template <bool B, size_t Tdimension, typename TElement, template<size_t, typename> class TData>
+struct tIsCCTypeBase<B, rrlib::math::tVector<Tdimension, TElement, TData> >
 {
   enum { value = true };
 };
