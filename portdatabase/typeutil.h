@@ -160,14 +160,14 @@ inline static bool GetTransactionType(void* x)
 }
 
 // Helper method to apply generic change to object
-template <typename C>
-inline static void ApplyChange(rrlib::serialization::tGenericChangeable<C>& obj, const C& transaction, int64_t param1, int64_t param2)
+template <typename T, typename C>
+inline static void ApplyChange(T& obj, const C& transaction, int64_t param1, typename boost::enable_if<boost::is_base_of<rrlib::serialization::tGenericChangeable<C>, T>, int64_t>::type param2)
 {
   obj.ApplyChange(transaction, param1, param2);
 }
 
 template <typename T>
-inline static void ApplyChange(T& obj, const T& transaction, int64_t param1, int64_t param2)
+inline static void ApplyChange(T& obj, const T& transaction, int64_t param1, typename boost::disable_if<boost::is_base_of<rrlib::serialization::tGenericChangeable<T>, T>, int64_t>::type param2)
 {
   //obj = transaction;
   rrlib::serialization::sSerialization::DeepCopy(transaction, obj, NULL);
