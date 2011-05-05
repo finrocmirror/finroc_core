@@ -316,7 +316,7 @@ void tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
     pc = tSynchMethodCallLogic::PerformSynchCall(pc, this, cPULL_TIMEOUT);
     if (pc->HasException())
     {
-      GetRaw(result_buffer);
+      GetRaw(result_buffer->GetObject(), true);
     }
     else
     {
@@ -330,7 +330,7 @@ void tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
   }
   catch (const tMethodCallException& e)
   {
-    GetRaw(result_buffer);
+    GetRaw(result_buffer->GetObject(), true);
   }
 }
 
@@ -421,7 +421,7 @@ const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, in
     if (pc->HasException())
     {
       // return local port data
-      tPortDataManager* pd = GetLockedUnsafeRaw();
+      tPortDataManager* pd = LockCurrentValueForRead();
       pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - 1)));  // we already have one lock
       pc->Recycle();
       return pd;
@@ -440,7 +440,7 @@ const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, in
   catch (const tMethodCallException& e)
   {
     // return local port data
-    tPortDataManager* pd = GetLockedUnsafeRaw();
+    tPortDataManager* pd = LockCurrentValueForRead();
     pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - 1)));  // we already have one lock
     pc->Recycle();
     return pd;

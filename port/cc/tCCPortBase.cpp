@@ -171,9 +171,9 @@ tCCPortDataManager* tCCPortBase::GetPullInInterthreadContainerRaw(bool intermedi
   return ret;
 }
 
-void tCCPortBase::GetRaw(rrlib::serialization::tGenericObject* buffer)
+void tCCPortBase::GetRaw(rrlib::serialization::tGenericObject* buffer, bool dont_pull)
 {
-  if (PushStrategy())
+  if (PushStrategy() || dont_pull)
   {
     for (; ;)
     {

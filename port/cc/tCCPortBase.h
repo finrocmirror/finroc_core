@@ -529,8 +529,20 @@ public:
    * Copy current value to buffer (Most efficient get()-version)
    *
    * \param buffer Buffer to copy current data to
+   * \param dont_pull Do not attempt to pull data - even if port is on push strategy
    */
-  void GetRaw(rrlib::serialization::tGenericObject* buffer);
+  inline void GetRaw(rrlib::serialization::tGenericObject* buffer)
+  {
+    GetRaw(buffer, false);
+  }
+
+  /*!
+   * Copy current value to buffer (Most efficient get()-version)
+   *
+   * \param buffer Buffer to copy current data to
+   * \param dont_pull Do not attempt to pull data - even if port is on push strategy
+   */
+  void GetRaw(rrlib::serialization::tGenericObject* buffer, bool dont_pull);
 
   /*!
    * Copy current value to buffer (Most efficient get()-version)
