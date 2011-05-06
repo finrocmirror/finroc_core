@@ -29,7 +29,6 @@
 #include <boost/type_traits/is_floating_point.hpp>
 #include <boost/type_traits/is_enum.hpp>
 #include "core/portdatabase/tCCType.h"
-#include "rrlib/serialization/tGenericChangeable.h"
 #include "rrlib/serialization/deepcopy.h"
 
 namespace rrlib
@@ -113,6 +112,12 @@ struct tUseCCType
   enum { value = tIsCCType<T>::value || boost::is_integral<T>::value || boost::is_floating_point<T>::value || boost::is_enum<T>::value };
 };
 
+template <typename Q, typename C>
+inline C* GenericChangeTypeHelper(void (Q::*tFunc)(const C& t, int64_t i1, int64_t i2))
+{
+  return NULL;
+}
+
 /*!
  * This struct is used to determine the transaction-based change class for a type
  */
@@ -120,13 +125,13 @@ template <typename T>
 struct tGenericChangeType
 {
 
-  template<typename C>
-  static C* Change(rrlib::serialization::tGenericChangeable<C>* tc)
+  template < typename Q = T >
+  static decltype(GenericChangeTypeHelper(&Q::ApplyChange)) Change(Q* tc/*, decltype(HelperBasic(&Q::ApplyChange)) = NULL*/)
   {
     return NULL;
   }
 
-  static T* Change(void* x)
+  static T* Change(...)
   {
     return NULL;
   }
@@ -161,13 +166,13 @@ inline static bool GetTransactionType(void* x)
 
 // Helper method to apply generic change to object
 template <typename T, typename C>
-inline static void ApplyChange(T& obj, const C& transaction, int64_t param1, typename boost::enable_if<boost::is_base_of<rrlib::serialization::tGenericChangeable<C>, T>, int64_t>::type param2)
+inline static void ApplyChange(T& obj, const C& transaction, int64_t param1, int64_t param2, decltype(((T*)NULL)->ApplyChange(*((C*)NULL), 0, 0))* = NULL)
 {
   obj.ApplyChange(transaction, param1, param2);
 }
 
 template <typename T>
-inline static void ApplyChange(T& obj, const T& transaction, int64_t param1, typename boost::disable_if<boost::is_base_of<rrlib::serialization::tGenericChangeable<T>, T>, int64_t>::type param2)
+inline static void ApplyChange(T& obj, const T& transaction, ...)
 {
   //obj = transaction;
   rrlib::serialization::sSerialization::DeepCopy(transaction, obj, NULL);
