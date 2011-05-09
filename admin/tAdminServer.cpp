@@ -264,7 +264,7 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortD
   tConstructorParameters* params = NULL;
   if (method == &(cSET_ANNOTATION))
   {
-    assert((name == NULL));
+    assert(!name);
     ::finroc::core::tFrameworkElement* elem = tRuntimeEnvironment::GetInstance()->GetElement(cma_index);
     if (elem == NULL || (!elem->IsReady()))
     {

@@ -117,7 +117,7 @@ R tPort4Method<HANDLER, R, P1, P2, P3, P4>::Call(tInterfaceClientPort port, tP1A
 }
 
 template<typename HANDLER, typename R, typename P1, typename P2, typename P3, typename P4>
-void tPort4Method<HANDLER, R, P1, P2, P3, P4>::CallAsync(const tInterfaceClientPort* port, tAsyncReturnHandler<R>* handler, tP1Arg p1, tP2Arg p2, tP3Arg p3, tP4Arg p4, int net_timeout, bool force_same_thread)
+void tPort4Method<HANDLER, R, P1, P2, P3, P4>::CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, tP1Arg p1, tP2Arg p2, tP3Arg p3, tP4Arg p4, int net_timeout, bool force_same_thread)
 {
   //1
   assert((HasLock(p1)));  //2
@@ -125,7 +125,7 @@ void tPort4Method<HANDLER, R, P1, P2, P3, P4>::CallAsync(const tInterfaceClientP
   assert((HasLock(p3)));  //4
   assert((HasLock(p4)));
   //n
-  tInterfacePort* ip = port->GetServer();
+  tInterfacePort* ip = port.GetServer();
   if (ip != NULL && ip->GetType() == tInterfacePort::eNetwork)
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
@@ -135,7 +135,7 @@ void tPort4Method<HANDLER, R, P1, P2, P3, P4>::CallAsync(const tInterfaceClientP
     mc->AddParam(2, p3);  //4
     mc->AddParam(3, p4);
     //n
-    mc->PrepareSyncRemoteExecution(this, port->GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
+    mc->PrepareSyncRemoteExecution(this, port.GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
     tRPCThreadPool::GetInstance()->ExecuteTask(mc);
   }
   else if (ip != NULL && ip->GetType() == tInterfacePort::eServer)
@@ -173,7 +173,7 @@ void tPort4Method<HANDLER, R, P1, P2, P3, P4>::CallAsync(const tInterfaceClientP
       mc->AddParam(2, p3);  //4
       mc->AddParam(3, p4);
       //n
-      mc->PrepareExecution(this, port->GetDataType(), mhandler, handler);
+      mc->PrepareExecution(this, port.GetDataType(), mhandler, handler);
       tRPCThreadPool::GetInstance()->ExecuteTask(mc);
     }
   }

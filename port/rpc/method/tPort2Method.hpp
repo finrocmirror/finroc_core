@@ -106,19 +106,19 @@ R tPort2Method<HANDLER, R, P1, P2>::Call(tInterfaceClientPort port, tP1Arg p1, t
 }
 
 template<typename HANDLER, typename R, typename P1, typename P2>
-void tPort2Method<HANDLER, R, P1, P2>::CallAsync(const tInterfaceClientPort* port, tAsyncReturnHandler<R>* handler, tP1Arg p1, tP2Arg p2, int net_timeout, bool force_same_thread)
+void tPort2Method<HANDLER, R, P1, P2>::CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, tP1Arg p1, tP2Arg p2, int net_timeout, bool force_same_thread)
 {
   //1
   assert((HasLock(p1)));  //2
   assert((HasLock(p2)));
-  tInterfacePort* ip = port->GetServer();
+  tInterfacePort* ip = port.GetServer();
   if (ip != NULL && ip->GetType() == tInterfacePort::eNetwork)
   {
     tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
     //1
     mc->AddParam(0, p1);  //2
     mc->AddParam(1, p2);
-    mc->PrepareSyncRemoteExecution(this, port->GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
+    mc->PrepareSyncRemoteExecution(this, port.GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
     tRPCThreadPool::GetInstance()->ExecuteTask(mc);
   }
   else if (ip != NULL && ip->GetType() == tInterfacePort::eServer)
@@ -150,7 +150,7 @@ void tPort2Method<HANDLER, R, P1, P2>::CallAsync(const tInterfaceClientPort* por
       //1
       mc->AddParam(0, p1);  //2
       mc->AddParam(1, p2);
-      mc->PrepareExecution(this, port->GetDataType(), mhandler, handler);
+      mc->PrepareExecution(this, port.GetDataType(), mhandler, handler);
       tRPCThreadPool::GetInstance()->ExecuteTask(mc);
     }
   }

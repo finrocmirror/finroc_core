@@ -90,7 +90,7 @@ public:
    * \param net_timout Network timeout in ms (value <= 0 means method default)
    * \param force_same_thread Force that method call is performed by this thread on local machine (even if method call default is something else)
    */
-  void CallAsync(const tInterfaceClientPort* port, tAsyncReturnHandler<R>* handler, tP1Arg p1, tP2Arg p2, tP3Arg p3, tP4Arg p4, int net_timeout = -1, bool force_same_thread = false);
+  void CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, tP1Arg p1, tP2Arg p2, tP3Arg p3, tP4Arg p4, int net_timeout = -1, bool force_same_thread = false);
 
   virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall* mc, tInterfaceNetPort* net_port, tAbstractAsyncReturnHandler* ret_handler, int net_timeout);
 

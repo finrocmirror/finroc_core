@@ -83,7 +83,7 @@ public:
   virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
   {
     assert(typeid(*value).name() == typeid(tPortDataManager).name());
-    tPortDataManager* mgr = static_cast<tPortDataManager*>(value);
+    tPortDataManager* mgr = const_cast<tPortDataManager*>(static_cast<const tPortDataManager*>(value));
     mgr->AddLock();
     PortChanged(origin, tPortDataPtr<const T>(mgr));
   }
