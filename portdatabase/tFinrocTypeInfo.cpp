@@ -27,7 +27,6 @@ namespace finroc
 {
 namespace core
 {
-util::tAtomicInt tFinrocTypeInfo::last_cc_index;
 const int tFinrocTypeInfo::cMAX_TYPES;
 const int tFinrocTypeInfo::cMAX_CCTYPES;
 
@@ -63,6 +62,7 @@ tFinrocTypeInfo* tFinrocTypeInfo::InfoArray()
 
 void tFinrocTypeInfo::Init(tFinrocTypeInfo::tType type_)
 {
+  static util::tAtomicInt last_cc_index(0);
   if (this->type != eSTD)
   {
     return;

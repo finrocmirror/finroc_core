@@ -68,11 +68,6 @@ private:
 
 public:
 
-  // static stuff
-
-  /*! CC Type counter */
-  static util::tAtomicInt last_cc_index;
-
   /*! Maximum number of types */
   static const int cMAX_TYPES = 2000;
 
