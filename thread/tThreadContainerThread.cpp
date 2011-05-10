@@ -41,7 +41,8 @@ void tThreadContainerThread::MainLoopCallback()
       tasks.Clear();
       non_sensor_tasks.Clear();
       schedule.Clear();
-      filter.TraverseElementTree(this->thread_container, this, NULL, tmp);
+
+      filter.TraverseElementTree(this->thread_container, this, false, tmp);
       tasks.AddAll(non_sensor_tasks);
 
       // create task graph

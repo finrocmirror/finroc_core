@@ -68,7 +68,7 @@ public:
   {
   private:
 
-    ::tbb::atomic<short> wrapped; // one less than actual number of references. So -1 when actually no locks.
+    std::atomic<short> wrapped; // one less than actual number of references. So -1 when actually no locks.
 
     /*! Get pointer to manager */
     inline tPortDataManager* GetManager();
@@ -205,7 +205,7 @@ public:
     {
       assert((!GetManager()->unused));
 
-      __TBB_machine_fetchadd1(this, count); // mean trick... won't make negative value positive *g* - CPU should not like this, but it's reasonably fast actually
+      std::atomic_fetch_add((std::atomic<int8_t>*)this, count); // mean trick... won't make negative value positive *g* - CPU should not like this, but it's reasonably fast actually
       return wrapped >= 0;
 
     }
@@ -419,7 +419,7 @@ void tPortDataManager::tRefCounter::ReleaseLocks(int8 count)
 {
   assert((!GetManager()->unused));
 
-  short new_val = wrapped.fetch_and_add(-count) - count;
+  short new_val = wrapped.fetch_add(-count) - count;
   if (new_val < 0)
   {
     GetManager()->DangerousDirectRecycle();

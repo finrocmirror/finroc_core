@@ -132,12 +132,12 @@ public:
   {}
 
   // Standard constructor
-  tPortDataPtr(tManager* manager_, tMode mode_ = eNORMAL) : data(GetData(manager_)), manager(manager_), mode(mode_)
+  explicit tPortDataPtr(tManager* manager_, tMode mode_ = eNORMAL) : data(GetData(manager_)), manager(manager_), mode(mode_)
   {}
 
   // Standard constructor
   template < typename Q = tManagerTL >
-  tPortDataPtr(typename boost::enable_if_c<typeutil::tUseCCType<T>::value, Q*>::type manager_) : data(GetData(manager)), manager_tl(manager_), mode(eUNUSED)
+  explicit tPortDataPtr(typename boost::enable_if_c<typeutil::tUseCCType<T>::value, Q*>::type manager_) : data(GetData(manager)), manager_tl(manager_), mode(eUNUSED)
   {}
 
   // Move constructor
@@ -242,9 +242,9 @@ public:
     return Get();
   }
 
-  operator bool() const
+  operator const void*() const
   {
-    return data == 0 ? false : true;
+    return data;
   }
 
   operator const tPortDataPtr<const T>&() const
@@ -297,7 +297,7 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
   {}
 
   // Standard constructor
-  tPortDataPtr(tManager* manager_) : data(manager_ == NULL ? NULL : manager_->GetObject()), manager(manager_), mode(eNORMAL)
+  explicit tPortDataPtr(tManager* manager_) : data(manager_ == NULL ? NULL : manager_->GetObject()), manager(manager_), mode(eNORMAL)
   {}
 
   // Move constructor
@@ -386,9 +386,9 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
     return Get();
   }
 
-  operator bool() const
+  operator const void*() const
   {
-    return data == 0 ? false : true;
+    return data;
   }
 
   /*!
