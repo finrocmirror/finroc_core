@@ -283,9 +283,7 @@ void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataManagerTL* read_object, int
     cur_data->ReleaseLock();   // unlock value that we just locked for comparison
     if (equal)
     {
-      // laborious version of recycle
-      read_object->SetRefCounter(1);
-      read_object->ReleaseLock();
+      read_object->RecycleUnused();
       return;
     }
   }

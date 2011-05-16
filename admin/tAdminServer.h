@@ -35,6 +35,7 @@
 #include "core/port/rpc/method/tPort2Method.h"
 #include "core/port/rpc/method/tVoid0Method.h"
 #include "core/port/rpc/method/tPort1Method.h"
+#include "core/port/rpc/method/tPort3Method.h"
 #include "core/portdatabase/tRPCInterfaceType.h"
 #include "rrlib/serialization/tMemoryBuffer.h"
 #include "core/port/rpc/tInterfaceServerPort.h"
@@ -97,6 +98,9 @@ public:
   /*! Is framework element with specified handle currently executing? */
   static tPort1Method<tAdminServer*, int, int> cIS_RUNNING;
 
+  /*! Get current port value as string */
+  static tPort3Method<tAdminServer*, tPortDataPtr<tCoreString>, int, int, int > cGET_PORT_VALUE_AS_STRING;
+
   /*! Data Type of method calls to this port */
   static tRPCInterfaceType cDATA_TYPE;
 
@@ -126,9 +130,11 @@ public:
 
   int HandleCall(const tAbstractMethod* method, int handle);
 
+  tPortDataPtr<tCoreString> HandleCall(const tAbstractMethod* method, int p1, int p2, int p3);
+
   void HandleVoidCall(const tAbstractMethod* method, int p1, int p2);
 
-  void HandleVoidCall(tAbstractMethod* method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int dummy);
+  void HandleVoidCall(tAbstractMethod* method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int as_string);
 
   void HandleVoidCall(tAbstractMethod* method, int cma_index, tPortDataPtr<tCoreString>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer);
 

@@ -197,6 +197,15 @@ public:
   void PostThreadReleaseLock();
 
   /*!
+   * Recycle unused buffer
+   */
+  inline void RecycleUnused()
+  {
+    SetRefCounter(1);
+    ReleaseLock();
+  }
+
+  /*!
    * (May only be called by owner thread)
    * Remove read lock
    */

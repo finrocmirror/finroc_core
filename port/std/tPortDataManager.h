@@ -384,6 +384,15 @@ public:
   }
 
   /*!
+   * Recycle unused buffer
+   */
+  inline void RecycleUnused()
+  {
+    GetCurrentRefCounter()->SetOrAddLock();
+    ReleaseLock();
+  }
+
+  /*!
    * Release read lock
    */
   inline void ReleaseLock()

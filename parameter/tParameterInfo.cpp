@@ -80,8 +80,7 @@ void tParameterInfo::LoadValue(bool ignore_ready)
           }
           catch (const util::tException& e)
           {
-            c->SetRefCounter(1);
-            c->ReleaseLock();
+            c->RecycleUnused();
           }
         }
         else if (tFinrocTypeInfo::IsStdType(ann->GetDataType()))
@@ -95,8 +94,7 @@ void tParameterInfo::LoadValue(bool ignore_ready)
           }
           catch (const util::tException& e)
           {
-            pd->GetCurrentRefCounter()->SetOrAddLock();
-            pd->ReleaseLock();
+            pd->RecycleUnused();
           }
         }
         else
