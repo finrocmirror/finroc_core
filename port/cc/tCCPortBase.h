@@ -167,6 +167,7 @@ private:
     // inform listeners?
     if (cINFORM_LISTENERS)
     {
+      SetChanged(cCHANGE_CONSTANT);
       NotifyListeners(tc);
     }
 
