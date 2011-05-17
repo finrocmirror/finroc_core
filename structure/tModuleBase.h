@@ -47,6 +47,7 @@
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/structure/tConveniencePort.h"
 #include "core/structure/tStructureElementRegister.h"
+#include "core/port/tEdgeAggregator.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -95,6 +96,22 @@ protected:
 
   /*! Called whenever parameters have changed */
   virtual void ParametersChanged() {}
+
+  /*!
+   * Has any port in edge aggregator changed?
+   * (should only be called by module classes such as tModule and tSenseControlModule)
+   *
+   * \param ea Edge aggregator to check
+   */
+  bool HasAnyPortChanged(tEdgeAggregator* ea);
+
+  /*!
+   * Reset changed flags of all ports
+   * (should only be called by module classes such as tModule and tSenseControlModule)
+   *
+   * \param ea Edge aggregator containing ports to be reset
+   */
+  void ResetChangedFlags(tEdgeAggregator* ea);
 
 public:
 

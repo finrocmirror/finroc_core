@@ -45,7 +45,6 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
-#include "core/port/tEdgeAggregator.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -111,6 +110,28 @@ protected:
 // Public methods
 //----------------------------------------------------------------------
 public:
+
+  /*!
+   * May be called in Sense() method to check
+   * whether any sensor input port has changed.
+   *
+   * (Changed flags are reset after Sense() is called)
+   */
+  bool SensorInputChanged()
+  {
+    return HasAnyPortChanged(sensor_input);
+  }
+
+  /*!
+   * May be called in Control() method to check
+   * whether any controller input port has changed.
+   *
+   * (Changed flags are reset after Control() is called)
+   */
+  bool ControllerInputChanged()
+  {
+    return HasAnyPortChanged(controller_input);
+  }
 
   template < typename T = double >
   struct tControllerInput : public tPort<T>, tConveniencePort<tSenseControlModule>

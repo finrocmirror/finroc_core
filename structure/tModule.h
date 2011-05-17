@@ -45,7 +45,6 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
-#include "core/port/tEdgeAggregator.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -98,6 +97,17 @@ protected:
 //----------------------------------------------------------------------
 public:
 
+  /*!
+   * May be called in Update() method to check
+   * whether any input port has changed.
+   *
+   * (Changed flags are reset after Update() is called)
+   */
+  bool InputChanged()
+  {
+    return HasAnyPortChanged(input);
+  }
+
   template < typename T = double >
   struct tInput : public tPort<T>, tConveniencePort<tModule>
   {
@@ -127,7 +137,6 @@ public:
   };
 
   tModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
-
 };
 
 //----------------------------------------------------------------------

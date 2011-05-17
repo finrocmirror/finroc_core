@@ -105,6 +105,7 @@ void tSenseControlModule::ControlTask::ExecuteTask()
 {
   this->module->CheckParameters();
   this->module->Control();
+  this->module->ResetChangedFlags(this->module->controller_input);
 }
 
 //----------------------------------------------------------------------
@@ -121,4 +122,5 @@ void tSenseControlModule::SenseTask::ExecuteTask()
 {
   this->module->CheckParameters();
   this->module->Sense();
+  this->module->ResetChangedFlags(this->module->sensor_input);
 }

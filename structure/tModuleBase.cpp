@@ -86,3 +86,25 @@ void tModuleBase::PortChanged(tAbstractPort* origin, const void* const& value)
   parameters_changed = true;
 }
 
+bool tModuleBase::HasAnyPortChanged(tEdgeAggregator* ea)
+{
+  bool result = false;
+  tChildIterator ci(ea);
+  tAbstractPort* ap = NULL;
+  while ((ap = ci.NextPort()) != NULL)
+  {
+    result |= ap->HasChanged();
+  }
+  return result;
+}
+
+void tModuleBase::ResetChangedFlags(tEdgeAggregator* ea)
+{
+  tChildIterator ci(ea);
+  tAbstractPort* ap = NULL;
+  while ((ap = ci.NextPort()) != NULL)
+  {
+    ap->ResetChanged();
+  }
+}
+

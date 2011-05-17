@@ -94,4 +94,5 @@ void tModule::UpdateTask::ExecuteTask()
 {
   this->module->CheckParameters();
   this->module->Update();
+  this->module->ResetChangedFlags(this->module->input);
 }
