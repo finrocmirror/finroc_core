@@ -43,13 +43,19 @@
 #include "core/port/rpc/tMethodCall.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
 
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
+
 namespace finroc
 {
 namespace core
 {
 class tAbstractCall;
-class tCoreInput;
-class tCoreOutput;
 class tCCPortDataManagerTL;
 class tPortDataManager;
 
@@ -257,7 +263,7 @@ public:
    * \param ci Stream
    * \param timestamp Time stamp
    */
-  void ReceiveDataFromStream(tCoreInput* ci, int64 timestamp, int8 changed_flag);
+  void ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int64 timestamp, int8 changed_flag);
 
   virtual void SendCallReturn(tAbstractCall* mc) = 0;
 
@@ -285,7 +291,7 @@ public:
    * \param co Stream
    * \param start_time Time stamp
    */
-  void WriteDataToNetwork(tCoreOutput* co, int64 start_time);
+  void WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64 start_time);
 
 public:
 

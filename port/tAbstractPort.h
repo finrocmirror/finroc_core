@@ -32,6 +32,7 @@
 #include "core/port/tPortFlags.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/tFrameworkElement.h"
+#include "rrlib/serialization/tFactory.h"
 
 namespace rrlib
 {
@@ -48,7 +49,6 @@ namespace core
 class tLinkEdge;
 class tNetPort;
 class tPortDataManager;
-class tCoreOutput;
 
 /*!
  * \author Max Reichardt
@@ -64,7 +64,7 @@ class tCoreOutput;
  * In many cases this (non-blocking) behaviour is intended.
  * However, to avoid that, synchronize to runtime before calling.
  */
-class tAbstractPort : public tFrameworkElement
+class tAbstractPort : public tFrameworkElement, public rrlib::serialization::tFactory
 {
 protected:
 
@@ -355,6 +355,13 @@ public:
    */
   void ConnectToTarget(const util::tString& dest_link);
 
+  virtual std::shared_ptr<void> CreateBuffer(rrlib::serialization::tDataTypeBase dt)
+  {
+    return std::shared_ptr<void>(dt.CreateInstance());
+  }
+
+  virtual rrlib::serialization::tGenericObject* CreateGenericObject(rrlib::serialization::tDataTypeBase dt, void* factory_parameter);
+
   /*!
    * disconnects all edges
    */
@@ -632,7 +639,7 @@ public:
    *
    * \param co Output Stream
    */
-  void SerializeOutgoingConnections(tCoreOutput* co);
+  void SerializeOutgoingConnections(rrlib::serialization::tOutputStream& co);
 
   /*!
    * (relevant for input ports only)

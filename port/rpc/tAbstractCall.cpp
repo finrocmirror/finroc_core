@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tAbstractCall.h"
-#include "core/buffers/tCoreInput.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/serialization/tOutputStream.h"
 #include "core/datatype/tNumber.h"
 #include "core/port/rpc/tMethodCallSyncher.h"
 
@@ -48,12 +48,12 @@ tAbstractCall::tAbstractCall() :
   //callerStack = new CallStack(maxCallDepth);
 }
 
-void tAbstractCall::DeserializeImpl(tCoreInput* is, bool skip_parameters)
+void tAbstractCall::DeserializeImpl(rrlib::serialization::tInputStream& is, bool skip_parameters)
 {
-  status = is->ReadByte();
-  syncher_iD = is->ReadByte();
-  thread_uid = is->ReadInt();
-  method_call_index = is->ReadShort();
+  status = is.ReadByte();
+  syncher_iD = is.ReadByte();
+  thread_uid = is.ReadInt();
+  method_call_index = is.ReadShort();
 
   // deserialize parameters
   if (skip_parameters)
@@ -62,7 +62,7 @@ void tAbstractCall::DeserializeImpl(tCoreInput* is, bool skip_parameters)
   }
   for (size_t i = 0u; i < cMAX_PARAMS; i++)
   {
-    params[i].Deserialize(*is);
+    params[i].Deserialize(is);
   }
 }
 
@@ -98,7 +98,7 @@ void tAbstractCall::RecycleParameters()
   }
 }
 
-void tAbstractCall::Serialize(tCoreOutput& oos) const
+void tAbstractCall::Serialize(rrlib::serialization::tOutputStream& oos) const
 {
   oos.WriteByte(status);
   oos.WriteByte(syncher_iD);

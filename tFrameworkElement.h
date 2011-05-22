@@ -31,6 +31,14 @@
 #include "core/port/tThreadLocalCache.h"
 #include "core/tAnnotatable.h"
 
+namespace rrlib
+{
+namespace serialization
+{
+class tOutputStream;
+} // namespace rrlib
+} // namespace serialization
+
 namespace finroc
 {
 namespace core
@@ -39,7 +47,6 @@ class tRuntimeEnvironment;
 class tAbstractPort;
 class tCreateFrameworkElementAction;
 class tConstructorParameters;
-class tCoreOutput;
 
 /*!
  * \author Max Reichardt
@@ -860,7 +867,7 @@ public:
    * \param os OutputStream
    * \param i Link Number (0 is primary link/description)
    */
-  void WriteDescription(tCoreOutput* os, int i) const;
+  void WriteDescription(rrlib::serialization::tOutputStream& os, int i) const;
 
 public:
 

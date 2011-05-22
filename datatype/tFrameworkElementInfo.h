@@ -32,14 +32,20 @@
 #include "core/port/tEdgeAggregator.h"
 #include "core/tFrameworkElementTreeFilter.h"
 
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
+
 namespace finroc
 {
 namespace core
 {
-class tCoreInput;
 class tRemoteTypes;
 class tFrameworkElement;
-class tCoreOutput;
 
 /*!
  * \author Max Reichardt
@@ -132,7 +138,7 @@ public:
    * \param is Input Stream to deserialize from
    * \param type_lookup Remote type information to lookup type
    */
-  void Deserialize(tCoreInput* is, tRemoteTypes& type_lookup);
+  void Deserialize(rrlib::serialization::tInputStream& is, tRemoteTypes& type_lookup);
 
   /*!
    * \param extra_flags all flags
@@ -227,7 +233,7 @@ public:
    *
    * (call in runtime-registry synchronized context only)
    */
-  static void SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, tCoreOutput* tp, tFrameworkElementTreeFilter element_filter, util::tStringBuilder& tmp);
+  static void SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, tFrameworkElementTreeFilter element_filter, util::tStringBuilder& tmp);
 
   virtual const util::tString ToString() const;
 

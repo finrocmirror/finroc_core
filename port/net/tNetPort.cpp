@@ -20,11 +20,11 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/net/tNetPort.h"
-#include "core/buffers/tCoreInput.h"
+#include "rrlib/serialization/tInputStream.h"
 #include "rrlib/serialization/tGenericObject.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tOutputStream.h"
 #include "core/port/std/tPortQueueFragmentRaw.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/std/tPortDataReference.h"
@@ -88,28 +88,28 @@ void tNetPort::PropagateStrategyFromTheNet(int16 strategy)
   }
 }
 
-void tNetPort::ReceiveDataFromStream(tCoreInput* ci, int64 timestamp, int8 changed_flag)
+void tNetPort::ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int64 timestamp, int8 changed_flag)
 {
   assert((GetPort()->IsReady()));
   if (IsStdType() || IsTransactionType())
   {
     tStdNetPort* pb = static_cast<tStdNetPort*>(wrapped);
-    ci->SetBufferSource(pb);
+    ci.SetFactory(pb);
     do
     {
-      pb->PublishFromNet(static_cast<tPortDataManager*>(ci->ReadObject(wrapped->GetDataType())->GetManager()), changed_flag);
+      pb->PublishFromNet(static_cast<tPortDataManager*>(ci.ReadObject(wrapped->GetDataType(), NULL)->GetManager()), changed_flag);
     }
-    while (ci->ReadBoolean());
-    ci->SetBufferSource(NULL);
+    while (ci.ReadBoolean());
+    ci.SetFactory(NULL);
   }
   else if (IsCCType())
   {
     tCCNetPort* pb = static_cast<tCCNetPort*>(wrapped);
     do
     {
-      pb->PublishFromNet(static_cast<tCCPortDataManagerTL*>(ci->ReadObject(wrapped->GetDataType())->GetManager()), changed_flag);
+      pb->PublishFromNet(static_cast<tCCPortDataManagerTL*>(ci.ReadObject(wrapped->GetDataType(), NULL)->GetManager()), changed_flag);
     }
-    while (ci->ReadBoolean());
+    while (ci.ReadBoolean());
   }
   else    // interface port
   {
@@ -139,7 +139,7 @@ void tNetPort::UpdateFlags(int flags)
   }
 }
 
-void tNetPort::WriteDataToNetwork(tCoreOutput* co, int64 start_time)
+void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64 start_time)
 {
   bool use_q = wrapped->GetFlag(tPortFlags::cUSES_QUEUE);
   bool first = true;
@@ -149,7 +149,7 @@ void tNetPort::WriteDataToNetwork(tCoreOutput* co, int64 start_time)
     if (!use_q)
     {
       tPortDataManager* pd = pb->GetLockedUnsafeRaw();
-      co->WriteObject(pd->GetObject());
+      co.WriteObject(pd->GetObject());
       pd->ReleaseLock();
     }
     else
@@ -161,10 +161,10 @@ void tNetPort::WriteDataToNetwork(tCoreOutput* co, int64 start_time)
       {
         if (!first)
         {
-          co->WriteBoolean(true);
+          co.WriteBoolean(true);
         }
         first = false;
-        co->WriteObject(pd->GetManager()->GetObject());
+        co.WriteObject(pd->GetManager()->GetObject());
         pd->GetManager()->ReleaseLock();
       }
     }
@@ -175,7 +175,7 @@ void tNetPort::WriteDataToNetwork(tCoreOutput* co, int64 start_time)
     if (!use_q)
     {
       tCCPortDataManager* ccitc = pb->GetInInterThreadContainer();
-      co->WriteObject(ccitc->GetObject());
+      co.WriteObject(ccitc->GetObject());
       ccitc->Recycle2();
     }
     else
@@ -187,10 +187,10 @@ void tNetPort::WriteDataToNetwork(tCoreOutput* co, int64 start_time)
       {
         if (!first)
         {
-          co->WriteBoolean(true);
+          co.WriteBoolean(true);
         }
         first = false;
-        co->WriteObject(pd->GetObject());
+        co.WriteObject(pd->GetObject());
         pd->Recycle2();
       }
     }
@@ -199,7 +199,7 @@ void tNetPort::WriteDataToNetwork(tCoreOutput* co, int64 start_time)
   {
     throw util::tRuntimeException("Method calls are not handled using this mechanism", CODE_LOCATION_MACRO);
   }
-  co->WriteBoolean(false);
+  co.WriteBoolean(false);
 }
 
 tNetPort::tCCNetPort::tCCNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfo pci) :

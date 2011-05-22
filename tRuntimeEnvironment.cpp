@@ -199,13 +199,13 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   instance->unrelated = new ::finroc::core::tFrameworkElement(instance.get(), "Unrelated");
   __attribute__((unused))
   tAdminServer* as = new tAdminServer();
-  ::finroc::core::tFrameworkElement::InitAll();
 
   // init thread-local-cache for main thread */
   tThreadLocalCache::Get();
 
   //ConfigFile.init(conffile);
   tRuntimeSettings::StaticInit();  // can be done now... or last
+  ::finroc::core::tFrameworkElement::InitAll();
 
   tStreamCommitThread::StaticInit();
   // Start thread

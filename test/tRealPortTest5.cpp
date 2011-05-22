@@ -30,8 +30,8 @@
 #include "plugins/blackboard/tBlackboardBuffer.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
-#include "core/buffers/tCoreOutput.h"
-#include "core/buffers/tCoreInput.h"
+#include "rrlib/serialization/tOutputStream.h"
+#include "rrlib/serialization/tInputStream.h"
 #include "plugins/blackboard/tSingleBufferedBlackboardServer.h"
 #include "rrlib/serialization/tMemoryBuffer.h"
 #include "plugins/blackboard/tBlackboardClient.h"
@@ -129,13 +129,13 @@ void tRealPortTest5::TestSimpleEdge2()
   tFrameworkElement::InitAll();
 
   tPortDataPtr<blackboard::tBlackboardBuffer> buf = output.GetUnusedBuffer();
-  tCoreOutput co(buf.Get());
+  rrlib::serialization::tOutputStream co(buf.Get());
   co.WriteInt(42);
   co.Close();
   output.Publish(buf);
 
   const blackboard::tBlackboardBuffer* cbuf = input.GetAutoLocked();
-  tCoreInput ci(cbuf);
+  rrlib::serialization::tInputStream ci(cbuf);
   util::tSystem::out.Println(ci.ReadInt());
   input.ReleaseAutoLocks();
 
@@ -171,7 +171,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
   blackboard::tBlackboardManager::GetInstance();
   __attribute__((unused))
   blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>* server2 = new blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>("testbb");
-  blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> client("testbb", NULL);
+  blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> client("testbb", NULL, false);
   //client.autoConnect();
   tFrameworkElement::InitAll();
 
@@ -180,7 +180,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
     blackboard::tBlackboardWriteAccess<rrlib::serialization::tMemoryBuffer> bbw(client, 4000000);
     bbw.Resize(8u);
 
-    tCoreOutput co(&(bbw[0]));
+    rrlib::serialization::tOutputStream co(&(bbw[0]));
     co.WriteLong(0);
     co.Close();
   }
@@ -190,7 +190,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
 
   tPortDataPtr<std::vector<tMemoryBuffer> > buf = client.GetUnusedChangeBuffer();
   rrlib::serialization::sSerialization::ResizeVector(*buf, 1);
-  tCoreOutput co(&buf->at(0));
+  rrlib::serialization::tOutputStream co(&buf->at(0));
   co.WriteInt(0x4BCDEF12);
   co.Close();
   try
@@ -205,7 +205,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
   buf.reset();
 
   tPortDataPtr<const std::vector<tMemoryBuffer> > cbuf = client.Read();
-  tCoreInput ci(&cbuf->at(0));
+  rrlib::serialization::tInputStream ci(&cbuf->at(0));
   util::tSystem::out.Println(ci.ReadInt());
 
   cbuf.reset();

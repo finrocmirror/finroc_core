@@ -27,20 +27,26 @@
 
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "rrlib/serialization/tTypeEncoder.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
 namespace core
 {
-class tCoreInput;
-class tCoreOutput;
-
 /*!
  * \author Max Reichardt
  *
  * This class aggregates information about types used in remote runtime environments.
  */
-class tRemoteTypes : public util::tLogUser
+class tRemoteTypes : public util::tLogUser, public rrlib::serialization::tTypeEncoder
 {
   /*! Entry in remote type register */
   class tEntry : public util::tObject
@@ -48,36 +54,33 @@ class tRemoteTypes : public util::tLogUser
     friend class tRemoteTypes;
   private:
 
-    /*! update time for this data type */
-    int16 update_time;
-
-    /*! local data type that represents the same time - null if there is noch such type in local runtime environment */
+    /*! local data type that represents the same time - null if there is no such type in local runtime environment */
     rrlib::serialization::tDataTypeBase local_data_type;
+
+    /*! Number of local types checked to resolve type */
+    int16 types_checked;
+
+    /*! name of remote type */
+    util::tString name;
 
   public:
 
     tEntry();
 
-    tEntry(int16 time, rrlib::serialization::tDataTypeBase local);
-
-    bool operator==(void* x)
-    {
-      if (x == NULL)
-      {
-        return local_data_type == NULL;
-      }
-      return x == this;
-    }
+    tEntry(rrlib::serialization::tDataTypeBase local);
 
   };
 
 private:
 
-  /*! List with remote types - index is remote type id */
-  ::finroc::util::tArrayWrapper<tEntry>* types;
+  /*! List with remote types - index is remote type id (=> mapping: remote type id => local type id */
+  util::tSafeConcurrentlyIterableList<tEntry> types;
 
-  /*! List with remote types - index is local type id */
-  ::finroc::util::tArrayWrapper<tEntry>* types_by_local_uid;
+  /*! List with remote type update times - index is local type id */
+  util::tSafeConcurrentlyIterableList<int16> update_times;
+
+  /*! Number (max index) of local types already sent to remote runtime */
+  int16 local_types_sent;
 
   /*! Remote Global default update time */
   int16 global_default;
@@ -87,13 +90,7 @@ public:
   /*! Log domain for edges */
   RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "remote_types");
 
-  tRemoteTypes();
-
-  virtual ~tRemoteTypes()
-  {
-    delete types;
-    delete types_by_local_uid;
-  }
+private:
 
   /*!
    * Init remote data type information from intput stream buffer.
@@ -101,7 +98,19 @@ public:
    *
    * \param ci Input Stream Buffer to read from
    */
-  void Deserialize(tCoreInput* ci);
+  void Deserialize(rrlib::serialization::tInputStream& ci);
+
+  /*!
+   * Serializes information about local data types
+   *
+   * \param dtr DataTypeRegister to serialize
+   * \param co Output Stream to write information to
+   */
+  void SerializeLocalDataTypes(rrlib::serialization::tOutputStream& co);
+
+public:
+
+  tRemoteTypes();
 
   /*!
    * \return Remote Global default update time
@@ -112,36 +121,20 @@ public:
   }
 
   /*!
-   * \param uid Remote type uid
-   * \return Local data type - which is identical to remote type; or null if no such type exists
-   */
-  rrlib::serialization::tDataTypeBase GetLocalType(int16 uid);
-
-  /*!
    * \param data_type Local Data Type
    * \return Remote default minimum network update interval for this type
    */
-  inline int16 GetTime(const rrlib::serialization::tDataTypeBase& data_type)
-  {
-    assert(((Initialized())) && "Not initialized");
-    return (*(types_by_local_uid))[data_type.GetUid()].update_time;
-  }
+  int16 GetTime(const rrlib::serialization::tDataTypeBase& data_type);
 
   /*!
    * \return Has this object been initialized?
    */
   inline bool Initialized()
   {
-    return types != NULL;
+    return types.Size() != 0;
   }
 
-  /*!
-   * Serializes information about local data types
-   *
-   * \param dtr DataTypeRegister to serialize
-   * \param co Output Stream to write information to
-   */
-  static void SerializeLocalDataTypes(tCoreOutput* co);
+  virtual rrlib::serialization::tDataTypeBase ReadType(rrlib::serialization::tInputStream& is);
 
   /*!
    * Set new update time for specified Type
@@ -149,7 +142,17 @@ public:
    * \param type_uid Type uid
    * \param new_time new update time
    */
-  void SetTime(int16 type_uid, int16 new_time);
+  void SetTime(rrlib::serialization::tDataTypeBase dt, int16 new_time);
+
+  /*!
+   * \return Have new types been added since last update?
+   */
+  inline bool TypeUpdateNecessary()
+  {
+    return rrlib::serialization::tDataTypeBase::GetTypeCount() > local_types_sent;
+  }
+
+  virtual void WriteType(rrlib::serialization::tOutputStream& os, rrlib::serialization::tDataTypeBase dt);
 
 };
 

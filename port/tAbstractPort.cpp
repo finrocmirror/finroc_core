@@ -24,12 +24,16 @@
 #include "core/tRuntimeListener.h"
 #include "core/tLinkEdge.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
+#include "core/port/std/tPortDataManager.h"
+#include "core/port/cc/tCCPortDataManagerTL.h"
+#include "core/port/tThreadLocalCache.h"
+#include "core/port/cc/tCCPortDataManager.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/tCoreFlags.h"
 #include "core/port/net/tNetPort.h"
-#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tEdgeAggregator.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {
@@ -154,6 +158,29 @@ void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
       target->InitialPushTo(this, true);
     }
   }
+}
+
+rrlib::serialization::tGenericObject* tAbstractPort::CreateGenericObject(rrlib::serialization::tDataTypeBase dt, void* factory_parameter)
+{
+  if (tFinrocTypeInfo::IsStdType(dt))
+  {
+    return GetUnusedBufferRaw(dt)->GetObject();
+  }
+  else if (tFinrocTypeInfo::IsCCType(dt))
+  {
+    if (factory_parameter == NULL)
+    {
+      // get thread local buffer
+      return tThreadLocalCache::Get()->GetUnusedBuffer(dt)->GetObject();
+    }
+    else
+    {
+      // get interthread buffer
+      return tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(dt)->GetObject();
+    }
+  }
+  FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Cannot create buffer of type ", dt.GetName());
+  return NULL;
 }
 
 void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
@@ -597,7 +624,7 @@ void tAbstractPort::RemoveInternal(tAbstractPort* src, tAbstractPort* dest)
   src->PropagateStrategy(NULL, NULL);
 }
 
-void tAbstractPort::SerializeOutgoingConnections(tCoreOutput* co)
+void tAbstractPort::SerializeOutgoingConnections(rrlib::serialization::tOutputStream& co)
 {
   util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
   int8 count = 0;
@@ -608,13 +635,13 @@ void tAbstractPort::SerializeOutgoingConnections(tCoreOutput* co)
       count++;
     }
   }
-  co->WriteByte(count);
+  co.WriteByte(count);
   for (int i = 0, n = it->Size(); i < n; i++)
   {
     tAbstractPort* as = it->Get(i);
     if (as != NULL)
     {
-      co->WriteInt(as->GetHandle());
+      co.WriteInt(as->GetHandle());
     }
   }
 }

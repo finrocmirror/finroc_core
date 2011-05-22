@@ -31,13 +31,18 @@
 
 #include "core/port/tPortDataPtr.h"
 
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
+
 namespace finroc
 {
 namespace core
 {
-class tCoreInput;
-class tCoreOutput;
-
 /*!
  * Storage for a parameter
  *
@@ -62,6 +67,12 @@ public:
   /*! Type of parameter (see constants at beginning of class) */
   int8 type;
 
+private:
+
+  tPortDataPtr<rrlib::serialization::tGenericObject> Lock(rrlib::serialization::tGenericObject* tmp);
+
+public:
+
   tCallParameter();
 
   inline void Clear()
@@ -75,11 +86,11 @@ public:
     Recycle();
   }
 
-  void Deserialize(tCoreInput& is);
+  void Deserialize(rrlib::serialization::tInputStream& is);
 
   void Recycle();
 
-  void Serialize(tCoreOutput& oos) const;
+  void Serialize(rrlib::serialization::tOutputStream& oos) const;
 
 };
 

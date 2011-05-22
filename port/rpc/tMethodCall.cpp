@@ -20,12 +20,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tMethodCall.h"
-#include "core/buffers/tCoreInput.h"
+#include "rrlib/serialization/tInputStream.h"
 #include "core/port/rpc/method/tPortInterface.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
 #include "core/port/rpc/method/tAbstractMethod.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {
@@ -43,13 +43,13 @@ tMethodCall::tMethodCall() :
 {
 }
 
-void tMethodCall::DeserializeCall(tCoreInput* is, const rrlib::serialization::tDataTypeBase& dt, bool skip_parameters)
+void tMethodCall::DeserializeCall(rrlib::serialization::tInputStream& is, const rrlib::serialization::tDataTypeBase& dt, bool skip_parameters)
 {
   //assert(skipParameters || (dt != null && dt.isMethodType())) : "Method type required here";
   port_interface_type = dt;
-  int8 b = is->ReadByte();
+  int8 b = is.ReadByte();
   method = (dt == NULL) ? NULL : tFinrocTypeInfo::Get(dt).GetPortInterface()->GetMethod(b);
-  net_timeout = is->ReadInt();
+  net_timeout = is.ReadInt();
   ::finroc::core::tAbstractCall::DeserializeImpl(is, skip_parameters);
 }
 
@@ -134,7 +134,7 @@ void tMethodCall::Recycle()
   ::finroc::core::tAbstractCall::Recycle();
 }
 
-void tMethodCall::Serialize(tCoreOutput& oos) const
+void tMethodCall::Serialize(rrlib::serialization::tOutputStream& oos) const
 {
   oos.WriteByte(method == NULL ? -1 : method->GetMethodId());
   assert(((GetStatus() != cSYNCH_CALL || net_timeout > 0)) && "Network timeout needs to be >0 with a synch call");

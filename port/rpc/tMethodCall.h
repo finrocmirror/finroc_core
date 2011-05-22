@@ -29,6 +29,14 @@
 #include "core/port/rpc/tAbstractCall.h"
 #include "rrlib/finroc_core_utils/thread/tTask.h"
 
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
+
 namespace finroc
 {
 namespace core
@@ -37,8 +45,6 @@ class tAbstractMethod;
 class tAbstractMethodCallHandler;
 class tAbstractAsyncReturnHandler;
 class tInterfaceNetPort;
-class tCoreInput;
-class tCoreOutput;
 
 /*!
  * \author Max Reichardt
@@ -93,7 +99,7 @@ public:
   /*! (Typically not instantiated directly - possible though) */
   tMethodCall();
 
-  virtual void Deserialize(tCoreInput& is)
+  virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
     throw util::tRuntimeException("Call deserializeCall instead, please!", CODE_LOCATION_MACRO);
   }
@@ -106,7 +112,7 @@ public:
    * \param skip_parameters Skip deserialization of parameter stuff? (for cases when port has been deleted;
    * in this case we need to jump to skip target afterwards)
    */
-  void DeserializeCall(tCoreInput* is, const rrlib::serialization::tDataTypeBase& dt, bool skip_parameters);
+  void DeserializeCall(rrlib::serialization::tInputStream& is, const rrlib::serialization::tDataTypeBase& dt, bool skip_parameters);
 
   virtual void ExecuteTask();
 
@@ -189,7 +195,7 @@ public:
 
   void Recycle();
 
-  virtual void Serialize(tCoreOutput& oos) const;
+  virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;
 
   /*!
    * \param m The Method that will be called (may not be changed - to avoid ugly programming errors)

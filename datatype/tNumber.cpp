@@ -70,7 +70,7 @@ void tNumber::Deserialize(rrlib::serialization::tInputStream& ois)
 void tNumber::Deserialize(rrlib::serialization::tStringInputStream& is)
 {
   // scan for unit
-  util::tString s = is.ReadWhile("eE-.", rrlib::serialization::tStringInputStream::cDIGIT, true);
+  util::tString s = is.ReadWhile("-.", rrlib::serialization::tStringInputStream::cDIGIT | rrlib::serialization::tStringInputStream::cWHITESPACE | rrlib::serialization::tStringInputStream::cLETTER, true);
   util::tString num = s;
   for (size_t i = 0u; i < s.Length(); i++)
   {
@@ -81,8 +81,8 @@ void tNumber::Deserialize(rrlib::serialization::tStringInputStream& is)
       {
         continue;  // exponent in decimal notation
       }
-      num = s.Substring(0, i);
-      util::tString unit_string = s.Substring(i);
+      num = s.Substring(0, i).Trim();
+      util::tString unit_string = s.Substring(i).Trim();
       unit = tUnit::GetUnit(unit_string);
       break;
     }
@@ -180,6 +180,10 @@ void tNumber::Serialize(rrlib::serialization::tOutputStream& oos) const
     oos.WriteByte(PrepFirstByte(cCONST));
     oos.WriteByte((static_cast<tConstant*>(unit))->GetConstantId());
   }
+  if (unit != &(tUnit::cNO_UNIT))
+  {
+    oos.WriteByte(unit->GetUid());
+  }
 }
 
 void tNumber::SetValue(tConstant* value_)
@@ -190,26 +194,26 @@ void tNumber::SetValue(tConstant* value_)
 
 void tNumber::SetValue(const util::tNumber& value_, tUnit* unit_)
 {
-  this->unit = unit_;
   if (typeid(value_) == typeid(int64))
   {
-    SetValue(value_.LongValue());
+    SetValue(value_.LongValue(), unit_);
   }
   else if (typeid(value_) == typeid(int))
   {
-    SetValue(value_.IntValue());
+    SetValue(value_.IntValue(), unit_);
   }
   else if (typeid(value_) == typeid(float))
   {
-    SetValue(value_.FloatValue());
+    SetValue(value_.FloatValue(), unit_);
   }
   else if (typeid(value_) == typeid(tNumber))
   {
-    SetValue(static_cast<const tNumber&>(value_));
+    CopyFrom(static_cast<const tNumber&>(value_));
+    this->unit = unit_;
   }
   else
   {
-    SetValue(value_.DoubleValue());
+    SetValue(value_.DoubleValue(), unit_);
   }
 }
 

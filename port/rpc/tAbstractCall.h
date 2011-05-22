@@ -32,12 +32,18 @@
 
 #include "core/port/rpc/tParameterUtil.h"
 
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
+
 namespace finroc
 {
 namespace core
 {
-class tCoreInput;
-class tCoreOutput;
 class tMethodCallSyncher;
 
 /*!
@@ -126,12 +132,12 @@ public:
    */
   tAbstractCall();
 
-  virtual void Deserialize(tCoreInput& is)
+  virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
-    DeserializeImpl(&(is), false);
+    DeserializeImpl(is, false);
   }
 
-  void DeserializeImpl(tCoreInput* is, bool skip_parameters);
+  void DeserializeImpl(rrlib::serialization::tInputStream& is, bool skip_parameters);
 
   virtual void GenericRecycle()
   {
@@ -194,7 +200,7 @@ public:
    */
   void RecycleParameters();
 
-  virtual void Serialize(tCoreOutput& oos) const;
+  virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;
 
   template <typename T>
   void GetParam(int index, T& pd)

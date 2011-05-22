@@ -82,7 +82,7 @@ void tStructureParameterBase::Deserialize(rrlib::serialization::tInputStream& is
   else
   {
     is.ReadString();
-    is.ReadString();
+    is.ReadType();
   }
   if (is.ReadBoolean())
   {
@@ -116,7 +116,7 @@ void tStructureParameterBase::Deserialize(const rrlib::xml2::tXMLNode& node)
 void tStructureParameterBase::Serialize(rrlib::serialization::tOutputStream& os) const
 {
   os.WriteString(name);
-  os.WriteString(type.GetName());
+  os.WriteType(type);
   rrlib::serialization::tTypedObject* val = ValPointer();
 
   os.WriteBoolean(val != NULL);

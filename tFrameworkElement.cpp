@@ -27,7 +27,7 @@
 #include "core/tRuntimeListener.h"
 #include "rrlib/finroc_core_utils/tGarbageCollector.h"
 #include "core/parameter/tStructureParameterList.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tOutputStream.h"
 #include "core/port/tAbstractPort.h"
 
 namespace finroc
@@ -856,17 +856,17 @@ void tFrameworkElement::SetFlag(int flag)
   }
 }
 
-void tFrameworkElement::WriteDescription(tCoreOutput* os, int i) const
+void tFrameworkElement::WriteDescription(rrlib::serialization::tOutputStream& os, int i) const
 {
   if (IsReady())
   {
-    os->WriteString(GetLink(i)->description);
+    os.WriteString(GetLink(i)->description);
   }
   else
   {
     {
       util::tLock lock3(GetRegistryLock());  // synchronize, while description can be changed (C++ strings may not be thread safe...)
-      os->WriteString(IsDeleted() ? "deleted element" : GetLink(i)->description);
+      os.WriteString(IsDeleted() ? "deleted element" : GetLink(i)->description);
     }
   }
 }

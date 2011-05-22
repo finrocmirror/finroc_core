@@ -22,7 +22,7 @@
 #include "core/admin/tAdminServer.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tAbstractPort.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tOutputStream.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tCreateFrameworkElementAction.h"
 #include "core/plugin/tPlugins.h"
@@ -38,7 +38,7 @@
 #include "rrlib/serialization/sSerialization.h"
 #include "core/port/std/tPortBase.h"
 #include "core/port/std/tPortDataManager.h"
-#include "core/buffers/tCoreInput.h"
+#include "rrlib/serialization/tInputStream.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/tThreadLocalCache.h"
 #include "rrlib/serialization/tStringInputStream.h"
@@ -97,7 +97,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
   assert((method == &(cGET_CREATE_MODULE_ACTIONS)));
 
   tPortDataPtr<rrlib::serialization::tMemoryBuffer> mb = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
-  tCoreOutput co(mb.get());
+  rrlib::serialization::tOutputStream co(mb.get(), rrlib::serialization::tOutputStream::eNames);
   const util::tSimpleList<tCreateFrameworkElementAction*>& module_types = tPlugins::GetInstance()->GetModuleTypes();
   for (size_t i = 0u; i < module_types.Size(); i++)
   {
@@ -139,8 +139,8 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
   else
   {
     tPortDataPtr<rrlib::serialization::tMemoryBuffer> buf = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
-    tCoreOutput co(buf.get());
-    co.WriteString(result->GetType().GetName());
+    rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::tOutputStream::eNames);
+    co.WriteType(result->GetType());
     result->Serialize(co);
     co.Close();
     return buf;
@@ -270,8 +270,8 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int port_handle, tPor
       util::tLock lock3(port);
       if (port->IsReady())
       {
-        tCoreInput ci(buf.get());
-        rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::FindType(ci.ReadString());
+        rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::tInputStream::eNames);
+        rrlib::serialization::tDataTypeBase dt = ci.ReadType();
         if (tFinrocTypeInfo::IsCCType(port->GetDataType()) && tFinrocTypeInfo::IsCCType(dt))
         {
           tCCPortBase* p = static_cast<tCCPortBase*>(port);
@@ -339,8 +339,8 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortD
     }
     else
     {
-      tCoreInput ci(params_buffer.get());
-      rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::FindType(ci.ReadString());
+      rrlib::serialization::tInputStream ci(params_buffer.get(), rrlib::serialization::tInputStream::eNames);
+      rrlib::serialization::tDataTypeBase dt = ci.ReadType();
       if (dt == NULL)
       {
         FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Data type not available. Cancelling setting of annotation.");
@@ -384,7 +384,7 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortD
           if (cma->GetParameterTypes() != NULL && cma->GetParameterTypes()->Size() > 0)
           {
             params = cma->GetParameterTypes()->Instantiate();
-            tCoreInput ci(params_buffer.get());
+            rrlib::serialization::tInputStream ci(params_buffer.get());
             for (size_t i = 0u; i < params->Size(); i++)
             {
               tStructureParameterBase* param = params->Get(i);

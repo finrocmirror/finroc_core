@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tReusable.h"
-#include "core/portdatabase/tCoreSerializable.h"
+#include "rrlib/serialization/tSerializable.h"
 
 namespace finroc
 {
@@ -37,7 +37,7 @@ namespace core
  *
  * This is the base class for some classes that are both Serializable and Reusable
  */
-class tSerializableReusable : public util::tReusable, public tCoreSerializable
+class tSerializableReusable : public util::tReusable, public rrlib::serialization::tSerializable
 {
 public:
 

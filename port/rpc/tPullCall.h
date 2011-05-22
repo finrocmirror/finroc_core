@@ -28,13 +28,19 @@
 #include "core/port/rpc/tAbstractCall.h"
 #include "rrlib/finroc_core_utils/thread/tTask.h"
 
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
+
 namespace finroc
 {
 namespace core
 {
 class tNetPort;
-class tCoreInput;
-class tCoreOutput;
 
 /*!
  * \author Max Reichardt
@@ -73,7 +79,7 @@ public:
 
   tPullCall();
 
-  virtual void Deserialize(tCoreInput& is);
+  virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
   virtual void ExecuteTask();
 
@@ -87,7 +93,7 @@ public:
     this->port = port_;
   }
 
-  virtual void Serialize(tCoreOutput& oos) const;
+  virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;
 
   virtual const util::tString ToString() const
   {

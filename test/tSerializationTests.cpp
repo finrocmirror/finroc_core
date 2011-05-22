@@ -21,9 +21,9 @@
  */
 #include "core/test/tSerializationTests.h"
 #include "core/datatype/tNumber.h"
-#include "core/buffers/tMemBuffer.h"
-#include "core/buffers/tCoreOutput.h"
-#include "core/buffers/tCoreInput.h"
+#include "rrlib/serialization/tMemoryBuffer.h"
+#include "rrlib/serialization/tOutputStream.h"
+#include "rrlib/serialization/tInputStream.h"
 
 namespace finroc
 {
@@ -32,38 +32,38 @@ namespace core
 void tSerializationTests::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 {
   //testx((byte)0);
-  tNumber* num = new tNumber();
-  tMemBuffer* mb = new tMemBuffer();
-  tCoreOutput* buf = new tCoreOutput(mb);
+  tNumber num;
+  rrlib::serialization::tMemoryBuffer mb;
+  rrlib::serialization::tOutputStream buf(&(mb));
   for (int i = -100; i < 69000; i++)
   {
-    num->SetValue(i);
-    num->Serialize(*buf);
+    num.SetValue(i);
+    num.Serialize(buf);
   }
   for (int64 l = 4000000000LL; l < 70000000000LL; l += 1000000000)
   {
-    num->SetValue(l);
-    num->Serialize(*buf);
+    num.SetValue(l);
+    num.Serialize(buf);
   }
   for (float f = 0; f < 2000; f += 4)
   {
-    num->SetValue(f);
-    num->Serialize(*buf);
+    num.SetValue(f);
+    num.Serialize(buf);
   }
   for (double d = 0; d < 5000; d += 4)
   {
-    num->SetValue(d);
-    num->Serialize(*buf);
+    num.SetValue(d);
+    num.Serialize(buf);
   }
-  buf->Flush();
+  buf.Flush();
 
-  tCoreInput* ci = new tCoreInput(mb);
-  util::tSystem::out.Println(ci->Remaining());
+  rrlib::serialization::tInputStream ci(&(mb));
+  util::tSystem::out.Println(ci.Remaining());
 
-  while (ci->Remaining() > 0)
+  while (ci.Remaining() > 0)
   {
-    num->Deserialize(*ci);
-    util::tSystem::out.Println(num->ToString());
+    num.Deserialize(ci);
+    util::tSystem::out.Println(num.ToString());
   }
 }
 

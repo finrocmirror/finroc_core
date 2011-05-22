@@ -34,10 +34,9 @@
 #include "core/port/cc/tCCPortDataBufferPool.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPool.h"
-#include "core/buffers/tCoreInput.h"
+#include "rrlib/serialization/tInputStream.h"
 #include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
-#include "rrlib/serialization/tDataTypeBase.h"
 #include "core/port/cc/tCCPortQueueElement.h"
 #include "rrlib/finroc_core_utils/container/tBoundedQElementContainer.h"
 #include "core/port/std/tPortQueueElement.h"
@@ -138,7 +137,7 @@ public:
   util::tReusablesPool<tCCPortQueueElement>* ccpq_fragments;
 
   /*! CoreInput for Input packet processor */
-  tCoreInput input_packet_processor;
+  rrlib::serialization::tInputStream input_packet_processor;
 
   /*! Thread ID as reuturned by ThreadUtil::getCurrentThreadId() */
   int64 thread_id;
@@ -163,7 +162,7 @@ private:
 
   inline tCCPortDataBufferPool* GetCCPool(const rrlib::serialization::tDataTypeBase& data_type)
   {
-    return GetCCPool(tFinrocTypeInfo::Get(data_type.GetUid()).GetCCIndex());
+    return GetCCPool(tFinrocTypeInfo::Get(data_type).GetCCIndex());
   }
 
   inline tCCPortDataBufferPool* GetCCPool(int16 cc_type_index)
