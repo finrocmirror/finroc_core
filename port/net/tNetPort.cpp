@@ -274,19 +274,12 @@ void tNetPort::tCCNetPort::PropagateStrategy(int16 strategy)
 
 void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataManagerTL* read_object, int8 changed_flag)
 {
-  if (changed_flag != ::finroc::core::tAbstractPort::cCHANGED_INITIAL)    // always publish initial pushes
-  {
-
-    // only publish if value has actually changed...
-    tCCPortDataManagerTL* cur_data = this->GetLockedUnsafeInContainer();
-    bool equal = cur_data->ContentEquals(read_object->GetObject()->GetRawDataPtr());
-    cur_data->ReleaseLock();   // unlock value that we just locked for comparison
-    if (equal)
-    {
-      read_object->RecycleUnused();
-      return;
-    }
-  }
+  // Publish all pushed data from the network. This avoids problems in finstruct.
+  // Compared to tranferring the stuff over the network,
+  // effort for publishing the stuff locally, is negligible.
+  /*if (changedFlag != AbstractPort.CHANGED_INITIAL) {
+    check ...
+  }*/
 
   tThreadLocalCache* tc = tThreadLocalCache::GetFast();
   if (IsOutputPort())
