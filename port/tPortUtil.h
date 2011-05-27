@@ -288,14 +288,30 @@ public:
 
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
-    t.reset();
+    if (typeid(*t.GetManager()) == typeid(tManagerTL))
+    {
+      port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+      t.reset();
+    }
+    else
+    {
+      assert(typeid(*t.GetManager()) == typeid(tManager));
+      CopyAndPublish(port, *t);
+    }
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
-    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
-    t.reset();
+    if (typeid(*t.GetManager()) == typeid(tManagerTL))
+    {
+      port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+      t.reset();
+    }
+    else
+    {
+      assert(typeid(*t.GetManager()) == typeid(tManager));
+      CopyAndPublish(port, *t);
+    }
   }
 
   static void CopyAndPublish(tPortType* port, const T& t)
@@ -430,14 +446,30 @@ public:
 
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
-    t.reset();
+    if (typeid(*t.GetManager()) == typeid(tManagerTL))
+    {
+      port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+      t.reset();
+    }
+    else
+    {
+      assert(typeid(*t.GetManager()) == typeid(tManager));
+      CopyAndPublish(port, *t);
+    }
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
-    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
-    t.reset();
+    if (typeid(*t.GetManager()) == typeid(tManagerTL))
+    {
+      port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+      t.reset();
+    }
+    else
+    {
+      assert(typeid(*t.GetManager()) == typeid(tManager));
+      CopyAndPublish(port, *t);
+    }
   }
 
   static void CopyAndPublish(tPortType* port, const bool& t)
@@ -546,14 +578,30 @@ public:
 
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
-    t.reset();
+    if (typeid(*t.GetManager()) == typeid(tManagerTL))
+    {
+      port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+      t.reset();
+    }
+    else
+    {
+      assert(typeid(*t.GetManager()) == typeid(tManager));
+      CopyAndPublish(port, *t);
+    }
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
-    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
-    t.reset();
+    if (typeid(*t.GetManager()) == typeid(tManagerTL))
+    {
+      port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
+      t.reset();
+    }
+    else
+    {
+      assert(typeid(*t.GetManager()) == typeid(tManager));
+      CopyAndPublish(port, *t);
+    }
   }
 
   static void CopyAndPublish(tPortType* port, const T& t)
