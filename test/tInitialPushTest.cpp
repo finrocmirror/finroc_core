@@ -23,10 +23,9 @@
 #include "core/tRuntimeEnvironment.h"
 #include "plugins/blackboard/tBlackboardBuffer.h"
 #include "core/port/tPortCreationInfo.h"
-#include "rrlib/serialization/tMemoryBuffer.h"
 #include "core/port/tPortFlags.h"
 #include "core/tFrameworkElement.h"
-#include "core/buffers/tCoreOutput.h"
+#include "rrlib/serialization/tOutputStream.h"
 #include "rrlib/serialization/tFixedBuffer.h"
 #include "core/port/tThreadLocalCache.h"
 
@@ -39,8 +38,8 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // setup and initialize ports
   //ThreadLocalCache.get();
   tRuntimeEnvironment::GetInstance();
-  tPort<blackboard::tBlackboardBuffer> out(tPortCreationInfo("StdOut", rrlib::serialization::tMemoryBuffer::cTYPE, tPortFlags::cOUTPUT_PORT));
-  tPort<blackboard::tBlackboardBuffer> in(tPortCreationInfo("StdIn", rrlib::serialization::tMemoryBuffer::cTYPE, tPortFlags::cINPUT_PORT));
+  tPort<blackboard::tBlackboardBuffer> out(tPortCreationInfo("StdOut", blackboard::tBlackboardBuffer::cTYPE, tPortFlags::cOUTPUT_PORT));
+  tPort<blackboard::tBlackboardBuffer> in(tPortCreationInfo("StdIn", blackboard::tBlackboardBuffer::cTYPE, tPortFlags::cINPUT_PORT));
   tPort<int> n_out(tPortCreationInfo("NumOut", tPortFlags::cOUTPUT_PORT));
   tPort<int> n_in(tPortCreationInfo("NumIn", tPortFlags::cINPUT_PORT));
   tPort<int> n_rev_out(tPortCreationInfo("NumRevOut", tPortFlags::cOUTPUT_PORT | tPortFlags::cPUSH_STRATEGY_REVERSE));
@@ -49,7 +48,7 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // fill output ports with something
   n_out.Publish(23);
   tPortDataPtr<blackboard::tBlackboardBuffer> bb = out.GetUnusedBuffer();
-  tCoreOutput co;
+  rrlib::serialization::tOutputStream co;
   co.Reset(bb.get());
   co.WriteInt(23);
   co.Close();

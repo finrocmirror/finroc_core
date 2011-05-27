@@ -301,6 +301,18 @@ public:
     return typeutil::tIsCCType<T>::value; // compile-time constant
   }
 
+  /*!
+   * Publish Data Buffer. This data will be forwarded to any connected ports.
+   * It should not be modified thereafter.
+   * Should only be called on output ports.
+   *
+   * \param data Data buffer acquired from a port using getUnusedBuffer (or locked data received from another port)
+   */
+  inline void Publish(tPortDataPtr<const T> && data)
+  {
+    tPortUtil<T>::Publish(wrapped, data);
+  }
+
   // Publish Data Buffer. This data will be forwarded to any connected ports.
   // Should only be called on output ports.
   //
@@ -311,18 +323,16 @@ public:
     tPortUtil<T>::CopyAndPublish(wrapped, data);
   }
 
+  inline void Publish(tPortDataPtr<T> && data)
+  {
+    tPortUtil<T>::Publish(wrapped, data);
+  }
+
   inline void Publish(tPortDataPtr<T>& data)
   {
     tPortUtil<T>::Publish(wrapped, data);
   }
 
-  /*!
-   * Publish Data Buffer. This data will be forwarded to any connected ports.
-   * It should not be modified thereafter.
-   * Should only be called on output ports.
-   *
-   * \param data Data buffer acquired from a port using getUnusedBuffer (or locked data received from another port)
-   */
   inline void Publish(tPortDataPtr<const T>& data)
   {
     tPortUtil<T>::Publish(wrapped, data);
