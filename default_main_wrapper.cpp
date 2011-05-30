@@ -34,6 +34,7 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include <cstdlib>
+#include <csignal>
 
 extern "C"
 {
@@ -73,6 +74,40 @@ extern "C"
 // Implementation
 //----------------------------------------------------------------------
 
+bool run_main_loop = false;
+
+//----------------------------------------------------------------------
+// HandleSignalSIGINT
+//----------------------------------------------------------------------
+void HandleSignalSIGINT(int signal)
+{
+  assert(signal == SIGINT);
+  FINROC_LOG_STREAM(rrlib::logging::eLL_USER) << "\nCaught SIGINT. Exiting...";
+  run_main_loop = false;
+}
+
+//----------------------------------------------------------------------
+// InstallSignalHandler
+//----------------------------------------------------------------------
+bool InstallSignalHandler()
+{
+  struct sigaction signal_action;
+  signal_action.sa_handler = HandleSignalSIGINT;
+  sigemptyset(&signal_action.sa_mask);
+  signal_action.sa_flags = 0;
+
+  if (sigaction(SIGINT, &signal_action, NULL) != 0)
+  {
+    perror("Could not install signal handler");
+    return false;
+  }
+
+  return true;
+}
+
+//----------------------------------------------------------------------
+// LogConfigHandler
+//----------------------------------------------------------------------
 bool LogConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
 {
   rrlib::getopt::tOption log_config(name_to_option_map.at("log-config"));
@@ -84,16 +119,21 @@ bool LogConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
   return true;
 }
 
-
+//----------------------------------------------------------------------
+// ParameterConfig
+//----------------------------------------------------------------------
 rrlib::getopt::tOption& ParameterConfig()
 {
   static rrlib::getopt::tOption parameter_config;
   return parameter_config;
 }
 
+//----------------------------------------------------------------------
+// ParameterConfigHandler
+//----------------------------------------------------------------------
 bool ParameterConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
 {
-  rrlib::getopt::tOption parameter_config(name_to_option_map.at("config_file"));
+  rrlib::getopt::tOption parameter_config(name_to_option_map.at("config-file"));
   if (parameter_config->IsActive())
   {
     ParameterConfig() = parameter_config;
@@ -106,22 +146,25 @@ bool ParameterConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_optio
 //----------------------------------------------------------------------
 int main(int argc, char **argv)
 {
+  if (!InstallSignalHandler())
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR) << "Error installing signal handler. Exiting...";
+    return EXIT_FAILURE;
+  }
+
   rrlib::logging::default_log_description = basename(argv[0]);
 
   rrlib::getopt::SetProgramVersion(cPROGRAM_VERSION);
   rrlib::getopt::SetProgramDescription(cPROGRAM_DESCRIPTION);
 
   rrlib::getopt::AddValue("log-config", 'l', "Log config file", &LogConfigHandler);
-
-  rrlib::getopt::AddValue("config_file", 'c', "Parameter config file", &ParameterConfigHandler);
+  rrlib::getopt::AddValue("config-file", 'c', "Parameter config file", &ParameterConfigHandler);
 
   StartUp();
 
   rrlib::getopt::ProcessCommandLine(argc, argv);
 
   finroc::core::tRuntimeEnvironment *runtime_environment = finroc::core::tRuntimeEnvironment::GetInstance();
-  //finroc::tcp::tTCPServer *server = new finroc::tcp::tTCPServer(4444, true, NULL);
-  //server->Init();
 
   // Create and connect TCP peer
   finroc::tcp::tTCPPeer* tcp_peer = new finroc::tcp::tTCPPeer(finroc::util::tStringBuilder("localhost:") + 4444, "", finroc::tcp::tTCPPeer::eFULL, 4444, finroc::tcp::tTCPPeer::cDEFAULT_FILTER, true);
@@ -142,7 +185,8 @@ int main(int argc, char **argv)
   main_thread->Init();
   main_thread->StartExecution();
 
-  while (true)
+  run_main_loop = true;
+  while (run_main_loop)
   {
     try
     {
@@ -152,7 +196,7 @@ int main(int argc, char **argv)
     {
     }
   }
-  //  main_thread->JoinThread();
+  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG) << "Left main loop";
 
   return EXIT_SUCCESS;
 }
