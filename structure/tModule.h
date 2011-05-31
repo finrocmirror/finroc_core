@@ -120,6 +120,12 @@ public:
     {
       this->UpdateCurrentPortNameIndex();
     }
+
+    tInput(tModule* parent, const finroc::util::tString &name)
+        : tPort<T>(name, parent->input, false)
+    {
+      this->UpdateCurrentPortNameIndex(parent);
+    }
   };
 
   template < typename T = double >
@@ -133,6 +139,12 @@ public:
         : tPort<T>(name, this->FindParent()->output, true)
     {
       this->UpdateCurrentPortNameIndex();
+    }
+
+    tOutput(tModule* parent, const finroc::util::tString &name)
+        : tPort<T>(name, parent->output, true)
+    {
+      this->UpdateCurrentPortNameIndex(parent);
     }
   };
 

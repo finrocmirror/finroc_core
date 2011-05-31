@@ -72,6 +72,11 @@ tModuleBase::tModuleBase(tFrameworkElement *parent, const util::tString &name)
   tStructureElementRegister::AddModule(this);
 }
 
+tModuleBase::~tModuleBase()
+{
+  tStructureElementRegister::RemoveModule(this);
+}
+
 void tModuleBase::CheckParameters()
 {
   if (parameters_changed)

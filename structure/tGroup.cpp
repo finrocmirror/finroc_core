@@ -82,6 +82,11 @@ tGroup::tGroup(tFrameworkElement *parent, const util::tString &name, const util:
   tStructureElementRegister::AddModule(this);
 }
 
+tGroup::~tGroup()
+{
+  tStructureElementRegister::RemoveModule(this);
+}
+
 ////----------------------------------------------------------------------
 //// tGroup SetParameter
 ////----------------------------------------------------------------------

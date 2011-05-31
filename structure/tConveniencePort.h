@@ -80,9 +80,12 @@ protected:
   }
 
   /*! Get & update current index for auto-generated port names */
-  int UpdateCurrentPortNameIndex()
+  int UpdateCurrentPortNameIndex(BASE* parent = NULL)
   {
-    BASE* parent = FindParent();
+    if (parent == NULL)
+    {
+      parent = FindParent();
+    }
     if (typeid(*parent).name() != parent->count_for_type) // detect class change when traversing module type hierarchy
     {
       parent->count_for_type = typeid(*parent).name();

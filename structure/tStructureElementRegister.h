@@ -60,7 +60,15 @@ namespace core
 namespace structure
 {
 
-//! contains information about auto-generated port name of a single module type
+//----------------------------------------------------------------------
+// Forward declarations / typedefs / enums
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Class declaration
+//----------------------------------------------------------------------
+
+//! Contains information about auto-generated port name of a single module type
 struct tModulePorts
 {
   /*! demangled RTTI name of module type (without template arguments) */
@@ -70,13 +78,19 @@ struct tModulePorts
   std::vector<util::tString> ports;
 };
 
-//----------------------------------------------------------------------
-// Forward declarations / typedefs / enums
-//----------------------------------------------------------------------
+//! Info on a single instantiated module */
+struct tInstantiatedModule
+{
+  /*! Pointer to beginning of memory block */
+  char* address;
 
-//----------------------------------------------------------------------
-// Class declaration
-//----------------------------------------------------------------------
+  /*! Size of memory block */
+  size_t size;
+
+  /*! Pointer to module (usually == address, but not always) */
+  tFrameworkElement* module;
+};
+
 //!
 /*!
  * Internal helper class: Can be used to determine which is the parent module or group of a port
@@ -91,24 +105,34 @@ class tStructureElementRegister
   /*!
    * \return Register containing all instantiated elements
    */
-  static std::vector<tFrameworkElement*>& GetRegister();
+  static std::vector<tInstantiatedModule>& GetRegister();
 
   /*!
    * \return Register containing port names for all module types with auto-generated port names
    */
   static std::vector<tModulePorts>& GetModuleTypeRegister();
 
+  //RRLIB_LOG_CREATE_DEFAULT_DOMAIN("structure_element_register")
+
 public:
+
+  /*!
+   * Add memory block in which a tModuleBase or tGroup will be constructed
+   * (should only be called by tModuleBase and tGroup)
+   */
+  static void AddMemoryBlock(void* address, size_t size);
 
   /*!
    * Add Module to register
    * (should only be called by tModuleBase and tGroup)
    */
-  static inline void AddModule(tFrameworkElement* module)
-  {
-    util::tLock(GetMutex());
-    GetRegister().push_back(module);
-  }
+  static void AddModule(tFrameworkElement* module);
+
+  /*!
+   * Add Module to register
+   * (should only be called by tModuleBase and tGroup)
+   */
+  static void RemoveModule(tFrameworkElement* module);
 
   /*!
    * Add port names for a module type

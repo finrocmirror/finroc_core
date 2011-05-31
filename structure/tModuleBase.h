@@ -117,6 +117,20 @@ public:
 
   tModuleBase(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
 
+  virtual ~tModuleBase();
+
+  void* operator new(size_t size)
+  {
+    void* result = ::operator new(size);
+    tStructureElementRegister::AddMemoryBlock(result, size);
+    return result;
+  }
+
+  void* operator new[](size_t size)
+  {
+    assert(false && "Allocating (non-pointer) array of framework elements is not allowed.");
+  }
+
   /*!
    * (Should only be called by abstract module classes succh as tModule and tSenseControlModule)
    *
@@ -132,6 +146,7 @@ public:
   {
   public:
 
+    // constructors taking description as tString
     tParameter(const finroc::util::tString& description, const util::tString& config_entry = "")
         : finroc::core::tParameter<T>(description, this->FindParent()->parameters, config_entry)
     {
@@ -154,6 +169,7 @@ public:
       this->UpdateCurrentPortNameIndex();
     }
 
+    // constructors taking description as const char*
     tParameter(const char* description, const util::tString& config_entry = "")
         : finroc::core::tParameter<T>(description, this->FindParent()->parameters, config_entry)
     {
@@ -176,6 +192,7 @@ public:
       this->UpdateCurrentPortNameIndex();
     }
 
+    // constructors when relying on auto-generated descriptions in initializer list
     tParameter(const util::tString& config_entry = "")
         : finroc::core::tParameter<T>(this->GetPortName(), this->FindParent()->parameters, config_entry)
     {
@@ -194,6 +211,53 @@ public:
     {
       this->AddPortListener(this->FindParent());
     }
+
+    // constructors taking parent and description as tString
+    tParameter(tModuleBase* parent, const finroc::util::tString& description, const util::tString& config_entry = "")
+        : finroc::core::tParameter<T>(description, parent->parameters, config_entry)
+    {
+      this->AddPortListener(parent);
+      this->UpdateCurrentPortNameIndex(parent);
+    }
+
+    tParameter(tModuleBase* parent, const util::tString& description, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "")
+        : finroc::core::tParameter<T>(description, parent->parameters, default_value, unit, config_entry)
+    {
+      this->AddPortListener(parent);
+      this->UpdateCurrentPortNameIndex(parent);
+    }
+
+    template < typename Q = T >
+    tParameter(tModuleBase* parent, const util::tString& description, const T& default_value, typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type b, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "")
+        : finroc::core::tParameter<T>(description, parent->parameters, default_value, b, unit, config_entry)
+    {
+      this->AddPortListener(parent);
+      this->UpdateCurrentPortNameIndex(parent);
+    }
+
+    // constructors taking parent and description as const char*
+    tParameter(tModuleBase* parent, const char* description, const util::tString& config_entry = "")
+        : finroc::core::tParameter<T>(description, parent->parameters, config_entry)
+    {
+      this->AddPortListener(parent);
+      this->UpdateCurrentPortNameIndex(parent);
+    }
+
+    tParameter(tModuleBase* parent, const char* description, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "")
+        : finroc::core::tParameter<T>(description, parent->parameters, default_value, unit, config_entry)
+    {
+      this->AddPortListener(parent);
+      this->UpdateCurrentPortNameIndex(parent);
+    }
+
+    template < typename Q = T >
+    tParameter(tModuleBase* parent, const char* description, const T& default_value, typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type b, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "")
+        : finroc::core::tParameter<T>(description, parent->parameters, default_value, b, unit, config_entry)
+    {
+      this->AddPortListener(parent);
+      this->UpdateCurrentPortNameIndex(parent);
+    }
+
   };
 };
 

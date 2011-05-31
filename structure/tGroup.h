@@ -110,6 +110,12 @@ public:
     {
       this->UpdateCurrentPortNameIndex();
     }
+
+    tControllerInput(tGroup* parent, const finroc::util::tString &name)
+        : tPort<T>(tPortCreationInfo(name, parent->controller_input, tPortFlags::cINPUT_PROXY))
+    {
+      this->UpdateCurrentPortNameIndex(parent);
+    }
   };
   template < typename T = double >
   struct tControllerOutput : public tPort<T>, tConveniencePort<tGroup>
@@ -123,6 +129,13 @@ public:
     {
       this->UpdateCurrentPortNameIndex();
     }
+
+    tControllerOutput(tGroup* parent, const finroc::util::tString &name)
+        : tPort<T>(tPortCreationInfo(name, parent->controller_output, tPortFlags::cOUTPUT_PROXY))
+    {
+      this->UpdateCurrentPortNameIndex(parent);
+    }
+
   };
   template < typename T = double >
   struct tSensorInput : public tPort<T>, tConveniencePort<tGroup>
@@ -135,6 +148,12 @@ public:
         : tPort<T>(tPortCreationInfo(name, this->FindParent()->sensor_input, tPortFlags::cINPUT_PROXY))
     {
       this->UpdateCurrentPortNameIndex();
+    }
+
+    tSensorInput(tGroup* parent, const finroc::util::tString &name)
+        : tPort<T>(tPortCreationInfo(name, parent->sensor_input, tPortFlags::cINPUT_PROXY))
+    {
+      this->UpdateCurrentPortNameIndex(parent);
     }
   };
   template < typename T = double >
@@ -149,9 +168,29 @@ public:
     {
       this->UpdateCurrentPortNameIndex();
     }
+
+    tSensorOutput(tGroup* parent, const finroc::util::tString &name)
+        : tPort<T>(tPortCreationInfo(name, parent->sensor_output, tPortFlags::cOUTPUT_PROXY))
+    {
+      this->UpdateCurrentPortNameIndex(parent);
+    }
   };
 
   tGroup(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name, const finroc::util::tString &structure_config_file);
+
+  virtual ~tGroup();
+
+  void* operator new(size_t size)
+  {
+    void* result = ::operator new(size);
+    tStructureElementRegister::AddMemoryBlock(result, size);
+    return result;
+  }
+
+  void* operator new[](size_t size)
+  {
+    assert(false && "Allocating (non-pointer) array of framework elements is not allowed.");
+  }
 
 //  void SetParameter(size_t index, const finroc::util::tString &new_value);
 //  void SetParameter(const finroc::util::tString &name, const finroc::util::tString &new_value);
