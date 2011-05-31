@@ -190,6 +190,7 @@ public:
   void* operator new[](size_t size)
   {
     assert(false && "Allocating (non-pointer) array of framework elements is not allowed.");
+    throw std::bad_alloc();
   }
 
 //  void SetParameter(size_t index, const finroc::util::tString &new_value);
