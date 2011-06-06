@@ -65,8 +65,8 @@ public:
       tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u))
   {
     SetDefault(default_value);
-    SetConfigEntry(config_entry);
     this->wrapped->AddAnnotation(new tParameterInfo());
+    SetConfigEntry(config_entry);
   }
 
   template < typename Q = T >
@@ -74,8 +74,8 @@ public:
       tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u), b)
   {
     SetDefault(default_value);
-    SetConfigEntry(config_entry);
     this->wrapped->AddAnnotation(new tParameterInfo());
+    SetConfigEntry(config_entry);
   }
 
   /*!
