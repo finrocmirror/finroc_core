@@ -47,6 +47,7 @@ class tRuntimeEnvironment;
 class tAbstractPort;
 class tCreateFrameworkElementAction;
 class tConstructorParameters;
+class tConfigFile;
 
 /*!
  * \author Max Reichardt
@@ -567,6 +568,8 @@ public:
   {
     return *this;
   }
+
+  tConfigFile* GetConfigFile();
 
   /*!
    * \return Primary parent framework element

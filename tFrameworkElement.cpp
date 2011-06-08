@@ -27,6 +27,7 @@
 #include "core/tRuntimeListener.h"
 #include "rrlib/finroc_core_utils/tGarbageCollector.h"
 #include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tConfigFile.h"
 #include "rrlib/serialization/tOutputStream.h"
 #include "core/port/tAbstractPort.h"
 
@@ -446,6 +447,12 @@ void tFrameworkElement::GetNameHelper(util::tStringBuilder& sb, const tLink* l, 
   sb.Append('/');
   sb.Append(l->description);
 }
+
+tConfigFile* tFrameworkElement::GetConfigFile()
+{
+  return dynamic_cast<finroc::core::tConfigFile*>(this->GetAnnotation(finroc::core::tConfigFile::cTYPE));
+}
+
 
 tFrameworkElement* tFrameworkElement::GetParent(int link_index) const
 {
