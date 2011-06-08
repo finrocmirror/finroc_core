@@ -450,7 +450,7 @@ void tFrameworkElement::GetNameHelper(util::tStringBuilder& sb, const tLink* l, 
 
 tConfigFile* tFrameworkElement::GetConfigFile()
 {
-  return dynamic_cast<finroc::core::tConfigFile*>(this->GetAnnotation(finroc::core::tConfigFile::cTYPE));
+  return tConfigFile::Find(this);
 }
 
 
