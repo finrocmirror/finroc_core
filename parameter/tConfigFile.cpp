@@ -24,11 +24,13 @@
 #include "rrlib/finroc_core_utils/sFiles.h"
 #include "rrlib/xml2_wrapper/tXML2WrapperException.h"
 #include "rrlib/serialization/tTypedObject.h"
+#include "rrlib/serialization/tInputStream.h"
+#include "core/tFrameworkElement.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "core/tFrameworkElement.h"
 #include "core/tFrameworkElementTreeFilter.h"
 #include "core/tCoreFlags.h"
+#include "rrlib/serialization/tOutputStream.h"
 #include "core/parameter/tParameterInfo.h"
 
 namespace finroc
@@ -43,7 +45,8 @@ util::tString tConfigFile::cXML_LEAF_NAME = "value";
 tConfigFile::tConfigFile(const util::tString& filename_) :
     wrapped(),
     filename(filename_),
-    temp_buffer()
+    temp_buffer(),
+    active(true)
 {
   if (util::sFiles::Exists(filename_))
   {
@@ -68,9 +71,74 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
 tConfigFile::tConfigFile() :
     wrapped(),
     filename(),
-    temp_buffer()
+    temp_buffer(),
+    active(true)
 {
-  throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
+  wrapped.AddRootNode(cXML_BRANCH_NAME);
+}
+
+void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
+{
+  active = is.ReadBoolean();
+  util::tString file = is.ReadString();
+  util::tString content = is.ReadString();
+
+  if (active && file.Length() > 0 && content.Length() == 0 && (!file.Equals(filename)))
+  {
+    // load file
+    if (util::sFiles::Exists(file))
+    {
+      try
+      {
+        wrapped = rrlib::xml2::tXMLDocument(file, false); // false = do not validate with dtd
+      }
+      catch (const rrlib::xml2::tXML2WrapperException& e)
+      {
+        FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+        wrapped = rrlib::xml2::tXMLDocument();
+        try
+        {
+          wrapped.AddRootNode(cXML_BRANCH_NAME);
+        }
+        catch (const rrlib::xml2::tXML2WrapperException& e1)
+        {
+          FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+        }
+      }
+    }
+    filename = file;
+  }
+  else if (active && content.Length() > 0)
+  {
+    if (file.Length() > 0)
+    {
+      filename = file;
+    }
+
+    try
+    {
+      wrapped = rrlib::xml2::tXMLDocument(content.GetCString(), content.Length() + 1);
+    }
+    catch (const util::tException& e)
+    {
+      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+    }
+  }
+}
+
+tConfigFile* tConfigFile::Find(tFrameworkElement* element)
+{
+  ::finroc::core::tFinrocAnnotation* ann = element->GetAnnotation(cTYPE);
+  if (ann != NULL && (static_cast<tConfigFile*>(ann))->active == true)
+  {
+    return static_cast<tConfigFile*>(ann);
+  }
+  tFrameworkElement* parent = element->GetParent();
+  if (parent != NULL)
+  {
+    return Find(parent);
+  }
+  return NULL;
 }
 
 rrlib::xml2::tXMLNode& tConfigFile::GetEntry(const util::tString& entry, bool create)
@@ -217,6 +285,25 @@ void tConfigFile::SaveFile()
 
   // write new tree to file
   wrapped.WriteToFile(filename);
+}
+
+void tConfigFile::Serialize(rrlib::serialization::tOutputStream& os) const
+{
+  os.WriteBoolean(active);
+  os.WriteString(GetFilename());
+
+  try
+  {
+    os.WriteString(wrapped.GetRootNode().GetXMLDump());
+  }
+  catch (const rrlib::xml2::tXML2WrapperException& e)
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+  }
+  catch (const util::tException& e)
+  {
+    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+  }
 }
 
 void tConfigFile::TreeFilterCallback(tFrameworkElement* fe, bool loading_parameters)

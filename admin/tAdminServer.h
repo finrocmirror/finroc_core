@@ -41,11 +41,20 @@
 #include "core/port/rpc/tInterfaceServerPort.h"
 #include "core/port/rpc/method/tAbstractMethodCallHandler.h"
 
+namespace rrlib
+{
+namespace serialization
+{
+class tOutputStream;
+} // namespace rrlib
+} // namespace serialization
+
 namespace finroc
 {
 namespace core
 {
 class tAbstractMethod;
+class tConfigFile;
 
 /*!
  * \author Max Reichardt
@@ -54,6 +63,23 @@ class tAbstractMethod;
  */
 class tAdminServer : public tInterfaceServerPort, public tAbstractMethodCallHandler
 {
+  /*! Struct for callback parameters for GET_PARAMETER_INFO method */
+  struct tCallbackParameters
+  {
+public:
+
+    rrlib::serialization::tOutputStream* co;
+
+    tConfigFile* cf;
+
+    tCallbackParameters(tConfigFile* cf2, rrlib::serialization::tOutputStream* co2) :
+        co(co2),
+        cf(cf2)
+    {
+    }
+
+  };
+
 public:
 
   /*! Admin interface */
@@ -101,6 +127,9 @@ public:
   /*! Get current port value as string */
   static tPort3Method<tAdminServer*, tPortDataPtr<tCoreString>, int, int, int > cGET_PORT_VALUE_AS_STRING;
 
+  /*! Get parameter info for specified framework element: ConfigFile, children with config file, info on all parameters with same config file  */
+  static tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > cGET_PARAMETER_INFO;
+
   /*! Data Type of method calls to this port */
   static tRPCInterfaceType cDATA_TYPE;
 
@@ -141,6 +170,8 @@ public:
   void HandleVoidCall(const tAbstractMethod* method, int handle);
 
   void HandleVoidCall(const tAbstractMethod* method);
+
+  void TreeFilterCallback(tFrameworkElement* fe, const tCallbackParameters& custom_param);
 
 };
 

@@ -31,6 +31,14 @@
 
 namespace rrlib
 {
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
+
+namespace rrlib
+{
 namespace xml2
 {
 class tXMLNode;
@@ -70,6 +78,9 @@ private:
   /*! Temp buffer - only used in synchronized context */
   util::tStringBuilder temp_buffer;
 
+  /*! Is config file active? (false when config file is deleted via finstruct) */
+  bool active;
+
 public:
 
   /*! Data Type */
@@ -84,9 +95,11 @@ public:
   tConfigFile(const util::tString& filename_);
 
   /*!
-   * Dummy constructor. Generic instantiation is not supported.
+   * Create empty config file with no filename (should only be used to deserialize from stream shortly afterwards)
    */
   tConfigFile();
+
+  virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
   /*!
    * Find ConfigFile which specified element is configured from
@@ -94,10 +107,7 @@ public:
    * \param element Element
    * \return ConfigFile - or null if none could be found
    */
-  inline static tConfigFile* Find(tFrameworkElement* element)
-  {
-    return static_cast<tConfigFile*>(FindParentWithAnnotation(element, cTYPE));
-  }
+  static tConfigFile* Find(tFrameworkElement* element);
 
   // TODO: reduce code duplication in hasEntry() and getEntry()
 
@@ -109,6 +119,14 @@ public:
    * \return XMLNode representing entry
    */
   rrlib::xml2::tXMLNode& GetEntry(const util::tString& entry, bool create = false);
+
+  /*!
+   * \return Filename of current config file
+   */
+  inline util::tString GetFilename() const
+  {
+    return filename;
+  }
 
   /*!
    * Searches given entry in config file and returns its value as string if present.
@@ -126,6 +144,16 @@ public:
   bool HasEntry(const util::tString& entry);
 
   /*!
+   * (Should only be used when Annotatable::getAnnotation() is called manually)
+   *
+   * \return Is config file active (does it "exist")?
+   */
+  inline bool IsActive() const
+  {
+    return IsActive();
+  }
+
+  /*!
    * set parameters of all child nodes to current values in tree
    */
   void LoadParameterValues();
@@ -134,6 +162,8 @@ public:
    * Saves configuration file back to HDD
    */
   void SaveFile();
+
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 
   void TreeFilterCallback(tFrameworkElement* fe, bool loading_parameters);
 

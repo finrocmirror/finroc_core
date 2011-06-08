@@ -31,6 +31,8 @@
 #include "core/tRuntimeEnvironment.h"
 #include "core/tFinrocAnnotation.h"
 #include "rrlib/serialization/tDataTypeBase.h"
+#include "core/parameter/tConfigFile.h"
+#include "core/tFrameworkElementTreeFilter.h"
 #include "core/thread/tExecutionControl.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/cc/tCCPortBase.h"
@@ -46,6 +48,7 @@
 #include "core/parameter/tConstructorParameters.h"
 #include "core/parameter/tStructureParameterBase.h"
 #include "core/finstructable/tFinstructableGroup.h"
+#include "core/parameter/tParameterInfo.h"
 
 namespace finroc
 {
@@ -66,6 +69,7 @@ tVoid0Method<tAdminServer*> tAdminServer::cSTART_EXECUTION(tAdminServer::cMETHOD
 tVoid0Method<tAdminServer*> tAdminServer::cPAUSE_EXECUTION(tAdminServer::cMETHODS, "Pause execution", false);
 tPort1Method<tAdminServer*, int, int> tAdminServer::cIS_RUNNING(tAdminServer::cMETHODS, "Is Framework element running", "handle", false);
 tPort3Method<tAdminServer*, tPortDataPtr<tCoreString>, int, int, int > tAdminServer::cGET_PORT_VALUE_AS_STRING(tAdminServer::cMETHODS, "Get port value as string", "handle", "dummy", "dummy", false);
+tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > tAdminServer::cGET_PARAMETER_INFO(tAdminServer::cMETHODS, "Get Annotation", "handle", "annotation type", false);
 tRPCInterfaceType tAdminServer::cDATA_TYPE("Administration method calls", &(tAdminServer::cMETHODS));
 util::tString tAdminServer::cPORT_NAME = "Administration";
 util::tString tAdminServer::cQUALIFIED_PORT_NAME = "Unrelated/Administration";
@@ -119,29 +123,62 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
 
 tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbstractMethod* method, int handle, tPortDataPtr<tCoreString>& type)
 {
-  assert((method == &(cGET_ANNOTATION)));
-  ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
-  tFinrocAnnotation* result = NULL;
-  rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::FindType(type->ToString());
-  if (fe != NULL && fe->IsReady() && dt != NULL)
+  if (method == &(cGET_ANNOTATION))
   {
-    result = fe->GetAnnotation(dt);
-  }
-  else
-  {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Could not query element for annotation type ", type->ToString());
-  }
+    ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
+    tFinrocAnnotation* result = NULL;
+    rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::FindType(type->ToString());
+    if (fe != NULL && fe->IsReady() && dt != NULL)
+    {
+      result = fe->GetAnnotation(dt);
+    }
+    else
+    {
+      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Could not query element for annotation type ", type->ToString());
+    }
 
-  if (result == NULL)
-  {
-    return tPortDataPtr<rrlib::serialization::tMemoryBuffer>();
+    if (result == NULL)
+    {
+      return tPortDataPtr<rrlib::serialization::tMemoryBuffer>();
+    }
+    else
+    {
+      tPortDataPtr<rrlib::serialization::tMemoryBuffer> buf = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
+      rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::tOutputStream::eNames);
+      co.WriteType(result->GetType());
+      result->Serialize(co);
+      co.Close();
+      return buf;
+    }
   }
   else
   {
+    assert((method == &(cGET_PARAMETER_INFO)));
+
+    ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
+    if (fe == NULL || (!fe->IsReady()))
+    {
+      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Could not get parameter info for framework element ", handle);
+
+      return tPortDataPtr<rrlib::serialization::tMemoryBuffer>();
+    }
+
+    tConfigFile* cf = tConfigFile::Find(fe);
     tPortDataPtr<rrlib::serialization::tMemoryBuffer> buf = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
     rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::tOutputStream::eNames);
-    co.WriteType(result->GetType());
-    result->Serialize(co);
+    if (cf == NULL)
+    {
+      co.WriteBoolean(false);
+    }
+    else
+    {
+      co.WriteBoolean(true);
+      tCallbackParameters params(cf, &(co));
+      co.WriteInt((static_cast< ::finroc::core::tFrameworkElement*>(cf->GetAnnotated()))->GetHandle());
+      cf->Serialize(co);
+      tFrameworkElementTreeFilter filter;
+      filter.TraverseElementTree(fe, this, params);
+    }
     co.Close();
     return buf;
   }
@@ -477,6 +514,28 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method)
     GetRuntime()->StopExecution();
   }
 
+}
+
+void tAdminServer::TreeFilterCallback(tFrameworkElement* fe, const tCallbackParameters& custom_param)
+{
+  tConfigFile* cf = static_cast<tConfigFile*>(fe->GetAnnotation(tConfigFile::cTYPE));
+  if (cf != NULL)
+  {
+    custom_param.co->WriteByte(1);
+    custom_param.co->WriteInt(fe->GetHandle());
+    custom_param.co->WriteString(cf->GetFilename());
+    custom_param.co->WriteBoolean(cf->IsActive());
+  }
+  else
+  {
+    tParameterInfo* pi = static_cast<tParameterInfo*>(fe->GetAnnotation(tParameterInfo::cTYPE));
+    if (pi != NULL && custom_param.cf == tConfigFile::Find(fe))
+    {
+      custom_param.co->WriteByte(2);
+      custom_param.co->WriteInt(fe->GetHandle());
+      custom_param.co->WriteString(pi->GetConfigEntry());
+    }
+  }
 }
 
 } // namespace finroc

@@ -23,6 +23,8 @@
 #include "rrlib/serialization/tDataType.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tFrameworkElement.h"
+#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/serialization/tStringInputStream.h"
 #include "core/port/tAbstractPort.h"
 #include "core/parameter/tConfigFile.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
@@ -42,6 +44,10 @@ namespace core
 {
 rrlib::serialization::tDataTypeBase tParameterInfo::cTYPE = rrlib::serialization::tDataType<tParameterInfo>();
 
+tParameterInfo::tParameterInfo() :
+    config_entry()
+{}
+
 void tParameterInfo::AnnotatedObjectInitialized()
 {
   try
@@ -52,6 +58,16 @@ void tParameterInfo::AnnotatedObjectInitialized()
   {
     FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, tFrameworkElement::log_domain, e);
   }
+}
+
+void tParameterInfo::Deserialize(rrlib::serialization::tInputStream& is)
+{
+  SetConfigEntry(is.ReadString());
+}
+
+void tParameterInfo::Deserialize(rrlib::serialization::tStringInputStream& is)
+{
+  SetConfigEntry(is.ReadAll());
 }
 
 void tParameterInfo::LoadValue(bool ignore_ready)

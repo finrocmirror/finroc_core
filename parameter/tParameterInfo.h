@@ -26,11 +26,17 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/serialization/tDataTypeBase.h"
-#include "rrlib/serialization/tInputStream.h"
-#include "rrlib/serialization/tStringInputStream.h"
 #include "rrlib/serialization/tOutputStream.h"
 #include "rrlib/serialization/tStringOutputStream.h"
 #include "core/tFinrocAnnotation.h"
+
+namespace rrlib
+{
+namespace serialization
+{
+class tInputStream;
+} // namespace rrlib
+} // namespace serialization
 
 namespace finroc
 {
@@ -63,19 +69,11 @@ protected:
 
 public:
 
-  tParameterInfo() :
-      config_entry()
-  {}
+  tParameterInfo();
 
-  virtual void Deserialize(rrlib::serialization::tInputStream& is)
-  {
-    SetConfigEntry(is.ReadString());
-  }
+  virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
-  virtual void Deserialize(rrlib::serialization::tStringInputStream& is)
-  {
-    SetConfigEntry(is.ReadAll());
-  }
+  virtual void Deserialize(rrlib::serialization::tStringInputStream& is);
 
   /*!
    * \return Place in Configuration tree, this parameter is configured from (nodes are separated with dots)
