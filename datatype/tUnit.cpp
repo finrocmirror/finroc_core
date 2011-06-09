@@ -115,7 +115,7 @@ double tUnit::GetConversionFactor(tUnit* u) const
 {
   if (ConvertibleTo(u))
   {
-    return u->factor / factor;
+    return factor / u->factor;
   }
   throw util::tRuntimeException("Units cannot be converted.", CODE_LOCATION_MACRO);
 }
