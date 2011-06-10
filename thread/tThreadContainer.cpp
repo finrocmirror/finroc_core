@@ -40,6 +40,8 @@ tThreadContainer::tThreadContainer(tFrameworkElement* parent, const util::tStrin
     thread()
 {
   tStructureParameterList::GetOrCreate(this)->Add(rt_thread);
+  tStructureParameterList::GetOrCreate(this)->Add(cycle_time);
+  tStructureParameterList::GetOrCreate(this)->Add(warn_on_cycle_time_exceed);
   AddAnnotation(new tExecutionControl(*this));
 }
 
