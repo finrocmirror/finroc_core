@@ -28,6 +28,7 @@
  */
 //----------------------------------------------------------------------
 #include "core/structure/tStructureElementRegister.h"
+#include "core/tRuntimeEnvironment.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -72,18 +73,21 @@ namespace structure
 util::tMutex& tStructureElementRegister::GetMutex()
 {
   static util::tMutex mutex;
+  static tRuntimeEnvironment::tStaticDeleter deleter; // make sure all framework elements are deleted before mutex
   return mutex;
 }
 
 std::vector<tInstantiatedModule>& tStructureElementRegister::GetRegister()
 {
   static std::vector<tInstantiatedModule> reg;
+  static tRuntimeEnvironment::tStaticDeleter deleter; // make sure all framework elements are deleted before register
   return reg;
 }
 
 std::vector<tModulePorts>& tStructureElementRegister::GetModuleTypeRegister()
 {
   static std::vector<tModulePorts> reg;
+  static tRuntimeEnvironment::tStaticDeleter deleter; // make sure all framework elements are deleted before register
   return reg;
 }
 
