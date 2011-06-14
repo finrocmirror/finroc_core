@@ -331,8 +331,16 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
   tPortDataPtr& operator=(tPortDataPtr<U> && o)
   {
     o.data = NULL;
-    data = o.manager->GetObject();
-    manager = o.manager;
+    if (o.manager != NULL)
+    {
+      data = o.manager->GetObject();
+      manager = o.manager;
+    }
+    else
+    {
+      data = NULL;
+      manager = NULL;
+    }
     o.manager = NULL;
     std::swap(mode, o.mode);
     return *this;

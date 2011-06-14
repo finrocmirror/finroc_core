@@ -103,15 +103,15 @@ public:
 
   static void AddParam(tCallParameter* p, tPortDataPtr<T>& val)
   {
-    p->type = tCallParameter::cOBJECT;
     typename tPortDataPtr<T>::tManager* mgr = val.GetManager();
     if (mgr != NULL)
     {
+      p->type = tCallParameter::cOBJECT;
       p->value = std::move(val);
     }
     else
     {
-      p->value = tPortDataPtr<T>();
+      p->type = tCallParameter::cNULLPARAM;
     }
   }
 };
