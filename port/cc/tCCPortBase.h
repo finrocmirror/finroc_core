@@ -507,6 +507,12 @@ public:
   tCCPortDataManager* GetInInterThreadContainer();
 
   /*!
+   * \param dont_pull Do not attempt to pull data - even if port is on push strategy
+   * \return Current data in CC Interthread-container. Needs to be recycled manually.
+   */
+  tCCPortDataManager* GetInInterThreadContainer(bool dont_pull);
+
+  /*!
    * Pulls port data (regardless of strategy) and returns it in interhread container
    * (careful: no auto-release of lock)
    * \param intermediate_assign Assign pulled value to ports in between?
@@ -530,7 +536,6 @@ public:
    * Copy current value to buffer (Most efficient get()-version)
    *
    * \param buffer Buffer to copy current data to
-   * \param dont_pull Do not attempt to pull data - even if port is on push strategy
    */
   inline void GetRaw(rrlib::serialization::tGenericObject* buffer)
   {

@@ -136,6 +136,13 @@ tCCPortDataManager* tCCPortBase::GetInInterThreadContainer()
   return ccitc;
 }
 
+tCCPortDataManager* tCCPortBase::GetInInterThreadContainer(bool dont_pull)
+{
+  tCCPortDataManager* ccitc = tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(GetDataType());
+  GetRaw(ccitc->GetObject(), dont_pull);
+  return ccitc;
+}
+
 tCCPortDataManagerTL* tCCPortBase::GetLockedUnsafeInContainer()
 {
   tCCPortDataRef* val = value;

@@ -484,7 +484,18 @@ public:
    */
   inline tPortDataManager* GetLockedUnsafeRaw()
   {
-    if (PushStrategy())
+    return GetLockedUnsafeRaw(false);
+  }
+
+  /*!
+   * (careful: typically not meant for use by clients (not type-safe, no auto-release of locks))
+   *
+   * \param dont_pull Do not attempt to pull data - even if port is on push strategy
+   * \return current locked port data
+   */
+  inline tPortDataManager* GetLockedUnsafeRaw(bool dont_pull)
+  {
+    if (PushStrategy() || dont_pull)
     {
       return LockCurrentValueForRead();
     }

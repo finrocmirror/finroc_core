@@ -50,7 +50,7 @@ class tFinrocTypeInfo : public util::tObject
 {
 public:
 
-  enum tType { eSTD, eCC, eMETHOD, eTRANSACTION, eUNKNOWN };
+  enum tType { eSTD, eCC, eMETHOD, eTRANSACTION, eUNKNOWN_STD, eUNKNOWN_CC, eUNKNOWN_METHOD, eUNKNOWN_TRANSACTION };
 
 private:
 
@@ -204,6 +204,15 @@ public:
   inline static bool IsStdType(const rrlib::serialization::tDataTypeBase& dt)
   {
     return Get(dt).GetType() == eSTD;
+  }
+
+  /*!
+   * \param dt Data type to look this up for
+   * \return It this an unknown type
+   */
+  inline static bool IsUnknownType(rrlib::serialization::tDataTypeBase dt)
+  {
+    return Get(dt).GetType() >= eUNKNOWN_STD;
   }
 
   /*!

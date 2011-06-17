@@ -42,7 +42,7 @@ tRemoteTypes::tRemoteTypes() :
 
 void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
 {
-  rrlib::logging::tLogStream ls = FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain);
+  rrlib::logging::tLogStream ls = FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain);
   if (types.Size() == 0)
   {
     assert(((!Initialized())) && "Already initialized");
@@ -57,6 +57,9 @@ void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
   while (next != -1)
   {
     int16 time = ci.ReadShort();
+
+    ci.ReadByte();
+
     util::tString name = ci.ReadString();
     int16 checked_types = rrlib::serialization::tDataTypeBase::GetTypeCount();
     rrlib::serialization::tDataTypeBase local = rrlib::serialization::tDataTypeBase::FindType(name);
@@ -133,8 +136,10 @@ void tRemoteTypes::SerializeLocalDataTypes(rrlib::serialization::tOutputStream& 
   for (int16 i = local_types_sent, n = type_count; i < n; i++)
   {
     rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::GetType(i);
+
     co.WriteShort(dt.GetUid());
     co.WriteShort(tFinrocTypeInfo::Get(i).GetUpdateTime());
+    co.WriteByte(tFinrocTypeInfo::Get(i).GetType());
     co.WriteString(dt.GetName());
   }
   co.WriteShort(-1);  // terminator

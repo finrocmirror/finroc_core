@@ -148,7 +148,7 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
     tStdNetPort* pb = static_cast<tStdNetPort*>(wrapped);
     if (!use_q)
     {
-      tPortDataManager* pd = pb->GetLockedUnsafeRaw();
+      tPortDataManager* pd = pb->GetLockedUnsafeRaw(true);
       co.WriteObject(pd->GetObject());
       pd->ReleaseLock();
     }
@@ -174,7 +174,7 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
     tCCNetPort* pb = static_cast<tCCNetPort*>(wrapped);
     if (!use_q)
     {
-      tCCPortDataManager* ccitc = pb->GetInInterThreadContainer();
+      tCCPortDataManager* ccitc = pb->GetInInterThreadContainer(true);
       co.WriteObject(ccitc->GetObject());
       ccitc->Recycle2();
     }

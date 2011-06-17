@@ -107,7 +107,7 @@ private:
 
   inline bool IsUnknownType()
   {
-    return ftype == tFinrocTypeInfo::eUNKNOWN;
+    return ftype >= tFinrocTypeInfo::eUNKNOWN_STD;
   }
 
 protected:
