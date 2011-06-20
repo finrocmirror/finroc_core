@@ -69,6 +69,11 @@ protected:
     const T* val = tc->data->GetObject()->GetData<T>();
     if (!bounds.InBounds(*val))
     {
+      if (tc->ref->GetContainer()->GetRefCounter() == 0)    // still unused
+      {
+        FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Attempt to publish value that is out-of-bounds of output (!) port. This is undesirable.");
+        tc->ref->GetContainer()->RecycleUnused();
+      }
       if (bounds.Discard())
       {
         tc->ref = this->value;

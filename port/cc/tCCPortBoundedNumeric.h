@@ -31,6 +31,7 @@
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/datatype/tNumber.h"
 #include "core/port/cc/tCCPortDataRef.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/tPortFlags.h"
 #include "core/port/cc/tCCPortDataManager.h"
@@ -73,6 +74,11 @@ protected:
     T val = cn->Value<T>();
     if (!bounds.InBounds(val))
     {
+      if (tc->ref->GetContainer()->GetRefCounter() == 0)    // still unused
+      {
+        FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Attempt to publish value that is out-of-bounds of output (!) port. This is undesirable.");
+        tc->ref->GetContainer()->RecycleUnused();
+      }
       if (bounds.Discard())
       {
         tc->ref = this->value;

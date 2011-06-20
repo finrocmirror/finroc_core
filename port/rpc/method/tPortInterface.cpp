@@ -38,9 +38,18 @@ tPortInterface::tPortInterface(const util::tString& name_, bool shutdown_runtime
 void tPortInterface::AddMethod(tAbstractMethod* m)
 {
   assert(((methods.Size() <= 127)) && "too many methods");
-  m->method_id = static_cast<int8>(methods.Size());
-  m->type = this;
-  methods.Add(m);
+  if (methods.Contains(m))
+  {
+    // should only happen in C++ (with certain static initialization order)
+    m->method_id = static_cast<int>(methods.IndexOf(m));
+    m->type = this;
+  }
+  else
+  {
+    m->method_id = static_cast<int8>(methods.Size());
+    m->type = this;
+    methods.Add(m);
+  }
 }
 
 tPortInterface::~tPortInterface()

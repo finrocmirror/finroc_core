@@ -42,7 +42,7 @@ tRemoteTypes::tRemoteTypes() :
 
 void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
 {
-  rrlib::logging::tLogStream ls = FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG, log_domain);
+  rrlib::logging::tLogStream ls = FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain);
   if (types.Size() == 0)
   {
     assert(((!Initialized())) && "Already initialized");
