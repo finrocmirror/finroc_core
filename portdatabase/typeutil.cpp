@@ -31,6 +31,7 @@
 #include "rrlib/math/tPose3D.h"
 #include "rrlib/math/tPose2D.h"
 #include "rrlib/math/tVector.h"
+#include "rrlib/math/tAngle.h"
 
 #endif
 
@@ -73,6 +74,10 @@ void InitCCTypes()
   InitCCType<rrlib::math::tVector<3, double, rrlib::math::vector::Polar> >();
   InitCCType<rrlib::math::tVector<2, float, rrlib::math::vector::Polar> >();
   InitCCType<rrlib::math::tVector<3, float, rrlib::math::vector::Polar> >();
+  InitCCType<rrlib::math::tAngle<double, rrlib::math::angle::Degree, rrlib::math::angle::Signed> >();
+  InitCCType<rrlib::math::tAngle<double, rrlib::math::angle::Degree, rrlib::math::angle::Unsigned> >();
+  InitCCType<rrlib::math::tAngle<double, rrlib::math::angle::Radian, rrlib::math::angle::Signed> >();
+  InitCCType<rrlib::math::tAngle<double, rrlib::math::angle::Radian, rrlib::math::angle::Unsigned> >();
 #endif
 
 }
