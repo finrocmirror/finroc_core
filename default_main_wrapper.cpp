@@ -46,6 +46,8 @@ extern "C"
 #include "rrlib/logging/definitions.h"
 
 #include "core/tRuntimeEnvironment.h"
+#include "core/parameter/tConfigFile.h"
+#include "rrlib/finroc_core_utils/sFiles.h"
 #include "plugins/tcp/tTCPServer.h"
 #include "plugins/tcp/tTCPPeer.h"
 
@@ -120,15 +122,6 @@ bool LogConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
 }
 
 //----------------------------------------------------------------------
-// ParameterConfig
-//----------------------------------------------------------------------
-rrlib::getopt::tOption& ParameterConfig()
-{
-  static rrlib::getopt::tOption parameter_config;
-  return parameter_config;
-}
-
-//----------------------------------------------------------------------
 // ParameterConfigHandler
 //----------------------------------------------------------------------
 bool ParameterConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
@@ -136,7 +129,16 @@ bool ParameterConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_optio
   rrlib::getopt::tOption parameter_config(name_to_option_map.at("config-file"));
   if (parameter_config->IsActive())
   {
-    ParameterConfig() = parameter_config;
+    const char* file = boost::any_cast<const char *>(parameter_config->GetValue());
+    if (!finroc::util::sFiles::Exists(file))
+    {
+      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR) << "Could not find specified config file " << file;
+    }
+    else
+    {
+      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG) << "Loading config file " << file;
+    }
+    finroc::core::tRuntimeEnvironment::GetInstance()->AddAnnotation(new finroc::core::tConfigFile(file));
   }
   return true;
 }
@@ -180,7 +182,7 @@ int main(int argc, char **argv)
 
   finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread");
 
-  InitMainGroup(main_thread, ParameterConfig());
+  InitMainGroup(main_thread);
 
   main_thread->Init();
   main_thread->StartExecution();

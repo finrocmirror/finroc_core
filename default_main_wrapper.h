@@ -65,7 +65,7 @@ extern const char * const cPROGRAM_DESCRIPTION;
 //----------------------------------------------------------------------
 
 void StartUp();
-void InitMainGroup(finroc::core::tThreadContainer *main_thread, const rrlib::getopt::tOption& option = rrlib::getopt::tOption());
+void InitMainGroup(finroc::core::tThreadContainer *main_thread);
 
 
 
