@@ -123,6 +123,10 @@ tRuntimeEnvironment::~tRuntimeEnvironment()
 
 ::finroc::core::tFrameworkElement* tRuntimeEnvironment::GetElement(int handle)
 {
+  if (handle == this->GetHandle())
+  {
+    return this;
+  }
   ::finroc::core::tFrameworkElement* fe = handle >= 0 ? registry.ports->Get(handle) : registry.elements.Get(handle);
   if (fe == NULL)
   {

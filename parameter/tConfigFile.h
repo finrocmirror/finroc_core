@@ -150,7 +150,7 @@ public:
    */
   inline bool IsActive() const
   {
-    return IsActive();
+    return active;
   }
 
   /*!
