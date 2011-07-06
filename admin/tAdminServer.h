@@ -33,10 +33,10 @@
 #include "core/datatype/tCoreString.h"
 #include "core/port/rpc/method/tVoid1Method.h"
 #include "core/port/rpc/method/tPort2Method.h"
-#include "core/port/rpc/method/tVoid0Method.h"
 #include "core/port/rpc/method/tPort1Method.h"
 #include "core/port/rpc/method/tPort3Method.h"
 #include "core/portdatabase/tRPCInterfaceType.h"
+#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/serialization/tMemoryBuffer.h"
 #include "core/port/rpc/tInterfaceServerPort.h"
 #include "core/port/rpc/method/tAbstractMethodCallHandler.h"
@@ -53,6 +53,7 @@ namespace finroc
 {
 namespace core
 {
+class tExecutionControl;
 class tAbstractMethod;
 class tConfigFile;
 
@@ -72,9 +73,19 @@ public:
 
     tConfigFile* cf;
 
+    util::tSimpleList<tExecutionControl*>* ecs;
+
     tCallbackParameters(tConfigFile* cf2, rrlib::serialization::tOutputStream* co2) :
         co(co2),
-        cf(cf2)
+        cf(cf2),
+        ecs(NULL)
+    {
+    }
+
+    tCallbackParameters(util::tSimpleList<tExecutionControl*>* ecs_) :
+        co(NULL),
+        cf(NULL),
+        ecs(ecs_)
     {
     }
 
@@ -116,10 +127,10 @@ public:
   static tVoid1Method<tAdminServer*, int> cDELETE_ELEMENT;
 
   /*! Start/Resume application execution */
-  static tVoid0Method<tAdminServer*> cSTART_EXECUTION;
+  static tVoid1Method<tAdminServer*, int> cSTART_EXECUTION;
 
   /*! Stop/Pause application execution */
-  static tVoid0Method<tAdminServer*> cPAUSE_EXECUTION;
+  static tVoid1Method<tAdminServer*, int> cPAUSE_EXECUTION;
 
   /*! Is framework element with specified handle currently executing? */
   static tPort1Method<tAdminServer*, int, int> cIS_RUNNING;
@@ -139,6 +150,9 @@ public:
   /*! Qualified port name */
   static util::tString cQUALIFIED_PORT_NAME;
 
+  /*! Return values for IS_RUNNING */
+  static const int cNOTHING = -1, cSTOPPED = 0, cSTARTED = 1, cBOTH = 2;
+
 private:
 
   /*!
@@ -148,6 +162,15 @@ private:
    * \param dest Destination port
    */
   void Connect(tAbstractPort* src, tAbstractPort* dest);
+
+  /*!
+   * Returns all relevant execution controls for start/stop command on specified element
+   * (Helper method for IS_RUNNING, START_EXECUTION and PAUSE_EXECUTION)
+   *
+   * \param result Result buffer for list of execution controls
+   * \param element_handle Handle of element
+   */
+  void GetExecutionControls(util::tSimpleList<tExecutionControl*>& result, int element_handle);
 
 public:
 
@@ -168,8 +191,6 @@ public:
   void HandleVoidCall(tAbstractMethod* method, int cma_index, tPortDataPtr<tCoreString>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer);
 
   void HandleVoidCall(const tAbstractMethod* method, int handle);
-
-  void HandleVoidCall(const tAbstractMethod* method);
 
   void TreeFilterCallback(tFrameworkElement* fe, const tCallbackParameters& custom_param);
 

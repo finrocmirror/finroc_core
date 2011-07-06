@@ -22,18 +22,17 @@
 #include "core/admin/tAdminServer.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tAbstractPort.h"
+#include "core/tFrameworkElement.h"
+#include "core/tRuntimeEnvironment.h"
+#include "core/tFrameworkElementTreeFilter.h"
+#include "core/thread/tExecutionControl.h"
 #include "rrlib/serialization/tOutputStream.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tCreateFrameworkElementAction.h"
 #include "core/plugin/tPlugins.h"
 #include "core/parameter/tStructureParameterList.h"
-#include "core/tFrameworkElement.h"
-#include "core/tRuntimeEnvironment.h"
 #include "core/tFinrocAnnotation.h"
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "core/parameter/tConfigFile.h"
-#include "core/tFrameworkElementTreeFilter.h"
-#include "core/thread/tExecutionControl.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "rrlib/serialization/tGenericObject.h"
@@ -65,14 +64,15 @@ tVoid1Method<tAdminServer*, int> tAdminServer::cSAVE_FINSTRUCTABLE_GROUP(tAdminS
 tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > tAdminServer::cGET_ANNOTATION(tAdminServer::cMETHODS, "Get Annotation", "handle", "annotation type", false);
 tVoid4Method<tAdminServer*, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > tAdminServer::cSET_ANNOTATION(tAdminServer::cMETHODS, "Set Annotation", "handle", "dummy", "dummy", "annotation", false);
 tVoid1Method<tAdminServer*, int> tAdminServer::cDELETE_ELEMENT(tAdminServer::cMETHODS, "Delete Framework element", "handle", false);
-tVoid0Method<tAdminServer*> tAdminServer::cSTART_EXECUTION(tAdminServer::cMETHODS, "Start execution", false);
-tVoid0Method<tAdminServer*> tAdminServer::cPAUSE_EXECUTION(tAdminServer::cMETHODS, "Pause execution", false);
+tVoid1Method<tAdminServer*, int> tAdminServer::cSTART_EXECUTION(tAdminServer::cMETHODS, "Start execution", "Framework element handle", false);
+tVoid1Method<tAdminServer*, int> tAdminServer::cPAUSE_EXECUTION(tAdminServer::cMETHODS, "Pause execution", "Framework element handle", false);
 tPort1Method<tAdminServer*, int, int> tAdminServer::cIS_RUNNING(tAdminServer::cMETHODS, "Is Framework element running", "handle", false);
 tPort3Method<tAdminServer*, tPortDataPtr<tCoreString>, int, int, int > tAdminServer::cGET_PORT_VALUE_AS_STRING(tAdminServer::cMETHODS, "Get port value as string", "handle", "dummy", "dummy", false);
 tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > tAdminServer::cGET_PARAMETER_INFO(tAdminServer::cMETHODS, "Get Annotation", "handle", "annotation type", false);
 tRPCInterfaceType tAdminServer::cDATA_TYPE("Administration method calls", &(tAdminServer::cMETHODS));
 util::tString tAdminServer::cPORT_NAME = "Administration";
 util::tString tAdminServer::cQUALIFIED_PORT_NAME = "Unrelated/Administration";
+const int tAdminServer::cNOTHING, tAdminServer::cSTOPPED, tAdminServer::cSTARTED, tAdminServer::cBOTH;
 
 tAdminServer::tAdminServer() :
     tInterfaceServerPort(cPORT_NAME, NULL, cDATA_TYPE, NULL, tCoreFlags::cSHARED)
@@ -93,6 +93,24 @@ void tAdminServer::Connect(tAbstractPort* src, tAbstractPort* dest)
   else
   {
     src->ConnectToTarget(dest);
+  }
+}
+
+void tAdminServer::GetExecutionControls(util::tSimpleList<tExecutionControl*>& result, int element_handle)
+{
+  ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(element_handle);
+  if (fe != NULL && (fe->IsReady()))
+  {
+    tFrameworkElementTreeFilter filter;
+    filter.TraverseElementTree(fe, this, tCallbackParameters(&(result)));
+  }
+  if (result.Size() == 0)
+  {
+    tExecutionControl* ec = tExecutionControl::Find(fe);
+    if (ec != NULL)
+    {
+      result.Add(ec);
+    }
   }
 }
 
@@ -186,18 +204,33 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
 
 int tAdminServer::HandleCall(const tAbstractMethod* method, int handle)
 {
-  assert((method == &(cIS_RUNNING)));
-  ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
-  if (fe != NULL && (fe->IsReady()))
+  assert((method == &(cSTART_EXECUTION) || method == &(cPAUSE_EXECUTION) || method == &(cIS_RUNNING)));
+  util::tSimpleList<tExecutionControl*> ecs;
+  GetExecutionControls(ecs, handle);
+
+  bool stopped = false;
+  bool running = false;
+  for (size_t i = 0u; i < ecs.Size(); i++)
   {
-    tExecutionControl* ec = tExecutionControl::Find(fe);
-    if (ec == NULL)
-    {
-      return 0;
-    }
-    return ec->IsRunning() ? 1 : 0;
+    stopped |= (!ecs.Get(i)->IsRunning());
+    running |= ecs.Get(i)->IsRunning();
   }
-  return -1;
+  if (running && stopped)
+  {
+    return cBOTH;
+  }
+  else if (running)
+  {
+    return cSTARTED;
+  }
+  else if (stopped)
+  {
+    return cSTOPPED;
+  }
+  else
+  {
+    return cNOTHING;
+  }
 }
 
 tPortDataPtr<tCoreString> tAdminServer::HandleCall(const tAbstractMethod* method, int p1, int p2, int p3)
@@ -482,6 +515,37 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int handle)
     return;
   }
 
+  if (method == &(cSTART_EXECUTION) || method == &(cPAUSE_EXECUTION))
+  {
+    util::tSimpleList<tExecutionControl*> ecs;
+    GetExecutionControls(ecs, handle);
+    if (ecs.Size() == 0)
+    {
+      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Start/Pause command has not effect");
+    }
+    if (method == &(cSTART_EXECUTION))
+    {
+      for (size_t i = 0u; i < ecs.Size(); i++)
+      {
+        if (!ecs.Get(i)->IsRunning())
+        {
+          ecs.Get(i)->Start();
+        }
+      }
+    }
+    else if (method == &(cPAUSE_EXECUTION))
+    {
+      for (size_t i = 0u; i < ecs.Size(); i++)
+      {
+        if (ecs.Get(i)->IsRunning())
+        {
+          ecs.Get(i)->Pause();
+        }
+      }
+    }
+    return;
+  }
+
   assert((method == &(cSAVE_FINSTRUCTABLE_GROUP)));
   ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
   if (fe != NULL && fe->IsReady() && fe->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP))
@@ -502,22 +566,18 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int handle)
   }
 }
 
-void tAdminServer::HandleVoidCall(const tAbstractMethod* method)
-{
-  assert((method == &(cSTART_EXECUTION) || method == &(cPAUSE_EXECUTION)));
-  if (method == &(cSTART_EXECUTION))
-  {
-    GetRuntime()->StartExecution();
-  }
-  else if (method == &(cPAUSE_EXECUTION))
-  {
-    GetRuntime()->StopExecution();
-  }
-
-}
-
 void tAdminServer::TreeFilterCallback(tFrameworkElement* fe, const tCallbackParameters& custom_param)
 {
+  if (custom_param.ecs != NULL)
+  {
+    tExecutionControl* ec = static_cast<tExecutionControl*>(fe->GetAnnotation(tExecutionControl::cTYPE));
+    if (ec != NULL)
+    {
+      custom_param.ecs->Add(ec);
+    }
+    return;
+  }
+
   tConfigFile* cf = static_cast<tConfigFile*>(fe->GetAnnotation(tConfigFile::cTYPE));
   if (cf != NULL)
   {
