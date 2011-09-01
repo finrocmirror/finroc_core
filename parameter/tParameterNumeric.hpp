@@ -24,7 +24,6 @@
 #include "core/port/tPortWrapperBase.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/tThreadLocalCache.h"
-#include "core/datatype/tBoolean.h"
 #include "rrlib/serialization/tGenericObject.h"
 #include "core/port/cc/tCCPortBase.h"
 

@@ -23,28 +23,9 @@
 #define core__portdatabase__typeutil_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-#include <boost/type_traits/has_virtual_destructor.hpp>
-#include <boost/type_traits/remove_pointer.hpp>
-#include <boost/type_traits/is_integral.hpp>
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/is_enum.hpp>
-#include "core/portdatabase/tCCType.h"
+#include <type_traits>
 #include "rrlib/serialization/deepcopy.h"
-
-namespace rrlib
-{
-namespace math
-{
-class tPose3D;
-class tPose2D;
-template <size_t, typename, template<size_t, typename> class> class tVector;
-template <typename, typename, typename> class tAngle;
-}
-namespace util
-{
-class tTime;
-}
-}
+#include "rrlib/serialization/tTypeTraitsVector.h"
 
 namespace finroc
 {
@@ -60,64 +41,31 @@ class tTransaction;
  */
 namespace typeutil
 {
-template <bool CC, typename T>
-struct tIsCCTypeBase
-{
-  enum { value = false };
-};
-
-template <typename T>
-struct tIsCCTypeBase<true, T>
-{
-  enum { value = true };
-};
-
-template <bool B>
-struct tIsCCTypeBase<B, rrlib::math::tPose3D>
-{
-  enum { value = true };
-};
-
-template <bool B>
-struct tIsCCTypeBase<B, rrlib::math::tPose2D>
-{
-  enum { value = true };
-};
-
-template <bool B, size_t Tdimension, typename TElement, template<size_t, typename> class TData>
-struct tIsCCTypeBase<B, rrlib::math::tVector<Tdimension, TElement, TData> >
-{
-  enum { value = true };
-};
-
-template <bool B, typename TElement, typename TUnitPolicy, typename TSignPolicy>
-struct tIsCCTypeBase<B, rrlib::math::tAngle<TElement, TUnitPolicy, TSignPolicy> >
-{
-  enum { value = true };
-};
-
-template <bool B>
-struct tIsCCTypeBase<B, rrlib::util::tTime>
-{
-  enum { value = true };
-};
 
 /*!
  * This struct is used to determine whether a type is a "cheap copy" type.
+ *
  * In this case 'value' is true.
+ *
+ * Cheap copy types never block or allocate memory during copying.
+ * As a rule of thumb, all types that could be copied by using memcpy and that are not too big (maybe 256 bytes)
+ * are cheap copy types.
+ *
+ * Interestingly, std::has_trivial_destructor is a pretty good heuristic whether a type is a cheap copy type.
  */
 template <typename T>
-struct tIsCCType : public tIsCCTypeBase<boost::is_base_of<tCCType, T>::value, T> {};
+struct tIsCCType
+{
+  enum { value = std::has_trivial_destructor<T>::value && (sizeof(T) <= 256) };
+};
 
 /*!
- * This struct is used to determine whether a "cheap copy" type should be used in Port.
- * In this case 'value' is true.
+ * Equivalent for runtime "cheap copy" type identification
  */
-template <typename T>
-struct tUseCCType
+inline bool IsCCType(const rrlib::serialization::tDataTypeBase& dt)
 {
-  enum { value = tIsCCType<T>::value || boost::is_integral<T>::value || boost::is_floating_point<T>::value || boost::is_enum<T>::value };
-};
+  return dt.GetSize() <= 256 && ((dt.GetTypeTraits() & rrlib::serialization::trait_flags::cHAS_TRIVIAL_DESTRUCTOR) != 0);
+}
 
 template <typename Q, typename C>
 inline C* GenericChangeTypeHelper(void (Q::*tFunc)(const C& t, int64_t i1, int64_t i2))
@@ -143,23 +91,8 @@ struct tGenericChangeType
     return NULL;
   }
 
-  typedef typename boost::remove_pointer < typeof(Change((T*)1)) >::type type;
+  typedef typename std::remove_pointer < typeof(Change((T*)1)) >::type type;
 };
-
-// Helper methods for determining whether a type has a virtual table
-template <typename T>
-inline static bool HasVTable(T* t)
-{
-  return HasVTableHelper(boost::has_virtual_destructor<T>());
-}
-inline static bool HasVTableHelper(const boost::true_type&)
-{
-  return true;
-}
-inline static bool HasVTableHelper(const boost::false_type&)
-{
-  return false;
-}
 
 // Helper methods for determining whether a type is a transaction type
 /*static bool GetTransactionType(tTransaction* x)
@@ -195,7 +128,6 @@ inline static void ApplyChange(std::vector<T>& obj, const std::vector<T>& transa
   }
 }
 
-void InitCCTypes();
 } // namespace typeutil
 
 } // namespace finroc

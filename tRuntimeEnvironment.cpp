@@ -194,7 +194,6 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   tMethodCallSyncher::StaticInit();  // dito
   util::tBoundedQElementContainer::StaticInit();
   util::tChunkedBuffer::StaticInit();
-  typeutil::InitCCTypes();  // should be done before any ports/elements are added
 
   new tRuntimeEnvironment(); // should be done before any ports/elements are added
   instance->registry.infos_lock = infos_lock;

@@ -20,8 +20,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/tPort.h"
-#include "core/datatype/tBoolean.h"
-#include "core/datatype/tEnumValue.h"
 #include "core/datatype/tPortCreationList.h"
 #include "core/datatype/tDataTypeReference.h"
 #include "core/parameter/tParameter.h"
@@ -31,10 +29,9 @@
 #include "core/thread/tPeriodicFrameworkElementTask.h"
 
 template class rrlib::serialization::tDataType<finroc::core::tNumber>;
-template class rrlib::serialization::tDataType<finroc::core::tBoolean>;
+template class rrlib::serialization::tDataType<bool>;
 template class rrlib::serialization::tDataType<finroc::core::tCoreString>;
 template class rrlib::serialization::tDataType<finroc::core::tDataTypeReference>;
-template class rrlib::serialization::tDataType<finroc::core::tEnumValue>;
 template class rrlib::serialization::tDataType<finroc::core::tPortCreationList>;
 template class rrlib::serialization::tDataType<finroc::core::tConfigFile>;
 template class rrlib::serialization::tDataType<finroc::core::tParameterInfo>;
@@ -55,7 +52,6 @@ template class tPort<double>;
 template class tPort<tNumber>;
 template class tPort<tCoreString>;
 template class tPort<bool>;
-template class tPort<tEnumValue>;
 template class tPort<rrlib::serialization::tMemoryBuffer>;
 
 template class tParameterBase<int>;
@@ -65,7 +61,6 @@ template class tParameterBase<double>;
 template class tParameterBase<tNumber>;
 template class tParameterBase<tCoreString>;
 template class tParameterBase<bool>;
-template class tParameterBase<tEnumValue>;
 template class tParameterBase<rrlib::serialization::tMemoryBuffer>;
 
 template class tParameter<int>;
@@ -75,7 +70,6 @@ template class tParameter<double>;
 template class tParameter<tNumber>;
 template class tParameter<tCoreString>;
 template class tParameter<bool>;
-template class tParameter<tEnumValue>;
 template class tParameter<rrlib::serialization::tMemoryBuffer>;
 
 template class tParameterNumeric<int>;

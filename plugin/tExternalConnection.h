@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/plugin/tConnectionListener.h"
-#include "core/parameter/tStructureParameterString.h"
+#include "core/parameter/tStructureParameter.h"
 #include "core/tFrameworkElement.h"
 
 namespace finroc
@@ -61,7 +61,7 @@ private:
   bool first_connect;
 
   /*! if set, this module automatically connects to this address */
-  tStructureParameterString* auto_connect_to;
+  tStructureParameter<util::tString> auto_connect_to;
 
 public:
 

@@ -24,10 +24,6 @@
 
 #include "core/port/rpc/tCallParameter.h"
 #include "core/portdatabase/typeutil.h"
-#include <boost/type_traits/is_base_of.hpp>
-#include <boost/type_traits/is_enum.hpp>
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/is_integral.hpp>
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
@@ -145,7 +141,7 @@ public:
 };
 
 template <typename T>
-class tParameterUtil : public tParameterUtilBase < T, boost::is_enum<T>::value || boost::is_integral<T>::value || boost::is_floating_point<T>::value >
+class tParameterUtil : public tParameterUtilBase < T, std::is_integral<T>::value || std::is_floating_point<T>::value >
 {
 };
 

@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2010 Max Reichardt,
+ * Copyright (C) 2010-2011 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef core__parameter__tStructureParameterNumeric_h__
-#define core__parameter__tStructureParameterNumeric_h__
+#ifndef core__parameter__tStructureParameterImplNumeric_h__
+#define core__parameter__tStructureParameterImplNumeric_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
@@ -44,7 +44,7 @@ namespace core
  * Numeric Structure parameter.
  */
 template<typename T>
-class tStructureParameterNumeric : public tStructureParameter<tNumber>
+class tStructureParameterImplNumeric : public tStructureParameterImplStandard<tNumber>
 {
 private:
 
@@ -67,25 +67,70 @@ private:
   }
 
   /*!
-   * Adjust value to parameter constraints
-   *
-   * \param cCurrent CoreNumber buffer
+   * \param cn New Value
    */
-  void Set(tNumber cn);
+  inline void Set(tNumber cn)
+  {
+    if (unit != &(tUnit::cNO_UNIT) && cn.GetUnit() != unit)
+    {
+      if (cn.GetUnit() == &(tUnit::cNO_UNIT))
+      {
+        cn.SetUnit(unit);
+      }
+      else
+      {
+        cn.SetValue(cn.GetUnit()->ConvertTo(cn.DoubleValue(), unit), unit);
+      }
+    }
+
+    double val = cn.DoubleValue();
+    if (!bounds.InBounds(val))
+    {
+      if (bounds.Discard())
+      {
+        return;
+      }
+      else if (bounds.AdjustToRange())
+      {
+        cn.SetValue(bounds.ToBounds(val), cn.GetUnit());
+      }
+      else if (bounds.ApplyDefault())
+      {
+        cn.SetValue(default_val, unit);
+      }
+    }
+    GetBuffer()->SetValue(cn);
+  }
 
 public:
 
-  tStructureParameterNumeric(const util::tString& name, T default_value, bool constructor_prototype);
+  tStructureParameterImplNumeric(const util::tString& name, T default_value = 0, tUnit* unit = &tUnit::cNO_UNIT, bool constructor_prototype = false) :
+      tStructureParameterImplStandard<tNumber>(name, constructor_prototype),
+      unit(unit),
+      bounds(),
+      default_val(default_value)
+  {
+    if (!constructor_prototype)
+    {
+      Set(default_value);
+    }
+  }
 
-  tStructureParameterNumeric(const util::tString& name, T default_value);
-
-  tStructureParameterNumeric(const util::tString& name, T default_value, bool constructor_prototype, tBounds<T> bounds_);
-
-  tStructureParameterNumeric(const util::tString& name, T default_value, tBounds<T> bounds2);
+  tStructureParameterImplNumeric(const util::tString& name, T default_value, tBounds<T> bounds = tBounds<T>(), tUnit* unit = &tUnit::cNO_UNIT, bool constructor_prototype = false) :
+      tStructureParameterImplStandard<tNumber>(name, constructor_prototype),
+      unit(unit),
+      bounds(bounds),
+      default_val(default_value)
+  {
+    if (!constructor_prototype)
+    {
+      Set(default_value);
+    }
+  }
 
   virtual ::finroc::core::tStructureParameterBase* DeepCopy()
   {
-    return new tStructureParameterNumeric<T>(GetName(), default_val, false, bounds);
+    return new tStructureParameterImplNumeric<T>(GetName(), default_val, bounds, unit, false);
   }
 
   /*!
@@ -106,13 +151,13 @@ public:
     return bounds;
   }
 
-  /*! Helper to get this safely during static initialization */
-  inline static rrlib::serialization::tDataTypeBase GetDataType()
+  virtual void Set(const util::tString& new_value)
   {
-    return rrlib::serialization::tDataType<tNumber>();
+    tNumber cn;
+    rrlib::serialization::tStringInputStream sis(new_value);
+    cn.Deserialize(sis);
+    Set(cn);
   }
-
-  virtual void Set(const util::tString& new_value);
 
   /*!
    * \param new_value New Value
@@ -122,12 +167,9 @@ public:
     tNumber cn(new_value);
     Set(cn);
   }
-
 };
 
 } // namespace finroc
 } // namespace core
 
-#include "core/parameter/tStructureParameterNumeric.hpp"
-
-#endif // core__parameter__tStructureParameterNumeric_h__
+#endif // core__parameter__tStructureParameterImplNumeric_h__

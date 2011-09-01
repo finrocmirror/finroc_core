@@ -31,10 +31,9 @@ tStandardCreateModuleAction<tGroup> tGroup::cCREATE_ACTION("Group", util::tTyped
 
 tGroup::tGroup(tFrameworkElement* parent, const util::tString& description) :
     tEdgeAggregator(parent, description, 0),
-    ports(new tStructureParameter<tPortCreationList>("Ports", tPortCreationList::cTYPE))
+    ports("Ports", this)
 {
-  AddAnnotation(new tStructureParameterList(ports));
-  ports->GetValue()->InitialSetup(this, 0, true);
+  ports.GetValue()->InitialSetup(this, 0, true);
 }
 
 } // namespace finroc

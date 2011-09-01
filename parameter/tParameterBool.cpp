@@ -30,30 +30,30 @@ namespace finroc
 {
 namespace core
 {
-tParameterBool::tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, const util::tString& config_entry) :
-    tParameterBase<bool>(description, parent),
+tParameterBool::tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, tUnit* unit, const util::tString& config_entry)
+    : tParameterBase<bool>(description, parent, default_value, unit, config_entry),
     cache(new tBoolCache())
 {
-  // this(description,parent,defaultValue);
   this->AddPortListener(cache.get());
   cache->current_value = default_value;
   SetDefault(default_value);
   SetConfigEntry(config_entry);
 }
 
-tParameterBool::tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value) :
-    tParameterBase<bool>(description, parent),
+tParameterBool::tParameterBool(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry)
+    : tParameterBase<bool>(description, parent, config_entry),
     cache(new tBoolCache())
 {
   this->AddPortListener(cache.get());
-  cache->current_value = default_value;
-  SetDefault(default_value);
+  cache->current_value = false;
+  SetDefault(false);
+  SetConfigEntry(config_entry);
 }
 
 void tParameterBool::Set(bool b)
 {
-  tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(tBoolean::cTYPE);
-  cb->GetObject()->GetData<tBoolean>()->Set(b);
+  tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(rrlib::serialization::tDataType<bool>());
+  (*(cb->GetObject()->GetData<bool>())) = b;
   (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
   cache->current_value = b;
 }

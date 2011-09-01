@@ -45,26 +45,24 @@ tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup::cCREATE_AC
 
 tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name) :
     tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
-    xml_file(new tStructureParameterString("XML file", "")),
+    xml_file("XML file", this, ""),
     current_xml_file(""),
     connect_tmp(),
     link_tmp("")
 {
-  AddAnnotation(new tStructureParameterList(xml_file));
 }
 
 tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_) :
     tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
-    xml_file(new tStructureParameterString("XML file", "")),
+    xml_file("XML file", this, ""),
     current_xml_file(""),
     connect_tmp(),
     link_tmp("")
 {
   // this(parent,name);
-  AddAnnotation(new tStructureParameterList(xml_file));
   try
   {
-    this->xml_file->Set(xml_file_);
+    this->xml_file.Set(xml_file_);
   }
   catch (const util::tException& e)
   {
@@ -320,9 +318,9 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
 void tFinstructableGroup::StructureParametersChanged()
 {
   util::tLock lock1(this);
-  if (!current_xml_file.Equals(xml_file->GetValue()->ToString()))
+  if (!current_xml_file.Equals(xml_file.Get()))
   {
-    current_xml_file = xml_file->Get();
+    current_xml_file = xml_file.Get();
     //if (this.childCount() == 0) { // TODO: original intension: changing xml files to mutliple existing ones in finstruct shouldn't load all of them
     if (util::sFiles::Exists(current_xml_file))
     {

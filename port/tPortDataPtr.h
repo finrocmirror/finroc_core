@@ -29,9 +29,6 @@
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/portdatabase/typeutil.h"
 #include <boost/utility.hpp>
-#include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/remove_const.hpp>
-#include <boost/utility/enable_if.hpp>
 
 namespace finroc
 {
@@ -79,8 +76,8 @@ template <typename T>
 class tPortDataPtr : public tPortDataPtrBase
 {
 public:
-  typedef typename detail::tManagerLookup<typeutil::tUseCCType<T>::value>::tManager tManager;
-  typedef typename detail::tManagerLookup<typeutil::tUseCCType<T>::value>::tManagerTL tManagerTL;
+  typedef typename detail::tManagerLookup<typeutil::tIsCCType<T>::value>::tManager tManager;
+  typedef typename detail::tManagerLookup<typeutil::tIsCCType<T>::value>::tManagerTL tManagerTL;
 
 private:
   friend class tPort<T>;
@@ -107,8 +104,8 @@ private:
     return go->GetData<T>();
   }
 
-  template < typename Q = tManagerTL >
-  static inline T* GetData(typename boost::enable_if_c<typeutil::tUseCCType<T>::value, Q>::type* mgr)
+  template < bool CC = typeutil::tIsCCType<T>::value >
+  static inline T* GetData(typename std::enable_if<CC, tManagerTL>::type* mgr)
   {
     if (mgr == NULL)
     {
@@ -127,8 +124,8 @@ public:
   {}
 
   // Standard constructor
-  template < typename Q = tManagerTL >
-  tPortDataPtr(T* data_, typename boost::enable_if_c<typeutil::tUseCCType<T>::value, Q*>::type manager_) : data(data_), manager_tl(manager_), mode(eUNUSED)
+  template < bool CC = typeutil::tIsCCType<T>::value >
+  tPortDataPtr(T* data_, typename std::enable_if<CC, tManagerTL*>::type manager_) : data(data_), manager_tl(manager_), mode(eUNUSED)
   {}
 
   // Standard constructor
@@ -136,8 +133,8 @@ public:
   {}
 
   // Standard constructor
-  template < typename Q = tManagerTL >
-  explicit tPortDataPtr(typename boost::enable_if_c<typeutil::tUseCCType<T>::value, Q*>::type manager_) : data(GetData(manager)), manager_tl(manager_), mode(eUNUSED)
+  template < bool CC = typeutil::tIsCCType<T>::value >
+  explicit tPortDataPtr(typename std::enable_if<CC, tManagerTL*>::type manager_) : data(GetData(manager)), manager_tl(manager_), mode(eUNUSED)
   {}
 
   // Move constructor
@@ -149,8 +146,8 @@ public:
   }
 
   // Move constructor (from non-const)
-  template < typename Q = T >
-  tPortDataPtr(typename boost::enable_if_c<boost::is_const<T>::value, tPortDataPtr<typename boost::remove_const<Q>::type> >::type && o) : data(NULL), manager(NULL), mode(eNORMAL)
+  template < bool CONST = std::is_const<T>::value >
+  tPortDataPtr(typename std::enable_if<CONST, tPortDataPtr<typename std::remove_const<T>::type> >::type && o) : data(NULL), manager(NULL), mode(eNORMAL)
   {
     data = o.data;
     o.data = NULL;
@@ -169,7 +166,7 @@ public:
 
   // Move assignment (GenericObject to T)
   template < typename G = rrlib::serialization::tGenericObject >
-  tPortDataPtr& operator=(tPortDataPtr < typename boost::enable_if_c < !boost::is_same<T, G>::value, G >::type > && o)
+  tPortDataPtr& operator=(tPortDataPtr < typename std::enable_if < !std::is_same<T, G>::value, G >::type > && o)
   {
     rrlib::serialization::tGenericObject* go = o.data;
     data = (go == NULL) ? NULL : go->GetData<T>();
@@ -309,8 +306,8 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
   }
 
   // Move constructor (from non-const)
-  template < typename Q = T >
-  tPortDataPtr(typename boost::enable_if_c<boost::is_const<T>::value, tPortDataPtr<typename boost::remove_const<Q>::type> >::type && o) : data(NULL), manager(NULL), mode(eNORMAL)
+  template < bool CONST = std::is_const<T>::value >
+  tPortDataPtr(typename std::enable_if<CONST, tPortDataPtr<typename std::remove_const<T>::type>>::type && o) : data(NULL), manager(NULL), mode(eNORMAL)
   {
     std::swap(data, o.data);
     std::swap(manager, o.manager);

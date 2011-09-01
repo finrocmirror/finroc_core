@@ -25,8 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/parameter/tStructureParameterBool.h"
-#include "core/parameter/tStructureParameterNumeric.h"
+#include "core/parameter/tStructureParameter.h"
 #include "core/datatype/tBounds.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/thread/tThreadContainerThread.h"
@@ -48,13 +47,13 @@ class tThreadContainer : public tGroup, public tStartAndPausable
 private:
 
   /*! Should this container contain a real-time thread? */
-  tStructureParameterBool* rt_thread;
+  tStructureParameter<bool> rt_thread;
 
   /*! Thread cycle time */
-  tStructureParameterNumeric<int>* cycle_time;
+  tStructureParameter<int> cycle_time;
 
   /*! Warn on cycle time exceed */
-  tStructureParameterBool* warn_on_cycle_time_exceed;
+  tStructureParameter<bool> warn_on_cycle_time_exceed;
 
   /*! CreateModuleAction */
   static tStandardCreateModuleAction<tThreadContainer> cCREATE_ACTION;
@@ -82,7 +81,7 @@ public:
    */
   inline int GetCycleTime()
   {
-    return cycle_time->Get();
+    return cycle_time.Get();
   }
 
   virtual bool IsExecuting();
@@ -103,7 +102,7 @@ public:
    */
   inline void SetCycleTime(int period)
   {
-    cycle_time->Set(period);
+    cycle_time.Set(period);
   }
 
   virtual void StartExecution();

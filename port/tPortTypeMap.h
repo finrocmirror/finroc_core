@@ -32,12 +32,6 @@
 #include "core/port/cc/tCCQueueFragmentRaw.h"
 #include "core/datatype/tCoreString.h"
 
-#include <boost/type_traits/remove_pointer.hpp>
-#include <boost/type_traits/is_pointer.hpp>
-#include <boost/type_traits/is_enum.hpp>
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/is_integral.hpp>
-
 /*!
  * In Finroc, it is sometimes necessary to handle ports of very different types in a generic way.
  *
@@ -52,6 +46,8 @@
  * tListType:      Type for list of T objects
  * tGenericChange: Type that can be used for generic (transaction-like) changes (e.g. in blackboards)
  * tQueueFragment: Type for port queue fragment (to dequeue several elements at once)
+ * tParameterImpl: Type for parameter implementation
+ * tStructureParameterImpl: Type for structure parameter implementation
  *
  * //tPortType:      Type of port to handle this type
  * //tValueVar:      Type to use for function and class variables operating with non-const port values.
@@ -61,6 +57,14 @@ namespace finroc
 {
 namespace core
 {
+template <typename T>
+class tParameterBase;
+template <typename T>
+class tStructureParameterImplNumeric;
+template <typename T>
+class tStructureParameterImplStandard;
+class tStructureParameterImplString;
+
 
 // Standard port of type T
 template <typename T>
@@ -71,7 +75,10 @@ struct tStdPortTypeMap
   typedef T tPortDataType;
   typedef tPortDataManager tManagerType;
   typedef tPortQueueFragmentRaw tQueueFragment;
+  typedef tParameterBase<T> tParameterImpl;
+  typedef tStructureParameterImplStandard<T> tStructureParameterImpl;
   enum { boundable = 0 };
+  enum { numeric = 0 };
 
 //  typedef tPort<T> tPortType;
 //  typedef shared_ptr<T> tValueVar;
@@ -89,7 +96,10 @@ struct tCCPortTypeMap
   typedef tCCPortBounded<T> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
   typedef tCCQueueFragmentRaw tQueueFragment;
+  typedef tParameterBase<T> tParameterImpl;
+  typedef tStructureParameterImplStandard<T> tStructureParameterImpl;
   enum { boundable = 1 };
+  enum { numeric = 0 };
 
 //  typedef tCCPort<T> tPortType;
 //  typedef T tValueVar;
@@ -102,7 +112,7 @@ struct tPortTypeMapBase
 {
 };
 
-// Numeric
+// Numeric (tNumber)
 template<bool ENUM, bool INT>
 struct tPortTypeMapBase<tNumber, true, ENUM, INT>
 {
@@ -112,7 +122,10 @@ struct tPortTypeMapBase<tNumber, true, ENUM, INT>
   typedef tCCPortBoundedNumeric<tNumber> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
   typedef tCCQueueFragmentRaw tQueueFragment;
+  typedef tParameterBase<tNumber> tParameterImpl;
+  typedef tStructureParameterImplNumeric<tNumber> tStructureParameterImpl;
   enum { boundable = 1 };
+  enum { numeric = 1 };
 
 //  typedef tPortNumeric tPortType;
 //  typedef T tValueVar;
@@ -121,8 +134,8 @@ struct tPortTypeMapBase<tNumber, true, ENUM, INT>
 
 
 // Numeric
-template<typename T, bool CC, bool ENUM>
-struct tPortTypeMapBase<T, CC, ENUM, true>
+template<typename T, bool ENUM>
+struct tPortTypeMapBase<T, true, ENUM, true>
 {
 
   typedef tCCPortBase tPortBaseType;
@@ -130,7 +143,10 @@ struct tPortTypeMapBase<T, CC, ENUM, true>
   typedef tCCPortBoundedNumeric<T> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
   typedef tCCQueueFragmentRaw tQueueFragment;
+  typedef tParameterNumeric<T> tParameterImpl;
+  typedef tStructureParameterImplNumeric<T> tStructureParameterImpl;
   enum { boundable = 1 };
+  enum { numeric = 1 };
 
 //  typedef tPortNumeric tPortType;
 //  typedef T tValueVar;
@@ -138,16 +154,19 @@ struct tPortTypeMapBase<T, CC, ENUM, true>
 };
 
 // Enum
-template<typename T, bool CC, bool INT>
-struct tPortTypeMapBase<T, CC, true, INT>
+template<typename T, bool INT>
+struct tPortTypeMapBase<T, true, true, INT>
 {
 
   typedef tCCPortBase tPortBaseType;
-  typedef tNumber tPortDataType;
-  typedef tCCPortBoundedNumeric<int> tBoundedPortBaseType;
+  typedef T tPortDataType;
+  typedef tCCPortBounded<T> tBoundedPortBaseType;
   typedef tCCPortDataManager tManagerType;
   typedef tCCQueueFragmentRaw tQueueFragment;
-  enum { boundable = 1 };
+  typedef tParameterBase<T> tParameterImpl;
+  typedef tStructureParameterImplStandard<T> tStructureParameterImpl;
+  enum { boundable = 0 };
+  enum { numeric = 0 };
 
 //  typedef tPortNumeric tPortType;
 //  typedef T tValueVar;
@@ -156,11 +175,17 @@ struct tPortTypeMapBase<T, CC, true, INT>
 
 // String
 template<>
-struct tPortTypeMapBase<std::string, false, false, false> : tStdPortTypeMap<tCoreString> {};
+struct tPortTypeMapBase<std::string, false, false, false> : tStdPortTypeMap<tCoreString>
+{
+  typedef tStructureParameterImplString tStructureParameterImpl;
+};
 
 // Finroc String
 template<>
-struct tPortTypeMapBase<util::tString, false, false, false> : tStdPortTypeMap<tCoreString> {};
+struct tPortTypeMapBase<util::tString, false, false, false> : tStdPortTypeMap<tCoreString>
+{
+  typedef tStructureParameterImplString tStructureParameterImpl;
+};
 
 // CC type
 template<typename T, bool ENUM, bool INT>
@@ -172,7 +197,7 @@ struct tPortTypeMapBase<T, false, false, false> : tStdPortTypeMap<T> {};
 
 // Actual class
 template<typename T>
-struct tPortTypeMap : tPortTypeMapBase < T, typeutil::tIsCCType<T>::value, boost::is_enum<T>::value, boost::is_integral<T>::value || boost::is_floating_point<T>::value >
+struct tPortTypeMap : tPortTypeMapBase < T, typeutil::tIsCCType<T>::value, std::is_enum<T>::value, std::is_integral<T>::value || std::is_floating_point<T>::value >
 {
   typedef typename typeutil::tGenericChangeType<T>::type tGenericChange;
   typedef std::vector<T> tListType;
@@ -185,10 +210,13 @@ struct tPortTypeMap<bool>
   typedef typeutil::tGenericChangeType<bool>::type tGenericChange;
   typedef std::vector<bool> tListType;
   typedef tCCPortBase tPortBaseType;
-  typedef tBoolean tPortDataType;
+  typedef bool tPortDataType;
   typedef tCCPortDataManager tManagerType;
   typedef tCCQueueFragmentRaw tQueueFragment;
+  typedef tParameterBool tParameterImpl;
+  typedef tStructureParameterImplStandard<bool> tStructureParameterImpl;
   enum { boundable = 0 };
+  enum { numeric = 0 };
 };
 
 

@@ -27,6 +27,7 @@ namespace finroc
 {
 namespace core
 {
+int tFinrocTypeInfo::initialized_types = 0;
 const int tFinrocTypeInfo::cMAX_TYPES;
 const int tFinrocTypeInfo::cMAX_CCTYPES;
 
@@ -62,16 +63,38 @@ tFinrocTypeInfo* tFinrocTypeInfo::InfoArray()
 
 void tFinrocTypeInfo::Init(tFinrocTypeInfo::tType type_)
 {
-  static util::tAtomicInt last_cc_index(0);
   if (this->type != eSTD)
   {
     return;
   }
   this->type = type_;
 
-  if (type_ == eCC)
+  assert(type_ != eCC && "This is now done automatically");
+}
+
+void tFinrocTypeInfo::InitMoreTypes()
+{
+  static util::tAtomicInt last_cc_index(0);
+  static util::tMutex mutex;
+  util::tLock lock(mutex); // we need exclusive access on index variables
+  for (; initialized_types < rrlib::serialization::tDataTypeBase::GetTypeCount(); initialized_types++)
   {
-    cc_index = static_cast<int16>(last_cc_index.GetAndIncrement());
+    tFinrocTypeInfo& finfo = InfoArray()[initialized_types];
+    if (finfo.type == eSTD)
+    {
+      rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::GetType((short)initialized_types);
+      if (typeutil::IsCCType(dt))
+      {
+        finfo.type = eCC;
+        if (dt.GetRttiName() == typeid(bool).name() ||
+            ((dt.GetTypeTraits() & rrlib::serialization::trait_flags::cIS_INTEGRAL) == 0 &&
+             (dt.GetTypeTraits() & rrlib::serialization::trait_flags::cIS_FLOATING_POINT) == 0))
+        {
+          // increase cc index if we have no numeric type
+          finfo.cc_index = static_cast<int16>(last_cc_index.GetAndIncrement());
+        }
+      }
+    }
   }
 }
 

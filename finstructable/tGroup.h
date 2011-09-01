@@ -44,7 +44,7 @@ class tGroup : public tEdgeAggregator
 private:
 
   /*! List of ports */
-  tStructureParameter<tPortCreationList>* ports;
+  tStructureParameter<tPortCreationList> ports;
 
   /*! CreateModuleAction */
   static tStandardCreateModuleAction<tGroup> cCREATE_ACTION;

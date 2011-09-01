@@ -25,10 +25,10 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/parameter/tStructureParameterString.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/tFrameworkElement.h"
+#include "core/parameter/tStructureParameter.h"
 
 namespace rrlib
 {
@@ -59,7 +59,7 @@ class tFinstructableGroup : public tFrameworkElement
 private:
 
   /*! contains name of XML to use */
-  tStructureParameterString* xml_file;
+  tStructureParameter<util::tString> xml_file;
 
   /*! contains name of XML that is currently used (variable is used to detect changes to xmlFile parameter) */
   util::tString current_xml_file;

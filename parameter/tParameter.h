@@ -33,46 +33,15 @@ namespace finroc
 namespace core
 {
 
-template <typename T, bool NUMERIC>
-class tParameterParent : public tParameterBase<T>
-{
-
-  typedef tParameterBase<T> tParent;
-
-public:
-
-  tParameterParent(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry = "") : tParent(description, parent, config_entry) {}
-
-  tParameterParent(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, unit, config_entry) {}
-
-  template < typename Q = T >
-  tParameterParent(const util::tString& description, tFrameworkElement* parent, const T& default_value, typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type b, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, b, unit, config_entry) {}
-};
-
-template <typename T>
-class tParameterParent<T, true> : public tParameterNumeric<T>
-{
-
-  typedef tParameterNumeric<T> tParent;
-
-public:
-
-  tParameterParent(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry = "") : tParent(description, parent, config_entry) {}
-
-  tParameterParent(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, unit, config_entry) {}
-
-  tParameterParent(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds<T> b, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, b, unit, config_entry) {}
-};
-
 /*!
  * \author Max Reichardt
  *
  * Parameter template class for all types
  */
 template <typename T>
-class tParameter : public tParameterParent < T, boost::is_integral<T>::value || boost::is_floating_point<T>::value || boost::is_enum<T>::value >
+class tParameter : public tPortTypeMap<T>::tParameterImpl
 {
-  typedef tParameterParent < T, boost::is_integral<T>::value || boost::is_floating_point<T>::value || boost::is_enum<T>::value > tParent;
+  typedef typename tPortTypeMap<T>::tParameterImpl tParent;
 
 public:
 
@@ -80,19 +49,9 @@ public:
 
   tParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, unit, config_entry) {}
 
-  template < typename Q = T >
-  tParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type b, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, b, unit, config_entry) {}
+  template < bool BOUNDABLE = tPortTypeMap<T>::boundable >
+  tParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, typename std::enable_if<BOUNDABLE, tBounds<T>>::type b, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, b, unit, config_entry) {}
 
-};
-
-template <>
-class tParameter<bool> : public tParameterBool
-{
-public:
-
-  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry = "") : tParameterBool(description, parent, false, config_entry) {}
-
-  tParameter(const util::tString& description, tFrameworkElement* parent, const bool& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParameterBool(description, parent, default_value, config_entry) {}
 };
 
 } // namespace finroc
@@ -109,7 +68,6 @@ extern template class tParameter<double>;
 extern template class tParameter<tNumber>;
 extern template class tParameter<tCoreString>;
 extern template class tParameter<bool>;
-extern template class tParameter<tEnumValue>;
 extern template class tParameter<rrlib::serialization::tMemoryBuffer>;
 
 } // namespace finroc

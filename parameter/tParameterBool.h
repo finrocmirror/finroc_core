@@ -26,7 +26,6 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/parameter/tParameterBase.h"
-#include "core/datatype/tBoolean.h"
 #include "core/port/tPortListener.h"
 
 namespace finroc
@@ -69,9 +68,9 @@ public:
   /*! Bool cache instance used for this parameter */
   std::shared_ptr<tBoolCache> cache;
 
-  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, const util::tString& config_entry);
+  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, tUnit* unit, const util::tString& config_entry);
 
-  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value);
+  tParameterBool(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry);
 
   /*!
    * \return Current parameter value

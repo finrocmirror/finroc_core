@@ -36,9 +36,8 @@ tExternalConnection::tExternalConnection(const util::tString& description, const
     connected(false),
     listener(),
     first_connect(true),
-    auto_connect_to(new tStructureParameterString("Autoconnect to", ""))
+    auto_connect_to("Autoconnect to", this, "")
 {
-  tStructureParameterList::GetOrCreate(this)->Add(auto_connect_to);
 }
 
 void tExternalConnection::Connect(const util::tString& address)
@@ -87,7 +86,7 @@ void tExternalConnection::PrepareDelete()
 
 void tExternalConnection::StructureParametersChanged()
 {
-  util::tString s = auto_connect_to->Get();
+  util::tString s = auto_connect_to.Get();
   if (s.Length() > 0)
   {
     if (!s.Equals(last_address))

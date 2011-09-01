@@ -34,14 +34,11 @@ tStandardCreateModuleAction<tThreadContainer> tThreadContainer::cCREATE_ACTION("
 
 tThreadContainer::tThreadContainer(tFrameworkElement* parent, const util::tString& description) :
     tGroup(parent, description),
-    rt_thread(new tStructureParameterBool("Realtime Thread", false)),
-    cycle_time(new tStructureParameterNumeric<int>("Cycle Time", 40, tBounds<int>(1, 60000, true))),
-    warn_on_cycle_time_exceed(new tStructureParameterBool("Warn on cycle time exceed", true)),
+    rt_thread("Realtime Thread", this, false),
+    cycle_time("Cycle Time", this, 40, tBounds<int>(1, 60000, true)),
+    warn_on_cycle_time_exceed("Warn on cycle time exceed", this, true),
     thread()
 {
-  tStructureParameterList::GetOrCreate(this)->Add(rt_thread);
-  tStructureParameterList::GetOrCreate(this)->Add(cycle_time);
-  tStructureParameterList::GetOrCreate(this)->Add(warn_on_cycle_time_exceed);
   AddAnnotation(new tExecutionControl(*this));
 }
 
@@ -84,8 +81,8 @@ void tThreadContainer::JoinThread()
 void tThreadContainer::StartExecution()
 {
   assert((thread.get() == NULL));
-  thread = util::sThreadUtil::GetThreadSharedPtr(new tThreadContainerThread(this, cycle_time->Get(), warn_on_cycle_time_exceed->Get()));
-  if (rt_thread->Get())
+  thread = util::sThreadUtil::GetThreadSharedPtr(new tThreadContainerThread(this, cycle_time.Get(), warn_on_cycle_time_exceed.Get()));
+  if (rt_thread.Get())
   {
     util::sThreadUtil::MakeThreadRealtime(thread);
   }

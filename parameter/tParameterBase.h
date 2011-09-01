@@ -70,7 +70,7 @@ public:
   }
 
   template < typename Q = T >
-  tParameterBase(const util::tString& description, tFrameworkElement* parent, const T& default_value, const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b, tUnit* u = NULL, const util::tString& config_entry = "", const rrlib::serialization::tDataTypeBase& dt = NULL) :
+  tParameterBase(const util::tString& description, tFrameworkElement* parent, const T& default_value, const typename std::enable_if<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b, tUnit* u = NULL, const util::tString& config_entry = "", const rrlib::serialization::tDataTypeBase& dt = NULL) :
       tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u), b)
   {
     SetDefault(default_value);
@@ -106,7 +106,6 @@ extern template class tParameterBase<double>;
 extern template class tParameterBase<tNumber>;
 extern template class tParameterBase<tCoreString>;
 extern template class tParameterBase<bool>;
-extern template class tParameterBase<tEnumValue>;
 extern template class tParameterBase<rrlib::serialization::tMemoryBuffer>;
 
 } // namespace finroc

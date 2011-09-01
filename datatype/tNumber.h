@@ -29,7 +29,6 @@
 #include "core/datatype/tUnit.h"
 #include "rrlib/serialization/tStringOutputStream.h"
 #include "rrlib/serialization/tSerializable.h"
-#include "core/portdatabase/tCCType.h"
 
 namespace rrlib
 {
@@ -50,7 +49,7 @@ class tConstant;
  *
  * This class stores numbers (with units) of different types.
  */
-class tNumber : public rrlib::serialization::tSerializable, public util::tObject, public tCCType
+class tNumber : public rrlib::serialization::tSerializable
 {
 public:
 
@@ -210,7 +209,7 @@ public:
     return Value<double>();
   }
 
-  virtual bool Equals(const util::tObject& other) const;
+  bool Equals(const tNumber& other) const;
 
   inline virtual float FloatValue() const
   {

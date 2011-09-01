@@ -30,7 +30,6 @@
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tNumber.h"
-#include "core/datatype/tBoolean.h"
 #include "rrlib/serialization/tGenericObjectManager.h"
 
 namespace finroc
@@ -72,7 +71,7 @@ public:
   }
 };
 
-/*! variant for shared_ptr with auto-lock-release */
+/*! variant for smart pointer with auto-lock-release */
 template < typename T >
 class tPortListenerAdapter<tPortDataPtr<const T>, false, false> : public tPortListenerRaw
 {
@@ -89,7 +88,7 @@ public:
   }
 };
 
-/*! variant for shared_ptr with auto-lock-release (CC type - slightly inefficient) */
+/*! variant for smart pointer with auto-lock-release (CC type - slightly inefficient) */
 template < typename T >
 class tPortListenerAdapter<tPortDataPtr<const T>, true, false> : public tPortListenerRaw
 {
@@ -128,7 +127,7 @@ public:
   }
 };
 
-/*! variant for numbers in shared_pointers (possibly required for weird templates ;-) ) */
+/*! variant for numbers in  smart pointers (possibly required for weird templates ;-) ) */
 template < typename T, bool CC>
 class tPortListenerAdapter<tPortDataPtr<const T>, CC, true> : public tPortListenerRaw
 {
@@ -165,38 +164,6 @@ public:
   virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
   {
     PortChanged(origin, value->GetObject()->GetRawDataPtr());
-  }
-};
-
-/*! variant for bool */
-template < bool CC >
-class tPortListenerAdapter<bool, CC, true> : public tPortListenerRaw
-{
-public:
-
-  virtual void PortChanged(tAbstractPort* origin, const bool& value) = 0;
-
-  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
-  {
-    const rrlib::serialization::tGenericObject* go = value->GetObject();
-    PortChanged(origin, go->GetData<tBoolean>()->Get());
-  }
-};
-
-/*! variant for tPortDataPtr<bool> */
-template < bool CC >
-class tPortListenerAdapter<tPortDataPtr<const bool>, CC, true> : public tPortListenerRaw
-{
-public:
-
-  virtual void PortChanged(tAbstractPort* origin,  const tPortDataPtr<const bool>& value) = 0;
-
-  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
-  {
-    const tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(value->GetObject()->GetType());
-    rrlib::serialization::tGenericObject* go = c->GetObject();
-    go->DeepCopyFrom(value->GetObject());
-    PortChanged(origin, tPortDataPtr<const bool>(go->GetData<tBoolean>()->GetPointer(), c));
   }
 };
 

@@ -66,13 +66,16 @@ private:
   /*! Pointer to port interface in case of method type */
   tPortInterface* port_interface;
 
+  /*! Number of initialized types */
+  static int initialized_types;
+
 public:
 
   /*! Maximum number of types */
   static const int cMAX_TYPES = 2000;
 
   /*! Maximum number of "cheap copy" types */
-  static const int cMAX_CCTYPES = 50;
+  static const int cMAX_CCTYPES = 100;
 
 private:
 
@@ -104,7 +107,7 @@ public:
    */
   inline static tFinrocTypeInfo& Get(const rrlib::serialization::tDataTypeBase& type_)
   {
-    return InfoArray()[type_.GetUid()];
+    return Get(type_.GetUid());
   }
 
   /*!
@@ -113,6 +116,10 @@ public:
    */
   inline static tFinrocTypeInfo& Get(int16 uid_)
   {
+    if (initialized_types <= uid_)
+    {
+      InitMoreTypes();
+    }
     return InfoArray()[uid_];
   }
 
@@ -178,6 +185,11 @@ public:
     type = eMETHOD;
     port_interface = methods;
   }
+
+  /*!
+   * Initialize more finroc types
+   */
+  static void InitMoreTypes();
 
   /*!
    * \param dt Data type to look this up for

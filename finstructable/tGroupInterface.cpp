@@ -34,18 +34,16 @@ tConstructorCreateModuleAction<tGroupInterface, tGroupInterface::tDataClassifica
 
 tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString& description) :
     tEdgeAggregator(parent, description, ::finroc::core::tEdgeAggregator::cIS_INTERFACE),
-    ports(new tStructureParameter<tPortCreationList>("Ports", tPortCreationList::cTYPE))
+    ports("Ports", this)
 {
-  AddAnnotation(new tStructureParameterList(ports));
-  ports->GetValue()->InitialSetup(this, 0, true);
+  ports.GetValue()->InitialSetup(this, 0, true);
 }
 
 tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString& description, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link) :
     tEdgeAggregator(parent, description, ComputeFlags(data_class, shared, unique_link)),
-    ports(new tStructureParameter<tPortCreationList>("Ports", tPortCreationList::cTYPE))
+    ports("Ports", this)
 {
-  AddAnnotation(new tStructureParameterList(ports));
-  ports->GetValue()->InitialSetup(this, ComputePortFlags(port_dir, shared, unique_link), port_dir == eBOTH);
+  ports.GetValue()->InitialSetup(this, ComputePortFlags(port_dir, shared, unique_link), port_dir == eBOTH);
 }
 
 int tGroupInterface::ComputeFlags(tGroupInterface::tDataClassification data_class, bool shared, bool unique_link)

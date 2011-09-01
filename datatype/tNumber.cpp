@@ -122,13 +122,8 @@ void tNumber::Deserialize(rrlib::serialization::tStringInputStream& is)
   }
 }
 
-bool tNumber::Equals(const util::tObject& other) const
+bool tNumber::Equals(const tNumber& o) const
 {
-  if (!(typeid(other) == typeid(tNumber)))
-  {
-    return false;
-  }
-  const tNumber& o = static_cast<const tNumber&>(other);
   bool value_matches = (lval == o.lval);
   return o.num_type == num_type && o.unit == unit && value_matches;
 }

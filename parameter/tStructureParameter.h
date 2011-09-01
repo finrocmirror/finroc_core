@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2010 Max Reichardt,
+ * Copyright (C) 2010-2011 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -27,12 +27,18 @@
 
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "core/parameter/tStructureParameterBase.h"
+#include "core/parameter/tStructureParameterList.h"
 #include "rrlib/serialization/tGenericObject.h"
+#include "core/port/tPortTypeMap.h"
+#include "core/parameter/tStructureParameterImplStandard.h"
+#include "core/parameter/tStructureParameterImplString.h"
+#include "core/parameter/tStructureParameterImplNumeric.h"
 
 namespace finroc
 {
 namespace core
 {
+
 /*!
  * \author Max Reichardt
  *
@@ -47,66 +53,138 @@ namespace core
  * - ...they are stored in an FinstructableGroup's XML-file rather than
  * the attribute tree.
  */
-template<typename T>
-class tStructureParameter : public tStructureParameterBase
+template <typename T>
+class tStructureParameter
 {
+
+  typedef typename tPortTypeMap<T>::tStructureParameterImpl tImpl;
+
+  /*! Structure Parameter Implementation */
+  tImpl* impl;
+
 public:
 
-  tStructureParameter(const util::tString& name) :
-      tStructureParameterBase(name, rrlib::serialization::tDataType<T>(), false)
-  {}
+  /*!
+   * \param name Name of parameter
+   * \param parent Parent framework element
+   */
+  tStructureParameter(const util::tString& name, tFrameworkElement* parent) :
+      impl(new tImpl(name))
+  {
+    tStructureParameterList::GetOrCreate(parent)->Add(impl);
+  }
 
   /*!
    * \param name Name of parameter
-   * \param type DataType of parameter
-   * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
+   * \param parent Parent framework element
+   * \param default_value default value in string representation
    */
-  tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type, bool constructor_prototype);
+  tStructureParameter(const util::tString& name, tFrameworkElement* parent, const util::tString& default_value) :
+      impl(new tImpl(name, default_value))
+  {
+    tStructureParameterList::GetOrCreate(parent)->Add(impl);
+  }
 
   /*!
    * \param name Name of parameter
-   * \param type DataType of parameter
-   * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
-   * \param default_value Default value
+   * \param parent Parent framework element
+   * \param default_value default value
+   *
+   * (disabled for util::tString to avoid ambiguities with first constructor)
    */
-  tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type, bool constructor_prototype, const util::tString& default_value);
+  template < bool NOSTRING = !std::is_same<T, util::tString>::value >
+  tStructureParameter(const typename std::enable_if<NOSTRING, util::tString&>::type name, tFrameworkElement* parent, const T& default_value) :
+      impl(new tImpl(name, default_value))
+  {
+    tStructureParameterList::GetOrCreate(parent)->Add(impl);
+  }
 
   /*!
-   * Typical constructor for modules with empty constructor
-   * (non-const parameter)
+   * (Numeric constructor)
    *
    * \param name Name of parameter
-   * \param type DataType of parameter
-   * \param default_value Default value
+   * \param parent Parent framework element
+   * \param default_value default value in string representation
+   * \oaram unit Unit of parameter
    */
-  tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type, const util::tString& default_value);
+  template < bool NUMERIC = tPortTypeMap<T>::numeric >
+  tStructureParameter(const typename std::enable_if<NUMERIC, util::tString>::type& name, tFrameworkElement* parent, const T& default_value, tUnit* unit = &tUnit::cNO_UNIT) :
+      impl(new tImpl(name, default_value, unit))
+  {
+    tStructureParameterList::GetOrCreate(parent)->Add(impl);
+  }
 
   /*!
+   * (Numeric constructor)
+   *
    * \param name Name of parameter
-   * \param type DataType of parameter
+   * \param parent Parent framework element
+   * \param default_value default value in string representation
+   * \param bounds Bounds of parameter
+   * \oaram unit Unit of parameter
    */
-  tStructureParameter(const util::tString& name, rrlib::serialization::tDataTypeBase type);
-
-  virtual ::finroc::core::tStructureParameterBase* DeepCopy()
+  template < bool NUMERIC = tPortTypeMap<T>::numeric >
+  tStructureParameter(const typename std::enable_if<NUMERIC, util::tString>::type& name, tFrameworkElement* parent, const T& default_value, tBounds<T> bounds = tBounds<T>(), tUnit* unit = &tUnit::cNO_UNIT) :
+      impl(new tImpl(name, default_value, bounds, unit))
   {
-    return new tStructureParameter<T>(GetName(), GetType(), false, "");
+    tStructureParameterList::GetOrCreate(parent)->Add(impl);
+  }
+
+  /*!
+   * \return Current parameter value
+   * (reference without lock for T = std::string)
+   * (without additional locks value is deleted, when parameter is - which doesn't happen while a module is running)
+   *
+   * (only available for "cheap copy" and string types)
+   */
+  template < bool ENABLED = typeutil::tIsCCType<T>::value >
+  T Get(typename std::enable_if<ENABLED, void*>::type dummy = NULL)
+  {
+    return impl->Get();
+  }
+  template < bool ENABLED = std::is_same<T, std::string>::value >
+  const std::string& Get(typename std::enable_if<ENABLED, void*>::type dummy = NULL)
+  {
+    return impl->GetValue()->GetBuffer().GetStdStringRef();
+  }
+  template < bool ENABLED = std::is_same<T, util::tString>::value >
+  const util::tString Get(typename std::enable_if<ENABLED, void*>::type dummy = NULL)
+  {
+    return impl->GetValue()->ToString();
   }
 
   /*!
    * \return Current parameter value (without lock)
    * (without additional locks value is deleted, when parameter is - which doesn't happen while a module is running)
+   *
+   * (not available for numeric and string types)
    */
-  inline T* GetValue()
+  template < bool ENABLED = std::is_same<tImpl, tStructureParameterImplStandard<T>>::value >
+  inline T* GetValue(typename std::enable_if<ENABLED, void*>::type dummy = NULL)
   {
-    rrlib::serialization::tGenericObject* go = ::finroc::core::tStructureParameterBase::ValPointer();
-    return go->GetData<T>();
+    return impl->GetValue();
   }
 
+  /*!
+   * \param new_value New value
+   */
+  inline void SetValue(const T& new_value)
+  {
+    impl->SetValue(new_value);
+  }
+
+  /*!
+   * (same as SetValue)
+   *
+   * \param new_value New value
+   */
+  inline void Set(const T& new_value)
+  {
+    SetValue(new_value);
+  }
 };
 
 } // namespace finroc
 } // namespace core
-
-#include "core/parameter/tStructureParameter.hpp"
 
 #endif // core__parameter__tStructureParameter_h__

@@ -26,8 +26,6 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tPortWrapperBase.h"
-#include "core/datatype/tBoolean.h"
-#include "core/datatype/tEnumValue.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortListener.h"
 
@@ -92,7 +90,7 @@ public:
   /*!
    * \param pci Construction parameters in Port Creation Info Object
    */
-  tPort(tPortCreationInfo pci, const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type& bounds)
+  tPort(tPortCreationInfo pci, const typename std::enable_if<tPortTypeMap<Q>::boundable, tBounds<T> >::type& bounds)
   {
     wrapped = new typename tPortTypeMap<T>::tBoundedPortBaseType(ProcessPci(pci), bounds);
   }
@@ -253,7 +251,7 @@ public:
   /*!
    * \return Bounds as they are currently set
    */
-  inline const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type GetBounds() const
+  inline const typename std::enable_if<tPortTypeMap<Q>::boundable, tBounds<T> >::type GetBounds() const
   {
     return tPortUtil<T>::GetBounds(wrapped);
   }
@@ -358,7 +356,7 @@ public:
    *
    * \param b New Bounds
    */
-  inline void SetBounds(const typename boost::enable_if_c<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b)
+  inline void SetBounds(const typename std::enable_if<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b)
   {
     tPortUtil<T>::SetBounds(wrapped, b);
   }
@@ -391,7 +389,6 @@ extern template class tPort<double>;
 extern template class tPort<tNumber>;
 extern template class tPort<tCoreString>;
 extern template class tPort<bool>;
-extern template class tPort<tEnumValue>;
 extern template class tPort<rrlib::serialization::tMemoryBuffer>;
 
 } // namespace finroc
