@@ -108,7 +108,7 @@ public:
    * \oaram unit Unit of parameter
    */
   template < bool NUMERIC = tPortTypeMap<T>::numeric >
-  tStructureParameter(const typename std::enable_if<NUMERIC, util::tString>::type& name, tFrameworkElement* parent, const T& default_value, tUnit* unit = &tUnit::cNO_UNIT) :
+  tStructureParameter(const typename std::enable_if<NUMERIC, util::tString>::type& name, tFrameworkElement* parent, const T& default_value, tUnit* unit) :
       impl(new tImpl(name, default_value, unit))
   {
     tStructureParameterList::GetOrCreate(parent)->Add(impl);

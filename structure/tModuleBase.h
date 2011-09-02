@@ -348,7 +348,7 @@ public:
     }
 
     template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(typename std::enable_if<NUMERIC, const T>::type& default_value, tUnit* unit = &(tUnit::cNO_UNIT))
+    tStructureParameter(typename std::enable_if<NUMERIC, const T>::type& default_value, tUnit* unit)
         : finroc::core::tParameter<T>(this->GetPortName(), this->FindParent(), default_value, unit)
     {
     }
