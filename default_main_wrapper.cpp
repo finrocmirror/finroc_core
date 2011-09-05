@@ -47,6 +47,7 @@ extern "C"
 
 #include "core/tRuntimeEnvironment.h"
 #include "core/parameter/tConfigFile.h"
+#include "core/thread/tExecutionControl.h"
 #include "rrlib/finroc_core_utils/sFiles.h"
 #include "plugins/tcp/tTCPServer.h"
 #include "plugins/tcp/tTCPPeer.h"
@@ -185,7 +186,7 @@ int main(int argc, char **argv)
   InitMainGroup(main_thread);
 
   main_thread->Init();
-  main_thread->StartExecution();
+  finroc::core::tExecutionControl::StartAll(main_thread);
 
   run_main_loop = true;
   while (run_main_loop)

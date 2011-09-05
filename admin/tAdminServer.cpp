@@ -99,11 +99,7 @@ void tAdminServer::Connect(tAbstractPort* src, tAbstractPort* dest)
 void tAdminServer::GetExecutionControls(util::tSimpleList<tExecutionControl*>& result, int element_handle)
 {
   ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(element_handle);
-  if (fe != NULL && (fe->IsReady()))
-  {
-    tFrameworkElementTreeFilter filter;
-    filter.TraverseElementTree(fe, this, tCallbackParameters(&(result)));
-  }
+  tExecutionControl::FindAll(result, fe);
   if (result.Size() == 0)
   {
     tExecutionControl* ec = tExecutionControl::Find(fe);
@@ -204,7 +200,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
 
 int tAdminServer::HandleCall(const tAbstractMethod* method, int handle)
 {
-  assert((method == &(cSTART_EXECUTION) || method == &(cPAUSE_EXECUTION) || method == &(cIS_RUNNING)));
+  assert(method == &(cIS_RUNNING));
   util::tSimpleList<tExecutionControl*> ecs;
   GetExecutionControls(ecs, handle);
 
@@ -568,16 +564,6 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int handle)
 
 void tAdminServer::TreeFilterCallback(tFrameworkElement* fe, const tCallbackParameters& custom_param)
 {
-  if (custom_param.ecs != NULL)
-  {
-    tExecutionControl* ec = static_cast<tExecutionControl*>(fe->GetAnnotation(tExecutionControl::cTYPE));
-    if (ec != NULL)
-    {
-      custom_param.ecs->Add(ec);
-    }
-    return;
-  }
-
   tConfigFile* cf = static_cast<tConfigFile*>(fe->GetAnnotation(tConfigFile::cTYPE));
   if (cf != NULL)
   {

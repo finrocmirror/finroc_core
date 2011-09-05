@@ -19,6 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "core/tFrameworkElement.h"
+#include "core/tFrameworkElementTreeFilter.h"
 #include "core/thread/tExecutionControl.h"
 #include "rrlib/serialization/tDataType.h"
 
@@ -37,6 +39,57 @@ tExecutionControl::tExecutionControl() :
     implementation(NULL)
 {
   throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
+}
+
+namespace internal
+{
+struct tFindCallback
+{
+  void TreeFilterCallback(tFrameworkElement* fe, util::tSimpleList<tExecutionControl*>* const customParam)
+  {
+    tExecutionControl* ec = fe->GetAnnotation<tExecutionControl>();
+    if (ec != NULL)
+    {
+      customParam->Add(ec);
+    }
+  }
+};
+}
+
+void tExecutionControl::FindAll(util::tSimpleList<tExecutionControl*>& result, tFrameworkElement* fe)
+{
+  if (fe != NULL && (fe->IsReady()))
+  {
+    tFrameworkElementTreeFilter filter;
+    internal::tFindCallback cb;
+    filter.TraverseElementTree(fe, &cb, &result);
+  }
+}
+
+void tExecutionControl::PauseAll(tFrameworkElement* fe)
+{
+  util::tSimpleList<tExecutionControl*> ecs;
+  FindAll(ecs, fe);
+  for (size_t i = 0; i < ecs.Size(); i++)
+  {
+    if (ecs.Get(i)->IsRunning())
+    {
+      ecs.Get(i)->Pause();
+    }
+  }
+}
+
+void tExecutionControl::StartAll(tFrameworkElement* fe)
+{
+  util::tSimpleList<tExecutionControl*> ecs;
+  FindAll(ecs, fe);
+  for (size_t i = 0; i < ecs.Size(); i++)
+  {
+    if (!ecs.Get(i)->IsRunning())
+    {
+      ecs.Get(i)->Start();
+    }
+  }
 }
 
 } // namespace finroc

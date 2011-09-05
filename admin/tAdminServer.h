@@ -73,19 +73,9 @@ public:
 
     tConfigFile* cf;
 
-    util::tSimpleList<tExecutionControl*>* ecs;
-
     tCallbackParameters(tConfigFile* cf2, rrlib::serialization::tOutputStream* co2) :
         co(co2),
-        cf(cf2),
-        ecs(NULL)
-    {
-    }
-
-    tCallbackParameters(util::tSimpleList<tExecutionControl*>* ecs_) :
-        co(NULL),
-        cf(NULL),
-        ecs(ecs_)
+        cf(cf2)
     {
     }
 

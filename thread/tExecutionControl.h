@@ -69,6 +69,14 @@ public:
   }
 
   /*!
+   * Returns all execution controls below and including specified element
+   *
+   * \param result Result buffer for list of execution controls (controls are added to list)
+   * \param elementHandle Framework element that is root of subtree to search for execution controls
+   */
+  static void FindAll(util::tSimpleList<tExecutionControl*>& result, tFrameworkElement* fe);
+
+  /*!
    * \return Is currently executing?
    */
   inline bool IsRunning()
@@ -85,12 +93,26 @@ public:
   }
 
   /*!
+   * Pauses all execution controls below and possibly attached to specified element
+   *
+   * \param fe Framework element that is root of subtree to search for execution controls
+   */
+  static void PauseAll(tFrameworkElement* fe);
+
+  /*!
    * Start/Resume execution
    */
   inline void Start()
   {
     implementation->StartExecution();
   }
+
+  /*!
+   * Starts all execution controls below and possibly attached to specified element
+   *
+   * \param fe Framework element that is root of subtree to search for execution controls
+   */
+  static void StartAll(tFrameworkElement* fe);
 
 };
 
