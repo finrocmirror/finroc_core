@@ -359,7 +359,7 @@ public:
 
     void PublishFromNet(tCCPortDataManagerTL* read_object, int8 changed_flag);
 
-    virtual void PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer);
+    virtual bool PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer);
 
     inline void UpdateFlags(int flags)
     {

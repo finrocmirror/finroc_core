@@ -297,7 +297,7 @@ void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataManagerTL* read_object, int
   }
 }
 
-void tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer)
+bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer)
 {
   tPullCall* pc = tThreadLocalCache::GetFast()->GetUnusedPullCall();
   pc->SetRemotePortHandle(outer_class_ptr->remote_handle);
@@ -323,6 +323,7 @@ void tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
   {
     GetRaw(result_buffer->GetObject(), true);
   }
+  return true;
 }
 
 tNetPort::tStdNetPort::tStdNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfo pci) :

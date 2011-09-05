@@ -257,33 +257,38 @@ void tCCPortBase::PullValueRawImpl(tThreadLocalCache* tc, bool intermediate_assi
   if ((!first) && pull_request_handler != NULL)    // for network port pulling it's good if pullRequestHandler is not called on first port - and there aren't any scenarios where this would make sense
   {
     tCCPortDataManagerTL* res_buf = tc->GetUnusedBuffer(this->data_type);
-    pull_request_handler->PullRequest(this, res_buf);
-    tc->data = res_buf;
-    tc->data->SetRefCounter(1);  // one lock for caller
-    tc->ref = tc->data->GetCurrentRef();
-    Assign(tc);
-  }
-  else
-  {
-    // continue with next-best connected source port
-    for (size_t i = 0u, n = sources->Size(); i < n; i++)
+    if (pull_request_handler->PullRequest(this, res_buf))
     {
-      tCCPortBase* pb = sources->Get(i);
-      if (pb != NULL)
-      {
-        pb->PullValueRawImpl(tc, intermediate_assign, false);
-        if ((first || intermediate_assign) && (!value->GetContainer()->ContentEquals(tc->data->GetObject()->GetRawDataPtr())))
-        {
-          Assign(tc);
-        }
-        return;
-      }
+      tc->data = res_buf;
+      tc->data->SetRefCounter(1);  // one lock for caller
+      tc->ref = tc->data->GetCurrentRef();
+      Assign(tc);
+      return;
     }
-
-    // no connected source port... pull/return current value
-    tc->data = GetLockedUnsafeInContainer();  // one lock for caller
-    tc->ref = tc->data->GetCurrentRef();
+    else
+    {
+      res_buf->RecycleUnused();
+    }
   }
+
+  // continue with next-best connected source port
+  for (size_t i = 0u, n = sources->Size(); i < n; i++)
+  {
+    tCCPortBase* pb = sources->Get(i);
+    if (pb != NULL)
+    {
+      pb->PullValueRawImpl(tc, intermediate_assign, false);
+      if ((first || intermediate_assign) && (!value->GetContainer()->ContentEquals(tc->data->GetObject()->GetRawDataPtr())))
+      {
+        Assign(tc);
+      }
+      return;
+    }
+  }
+
+  // no connected source port... pull/return current value
+  tc->data = GetLockedUnsafeInContainer();  // one lock for caller
+  tc->ref = tc->data->GetCurrentRef();
 }
 
 void tCCPortBase::SetMaxQueueLengthImpl(int length)

@@ -223,42 +223,49 @@ const void tPortBase::PullValueRawImpl(tPublishCache& pc, bool intermediate_assi
   if ((!first) && pull_request_handler != NULL)
   {
     pc.lock_estimate++;  // for local assign
-    tPortDataReference* pdr = pull_request_handler->PullRequest(this, static_cast<int8>(pc.lock_estimate))->GetCurReference();
-    pc.cur_ref = pdr;
-    pc.cur_ref_counter = pdr->GetRefCounter();
-    assert((pdr->GetRefCounter()->GetLocks() >= pc.lock_estimate));
-    if (pc.cur_ref != value.Get())
+    const tPortDataManager* mgr = pull_request_handler->PullRequest(this, static_cast<int8>(pc.lock_estimate));
+    if (mgr != NULL)
     {
-      Assign(pc);
-    }
-    pc.set_locks++;  // lock for return
-  }
-  else
-  {
-    // continue with next-best connected source port
-    for (size_t i = 0u, n = sources->Size(); i < n; i++)
-    {
-      tPortBase* pb = sources->Get(i);
-      if (pb != NULL)
+      tPortDataReference* pdr = mgr->GetCurReference();
+      pc.cur_ref = pdr;
+      pc.cur_ref_counter = pdr->GetRefCounter();
+      assert((pdr->GetRefCounter()->GetLocks() >= pc.lock_estimate));
+      if (pc.cur_ref != value.Get())
       {
-        if (intermediate_assign)
-        {
-          pc.lock_estimate++;
-        }
-        pb->PullValueRawImpl(pc, intermediate_assign, false);
-        if ((first || intermediate_assign) && (pc.cur_ref != value.Get()))
-        {
-          Assign(pc);
-        }
-        return;
+        Assign(pc);
       }
+      pc.set_locks++;  // lock for return
+      return;
     }
-
-    // no connected source port... pull/return current value
-    pc.cur_ref = LockCurrentValueForRead(static_cast<int8>(pc.lock_estimate));
-    pc.cur_ref_counter = pc.cur_ref->GetRefCounter();
-    pc.set_locks++;  // lock for return
+    else
+    {
+      pc.lock_estimate--; // ok... pull request was not handled, revert and continue normally
+    }
   }
+
+  // continue with next-best connected source port
+  for (size_t i = 0u, n = sources->Size(); i < n; i++)
+  {
+    tPortBase* pb = sources->Get(i);
+    if (pb != NULL)
+    {
+      if (intermediate_assign)
+      {
+        pc.lock_estimate++;
+      }
+      pb->PullValueRawImpl(pc, intermediate_assign, false);
+      if ((first || intermediate_assign) && (pc.cur_ref != value.Get()))
+      {
+        Assign(pc);
+      }
+      return;
+    }
+  }
+
+  // no connected source port... pull/return current value
+  pc.cur_ref = LockCurrentValueForRead(static_cast<int8>(pc.lock_estimate));
+  pc.cur_ref_counter = pc.cur_ref->GetRefCounter();
+  pc.set_locks++;  // lock for return
 }
 
 void tPortBase::SetMaxQueueLengthImpl(int length)

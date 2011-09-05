@@ -46,7 +46,7 @@ public:
    *
    * \param origin (Output) Port pull request comes from
    * \param add_locks Number of locks to set/add
-   * \return PortData to answer request with (with one additional lock)
+   * \return PortData to answer request with (with one additional lock) - or null if pull should be handled by port (now)
    */
   virtual const tPortDataManager* PullRequest(tPortBase* origin, int8 add_locks) = 0;
 

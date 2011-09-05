@@ -46,8 +46,9 @@ public:
    *
    * \param origin (Output) Port pull request comes from
    * \param result_buffer Buffer with result
+   * \return Was pull request handled (and result buffer filled) - or should it be handled by port in the standard way (now)?
    */
-  virtual void PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer) = 0;
+  virtual bool PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer) = 0;
 
 };
 
