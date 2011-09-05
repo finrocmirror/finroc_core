@@ -76,7 +76,7 @@ void StartUp()
 //----------------------------------------------------------------------
 // InitMainGroup
 //----------------------------------------------------------------------
-void InitMainGroup(finroc::core::tThreadContainer *main_thread)
+void InitMainGroup(finroc::core::tThreadContainer *main_thread, std::vector<char*> remaining_args)
 {
 
   mTestModule *test_module = new mTestModule(main_thread);

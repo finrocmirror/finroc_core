@@ -65,7 +65,7 @@ extern const char * const cPROGRAM_DESCRIPTION;
 //----------------------------------------------------------------------
 
 void StartUp();
-void InitMainGroup(finroc::core::tThreadContainer *main_thread);
+void InitMainGroup(finroc::core::tThreadContainer *main_thread, std::vector<char*> remaining_args);
 
 
 

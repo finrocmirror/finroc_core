@@ -78,6 +78,7 @@ extern "C"
 //----------------------------------------------------------------------
 
 bool run_main_loop = false;
+bool pause_at_startup = false;
 
 //----------------------------------------------------------------------
 // HandleSignalSIGINT
@@ -145,6 +146,17 @@ bool ParameterConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_optio
 }
 
 //----------------------------------------------------------------------
+// PauseHandler
+//----------------------------------------------------------------------
+bool PauseHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
+{
+  rrlib::getopt::tOption pause(name_to_option_map.at("pause"));
+  pause_at_startup = pause->IsActive();
+  return true;
+}
+
+
+//----------------------------------------------------------------------
 // main
 //----------------------------------------------------------------------
 int main(int argc, char **argv)
@@ -162,10 +174,11 @@ int main(int argc, char **argv)
 
   rrlib::getopt::AddValue("log-config", 'l', "Log config file", &LogConfigHandler);
   rrlib::getopt::AddValue("config-file", 'c', "Parameter config file", &ParameterConfigHandler);
+  rrlib::getopt::AddFlag("pause", 'p', "Pause program at startup", &PauseHandler);
 
   StartUp();
 
-  rrlib::getopt::ProcessCommandLine(argc, argv);
+  std::vector<char *> remaining_args = rrlib::getopt::ProcessCommandLine(argc, argv);
 
   finroc::core::tRuntimeEnvironment *runtime_environment = finroc::core::tRuntimeEnvironment::GetInstance();
 
@@ -183,10 +196,17 @@ int main(int argc, char **argv)
 
   finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread");
 
-  InitMainGroup(main_thread);
+  InitMainGroup(main_thread, remaining_args);
 
   main_thread->Init();
-  finroc::core::tExecutionControl::StartAll(main_thread);
+  if (pause_at_startup)
+  {
+    finroc::core::tExecutionControl::PauseAll(main_thread); // Shouldn't be necessary, but who knows what people might implement
+  }
+  else
+  {
+    finroc::core::tExecutionControl::StartAll(main_thread);
+  }
 
   run_main_loop = true;
   while (run_main_loop)
