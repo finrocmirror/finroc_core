@@ -56,7 +56,7 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
     }
     catch (const rrlib::xml2::tXML2WrapperException& e)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
       wrapped = rrlib::xml2::tXMLDocument();
       wrapped.AddRootNode(cXML_BRANCH_NAME);
     }
@@ -94,7 +94,7 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
       }
       catch (const rrlib::xml2::tXML2WrapperException& e)
       {
-        FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
         wrapped = rrlib::xml2::tXMLDocument();
         try
         {
@@ -102,7 +102,7 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
         }
         catch (const rrlib::xml2::tXML2WrapperException& e1)
         {
-          FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
         }
       }
     }
@@ -121,7 +121,7 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
     }
     catch (const util::tException& e)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
     }
   }
 }
@@ -169,7 +169,7 @@ rrlib::xml2::tXMLNode& tConfigFile::GetEntry(const util::tString& entry, bool cr
         }
         catch (const rrlib::xml2::tXML2WrapperException& e)
         {
-          FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "tree node without name");
+          FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "tree node without name");
         }
       }
     }
@@ -249,7 +249,7 @@ bool tConfigFile::HasEntry(const util::tString& entry)
         }
         catch (const rrlib::xml2::tXML2WrapperException& e)
         {
-          FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "tree node without name");
+          FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "tree node without name");
         }
       }
     }
@@ -298,11 +298,11 @@ void tConfigFile::Serialize(rrlib::serialization::tOutputStream& os) const
   }
   catch (const rrlib::xml2::tXML2WrapperException& e)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
   }
 }
 
@@ -321,7 +321,7 @@ void tConfigFile::TreeFilterCallback(tFrameworkElement* fe, bool loading_paramet
         }
         catch (const util::tException& e)
         {
-          FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
         }
       }
       else
@@ -332,7 +332,7 @@ void tConfigFile::TreeFilterCallback(tFrameworkElement* fe, bool loading_paramet
         }
         catch (const util::tException& e)
         {
-          FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
         }
       }
     }

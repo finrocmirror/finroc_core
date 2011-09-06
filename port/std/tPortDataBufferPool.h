@@ -65,7 +65,7 @@ private:
   /*!
    * Helper for above
    */
-  void PrintElement(int indent, const tPortDataManager* pdm, rrlib::logging::tLogStream& output) const;
+  void PrintElement(int indent, const tPortDataManager* pdm, std::stringstream& output) const;
 
 protected:
 
@@ -108,7 +108,7 @@ public:
    * \param indent Indentation
    * \param output
    */
-  void PrintStructure(int indent, rrlib::logging::tLogStream& output) const;
+  void PrintStructure(int indent, std::stringstream& output) const;
 
 };
 

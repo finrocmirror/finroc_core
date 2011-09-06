@@ -179,7 +179,7 @@ void tPortBase::NotifyDisconnect()
   }
 }
 
-void tPortBase::PrintStructure(int indent, rrlib::logging::tLogStream& output)
+void tPortBase::PrintStructure(int indent, std::stringstream& output)
 {
   ::finroc::core::tFrameworkElement::PrintStructure(indent, output);
   if (buffer_pool != NULL)

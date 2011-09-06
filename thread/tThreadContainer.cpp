@@ -72,7 +72,7 @@ void tThreadContainer::JoinThread()
     }
     catch (const util::tInterruptedException& e)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Interrupted ?!!");
+      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Interrupted ?!!");
     }
     thread.reset();
   }

@@ -100,7 +100,7 @@ void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vecto
   }
   flags_ |= tmp;
 
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating port ", name, " in IOVector ", io_vector_->GetQualifiedLink());
+  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating port ", name, " in IOVector ", io_vector_->GetQualifiedLink());
   if (tFinrocTypeInfo::IsStdType(dt))
   {
     ap = new tPortBase(tPortCreationInfo(name, io_vector_, dt, flags_));
@@ -115,7 +115,7 @@ void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vecto
   }
   else
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Cannot create port with type: ", dt.GetName());
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Cannot create port with type: ", dt.GetName());
   }
   if (ap != NULL)
   {

@@ -48,7 +48,7 @@ tPortDataManager* tPortDataBufferPool::CreateBuffer()
   return pdm;
 }
 
-void tPortDataBufferPool::PrintElement(int indent, const tPortDataManager* pdm, rrlib::logging::tLogStream& output) const
+void tPortDataBufferPool::PrintElement(int indent, const tPortDataManager* pdm, std::stringstream& output) const
 {
   if (pdm == NULL)
   {
@@ -65,7 +65,7 @@ void tPortDataBufferPool::PrintElement(int indent, const tPortDataManager* pdm, 
   output << pdm->ToString() << std::endl;
 }
 
-void tPortDataBufferPool::PrintStructure(int indent, rrlib::logging::tLogStream& output) const
+void tPortDataBufferPool::PrintStructure(int indent, std::stringstream& output) const
 {
   for (int i = 0; i < indent; i++)
   {

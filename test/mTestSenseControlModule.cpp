@@ -75,7 +75,7 @@ mTestSenseControlModule::mTestSenseControlModule(finroc::core::tFrameworkElement
 void mTestSenseControlModule::Control()
 {
   this->co_signal_2.Publish(this->counter);
-  FINROC_LOG_STREAM(eLL_DEBUG) << this->counter;
+  FINROC_LOG_PRINT(eLL_DEBUG, this->counter);
   this->counter++;
 }
 

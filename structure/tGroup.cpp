@@ -96,19 +96,19 @@ tGroup::~tGroup()
 //  finroc::core::tStructureParameterBase* param = spl->Get(index);
 //  param->Set(new_value);
 //
-//  FINROC_LOG_STREAM(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> updating parameter with name: " << param->GetName();
+//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> updating parameter with name: " << param->GetName();
 //
 //  this->StructureParametersChanged();
 //}
 //
 //void tGroup::SetParameter(const finroc::util::tString &name, const finroc::util::tString &new_value)
 //{
-//  FINROC_LOG_STREAM(eLL_DEBUG) << this->GetDescription() << "::SetParameter(" << name << ", " << new_value << ") called";
+//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetDescription() << "::SetParameter(" << name << ", " << new_value << ") called";
 //
 //  finroc::core::tStructureParameterList* spl = static_cast<finroc::core::tStructureParameterList*>(this->GetAnnotation(finroc::core::tStructureParameterList::cTYPE));
 //
 //  size_t dimension = spl->Size();
-//  FINROC_LOG_STREAM(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> analysing structure parameter ist of size " << dimension;
+//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> analysing structure parameter ist of size " << dimension;
 //  for (size_t i = 0; i < dimension; ++i)
 //  {
 //    finroc::core::tStructureParameterBase* param = spl->Get(i);

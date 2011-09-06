@@ -82,7 +82,7 @@ bool tInputStreamPort<T>::tPortImpl<T>::ProcessPacket(T* data)
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Error while processing packet: ", e);
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Error while processing packet: ", e);
   }
   return false;
 }

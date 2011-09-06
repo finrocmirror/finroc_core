@@ -86,7 +86,7 @@ bool pause_at_startup = false;
 void HandleSignalSIGINT(int signal)
 {
   assert(signal == SIGINT);
-  FINROC_LOG_STREAM(rrlib::logging::eLL_USER) << "\nCaught SIGINT. Exiting...";
+  FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "\nCaught SIGINT. Exiting...");
   run_main_loop = false;
 }
 
@@ -134,11 +134,11 @@ bool ParameterConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_optio
     const char* file = boost::any_cast<const char *>(parameter_config->GetValue());
     if (!finroc::util::sFiles::Exists(file))
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR) << "Could not find specified config file " << file;
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not find specified config file ", file);
     }
     else
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG) << "Loading config file " << file;
+      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Loading config file ", file);
     }
     finroc::core::tRuntimeEnvironment::GetInstance()->AddAnnotation(new finroc::core::tConfigFile(file));
   }
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 {
   if (!InstallSignalHandler())
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR) << "Error installing signal handler. Exiting...";
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error installing signal handler. Exiting...");
     return EXIT_FAILURE;
   }
 
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
   }
   catch (const finroc::util::tException& e1)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING) << "Error connecting Peer" << e1;
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Error connecting Peer", e1);
   }
 
   finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread");
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
     {
     }
   }
-  FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG) << "Left main loop";
+  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Left main loop");
 
   return EXIT_SUCCESS;
 }

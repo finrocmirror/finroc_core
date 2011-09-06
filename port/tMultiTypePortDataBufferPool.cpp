@@ -45,7 +45,7 @@ tPortDataManager* tMultiTypePortDataBufferPool::PossiblyCreatePool(rrlib::serial
   return new_pool->GetUnusedBuffer();
 }
 
-void tMultiTypePortDataBufferPool::PrintStructure(int indent, rrlib::logging::tLogStream& output)
+void tMultiTypePortDataBufferPool::PrintStructure(int indent, std::stringstream& output)
 {
   for (int i = 0; i < indent; i++)
   {

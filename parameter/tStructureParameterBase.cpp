@@ -92,7 +92,7 @@ void tStructureParameterBase::Deserialize(rrlib::serialization::tInputStream& is
     }
     catch (const util::tException& e)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
     }
   }
 }

@@ -79,7 +79,7 @@ public:
    */
   inline void AddModuleType(tCreateFrameworkElementAction* cma)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Adding module type: ", cma->GetName(), " (", cma->GetModuleGroup(), ")");
+    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Adding module type: ", cma->GetName(), " (", cma->GetModuleGroup(), ")");
     GetModuleTypes().Add(cma);
   }
 

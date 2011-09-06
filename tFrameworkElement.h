@@ -389,7 +389,7 @@ protected:
    * \param indent Current indentation level
    * \param output Only used in C++ for streaming
    */
-  virtual void PrintStructure(int indent, rrlib::logging::tLogStream& output);
+  virtual void PrintStructure(int indent, std::stringstream& output);
 
   /*!
    * Publish updated edge information

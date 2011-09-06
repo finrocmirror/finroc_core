@@ -98,7 +98,7 @@ void tVoid0Method<HANDLER>::ExecuteFromMethodCallObject(tMethodCall* call, const
   catch (const tMethodCallException& e)
   {
     // don't send anything back
-    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
   }
   call->Recycle();
 }

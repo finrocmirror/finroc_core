@@ -75,6 +75,6 @@ mTestModule::mTestModule(finroc::core::tFrameworkElement *parent, const finroc::
 void mTestModule::Update()
 {
   this->signal_2.Publish(this->counter);
-  FINROC_LOG_STREAM(eLL_DEBUG) << this->counter;
+  FINROC_LOG_PRINT(eLL_DEBUG, this->counter);
   this->counter++;
 }

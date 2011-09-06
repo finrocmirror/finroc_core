@@ -469,7 +469,7 @@ public:
         }
         catch (const blackboard::tBBLockException& ex)
         {
-          FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Read-locking blackboard failed");
+          FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Read-locking blackboard failed");
         }
       }
 

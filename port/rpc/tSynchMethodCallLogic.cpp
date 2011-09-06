@@ -52,7 +52,7 @@ tAbstractCall* tSynchMethodCallLogic::PerformSynchCallImpl(tAbstractCall* call, 
     }
     catch (const util::tInterruptedException& e)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, "Synch method call interrupted... this shouldn't happen... usually");
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Synch method call interrupted... this shouldn't happen... usually");
     }
 
     // reset stuff for next call

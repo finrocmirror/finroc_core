@@ -281,7 +281,7 @@ protected:
    */
   virtual void NonStandardAssign(tPublishCache& pc);
 
-  virtual void PrintStructure(int indent, rrlib::logging::tLogStream& output);
+  virtual void PrintStructure(int indent, std::stringstream& output);
 
   /*!
    * Publish data

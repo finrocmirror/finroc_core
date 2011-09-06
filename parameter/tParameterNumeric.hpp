@@ -60,7 +60,7 @@ tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrame
   }
   else
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Default value is out of bounds");
+    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Default value is out of bounds");
 
     this->SetDefault(default_value);
   }

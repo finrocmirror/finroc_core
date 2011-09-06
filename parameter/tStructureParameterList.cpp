@@ -84,7 +84,7 @@ void tStructureParameterList::Deserialize(const rrlib::xml2::tXMLNode& node)
   size_t number_of_children = std::distance(node.GetChildrenBegin(), node.GetChildrenEnd());
   if (number_of_children != Size())
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_WARNING, log_domain, "Parameter list size and number of xml parameters differ. Trying anyway");
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Parameter list size and number of xml parameters differ. Trying anyway");
   }
   int count = std::min(number_of_children, Size());
   rrlib::xml2::tXMLNode::const_iterator child = node.GetChildrenBegin();

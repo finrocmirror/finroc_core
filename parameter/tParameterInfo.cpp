@@ -56,7 +56,7 @@ void tParameterInfo::AnnotatedObjectInitialized()
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, tFrameworkElement::log_domain, e);
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, tFrameworkElement::log_domain, e);
   }
 }
 
@@ -170,7 +170,7 @@ void tParameterInfo::SetConfigEntry(const util::tString& config_entry_)
     }
     catch (const util::tException& e)
     {
-      FINROC_LOG_STREAM(rrlib::logging::eLL_ERROR, log_domain, e);
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
     }
   }
 }
