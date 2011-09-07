@@ -79,6 +79,7 @@ extern "C"
 
 bool run_main_loop = false;
 bool pause_at_startup = false;
+int network_port = 4444;
 
 //----------------------------------------------------------------------
 // HandleSignalSIGINT
@@ -155,6 +156,29 @@ bool PauseHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
   return true;
 }
 
+//----------------------------------------------------------------------
+// PortHandler
+//----------------------------------------------------------------------
+bool PortHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
+{
+  rrlib::getopt::tOption port_option(name_to_option_map.at("port"));
+  if (port_option->IsActive())
+  {
+    const char* port_string = boost::any_cast<const char *>(port_option->GetValue());
+    int port = atoi(port_string);
+    if (port < 1 || port > 65535)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Invalid port '", port_string, "'. Using default: ", network_port);
+    }
+    else
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Listening on user defined port ", port, ".");
+      network_port = port;
+    }
+  }
+
+  return true;
+}
 
 //----------------------------------------------------------------------
 // main
@@ -174,7 +198,8 @@ int main(int argc, char **argv)
 
   rrlib::getopt::AddValue("log-config", 'l', "Log config file", &LogConfigHandler);
   rrlib::getopt::AddValue("config-file", 'c', "Parameter config file", &ParameterConfigHandler);
-  rrlib::getopt::AddFlag("pause", 'p', "Pause program at startup", &PauseHandler);
+  rrlib::getopt::AddValue("port", 'p', "Network port to use", &PortHandler);
+  rrlib::getopt::AddFlag("pause", 0, "Pause program at startup", &PauseHandler);
 
   StartUp();
 
@@ -183,7 +208,7 @@ int main(int argc, char **argv)
   finroc::core::tRuntimeEnvironment *runtime_environment = finroc::core::tRuntimeEnvironment::GetInstance();
 
   // Create and connect TCP peer
-  finroc::tcp::tTCPPeer* tcp_peer = new finroc::tcp::tTCPPeer(finroc::util::tStringBuilder("localhost:") + 4444, "", finroc::tcp::tTCPPeer::eFULL, 4444, finroc::tcp::tTCPPeer::cDEFAULT_FILTER, true);
+  finroc::tcp::tTCPPeer* tcp_peer = new finroc::tcp::tTCPPeer(finroc::util::tStringBuilder("localhost:") + network_port, "", finroc::tcp::tTCPPeer::eFULL, network_port, finroc::tcp::tTCPPeer::cDEFAULT_FILTER, true);
   tcp_peer->Init();
   try
   {
