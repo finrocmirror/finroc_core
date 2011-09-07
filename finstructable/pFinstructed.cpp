@@ -77,6 +77,7 @@ void InitMainGroup(finroc::core::tThreadContainer *main_thread, std::vector<char
       else
       {
         xml_name = arg;
+        group_name = arg;
         if (arg.Contains("/"))
         {
           group_name = arg.Substring(arg.LastIndexOf("/") + 1); // cut off path
