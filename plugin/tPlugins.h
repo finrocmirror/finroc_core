@@ -128,16 +128,6 @@ public:
     return &(plugins);
   }
 
-  // closes dlopen-ed libraries
-  class tDLCloser
-  {
-  public:
-    util::tSimpleList<void*> loaded;
-
-    tDLCloser() : loaded() {}
-    ~tDLCloser();
-  };
-
   /*!
    * Returns/loads CreateFrameworkElementAction with specified name and specified .so file.
    * (doesn't do any dynamic loading, if .so is already present)

@@ -68,7 +68,10 @@ tVoid1Method<tAdminServer*, int> tAdminServer::cSTART_EXECUTION(tAdminServer::cM
 tVoid1Method<tAdminServer*, int> tAdminServer::cPAUSE_EXECUTION(tAdminServer::cMETHODS, "Pause execution", "Framework element handle", false);
 tPort1Method<tAdminServer*, int, int> tAdminServer::cIS_RUNNING(tAdminServer::cMETHODS, "Is Framework element running", "handle", false);
 tPort3Method<tAdminServer*, tPortDataPtr<tCoreString>, int, int, int > tAdminServer::cGET_PORT_VALUE_AS_STRING(tAdminServer::cMETHODS, "Get port value as string", "handle", "dummy", "dummy", false);
-tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > tAdminServer::cGET_PARAMETER_INFO(tAdminServer::cMETHODS, "Get Annotation", "handle", "annotation type", false);
+tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > tAdminServer::cGET_PARAMETER_INFO(tAdminServer::cMETHODS, "GetParameterInfo", "handle", "dummy", false);
+tPort0Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>> tAdminServer::cGET_MODULE_LIBRARIES(tAdminServer::cMETHODS, "GetModuleLibraries", false);
+tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString>> tAdminServer::cLOAD_MODULE_LIBRARY(tAdminServer::cMETHODS, "LoadModuleLibrary", "dummy", "library name", false);
+
 tRPCInterfaceType tAdminServer::cDATA_TYPE("Administration method calls", &(tAdminServer::cMETHODS));
 util::tString tAdminServer::cPORT_NAME = "Administration";
 util::tString tAdminServer::cQUALIFIED_PORT_NAME = "Unrelated/Administration";
@@ -112,25 +115,38 @@ void tAdminServer::GetExecutionControls(util::tSimpleList<tExecutionControl*>& r
 
 tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbstractMethod* method)
 {
-  assert((method == &(cGET_CREATE_MODULE_ACTIONS)));
+  assert((method == &(cGET_CREATE_MODULE_ACTIONS)) || (method == &(cLOAD_MODULE_LIBRARY)) || (method == &(cGET_MODULE_LIBRARIES)));
 
   tPortDataPtr<rrlib::serialization::tMemoryBuffer> mb = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
   rrlib::serialization::tOutputStream co(mb.get(), rrlib::serialization::tOutputStream::eNames);
-  const util::tSimpleList<tCreateFrameworkElementAction*>& module_types = tPlugins::GetInstance()->GetModuleTypes();
-  for (size_t i = 0u; i < module_types.Size(); i++)
+
+  if (method == &(cGET_MODULE_LIBRARIES))
   {
-    const tCreateFrameworkElementAction& cma = *module_types.Get(i);
-    co.WriteString(cma.GetName());
-    co.WriteString(cma.GetModuleGroup());
-    if (cma.GetParameterTypes() != NULL)
+    std::vector<std::string> libs = sDynamicLoading::GetLoadableFinrocLibraries();
+    for (size_t i = 0; i < libs.size(); i++)
     {
-      cma.GetParameterTypes()->Serialize(co);
-    }
-    else
-    {
-      tStructureParameterList::cEMPTY.Serialize(co);
+      co.WriteString(libs[i]);
     }
   }
+  else
+  {
+    const util::tSimpleList<tCreateFrameworkElementAction*>& module_types = tPlugins::GetInstance()->GetModuleTypes();
+    for (size_t i = 0u; i < module_types.Size(); i++)
+    {
+      const tCreateFrameworkElementAction& cma = *module_types.Get(i);
+      co.WriteString(cma.GetName());
+      co.WriteString(cma.GetModuleGroup());
+      if (cma.GetParameterTypes() != NULL)
+      {
+        cma.GetParameterTypes()->Serialize(co);
+      }
+      else
+      {
+        tStructureParameterList::cEMPTY.Serialize(co);
+      }
+    }
+  }
+
   co.Close();
   return mb;
 }
@@ -164,6 +180,12 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
       co.Close();
       return buf;
     }
+  }
+  else if (method == &(cLOAD_MODULE_LIBRARY))
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Loading library ", type->ToString());
+    sDynamicLoading::DLOpen(type->ToString().GetCString());
+    return HandleCall(method); // return stuff from GET_CREATE_MODULE_ACTIONS
   }
   else
   {

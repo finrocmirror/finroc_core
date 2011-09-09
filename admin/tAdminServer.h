@@ -131,6 +131,12 @@ public:
   /*! Get parameter info for specified framework element: ConfigFile, children with config file, info on all parameters with same config file  */
   static tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > cGET_PARAMETER_INFO;
 
+  /*! Get module libraries (.so files) */
+  static tPort0Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>> cGET_MODULE_LIBRARIES;
+
+  /*! Load module library (.so file). Returns updated module list (same as GET_CREATE_MODULE_ACTIONS) */
+  static tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString>> cLOAD_MODULE_LIBRARY;
+
   /*! Data Type of method calls to this port */
   static tRPCInterfaceType cDATA_TYPE;
 

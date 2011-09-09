@@ -24,8 +24,7 @@
 #define core__plugin__tCreateFrameworkElementAction_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
-#include <dlfcn.h>
+#include "core/plugin/sDynamicLoading.h"
 
 namespace finroc
 {
@@ -73,9 +72,7 @@ public:
   // returns .so file in which address provided as argument is found by dladdr
   util::tString GetBinary(void* addr)
   {
-    Dl_info info;
-    dladdr(addr, &info);
-    util::tString tmp(info.dli_fname);
+    util::tString tmp(sDynamicLoading::GetBinary(addr));
     return tmp.Substring(tmp.LastIndexOf("/") + 1);
   }
 

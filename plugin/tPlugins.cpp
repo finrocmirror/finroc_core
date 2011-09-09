@@ -28,14 +28,6 @@ namespace finroc
 {
 namespace core
 {
-tPlugins::tDLCloser::~tDLCloser()
-{
-  tRuntimeEnvironment::Shutdown();
-  for (size_t i = 0; i < loaded.Size(); i++)
-  {
-    dlclose(loaded.Get(i));
-  }
-}
 
 void tPlugins::FindAndLoadPlugins()
 {
@@ -53,7 +45,6 @@ tCreateFrameworkElementAction* tPlugins::LoadModuleType(const util::tString& gro
 {
   // dynamically loaded .so files
   static util::tSimpleList<util::tString> loaded;
-  static tDLCloser dlcloser;
 
   // try to find module among existing modules
   const util::tSimpleList<tCreateFrameworkElementAction*>& modules = GetModuleTypes();
@@ -80,15 +71,10 @@ tCreateFrameworkElementAction* tPlugins::LoadModuleType(const util::tString& gro
   if (!already_loaded)
   {
     loaded.Add(group);
-    void* handle = dlopen(group.GetCString(), RTLD_NOW | RTLD_GLOBAL);
-    if (handle)
+    std::set<std::string> loaded = sDynamicLoading::GetLoadedFinrocLibraries();
+    if (loaded.find(group) == loaded.end() && sDynamicLoading::DLOpen(group.GetCString()))
     {
-      dlcloser.loaded.Add(handle);
       return LoadModuleType(group, name);
-    }
-    else
-    {
-      FINROC_LOG_PRINTF(rrlib::logging::eLL_ERROR, log_domain, "Error from dlopen: %s", dlerror());
     }
   }
 
