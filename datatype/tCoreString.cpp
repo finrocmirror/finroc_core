@@ -29,7 +29,7 @@ namespace core
 rrlib::serialization::tDataTypeBase tCoreString::cTYPE = rrlib::serialization::tDataType<tCoreString>();
 
 tCoreString::tCoreString() :
-    buffer(128)
+    buffer((size_t)128)
 {
 }
 
