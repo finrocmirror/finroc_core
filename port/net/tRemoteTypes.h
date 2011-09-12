@@ -93,7 +93,7 @@ public:
 private:
 
   /*!
-   * Init remote data type information from intput stream buffer.
+   * Init remote data type information from input stream buffer.
    * (call only once!)
    *
    * \param ci Input Stream Buffer to read from
@@ -103,7 +103,6 @@ private:
   /*!
    * Serializes information about local data types
    *
-   * \param dtr DataTypeRegister to serialize
    * \param co Output Stream to write information to
    */
   void SerializeLocalDataTypes(rrlib::serialization::tOutputStream& co);

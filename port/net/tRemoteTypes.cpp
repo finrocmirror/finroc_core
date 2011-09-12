@@ -91,7 +91,7 @@ void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
 int16 tRemoteTypes::GetTime(const rrlib::serialization::tDataTypeBase& data_type)
 {
   assert(((Initialized())) && "Not initialized");
-  while (static_cast<int16>(update_times.Size()) < data_type.GetUid())
+  while (static_cast<int16>(update_times.Size()) <= data_type.GetUid())
   {
     update_times.Add(static_cast<int16>(-1), true);
   }
