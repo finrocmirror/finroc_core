@@ -100,7 +100,7 @@ public:
 
   virtual ::finroc::core::tStructureParameterBase* DeepCopy()
   {
-    return new tStructureParameterImplStandard<T>(GetName(), *GetValue(), false);
+    return new tStructureParameterImplStandard<T>(GetName(), false);
   }
 
   /*!

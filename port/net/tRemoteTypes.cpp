@@ -63,7 +63,7 @@ void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
     util::tString name = ci.ReadString();
     int16 checked_types = rrlib::serialization::tDataTypeBase::GetTypeCount();
     rrlib::serialization::tDataTypeBase local = rrlib::serialization::tDataTypeBase::FindType(name);
-    ls << "- " << name << " (" << next << ") - " << (local != NULL ? "available here, too" : "not available here") << std::endl;
+    ls << "- " << name << " (" << next << ") - " << (local != NULL  && (!tFinrocTypeInfo::IsUnknownType(local)) ? "available here, too" : "not available here") << std::endl;
     int types_size = types.Size();  // to avoid warning
     assert((next == types_size));
     tEntry e(local);
