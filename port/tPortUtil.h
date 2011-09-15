@@ -489,30 +489,6 @@ class tPortUtil : public tPortUtilBase < T, typeutil::tIsCCType<T>::value, std::
 
 };
 
-template<typename T, bool GETVALUE>
-class tPortParentBase : public tPortWrapperBase<typename tPortTypeMap<T>::tPortBaseType>
-  {};
-
-template<typename T>
-class tPortParentBase<T, true> : public tPortWrapperBase<typename tPortTypeMap<T>::tPortBaseType>
-{
-public:
-  /*!
-   * \return Port's current value
-   */
-  inline T GetValue()
-  {
-    T t;
-    tPortUtil<T>::GetValue(this->wrapped, t);
-    return t;
-  }
-
-};
-
-template<typename T>
-class tPortParent : public tPortParentBase < T, typeutil::tIsCCType<T>::value >
-  {};
-
 } // namespace finroc
 } // namespace core
 

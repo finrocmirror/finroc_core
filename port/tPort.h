@@ -49,7 +49,7 @@ class tFrameworkElement;
  * In C++ code for correct casting is generated.
  */
 template<typename T>
-class tPort : public tPortParent<T>
+class tPort : public tPortWrapperBase<typename tPortTypeMap<T>::tPortBaseType>
 {
 protected:
 
@@ -86,11 +86,12 @@ public:
     wrapped = new tPortBaseType(ProcessPci(pci));
   }
 
-  template < typename Q = T >
   /*!
    * \param pci Construction parameters in Port Creation Info Object
+   * \param bounds Bounds for values in port
    */
-  tPort(tPortCreationInfo pci, const typename std::enable_if<tPortTypeMap<Q>::boundable, tBounds<T> >::type& bounds)
+  template < bool BOUNDABLE = tPortTypeMap<T>::boundable >
+  tPort(tPortCreationInfo pci, const typename std::enable_if<BOUNDABLE, tBounds<T>>::type& bounds)
   {
     wrapped = new typename tPortTypeMap<T>::tBoundedPortBaseType(ProcessPci(pci), bounds);
   }
@@ -247,11 +248,11 @@ public:
   //    }
   //
 
-  template < typename Q = T >
   /*!
    * \return Bounds as they are currently set
    */
-  inline const typename std::enable_if<tPortTypeMap<Q>::boundable, tBounds<T> >::type GetBounds() const
+  template < bool BOUNDABLE = tPortTypeMap<T>::boundable >
+  inline const typename std::enable_if<BOUNDABLE, tBounds<T>>::type GetBounds() const
   {
     return tPortUtil<T>::GetBounds(wrapped);
   }
@@ -289,6 +290,19 @@ public:
   inline tPortDataPtr<T> GetUnusedBuffer()
   {
     return tPortUtil<T>::GetUnusedBuffer(wrapped);
+  }
+
+  /*!
+   * \return Port's current value
+   *
+   * (only available for CC types)
+   */
+  template < bool CC = typeutil::tIsCCType<T>::value >
+  inline typename std::enable_if<CC, T>::type GetValue()
+  {
+    T t;
+    tPortUtil<T>::GetValue(this->wrapped, t);
+    return t;
   }
 
   /*!
@@ -349,14 +363,14 @@ public:
     wrapped->RemovePortListenerRaw(listener);
   }
 
-  template < typename Q = T >
   /*!
    * Set new bounds
    * (This is not thread-safe and must only be done in "pause mode")
    *
    * \param b New Bounds
    */
-  inline void SetBounds(const typename std::enable_if<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b)
+  template < bool BOUNDABLE = tPortTypeMap<T>::boundable >
+  inline void SetBounds(const typename std::enable_if<BOUNDABLE, tBounds<T>>::type& b)
   {
     tPortUtil<T>::SetBounds(wrapped, b);
   }
