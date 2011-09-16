@@ -56,7 +56,7 @@ private:
   /*!
    * Make sure non-standard assign flag is set
    */
-  inline static tPortCreationInfo ProcessPciBNP(tPortCreationInfo pci)
+  inline static tPortCreationInfoBase ProcessPciBNP(tPortCreationInfo<T> pci)
   {
     pci.flags = pci.flags | tPortFlags::cNON_STANDARD_ASSIGN;
     return pci;
@@ -104,9 +104,9 @@ public:
   /*!
    * \param pci Construction parameters in Port Creation Info Object
    */
-  tCCPortBounded(tPortCreationInfo pci, tBounds<T> b) :
+  tCCPortBounded(tPortCreationInfo<T> pci) :
       tCCPortBase(ProcessPciBNP(pci)),
-      bounds(b)
+      bounds(pci.GetBounds())
   {
   }
 

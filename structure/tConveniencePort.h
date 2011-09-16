@@ -61,7 +61,7 @@ namespace structure
  * Base class for ports that are typically used inside modules by application developer.
  */
 template <typename BASE>
-class tConveniencePort
+class tConveniencePortBase
 {
 protected:
 
@@ -94,6 +94,116 @@ protected:
     int current_index = parent->auto_name_port_count;
     parent->auto_name_port_count++;
     return current_index;
+  }
+};
+
+/*!
+ * Base class for ports that are typically used inside modules by application developer.
+ */
+
+/**
+ *
+ *
+ * Note for application developers:
+ * Constructor takes variadic argument list... just any properties you want to assign to port (see tPort class).
+ * However, unlike tPort, a string is only considered as description, if it is the first argument.
+ */
+template <typename T, typename BASE, typename PORT>
+class tConveniencePort : public PORT, public tConveniencePortBase<BASE>
+{
+public:
+
+  tConveniencePort(uint flags, tFrameworkElement*(*getContainer)(BASE*)) : PORT(tPortCreationInfo<T>(this->GetPortName(), getContainer(this->FindParent()), flags)) {}
+
+  /*!
+   * Constructor takes variadic argument list... just any properties you want to assign to port.
+   *
+   * Unlike tPort, port name and parent are usually determined automatically (however, only possible when port is direct class member).
+   * If this is not possible/desired, description needs to be provided as first constructor argument - parent as arbitrary one.
+   *
+   * So...
+   *
+   * The first argument is interpreted as port name if it is a string. Any further string argument is interpreted as config entry (relevant for parameters only).
+   * A framework element pointer is interpreted as parent.
+   * unsigned int arguments are interpreted as flags.
+   * int argument is interpreted as queue length.
+   * tBounds<T> are port's bounds.
+   * tUnit argument is port's unit.
+   * int16/short argument is interpreted as minimum network update interval.
+   * const T& is interpreted as port's default value.
+   * tPortCreationInfo<T> argument is copied. This is only allowed as first argument.
+   *
+   * This becomes a little tricky when port has numeric or string type.
+   * There we have these rules:
+   *
+   * string type: The first argument is interpreted as port name if it is a string.
+   *              A further string argument is interpreted as default_value. Another one as config entry.
+   * numeric type: The first numeric argument is interpreted as default_value.
+   */
+  template<typename A1, typename ... ARest>
+  tConveniencePort(uint flags, tFrameworkElement*(*getContainer)(BASE*), const A1& arg1, const ARest&... rest) : PORT(CreatePCI(flags, getContainer, arg1, rest...)) {}
+
+protected:
+
+  /*!
+   * Helper to determine whether argument has a string type
+   */
+  static bool IsString(const char*)
+  {
+    return true;
+  }
+  static bool IsString(const std::string&)
+  {
+    return true;
+  }
+  static bool IsString(const util::tString&)
+  {
+    return true;
+  }
+  static bool IsString(...)
+  {
+    return false;
+  }
+
+  /*!
+   * Create port creation info for this convenience port
+   */
+  template<typename A1, typename ... ARest>
+  tPortCreationInfo<T> CreatePCI(uint flags, tFrameworkElement*(*getContainer)(BASE*), const A1& arg1, const ARest&... rest)
+  {
+    tPortCreationInfo<T> result;
+    if (IsString(arg1))
+    {
+      result = tPortCreationInfo<T>(arg1, rest..., flags);
+      if (result.description.Length() == 0)
+      {
+        result.description = this->GetPortName();
+      }
+      else
+      {
+        if (result.parent == NULL)
+        {
+          UpdateCurrentPortNameIndex(this->FindParent());
+        }
+        else
+        {
+          UpdateCurrentPortNameIndex(static_cast<BASE*>(result.parent));
+        }
+      }
+    }
+    else
+    {
+      result = tPortCreationInfo<T>(this->GetPortName(), arg1, rest..., flags);
+    }
+    if (result.parent == NULL)
+    {
+      result.parent = getContainer(this->FindParent());
+    }
+    else
+    {
+      result.parent = getContainer(static_cast<BASE*>(result.parent));
+    }
+    return result;
   }
 };
 

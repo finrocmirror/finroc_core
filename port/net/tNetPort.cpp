@@ -38,7 +38,7 @@ namespace core
 {
 const int tNetPort::cPULL_TIMEOUT;
 
-tNetPort::tNetPort(tPortCreationInfo pci, util::tObject* belongs_to_) :
+tNetPort::tNetPort(tPortCreationInfoBase pci, util::tObject* belongs_to_) :
     wrapped(NULL),
     belongs_to(belongs_to_),
     remote_handle(0),
@@ -46,7 +46,7 @@ tNetPort::tNetPort(tPortCreationInfo pci, util::tObject* belongs_to_) :
     last_update(util::tLong::cMIN_VALUE)
 {
   // keep most these flags
-  int f = pci.flags & (tPortFlags::cACCEPTS_DATA | tPortFlags::cEMITS_DATA | tPortFlags::cMAY_ACCEPT_REVERSE_DATA | tPortFlags::cIS_OUTPUT_PORT | tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT | tPortFlags::cNON_STANDARD_ASSIGN | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cFINSTRUCTED);
+  uint f = pci.flags & (tPortFlags::cACCEPTS_DATA | tPortFlags::cEMITS_DATA | tPortFlags::cMAY_ACCEPT_REVERSE_DATA | tPortFlags::cIS_OUTPUT_PORT | tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT | tPortFlags::cNON_STANDARD_ASSIGN | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cFINSTRUCTED);
 
   // set either emit or accept data
   f |= ((f & tPortFlags::cIS_OUTPUT_PORT) > 0) ? tPortFlags::cEMITS_DATA : tPortFlags::cACCEPTS_DATA;
@@ -117,11 +117,11 @@ void tNetPort::ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int
   }
 }
 
-void tNetPort::UpdateFlags(int flags)
+void tNetPort::UpdateFlags(uint flags)
 {
   // process flags... keep DELETE and READY flags
-  int keep_flags = tCoreFlags::cSTATUS_FLAGS;
-  int cur_flags = GetPort()->GetAllFlags() & keep_flags;
+  uint keep_flags = tCoreFlags::cSTATUS_FLAGS;
+  uint cur_flags = GetPort()->GetAllFlags() & keep_flags;
   flags &= ~(keep_flags);
   flags |= cur_flags;
 
@@ -202,7 +202,7 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
   co.WriteBoolean(false);
 }
 
-tNetPort::tCCNetPort::tCCNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfo pci) :
+tNetPort::tCCNetPort::tCCNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci) :
     tCCPortBase(pci),
     outer_class_ptr(outer_class_ptr_)
 {
@@ -326,7 +326,7 @@ bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
   return true;
 }
 
-tNetPort::tStdNetPort::tStdNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfo pci) :
+tNetPort::tStdNetPort::tStdNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci) :
     tPortBase(pci),
     outer_class_ptr(outer_class_ptr_)
 {
@@ -439,7 +439,7 @@ const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, in
   }
 }
 
-tNetPort::tInterfaceNetPortImpl::tInterfaceNetPortImpl(tNetPort* const outer_class_ptr_, tPortCreationInfo pci) :
+tNetPort::tInterfaceNetPortImpl::tInterfaceNetPortImpl(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci) :
     tInterfaceNetPort(pci),
     outer_class_ptr(outer_class_ptr_)
 {

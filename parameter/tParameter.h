@@ -45,13 +45,8 @@ class tParameter : public tPortTypeMap<T>::tParameterImpl
 
 public:
 
-  tParameter(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry = "") : tParent(description, parent, config_entry) {}
-
-  tParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, unit, config_entry) {}
-
-  template < bool BOUNDABLE = tPortTypeMap<T>::boundable >
-  tParameter(const util::tString& description, tFrameworkElement* parent, const T& default_value, typename std::enable_if<BOUNDABLE, tBounds<T>>::type b, tUnit* unit = &(tUnit::cNO_UNIT), const util::tString& config_entry = "") : tParent(description, parent, default_value, b, unit, config_entry) {}
-
+  template<typename ... ARGS>
+  tParameter(const ARGS&... args) : tParent(args...) {}
 };
 
 } // namespace finroc

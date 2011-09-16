@@ -60,9 +60,19 @@ public:
   //    public final static DataType<Bounds> TYPE = new DataType<Bounds>(Bounds.class);
 
   /*! dummy constructor for no bounds */
-  tBounds() :
+  template < bool INIT0 = std::is_fundamental<T>::value >
+  tBounds(typename std::enable_if<INIT0, void>::type* v = 0) :
       min(0),
       max(0),
+      action(eNONE),
+      out_of_bounds_default(0)
+  {
+  }
+
+  template < bool INIT0 = std::is_fundamental<T>::value >
+  tBounds(typename std::enable_if < !INIT0, void >::type* v = 0) :
+      min(),
+      max(),
       action(eNONE),
       out_of_bounds_default()
   {

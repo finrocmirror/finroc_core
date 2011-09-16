@@ -30,7 +30,7 @@
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/port/tPortFlags.h"
-#include "core/port/tPortCreationInfo.h"
+#include "core/port/tPortCreationInfoBase.h"
 #include "core/tFrameworkElement.h"
 #include "rrlib/serialization/tFactory.h"
 
@@ -104,7 +104,7 @@ private:
   int16 strategy;
 
   /*! Constant for bulk and express flag */
-  static const int cBULK_N_EXPRESS = tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT;
+  static const uint cBULK_N_EXPRESS = tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT;
 
 protected:
 
@@ -160,7 +160,7 @@ private:
    * \param pci Port creation info
    * \return processed flags
    */
-  static int ProcessFlags(const tPortCreationInfo& pci);
+  static uint ProcessFlags(const tPortCreationInfoBase& pci);
 
   static void RemoveInternal(tAbstractPort* src, tAbstractPort* dest);
 
@@ -307,7 +307,7 @@ public:
   /*!
    * \param pci PortCreationInformation
    */
-  tAbstractPort(tPortCreationInfo pci);
+  tAbstractPort(tPortCreationInfoBase pci);
 
   /*!
    * \return Does port accept reverse data?

@@ -25,7 +25,7 @@
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/std/tPortBase.h"
-#include "core/port/tPortCreationInfo.h"
+#include "core/port/tPortCreationInfoBase.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/rpc/tInterfacePort.h"
 #include "rrlib/serialization/tInputStream.h"
@@ -37,7 +37,7 @@ namespace finroc
 {
 namespace core
 {
-const int tPortCreationList::cRELEVANT_FLAGS;
+const uint tPortCreationList::cRELEVANT_FLAGS;
 rrlib::serialization::tDataTypeBase tPortCreationList::cTYPE = rrlib::serialization::tDataType<tPortCreationList>();
 
 tPortCreationList::tPortCreationList() :
@@ -56,7 +56,7 @@ void tPortCreationList::Add(const util::tString& name, rrlib::serialization::tDa
   }
 }
 
-void tPortCreationList::ApplyChanges(tFrameworkElement* io_vector_, int flags_)
+void tPortCreationList::ApplyChanges(tFrameworkElement* io_vector_, uint flags_)
 {
   {
     util::tLock lock2(io_vector_);
@@ -78,7 +78,7 @@ void tPortCreationList::ApplyChanges(tFrameworkElement* io_vector_, int flags_)
   }
 }
 
-void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, int flags_, const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output, tAbstractPort* prototype)
+void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, uint flags_, const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output, tAbstractPort* prototype)
 {
   if (ap != NULL && ap->DescriptionEquals(name) && ap->GetDataType() == dt && (ap->GetAllFlags() & cRELEVANT_FLAGS) == (flags_ & cRELEVANT_FLAGS))
   {
@@ -103,11 +103,11 @@ void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vecto
   FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating port ", name, " in IOVector ", io_vector_->GetQualifiedLink());
   if (tFinrocTypeInfo::IsStdType(dt))
   {
-    ap = new tPortBase(tPortCreationInfo(name, io_vector_, dt, flags_));
+    ap = new tPortBase(tPortCreationInfoBase(name, io_vector_, dt, flags_));
   }
   else if (tFinrocTypeInfo::IsCCType(dt))
   {
-    ap = new tCCPortBase(tPortCreationInfo(name, io_vector_, dt, flags_));
+    ap = new tCCPortBase(tPortCreationInfoBase(name, io_vector_, dt, flags_));
   }
   else if (tFinrocTypeInfo::IsMethodType(dt))
   {
@@ -213,7 +213,7 @@ void tPortCreationList::GetPorts(const tFrameworkElement* elem, util::tSimpleLis
   }
 }
 
-void tPortCreationList::InitialSetup(tFrameworkElement* managed_io_vector, int port_creation_flags, bool show_output_port_selection_)
+void tPortCreationList::InitialSetup(tFrameworkElement* managed_io_vector, uint port_creation_flags, bool show_output_port_selection_)
 {
   assert(((io_vector == NULL || io_vector == managed_io_vector) && list.IsEmpty()));
   io_vector = managed_io_vector;

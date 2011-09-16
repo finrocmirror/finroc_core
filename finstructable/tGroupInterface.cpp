@@ -46,9 +46,9 @@ tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString&
   ports.GetValue()->InitialSetup(this, ComputePortFlags(port_dir, shared, unique_link), port_dir == eBOTH);
 }
 
-int tGroupInterface::ComputeFlags(tGroupInterface::tDataClassification data_class, bool shared, bool unique_link)
+uint tGroupInterface::ComputeFlags(tGroupInterface::tDataClassification data_class, bool shared, bool unique_link)
 {
-  int flags = ::finroc::core::tEdgeAggregator::cIS_INTERFACE;
+  uint flags = ::finroc::core::tEdgeAggregator::cIS_INTERFACE;
   if (data_class == eSENSOR_DATA)
   {
     flags |= ::finroc::core::tEdgeAggregator::cSENSOR_DATA;
@@ -68,9 +68,9 @@ int tGroupInterface::ComputeFlags(tGroupInterface::tDataClassification data_clas
   return flags;
 }
 
-int tGroupInterface::ComputePortFlags(tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link)
+uint tGroupInterface::ComputePortFlags(tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link)
 {
-  int flags = 0;
+  uint flags = 0;
   if (shared)
   {
     flags |= tCoreFlags::cSHARED;

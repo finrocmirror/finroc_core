@@ -54,10 +54,10 @@ class tFrameworkElementTreeFilter : public rrlib::serialization::tSerializable
 private:
 
   /*! Framework element's flags that are relevant */
-  int relevant_flags;
+  uint relevant_flags;
 
   /*! Result that needs to be achieved when ANDing element's flags with relevant flags (see ChildIterator) */
-  int flag_result;
+  uint flag_result;
 
   /*! Qualified names of framework elements need to start with one of these in order to be published */
   std::shared_ptr<util::tSimpleList<util::tString> > paths;
@@ -73,14 +73,14 @@ public:
    * \param relevant_flags Framework element's flags that are relevant
    * \param flag_result Result that needs to be achieved when ANDing element's flags with relevant flags (see ChildIterator)
    */
-  tFrameworkElementTreeFilter(int relevant_flags_, int flag_result_);
+  tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_);
 
   /*!
    * \param relevant_flags Framework element's flags that are relevant
    * \param flag_result Result that needs to be achieved when ANDing element's flags with relevant flags (see ChildIterator)
    * \param paths Qualified names of framework elements need to start with one of these (comma-separated list of strings)
    */
-  tFrameworkElementTreeFilter(int relevant_flags_, int flag_result_, const util::tString& paths_);
+  tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_, const util::tString& paths_);
 
   /*!
    * \param element Framework element

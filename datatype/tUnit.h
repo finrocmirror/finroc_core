@@ -146,9 +146,9 @@ public:
 
   static tUnit rad;
 
-  static tUnit cHz;
+  static tUnit Hz;
 
-  static tUnit cPixel;
+  static tUnit Pixel;
 
 private:
 

@@ -108,43 +108,62 @@ public:
     return HasAnyPortChanged(input);
   }
 
+  /**
+   * Port classes to use in module.
+   *
+   * Constructors take a variadic argument list... just any properties you want to assign to port.
+   *
+   * Unlike tPort, port name and parent are usually determined automatically (however, only possible when port is direct class member).
+   * If this is not possible/desired, description needs to be provided as first constructor argument - parent as arbitrary one.
+   *
+   * So...
+   *
+   * The first argument is interpreted as port name if it is a string. Any further string argument is interpreted as config entry (relevant for parameters only).
+   * A framework element pointer is interpreted as parent.
+   * unsigned int arguments are interpreted as flags.
+   * int argument is interpreted as queue length.
+   * tBounds<T> are port's bounds.
+   * tUnit argument is port's unit.
+   * int16/short argument is interpreted as minimum network update interval.
+   * const T& is interpreted as port's default value.
+   * tPortCreationInfo<T> argument is copied. This is only allowed as first argument.
+   *
+   * This becomes a little tricky when port has numeric or string type.
+   * There we have these rules:
+   *
+   * string type: The first argument is interpreted as port name if it is a string.
+   *              A further string argument is interpreted as default_value. Another one as config entry.
+   * numeric type: The first numeric argument is interpreted as default_value.
+   */
   template < typename T = double >
-  struct tInput : public tPort<T>, tConveniencePort<tModule>
+  class tInput : public tConveniencePort < T, tModule, tPort<T> >
   {
-    tInput()
-        : tPort<T>(this->GetPortName(), this->FindParent()->input, false)
+  public:
+    template<typename ... ARGS>
+    tInput(const ARGS&... args)
+        : tConveniencePort < T, tModule, tPort<T>>(tPortFlags::cINPUT_PORT, GetContainer, args...)
     {}
 
-    tInput(const finroc::util::tString &name)
-        : tPort<T>(name, this->FindParent()->input, false)
+  private:
+    static tFrameworkElement* GetContainer(tModule* module)
     {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tInput(tModule* parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->input, false)
-    {
-      this->UpdateCurrentPortNameIndex(parent);
+      return module->input;
     }
   };
 
   template < typename T = double >
-  struct tOutput : public tPort<T>, tConveniencePort<tModule>
+  class tOutput : public tConveniencePort < T, tModule, tPort<T> >
   {
-    tOutput()
-        : tPort<T>(this->GetPortName(), this->FindParent()->output, true)
+  public:
+    template<typename ... ARGS>
+    tOutput(const ARGS&... args)
+        : tConveniencePort < T, tModule, tPort<T>>(tPortFlags::cOUTPUT_PORT, GetContainer, args...)
     {}
 
-    tOutput(const finroc::util::tString &name)
-        : tPort<T>(name, this->FindParent()->output, true)
+  private:
+    static tFrameworkElement* GetContainer(tModule* module)
     {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tOutput(tModule* parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->output, true)
-    {
-      this->UpdateCurrentPortNameIndex(parent);
+      return module->output;
     }
   };
 

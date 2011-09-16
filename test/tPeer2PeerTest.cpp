@@ -41,10 +41,10 @@ void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 
   // Create two ports
   tFrameworkElement* link_test = new tFrameworkElement(NULL, "linkTest");
-  tPort<int> output(tPortCreationInfo("testOut", tPortFlags::cSHARED_OUTPUT_PORT));
+  tPort<int> output("testOut", tPortFlags::cSHARED_OUTPUT_PORT);
   output.GetWrapped()->Link(link_test, "linkTestPort");
-  tPort<int> output2(tPortCreationInfo("testOutGlobal", tPortFlags::cSHARED_OUTPUT_PORT | tCoreFlags::cGLOBALLY_UNIQUE_LINK));
-  tPort<int> input(tPortCreationInfo("testIn", tPortFlags::cINPUT_PORT));
+  tPort<int> output2("testOutGlobal", tPortFlags::cSHARED_OUTPUT_PORT | tCoreFlags::cGLOBALLY_UNIQUE_LINK);
+  tPort<int> input("testIn", tPortFlags::cINPUT_PORT);
   input.ConnectToSource("/TCP/localhost:4444/Unrelated/testOut");
   input.ConnectToSource("/Unrelated/testOutGlobal");
 

@@ -55,16 +55,16 @@ private:
 public:
 
   /*! Is this edge aggregator an interface of its parent (one of possibly many) */
-  static const int cIS_INTERFACE = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG;
+  static const uint cIS_INTERFACE = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG;
 
   /*! Hint for displaying in finstruct: Is this sensor data only? */
-  static const int cSENSOR_DATA = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG << 1;
+  static const uint cSENSOR_DATA = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG << 1;
 
   /*! Hint for displaying in finstruct: Is this controller data only? */
-  static const int cCONTROLLER_DATA = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG << 2;
+  static const uint cCONTROLLER_DATA = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG << 2;
 
   /*! All flags introduced by edge aggregator class */
-  static const int cALL_EDGE_AGGREGATOR_FLAGS = cIS_INTERFACE | cSENSOR_DATA | cCONTROLLER_DATA;
+  static const uint cALL_EDGE_AGGREGATOR_FLAGS = cIS_INTERFACE | cSENSOR_DATA | cCONTROLLER_DATA;
 
 private:
 
@@ -91,7 +91,7 @@ private:
 public:
 
   /*! see FrameworkElement for parameter description */
-  tEdgeAggregator(tFrameworkElement* parent_ = NULL, const util::tString& description_ = "", int flags_ = 0);
+  tEdgeAggregator(tFrameworkElement* parent_ = NULL, const util::tString& description_ = "", uint flags_ = 0);
 
   /*!
    * (Should be called by abstract port only)

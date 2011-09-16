@@ -82,7 +82,7 @@ protected:
 
   public:
 
-    tPortImpl(tPortCreationInfo pci, tInputPacketProcessor<T>* user_, tNewConnectionHandler* conn_handler_);
+    tPortImpl(tPortCreationInfo<T> pci, tInputPacketProcessor<T>* user_, tNewConnectionHandler* conn_handler_);
 
     /*!
      * Process any packet currently in queue (method only for convenience)
@@ -98,11 +98,11 @@ public:
 
 private:
 
-  static tPortCreationInfo ProcessPCI(tPortCreationInfo pci, const util::tString& description);
+  static tPortCreationInfo<T> ProcessPCI(tPortCreationInfo<T> pci, const util::tString& description);
 
 public:
 
-  tInputStreamPort(const util::tString& description, tPortCreationInfo pci, tInputPacketProcessor<T>* user, tNewConnectionHandler* conn_handler);
+  tInputStreamPort(const util::tString& description, tPortCreationInfo<T> pci, tInputPacketProcessor<T>* user, tNewConnectionHandler* conn_handler);
 
 };
 

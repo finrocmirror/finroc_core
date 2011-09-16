@@ -27,7 +27,7 @@
 
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/port/tAbstractPort.h"
-#include "core/port/tPortCreationInfo.h"
+#include "core/port/tPortCreationInfoBase.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/cc/tCCPortQueue.h"
 #include "core/port/tThreadLocalCache.h"
@@ -364,7 +364,7 @@ public:
   /*!
    * \param pci PortCreationInformation
    */
-  tCCPortBase(tPortCreationInfo pci);
+  tCCPortBase(tPortCreationInfoBase pci);
 
   /*!
    * \param listener Listener to add

@@ -32,7 +32,7 @@ namespace core
 const int tBasicRealtimeTest::cINTERVAL;
 
 tBasicRealtimeTest::tBasicRealtimeTest(const util::tString& name) :
-    port(name + "-port", NULL, true),
+    port(name + "-port", tPortFlags::cOUTPUT_PORT),
     max_latency(),
     total_latency(),
     cycles()

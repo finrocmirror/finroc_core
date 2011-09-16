@@ -53,9 +53,9 @@ tAbstractPort::~tAbstractPort()
 
 const int tAbstractPort::cPULL_TIMEOUT;
 const int8 tAbstractPort::cNO_CHANGE, tAbstractPort::cCHANGED, tAbstractPort::cCHANGED_INITIAL;
-const int tAbstractPort::cBULK_N_EXPRESS;
+const uint tAbstractPort::cBULK_N_EXPRESS;
 
-tAbstractPort::tAbstractPort(tPortCreationInfo pci) :
+tAbstractPort::tAbstractPort(tPortCreationInfoBase pci) :
     tFrameworkElement(pci.parent, pci.description, ProcessFlags(pci), pci.lock_order < 0 ? tLockOrderLevels::cPORT : pci.lock_order),
     changed(0),
     edges_src(NULL),
@@ -489,9 +489,9 @@ void tAbstractPort::PrepareDelete()
   DisconnectAll();
 }
 
-int tAbstractPort::ProcessFlags(const tPortCreationInfo& pci)
+uint tAbstractPort::ProcessFlags(const tPortCreationInfoBase& pci)
 {
-  int flags = pci.flags;
+  uint flags = pci.flags;
   assert((((flags & cBULK_N_EXPRESS) != cBULK_N_EXPRESS)) && "Cannot be bulk and express port at the same time");
   assert((pci.data_type != NULL));
   if ((flags & cBULK_N_EXPRESS) == 0)

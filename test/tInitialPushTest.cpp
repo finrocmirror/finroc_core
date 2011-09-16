@@ -38,11 +38,11 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // setup and initialize ports
   //ThreadLocalCache.get();
   tRuntimeEnvironment::GetInstance();
-  tPort<blackboard::tBlackboardBuffer> out(tPortCreationInfo("StdOut", blackboard::tBlackboardBuffer::cTYPE, tPortFlags::cOUTPUT_PORT));
-  tPort<blackboard::tBlackboardBuffer> in(tPortCreationInfo("StdIn", blackboard::tBlackboardBuffer::cTYPE, tPortFlags::cINPUT_PORT));
-  tPort<int> n_out(tPortCreationInfo("NumOut", tPortFlags::cOUTPUT_PORT));
-  tPort<int> n_in(tPortCreationInfo("NumIn", tPortFlags::cINPUT_PORT));
-  tPort<int> n_rev_out(tPortCreationInfo("NumRevOut", tPortFlags::cOUTPUT_PORT | tPortFlags::cPUSH_STRATEGY_REVERSE));
+  tPort<blackboard::tBlackboardBuffer> out("StdOut", tPortFlags::cOUTPUT_PORT);
+  tPort<blackboard::tBlackboardBuffer> in("StdIn", tPortFlags::cINPUT_PORT);
+  tPort<int> n_out("NumOut", tPortFlags::cOUTPUT_PORT);
+  tPort<int> n_in("NumIn", tPortFlags::cINPUT_PORT);
+  tPort<int> n_rev_out("NumRevOut", tPortFlags::cOUTPUT_PORT | tPortFlags::cPUSH_STRATEGY_REVERSE);
   tFrameworkElement::InitAll();
 
   // fill output ports with something
@@ -60,8 +60,8 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   in.ConnectToSource(out);
 
   // print output
-  util::tSystem::out.Println(util::tStringBuilder("NumIn (exp 23): ") + n_in.GetValue());
-  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.GetValue());
+  util::tSystem::out.Println(util::tStringBuilder("NumIn (exp 23): ") + n_in.Get());
+  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
   const blackboard::tBlackboardBuffer* bb2 = in.GetAutoLocked();
   util::tSystem::out.Println(util::tStringBuilder("StdIn (exp 23): ") + bb2->GetBuffer()->GetInt(0u));
   tThreadLocalCache::GetFast()->ReleaseAllLocks();
@@ -71,28 +71,28 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   n_out.Publish(42);
   //System.out.println("NumIn: " + nIn.getDoubleRaw());
   n_in.SetPushStrategy(true);
-  util::tSystem::out.Println(util::tStringBuilder("NumIn (expected 23 - because we have two sources => no push): ") + n_in.GetValue());
-  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.GetValue());
+  util::tSystem::out.Println(util::tStringBuilder("NumIn (expected 23 - because we have two sources => no push): ") + n_in.Get());
+  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
   n_rev_out.SetReversePushStrategy(false);
   n_out.Publish(12);
-  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.GetValue());
+  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
   n_rev_out.SetReversePushStrategy(true);
-  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 12): ") + n_rev_out.GetValue());
+  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 12): ") + n_rev_out.Get());
 
   // now for a complex net
   util::tSystem::out.Println("\nNow for a complex net...");
 
   // o1->o2
-  tPort<int> o1(tPortCreationInfo("o1", tPortFlags::cOUTPUT_PROXY));
+  tPort<int> o1("o1", tPortFlags::cOUTPUT_PROXY);
   tFrameworkElement::InitAll();
   o1.Publish(24);
-  tPort<int> o2(tPortCreationInfo("o2", tPortFlags::cINPUT_PROXY | tPortFlags::cPUSH_STRATEGY));
+  tPort<int> o2("o2", tPortFlags::cINPUT_PROXY | tPortFlags::cPUSH_STRATEGY);
   tFrameworkElement::InitAll();
   o1.ConnectToTarget(o2);
   Print(o2, 24);
 
   // o1->o2->o3
-  tPort<int> o3(tPortCreationInfo("o3", tPortFlags::cINPUT_PORT));
+  tPort<int> o3("o3", tPortFlags::cINPUT_PORT);
   o2.ConnectToTarget(o3);
   tFrameworkElement::InitAll();
   o2.SetPushStrategy(false);
@@ -103,7 +103,7 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   Print(o3, 22);
 
   // o0->o1->o2->o3
-  tPort<int> o0(tPortCreationInfo("o0", tPortFlags::cOUTPUT_PROXY));
+  tPort<int> o0("o0", tPortFlags::cOUTPUT_PROXY);
   tFrameworkElement::InitAll();
   o0.Publish(42);
   o0.ConnectToTarget(o1);
@@ -112,13 +112,13 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // o6->o0->o1->o2->o3
   //              \            .
   //               o4->o5
-  tPort<int> o4(tPortCreationInfo("o4", tPortFlags::cINPUT_PROXY));
-  tPort<int> o5(tPortCreationInfo("o5", tPortFlags::cINPUT_PORT));
+  tPort<int> o4("o4", tPortFlags::cINPUT_PROXY);
+  tPort<int> o5("o5", tPortFlags::cINPUT_PORT);
   tFrameworkElement::InitAll();
   o4.ConnectToTarget(o5);
   o2.ConnectToTarget(o4);
   Print(o5, 42);
-  tPort<int> o6(tPortCreationInfo("o6", tPortFlags::cOUTPUT_PORT));
+  tPort<int> o6("o6", tPortFlags::cOUTPUT_PORT);
   tFrameworkElement::InitAll();
   o6.Publish(44);
   o6.ConnectToTarget(o0);
@@ -128,10 +128,10 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // o6->o0->o1->o2->o3
   //        /     \            .
   //      o7->o8   o4->o5
-  tPort<int> o7(tPortCreationInfo("o7", tPortFlags::cOUTPUT_PROXY));
+  tPort<int> o7("o7", tPortFlags::cOUTPUT_PROXY);
   tFrameworkElement::InitAll();
   o7.Publish(33);
-  tPort<int> o8(tPortCreationInfo("o8", tPortFlags::cINPUT_PORT));
+  tPort<int> o8("o8", tPortFlags::cINPUT_PORT);
   tFrameworkElement::InitAll();
   o7.ConnectToTarget(o8);
   Print(o8, 33);
@@ -141,7 +141,7 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // o6->o0->o1->o2->o3
   //        /     \            .
   //  o9->o7->o8   o4->o5
-  tPort<int> o9(tPortCreationInfo("o9", tPortFlags::cOUTPUT_PORT));
+  tPort<int> o9("o9", tPortFlags::cOUTPUT_PORT);
   tFrameworkElement::InitAll();
   o9.Publish(88);
   o9.ConnectToTarget(o7);

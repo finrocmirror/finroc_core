@@ -30,8 +30,8 @@ namespace finroc
 namespace core
 {
 const int8 tFrameworkElementInfo::cEDGE_CHANGE;
-const int tFrameworkElementInfo::cPARENT_FLAGS_TO_STORE;
-const int tFrameworkElementInfo::cEDGE_AGG_PARENT_FLAGS_TO_STORE;
+const uint tFrameworkElementInfo::cPARENT_FLAGS_TO_STORE;
+const uint tFrameworkElementInfo::cEDGE_AGG_PARENT_FLAGS_TO_STORE;
 
 tFrameworkElementInfo::tFrameworkElementInfo() :
     links(),
@@ -105,7 +105,7 @@ void tFrameworkElementInfo::Deserialize(rrlib::serialization::tInputStream& is, 
   }
 }
 
-int tFrameworkElementInfo::FilterParentFlags(int extra_flags)
+uint tFrameworkElementInfo::FilterParentFlags(uint extra_flags)
 {
   if ((extra_flags & tCoreFlags::cEDGE_AGGREGATOR) != 0)
   {

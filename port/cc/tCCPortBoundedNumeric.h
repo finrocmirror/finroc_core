@@ -59,7 +59,7 @@ private:
   /*!
    * Make sure non-standard assign flag is set
    */
-  inline static tPortCreationInfo ProcessPciBNP(tPortCreationInfo pci)
+  inline static tPortCreationInfoBase ProcessPciBNP(tPortCreationInfo<T> pci)
   {
     pci.flags = pci.flags | tPortFlags::cNON_STANDARD_ASSIGN;
     pci.data_type = tNumber::cTYPE;
@@ -109,9 +109,9 @@ public:
   /*!
    * \param pci Construction parameters in Port Creation Info Object
    */
-  tCCPortBoundedNumeric(tPortCreationInfo pci, tBounds<T> b) :
+  tCCPortBoundedNumeric(tPortCreationInfo<T> pci) :
       tCCPortBase(ProcessPciBNP(pci)),
-      bounds(b)
+      bounds(pci.GetBounds())
   {
   }
 
@@ -121,6 +121,17 @@ public:
   inline tBounds<T> GetBounds() const
   {
     return bounds;
+  }
+
+  virtual void PreChildInit()
+  {
+    tNumber cn;
+    this->GetRawT(cn);
+    T t = cn.Value<T>();
+    if (!bounds.InBounds(t))
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Default value is out of bounds");
+    }
   }
 
   /*!

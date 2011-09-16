@@ -66,8 +66,9 @@ public:
 
     rrlib::serialization::tInputStream is;
 
-    tTestStdPort(tPortCreationInfo pci) :
-        tPort<rrlib::serialization::tMemoryBuffer>(pci),
+    template <typename ... ARGS>
+    tTestStdPort(const ARGS& ... args) :
+        tPort<rrlib::serialization::tMemoryBuffer>(args...),
         os(),
         is()
     {
@@ -164,60 +165,59 @@ public:
     {
       if (cPUSH_TESTS)
       {
-        cc_push_out = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPush Output", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_push_in = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPush Input", tPortFlags::cSHARED_INPUT_PORT)));
+        cc_push_out = std::shared_ptr<tPort<int> >(new tPort<int>("CCPush Output", tPortFlags::cSHARED_OUTPUT_PORT));
+        cc_push_in = std::shared_ptr<tPort<int> >(new tPort<int>("CCPush Input", tPortFlags::cSHARED_INPUT_PORT));
         cc_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
       }
       if (cPULL_PUSH_TESTS)
       {
-        cc_pull_push_out = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPullPush Output", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_pull_push_in = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPullPush Input", tPortFlags::cSHARED_INPUT_PORT)));
+        cc_pull_push_out = std::shared_ptr<tPort<int> >(new tPort<int>("CCPullPush Output", tPortFlags::cSHARED_OUTPUT_PORT));
+        cc_pull_push_in = std::shared_ptr<tPort<int> >(new tPort<int>("CCPullPush Input", tPortFlags::cSHARED_INPUT_PORT));
         cc_pull_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         cc_pull_push_in->SetPushStrategy(false);
       }
       if (cREVERSE_PUSH_TESTS)
       {
-        cc_rev_push_out = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCRevPush Output", tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH)));
-        cc_rev_push_out_local = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_rev_push_in = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCRevPush Input", tPortFlags::cSHARED_INPUT_PORT)));
+        cc_rev_push_out = std::shared_ptr<tPort<int> >(new tPort<int>("CCRevPush Output", tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH));
+        cc_rev_push_out_local = std::shared_ptr<tPort<int> >(new tPort<int>("CCRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT));
+        cc_rev_push_in = std::shared_ptr<tPort<int> >(new tPort<int>("CCRevPush Input", tPortFlags::cSHARED_INPUT_PORT));
         cc_rev_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         cc_rev_push_out_local->ConnectToTarget(*cc_rev_push_in);
       }
       if (cQ_TESTS)
       {
-        cc_qOut = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPush Queue Output", tPortFlags::cSHARED_OUTPUT_PORT)));
-        cc_qIn = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("CCPush Queue Input", tPortFlags::cSHARED_INPUT_PORT, 0)));
+        cc_qOut = std::shared_ptr<tPort<int> >(new tPort<int>("CCPush Queue Output", tPortFlags::cSHARED_OUTPUT_PORT));
+        cc_qIn = std::shared_ptr<tPort<int> >(new tPort<int>("CCPush Queue Input", tPortFlags::cSHARED_INPUT_PORT, 0));
         cc_qIn->SetMinNetUpdateInterval(cRECV_FREQ);
       }
     }
     if (cSTD_TESTS)
     {
-      rrlib::serialization::tDataTypeBase bt = rrlib::serialization::tMemoryBuffer::cTYPE;
       if (cPUSH_TESTS)
       {
-        std_push_out = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
+        std_push_out = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdPush Output", tPortFlags::cSHARED_OUTPUT_PORT));
+        std_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdPush Input", tPortFlags::cSHARED_INPUT_PORT));
         std_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
       }
       if (cPULL_PUSH_TESTS)
       {
-        std_pull_push_out = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPullPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_pull_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPullPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
+        std_pull_push_out = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdPullPush Output", tPortFlags::cSHARED_OUTPUT_PORT));
+        std_pull_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdPullPush Input", tPortFlags::cSHARED_INPUT_PORT));
         std_pull_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         std_pull_push_in->SetPushStrategy(false);
       }
       if (cREVERSE_PUSH_TESTS)
       {
-        std_rev_push_out = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdRevPush Output", bt, tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH)));
-        std_rev_push_out_local = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdRevPush Output Local", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_rev_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdRevPush Input", bt, tPortFlags::cSHARED_INPUT_PORT)));
+        std_rev_push_out = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdRevPush Output", tPortFlags::cSHARED_OUTPUT_PORT | tPortFlags::cACCEPTS_REVERSE_DATA_PUSH));
+        std_rev_push_out_local = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT));
+        std_rev_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdRevPush Input", tPortFlags::cSHARED_INPUT_PORT));
         std_rev_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
         std_rev_push_out_local->ConnectToTarget(*std_rev_push_in);
       }
       if (cQ_TESTS)
       {
-        std_qOut = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPush Queue Output", bt, tPortFlags::cSHARED_OUTPUT_PORT)));
-        std_qIn = std::shared_ptr<tTestStdPort>(new tTestStdPort(tPortCreationInfo("StdPush Queue Input", bt, tPortFlags::cSHARED_INPUT_PORT, 0)));
+        std_qOut = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdPush Queue Output", tPortFlags::cSHARED_OUTPUT_PORT));
+        std_qIn = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdPush Queue Input", tPortFlags::cSHARED_INPUT_PORT, 0));
         std_qIn->SetMinNetUpdateInterval(cRECV_FREQ);
       }
     }
@@ -254,7 +254,7 @@ public:
           if (cc_push_in->HasChanged())
           {
             cc_push_in->ResetChanged();
-            util::tSystem::out.Println(util::tStringBuilder("ccPushIn received: ") + cc_push_in->GetValue());
+            util::tSystem::out.Println(util::tStringBuilder("ccPushIn received: ") + cc_push_in->Get());
           }
         }
 
@@ -266,7 +266,7 @@ public:
           if (cc_pull_push_in->HasChanged())
           {
             cc_pull_push_in->ResetChanged();
-            util::tSystem::out.Println(util::tStringBuilder("ccPullPushIn received: ") + cc_pull_push_in->GetValue());
+            util::tSystem::out.Println(util::tStringBuilder("ccPullPushIn received: ") + cc_pull_push_in->Get());
           }
 
           // do some stuff with push strategy
@@ -280,7 +280,7 @@ public:
           }
           else if (period_idx < 10 && (period_idx % 3) == 0)
           {
-            util::tSystem::out.Println(util::tStringBuilder("Pulling ccPullPushIn: ") + cc_pull_push_in->GetValue());
+            util::tSystem::out.Println(util::tStringBuilder("Pulling ccPullPushIn: ") + cc_pull_push_in->Get());
           }
         }
 
@@ -288,7 +288,7 @@ public:
         {
           if (cc_rev_push_in->HasChanged())
           {
-            int val = cc_rev_push_in->GetValue();
+            int val = cc_rev_push_in->Get();
             if (val < 0)
             {
               util::tSystem::out.Println(util::tStringBuilder("ccRevPushIn received: ") + val);
@@ -300,7 +300,7 @@ public:
           if (cc_rev_push_out->HasChanged())
           {
             cc_rev_push_out->ResetChanged();
-            util::tSystem::out.Println(util::tStringBuilder("ccRevPushOut received: ") + cc_rev_push_out->GetValue());
+            util::tSystem::out.Println(util::tStringBuilder("ccRevPushOut received: ") + cc_rev_push_out->Get());
           }
           if (period_idx == 17)
           {

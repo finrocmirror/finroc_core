@@ -79,7 +79,7 @@ namespace structure
 class tGroup : public tFinstructableGroup
 {
   template <typename T>
-  friend class tConveniencePort;
+  friend class tConveniencePortBase;
 
   finroc::core::tEdgeAggregator* controller_input;
   finroc::core::tEdgeAggregator* controller_output;
@@ -98,81 +98,94 @@ class tGroup : public tFinstructableGroup
 //----------------------------------------------------------------------
 public:
 
+  /**
+   * Port classes to use in module.
+   *
+   * Constructors take a variadic argument list... just any properties you want to assign to port.
+   *
+   * Unlike tPort, port name and parent are usually determined automatically (however, only possible when port is direct class member).
+   * If this is not possible/desired, description needs to be provided as first constructor argument - parent as arbitrary one.
+   *
+   * So...
+   *
+   * The first argument is interpreted as port name if it is a string. Any further string argument is interpreted as config entry (relevant for parameters only).
+   * A framework element pointer is interpreted as parent.
+   * unsigned int arguments are interpreted as flags.
+   * int argument is interpreted as queue length.
+   * tBounds<T> are port's bounds.
+   * tUnit argument is port's unit.
+   * int16/short argument is interpreted as minimum network update interval.
+   * const T& is interpreted as port's default value.
+   * tPortCreationInfo<T> argument is copied. This is only allowed as first argument.
+   *
+   * This becomes a little tricky when port has numeric or string type.
+   * There we have these rules:
+   *
+   * string type: The first argument is interpreted as port name if it is a string.
+   *              A further string argument is interpreted as default_value. Another one as config entry.
+   * numeric type: The first numeric argument is interpreted as default_value.
+   */
   template < typename T = double >
-  struct tControllerInput : public tPort<T>, tConveniencePort<tGroup>
+  class tControllerInput : public tConveniencePort < T, tGroup, tPort<T> >
   {
-    tControllerInput()
-        : tPort<T>(tPortCreationInfo(this->GetPortName(), this->FindParent()->controller_input, tPortFlags::cINPUT_PROXY))
+  public:
+    template<typename ... ARGS>
+    tControllerInput(const ARGS&... args)
+        : tConveniencePort < T, tGroup, tPort<T> > (tPortFlags::cINPUT_PROXY, GetContainer, args...)
     {}
 
-    tControllerInput(const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, this->FindParent()->controller_input, tPortFlags::cINPUT_PROXY))
+  private:
+    static tFrameworkElement* GetContainer(tGroup* module)
     {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tControllerInput(tGroup* parent, const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, parent->controller_input, tPortFlags::cINPUT_PROXY))
-    {
-      this->UpdateCurrentPortNameIndex(parent);
+      return module->controller_input;
     }
   };
+
   template < typename T = double >
-  struct tControllerOutput : public tPort<T>, tConveniencePort<tGroup>
+  class tControllerOutput : public tConveniencePort < T, tGroup, tPort<T> >
   {
-    tControllerOutput()
-        : tPort<T>(tPortCreationInfo(this->GetPortName(), this->FindParent()->controller_output, tPortFlags::cOUTPUT_PROXY))
+  public:
+    template<typename ... ARGS>
+    tControllerOutput(const ARGS&... args)
+        : tConveniencePort < T, tGroup, tPort<T> > (tPortFlags::cOUTPUT_PROXY, GetContainer, args...)
     {}
 
-    tControllerOutput(const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, this->FindParent()->controller_output, tPortFlags::cOUTPUT_PROXY))
+  private:
+    static tFrameworkElement* GetContainer(tGroup* module)
     {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tControllerOutput(tGroup* parent, const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, parent->controller_output, tPortFlags::cOUTPUT_PROXY))
-    {
-      this->UpdateCurrentPortNameIndex(parent);
-    }
-
-  };
-  template < typename T = double >
-  struct tSensorInput : public tPort<T>, tConveniencePort<tGroup>
-  {
-    tSensorInput()
-        : tPort<T>(tPortCreationInfo(this->GetPortName(), this->FindParent()->sensor_input, tPortFlags::cINPUT_PROXY))
-    {}
-
-    tSensorInput(const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, this->FindParent()->sensor_input, tPortFlags::cINPUT_PROXY))
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tSensorInput(tGroup* parent, const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, parent->sensor_input, tPortFlags::cINPUT_PROXY))
-    {
-      this->UpdateCurrentPortNameIndex(parent);
+      return module->controller_output;
     }
   };
+
   template < typename T = double >
-  struct tSensorOutput : public tPort<T>, tConveniencePort<tGroup>
+  class tSensorInput : public tConveniencePort < T, tGroup, tPort<T> >
   {
-    tSensorOutput()
-        : tPort<T>(tPortCreationInfo(this->GetPortName(), this->FindParent()->sensor_output, tPortFlags::cOUTPUT_PROXY))
+  public:
+    template<typename ... ARGS>
+    tSensorInput(const ARGS&... args)
+        : tConveniencePort < T, tGroup, tPort<T> >(tPortFlags::cINPUT_PROXY, GetContainer, args...)
     {}
 
-    tSensorOutput(const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, this->FindParent()->sensor_output, tPortFlags::cOUTPUT_PROXY))
+  private:
+    static tFrameworkElement* GetContainer(tGroup* module)
     {
-      this->UpdateCurrentPortNameIndex();
+      return module->sensor_input;
     }
+  };
 
-    tSensorOutput(tGroup* parent, const finroc::util::tString &name)
-        : tPort<T>(tPortCreationInfo(name, parent->sensor_output, tPortFlags::cOUTPUT_PROXY))
+  template < typename T = double >
+  class tSensorOutput : public tConveniencePort < T, tGroup, tPort<T> >
+  {
+  public:
+    template<typename ... ARGS>
+    tSensorOutput(const ARGS&... args)
+        : tConveniencePort < T, tGroup, tPort<T>>(tPortFlags::cOUTPUT_PROXY, GetContainer, args...)
+    {}
+
+  private:
+    static tFrameworkElement* GetContainer(tGroup* module)
     {
-      this->UpdateCurrentPortNameIndex(parent);
+      return module->sensor_output;
     }
   };
 

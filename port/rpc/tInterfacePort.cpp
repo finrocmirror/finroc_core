@@ -28,7 +28,7 @@ namespace finroc
 namespace core
 {
 tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_) :
-    tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, 0)), type_, -1)),
+    tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, 0)), type_, -1)),
     type(type_),
     edges_src(),
     edges_dest(),
@@ -38,8 +38,8 @@ tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkEleme
   InitLists(&(edges_src), &(edges_dest));
 }
 
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, int custom_flags) :
-    tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, custom_flags)), type_, -1)),
+tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags) :
+    tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, custom_flags)), type_, -1)),
     type(type_),
     edges_src(),
     edges_dest(),
@@ -49,8 +49,8 @@ tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkEleme
   InitLists(&(edges_src), &(edges_dest));
 }
 
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, int custom_flags, int lock_level) :
-    tAbstractPort(ProcessPci((tPortCreationInfo(description, parent, data_type, custom_flags)), type_, lock_level)),
+tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level) :
+    tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, custom_flags)), type_, lock_level)),
     type(type_),
     edges_src(),
     edges_dest(),
@@ -60,7 +60,7 @@ tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkEleme
   InitLists(&(edges_src), &(edges_dest));
 }
 
-tInterfacePort::tInterfacePort(tPortCreationInfo pci, tInterfacePort::tType type_, int lock_level) :
+tInterfacePort::tInterfacePort(tPortCreationInfoBase pci, tInterfacePort::tType type_, int lock_level) :
     tAbstractPort(ProcessPci(pci, type_, lock_level)),
     type(type_),
     edges_src(),
@@ -115,7 +115,7 @@ tPortDataManager* tInterfacePort::GetUnusedBufferRaw(rrlib::serialization::tData
   return buf_pool->GetUnusedBuffer(dt);
 }
 
-tPortCreationInfo tInterfacePort::ProcessPci(tPortCreationInfo pci, tInterfacePort::tType type_, int lock_level)
+tPortCreationInfoBase tInterfacePort::ProcessPci(tPortCreationInfoBase pci, tInterfacePort::tType type_, int lock_level)
 {
   switch (type_)
   {

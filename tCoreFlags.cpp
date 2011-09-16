@@ -25,26 +25,26 @@ namespace finroc
 {
 namespace core
 {
-const int tCoreFlags::cCONSTANT_FLAGS;
-const int tCoreFlags::cNON_CONSTANT_FLAGS;
-const int tCoreFlags::cIS_PORT;
-const int tCoreFlags::cGLOBALLY_UNIQUE_LINK;
-const int tCoreFlags::cIS_RUNTIME;
-const int tCoreFlags::cEDGE_AGGREGATOR;
-const int tCoreFlags::cALTERNATE_LINK_ROOT;
-const int tCoreFlags::cNETWORK_ELEMENT;
-const int tCoreFlags::cALLOWS_CHILDREN;
-const int tCoreFlags::cSHARED;
-const int tCoreFlags::cFIRST_PORT_FLAG;
-const int tCoreFlags::cAUTO_RENAME;
-const int tCoreFlags::cFIRST_CUSTOM_CONST_FLAG;
-const int tCoreFlags::cREADY;
-const int tCoreFlags::cPUBLISHED;
-const int tCoreFlags::cDELETED;
-const int tCoreFlags::cFINSTRUCTED;
-const int tCoreFlags::cFINSTRUCTABLE_GROUP;
-const int tCoreFlags::cFIRST_CUSTOM_NON_CONST_FLAG;
-const int tCoreFlags::cSTATUS_FLAGS;
+const uint tCoreFlags::cCONSTANT_FLAGS;
+const uint tCoreFlags::cNON_CONSTANT_FLAGS;
+const uint tCoreFlags::cIS_PORT;
+const uint tCoreFlags::cGLOBALLY_UNIQUE_LINK;
+const uint tCoreFlags::cIS_RUNTIME;
+const uint tCoreFlags::cEDGE_AGGREGATOR;
+const uint tCoreFlags::cALTERNATE_LINK_ROOT;
+const uint tCoreFlags::cNETWORK_ELEMENT;
+const uint tCoreFlags::cALLOWS_CHILDREN;
+const uint tCoreFlags::cSHARED;
+const uint tCoreFlags::cFIRST_PORT_FLAG;
+const uint tCoreFlags::cAUTO_RENAME;
+const uint tCoreFlags::cFIRST_CUSTOM_CONST_FLAG;
+const uint tCoreFlags::cREADY;
+const uint tCoreFlags::cPUBLISHED;
+const uint tCoreFlags::cDELETED;
+const uint tCoreFlags::cFINSTRUCTED;
+const uint tCoreFlags::cFINSTRUCTABLE_GROUP;
+const uint tCoreFlags::cFIRST_CUSTOM_NON_CONST_FLAG;
+const uint tCoreFlags::cSTATUS_FLAGS;
 
 } // namespace finroc
 } // namespace core

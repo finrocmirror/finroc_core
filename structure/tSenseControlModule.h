@@ -133,80 +133,94 @@ public:
     return HasAnyPortChanged(controller_input);
   }
 
+  /**
+   * Port classes to use in module.
+   *
+   * Constructors take a variadic argument list... just any properties you want to assign to port.
+   *
+   * Unlike tPort, port name and parent are usually determined automatically (however, only possible when port is direct class member).
+   * If this is not possible/desired, description needs to be provided as first constructor argument - parent as arbitrary one.
+   *
+   * So...
+   *
+   * The first argument is interpreted as port name if it is a string. Any further string argument is interpreted as config entry (relevant for parameters only).
+   * A framework element pointer is interpreted as parent.
+   * unsigned int arguments are interpreted as flags.
+   * int argument is interpreted as queue length.
+   * tBounds<T> are port's bounds.
+   * tUnit argument is port's unit.
+   * int16/short argument is interpreted as minimum network update interval.
+   * const T& is interpreted as port's default value.
+   * tPortCreationInfo<T> argument is copied. This is only allowed as first argument.
+   *
+   * This becomes a little tricky when port has numeric or string type.
+   * There we have these rules:
+   *
+   * string type: The first argument is interpreted as port name if it is a string.
+   *              A further string argument is interpreted as default_value. Another one as config entry.
+   * numeric type: The first numeric argument is interpreted as default_value.
+   */
   template < typename T = double >
-  struct tControllerInput : public tPort<T>, tConveniencePort<tSenseControlModule>
+  class tControllerInput : public tConveniencePort < T, tSenseControlModule, tPort<T> >
   {
-    tControllerInput()
-        : tPort<T>(this->GetPortName(), this->FindParent()->controller_input, false)
+  public:
+    template<typename ... ARGS>
+    tControllerInput(const ARGS&... args)
+        : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cINPUT_PORT, GetContainer, args...)
     {}
 
-    tControllerInput(const finroc::util::tString &name)
-        : tPort<T>(name, this->FindParent()->controller_input, false)
+  private:
+    static tFrameworkElement* GetContainer(tSenseControlModule* module)
     {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tControllerInput(tSenseControlModule* parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->controller_input, false)
-    {
-      this->UpdateCurrentPortNameIndex(parent);
+      return module->controller_input;
     }
   };
+
   template < typename T = double >
-  struct tControllerOutput : public tPort<T>, tConveniencePort<tSenseControlModule>
+  class tControllerOutput : public tConveniencePort < T, tSenseControlModule, tPort<T> >
   {
-    tControllerOutput()
-        : tPort<T>(this->GetPortName(), this->FindParent()->controller_output, true)
+  public:
+    template<typename ... ARGS>
+    tControllerOutput(const ARGS&... args)
+        : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cOUTPUT_PORT, GetContainer, args...)
     {}
 
-    tControllerOutput(const finroc::util::tString &name)
-        : tPort<T>(name, this->FindParent()->controller_output, true)
+  private:
+    static tFrameworkElement* GetContainer(tSenseControlModule* module)
     {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tControllerOutput(tSenseControlModule* parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->controller_output, true)
-    {
-      this->UpdateCurrentPortNameIndex(parent);
+      return module->controller_output;
     }
   };
+
   template < typename T = double >
-  struct tSensorInput : public tPort<T>, tConveniencePort<tSenseControlModule>
+  class tSensorInput : public tConveniencePort < T, tSenseControlModule, tPort<T> >
   {
-    tSensorInput()
-        : tPort<T>(this->GetPortName(), this->FindParent()->sensor_input, false)
+  public:
+    template<typename ... ARGS>
+    tSensorInput(const ARGS&... args)
+        : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cINPUT_PORT, GetContainer, args...)
     {}
 
-    tSensorInput(const finroc::util::tString &name)
-        : tPort<T>(name, this->FindParent()->sensor_input, false)
+  private:
+    static tFrameworkElement* GetContainer(tSenseControlModule* module)
     {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tSensorInput(tSenseControlModule* parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->sensor_input, false)
-    {
-      this->UpdateCurrentPortNameIndex(parent);
+      return module->sensor_input;
     }
   };
+
   template < typename T = double >
-  struct tSensorOutput : public tPort<T>, tConveniencePort<tSenseControlModule>
+  class tSensorOutput : public tConveniencePort < T, tSenseControlModule, tPort<T> >
   {
-    tSensorOutput()
-        : tPort<T>(this->GetPortName(), this->FindParent()->sensor_output, true)
+  public:
+    template<typename ... ARGS>
+    tSensorOutput(const ARGS&... args)
+        : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cOUTPUT_PORT, GetContainer, args...)
     {}
 
-    tSensorOutput(const finroc::util::tString &name)
-        : tPort<T>(name, this->FindParent()->sensor_output, true)
+  private:
+    static tFrameworkElement* GetContainer(tSenseControlModule* module)
     {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tSensorOutput(tSenseControlModule* parent, const finroc::util::tString &name)
-        : tPort<T>(name, parent->sensor_output, true)
-    {
-      this->UpdateCurrentPortNameIndex(parent);
+      return module->sensor_output;
     }
   };
 

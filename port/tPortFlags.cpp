@@ -25,31 +25,31 @@ namespace finroc
 {
 namespace core
 {
-const int tPortFlags::cHAS_QUEUE;
-const int tPortFlags::cPUSH_DATA_IMMEDIATELY;
-const int tPortFlags::cMAY_ACCEPT_REVERSE_DATA;
-const int tPortFlags::cACCEPTS_DATA;
-const int tPortFlags::cEMITS_DATA;
-const int tPortFlags::cIS_OUTPUT_PORT;
-const int tPortFlags::cIS_BULK_PORT;
-const int tPortFlags::cSPECIAL_REUSE_QUEUE;
-const int tPortFlags::cNON_STANDARD_ASSIGN;
-const int tPortFlags::cIS_EXPRESS_PORT;
-const int tPortFlags::cIS_VOLATILE;
-const int tPortFlags::cFIRST_CUSTOM_PORT_FLAG;
-const int tPortFlags::cUSES_QUEUE;
-const int tPortFlags::cDEFAULT_ON_DISCONNECT;
-const int tPortFlags::cPUSH_STRATEGY;
-const int tPortFlags::cPUSH_STRATEGY_REVERSE;
-const int tPortFlags::cHAS_AND_USES_QUEUE;
-const int tPortFlags::cACCEPTS_REVERSE_DATA_PUSH;
-const int tPortFlags::cOUTPUT_PORT;
-const int tPortFlags::cSHARED_OUTPUT_PORT;
-const int tPortFlags::cINPUT_PORT;
-const int tPortFlags::cSHARED_INPUT_PORT;
-const int tPortFlags::cPROXY;
-const int tPortFlags::cOUTPUT_PROXY;
-const int tPortFlags::cINPUT_PROXY;
+const uint tPortFlags::cHAS_QUEUE;
+const uint tPortFlags::cPUSH_DATA_IMMEDIATELY;
+const uint tPortFlags::cMAY_ACCEPT_REVERSE_DATA;
+const uint tPortFlags::cACCEPTS_DATA;
+const uint tPortFlags::cEMITS_DATA;
+const uint tPortFlags::cIS_OUTPUT_PORT;
+const uint tPortFlags::cIS_BULK_PORT;
+const uint tPortFlags::cSPECIAL_REUSE_QUEUE;
+const uint tPortFlags::cNON_STANDARD_ASSIGN;
+const uint tPortFlags::cIS_EXPRESS_PORT;
+const uint tPortFlags::cIS_VOLATILE;
+const uint tPortFlags::cFIRST_CUSTOM_PORT_FLAG;
+const uint tPortFlags::cUSES_QUEUE;
+const uint tPortFlags::cDEFAULT_ON_DISCONNECT;
+const uint tPortFlags::cPUSH_STRATEGY;
+const uint tPortFlags::cPUSH_STRATEGY_REVERSE;
+const uint tPortFlags::cHAS_AND_USES_QUEUE;
+const uint tPortFlags::cACCEPTS_REVERSE_DATA_PUSH;
+const uint tPortFlags::cOUTPUT_PORT;
+const uint tPortFlags::cSHARED_OUTPUT_PORT;
+const uint tPortFlags::cINPUT_PORT;
+const uint tPortFlags::cSHARED_INPUT_PORT;
+const uint tPortFlags::cPROXY;
+const uint tPortFlags::cOUTPUT_PROXY;
+const uint tPortFlags::cINPUT_PROXY;
 
 } // namespace finroc
 } // namespace core

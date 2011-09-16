@@ -168,10 +168,10 @@ protected:
   // Splitting flags up might allow compiler optimizations??
 
   /*! Constant Flags - see CoreFlags */
-  const int const_flags;
+  const uint const_flags;
 
   /*! Variable Flags - see CoreFlags */
-  int flags;
+  uint flags;
 
   /*! children - may contain null entries (for efficient thread-safe unsynchronized iteration) */
   util::tSafeConcurrentlyIterableList<tLink*> children;
@@ -245,7 +245,7 @@ private:
    *
    * \return Primary lock order
    */
-  static int GetLockOrder(int flags_, tFrameworkElement* parent, int lock_order);
+  static int GetLockOrder(uint flags_, tFrameworkElement* parent, int lock_order);
 
   /*!
    * Recursive Helper function for above
@@ -438,7 +438,7 @@ public:
    * \param flags_ Any special flags for framework element
    * \param lock_order_ Custom value for lock order (needs to be larger than parent's) - negative indicates unused.
    */
-  tFrameworkElement(tFrameworkElement* parent_ = NULL, const util::tString& description_ = "", int flags_ = tCoreFlags::cALLOWS_CHILDREN, int lock_order_ = -1);
+  tFrameworkElement(tFrameworkElement* parent_ = NULL, const util::tString& description_ = "", uint flags_ = tCoreFlags::cALLOWS_CHILDREN, int lock_order_ = -1);
 
   /*!
    * Add Child to framework element
@@ -477,7 +477,7 @@ public:
   /*!
    * \return Returns constant and non-constant flags
    */
-  inline int GetAllFlags() const
+  inline uint GetAllFlags() const
   {
     return flags | const_flags;
   }
@@ -522,7 +522,7 @@ public:
    * \param flag Flag to check
    * \return Answer
    */
-  inline bool GetFlag(const int flag) const
+  inline bool GetFlag(const uint flag) const
   {
     if (flag <= tCoreFlags::cCONSTANT_FLAGS)
     {
@@ -591,7 +591,7 @@ public:
    * \param flags Flags to look for
    * \return Parent or null
    */
-  tFrameworkElement* GetParentWithFlags(int flags_);
+  tFrameworkElement* GetParentWithFlags(uint flags_);
 
   /*!
    * (Use StringBuilder version if efficiency or real-time is an issue)
@@ -890,10 +890,10 @@ public:
     tFrameworkElement::tLink* const * last;
 
     /*! Relevant flags */
-    int flags;
+    uint flags;
 
     /*! Expected result when ANDing with flags */
-    int result;
+    uint result;
 
   protected:
 
@@ -908,14 +908,14 @@ public:
      * \param parent Framework element over whose child to iterate
      * \param flags Flags that children must have in order to be considered
      */
-    tChildIterator(const tFrameworkElement* parent, int flags_);
+    tChildIterator(const tFrameworkElement* parent, uint flags_);
 
     /*!
      * \param parent Framework element over whose child to iterate
      * \param flags Relevant flags
      * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
      */
-    tChildIterator(const tFrameworkElement* parent, int flags_, int result_);
+    tChildIterator(const tFrameworkElement* parent, uint flags_, uint result_);
 
     /*!
      * \param parent Framework element over whose child to iterate
@@ -923,7 +923,7 @@ public:
      * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
      * \param include_non_ready Include children that are not fully initialized yet?
      */
-    tChildIterator(const tFrameworkElement* parent, int flags_, int result_, bool include_non_ready);
+    tChildIterator(const tFrameworkElement* parent, uint flags_, uint result_, bool include_non_ready);
 
     /*!
      * \return Next child - or null if there are no more children left
@@ -961,7 +961,7 @@ public:
      * \param parent Framework element over whose child to iterate
      * \param flags Flags that children must have in order to be considered
      */
-    inline void Reset(const tFrameworkElement* parent, int flags_)
+    inline void Reset(const tFrameworkElement* parent, uint flags_)
     {
       Reset(parent, flags_, flags_);
     }
@@ -974,7 +974,7 @@ public:
      * \param flags Relevant flags
      * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
      */
-    inline void Reset(const tFrameworkElement* parent, int flags_, int result_)
+    inline void Reset(const tFrameworkElement* parent, uint flags_, uint result_)
     {
       Reset(parent, flags_, result_, false);
     }
@@ -988,7 +988,7 @@ public:
      * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
      * \param include_non_ready Include children that are not fully initialized yet?
      */
-    void Reset(const tFrameworkElement* parent, int flags_, int result_, bool include_non_ready);
+    void Reset(const tFrameworkElement* parent, uint flags_, uint result_, bool include_non_ready);
 
   };
 

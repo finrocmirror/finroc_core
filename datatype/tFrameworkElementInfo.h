@@ -70,7 +70,7 @@ public:
     int parent;
 
     /*! additional flags to store (especially if parent or this is globally unique link) */
-    int extra_flags;
+    uint extra_flags;
 
   };
 
@@ -89,7 +89,7 @@ private:
   rrlib::serialization::tDataTypeBase type;
 
   /*! Port Flags */
-  int flags;
+  uint flags;
 
   /*! Strategy to use for this port - if it is destination port */
   int16 strategy;
@@ -105,10 +105,10 @@ private:
   //public final static DataType TYPE = DataTypeRegister.getInstance().getDataType(FrameworkElementInfo.class);
 
   /*! mask for non-ports and non-edge-aggregators */
-  static const int cPARENT_FLAGS_TO_STORE = tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cEDGE_AGGREGATOR;
+  static const uint cPARENT_FLAGS_TO_STORE = tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cEDGE_AGGREGATOR;
 
   /*! mask for non-ports and non-edge-aggregators */
-  static const int cEDGE_AGG_PARENT_FLAGS_TO_STORE = cPARENT_FLAGS_TO_STORE | tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS;
+  static const uint cEDGE_AGG_PARENT_FLAGS_TO_STORE = cPARENT_FLAGS_TO_STORE | tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS;
 
 public:
 
@@ -144,7 +144,7 @@ public:
    * \param extra_flags all flags
    * \return Flags relevant for a remote parent framework element
    */
-  static int FilterParentFlags(int extra_flags);
+  static uint FilterParentFlags(uint extra_flags);
 
   /*!
    * Get outgoing connection's destination handles
@@ -168,7 +168,7 @@ public:
   /*!
    * \return the flags
    */
-  inline int GetFlags() const
+  inline uint GetFlags() const
   {
     return flags;
   }

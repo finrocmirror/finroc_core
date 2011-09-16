@@ -68,20 +68,14 @@ public:
   /*! Number cache instance used for this parameter */
   std::shared_ptr<tNumberCache> cache;
 
-private:
-
-  inline static T GetDefaultValue(T default_value)
+  template<typename ... ARGS>
+  tParameterNumeric(const ARGS&... args) :
+      tParameterBase<T>(args...),
+      cache(new tNumberCache())
   {
-    return default_value;
+    cache->current_value = this->Get();
+    this->AddPortListener(cache.get());
   }
-
-public:
-
-  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry);
-
-  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* u, const util::tString& config_entry);
-
-  tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds<T> b, tUnit* u, const util::tString& config_entry);
 
   /*!
    * \return Current parameter value

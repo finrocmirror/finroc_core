@@ -39,7 +39,7 @@ tFrameworkElementTreeFilter::tFrameworkElementTreeFilter() :
   }
 }
 
-tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(int relevant_flags_, int flag_result_) :
+tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_) :
     relevant_flags(relevant_flags_),
     flag_result(flag_result_),
     paths(new util::tSimpleList<util::tString>())
@@ -51,7 +51,7 @@ tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(int relevant_flags_, in
   }
 }
 
-tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(int relevant_flags_, int flag_result_, const util::tString& paths_) :
+tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_, const util::tString& paths_) :
     relevant_flags(relevant_flags_),
     flag_result(flag_result_),
     paths(new util::tSimpleList<util::tString>())

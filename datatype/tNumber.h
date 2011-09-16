@@ -403,6 +403,13 @@ public:
 
   void SetValue(const tNumber& value_);
 
+  void SetValue(const tNumber& value_, tUnit* u)
+  {
+    SetValue(value_);
+    SetUnit(u);
+  }
+
+
   virtual const util::tString ToString() const;
 
   bool operator<(const tNumber& other) const

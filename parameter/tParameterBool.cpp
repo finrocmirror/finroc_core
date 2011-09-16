@@ -30,26 +30,6 @@ namespace finroc
 {
 namespace core
 {
-tParameterBool::tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, tUnit* unit, const util::tString& config_entry)
-    : tParameterBase<bool>(description, parent, default_value, unit, config_entry),
-    cache(new tBoolCache())
-{
-  this->AddPortListener(cache.get());
-  cache->current_value = default_value;
-  SetDefault(default_value);
-  SetConfigEntry(config_entry);
-}
-
-tParameterBool::tParameterBool(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry)
-    : tParameterBase<bool>(description, parent, config_entry),
-    cache(new tBoolCache())
-{
-  this->AddPortListener(cache.get());
-  cache->current_value = false;
-  SetDefault(false);
-  SetConfigEntry(config_entry);
-}
-
 void tParameterBool::Set(bool b)
 {
   tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(rrlib::serialization::tDataType<bool>());

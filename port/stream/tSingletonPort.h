@@ -61,7 +61,7 @@ class tSingletonPort : public tPort<T>
 
   public:
 
-    tPortImpl(tPortCreationInfo pci, T& singleton);
+    tPortImpl(tPortCreationInfo<T> pci, T& singleton);
 
   };
 
@@ -72,7 +72,7 @@ class tSingletonPort : public tPort<T>
    * \param default_value
    * \return new PortCreationInfo
    */
-  static tPortCreationInfo AdjustPci(tPortCreationInfo pci);
+  static tPortCreationInfo<T> AdjustPci(tPortCreationInfo<T> pci);
 
 public:
 
@@ -80,7 +80,7 @@ public:
    * \param pci Bundled creation information about port
    * \param singleton The Singleton object that is contained in this port
    */
-  tSingletonPort(tPortCreationInfo pci, T& singleton);
+  tSingletonPort(tPortCreationInfo<T> pci, T& singleton);
 
 };
 

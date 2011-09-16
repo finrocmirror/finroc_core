@@ -35,7 +35,7 @@ namespace finroc
 {
 namespace core
 {
-tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tString& description_, int flags_, int lock_order_) :
+tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tString& description_, uint flags_, int lock_order_) :
     primary(this),
     flag_mutex(),
     creater_thread_uid(util::sThreadUtil::GetCurrentThreadId()),
@@ -420,7 +420,7 @@ tFrameworkElement::tLink* tFrameworkElement::GetLinkInternal(size_t link_index)
   return l;
 }
 
-int tFrameworkElement::GetLockOrder(int flags_, tFrameworkElement* parent, int lock_order)
+int tFrameworkElement::GetLockOrder(uint flags_, tFrameworkElement* parent, int lock_order)
 {
   if ((flags_ & tCoreFlags::cIS_RUNTIME) == 0)
   {
@@ -466,7 +466,7 @@ tFrameworkElement* tFrameworkElement::GetParent(int link_index) const
   }
 }
 
-tFrameworkElement* tFrameworkElement::GetParentWithFlags(int flags_)
+tFrameworkElement* tFrameworkElement::GetParentWithFlags(uint flags_)
 {
   if (primary.parent == NULL)
   {
@@ -888,7 +888,7 @@ tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* paren
   Reset(parent);
 }
 
-tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, int flags_) :
+tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, uint flags_) :
     next_elem(NULL),
     last(NULL),
     flags(0),
@@ -898,7 +898,7 @@ tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* paren
   Reset(parent, flags_);
 }
 
-tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, int flags_, int result_) :
+tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, uint flags_, uint result_) :
     next_elem(NULL),
     last(NULL),
     flags(0),
@@ -908,7 +908,7 @@ tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* paren
   Reset(parent, flags_, result_);
 }
 
-tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, int flags_, int result_, bool include_non_ready) :
+tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, uint flags_, uint result_, bool include_non_ready) :
     next_elem(NULL),
     last(NULL),
     flags(0),
@@ -950,7 +950,7 @@ tAbstractPort* tFrameworkElement::tChildIterator::NextPort()
   }
 }
 
-void tFrameworkElement::tChildIterator::Reset(const tFrameworkElement* parent, int flags_, int result_, bool include_non_ready)
+void tFrameworkElement::tChildIterator::Reset(const tFrameworkElement* parent, uint flags_, uint result_, bool include_non_ready)
 {
   assert((parent != NULL));
   this->flags = flags_ | tCoreFlags::cDELETED;

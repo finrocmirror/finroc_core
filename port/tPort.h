@@ -65,10 +65,23 @@ protected:
    * \param pci Input PortCreationInfo
    * \return Modified PortCreationInfo
    */
-  inline static tPortCreationInfo ProcessPci(tPortCreationInfo pci)
+  inline static tPortCreationInfo<T> ProcessPci(tPortCreationInfo<T> pci)
   {
     pci.data_type = rrlib::serialization::tDataType<typename tPortTypeMap<T>::tPortDataType>();
     return pci;
+  }
+
+  template < bool BOUNDABLE = tPortTypeMap<T>::boundable >
+  typename tPortTypeMap<T>::tPortBaseType* CreateBoundedPort(const typename std::enable_if<BOUNDABLE, tPortCreationInfo<T>>::type& pci)
+  {
+    return new typename tPortTypeMap<T>::tBoundedPortBaseType(ProcessPci(pci));
+  }
+
+  template < bool BOUNDABLE = tPortTypeMap<T>::boundable >
+  typename tPortTypeMap<T>::tPortBaseType* CreateBoundedPort(const typename std::enable_if < !BOUNDABLE, tPortCreationInfo<T >>::type& pci)
+  {
+    assert(false && "This should not be called. Bounds are not supported with non-cc types.");
+    return NULL;
   }
 
 public:
@@ -79,31 +92,41 @@ public:
   using tPortWrapperBase<tPortBaseType>::wrapped;
 
   /*!
-   * \param pci Construction parameters in Port Creation Info Object
+   * Constructor takes variadic argument list... just any properties you want to assign to port.
+   *
+   * The first string is interpreted as port name, the second possibly as config entry (relevant for parameters only).
+   * A framework element pointer is interpreted as parent.
+   * unsigned int arguments are interpreted as flags.
+   * int argument is interpreted as queue length.
+   * tBounds<T> are port's bounds.
+   * tUnit argument is port's unit.
+   * int16/short argument is interpreted as minimum network update interval.
+   * const T& is interpreted as port's default value.
+   * tPortCreationInfo<T> argument is copied. This is only allowed as first argument.
+   *
+   * This becomes a little tricky when port has numeric or string type.
+   * There we have these rules:
+   *
+   * string type: The second string argument is interpreted as default_value. The third as config entry.
+   * numeric type: The first numeric argument is interpreted as default_value. However, if it is the only unsigned int
+   *               argument, it is interpreted as flags (because every port needs flags).
    */
-  tPort(tPortCreationInfo pci)
+  template <typename ... ARGS>
+  tPort(const ARGS&... args)
   {
-    wrapped = new tPortBaseType(ProcessPci(pci));
-  }
-
-  /*!
-   * \param pci Construction parameters in Port Creation Info Object
-   * \param bounds Bounds for values in port
-   */
-  template < bool BOUNDABLE = tPortTypeMap<T>::boundable >
-  tPort(tPortCreationInfo pci, const typename std::enable_if<BOUNDABLE, tBounds<T>>::type& bounds)
-  {
-    wrapped = new typename tPortTypeMap<T>::tBoundedPortBaseType(ProcessPci(pci), bounds);
-  }
-
-  /*!
-   * \param description Port description
-   * \param parent Parent
-   * \param output_port Output port? (or rather input port)
-   */
-  tPort(const util::tString& description, tFrameworkElement* parent, bool output_port)
-  {
-    wrapped = new tPortBaseType(ProcessPci(tPortCreationInfo(description, parent, output_port ? tPortFlags::cOUTPUT_PORT : tPortFlags::cINPUT_PORT)));
+    tPortCreationInfo<T> pci(args...);
+    if (pci.bounds_set)
+    {
+      wrapped = CreateBoundedPort(pci);
+    }
+    else
+    {
+      wrapped = new tPortBaseType(ProcessPci(pci));
+    }
+    if (pci.default_value_set)
+    {
+      SetDefault(*(pci.GetDefault()));
+    }
   }
 
   void AddPortListener(tPortListener<tPortDataPtr<const T> >* listener)
@@ -181,15 +204,22 @@ public:
   }
 
   /*!
-   * Gets Port's current value
+   * Gets Port's current value (in most "natural" way)
    *
-   * \return Port's current value with read lock.
-   * (in Java lock will need to be released manually, in C++ tPortDataPtr takes care of this)
-   * (Using get with parameter T& is more efficient when using CC types - shouldn't matter usually)
+   * \param v unused dummy parameter for std::enable_if technique
+   * \return Port's current value by value in case of CC types. Port's current value with read lock in case of standard types.
    */
-  inline tPortDataPtr<const T> Get()
+  template < bool CC = typeutil::tIsCCType<T>::value >
+  inline tPortDataPtr<const T> Get(typename std::enable_if < !CC, void >::type* v = NULL)
   {
-    return tPortUtil<T>::GetValueWithLock(wrapped);
+    return GetPointer();
+  }
+  template < bool CC = typeutil::tIsCCType<T>::value >
+  inline T Get(typename std::enable_if<CC, void>::type* v = NULL)
+  {
+    T t;
+    tPortUtil<T>::GetValue(this->wrapped, t);
+    return t;
   }
 
   /*!
@@ -268,6 +298,18 @@ public:
   }
 
   /*!
+   * Gets Port's current value
+   *
+   * \return Port's current value with read lock.
+   * (in Java lock will need to be released manually, in C++ tPortDataPtr takes care of this)
+   * (Using get with parameter T& is more efficient when using CC types - shouldn't matter usually)
+   */
+  inline tPortDataPtr<const T> GetPointer()
+  {
+    return tPortUtil<T>::GetValueWithLock(wrapped);
+  }
+
+  /*!
    * Pulls port data (regardless of strategy)
    * (careful: no auto-release of lock in Java)
    *
@@ -290,19 +332,6 @@ public:
   inline tPortDataPtr<T> GetUnusedBuffer()
   {
     return tPortUtil<T>::GetUnusedBuffer(wrapped);
-  }
-
-  /*!
-   * \return Port's current value
-   *
-   * (only available for CC types)
-   */
-  template < bool CC = typeutil::tIsCCType<T>::value >
-  inline typename std::enable_if<CC, T>::type GetValue()
-  {
-    T t;
-    tPortUtil<T>::GetValue(this->wrapped, t);
-    return t;
   }
 
   /*!

@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/tAbstractPort.h"
-#include "core/port/tPortCreationInfo.h"
+#include "core/port/tPortCreationInfoBase.h"
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tThreadLocalCache.h"
@@ -78,7 +78,7 @@ public:
 private:
 
   /*! makes adjustment to flags passed through constructor */
-  static tPortCreationInfo ProcessPci(tPortCreationInfo pci, tInterfacePort::tType type_, int lock_level);
+  static tPortCreationInfoBase ProcessPci(tPortCreationInfoBase pci, tInterfacePort::tType type_, int lock_level);
 
 protected:
 
@@ -129,11 +129,11 @@ public:
 
   tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_);
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, int custom_flags);
+  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags);
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, int custom_flags, int lock_level);
+  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level);
 
-  tInterfacePort(tPortCreationInfo pci, tInterfacePort::tType type_, int lock_level);
+  tInterfacePort(tPortCreationInfoBase pci, tInterfacePort::tType type_, int lock_level);
 
   virtual ~tInterfacePort();
 

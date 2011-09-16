@@ -29,7 +29,7 @@ namespace finroc
 {
 namespace core
 {
-tPortBase::tPortBase(tPortCreationInfo pci) :
+tPortBase::tPortBase(tPortCreationInfoBase pci) :
     tAbstractPort(ProcessPci(pci)),
     edges_src(),
     edges_dest(),
@@ -192,7 +192,7 @@ void tPortBase::PrintStructure(int indent, std::stringstream& output)
   }
 }
 
-tPortCreationInfo& tPortBase::ProcessPci(tPortCreationInfo& pci)
+tPortCreationInfoBase& tPortBase::ProcessPci(tPortCreationInfoBase& pci)
 {
   if ((pci.flags & tPortFlags::cIS_OUTPUT_PORT) == 0)    // no output port
   {

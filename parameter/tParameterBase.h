@@ -47,35 +47,15 @@ class tUnit;
 template<typename T>
 class tParameterBase : public tPort<T>
 {
-  inline static rrlib::serialization::tDataTypeBase GetType(const rrlib::serialization::tDataTypeBase& dt)
-  {
-    return dt != NULL ? dt : rrlib::serialization::tDataType<T>();
-  }
-
 public:
 
-  tParameterBase(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry = "", const rrlib::serialization::tDataTypeBase& dt = NULL) :
-      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT))
+  template<typename ... ARGS>
+  tParameterBase(const ARGS&... args) :
+      tPort<T>(tPortCreationInfo<T>(args..., tPortFlags::cINPUT_PORT))
   {
     this->wrapped->AddAnnotation(new tParameterInfo());
-    SetConfigEntry(config_entry);
-  }
-
-  tParameterBase(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* u, const util::tString& config_entry = "", const rrlib::serialization::tDataTypeBase& dt = NULL) :
-      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u))
-  {
-    SetDefault(default_value);
-    this->wrapped->AddAnnotation(new tParameterInfo());
-    SetConfigEntry(config_entry);
-  }
-
-  template < typename Q = T >
-  tParameterBase(const util::tString& description, tFrameworkElement* parent, const T& default_value, const typename std::enable_if<tPortTypeMap<Q>::boundable, tBounds<T> >::type& b, tUnit* u = NULL, const util::tString& config_entry = "", const rrlib::serialization::tDataTypeBase& dt = NULL) :
-      tPort<T>(tPortCreationInfo(description, parent, GetType(dt), tPortFlags::cINPUT_PORT, u), b)
-  {
-    SetDefault(default_value);
-    this->wrapped->AddAnnotation(new tParameterInfo());
-    SetConfigEntry(config_entry);
+    tPortCreationInfo<T> pci(args...);
+    SetConfigEntry(pci.config_entry);
   }
 
   /*!

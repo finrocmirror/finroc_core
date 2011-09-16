@@ -31,42 +31,6 @@ namespace finroc
 {
 namespace core
 {
-template<typename T>
-tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry) :
-    tParameterBase<T>(description, parent, config_entry, tNumber::cTYPE),
-    cache(new tNumberCache())
-{
-  this->AddPortListener(cache.get());
-}
-
-template<typename T>
-tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tUnit* u, const util::tString& config_entry) :
-    tParameterBase<T>(description, parent, GetDefaultValue(default_value), u, config_entry, tNumber::cTYPE),
-    cache(new tNumberCache())
-{
-  cache->current_value = default_value;
-  this->AddPortListener(cache.get());
-}
-
-template<typename T>
-tParameterNumeric<T>::tParameterNumeric(const util::tString& description, tFrameworkElement* parent, const T& default_value, tBounds<T> b, tUnit* u, const util::tString& config_entry) :
-    tParameterBase<T>(description, parent, GetDefaultValue(default_value), b, u, config_entry, tNumber::cTYPE),
-    cache(new tNumberCache())
-{
-  T d = default_value;
-  if (b.InBounds(d))
-  {
-    this->SetDefault(default_value);
-  }
-  else
-  {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "Default value is out of bounds");
-
-    this->SetDefault(default_value);
-  }
-  cache->current_value = default_value;
-  this->AddPortListener(cache.get());
-}
 
 template<typename T>
 void tParameterNumeric<T>::Set(T v)

@@ -70,7 +70,7 @@ private:
    * \param unique_link Do ports habe globally unique link
    * \return flags for these parameters
    */
-  static int ComputeFlags(tGroupInterface::tDataClassification data_class, bool shared, bool unique_link);
+  static uint ComputeFlags(tGroupInterface::tDataClassification data_class, bool shared, bool unique_link);
 
   /*!
    * Compute port flags
@@ -81,7 +81,7 @@ private:
    * \param unique_link Do ports habe globally unique link
    * \return flags for these parameters
    */
-  static int ComputePortFlags(tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link);
+  static uint ComputePortFlags(tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link);
 
 public:
 
@@ -102,7 +102,6 @@ public:
    * \param port_dir Which types of ports can be created in this interface?
    * \param shared Shared interface/ports?
    * \param unique_link Do ports habe globally unique link
-   * \return flags for these parameters
    */
   tGroupInterface(tFrameworkElement* parent, const util::tString& description, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link);
 

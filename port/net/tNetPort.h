@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/rpc/tPullCall.h"
-#include "core/port/tPortCreationInfo.h"
+#include "core/port/tPortCreationInfoBase.h"
 #include "core/port/rpc/tSynchMethodCallLogic.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tAbstractPort.h"
@@ -180,7 +180,7 @@ protected:
 
 public:
 
-  tNetPort(tPortCreationInfo pci, util::tObject* belongs_to_);
+  tNetPort(tPortCreationInfoBase pci, util::tObject* belongs_to_);
 
   /*!
    * \return TCPServerConnection or RemoteServer instance that this port belongs to
@@ -283,7 +283,7 @@ public:
     this->remote_handle = remote_handle_;
   }
 
-  void UpdateFlags(int flags);
+  void UpdateFlags(uint flags);
 
   /*!
    * Write data to stream
@@ -335,7 +335,7 @@ public:
 
   public:
 
-    tCCNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfo pci);
+    tCCNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci);
 
     virtual tNetPort* AsNetPort()
     {
@@ -361,7 +361,7 @@ public:
 
     virtual bool PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer);
 
-    inline void UpdateFlags(int flags)
+    inline void UpdateFlags(uint flags)
     {
       SetFlag(flags & tCoreFlags::cNON_CONSTANT_FLAGS);
     }
@@ -410,7 +410,7 @@ public:
 
   public:
 
-    tStdNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfo pci);
+    tStdNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci);
 
     virtual tNetPort* AsNetPort()
     {
@@ -440,7 +440,7 @@ public:
 
     virtual const tPortDataManager* PullRequest(tPortBase* origin, int8 add_locks);
 
-    inline void UpdateFlags(int flags)
+    inline void UpdateFlags(uint flags)
     {
       SetFlag(flags & tCoreFlags::cNON_CONSTANT_FLAGS);
     }
@@ -492,7 +492,7 @@ public:
 
   public:
 
-    tInterfaceNetPortImpl(tNetPort* const outer_class_ptr_, tPortCreationInfo pci);
+    tInterfaceNetPortImpl(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci);
 
     virtual tNetPort* AsNetPort()
     {
@@ -527,7 +527,7 @@ public:
       return tSynchMethodCallLogic::PerformSynchCall(mc, this, timeout);
     }
 
-    inline void UpdateFlags(int flags)
+    inline void UpdateFlags(uint flags)
     {
       SetFlag(flags & tCoreFlags::cNON_CONSTANT_FLAGS);
     }

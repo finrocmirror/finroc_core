@@ -110,7 +110,7 @@ public:
 private:
 
   /*! Relevant flags for comparison */
-  static const int cRELEVANT_FLAGS = tCoreFlags::cSHARED | tPortFlags::cIS_VOLATILE;
+  static const uint cRELEVANT_FLAGS = tCoreFlags::cSHARED | tPortFlags::cIS_VOLATILE;
 
   /*! Should output port selection be visible in finstruct? */
   bool show_output_port_selection;
@@ -122,7 +122,7 @@ private:
   tFrameworkElement* io_vector;
 
   /*! Flags for port creation */
-  int flags;
+  uint flags;
 
   /*! (Local) change listener */
   tListener* listener;
@@ -148,7 +148,7 @@ private:
    * \param output output port
    * \param prototype Port prototype (only interesting for listener)
    */
-  void CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, int flags_, const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output, tAbstractPort* prototype);
+  void CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, uint flags_, const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output, tAbstractPort* prototype);
 
   /*!
    * Returns all child ports of specified framework element
@@ -177,7 +177,7 @@ public:
    * \param io_vector Other io vector
    * \param flags Flags to use for port creation
    */
-  void ApplyChanges(tFrameworkElement* io_vector_, int flags_);
+  void ApplyChanges(tFrameworkElement* io_vector_, uint flags_);
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
@@ -206,7 +206,7 @@ public:
    * \param port_creation_flags Flags for port creation
    * \param show_output_port_selection Should output port selection be visible in finstruct?
    */
-  void InitialSetup(tFrameworkElement* managed_io_vector, int port_creation_flags, bool show_output_port_selection_);
+  void InitialSetup(tFrameworkElement* managed_io_vector, uint port_creation_flags, bool show_output_port_selection_);
 
   virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 

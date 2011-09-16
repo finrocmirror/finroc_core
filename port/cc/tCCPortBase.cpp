@@ -31,7 +31,7 @@ namespace finroc
 {
 namespace core
 {
-tCCPortBase::tCCPortBase(tPortCreationInfo pci) :
+tCCPortBase::tCCPortBase(tPortCreationInfoBase pci) :
     tAbstractPort(pci),
     edges_src(),
     edges_dest(),

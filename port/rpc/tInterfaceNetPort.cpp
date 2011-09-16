@@ -31,7 +31,7 @@ namespace finroc
 {
 namespace core
 {
-tInterfaceNetPort::tInterfaceNetPort(tPortCreationInfo pci) :
+tInterfaceNetPort::tInterfaceNetPort(tPortCreationInfoBase pci) :
     tInterfacePort(pci, ::finroc::core::tInterfacePort::eNetwork, -1)
 {
 }

@@ -56,12 +56,12 @@ void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   // set up
   //RuntimeEnvironment.initialInit(/*new ByteArrayInputStream(new byte[0])*/);
   re = tRuntimeEnvironment::GetInstance();
-  output = std::shared_ptr<tPort<int> >(new tPort<int>("test1", NULL, true));
-  input = std::shared_ptr<tPort<int> >(new tPort<int>("test2", NULL, false));
+  output = std::shared_ptr<tPort<int> >(new tPort<int>("test1", tPortFlags::cOUTPUT_PORT));
+  input = std::shared_ptr<tPort<int> >(new tPort<int>("test2", tPortFlags::cINPUT_PORT));
   output->ConnectToTarget(*input);
-  p1 = std::shared_ptr<tPort<int> >(new tPort<int>("p1", NULL, false));
-  p2 = std::shared_ptr<tPort<int> >(new tPort<int>("p2", NULL, false));
-  p3 = std::shared_ptr<tPort<int> >(new tPort<int>("p3", NULL, false));
+  p1 = std::shared_ptr<tPort<int> >(new tPort<int>("p1", tPortFlags::cINPUT_PORT));
+  p2 = std::shared_ptr<tPort<int> >(new tPort<int>("p2", tPortFlags::cINPUT_PORT));
+  p3 = std::shared_ptr<tPort<int> >(new tPort<int>("p3", tPortFlags::cINPUT_PORT));
   p3->GetWrapped()->Link(tRuntimeEnvironment::GetInstance(), "portlink");
   tFrameworkElement::InitAll();
   //output.std11CaseReceiver = input;
@@ -95,7 +95,7 @@ void tRealPortTest5::TestSimpleEdge()
 
   output->Publish(42);
 
-  std::cout << input->GetValue() << std::endl;
+  std::cout << input->Get() << std::endl;
 
   try
   {
@@ -112,7 +112,7 @@ void tRealPortTest5::TestSimpleEdge()
     //for (int i = 0; i < 1000000; i++) {
     output->Publish(i);
 
-    result = input->GetValue();
+    result = input->Get();
   }
   int64 time = util::tSystem::CurrentTimeMillis() - start;
   util::tSystem::out.Println(util::tLong::ToString(time) + " " + result);
@@ -122,8 +122,8 @@ void tRealPortTest5::TestSimpleEdge2()
 {
   blackboard::tBlackboardManager::GetInstance();
 
-  tPort<finroc::blackboard::tBlackboardBuffer> input(tPortCreationInfo("input", tPortFlags::cINPUT_PORT));
-  tPort<finroc::blackboard::tBlackboardBuffer> output(tPortCreationInfo("output", tPortFlags::cOUTPUT_PORT));
+  tPort<finroc::blackboard::tBlackboardBuffer> input("input", tPortFlags::cINPUT_PORT);
+  tPort<finroc::blackboard::tBlackboardBuffer> output("output", tPortFlags::cOUTPUT_PORT);
 
   output.ConnectToTarget(input);
   tFrameworkElement::InitAll();
@@ -259,7 +259,7 @@ void tRealPortTest5::TestSimpleSet()
   }
   int64 time = util::tSystem::CurrentTimeMillis() - start;
 
-  std::cout << time << " " << output->GetValue() << std::endl;
+  std::cout << time << " " << output->Get() << std::endl;
 }
 
 } // namespace finroc

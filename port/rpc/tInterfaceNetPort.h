@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/port/tPortCreationInfo.h"
+#include "core/port/tPortCreationInfoBase.h"
 #include "core/port/rpc/tInterfacePort.h"
 
 namespace finroc
@@ -44,7 +44,7 @@ class tInterfaceNetPort : public tInterfacePort
 {
 public:
 
-  tInterfaceNetPort(tPortCreationInfo pci);
+  tInterfaceNetPort(tPortCreationInfoBase pci);
 
   /*!
    * Called in extread thread for call received from network

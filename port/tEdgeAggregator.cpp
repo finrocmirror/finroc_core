@@ -27,12 +27,12 @@ namespace finroc
 {
 namespace core
 {
-const int tEdgeAggregator::cIS_INTERFACE;
-const int tEdgeAggregator::cSENSOR_DATA;
-const int tEdgeAggregator::cCONTROLLER_DATA;
-const int tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS;
+const uint tEdgeAggregator::cIS_INTERFACE;
+const uint tEdgeAggregator::cSENSOR_DATA;
+const uint tEdgeAggregator::cCONTROLLER_DATA;
+const uint tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS;
 
-tEdgeAggregator::tEdgeAggregator(tFrameworkElement* parent_, const util::tString& description_, int flags_) :
+tEdgeAggregator::tEdgeAggregator(tFrameworkElement* parent_, const util::tString& description_, uint flags_) :
     tFrameworkElement(parent_, description_, flags_ | tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cEDGE_AGGREGATOR, parent_ == NULL ? tLockOrderLevels::cLEAF_GROUP : -1),
     emerging_edges(0u, 5u)
 {

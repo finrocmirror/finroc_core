@@ -56,7 +56,7 @@ public:
    * \param pci Port Creation Info
    * \param listener Listener for pull requests
    */
-  tOutputStreamPort(tPortCreationInfo pci, tPullRequestHandler* listener) :
+  tOutputStreamPort(tPortCreationInfo<T> pci, tPullRequestHandler* listener) :
       tPort<T>(pci)
   {
     (static_cast<tPortBase*>(GetWrapped()))->SetPullRequestHandler(listener);

@@ -112,12 +112,12 @@ tRuntimeEnvironment::~tRuntimeEnvironment()
   ::finroc::core::tFrameworkElement* next = NULL;
   while ((next = ci.Next()) != NULL)
   {
-    if (next != tRuntimeSettings::GetInstance())
+    if (next != tRuntimeSettings::GetInstance()->GetParent())
     {
       next->ManagedDelete();
     }
   }
-  tRuntimeSettings::GetInstance()->ManagedDelete();
+  tRuntimeSettings::GetInstance()->GetParent()->ManagedDelete();
   instance_raw_ptr = NULL;
 }
 

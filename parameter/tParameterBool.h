@@ -68,9 +68,14 @@ public:
   /*! Bool cache instance used for this parameter */
   std::shared_ptr<tBoolCache> cache;
 
-  tParameterBool(const util::tString& description, tFrameworkElement* parent, bool default_value, tUnit* unit, const util::tString& config_entry);
-
-  tParameterBool(const util::tString& description, tFrameworkElement* parent, const util::tString& config_entry);
+  template<typename ... ARGS>
+  tParameterBool(const ARGS&... args) :
+      tParameterBase<bool>(args...),
+      cache(new tBoolCache())
+  {
+    this->AddPortListener(cache.get());
+    cache->current_value = Get();
+  }
 
   /*!
    * \return Current parameter value

@@ -47,8 +47,8 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   // Create number output port and input port with queue
   tRuntimeEnvironment::GetInstance();
   tThreadLocalCache::Get();
-  output = std::shared_ptr<tPort<int> >(new tPort<int>(tPortCreationInfo("output", tPortFlags::cOUTPUT_PORT)));
-  tPortCreationInfo input_pCI("input", tPortFlags::cINPUT_PORT | tPortFlags::cHAS_AND_USES_QUEUE | tPortFlags::cPUSH_STRATEGY);
+  output = std::shared_ptr<tPort<int> >(new tPort<int>("output", tPortFlags::cOUTPUT_PORT));
+  tPortCreationInfo<int> input_pCI("input", tPortFlags::cINPUT_PORT | tPortFlags::cHAS_AND_USES_QUEUE | tPortFlags::cPUSH_STRATEGY);
   input_pCI.max_queue_size = 10;
   tPort<int> input(input_pCI);
   input_pCI.max_queue_size = 0;

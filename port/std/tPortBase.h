@@ -28,7 +28,7 @@
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/port/tAbstractPort.h"
 #include "rrlib/serialization/tDataTypeBase.h"
-#include "core/port/tPortCreationInfo.h"
+#include "core/port/tPortCreationInfoBase.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/std/tPortDataReference.h"
 #include "core/port/std/tPortQueue.h"
@@ -125,7 +125,7 @@ private:
   }
 
   /*! makes adjustment to flags passed through constructor */
-  static tPortCreationInfo& ProcessPci(tPortCreationInfo& pci);
+  static tPortCreationInfoBase& ProcessPci(tPortCreationInfoBase& pci);
 
   template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cINFORM_LISTENERS>
   /*!
@@ -388,7 +388,7 @@ public:
   /*!
    * \param pci PortCreationInformation
    */
-  tPortBase(tPortCreationInfo pci);
+  tPortBase(tPortCreationInfoBase pci);
 
   /*!
    * \param listener Listener to add

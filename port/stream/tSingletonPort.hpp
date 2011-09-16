@@ -27,14 +27,14 @@ namespace finroc
 namespace core
 {
 template<typename T>
-tSingletonPort<T>::tSingletonPort(tPortCreationInfo pci, T& singleton)
+tSingletonPort<T>::tSingletonPort(tPortCreationInfo<T> pci, T& singleton)
 {
   this->wrapped = new tPortImpl<T>(AdjustPci(pci), singleton);
   Publish(tPortDataPtr<T>(&(singleton)));
 }
 
 template<typename T>
-tPortCreationInfo tSingletonPort<T>::AdjustPci(tPortCreationInfo pci)
+tPortCreationInfo<T> tSingletonPort<T>::AdjustPci(tPortCreationInfo<T> pci)
 {
   pci.send_buffer_size = 1;
   pci.alt_send_buffer_size = 0;
@@ -43,7 +43,7 @@ tPortCreationInfo tSingletonPort<T>::AdjustPci(tPortCreationInfo pci)
 }
 
 template<typename T>
-tSingletonPort<T>::tPortImpl<T>::tPortImpl(tPortCreationInfo pci, T& singleton) :
+tSingletonPort<T>::tPortImpl<T>::tPortImpl(tPortCreationInfo<T> pci, T& singleton) :
     tPortBase(pci),
     singleton_value(singleton)
 {

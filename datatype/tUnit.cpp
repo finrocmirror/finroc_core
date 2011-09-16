@@ -60,9 +60,9 @@ util::tSimpleList<tUnit*> tUnit::angle;
 tUnit tUnit::deg(tUnit::angle, "deg", 57.295779506);
 tUnit tUnit::rad(tUnit::angle, "rad", 1);
 util::tSimpleList<tUnit*> tUnit::frequency;
-tUnit tUnit::cHz(tUnit::frequency, "Hz", 1);
+tUnit tUnit::Hz(tUnit::frequency, "Hz", 1);
 util::tSimpleList<tUnit*> tUnit::screen;
-tUnit tUnit::cPixel(tUnit::screen, "Pixel", 1);
+tUnit tUnit::Pixel(tUnit::screen, "Pixel", 1);
 
 tUnit::tUnit(util::tSimpleList<tUnit*>& group_, const util::tString& description_, double factor_) :
     factor(factor_),
