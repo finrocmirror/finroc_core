@@ -146,33 +146,13 @@ public:
 protected:
 
   /*!
-   * Helper to determine whether argument has a string type
-   */
-  static bool IsString(const char*)
-  {
-    return true;
-  }
-  static bool IsString(const std::string&)
-  {
-    return true;
-  }
-  static bool IsString(const util::tString&)
-  {
-    return true;
-  }
-  static bool IsString(...)
-  {
-    return false;
-  }
-
-  /*!
    * Create port creation info for this convenience port
    */
   template<typename A1, typename ... ARest>
   tPortCreationInfo<T> CreatePCI(uint flags, tFrameworkElement*(*getContainer)(BASE*), const A1& arg1, const ARest&... rest)
   {
     tPortCreationInfo<T> result;
-    if (IsString(arg1))
+    if (internal::tIsString<A1>::value)
     {
       result = tPortCreationInfo<T>(arg1, rest..., flags);
       if (result.description.Length() == 0)

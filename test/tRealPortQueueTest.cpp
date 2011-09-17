@@ -69,7 +69,7 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
 
   util::tSystem::out.Println("Reading contents of queue (single dq)...");
   int cn = 0;
-  while ((input.DequeueSingle(cn)))
+  while ((input.Dequeue(cn)))
   {
     PrintNum(cn);
   }
@@ -81,7 +81,7 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   }
 
   util::tSystem::out.Println("Reading contents of queue (single dq)...");
-  while ((input.DequeueSingle(cn)))
+  while ((input.Dequeue(cn)))
   {
     PrintNum(cn);
   }
@@ -131,8 +131,8 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   output->ConnectToTarget(unlimited_input2);
 
   // remove values from initial push
-  unlimited_input.DequeueSingleAutoLocked();
-  unlimited_input2.DequeueSingleAutoLocked();
+  unlimited_input.DequeueAutoLocked();
+  unlimited_input2.DequeueAutoLocked();
   tThreadLocalCache::GetFast()->ReleaseAllLocks();
 
   // start writer threads
@@ -161,7 +161,7 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
     }
 
     // Dequeue from bounded queue
-    if (input.DequeueSingle(cc))
+    if (input.Dequeue(cc))
     {
       int val = cc;
       if (val >= 0)
@@ -177,7 +177,7 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
     }
 
     // Dequeue from unlimited queue (single dq)
-    if (unlimited_input.DequeueSingle(cc))
+    if (unlimited_input.Dequeue(cc))
     {
       int val = cc;
       if (val >= 0)

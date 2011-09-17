@@ -98,7 +98,7 @@ struct tCCPortTypeMap
   typedef tCCQueueFragmentRaw tQueueFragment;
   typedef tParameterBase<T> tParameterImpl;
   typedef tStructureParameterImplStandard<T> tStructureParameterImpl;
-  enum { boundable = 1 };
+  enum { boundable = typeutil::tHasSmallerThanOperator<T>::value };
   enum { numeric = 0 };
 
 //  typedef tCCPort<T> tPortType;

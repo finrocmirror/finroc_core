@@ -43,7 +43,7 @@ namespace typeutil
 {
 
 /*!
- * This struct is used to determine whether a type is a "cheap copy" type.
+ * This type-trait-like-struct is used to determine whether a type is a "cheap copy" type.
  *
  * In this case 'value' is true.
  *
@@ -66,6 +66,26 @@ inline bool IsCCType(const rrlib::serialization::tDataTypeBase& dt)
 {
   return dt.GetSize() <= 256 && ((dt.GetTypeTraits() & rrlib::serialization::trait_flags::cHAS_TRIVIAL_DESTRUCTOR) != 0);
 }
+
+/*!
+ * This type-trait-like-struct is used to determine whether a type supports operator '<' .
+ */
+template <typename T>
+struct tHasSmallerThanOperator
+{
+  template < typename U = T >
+  static int16_t Test(decltype((*(U*)(NULL)) < (*(U*)(NULL))))
+  {
+    return 0;
+  }
+
+  static int32_t Test(...)
+  {
+    return 0;
+  }
+
+  enum { value = sizeof(Test(true)) == sizeof(int16_t) };
+};
 
 template <typename Q, typename C>
 inline C* GenericChangeTypeHelper(void (Q::*tFunc)(const C& t, int64_t i1, int64_t i2))

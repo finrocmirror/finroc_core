@@ -318,7 +318,7 @@ public:
             cc_qIn->ResetChanged();
             util::tSystem::out.Print("ccPushIn received: ");
             int cn = 0;
-            while (cc_qIn->DequeueSingle(cn))
+            while (cc_qIn->Dequeue(cn))
             {
               util::tSystem::out.Print(util::tStringBuilder(" ") + cn);
             }
@@ -407,7 +407,7 @@ public:
             std_qIn->ResetChanged();
             util::tSystem::out.Print("stdPushIn received: ");
             const rrlib::serialization::tMemoryBuffer* cn = NULL;
-            while ((cn = std_qIn->DequeueSingleAutoLocked()) != NULL)
+            while ((cn = std_qIn->DequeueAutoLocked()) != NULL)
             {
               is.Reset(cn);
               int result = -1;

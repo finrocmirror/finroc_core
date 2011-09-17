@@ -167,7 +167,7 @@ public:
    *
    * \return Dequeued first/oldest element in queue
    */
-  inline tPortDataPtr<const T> DequeueSingle()
+  inline tPortDataPtr<const T> Dequeue()
   {
     return tPortUtil<T>::DequeueSingle(wrapped);
   }
@@ -183,7 +183,7 @@ public:
    * (Using this dequeueSingle()-variant is more efficient when using CC types, but can be extremely costly with large data types)
    * \return true if element was dequeued - false if queue was empty
    */
-  inline bool DequeueSingle(T& result)
+  inline bool Dequeue(T& result)
   {
     return tPortUtil<T>::DequeueSingle(wrapped, result);
   }
@@ -198,7 +198,7 @@ public:
    *
    * \return Dequeued first/oldest element in queue
    */
-  inline const T* DequeueSingleAutoLocked()
+  inline const T* DequeueAutoLocked()
   {
     return tPortUtil<T>::DequeueSingleAutoLocked(wrapped);
   }
