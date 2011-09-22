@@ -42,12 +42,35 @@ const char * const cPROGRAM_DESCRIPTION = "This program instantiates and execute
 // Implementation
 //----------------------------------------------------------------------
 
+int cycle_time = 40;
+
+bool CycleTimeHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
+{
+  rrlib::getopt::tOption port_option(name_to_option_map.at("cycle-time"));
+  if (port_option->IsActive())
+  {
+    const char* time_string = boost::any_cast<const char *>(port_option->GetValue());
+    int time = atoi(time_string);
+    if (time < 1 || time > 10000)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Invalid cycle time '", time_string, "'. Using default: ", cycle_time, " ms");
+    }
+    else
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Setting main thread cycle time to ", time, " ms.");
+      cycle_time = time;
+    }
+  }
+
+  return true;
+}
+
 //----------------------------------------------------------------------
 // StartUp
 //----------------------------------------------------------------------
 void StartUp()
 {
-
+  rrlib::getopt::AddValue("cycle-time", 't', "Cycle time of main thread in ms (default is 40)", &CycleTimeHandler);
 }
 
 //----------------------------------------------------------------------
@@ -96,5 +119,7 @@ void InitMainGroup(finroc::core::tThreadContainer *main_thread, std::vector<char
     FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_USER, "To set group name use <name>:<xml-file>. Otherwise xml-file name is used as group name.");
     exit(-1);
   }
+
+  main_thread->SetCycleTime(cycle_time);
 }
 
