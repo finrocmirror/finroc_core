@@ -341,6 +341,15 @@ public:
   void ConnectToSource(const util::tString& src_link);
 
   /*!
+   * Connect port to specified source port
+   *
+   * \param src_port_parent Parent of source port
+   * \param src_port_name Name of source port
+   * \param warn_if_not_available Print warning message if connection cannot be established
+   */
+  void ConnectToSource(tFrameworkElement* src_port_parent, util::tString& src_port_name, bool warn_if_not_available = true);
+
+  /*!
    * Connect port to specified target port
    *
    * \param target Target port
@@ -354,6 +363,15 @@ public:
    * \param link_name Link name of target port (relative to parent framework element)
    */
   void ConnectToTarget(const util::tString& dest_link);
+
+  /*!
+   * Connect port to specified destination port
+   *
+   * \param dest_port_parent Parent of destination port
+   * \param dest_port_name Name of destination port
+   * \param warn_if_not_available Print warning message if connection cannot be established
+   */
+  void ConnectToTarget(tFrameworkElement* dest_port_parent, util::tString& dest_port_name, bool warn_if_not_available = true);
 
   virtual std::shared_ptr<void> CreateBuffer(rrlib::serialization::tDataTypeBase dt)
   {

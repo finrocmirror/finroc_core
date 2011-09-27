@@ -103,6 +103,20 @@ void tAbstractPort::ConnectToSource(const util::tString& src_link)
   }
 }
 
+void tAbstractPort::ConnectToSource(tFrameworkElement* src_port_parent, util::tString& src_port_name, bool warn_if_not_available)
+{
+  tFrameworkElement* p = src_port_parent->GetChild(src_port_name);
+  if (p != NULL && p->IsPort())
+  {
+    ConnectToSource(static_cast<tAbstractPort*>(p));
+  }
+  else if (warn_if_not_available)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, edge_log, "Cannot find port '", src_port_name, "' in ", src_port_parent->GetQualifiedName(), ".");
+  }
+}
+
+
 void tAbstractPort::ConnectToTarget(tAbstractPort* target)
 {
   {
@@ -147,6 +161,20 @@ void tAbstractPort::ConnectToTarget(const util::tString& dest_link)
     link_edges->Add(new tLinkEdge(GetHandle(), MakeAbsoluteLink(dest_link)));
   }
 }
+
+void tAbstractPort::ConnectToTarget(tFrameworkElement* dest_port_parent, util::tString& dest_port_name, bool warn_if_not_available)
+{
+  tFrameworkElement* p = dest_port_parent->GetChild(dest_port_name);
+  if (p != NULL && p->IsPort())
+  {
+    ConnectToTarget(static_cast<tAbstractPort*>(p));
+  }
+  else if (warn_if_not_available)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, edge_log, "Cannot find port '", dest_port_name, "' in ", dest_port_parent->GetQualifiedName(), ".");
+  }
+}
+
 
 void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
 {
