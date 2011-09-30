@@ -80,8 +80,11 @@ public:
   /*! Is this port volatile (meaning that it's not always there and connections to it should preferably be links) */
   static const uint cIS_VOLATILE = cFIRST_PORT_FLAG << 10;
 
+  /*! Deactivates initial pushing when this (output) port is connected to another port with push strategy */
+  static const uint cNO_INITIAL_PUSHING = cFIRST_PORT_FLAG << 11;
+
   /*! First custom flag for special port types */
-  static const uint cFIRST_CUSTOM_PORT_FLAG = cFIRST_PORT_FLAG << 11;
+  static const uint cFIRST_CUSTOM_PORT_FLAG = cFIRST_PORT_FLAG << 12;
 
   // Non-constant flags
 

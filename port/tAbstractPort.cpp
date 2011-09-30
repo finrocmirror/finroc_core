@@ -88,7 +88,7 @@ void tAbstractPort::ConnectToSource(const util::tString& src_link)
     {
       return;
     }
-    if (link_edges == NULL)    // lazy inizialization
+    if (link_edges == NULL)    // lazy initialization
     {
       link_edges = new util::tSimpleList<tLinkEdge*>();
     }
@@ -576,7 +576,7 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
       }
       if (source_port)
       {
-        if (IsReady() && push_wanter->IsReady())
+        if (IsReady() && push_wanter->IsReady() && (!GetFlag(tPortFlags::cNO_INITIAL_PUSHING)) && (!push_wanter->GetFlag(tPortFlags::cNO_INITIAL_PUSHING)))
         {
           FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, initial_push_log, "Performing initial push from ", GetQualifiedName(), " to ", push_wanter->GetQualifiedName());
           InitialPushTo(push_wanter, false);
