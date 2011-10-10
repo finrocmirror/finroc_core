@@ -61,8 +61,6 @@ public:
    */
   struct tLinkInfo
   {
-public:
-
     /*! name */
     util::tString name;
 
@@ -71,7 +69,23 @@ public:
 
     /*! additional flags to store (especially if parent or this is globally unique link) */
     uint extra_flags;
+  };
 
+  /*!
+   * Infos regarding edges emerging from this element
+   */
+  struct tConnectionInfo
+  {
+    /*! Handle of destination port */
+    int handle;
+
+    /*! Was this edge finstructed? */
+    bool finstructed;
+
+    tConnectionInfo(int handle, bool finstructed) :
+        handle(handle),
+        finstructed(finstructed)
+    {}
   };
 
 private:
@@ -98,7 +112,7 @@ private:
   int16 min_net_update_time;
 
   /*! Stores outgoing connection destination ports - if this is a port */
-  util::tSimpleList<int> connections;
+  util::tSimpleList<tConnectionInfo> connections;
 
   /*! Register Data type */
   //@ConstPtr
@@ -147,11 +161,11 @@ public:
   static uint FilterParentFlags(uint extra_flags);
 
   /*!
-   * Get outgoing connection's destination handles
+   * Get outgoing connection's destination handles etc.
    *
    * \param copy_to List to copy result of get operation to
    */
-  inline void GetConnections(util::tSimpleList<int>& copy_to) const
+  inline void GetConnections(util::tSimpleList<tConnectionInfo>& copy_to) const
   {
     copy_to.Clear();
     copy_to.AddAll(connections);

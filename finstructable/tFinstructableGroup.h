@@ -56,10 +56,12 @@ class tAbstractPort;
  */
 class tFinstructableGroup : public tFrameworkElement
 {
-private:
+public:
 
   /*! contains name of XML to use */
   tStructureParameter<util::tString> xml_file;
+
+private:
 
   /*! contains name of XML that is currently used (variable is used to detect changes to xmlFile parameter) */
   util::tString current_xml_file;
@@ -69,6 +71,9 @@ private:
 
   /*! Temporary variable for save operation: Qualified link to this group */
   util::tString link_tmp;
+
+  /*! Temporary variable for save operation: Save parameter config entries in callback (instead of edges)? */
+  bool save_parameter_config_entries;
 
   /*! CreateModuleAction */
   static tStandardCreateModuleAction<tFinstructableGroup> cCREATE_ACTION;

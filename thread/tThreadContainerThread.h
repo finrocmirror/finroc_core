@@ -27,7 +27,7 @@ class tThreadContainerThread : public tCoreLoopThreadBase, public tRuntimeListen
 private:
 
   /*! Thread container that thread belongs to */
-  tThreadContainer* thread_container;
+  tFrameworkElement* thread_container;
 
   /*! true, when thread needs to make a new schedule before next run */
   volatile bool reschedule;
@@ -70,7 +70,7 @@ private:
 
 public:
 
-  tThreadContainerThread(tThreadContainer* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed);
+  tThreadContainerThread(tFrameworkElement* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed);
 
   /*!
    * \param fe Framework element

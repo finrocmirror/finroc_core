@@ -20,82 +20,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/thread/tThreadContainer.h"
-#include "core/parameter/tStructureParameterList.h"
-#include "core/tAnnotatable.h"
-#include "core/thread/tExecutionControl.h"
-#include "core/tFrameworkElement.h"
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 
 namespace finroc
 {
 namespace core
 {
+
+template class tThreadContainerElement<tGroup>;
+template class tThreadContainerElement<tFinstructableGroup>;
+
 tStandardCreateModuleAction<tThreadContainer> tThreadContainer::cCREATE_ACTION("ThreadContainer", util::tTypedClass<tThreadContainer>());
-
-tThreadContainer::tThreadContainer(tFrameworkElement* parent, const util::tString& description) :
-    tGroup(parent, description),
-    rt_thread("Realtime Thread", this, false),
-    cycle_time("Cycle Time", this, 40, tBounds<int>(1, 60000, true)),
-    warn_on_cycle_time_exceed("Warn on cycle time exceed", this, true),
-    thread()
-{
-  AddAnnotation(new tExecutionControl(*this));
-}
-
-tThreadContainer::~tThreadContainer()
-{
-  if (thread.get() != NULL)
-  {
-    StopThread();
-    JoinThread();
-  }
-  ;
-}
-
-bool tThreadContainer::IsExecuting()
-{
-  std::shared_ptr<tThreadContainerThread> t = thread;
-  if (t.get() != NULL)
-  {
-    return t->IsRunning();
-  }
-  return false;
-}
-
-void tThreadContainer::JoinThread()
-{
-  if (thread.get() != NULL)
-  {
-    try
-    {
-      thread->Join();
-    }
-    catch (const util::tInterruptedException& e)
-    {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Interrupted ?!!");
-    }
-    thread.reset();
-  }
-}
-
-void tThreadContainer::StartExecution()
-{
-  assert((thread.get() == NULL));
-  thread = util::sThreadUtil::GetThreadSharedPtr(new tThreadContainerThread(this, cycle_time.Get(), warn_on_cycle_time_exceed.Get()));
-  if (rt_thread.Get())
-  {
-    util::sThreadUtil::MakeThreadRealtime(thread);
-  }
-  thread->Start();
-}
-
-void tThreadContainer::StopThread()
-{
-  if (thread.get() != NULL)
-  {
-    thread->StopThread();
-  }
-}
+tStandardCreateModuleAction<tFinstructableThreadContainer> tFinstructableThreadContainer::cCREATE_ACTION("FinstructableThreadContainer", util::tTypedClass<tFinstructableThreadContainer>());
 
 } // namespace finroc
 } // namespace core

@@ -25,12 +25,8 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/parameter/tStructureParameter.h"
-#include "core/datatype/tBounds.h"
-#include "core/plugin/tStandardCreateModuleAction.h"
-#include "core/thread/tThreadContainerThread.h"
-#include "core/finstructable/tGroup.h"
-#include "core/thread/tStartAndPausable.h"
+#include "core/thread/tThreadContainerElement.h"
+#include "core/finstructable/tFinstructableGroup.h"
 
 namespace finroc
 {
@@ -42,29 +38,11 @@ namespace core
  * Contains thread that executes OrderedPeriodicTasks of all children.
  * Execution in performed in the order of the graph.
  */
-class tThreadContainer : public tGroup, public tStartAndPausable
+class tThreadContainer : public tThreadContainerElement<tGroup>
 {
 private:
-
-  /*! Should this container contain a real-time thread? */
-  tStructureParameter<bool> rt_thread;
-
-  /*! Thread cycle time */
-  tStructureParameter<int> cycle_time;
-
-  /*! Warn on cycle time exceed */
-  tStructureParameter<bool> warn_on_cycle_time_exceed;
-
   /*! CreateModuleAction */
   static tStandardCreateModuleAction<tThreadContainer> cCREATE_ACTION;
-
-  /*! Thread - while program is running - in pause mode null */
-  std::shared_ptr<tThreadContainerThread> thread;
-
-  /*!
-   * Stop thread in thread container (does not block - call join thread to block until thread has terminated)
-   */
-  void StopThread();
 
 public:
 
@@ -72,42 +50,60 @@ public:
    * \param description Name
    * \param parent parent
    */
-  tThreadContainer(tFrameworkElement* parent, const util::tString& description);
-
-  virtual ~tThreadContainer();
-
-  /*!
-   * \return Cycle time in milliseconds
-   */
-  inline int GetCycleTime()
-  {
-    return cycle_time.Get();
-  }
-
-  virtual bool IsExecuting();
-
-  /*!
-   * Block until thread has stopped
-   */
-  void JoinThread();
-
-  virtual void PauseExecution()
-  {
-    StopThread();
-    JoinThread();
-  }
-
-  /*!
-   * \param period Cycle time in milliseconds
-   */
-  inline void SetCycleTime(int period)
-  {
-    cycle_time.Set(period);
-  }
-
-  virtual void StartExecution();
-
+  tThreadContainer(tFrameworkElement* parent, const util::tString& description) :
+      tThreadContainerElement<tGroup>(parent, description)
+  {}
 };
+
+/*!
+ * \author Max Reichardt
+ *
+ * Contains thread that executes OrderedPeriodicTasks of all children.
+ * Execution in performed in the order of the graph.
+ */
+class tFinstructableThreadContainer : public tThreadContainerElement<tFinstructableGroup>
+{
+private:
+  /*! CreateModuleAction */
+  static tStandardCreateModuleAction<tFinstructableThreadContainer> cCREATE_ACTION;
+
+  /*! Log domain for this class */
+  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "framework_elements");
+
+public:
+
+  /*!
+   * \param description Name
+   * \param parent parent
+   */
+  tFinstructableThreadContainer(tFrameworkElement* parent, const util::tString& description) :
+      tThreadContainerElement<tFinstructableGroup>(parent, description)
+  {}
+
+  /*!
+   * (if the provided file does not exist, it is created, when contents are saved - and a warning is displayed)
+   * (if the provided file exists, its contents are loaded when group is initialized)
+   *
+   * \param description Name
+   * \param parent parent
+   * \param xml_file name of XML file (relative to finroc repository) that determines contents of this group
+   */
+  tFinstructableThreadContainer(tFrameworkElement* parent, const util::tString& description, const util::tString& xml_file) :
+      tThreadContainerElement<tFinstructableGroup>(parent, description)
+  {
+    try
+    {
+      this->xml_file.Set(xml_file);
+    }
+    catch (const util::tException& e)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
+    }
+  }
+};
+
+extern template class tThreadContainerElement<tGroup>;
+extern template class tThreadContainerElement<tFinstructableGroup>;
 
 } // namespace finroc
 } // namespace core

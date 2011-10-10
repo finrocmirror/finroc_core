@@ -14,7 +14,7 @@ namespace finroc
 {
 namespace core
 {
-tThreadContainerThread::tThreadContainerThread(tThreadContainer* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed) :
+tThreadContainerThread::tThreadContainerThread(tFrameworkElement* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed) :
     tCoreLoopThreadBase(default_cycle_time, warn_on_cycle_time_exceed),
     thread_container(thread_container_),
     reschedule(true),

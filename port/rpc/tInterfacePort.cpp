@@ -137,7 +137,7 @@ tPortCreationInfoBase tInterfacePort::ProcessPci(tPortCreationInfoBase pci, tInt
   return pci;
 }
 
-void tInterfacePort::RawConnectToTarget(tAbstractPort* target)
+void tInterfacePort::RawConnectToTarget(tAbstractPort* target, bool finstructed)
 {
   tInterfacePort* target2 = static_cast<tInterfacePort*>(target);
 
@@ -147,7 +147,7 @@ void tInterfacePort::RawConnectToTarget(tAbstractPort* target)
     target2->edges_dest.GetIterable()->Get(0)->DisconnectFrom(target2);
   }
 
-  ::finroc::core::tAbstractPort::RawConnectToTarget(target);
+  ::finroc::core::tAbstractPort::RawConnectToTarget(target, finstructed);
 }
 
 } // namespace finroc

@@ -118,7 +118,7 @@ protected:
     // do nothing in interface port
   }
 
-  virtual void RawConnectToTarget(tAbstractPort* target);
+  virtual void RawConnectToTarget(tAbstractPort* target, bool finstructed);
 
   virtual void SetMaxQueueLengthImpl(int length)
   {

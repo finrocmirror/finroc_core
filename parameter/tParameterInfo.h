@@ -55,6 +55,9 @@ private:
   /*! Place in Configuration tree, this parameter is configured from (nodes are separated with dots) */
   util::tString config_entry;
 
+  /*! Was config entry set from finstruct? */
+  bool entry_set_from_finstruct;
+
 public:
 
   /*! Data Type */
@@ -84,6 +87,14 @@ public:
   }
 
   /*!
+   * \return Is config entry set from finstruct/xml?
+   */
+  bool IsConfigEntrySetFromFinstruct()
+  {
+    return entry_set_from_finstruct;
+  }
+
+  /*!
    * load value from configuration file
    */
   inline void LoadValue()
@@ -106,11 +117,13 @@ public:
 
   virtual void Serialize(rrlib::serialization::tOutputStream& os) const
   {
+    os.WriteBoolean(entry_set_from_finstruct);
     os.WriteString(config_entry);
   }
 
   virtual void Serialize(rrlib::serialization::tStringOutputStream& os) const
   {
+    os.Append(entry_set_from_finstruct ? '+' : ' ');
     os.Append(config_entry);
   }
 
@@ -118,9 +131,9 @@ public:
    * (loads value from configuration file, if is exists
    *
    * \param config_entry New Place in Configuration tree, this parameter is configured from (nodes are separated with dots)
+   * \param finstruct_set Is config entry set from finstruct?
    */
-  void SetConfigEntry(const util::tString& config_entry_);
-
+  void SetConfigEntry(const util::tString& config_entry_, bool finstruct_set = false);
 };
 
 } // namespace finroc

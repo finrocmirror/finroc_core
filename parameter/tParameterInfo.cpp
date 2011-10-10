@@ -45,7 +45,8 @@ namespace core
 rrlib::serialization::tDataTypeBase tParameterInfo::cTYPE = rrlib::serialization::tDataType<tParameterInfo>();
 
 tParameterInfo::tParameterInfo() :
-    config_entry()
+    config_entry(),
+    entry_set_from_finstruct(false)
 {}
 
 void tParameterInfo::AnnotatedObjectInitialized()
@@ -62,12 +63,14 @@ void tParameterInfo::AnnotatedObjectInitialized()
 
 void tParameterInfo::Deserialize(rrlib::serialization::tInputStream& is)
 {
-  SetConfigEntry(is.ReadString());
+  entry_set_from_finstruct = is.ReadBoolean();
+  SetConfigEntry(is.ReadString(), entry_set_from_finstruct);
 }
 
 void tParameterInfo::Deserialize(rrlib::serialization::tStringInputStream& is)
 {
-  SetConfigEntry(is.ReadAll());
+  entry_set_from_finstruct = (is.Read() == '+');
+  SetConfigEntry(is.ReadAll(), entry_set_from_finstruct);
 }
 
 void tParameterInfo::LoadValue(bool ignore_ready)
@@ -159,16 +162,17 @@ void tParameterInfo::SaveValue()
   }
 }
 
-void tParameterInfo::SetConfigEntry(const util::tString& config_entry_)
+void tParameterInfo::SetConfigEntry(const util::tString& config_entry_, bool finstruct_set)
 {
   if (!this->config_entry.Equals(config_entry_))
   {
     this->config_entry = config_entry_;
+    this->entry_set_from_finstruct = finstruct_set;
     try
     {
       LoadValue();
     }
-    catch (const util::tException& e)
+    catch (const std::exception& e)
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
     }

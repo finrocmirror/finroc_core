@@ -207,6 +207,19 @@ int main(int argc, char **argv)
 
   finroc::core::tRuntimeEnvironment *runtime_environment = finroc::core::tRuntimeEnvironment::GetInstance();
 
+  // Have any top-level framework elements containing threads already been created?
+  // In this case, we won't create an extra thread container (finstructed part does not need one for example)
+  std::vector<finroc::core::tFrameworkElement*> executables;
+  finroc::core::tFrameworkElement::tChildIterator ci(runtime_environment);
+  finroc::core::tFrameworkElement* next = NULL;
+  while ((next = ci.Next()) != NULL)
+  {
+    if (next->GetAnnotation<finroc::core::tExecutionControl>() != NULL && (next->GetFlag(finroc::core::tCoreFlags::cFINSTRUCTABLE_GROUP) || next->GetFlag(finroc::core::tCoreFlags::cEDGE_AGGREGATOR)))
+    {
+      executables.push_back(next);
+    }
+  }
+
   // Create and connect TCP peer
   finroc::tcp::tTCPPeer* tcp_peer = new finroc::tcp::tTCPPeer(finroc::util::tStringBuilder("localhost:") + network_port, "", finroc::tcp::tTCPPeer::eFULL, network_port, finroc::tcp::tTCPPeer::cDEFAULT_FILTER, true);
   tcp_peer->Init();
@@ -219,18 +232,32 @@ int main(int argc, char **argv)
     FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Error connecting Peer", e1);
   }
 
-  finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread");
-
-  InitMainGroup(main_thread, remaining_args);
-
-  main_thread->Init();
-  if (pause_at_startup)
+  if (executables.size() == 0)
   {
-    finroc::core::tExecutionControl::PauseAll(main_thread); // Shouldn't be necessary, but who knows what people might implement
+    finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread");
+    InitMainGroup(main_thread, remaining_args);
+    executables.push_back(main_thread);
   }
   else
   {
-    finroc::core::tExecutionControl::StartAll(main_thread);
+    InitMainGroup(NULL, remaining_args);
+  }
+
+  for (size_t i = 0; i < executables.size(); i++)
+  {
+    finroc::core::tFrameworkElement* fe = executables[i];
+    if (!fe->IsReady())
+    {
+      fe->Init();
+    }
+    if (pause_at_startup)
+    {
+      finroc::core::tExecutionControl::PauseAll(fe); // Shouldn't be necessary, but who knows what people might implement
+    }
+    else
+    {
+      finroc::core::tExecutionControl::StartAll(fe);
+    }
   }
 
   run_main_loop = true;

@@ -56,14 +56,18 @@ private:
   /*! Pointer to next edge - for a singly linked list */
   tLinkEdge* next;
 
+  /*! Is this a finstructed link edge? */
+  bool finstructed;
+
   /*!
    * Creates link edge for two links
    *
    * \param source_link_ source link
    * \param target_link_ target link
    * \param port_handle_ If one link is null - this contains handle of partner port
+   * \param finstructed Is this a finstructed link edge?
    */
-  tLinkEdge(const util::tString& source_link_, const util::tString& target_link_, int port_handle_);
+  tLinkEdge(const util::tString& source_link_, const util::tString& target_link_, int port_handle_, bool finstructed);
 
 public:
 
@@ -72,24 +76,27 @@ public:
    *
    * \param source_link_ source link
    * \param target_handle handle of target port
+   * \param finstructed Is this a finstructed link edge?
    */
-  tLinkEdge(const util::tString& source_link_, int target_handle);
+  tLinkEdge(const util::tString& source_link_, int target_handle, bool finstructed);
 
   /*!
    * Creates link edge for two links
    *
    * \param source_link_ source link
    * \param target_link_ target link
+   * \param finstructed Is this a finstructed link edge?
    */
-  tLinkEdge(const util::tString& source_link_, const util::tString& target_link_);
+  tLinkEdge(const util::tString& source_link_, const util::tString& target_link_, bool finstructed);
 
   /*!
    * Creates link edge for handle and link
    *
    * \param source_handle handle of source port
    * \param target_link_ target link
+   * \param finstructed Is this a finstructed link edge?
    */
-  tLinkEdge(int source_handle, const util::tString& target_link_);
+  tLinkEdge(int source_handle, const util::tString& target_link_, bool finstructed);
 
   virtual ~tLinkEdge();
 
@@ -116,6 +123,14 @@ public:
   inline util::tString GetTargetLink()
   {
     return target_link;
+  }
+
+  /*!
+   * \return Was this link edge finstructed?
+   */
+  bool IsFinstructed()
+  {
+    return finstructed;
   }
 
   /*!

@@ -34,11 +34,32 @@
 #include "core/port/net/tNetPort.h"
 #include "core/port/tEdgeAggregator.h"
 #include "rrlib/serialization/tOutputStream.h"
+#include "core/tFinrocAnnotation.h"
 
 namespace finroc
 {
 namespace core
 {
+namespace internal
+{
+
+/*!
+ * Finstructed edge info if port has more than 16 outgoing connections
+ */
+class tFinstructedEdgeInfo : public tFinrocAnnotation
+{
+public:
+
+  /*! tAbstractPort::outgoing_edges_finstructed continued (starting at 17th port) */
+  std::vector<bool> outgoing_edges_finstructed;
+
+  tFinstructedEdgeInfo() :
+      outgoing_edges_finstructed()
+  {}
+};
+
+}
+
 tAbstractPort::~tAbstractPort()
 {
   if (AsNetPort() != NULL)
@@ -62,6 +83,7 @@ tAbstractPort::tAbstractPort(tPortCreationInfoBase pci) :
     edges_dest(NULL),
     link_edges(NULL),
     strategy(-1),
+    outgoing_edges_finstructed(0),
     data_type(pci.data_type),
     min_net_update_time(pci.min_net_update_interval)
 {
@@ -80,7 +102,7 @@ void tAbstractPort::CommitUpdateTimeChange()
   }*/
 }
 
-void tAbstractPort::ConnectToSource(const util::tString& src_link)
+void tAbstractPort::ConnectToSource(const util::tString& src_link, bool finstructed)
 {
   {
     util::tLock lock2(GetRegistryLock());
@@ -99,7 +121,7 @@ void tAbstractPort::ConnectToSource(const util::tString& src_link)
         return;
       }
     }
-    link_edges->Add(new tLinkEdge(MakeAbsoluteLink(src_link), GetHandle()));
+    link_edges->Add(new tLinkEdge(MakeAbsoluteLink(src_link), GetHandle(), finstructed));
   }
 }
 
@@ -117,7 +139,7 @@ void tAbstractPort::ConnectToSource(tFrameworkElement* src_port_parent, util::tS
 }
 
 
-void tAbstractPort::ConnectToTarget(tAbstractPort* target)
+void tAbstractPort::ConnectToTarget(tAbstractPort* target, bool finstructed)
 {
   {
     util::tLock lock2(GetRegistryLock());
@@ -127,7 +149,7 @@ void tAbstractPort::ConnectToTarget(tAbstractPort* target)
     }
     if (MayConnectTo(target) && (!IsConnectedTo(target)))
     {
-      RawConnectToTarget(target);
+      RawConnectToTarget(target, finstructed);
       target->PropagateStrategy(NULL, this);
       NewConnection(target);
       target->NewConnection(this);
@@ -139,7 +161,7 @@ void tAbstractPort::ConnectToTarget(tAbstractPort* target)
   }
 }
 
-void tAbstractPort::ConnectToTarget(const util::tString& dest_link)
+void tAbstractPort::ConnectToTarget(const util::tString& dest_link, bool finstructed)
 {
   {
     util::tLock lock2(GetRegistryLock());
@@ -158,7 +180,7 @@ void tAbstractPort::ConnectToTarget(const util::tString& dest_link)
         return;
       }
     }
-    link_edges->Add(new tLinkEdge(GetHandle(), MakeAbsoluteLink(dest_link)));
+    link_edges->Add(new tLinkEdge(GetHandle(), MakeAbsoluteLink(dest_link), finstructed));
   }
 }
 
@@ -350,7 +372,7 @@ void tAbstractPort::ForwardStrategy(int16 strategy2, tAbstractPort* push_wanter)
   }
 }
 
-void tAbstractPort::GetConnectionPartners(util::tSimpleList<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges)
+void tAbstractPort::GetConnectionPartners(util::tSimpleList<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges, bool finstructed_edges_only)
 {
   result.Clear();
   util::tArrayWrapper<tAbstractPort*>* it = NULL;
@@ -361,7 +383,7 @@ void tAbstractPort::GetConnectionPartners(util::tSimpleList<tAbstractPort*>& res
     for (int i = 0, n = it->Size(); i < n; i++)
     {
       tAbstractPort* target = it->Get(i);
-      if (target == NULL)
+      if (target == NULL || (finstructed_edges_only && (!IsEdgeFinstructed(i))))
       {
         continue;
       }
@@ -369,7 +391,7 @@ void tAbstractPort::GetConnectionPartners(util::tSimpleList<tAbstractPort*>& res
     }
   }
 
-  if (incoming_edges)
+  if (incoming_edges && (!finstructed_edges_only))
   {
     it = edges_dest->GetIterable();
     for (int i = 0, n = it->Size(); i < n; i++)
@@ -477,6 +499,24 @@ bool tAbstractPort::IsConnectedToReversePushSources() const
     }
   }
   return false;
+}
+
+bool tAbstractPort::IsEdgeFinstructed(int idx)
+{
+  if (idx < 0)
+  {
+    return false;
+  }
+  else if (idx < 16)
+  {
+    uint16_t flag = (uint16_t)(1 << idx);
+    return (outgoing_edges_finstructed & flag) != 0;
+  }
+  else
+  {
+    internal::tFinstructedEdgeInfo* info = GetAnnotation<internal::tFinstructedEdgeInfo>();
+    return info != NULL && info->outgoing_edges_finstructed[idx - 16];
+  }
 }
 
 util::tString tAbstractPort::MakeAbsoluteLink(const util::tString& rel_link)
@@ -618,12 +658,16 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
   }
 }
 
-void tAbstractPort::RawConnectToTarget(tAbstractPort* target)
+void tAbstractPort::RawConnectToTarget(tAbstractPort* target, bool finstructed)
 {
   tEdgeAggregator::EdgeAdded(this, target);
 
-  edges_src->Add(target, false);
+  size_t idx = edges_src->Add(target, false);
   target->edges_dest->Add(this, false);
+  if (finstructed)
+  {
+    SetEdgeFinstructed(idx, true);
+  }
 
   PublishUpdatedEdgeInfo(tRuntimeListener::cADD, target);
 }
@@ -670,7 +714,42 @@ void tAbstractPort::SerializeOutgoingConnections(rrlib::serialization::tOutputSt
     if (as != NULL)
     {
       co.WriteInt(as->GetHandle());
+      co.WriteBoolean(IsEdgeFinstructed(i));
     }
+  }
+}
+
+void tAbstractPort::SetEdgeFinstructed(int idx, bool value)
+{
+  if (idx < 0)
+  {
+    return;
+  }
+  else if (idx < 16)
+  {
+    uint16_t flag = (uint16_t)(1 << idx);
+    if (value)
+    {
+      outgoing_edges_finstructed |= flag;
+    }
+    else
+    {
+      outgoing_edges_finstructed &= ~flag;
+    }
+  }
+  else
+  {
+    internal::tFinstructedEdgeInfo* info = GetAnnotation<internal::tFinstructedEdgeInfo>();
+    if (info == NULL)
+    {
+      if (!value)
+      {
+        return;
+      }
+      info = new internal::tFinstructedEdgeInfo();
+      AddAnnotation(info);
+    }
+    info->outgoing_edges_finstructed[idx - 16] = value;
   }
 }
 

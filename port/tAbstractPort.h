@@ -106,6 +106,9 @@ private:
   /*! Constant for bulk and express flag */
   static const uint cBULK_N_EXPRESS = tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT;
 
+  /*! Bitvector indicating which of the first 16 outgoing edges was finstructed. Further info is stored in annotation if (ever) needed. */
+  uint16_t outgoing_edges_finstructed;
+
 protected:
 
   /*! Type of port data */
@@ -237,8 +240,9 @@ protected:
    * succeeded
    *
    * \param target Target to connect to
+   * \param finstructed Was edge created using finstruct? (Should never be called with true by application developer)
    */
-  virtual void RawConnectToTarget(tAbstractPort* target);
+  virtual void RawConnectToTarget(tAbstractPort* target, bool finstructed);
 
   /*!
    * Sets special change flag for initial push data
@@ -337,8 +341,9 @@ public:
    * (connection is (re)established when link is available)
    *
    * \param link_name Link name of source port (relative to parent framework element)
+   * \param finstructed Was edge created using finstruct? (Should never be called with true by application developer)
    */
-  void ConnectToSource(const util::tString& src_link);
+  void ConnectToSource(const util::tString& src_link, bool finstructed = false);
 
   /*!
    * Connect port to specified source port
@@ -353,16 +358,18 @@ public:
    * Connect port to specified target port
    *
    * \param target Target port
+   * \param finstructed Was edge created using finstruct? (Should never be called with true by application developer)
    */
-  void ConnectToTarget(tAbstractPort* target);
+  void ConnectToTarget(tAbstractPort* target, bool finstructed = false);
 
   /*!
    * Connect port to specified target port
    * (connection is (re)established when link is available)
    *
    * \param link_name Link name of target port (relative to parent framework element)
+   * \param finstructed Was edge created using finstruct? (Should never be called with true by application developer)
    */
-  void ConnectToTarget(const util::tString& dest_link);
+  void ConnectToTarget(const util::tString& dest_link, bool finstructed = false);
 
   /*!
    * Connect port to specified destination port
@@ -443,8 +450,9 @@ public:
    * \param result List to write results to
    * \param outgoing_edges Consider outgoing edges
    * \param incoming_edges Consider incoming edges
+   * \param finstructed_edges_only Consider only outgoing finstructed edges?
    */
-  void GetConnectionPartners(util::tSimpleList<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges);
+  void GetConnectionPartners(util::tSimpleList<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges, bool finstructed_edges_only = false);
 
   /*!
    * \return Type of port data
@@ -569,6 +577,12 @@ public:
    */
   bool IsConnectedToReversePushSources() const;
 
+  /*!
+   * \param target Index of target port
+   * \return Is edge to specified target port finstructed?
+   */
+  bool IsEdgeFinstructed(int idx);
+
   inline bool IsInputPort() const
   {
     return !IsOutputPort();
@@ -653,7 +667,7 @@ public:
 
   /*!
    * Serializes target handles of all outgoing connection destinations to stream
-   * [byte: number of connections][int handle1]...[int handle n]
+   * [byte: number of connections][int handle 1][bool finstructed 1]...[int handle n][bool finstructed n]
    *
    * \param co Output Stream
    */
@@ -680,6 +694,14 @@ public:
   }
 
   /*!
+   * Mark edge with specified index as finstructed
+   *
+   * \param idx Index of edge
+   * \param value True if edge was finstructed, false if edge was not finstructed (or when it is possibly deleted)
+   */
+  void SetEdgeFinstructed(int idx, bool value);
+
+  /*!
    * Set maximum queue length
    *
    * \param length Maximum queue length (values <= 1 mean that there is no queue)
@@ -704,7 +726,6 @@ public:
    * \param push Push data?
    */
   void SetReversePushStrategy(bool push);
-
 };
 
 } // namespace finroc

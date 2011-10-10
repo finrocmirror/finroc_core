@@ -36,6 +36,7 @@
 #include "core/datatype/tCoreString.h"
 #include "rrlib/finroc_core_utils/sFiles.h"
 #include "core/tLinkEdge.h"
+#include "core/parameter/tParameterInfo.h"
 
 namespace finroc
 {
@@ -48,7 +49,8 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
     xml_file("XML file", this, ""),
     current_xml_file(""),
     connect_tmp(),
-    link_tmp("")
+    link_tmp(""),
+    save_parameter_config_entries(false)
 {
 }
 
@@ -57,7 +59,8 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
     xml_file("XML file", this, ""),
     current_xml_file(""),
     connect_tmp(),
-    link_tmp("")
+    link_tmp(""),
+    save_parameter_config_entries(false)
 {
   // this(parent,name);
   try
@@ -211,15 +214,36 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
           }
           else if (src_port == NULL || src_port->IsVolatile())    // source volatile
           {
-            dest_port->ConnectToSource(QualifyLink(src));
+            dest_port->ConnectToSource(QualifyLink(src), true);
           }
           else if (dest_port == NULL || dest_port->IsVolatile())    // destination volatile
           {
-            src_port->ConnectToTarget(QualifyLink(dest));
+            src_port->ConnectToTarget(QualifyLink(dest), true);
           }
           else
           {
-            src_port->ConnectToTarget(dest_port);
+            src_port->ConnectToTarget(dest_port, true);
+          }
+        }
+        else if (name.Equals("config"))
+        {
+          util::tString param = node->GetStringAttribute("parameter");
+          tAbstractPort* parameter = GetChildPort(param);
+          if (parameter == NULL)
+          {
+            FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Cannot set config entry, because parameter is not available: ", param);
+          }
+          else
+          {
+            tParameterInfo* pi = parameter->GetAnnotation<tParameterInfo>();
+            if (pi == NULL)
+            {
+              FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Port is not parameter: ", param);
+            }
+            else
+            {
+              pi->SetConfigEntry(node->GetTextContent(), true);
+            }
           }
         }
         else
@@ -269,9 +293,13 @@ void tFinstructableGroup::SaveXml()
       link_tmp = GetQualifiedName() + "/";
       tFrameworkElementTreeFilter filter(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
 
+      save_parameter_config_entries = false;
+      filter.TraverseElementTree(this, this, &root);
+      save_parameter_config_entries = true;
       filter.TraverseElementTree(this, this, &root);
       doc.WriteToFile(current_xml_file);
-      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving successful");
+      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving successful.");
+
     }
     catch (const rrlib::xml2::tXML2WrapperException& e)
     {
@@ -337,7 +365,29 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
 {
   assert((fe->IsPort()));
   tAbstractPort* ap = static_cast<tAbstractPort*>(fe);
-  ap->GetConnectionPartners(connect_tmp, true, false);
+
+  // second pass?
+  if (save_parameter_config_entries)
+  {
+    tParameterInfo* info = ap->GetAnnotation<tParameterInfo>();
+    if (info != NULL && info->IsConfigEntrySetFromFinstruct())
+    {
+      try
+      {
+        rrlib::xml2::tXMLNode& config = root->AddChildNode("config");
+        config.SetAttribute("parameter", GetEdgeLink(ap));
+        config.SetContent(info->GetConfigEntry());
+      }
+      catch (rrlib::xml2::tXML2WrapperException& e)
+      {
+        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
+      }
+    }
+    return;
+  }
+
+  // first pass
+  ap->GetConnectionPartners(connect_tmp, true, false, true);  // only outgoing edges => we don't get any edges double
 
   for (size_t i = 0u; i < connect_tmp.Size(); i++)
   {
@@ -360,15 +410,13 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
     ::finroc::core::tFrameworkElement* common_finstructable_parent = common_parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
     if (common_finstructable_parent != this)
     {
-      // TODO: check why continue causes problems here
-      // continue;
+      continue;
     }
 
-    // check3: only save non-volatile connections in this step
+    // check3: only save non-volatile connections in this step (finstruct creates link edges for volatile ports)
     if (ap->IsVolatile() || ap2->IsVolatile())
     {
-      // TODO: check why continue causes problems here
-      // continue;
+      continue;
     }
 
     // save edge
@@ -383,6 +431,10 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
     for (size_t i = 0u; i < ap->GetLinkEdges()->Size(); i++)
     {
       tLinkEdge* le = ap->GetLinkEdges()->Get(i);
+      if (!le->IsFinstructed())
+      {
+        continue;
+      }
       if (le->GetSourceLink().Length() > 0)
       {
         // save edge

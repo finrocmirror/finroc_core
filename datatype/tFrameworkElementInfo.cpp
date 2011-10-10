@@ -99,7 +99,8 @@ void tFrameworkElementInfo::Deserialize(rrlib::serialization::tInputStream& is, 
       int8 cnt = is.ReadByte();
       for (int i = 0; i < cnt; i++)
       {
-        connections.Add(is.ReadInt());
+        int handle = is.ReadInt();
+        connections.Add(tConnectionInfo(handle, is.ReadBoolean()));
       }
     }
   }

@@ -85,17 +85,17 @@ tAdminServer::tAdminServer() :
 
 void tAdminServer::Connect(tAbstractPort* src, tAbstractPort* dest)
 {
-  if (src->IsVolatile())
+  if (src->IsVolatile() && (!dest->IsVolatile()))
   {
-    dest->ConnectToSource(src->GetQualifiedLink());
+    dest->ConnectToSource(src->GetQualifiedLink(), true);
   }
-  else if (dest->IsVolatile())
+  else if (dest->IsVolatile() && (!src->IsVolatile()))
   {
-    src->ConnectToTarget(dest->GetQualifiedLink());
+    src->ConnectToTarget(dest->GetQualifiedLink(), true);
   }
   else
   {
-    src->ConnectToTarget(dest);
+    src->ConnectToTarget(dest, true);
   }
 }
 
