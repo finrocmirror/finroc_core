@@ -125,9 +125,9 @@ void tAbstractPort::ConnectToSource(const util::tString& src_link, bool finstruc
   }
 }
 
-void tAbstractPort::ConnectToSource(tFrameworkElement* src_port_parent, util::tString& src_port_name, bool warn_if_not_available)
+void tAbstractPort::ConnectToSource(tFrameworkElement* src_port_parent, const util::tString& src_port_name, bool warn_if_not_available)
 {
-  tFrameworkElement* p = src_port_parent->GetChild(src_port_name);
+  tFrameworkElement* p = src_port_parent->GetChildElement(src_port_name, false);
   if (p != NULL && p->IsPort())
   {
     ConnectToSource(static_cast<tAbstractPort*>(p));
@@ -184,9 +184,9 @@ void tAbstractPort::ConnectToTarget(const util::tString& dest_link, bool finstru
   }
 }
 
-void tAbstractPort::ConnectToTarget(tFrameworkElement* dest_port_parent, util::tString& dest_port_name, bool warn_if_not_available)
+void tAbstractPort::ConnectToTarget(tFrameworkElement* dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available)
 {
-  tFrameworkElement* p = dest_port_parent->GetChild(dest_port_name);
+  tFrameworkElement* p = dest_port_parent->GetChildElement(dest_port_name, false);
   if (p != NULL && p->IsPort())
   {
     ConnectToTarget(static_cast<tAbstractPort*>(p));

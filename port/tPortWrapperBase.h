@@ -112,7 +112,7 @@ public:
    * \param src_port_name Name of source port
    * \param warn_if_not_available Print warning message if connection cannot be established
    */
-  void ConnectToSource(tFrameworkElement* src_port_parent, util::tString& src_port_name, bool warn_if_not_available = true)
+  void ConnectToSource(tFrameworkElement* src_port_parent, const util::tString& src_port_name, bool warn_if_not_available = true)
   {
     wrapped->ConnectToSource(src_port_parent, src_port_name, warn_if_not_available);
   }
@@ -155,7 +155,7 @@ public:
    * \param dest_port_name Name of destination port
    * \param warn_if_not_available Print warning message if connection cannot be established
    */
-  void ConnectToTarget(tFrameworkElement* dest_port_parent, util::tString& dest_port_name, bool warn_if_not_available = true)
+  void ConnectToTarget(tFrameworkElement* dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available = true)
   {
     wrapped->ConnectToTarget(dest_port_parent, dest_port_name, warn_if_not_available);
   }
