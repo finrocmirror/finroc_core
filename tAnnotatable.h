@@ -92,7 +92,7 @@ public:
 
   //! Convenience method for below
   template <typename A>
-  A* GetAnnotation()
+  A* GetAnnotation() const
   {
     return static_cast<A*>(GetAnnotation(rrlib::serialization::tDataType<A>()));
   }
@@ -103,7 +103,7 @@ public:
    * \param type Data type of annotation we're looking for
    * \return Annotation. Null if framework element has no annotation of this type.
    */
-  tFinrocAnnotation* GetAnnotation(const rrlib::serialization::tDataTypeBase& dt);
+  tFinrocAnnotation* GetAnnotation(const rrlib::serialization::tDataTypeBase& dt) const;
 
 };
 

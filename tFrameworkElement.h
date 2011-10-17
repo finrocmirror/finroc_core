@@ -569,7 +569,7 @@ public:
     return *this;
   }
 
-  tConfigFile* GetConfigFile();
+  tConfigFile* GetConfigFile() const;
 
   /*!
    * \return Primary parent framework element
@@ -591,7 +591,7 @@ public:
    * \param flags Flags to look for
    * \return Parent or null
    */
-  tFrameworkElement* GetParentWithFlags(uint flags_);
+  tFrameworkElement* GetParentWithFlags(uint flags_) const;
 
   /*!
    * (Use StringBuilder version if efficiency or real-time is an issue)

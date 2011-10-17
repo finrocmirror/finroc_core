@@ -62,7 +62,7 @@ private:
    */
   inline tNumber* GetBuffer()
   {
-    rrlib::serialization::tGenericObject* go = this->cc_value->GetObject();
+    rrlib::serialization::tGenericObject* go = ValPointer();
     return go->GetData<tNumber>();
   }
 

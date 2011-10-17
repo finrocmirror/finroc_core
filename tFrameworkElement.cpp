@@ -448,7 +448,7 @@ void tFrameworkElement::GetNameHelper(util::tStringBuilder& sb, const tLink* l, 
   sb.Append(l->description);
 }
 
-tConfigFile* tFrameworkElement::GetConfigFile()
+tConfigFile* tFrameworkElement::GetConfigFile() const
 {
   return tConfigFile::Find(this);
 }
@@ -466,7 +466,7 @@ tFrameworkElement* tFrameworkElement::GetParent(int link_index) const
   }
 }
 
-tFrameworkElement* tFrameworkElement::GetParentWithFlags(uint flags_)
+tFrameworkElement* tFrameworkElement::GetParentWithFlags(uint flags_) const
 {
   if (primary.parent == NULL)
   {

@@ -125,6 +125,9 @@ private:
   /*! Mutex for static methods */
   static util::tMutexLockOrder static_class_mutex;
 
+  /*! Command line arguments (used by parameters, for instance). Needs to be manually filled (usually in main()). */
+  std::map<std::string, std::string> command_line_args;
+
 public:
 
   /*! Framework element that contains all framework elements that have no parent specified */
@@ -157,6 +160,19 @@ protected:
 public:
 
   /*!
+   * (usually called from main())
+   * Register any relevant command line arguments at runtime.
+   * Can be retrieved by GetCommandLineArgument later.
+   *
+   * \param option Name of command line option.
+   * \param value Value of option.
+   */
+  void AddCommandLineArgument(const util::tString& option, const util::tString& value)
+  {
+    command_line_args.insert(std::pair<std::string, std::string>(option.GetStdString(), value.GetStdString()));
+  }
+
+  /*!
    * Add runtime listener
    *
    * \param listener Listener to add
@@ -172,6 +188,12 @@ public:
   {
     return creation_time;
   }
+
+  /*/
+   * \param name Name of command line argument
+   * \return Value of argument - or "" if not set.
+   */
+  util::tString GetCommandLineArgument(const util::tString& name);
 
   /*!
    * Get Framework element from handle

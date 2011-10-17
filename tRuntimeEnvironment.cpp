@@ -57,6 +57,7 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
     tFrameworkElement(NULL, "Runtime", tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cIS_RUNTIME, tLockOrderLevels::cRUNTIME_ROOT),
     registry(this),
     creation_time(util::tTime::GetPrecise()),
+    command_line_args(),
     unrelated(NULL)
 {
   assert(instance.get() == NULL);
@@ -119,6 +120,15 @@ tRuntimeEnvironment::~tRuntimeEnvironment()
   }
   tRuntimeSettings::GetInstance()->GetParent()->ManagedDelete();
   instance_raw_ptr = NULL;
+}
+
+util::tString tRuntimeEnvironment::GetCommandLineArgument(const util::tString& name)
+{
+  if (command_line_args.find(name) != command_line_args.end())
+  {
+    return command_line_args[name];
+  }
+  return "";
 }
 
 ::finroc::core::tFrameworkElement* tRuntimeEnvironment::GetElement(int handle)

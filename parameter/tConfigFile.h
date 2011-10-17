@@ -107,7 +107,7 @@ public:
    * \param element Element
    * \return ConfigFile - or null if none could be found
    */
-  static tConfigFile* Find(tFrameworkElement* element);
+  static tConfigFile* Find(const tFrameworkElement* element);
 
   // TODO: reduce code duplication in hasEntry() and getEntry()
 

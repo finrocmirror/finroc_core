@@ -58,7 +58,7 @@ tAnnotatable::~tAnnotatable()
   }
 }
 
-tFinrocAnnotation* tAnnotatable::GetAnnotation(const rrlib::serialization::tDataTypeBase& dt)
+tFinrocAnnotation* tAnnotatable::GetAnnotation(const rrlib::serialization::tDataTypeBase& dt) const
 {
   tFinrocAnnotation* ann = first_annotation;
   while (ann != NULL)

@@ -73,6 +73,9 @@ extern "C"
 // Const values
 //----------------------------------------------------------------------
 
+int finroc_argc_copy;     // copy of argc for 'finroc' part. TODO: remove when rrlib_getopt supports prioritized evaluation of -m option
+char ** finroc_argv_copy; // copy of argv for 'finroc' part. TODO: remove when rrlib_getopt supports prioritized evaluation of -m option
+
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
@@ -133,7 +136,7 @@ bool ParameterConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_optio
   if (parameter_config->IsActive())
   {
     const char* file = boost::any_cast<const char *>(parameter_config->GetValue());
-    if (!finroc::util::sFiles::Exists(file))
+    if (!finroc::util::sFiles::FinrocFileExists(file))
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not find specified config file ", file);
     }
@@ -185,6 +188,11 @@ bool PortHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
 //----------------------------------------------------------------------
 int main(int argc, char **argv)
 {
+
+  // TODO: remove when rrlib_getopt supports prioritized evaluation of -m option
+  finroc_argc_copy = argc;
+  finroc_argv_copy = argv;
+
   if (!InstallSignalHandler())
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error installing signal handler. Exiting...");

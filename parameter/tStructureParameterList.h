@@ -139,8 +139,10 @@ public:
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
-  // only used in FinstructableGroup
   virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
+
+  // currently only used in FinstructableGroup
+  void Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context);
 
   /*!
    * \param i Index
@@ -177,8 +179,10 @@ public:
 
   virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 
-  // only used in FinstructableGroup
   virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
+
+  // currently only used in FinstructableGroup
+  void Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const;
 
   /*!
    * \param create_action CreateModuleAction that was used to create framework element

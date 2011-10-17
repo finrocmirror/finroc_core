@@ -48,13 +48,13 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
     temp_buffer(),
     active(true)
 {
-  if (util::sFiles::Exists(filename_))
+  if (util::sFiles::FinrocFileExists(filename_))
   {
     try
     {
-      wrapped = rrlib::xml2::tXMLDocument(filename_, false); // false = do not validate with dtd
+      wrapped = util::sFiles::GetFinrocXMLDocument(filename_, false); // false = do not validate with dtd
     }
-    catch (const rrlib::xml2::tXML2WrapperException& e)
+    catch (const std::exception& e)
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
       wrapped = rrlib::xml2::tXMLDocument();
@@ -86,13 +86,13 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
   if (active && file.Length() > 0 && content.Length() == 0 && (!file.Equals(filename)))
   {
     // load file
-    if (util::sFiles::Exists(file))
+    if (util::sFiles::FinrocFileExists(file))
     {
       try
       {
-        wrapped = rrlib::xml2::tXMLDocument(file, false); // false = do not validate with dtd
+        wrapped = util::sFiles::GetFinrocXMLDocument(file, false);
       }
-      catch (const rrlib::xml2::tXML2WrapperException& e)
+      catch (const std::exception & e)
       {
         FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
         wrapped = rrlib::xml2::tXMLDocument();
@@ -126,7 +126,7 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
   }
 }
 
-tConfigFile* tConfigFile::Find(tFrameworkElement* element)
+tConfigFile* tConfigFile::Find(const tFrameworkElement* element)
 {
   ::finroc::core::tFinrocAnnotation* ann = element->GetAnnotation(cTYPE);
   if (ann != NULL && (static_cast<tConfigFile*>(ann))->active == true)
@@ -278,13 +278,28 @@ void tConfigFile::SaveFile()
   tFrameworkElement* ann = static_cast<tFrameworkElement*>(GetAnnotated());
   assert((ann != NULL));
   {
-    util::tLock lock2(ann->GetRegistryLock());  // nothing should change while we're doing this
+    util::tLock lock2(ann->GetRegistryLock()); // nothing should change while we're doing this
     tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
     fet.TraverseElementTree(ann, this, false, temp_buffer);
   }
 
-  // write new tree to file
-  wrapped.WriteToFile(filename);
+  try
+  {
+    util::tString save_to = util::sFiles::GetFinrocFileToSaveTo(filename);
+    if (save_to.Length() == 0)
+    {
+      util::tString save_to_alt = util::sFiles::GetFinrocFileToSaveTo(filename.Replace('/', '_'));
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "There does not seem to be any suitable location for: '", filename, "' . For now, using '", save_to_alt, "'.");
+      save_to = save_to_alt;
+    }
+
+    // write new tree to file
+    wrapped.WriteToFile(save_to);
+  }
+  catch (std::exception& e)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
+  }
 }
 
 void tConfigFile::Serialize(rrlib::serialization::tOutputStream& os) const

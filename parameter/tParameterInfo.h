@@ -58,6 +58,18 @@ private:
   /*! Was config entry set from finstruct? */
   bool entry_set_from_finstruct;
 
+  /*!
+   * Command line option to set this parameter
+   * (set by outer-most finstructable group)
+   */
+  util::tString command_line_option;
+
+  /*!
+   * Default value set in finstruct (optional)
+   * (set by finstructable group responsible for connecting this parameter to attribute tree)
+   */
+  util::tString finstruct_default;
+
 public:
 
   /*! Data Type */
@@ -76,7 +88,18 @@ public:
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
-  virtual void Deserialize(rrlib::serialization::tStringInputStream& is);
+  virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
+
+  void Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context, bool include_commmand_line);
+
+  /*!
+   * \return Command line option to set this parameter
+   * (set by outer-most finstructable group)
+   */
+  util::tString GetCommandLineOption()
+  {
+    return command_line_option;
+  }
 
   /*!
    * \return Place in Configuration tree, this parameter is configured from (nodes are separated with dots)
@@ -84,6 +107,23 @@ public:
   inline util::tString GetConfigEntry()
   {
     return config_entry;
+  }
+
+  /*!
+   * \return Default value set in finstruct (optional)
+   * (set by finstructable group responsible for connecting this parameter to attribute tree)
+   */
+  util::tString GetFinstructDefault()
+  {
+    return finstruct_default;
+  }
+
+  /*!
+   * \return Does parameter have any non-default info relevant for finstructed group?
+   */
+  bool HasNonDefaultFinstructInfo()
+  {
+    return (config_entry.Length() > 0 && entry_set_from_finstruct) || command_line_option.Length() > 0 || finstruct_default.Length() > 0;
   }
 
   /*!
@@ -115,16 +155,19 @@ public:
    */
   void SaveValue();
 
-  virtual void Serialize(rrlib::serialization::tOutputStream& os) const
-  {
-    os.WriteBoolean(entry_set_from_finstruct);
-    os.WriteString(config_entry);
-  }
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 
-  virtual void Serialize(rrlib::serialization::tStringOutputStream& os) const
+  virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
+
+  void Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context, bool include_command_line) const;
+
+  /*!
+   * \param commandLineOption Command line option to set this parameter
+   * (set by outer-most finstructable group)
+   */
+  void SetCommandLineOption(const util::tString& command_line_option)
   {
-    os.Append(entry_set_from_finstruct ? '+' : ' ');
-    os.Append(config_entry);
+    this->command_line_option = command_line_option;
   }
 
   /*!
@@ -134,6 +177,15 @@ public:
    * \param finstruct_set Is config entry set from finstruct?
    */
   void SetConfigEntry(const util::tString& config_entry_, bool finstruct_set = false);
+
+  /*!
+   * \param finstructDefault Default value set in finstruct.
+   * (set by finstructable group responsible for connecting this parameter to attribute tree)
+   */
+  void SetFinstructDefault(const util::tString& finstruct_default)
+  {
+    this->finstruct_default = finstruct_default;
+  }
 };
 
 } // namespace finroc

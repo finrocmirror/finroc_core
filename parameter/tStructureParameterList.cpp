@@ -70,16 +70,22 @@ void tStructureParameterList::Deserialize(rrlib::serialization::tInputStream& is
     {
       throw util::tRuntimeException("Invalid action id or parameter number", CODE_LOCATION_MACRO);
     }
+    tFrameworkElement* ann = static_cast<tFrameworkElement*>(GetAnnotated());
     for (size_t i = 0u; i < parameters.Size(); i++)
     {
       tStructureParameterBase* param = parameters.Get(i);
-      param->Deserialize(is);
+      param->Deserialize(is, ann);
     }
-    (static_cast<tFrameworkElement*>(GetAnnotated()))->StructureParametersChanged();
+    ann->StructureParametersChanged();
   }
 }
 
 void tStructureParameterList::Deserialize(const rrlib::xml2::tXMLNode& node)
+{
+  Deserialize(node, false);
+}
+
+void tStructureParameterList::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context)
 {
   size_t number_of_children = std::distance(node.GetChildrenBegin(), node.GetChildrenEnd());
   if (number_of_children != Size())
@@ -91,10 +97,11 @@ void tStructureParameterList::Deserialize(const rrlib::xml2::tXMLNode& node)
   for (int i = 0; i < count; i++)
   {
     tStructureParameterBase* param = Get(i);
-    param->Deserialize(*child);
+    param->Deserialize(*child, finstruct_context, static_cast<tFrameworkElement*>(GetAnnotated()));
     ++child;
   }
 }
+
 
 tStructureParameterList* tStructureParameterList::GetOrCreate(tFrameworkElement* fe)
 {
@@ -132,14 +139,20 @@ void tStructureParameterList::Serialize(rrlib::serialization::tOutputStream& os)
 
 void tStructureParameterList::Serialize(rrlib::xml2::tXMLNode& node) const
 {
+  Serialize(node, false);
+}
+
+void tStructureParameterList::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const
+{
   for (size_t i = 0u; i < Size(); i++)
   {
     rrlib::xml2::tXMLNode& child = node.AddChildNode("parameter");
     tStructureParameterBase* param = Get(i);
     child.SetAttribute("name", param->GetName());
-    param->Serialize(child);
+    param->Serialize(child, finstruct_context);
   }
 }
+
 
 } // namespace finroc
 } // namespace core

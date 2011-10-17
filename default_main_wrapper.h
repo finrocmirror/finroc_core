@@ -59,6 +59,8 @@
 //----------------------------------------------------------------------
 extern const char * const cPROGRAM_VERSION;
 extern const char * const cPROGRAM_DESCRIPTION;
+extern int finroc_argc_copy;     // copy of argc for 'finroc' part. TODO: remove when rrlib_getopt supports prioritized evaluation of -m option
+extern char ** finroc_argv_copy; // copy of argv for 'finroc' part. TODO: remove when rrlib_getopt supports prioritized evaluation of -m option
 
 //----------------------------------------------------------------------
 // Function declaration

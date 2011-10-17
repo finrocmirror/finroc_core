@@ -75,6 +75,9 @@ private:
   /*! Temporary variable for save operation: Save parameter config entries in callback (instead of edges)? */
   bool save_parameter_config_entries;
 
+  /*! Default name when group is main part */
+  util::tString main_name;
+
   /*! CreateModuleAction */
   static tStandardCreateModuleAction<tFinstructableGroup> cCREATE_ACTION;
 
@@ -111,7 +114,7 @@ private:
    *
    * \param e Exception
    */
-  void LogException(const rrlib::xml2::tXML2WrapperException& e);
+  void LogException(const std::exception& e);
 
   /*!
    * Make fully-qualified link from relative one
@@ -128,6 +131,14 @@ private:
    * \param current Framework element
    */
   void SerializeChildren(rrlib::xml2::tXMLNode& node, tFrameworkElement* current);
+
+  /*!
+   * Recursive helper function for ScanForCommandLineArgs
+   *
+   * \param result Result list
+   * \param parent Node to scan childs of
+   */
+  static void ScanForCommandLineArgsHelper(std::vector<util::tString>& result, const rrlib::xml2::tXMLNode& parent);
 
 protected:
 
@@ -155,6 +166,14 @@ public:
    */
   tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_);
 
+  /*!
+   * Is this finstructable group the one responsible for saving parameter's config entry?
+   *
+   * \param ap Framework element to check this for (usually parameter port)
+   * \return Answer.
+   */
+  bool IsResponsibleForConfigFileConnections(tFrameworkElement* ap) const;
+
   virtual void PostChildInit()
   {
     ::finroc::core::tFrameworkElement::PostChildInit();
@@ -165,6 +184,23 @@ public:
    * Save contents of group back to Xml file
    */
   void SaveXml();
+
+  /*!
+   * Scan for command line arguments in specified .finroc xml file.
+   * (for finroc executable)
+   *
+   * \param finroc_file File to scan in.
+   * \return List of command line arguments.
+   */
+  static std::vector<util::tString> ScanForCommandLineArgs(const util::tString& finroc_file);
+
+  /*!
+   * \param main_name Default name when group is main part
+   */
+  void SetMainName(const util::tString main_name)
+  {
+    this->main_name = main_name;
+  }
 
   virtual void StructureParametersChanged();
 

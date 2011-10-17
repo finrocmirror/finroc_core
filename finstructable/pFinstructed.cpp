@@ -23,6 +23,7 @@
 #include "core/default_main_wrapper.h"
 #include "core/finstructable/tFinstructableGroup.h"
 #include "core/tRuntimeEnvironment.h"
+#include "rrlib/finroc_core_utils/sFiles.h"
 
 //----------------------------------------------------------------------
 // Namespace usage
@@ -37,7 +38,7 @@ using namespace finroc::core;
 // Const values
 //----------------------------------------------------------------------
 const char * const cPROGRAM_VERSION = "ver 1.0";
-const char * const cPROGRAM_DESCRIPTION = "This program instantiates and executes all .xml files passed as command line arguments.";
+const char * const cPROGRAM_DESCRIPTION = "This program instantiates and executes all .finroc files passed as command line arguments.";
 
 //----------------------------------------------------------------------
 // Implementation
@@ -45,13 +46,14 @@ const char * const cPROGRAM_DESCRIPTION = "This program instantiates and execute
 
 int cycle_time = 40;
 tFinstructableThreadContainer* finstructable_thread_container = NULL;
+std::vector<finroc::util::tString> finroc_file_extra_args;
 
 /*!
  * Parses command line arguments of the form [<group_name>]:<xml-name>
  */
 bool ParseXMLArg(const finroc::util::tString& arg, finroc::util::tString& group_name, finroc::util::tString& xml_name)
 {
-  if (!arg.Substring(arg.Length() - 4).Equals(".xml"))
+  if (!arg.Substring(arg.Length() - 7).Equals(".finroc"))
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error parsing argument: ", arg);
     return false;
@@ -70,12 +72,31 @@ bool ParseXMLArg(const finroc::util::tString& arg, finroc::util::tString& group_
   else
   {
     xml_name = arg;
-    group_name = arg;
-    if (arg.Contains("/"))
+    if (finroc::util::sFiles::FinrocFileExists(xml_name))
     {
-      group_name = arg.Substring(arg.LastIndexOf("/") + 1); // cut off path
+      try
+      {
+        rrlib::xml2::tXMLDocument doc(finroc::util::sFiles::GetFinrocXMLDocument(xml_name, false));
+        rrlib::xml2::tXMLNode& root = doc.GetRootNode();
+        if (root.HasAttribute("defaultname"))
+        {
+          group_name = root.GetStringAttribute("defaultname");
+        }
+      }
+      catch (std::exception& e)
+      {
+        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error scanning file: ", xml_name);
+      }
     }
-    group_name = group_name.Substring(0, group_name.Length() - 4); // cut off .xml
+    if (group_name.Length() == 0)
+    {
+      group_name = arg;
+      if (arg.Contains("/"))
+      {
+        group_name = arg.Substring(arg.LastIndexOf("/") + 1); // cut off path
+      }
+      group_name = group_name.Substring(0, group_name.Length() - 7); // cut off .finroc
+    }
   }
   return true;
 }
@@ -112,6 +133,21 @@ bool MainHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
     if (ParseXMLArg(main_xml, group_name, xml_name))
     {
       finstructable_thread_container = new tFinstructableThreadContainer(finroc::core::tRuntimeEnvironment::GetInstance(), group_name, xml_name);
+      finstructable_thread_container->SetMainName(group_name);
+    }
+  }
+
+  return true;
+}
+
+bool FinrocFileArgHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
+{
+  for (size_t i = 0; i < finroc_file_extra_args.size(); i++)
+  {
+    rrlib::getopt::tOption extra_option(name_to_option_map.at(finroc_file_extra_args[i].GetCString()));
+    if (extra_option->IsActive())
+    {
+      finroc::core::tRuntimeEnvironment::GetInstance()->AddCommandLineArgument(finroc_file_extra_args[i], boost::any_cast<const char *>(extra_option->GetValue()));
     }
   }
 
@@ -124,7 +160,32 @@ bool MainHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
 void StartUp()
 {
   rrlib::getopt::AddValue("cycle-time", 't', "Cycle time of main thread in ms (default is 40)", &CycleTimeHandler);
-  rrlib::getopt::AddValue("main", 'm', "XML file of main program (FinstructableThreadContainer). Will replace 'Main thread'.", &MainHandler);
+  rrlib::getopt::AddValue("main", 'm', ".finroc file of main program (FinstructableThreadContainer). Will replace 'Main thread'.", &MainHandler);
+
+  // search for further command line arguments in main file that might have been provided
+  for (int i = 0; i < finroc_argc_copy; i++)
+  {
+    finroc::util::tString arg(finroc_argv_copy[i]);
+    finroc::util::tString main;
+    if (arg.StartsWith("--main="))
+    {
+      main = arg.Substring(7);
+    }
+    else if (i < (finroc_argc_copy - 1) && arg.Equals("-m"))
+    {
+      i++;
+      main = finroc_argv_copy[i];
+    }
+    if (main.Length() > 0 && main.EndsWith(".finroc"))
+    {
+      finroc_file_extra_args = finroc::core::tFinstructableGroup::ScanForCommandLineArgs(main);
+      for (size_t i = 0; i < finroc_file_extra_args.size(); i++)
+      {
+        rrlib::getopt::AddValue(finroc_file_extra_args[i].GetCString(), 0, "", &FinrocFileArgHandler);
+      }
+      return;
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -157,7 +218,7 @@ void InitMainGroup(finroc::core::tThreadContainer *main_thread, std::vector<char
   if ((main_thread == NULL || main_thread->ChildCount() == 0) && finstructable_thread_container == NULL)
   {
     FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_USER, "No finstructable groups specified.");
-    FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_USER, "Usage:  finstructed [-m <main-xml-file>] <xml-file1> <xml-file2>");
+    FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_USER, "Usage:  finroc [-m <main-xml-file>] <xml-file1> <xml-file2>");
     FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_USER, "To set group name use <name>:<xml-file>. Otherwise xml-file name is used as group name.");
     exit(-1);
   }

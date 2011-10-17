@@ -37,6 +37,7 @@
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/cc/tCCPortDataManager.h"
 #include "rrlib/serialization/tTypedObject.h"
+#include "core/tRuntimeEnvironment.h"
 
 namespace finroc
 {
@@ -46,7 +47,9 @@ rrlib::serialization::tDataTypeBase tParameterInfo::cTYPE = rrlib::serialization
 
 tParameterInfo::tParameterInfo() :
     config_entry(),
-    entry_set_from_finstruct(false)
+    entry_set_from_finstruct(false),
+    command_line_option(),
+    finstruct_default()
 {}
 
 void tParameterInfo::AnnotatedObjectInitialized()
@@ -64,13 +67,62 @@ void tParameterInfo::AnnotatedObjectInitialized()
 void tParameterInfo::Deserialize(rrlib::serialization::tInputStream& is)
 {
   entry_set_from_finstruct = is.ReadBoolean();
-  SetConfigEntry(is.ReadString(), entry_set_from_finstruct);
+  util::tString config_entry_tmp = is.ReadString();
+  util::tString command_line_option_tmp = is.ReadString();
+  util::tString finstruct_default_tmp = is.ReadString();
+  bool same = config_entry_tmp.Equals(config_entry) && command_line_option_tmp.Equals(command_line_option) && finstruct_default_tmp.Equals(finstruct_default);
+  config_entry = config_entry_tmp;
+  command_line_option = command_line_option_tmp;
+  finstruct_default = finstruct_default_tmp;
+
+  if (!same)
+  {
+    try
+    {
+      LoadValue();
+    }
+    catch (std::exception& e)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
+    }
+  }
 }
 
-void tParameterInfo::Deserialize(rrlib::serialization::tStringInputStream& is)
+void tParameterInfo::Deserialize(const rrlib::xml2::tXMLNode& node)
 {
-  entry_set_from_finstruct = (is.Read() == '+');
-  SetConfigEntry(is.ReadAll(), entry_set_from_finstruct);
+  Deserialize(node, false, true);
+}
+
+void tParameterInfo::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context, bool include_commmand_line)
+{
+  if (node.HasAttribute("config"))
+  {
+    config_entry = node.GetStringAttribute("config");
+    entry_set_from_finstruct = finstruct_context;
+  }
+  else
+  {
+    config_entry = "";
+  }
+  if (include_commmand_line)
+  {
+    if (node.HasAttribute("cmdline"))
+    {
+      command_line_option = node.GetStringAttribute("cmdline");
+    }
+    else
+    {
+      command_line_option = "";
+    }
+  }
+  if (node.HasAttribute("default"))
+  {
+    finstruct_default = node.GetStringAttribute("default");
+  }
+  else
+  {
+    finstruct_default = "";
+  }
 }
 
 void tParameterInfo::LoadValue(bool ignore_ready)
@@ -80,12 +132,55 @@ void tParameterInfo::LoadValue(bool ignore_ready)
     util::tLock lock2(ann->GetRegistryLock());
     if (ann != NULL && (ignore_ready || ann->IsReady()))
     {
-      tConfigFile* cf = tConfigFile::Find(ann);
-      if (cf == NULL)
+      // command line option
+      if (command_line_option.Length() > 0)
       {
-        return;
+        util::tString arg = tRuntimeEnvironment::GetInstance()->GetCommandLineArgument(command_line_option);
+        if (arg.Length() > 0)
+        {
+          rrlib::serialization::tStringInputStream sis(arg);
+          if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
+          {
+            tCCPortBase* port = static_cast<tCCPortBase*>(ann);
+            tCCPortDataManagerTL* c = tThreadLocalCache::Get()->GetUnusedBuffer(port->GetDataType());
+            try
+            {
+              c->GetObject()->Deserialize(sis);
+              port->BrowserPublishRaw(c);
+              return;
+            }
+            catch (const util::tException& e)
+            {
+              FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Failed to load parameter '", ann->GetQualifiedName(), "' from command line argument '", arg, "': ", e);
+              c->RecycleUnused();
+            }
+          }
+          else if (tFinrocTypeInfo::IsStdType(ann->GetDataType()))
+          {
+            tPortBase* port = static_cast<tPortBase*>(ann);
+            tPortDataManager* pd = port->GetUnusedBufferRaw();
+            try
+            {
+              pd->GetObject()->Deserialize(sis);
+              port->BrowserPublish(pd);
+              return;
+            }
+            catch (const util::tException& e)
+            {
+              FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Failed to load parameter '", ann->GetQualifiedName(), "' from command line argument '", arg, "': ", e);
+              pd->RecycleUnused();
+            }
+          }
+          else
+          {
+            throw util::tRuntimeException("Port Type not supported as a parameter", CODE_LOCATION_MACRO);
+          }
+        }
       }
-      if (cf->HasEntry(config_entry))
+
+      // config file entry
+      tConfigFile* cf = tConfigFile::Find(ann);
+      if (cf != NULL && config_entry.Length() > 0 && cf->HasEntry(config_entry))
       {
         rrlib::xml2::tXMLNode& node = cf->GetEntry(config_entry, false);
         if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
@@ -96,9 +191,11 @@ void tParameterInfo::LoadValue(bool ignore_ready)
           {
             c->GetObject()->Deserialize(node);
             port->BrowserPublishRaw(c);
+            return;
           }
           catch (const util::tException& e)
           {
+            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", config_entry, "': ", e);
             c->RecycleUnused();
           }
         }
@@ -110,9 +207,11 @@ void tParameterInfo::LoadValue(bool ignore_ready)
           {
             pd->GetObject()->Deserialize(node);
             port->BrowserPublish(pd);
+            return;
           }
           catch (const util::tException& e)
           {
+            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", config_entry, "': ", e);
             pd->RecycleUnused();
           }
         }
@@ -120,6 +219,49 @@ void tParameterInfo::LoadValue(bool ignore_ready)
         {
           throw util::tRuntimeException("Port Type not supported as a parameter", CODE_LOCATION_MACRO);
         }
+      }
+
+      // finstruct default
+      if (finstruct_default.Length() > 0)
+      {
+        rrlib::serialization::tStringInputStream sis(finstruct_default);
+        if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
+        {
+          tCCPortBase* port = static_cast<tCCPortBase*>(ann);
+          tCCPortDataManagerTL* c = tThreadLocalCache::Get()->GetUnusedBuffer(port->GetDataType());
+          try
+          {
+            c->GetObject()->Deserialize(sis);
+            port->BrowserPublishRaw(c);
+            return;
+          }
+          catch (const util::tException& e)
+          {
+            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Failed to load parameter '", ann->GetQualifiedName(), "' from finstruct default '", finstruct_default, "': ", e);
+            c->RecycleUnused();
+          }
+        }
+        else if (tFinrocTypeInfo::IsStdType(ann->GetDataType()))
+        {
+          tPortBase* port = static_cast<tPortBase*>(ann);
+          tPortDataManager* pd = port->GetUnusedBufferRaw();
+          try
+          {
+            pd->GetObject()->Deserialize(sis);
+            port->BrowserPublish(pd);
+            return;
+          }
+          catch (const util::tException& e)
+          {
+            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Failed to load parameter '", ann->GetQualifiedName(), "' from finstruct default '", finstruct_default, "': ", e);
+            pd->RecycleUnused();
+          }
+        }
+        else
+        {
+          throw util::tRuntimeException("Port Type not supported as a parameter", CODE_LOCATION_MACRO);
+        }
+
       }
     }
   }
@@ -159,6 +301,39 @@ void tParameterInfo::SaveValue()
   else
   {
     throw util::tRuntimeException("Port Type not supported as a parameter", CODE_LOCATION_MACRO);
+  }
+}
+
+void tParameterInfo::Serialize(rrlib::serialization::tOutputStream& os) const
+{
+  os.WriteBoolean(entry_set_from_finstruct);
+  os.WriteString(config_entry);
+  os.WriteString(command_line_option);
+  os.WriteString(finstruct_default);
+}
+
+void tParameterInfo::Serialize(rrlib::xml2::tXMLNode& node) const
+{
+  Serialize(node, false, true);
+}
+
+void tParameterInfo::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context, bool include_command_line) const
+{
+  assert(!(node.HasAttribute("default") || node.HasAttribute("cmdline") || node.HasAttribute("config")));
+  if (config_entry.Length() > 0 && (entry_set_from_finstruct || (!finstruct_context)))
+  {
+    node.SetAttribute("config", config_entry);
+  }
+  if (include_command_line)
+  {
+    if (command_line_option.Length() > 0)
+    {
+      node.SetAttribute("cmdline", command_line_option);
+    }
+  }
+  if (finstruct_default.Length() > 0)
+  {
+    node.SetAttribute("default", finstruct_default);
   }
 }
 

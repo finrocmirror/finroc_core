@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2010 Max Reichardt,
+ * Copyright (C) 2010-2011 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -51,13 +51,15 @@ namespace finroc
 {
 namespace core
 {
+class tFrameworkElement;
+
 /*!
  * \author Max Reichardt
  *
  * Structure Parameter class
  * (Generic base class without template type)
  */
-class tStructureParameterBase : public rrlib::serialization::tSerializable
+class tStructureParameterBase : util::tUncopyable
 {
   friend class tStructureParameterList;
 private:
@@ -68,16 +70,46 @@ private:
   /*! DataType of parameter */
   rrlib::serialization::tDataTypeBase type;
 
-protected:
+  /*! Current parameter value (in CreateModuleAction-prototypes this is null) */
+  rrlib::serialization::tGenericObject* value;
 
-  /*! Current parameter value (in CreateModuleAction-prototypes this is null) - Standard type */
-  tPortDataManager* value;
-
-  /*! Current parameter value (in CreateModuleAction-prototypes this is null) - CC type */
-  tCCPortDataManager* cc_value;
+  /*!
+   * StructureParameterBase whose value buffer to use.
+   * Typically, this is set to this.
+   * However, it is possible to attach this parameter to another (outer) parameter.
+   * In this case they share the same buffer: This parameter uses useValueOf.valPointer(), too.
+   */
+  tStructureParameterBase* use_value_of;
 
   /*! Index in parameter list */
   int list_index;
+
+  /*!
+   * Command line option to set this parameter
+   * (set by finstructable group containing module with this parameter)
+   */
+  util::tString command_line_option;
+
+  /*!
+   * Name of outer parameter if parameter is configured by structure parameter of finstructable group
+   * (usually set by finstructable group containing module with this parameter)
+   */
+  util::tString outer_parameter_attachment;
+
+  /*! Create outer parameter if it does not exist yet? (Otherwise an error message is displayed. Only true, when edited with finstruct.) */
+  bool create_outer_parameter;
+
+  /*!
+   * Place in Configuration tree, this parameter is configured from (nodes are separated with '/')
+   * (usually set by finstructable group containing module with this parameter)
+   */
+  util::tString config_entry;
+
+  /*! Was configEntry set by finstruct? */
+  bool config_entry_set_by_finstruct;
+
+  /*! Is this a proxy for other structure parameters? (as used in finstructable groups) */
+  bool structure_parameter_proxy;
 
 public:
 
@@ -95,6 +127,34 @@ private:
   void CreateBuffer(rrlib::serialization::tDataTypeBase type_);
 
   /*!
+   * Internal helper method to get parameter containing buffer we are using/sharing.
+   *
+   * \return Parameter containing buffer we are using/sharing.
+   */
+  tStructureParameterBase* GetParameterWithBuffer()
+  {
+    if (use_value_of == this)
+    {
+      return this;
+    }
+    return use_value_of->GetParameterWithBuffer();
+  }
+
+  /*!
+   * Internal helper method to get parameter containing buffer we are using/sharing.
+   *
+   * \return Parameter containing buffer we are using/sharing.
+   */
+  const tStructureParameterBase* GetParameterWithBuffer() const
+  {
+    if (use_value_of == this)
+    {
+      return this;
+    }
+    return use_value_of->GetParameterWithBuffer();
+  }
+
+  /*!
    * \return Is this a remote parameter?
    */
   inline bool RemoteValue()
@@ -102,12 +162,19 @@ private:
     return false;
   }
 
-protected:
+  /*!
+   * Set commandLineOption and configEntry.
+   * Check if they changed and possibly load value.
+   */
+  void UpdateAndPossiblyLoad(const util::tString& command_line_option_tmp, const util::tString& configEntryTmp, tFrameworkElement* parameterized);
 
   /*!
-   * Delete port buffer
+   * Check whether change to outerParameterAttachment occured and perform any
+   * changes required.
+   *
+   * \param parameterized Parameterized framework element.
    */
-  void DeleteBuffer();
+  void UpdateOuterParameterAttachment(tFrameworkElement* parameterized);
 
 public:
 
@@ -116,7 +183,15 @@ public:
    * \param type DataType of parameter
    * \param constructor_prototype Is this a CreteModuleActionPrototype (no buffer will be allocated)
    */
-  tStructureParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype);
+  tStructureParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy = false);
+
+  /*!
+   * Attach this structure parameter to another one.
+   * They will share the same value/buffer.
+   *
+   * \param other Other parameter to attach this one to. Use null or this to detach.
+   */
+  void AttachTo(tStructureParameterBase* other);
 
   /*!
    * (should be overridden by subclasses)
@@ -129,12 +204,12 @@ public:
 
   virtual ~tStructureParameterBase()
   {
-    DeleteBuffer();
+    delete value;
   }
 
-  virtual void Deserialize(rrlib::serialization::tInputStream& is);
+  void Deserialize(rrlib::serialization::tInputStream& is, tFrameworkElement* parameterized);
 
-  virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
+  void Deserialize(const rrlib::xml2::tXMLNode& node, bool finstructContext, tFrameworkElement* parameterized);
 
   const char* GetLogDescription()
   {
@@ -157,9 +232,17 @@ public:
     return type;
   }
 
-  virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
+  /*!
+   * \return Is this a proxy for other structure parameters? (only used in finstructable groups)
+   */
+  bool IsStructureParameterProxy() const
+  {
+    return structure_parameter_proxy;
+  }
 
-  virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
+  void Serialize(rrlib::serialization::tOutputStream& os) const;
+
+  void Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const;
 
   /*!
    * \return Value serialized as string (reverse operation to set)
@@ -181,7 +264,7 @@ public:
    */
   inline rrlib::serialization::tGenericObject* ValPointer() const
   {
-    return value != NULL ? value->GetObject() : (cc_value != NULL ? cc_value->GetObject() : NULL);
+    return GetParameterWithBuffer()->value;
   }
 
 };

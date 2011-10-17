@@ -37,6 +37,7 @@
 #include "rrlib/finroc_core_utils/sFiles.h"
 #include "core/tLinkEdge.h"
 #include "core/parameter/tParameterInfo.h"
+#include "core/parameter/tConfigFile.h"
 
 namespace finroc
 {
@@ -50,7 +51,8 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
     current_xml_file(""),
     connect_tmp(),
     link_tmp(""),
-    save_parameter_config_entries(false)
+    save_parameter_config_entries(false),
+    main_name()
 {
 }
 
@@ -60,7 +62,8 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
     current_xml_file(""),
     connect_tmp(),
     link_tmp(""),
-    save_parameter_config_entries(false)
+    save_parameter_config_entries(false),
+    main_name()
 {
   // this(parent,name);
   try
@@ -145,7 +148,7 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     if (constructor_params != NULL)
     {
       spl = action->GetParameterTypes()->Instantiate();
-      spl->Deserialize(*constructor_params);
+      spl->Deserialize(*constructor_params, true);
     }
     created = action->CreateModule(parent, name, spl);
     created->SetFinstructed(action, spl);
@@ -183,6 +186,27 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
   }
 }
 
+bool tFinstructableGroup::IsResponsibleForConfigFileConnections(tFrameworkElement* ap) const
+{
+  tConfigFile* cf = tConfigFile::Find(ap);
+  if (cf == NULL)
+  {
+    return false;
+  }
+  tFrameworkElement* config_element = static_cast<tFrameworkElement*>(cf->GetAnnotated());
+  const tFrameworkElement* responsible = config_element->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP) ? config_element : config_element->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
+  if (responsible == NULL)
+  { // ok, config file is probably attached to runtime. Choose outer-most finstructable group.
+    responsible = this;
+    const tFrameworkElement* tmp;
+    while ((tmp = responsible->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP)) != NULL)
+    {
+      responsible = tmp;
+    }
+  }
+  return responsible == this;
+}
+
 void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
 {
   util::tLock lock1(this);
@@ -191,14 +215,23 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
     try
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, log_domain, "Loading XML: ", xml_file_);
-      rrlib::xml2::tXMLDocument doc(xml_file_);
+      rrlib::xml2::tXMLDocument doc(util::sFiles::GetFinrocXMLDocument(xml_file_, false));
       rrlib::xml2::tXMLNode& root = doc.GetRootNode();
       link_tmp = GetQualifiedName() + "/";
+      if (main_name.Length() == 0 && root.HasAttribute("defaultname"))
+      {
+        main_name = root.GetStringAttribute("defaultname");
+      }
 
       for (rrlib::xml2::tXMLNode::const_iterator node = root.GetChildrenBegin(); node != root.GetChildrenEnd(); ++node)
       {
         util::tString name = node->GetName();
-        if (name.Equals("element"))
+        if (name.Equals("structureparameter"))
+        {
+          tStructureParameterList* spl = tStructureParameterList::GetOrCreate(this);
+          spl->Add(new tStructureParameterBase(node->GetStringAttribute("name"), rrlib::serialization::tDataTypeBase(), false, true));
+        }
+        else if (name.Equals("element"))
         {
           Instantiate(*node, this);
         }
@@ -225,9 +258,9 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
             src_port->ConnectToTarget(dest_port, true);
           }
         }
-        else if (name.Equals("config"))
+        else if (name.Equals("parameter"))
         {
-          util::tString param = node->GetStringAttribute("parameter");
+          util::tString param = node->GetStringAttribute("link");
           tAbstractPort* parameter = GetChildPort(param);
           if (parameter == NULL)
           {
@@ -236,13 +269,29 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
           else
           {
             tParameterInfo* pi = parameter->GetAnnotation<tParameterInfo>();
+            bool outermost_group = GetParent() == tRuntimeEnvironment::GetInstance();
             if (pi == NULL)
             {
               FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Port is not parameter: ", param);
             }
             else
             {
-              pi->SetConfigEntry(node->GetTextContent(), true);
+              if (outermost_group && node->HasAttribute("cmdline") && (!IsResponsibleForConfigFileConnections(parameter)))
+              {
+                pi->SetCommandLineOption(node->GetStringAttribute("cmdline"));
+              }
+              else
+              {
+                pi->Deserialize(*node, true, outermost_group);
+              }
+              try
+              {
+                pi->LoadValue();
+              }
+              catch (std::exception& e)
+              {
+                FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Unable to load parameter value: ", param, ". ", e);
+              }
             }
           }
         }
@@ -253,7 +302,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
       }
       FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, log_domain, "Loading XML successful");
     }
-    catch (const rrlib::xml2::tXML2WrapperException& e)
+    catch (const std::exception& e)
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Loading XML failed: ", xml_file_);
       LogException(e);
@@ -261,7 +310,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
   }
 }
 
-void tFinstructableGroup::LogException(const rrlib::xml2::tXML2WrapperException& e)
+void tFinstructableGroup::LogException(const std::exception& e)
 {
   const char* msg = e.what();
   FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, msg);
@@ -280,11 +329,39 @@ void tFinstructableGroup::SaveXml()
 {
   {
     util::tLock lock2(GetRegistryLock());
-    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving XML: ", current_xml_file);
+    util::tString save_to = util::sFiles::GetFinrocFileToSaveTo(current_xml_file);
+    if (save_to.Length() == 0)
+    {
+      util::tString save_to_alt = util::sFiles::GetFinrocFileToSaveTo(current_xml_file.Replace('/', '_'));
+      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "There does not seem to be any suitable location for: '", current_xml_file, "' . For now, using '", save_to_alt, "'.");
+      save_to = save_to_alt;
+    }
+    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving XML: ", save_to);
     rrlib::xml2::tXMLDocument doc;
     try
     {
       rrlib::xml2::tXMLNode& root = doc.AddRootNode("FinstructableGroup");
+
+      // serialize default main name
+      if (main_name.Length() > 0)
+      {
+        root.SetAttribute("defaultname", main_name);
+      }
+
+      // serialize proxy parameters
+      tStructureParameterList* spl = GetAnnotation<tStructureParameterList>();
+      if (spl != NULL)
+      {
+        for (size_t i = 0; i < spl->Size(); i++)
+        {
+          tStructureParameterBase* sp = spl->Get(i);
+          if (sp->IsStructureParameterProxy())
+          {
+            rrlib::xml2::tXMLNode& proxy = root.AddChildNode("structureparameter");
+            proxy.SetAttribute("name", sp->GetName());
+          }
+        }
+      }
 
       // serialize framework elements
       SerializeChildren(root, this);
@@ -297,7 +374,7 @@ void tFinstructableGroup::SaveXml()
       filter.TraverseElementTree(this, this, &root);
       save_parameter_config_entries = true;
       filter.TraverseElementTree(this, this, &root);
-      doc.WriteToFile(current_xml_file);
+      doc.WriteToFile(save_to);
       FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving successful.");
 
     }
@@ -307,6 +384,42 @@ void tFinstructableGroup::SaveXml()
       FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving failed: ", msg);
       throw util::tException(msg);
     }
+  }
+}
+
+std::vector<util::tString> tFinstructableGroup::ScanForCommandLineArgs(const util::tString& finroc_file)
+{
+  std::vector<util::tString> result;
+  try
+  {
+    rrlib::xml2::tXMLDocument doc(util::sFiles::GetFinrocXMLDocument(finroc_file, false));
+    try
+    {
+      RRLIB_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG, log_domain, "Scanning for command line options in ", finroc_file);
+      rrlib::xml2::tXMLNode& root = doc.GetRootNode();
+      ScanForCommandLineArgsHelper(result, root);
+      RRLIB_LOG_PRINTF_STATIC(rrlib::logging::eLL_DEBUG, log_domain, "Scanning successful. Found %d additional options.", result.size());
+    }
+    catch (std::exception& e)
+    {
+      RRLIB_LOG_PRINT_STATIC(rrlib::logging::eLL_WARNING, log_domain, "FinstructableGroup", "Scanning failed: ", finroc_file, e);
+    }
+  }
+  catch (std::exception& e)
+    {}
+  return result;
+}
+
+void tFinstructableGroup::ScanForCommandLineArgsHelper(std::vector<util::tString>& result, const rrlib::xml2::tXMLNode& parent)
+{
+  for (rrlib::xml2::tXMLNode::const_iterator node = parent.GetChildrenBegin(); node != parent.GetChildrenEnd(); ++node)
+  {
+    util::tString name(node->GetName());
+    if (node->HasAttribute("cmdline") && (name.Equals("structureparameter") || name.Equals("parameter")))
+    {
+      result.push_back(node->GetStringAttribute("cmdline"));
+    }
+    ScanForCommandLineArgsHelper(result, *node);
   }
 }
 
@@ -329,12 +442,12 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
       if (cps != NULL)
       {
         rrlib::xml2::tXMLNode& pn = n.AddChildNode("constructor");
-        cps->Serialize(pn);
+        cps->Serialize(pn, true);
       }
       if (spl != NULL)
       {
         rrlib::xml2::tXMLNode& pn = n.AddChildNode("parameters");
-        spl->Serialize(pn);
+        spl->Serialize(pn, true);
       }
 
       // serialize its children
@@ -350,7 +463,7 @@ void tFinstructableGroup::StructureParametersChanged()
   {
     current_xml_file = xml_file.Get();
     //if (this.childCount() == 0) { // TODO: original intension: changing xml files to mutliple existing ones in finstruct shouldn't load all of them
-    if (util::sFiles::Exists(current_xml_file))
+    if (util::sFiles::FinrocFileExists(current_xml_file))
     {
       LoadXml(current_xml_file);
     }
@@ -369,19 +482,28 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
   // second pass?
   if (save_parameter_config_entries)
   {
+
+    bool outermostGroup = GetParent() == tRuntimeEnvironment::GetInstance();
     tParameterInfo* info = ap->GetAnnotation<tParameterInfo>();
-    if (info != NULL && info->IsConfigEntrySetFromFinstruct())
+
+    if (info != NULL && info->HasNonDefaultFinstructInfo())
     {
-      try
+      if (!IsResponsibleForConfigFileConnections(ap))
       {
-        rrlib::xml2::tXMLNode& config = root->AddChildNode("config");
-        config.SetAttribute("parameter", GetEdgeLink(ap));
-        config.SetContent(info->GetConfigEntry());
+
+        if (outermostGroup && info->GetCommandLineOption().Length() >= 0)
+        {
+          rrlib::xml2::tXMLNode& config = root->AddChildNode("parameter");
+          config.SetAttribute("link", GetEdgeLink(ap));
+          config.SetAttribute("cmdline", info->GetCommandLineOption());
+        }
+
+        return;
       }
-      catch (rrlib::xml2::tXML2WrapperException& e)
-      {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
-      }
+
+      rrlib::xml2::tXMLNode& config = root->AddChildNode("parameter");
+      config.SetAttribute("link", GetEdgeLink(ap));
+      info->Serialize(config, true, outermostGroup);
     }
     return;
   }
