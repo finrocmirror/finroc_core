@@ -32,6 +32,7 @@
 #include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "rrlib/serialization/tOutputStream.h"
 #include "rrlib/serialization/tStringInputStream.h"
+#include "core/finstructable/tFinstructableGroup.h"
 
 namespace finroc
 {
@@ -232,7 +233,7 @@ void tPortCreationList::Serialize(rrlib::serialization::tOutputStream& os) const
     {
       const tEntry& e = list.Get(i);
       os.WriteString(e.name);
-      os.WriteString(e.type.ToString());
+      os.WriteString(e.type.Get().GetName());
       os.WriteBoolean(e.output_port);
     }
   }
@@ -270,6 +271,7 @@ void tPortCreationList::Serialize(rrlib::xml2::tXMLNode& node) const
       rrlib::xml2::tXMLNode& child = node.AddChildNode("port");
       child.SetAttribute("name", p->GetCDescription());
       child.SetAttribute("type", p->GetDataType().GetName());
+      tFinstructableGroup::AddDependency(p->GetDataType());
       if (show_output_port_selection)
       {
         child.SetAttribute("output", p->IsOutputPort());

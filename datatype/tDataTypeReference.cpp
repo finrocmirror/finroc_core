@@ -28,6 +28,11 @@ namespace core
 {
 rrlib::serialization::tDataTypeBase tDataTypeReference::cTYPE = rrlib::serialization::tDataType<tDataTypeReference>();
 
+tDataTypeReference::tDataTypeReference() :
+    referenced(tNumber::cTYPE)
+{
+}
+
 } // namespace finroc
 } // namespace core
 

@@ -45,6 +45,18 @@ namespace core
 {
 tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup::cCREATE_ACTION("Finstructable Group", util::tTypedClass<tFinstructableGroup>());
 
+/*! Thread currently saving finstructable group */
+static util::tThread* saving_thread = NULL;
+
+/*! Temporary variable for saving: .so files that should be loaded prior to instantiating this group */
+static std::set<std::string> dependencies_tmp;
+
+/*! Number of types at startup */
+static int startup_type_count = 0;
+
+/*! Loaded finroc libraries at startup */
+static std::set<std::string> startup_loaded_finroc_libs;
+
 tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name) :
     tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
     xml_file("XML file", this, ""),
@@ -73,6 +85,30 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
   catch (const util::tException& e)
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
+  }
+}
+
+void tFinstructableGroup::AddDependency(const util::tString& dependency)
+{
+  if (util::tThread::CurrentThreadRaw() == saving_thread && startup_loaded_finroc_libs.find(dependency.GetCString()) == startup_loaded_finroc_libs.end())
+  {
+    dependencies_tmp.insert(dependency);
+  }
+}
+
+void tFinstructableGroup::AddDependency(const rrlib::serialization::tDataTypeBase& dt)
+{
+  if (dt.GetUid() >= startup_type_count)
+  {
+    util::tString tmp(dt.GetBinary());
+    if (tmp.Length() > 0)
+    {
+      if (tmp.Contains("/"))
+      {
+        tmp = tmp.Substring(tmp.LastIndexOf("/") + 1);
+      }
+      AddDependency(tmp);
+    }
   }
 }
 
@@ -223,6 +259,35 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
         main_name = root.GetStringAttribute("defaultname");
       }
 
+      // load dependencies
+      if (root.HasAttribute("dependencies"))
+      {
+        std::vector<util::tString> deps = util::tString(root.GetStringAttribute("dependencies")).Split(",");
+        for (size_t i = 0; i < deps.size(); i++)
+        {
+          std::string dep = deps[i].Trim().GetCString();
+          std::vector<std::string> loadable = sDynamicLoading::GetLoadableFinrocLibraries();
+          bool loaded = false;
+          for (size_t i = 0; i < loadable.size(); i++)
+          {
+            if (loadable[i].compare(dep) == 0)
+            {
+              sDynamicLoading::DLOpen(dep.c_str());
+              loaded = true;
+              break;
+            }
+          }
+          if (!loaded)
+          {
+            std::set<std::string> loaded_libs = sDynamicLoading::GetLoadedFinrocLibraries();
+            if (loaded_libs.find(dep) == loaded_libs.end())
+            {
+              FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Dependency ", dep, " is not available.");
+            }
+          }
+        }
+      }
+
       for (rrlib::xml2::tXMLNode::const_iterator node = root.GetChildrenBegin(); node != root.GetChildrenEnd(); ++node)
       {
         util::tString name = node->GetName();
@@ -329,6 +394,8 @@ void tFinstructableGroup::SaveXml()
 {
   {
     util::tLock lock2(GetRegistryLock());
+    saving_thread = util::tThread::CurrentThreadRaw();
+    dependencies_tmp.clear();
     util::tString save_to = util::sFiles::GetFinrocFileToSaveTo(current_xml_file);
     if (save_to.Length() == 0)
     {
@@ -374,6 +441,24 @@ void tFinstructableGroup::SaveXml()
       filter.TraverseElementTree(this, this, &root);
       save_parameter_config_entries = true;
       filter.TraverseElementTree(this, this, &root);
+
+      // add dependencies
+      if (dependencies_tmp.size() > 0)
+      {
+        std::stringstream s;
+        for (std::set<std::string>::iterator it = dependencies_tmp.begin(); it != dependencies_tmp.end(); it++)
+        {
+          if (it != dependencies_tmp.begin())
+          {
+            s << ", ";
+          }
+          s << (*it);
+        }
+
+        root.SetAttribute("dependencies", s.str());
+        dependencies_tmp.clear();
+      }
+
       doc.WriteToFile(save_to);
       FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving successful.");
 
@@ -385,6 +470,7 @@ void tFinstructableGroup::SaveXml()
       throw util::tException(msg);
     }
   }
+  saving_thread = NULL;
 }
 
 std::vector<util::tString> tFinstructableGroup::ScanForCommandLineArgs(const util::tString& finroc_file)
@@ -438,6 +524,10 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
       n.SetAttribute("name", fe->GetCDescription());
       tCreateFrameworkElementAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(spl->GetCreateAction());
       n.SetAttribute("group", cma->GetModuleGroup());
+      if (cma->GetModuleGroup().EndsWith(".so"))
+      {
+        AddDependency(cma->GetModuleGroup().GetStdString());
+      }
       n.SetAttribute("type", cma->GetName());
       if (cps != NULL)
       {
@@ -454,6 +544,12 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
       SerializeChildren(n, fe);
     }
   }
+}
+
+void tFinstructableGroup::StaticInit()
+{
+  startup_type_count = rrlib::serialization::tDataTypeBase::GetTypeCount();
+  startup_loaded_finroc_libs = sDynamicLoading::GetLoadedFinrocLibraries();
 }
 
 void tFinstructableGroup::StructureParametersChanged()

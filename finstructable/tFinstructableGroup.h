@@ -167,6 +167,24 @@ public:
   tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_);
 
   /*!
+   * Helper method to collect .so files that need to be loaded before the contents of
+   * this XML file can be instantiated.
+   * (only has an effect if the current thread is currently saving this group to a file)
+   *
+   * \param dependency .so file that needs to be loaded
+   */
+  static void AddDependency(const util::tString& dependency);
+
+  /*!
+   * Helper method to collect data types that need to be loaded before the contents of
+   * this XML file can be instantiated.
+   * (only has an effect if the current thread is currently saving this group to a file)
+   *
+   * \param dt Data type required to instantiate this .xml
+   */
+  static void AddDependency(const rrlib::serialization::tDataTypeBase& dt);
+
+  /*!
    * Is this finstructable group the one responsible for saving parameter's config entry?
    *
    * \param ap Framework element to check this for (usually parameter port)
@@ -201,6 +219,11 @@ public:
   {
     this->main_name = main_name;
   }
+
+  /*!
+   * Perform some static initialization w.r.t. to state at program startup
+   */
+  static void StaticInit();
 
   virtual void StructureParametersChanged();
 

@@ -71,7 +71,7 @@ public:
   static std::string GetBinary(void* addr);
 
   /*!
-   * \return Returns vector with all libfinroc*.so files loaded by current process.
+   * \return Returns vector with all libfinroc*.so and librrlib*.so files loaded by current process.
    */
   static std::set<std::string> GetLoadedFinrocLibraries();
 

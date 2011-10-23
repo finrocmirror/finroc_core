@@ -38,6 +38,7 @@
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tFrameworkElementTreeFilter.h"
 #include "core/thread/tExecutionControl.h"
+#include "core/finstructable/tFinstructableGroup.h"
 
 namespace finroc
 {
@@ -228,6 +229,7 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   tPlugins::StaticInit();
   //deleteLast(RuntimeSettings.getInstance());
 
+  tFinstructableGroup::StaticInit();
   instance->SetFlag(tCoreFlags::cREADY);
 
   return instance.get();

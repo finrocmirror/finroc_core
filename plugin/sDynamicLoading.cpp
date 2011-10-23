@@ -88,7 +88,7 @@ std::set<std::string> sDynamicLoading::GetAvailableFinrocLibraries()
         if (!boost::filesystem::is_directory(it->status()))
         {
           std::string file(it->path().filename().c_str());
-          if (file.substr(0, 10).compare("libfinroc_") == 0 && file.substr(file.length() - 3, 3).compare(".so") == 0)
+          if ((file.substr(0, 10).compare("libfinroc_") == 0 || file.substr(0, 9).compare("librrlib_") == 0) && file.substr(file.length() - 3, 3).compare(".so") == 0)
           {
             result.insert(file);
           }
@@ -124,9 +124,18 @@ std::set<std::string> sDynamicLoading::GetLoadedFinrocLibraries()
   while (!maps.eof())
   {
     std::getline(maps, line);
-    if (line.find("/libfinroc") != std::string::npos && line.substr(line.length() - 3, 3).compare(".so") == 0)
+    if (line.find("/libfinroc_") != std::string::npos && line.substr(line.length() - 3, 3).compare(".so") == 0)
     {
-      std::string loaded = line.substr(line.find("/libfinroc") + 1);
+      std::string loaded = line.substr(line.find("/libfinroc_") + 1);
+      if (result.find(loaded) == result.end())
+      {
+        FINROC_LOG_PRINTF(rrlib::logging::eLL_DEBUG, "Found loaded finroc library: %s", loaded.c_str());
+        result.insert(loaded);
+      }
+    }
+    else if (line.find("/librrlib_") != std::string::npos && line.substr(line.length() - 3, 3).compare(".so") == 0)
+    {
+      std::string loaded = line.substr(line.find("/librrlib_") + 1);
       if (result.find(loaded) == result.end())
       {
         FINROC_LOG_PRINTF(rrlib::logging::eLL_DEBUG, "Found loaded finroc library: %s", loaded.c_str());

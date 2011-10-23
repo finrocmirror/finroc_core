@@ -38,26 +38,44 @@ namespace core
  *
  * Reference to data type (type doesn't need to exist in local runtime)
  */
-class tDataTypeReference : public tCoreString
+class tDataTypeReference : public rrlib::serialization::tSerializable
 {
+  /*! referenced data type */
+  rrlib::serialization::tDataTypeBase referenced;
+
 public:
 
-  /*! Data Type */
+  /*! Data Type of tDataTypeReference */
   static rrlib::serialization::tDataTypeBase cTYPE;
 
-  tDataTypeReference() {}
+  tDataTypeReference();
 
-  inline void DataType()
+  virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
-    Set(tNumber::cTYPE);  // default is CoreNumber
+    referenced = rrlib::serialization::tDataTypeBase::FindType(is.ReadString());
+  }
+
+  virtual void Deserialize(rrlib::serialization::tStringInputStream& s)
+  {
+    referenced = rrlib::serialization::tDataTypeBase::FindType(s.ReadAll());
   }
 
   /*!
    * \return Referenced data type - null if it doesn't exist in this runtime
    */
-  inline rrlib::serialization::tDataTypeBase Get()
+  inline rrlib::serialization::tDataTypeBase Get() const
   {
-    return rrlib::serialization::tDataTypeBase::FindType(GetBuffer().ToString());
+    return referenced;
+  }
+
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const
+  {
+    os.WriteString(referenced.GetName());
+  }
+
+  virtual void Serialize(rrlib::serialization::tStringOutputStream& os) const
+  {
+    os.Append(referenced.GetName());
   }
 
   /*!
@@ -65,7 +83,7 @@ public:
    */
   inline void Set(rrlib::serialization::tDataTypeBase dt)
   {
-    ::finroc::core::tCoreString::Set(dt.GetName());
+    referenced = dt;
   }
 
 };

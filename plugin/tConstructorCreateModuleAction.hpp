@@ -50,7 +50,7 @@ tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11,
   util::tSimpleList<util::tString> names;
   for (size_t i = 0; i < names_temp.size(); i++)
   {
-    names.Add(names_temp[i]);
+    names.Add(names_temp[i].Trim());
   }
   while (names.Size() < 12)
   {
