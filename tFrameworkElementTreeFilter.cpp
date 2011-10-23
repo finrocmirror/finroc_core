@@ -62,13 +62,14 @@ tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, u
   }
 }
 
-bool tFrameworkElementTreeFilter::Accept(tFrameworkElement* element, util::tStringBuilder& tmp) const
+bool tFrameworkElementTreeFilter::Accept(tFrameworkElement* element, util::tStringBuilder& tmp, int ignore_flags) const
 {
   if (element == NULL)
   {
     return false;
   }
-  if ((element->GetAllFlags() & relevant_flags) == flag_result)
+  int not_ignore = ~ignore_flags;
+  if ((element->GetAllFlags() & relevant_flags & not_ignore) == (flag_result & not_ignore))
   {
     if (paths->Size() == 0)
     {

@@ -85,9 +85,10 @@ public:
   /*!
    * \param element Framework element
    * \param tmp Temporary, currently unused string buffer
+   * \param ignore_flags These flags are ignored when checking flags
    * \return Is framework element accepted by filter?
    */
-  bool Accept(tFrameworkElement* element, util::tStringBuilder& tmp) const;
+  bool Accept(tFrameworkElement* element, util::tStringBuilder& tmp, int ignore_flags = 0) const;
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
