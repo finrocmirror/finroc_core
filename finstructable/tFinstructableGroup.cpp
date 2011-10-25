@@ -625,7 +625,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
     {
       common_parent = common_parent->GetParent();
     }
-    ::finroc::core::tFrameworkElement* common_finstructable_parent = common_parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
+    ::finroc::core::tFrameworkElement* common_finstructable_parent = GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP) ? this : common_parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
     if (common_finstructable_parent != this)
     {
       continue;
