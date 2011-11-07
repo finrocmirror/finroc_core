@@ -57,8 +57,8 @@ static int startup_type_count = 0;
 /*! Loaded finroc libraries at startup */
 static std::set<std::string> startup_loaded_finroc_libs;
 
-tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name) :
-    tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
+tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, uint flags) :
+    tFrameworkElement(parent, name, flags | tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
     xml_file("XML file", this, ""),
     current_xml_file(""),
     connect_tmp(),
@@ -68,8 +68,8 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
 {
 }
 
-tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_) :
-    tFrameworkElement(parent, name, tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
+tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_, uint flags) :
+    tFrameworkElement(parent, name, flags | tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
     xml_file("XML file", this, ""),
     current_xml_file(""),
     connect_tmp(),

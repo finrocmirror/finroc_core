@@ -47,11 +47,10 @@ private:
 public:
 
   /*!
-   * \param description Name
-   * \param parent parent
+   * (see FrameworkElement for parameter description)
    */
-  tThreadContainer(tFrameworkElement* parent, const util::tString& description) :
-      tThreadContainerElement<tGroup>(parent, description)
+  tThreadContainer(tFrameworkElement* parent, const util::tString& description, uint flags = 0) :
+      tThreadContainerElement<tGroup>(parent, description, flags)
   {}
 };
 
@@ -73,23 +72,21 @@ private:
 public:
 
   /*!
-   * \param description Name
-   * \param parent parent
+   * (see FrameworkElement for parameter description)
    */
-  tFinstructableThreadContainer(tFrameworkElement* parent, const util::tString& description) :
-      tThreadContainerElement<tFinstructableGroup>(parent, description)
+  tFinstructableThreadContainer(tFrameworkElement* parent, const util::tString& description, uint flags = 0) :
+      tThreadContainerElement<tFinstructableGroup>(parent, description, flags)
   {}
 
   /*!
    * (if the provided file does not exist, it is created, when contents are saved - and a warning is displayed)
    * (if the provided file exists, its contents are loaded when group is initialized)
    *
-   * \param description Name
-   * \param parent parent
    * \param xml_file name of XML file (relative to finroc repository) that determines contents of this group
+   * (see FrameworkElement for other parameter description)
    */
-  tFinstructableThreadContainer(tFrameworkElement* parent, const util::tString& description, const util::tString& xml_file) :
-      tThreadContainerElement<tFinstructableGroup>(parent, description)
+  tFinstructableThreadContainer(tFrameworkElement* parent, const util::tString& description, const util::tString& xml_file, uint flags = 0) :
+      tThreadContainerElement<tFinstructableGroup>(parent, description, flags)
   {
     try
     {

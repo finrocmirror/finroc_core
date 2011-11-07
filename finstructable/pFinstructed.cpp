@@ -132,7 +132,7 @@ bool MainHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
     finroc::util::tString xml_name;
     if (ParseXMLArg(main_xml, group_name, xml_name))
     {
-      finstructable_thread_container = new tFinstructableThreadContainer(finroc::core::tRuntimeEnvironment::GetInstance(), group_name, xml_name);
+      finstructable_thread_container = new tFinstructableThreadContainer(finroc::core::tRuntimeEnvironment::GetInstance(), group_name, xml_name, links_are_unique ? tCoreFlags::cGLOBALLY_UNIQUE_LINK : 0);
       finstructable_thread_container->SetMainName(group_name);
     }
   }

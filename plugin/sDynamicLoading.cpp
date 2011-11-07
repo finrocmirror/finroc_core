@@ -129,7 +129,7 @@ std::set<std::string> sDynamicLoading::GetLoadedFinrocLibraries()
       std::string loaded = line.substr(line.find("/libfinroc_") + 1);
       if (result.find(loaded) == result.end())
       {
-        FINROC_LOG_PRINTF(rrlib::logging::eLL_DEBUG, "Found loaded finroc library: %s", loaded.c_str());
+        FINROC_LOG_PRINTF(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Found loaded finroc library: %s", loaded.c_str());
         result.insert(loaded);
       }
     }
@@ -138,7 +138,7 @@ std::set<std::string> sDynamicLoading::GetLoadedFinrocLibraries()
       std::string loaded = line.substr(line.find("/librrlib_") + 1);
       if (result.find(loaded) == result.end())
       {
-        FINROC_LOG_PRINTF(rrlib::logging::eLL_DEBUG, "Found loaded finroc library: %s", loaded.c_str());
+        FINROC_LOG_PRINTF(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Found loaded finroc library: %s", loaded.c_str());
         result.insert(loaded);
       }
     }

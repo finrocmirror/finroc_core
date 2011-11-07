@@ -156,7 +156,7 @@ protected:
 
 public:
 
-  tFinstructableGroup(tFrameworkElement* parent, const util::tString& name);
+  tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, uint flags = 0);
 
   /*!
    * (if the provided file does not exist, it is created, when contents are saved - and a warning is displayed)
@@ -164,7 +164,7 @@ public:
    *
    * \param xml_file name of XML file (relative to finroc repository) that determines contents of this group
    */
-  tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_);
+  tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_, uint flags = 0);
 
   /*!
    * Helper method to collect .so files that need to be loaded before the contents of

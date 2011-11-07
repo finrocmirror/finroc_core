@@ -32,8 +32,8 @@ namespace core
 {
 
 template <typename BASE>
-tThreadContainerElement<BASE>::tThreadContainerElement(tFrameworkElement* parent, const util::tString& description) :
-    BASE(parent, description),
+tThreadContainerElement<BASE>::tThreadContainerElement(tFrameworkElement* parent, const util::tString& description, uint flags) :
+    BASE(parent, description, flags),
     rt_thread("Realtime Thread", this, false),
     cycle_time("Cycle Time", this, 40, tBounds<int>(1, 60000, true)),
     warn_on_cycle_time_exceed("Warn on cycle time exceed", this, true),

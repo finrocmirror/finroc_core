@@ -60,7 +60,7 @@ public:
    * \param default_port_flags Default flags for any ports to be created in this Group
    * (see FrameworkElement for other parameter description)
    */
-  tPortGroup(tFrameworkElement* parent, const util::tString& name, int flags, int default_port_flags);
+  tPortGroup(tFrameworkElement* parent, const util::tString& name, uint flags, int default_port_flags);
 
   /*!
    * Implementation of several Connect... functions (to avoid major code duplication)

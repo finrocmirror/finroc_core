@@ -83,6 +83,7 @@ char ** finroc_argv_copy; // copy of argv for 'finroc' part. TODO: remove when r
 bool run_main_loop = false;
 bool pause_at_startup = false;
 int network_port = 4444;
+bool links_are_unique = true;
 
 //----------------------------------------------------------------------
 // HandleSignalSIGINT
@@ -184,6 +185,16 @@ bool PortHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
 }
 
 //----------------------------------------------------------------------
+// UniqueHandler
+//----------------------------------------------------------------------
+bool UniqueHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
+{
+  rrlib::getopt::tOption opt(name_to_option_map.at("port-links-are-not-unique"));
+  links_are_unique = !opt->IsActive();
+  return true;
+}
+
+//----------------------------------------------------------------------
 // main
 //----------------------------------------------------------------------
 int main(int argc, char **argv)
@@ -208,6 +219,7 @@ int main(int argc, char **argv)
   rrlib::getopt::AddValue("config-file", 'c', "Parameter config file", &ParameterConfigHandler);
   rrlib::getopt::AddValue("port", 'p', "Network port to use", &PortHandler);
   rrlib::getopt::AddFlag("pause", 0, "Pause program at startup", &PauseHandler);
+  rrlib::getopt::AddFlag("port-links-are-not-unique", 0, "Port links in this part are not unique in P2P network (=> host name is prepended in GUI, for instance).", &UniqueHandler);
 
   StartUp();
 
@@ -242,7 +254,7 @@ int main(int argc, char **argv)
 
   if (executables.size() == 0)
   {
-    finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread");
+    finroc::core::tThreadContainer *main_thread = new finroc::core::tThreadContainer(runtime_environment, "Main Thread", links_are_unique ? finroc::core::tCoreFlags::cGLOBALLY_UNIQUE_LINK : 0);
     InitMainGroup(main_thread, remaining_args);
     executables.push_back(main_thread);
   }
