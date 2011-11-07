@@ -81,8 +81,8 @@ class tModule : public tModuleBase
     virtual void ExecuteTask();
   };
 
-  finroc::core::tEdgeAggregator *input;
-  finroc::core::tEdgeAggregator *output;
+  finroc::core::tPortGroup *input;
+  finroc::core::tPortGroup *output;
   UpdateTask update_task;
 
 //----------------------------------------------------------------------
@@ -168,6 +168,22 @@ public:
   };
 
   tModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
+
+  /*!
+   * \return Parent port group of all inputs
+   */
+  inline finroc::core::tPortGroup& GetInputs()
+  {
+    return *input;
+  }
+
+  /*!
+   * \return Parent port group of all outputs
+   */
+  inline finroc::core::tPortGroup& GetOutputs()
+  {
+    return *output;
+  }
 };
 
 //----------------------------------------------------------------------

@@ -116,7 +116,7 @@ public:
     }
   }
 
-  tStructureParameterImplNumeric(const util::tString& name, T default_value, tBounds<T> bounds = tBounds<T>(), tUnit* unit = &tUnit::cNO_UNIT, bool constructor_prototype = false) :
+  tStructureParameterImplNumeric(const util::tString& name, T default_value, tBounds<T> bounds, tUnit* unit = &tUnit::cNO_UNIT, bool constructor_prototype = false) :
       tStructureParameterImplStandard<tNumber>(name, constructor_prototype),
       unit(unit),
       bounds(bounds),

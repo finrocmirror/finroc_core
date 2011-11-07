@@ -79,7 +79,7 @@ public:
    * \param parent Parent framework element
    * \param default_value default value in string representation
    */
-  tStructureParameter(const util::tString& name, tFrameworkElement* parent, const util::tString& default_value) :
+  tStructureParameter(const util::tString& name, tFrameworkElement* parent, const std::string& default_value) :
       impl(new tImpl(name, default_value))
   {
     tStructureParameterList::GetOrCreate(parent)->Add(impl);
@@ -93,7 +93,7 @@ public:
    * (disabled for util::tString to avoid ambiguities with first constructor)
    */
   template < bool NOSTRING = !std::is_same<T, util::tString>::value >
-  tStructureParameter(const typename std::enable_if<NOSTRING, util::tString&>::type name, tFrameworkElement* parent, const T& default_value) :
+  tStructureParameter(const typename std::enable_if<NOSTRING, util::tString>::type& name, tFrameworkElement* parent, const T& default_value) :
       impl(new tImpl(name, default_value))
   {
     tStructureParameterList::GetOrCreate(parent)->Add(impl);
@@ -124,7 +124,7 @@ public:
    * \oaram unit Unit of parameter
    */
   template < bool NUMERIC = tPortTypeMap<T>::numeric >
-  tStructureParameter(const typename std::enable_if<NUMERIC, util::tString>::type& name, tFrameworkElement* parent, const T& default_value, tBounds<T> bounds = tBounds<T>(), tUnit* unit = &tUnit::cNO_UNIT) :
+  tStructureParameter(const typename std::enable_if<NUMERIC, util::tString>::type& name, tFrameworkElement* parent, const T& default_value, tBounds<T> bounds, tUnit* unit = &tUnit::cNO_UNIT) :
       impl(new tImpl(name, default_value, bounds, unit))
   {
     tStructureParameterList::GetOrCreate(parent)->Add(impl);

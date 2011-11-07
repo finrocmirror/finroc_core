@@ -29,7 +29,7 @@
 #include "core/parameter/tStructureParameter.h"
 #include "core/datatype/tPortCreationList.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
-#include "core/port/tEdgeAggregator.h"
+#include "core/port/tPortGroup.h"
 
 namespace finroc
 {
@@ -40,7 +40,7 @@ namespace core
  *
  * Group Interface Port Vector
  */
-class tGroupInterface : public tEdgeAggregator
+class tGroupInterface : public tPortGroup
 {
 public:
 

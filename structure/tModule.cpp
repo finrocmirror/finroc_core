@@ -67,8 +67,8 @@ using namespace finroc::core::structure;
 tModule::tModule(tFrameworkElement *parent, const util::tString &name)
     : tModuleBase(parent, name),
 
-    input(new tEdgeAggregator(this, "Input", tEdgeAggregator::cIS_INTERFACE)),
-    output(new tEdgeAggregator(this, "Output", tEdgeAggregator::cIS_INTERFACE)),
+    input(new tPortGroup(this, "Input", tEdgeAggregator::cIS_INTERFACE, tPortFlags::cINPUT_PORT)),
+    output(new tPortGroup(this, "Output", tEdgeAggregator::cIS_INTERFACE, tPortFlags::cOUTPUT_PORT)),
     update_task(this)
 {
   this->AddAnnotation(new tPeriodicFrameworkElementTask(this->input, this->output, &this->update_task));

@@ -34,6 +34,7 @@
 #include "core/port/cc/tCCPortDataBufferPool.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPool.h"
+#include "rrlib/finroc_core_utils/thread/tFastStaticThreadLocal.h"
 #include "rrlib/serialization/tInputStream.h"
 #include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"

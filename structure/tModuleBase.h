@@ -48,7 +48,7 @@
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/structure/tConveniencePort.h"
 #include "core/structure/tStructureElementRegister.h"
-#include "core/port/tEdgeAggregator.h"
+#include "core/port/tPortGroup.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -76,16 +76,30 @@ namespace structure
  * Base class for the different module types.
  * It contains common functionality.
  */
-class tModuleBase : public finroc::core::tFrameworkElement, finroc::core::tPortListener<>
+class tModuleBase : public finroc::core::tFrameworkElement
 {
   template <typename T>
   friend class tConveniencePortBase;
+
+  /*! Introduced this helper class to remove ambiguities when derived classes add listeners to ports */
+  class tParameterChangeDetector : public finroc::core::tPortListener<>
+  {
+    friend class tModuleBase;
+
+    /*! Changed flag that is set whenever a parameter change is detected */
+    volatile bool parameters_changed;
+
+    /*! Implementation of tPortListenerRaw */
+    virtual void PortChanged(tAbstractPort* origin, const void* const& value);
+
+    tParameterChangeDetector() : parameters_changed(true) {}
+  };
 
   /*! Element aggregating parameters */
   finroc::core::tFrameworkElement* parameters;
 
   /*! Changed flag that is set whenever a parameter change is detected */
-  volatile bool parameters_changed;
+  tParameterChangeDetector parameters_changed;
 
   /*! Number of ports already created that have auto-generated names */
   int auto_name_port_count;
@@ -140,9 +154,6 @@ public:
    */
   void CheckParameters();
 
-  /*! Implementation of tPortListenerRaw */
-  virtual void PortChanged(tAbstractPort* origin, const void* const& value);
-
   template < typename T = double >
   class tParameter : public tConveniencePort < T, tModuleBase, finroc::core::tParameter<T> >
   {
@@ -152,7 +163,7 @@ public:
         : tConveniencePort < T, tModuleBase, finroc::core::tParameter<T>>(0u, GetContainer, args...)
     {
       assert(this->GetWrapped()->GetParent()->DescriptionEquals("Parameters"));
-      this->AddPortListener(static_cast<tModuleBase*>(this->GetWrapped()->GetParent()->GetParent()));
+      this->AddPortListener(&static_cast<tModuleBase*>(this->GetWrapped()->GetParent()->GetParent())->parameters_changed);
     }
 
   private:

@@ -65,7 +65,7 @@ using namespace finroc::core::structure;
 tModuleBase::tModuleBase(tFrameworkElement *parent, const util::tString &name)
     : tFrameworkElement(parent, name),
     parameters(new tFrameworkElement(this, "Parameters")),
-    parameters_changed(true),
+    parameters_changed(),
     auto_name_port_count(0),
     count_for_type(NULL)
 {
@@ -79,14 +79,14 @@ tModuleBase::~tModuleBase()
 
 void tModuleBase::CheckParameters()
 {
-  if (parameters_changed)
+  if (parameters_changed.parameters_changed)
   {
-    parameters_changed = false;
+    parameters_changed.parameters_changed = false;
     ParametersChanged();
   }
 }
 
-void tModuleBase::PortChanged(tAbstractPort* origin, const void* const& value)
+void tModuleBase::tParameterChangeDetector::PortChanged(tAbstractPort* origin, const void* const& value)
 {
   parameters_changed = true;
 }

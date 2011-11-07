@@ -89,12 +89,12 @@ class tSenseControlModule : public tModuleBase
     virtual void ExecuteTask();
   };
 
-  finroc::core::tEdgeAggregator *controller_input;
-  finroc::core::tEdgeAggregator *controller_output;
+  finroc::core::tPortGroup *controller_input;
+  finroc::core::tPortGroup *controller_output;
   ControlTask control_task;
 
-  finroc::core::tEdgeAggregator *sensor_input;
-  finroc::core::tEdgeAggregator *sensor_output;
+  finroc::core::tPortGroup *sensor_input;
+  finroc::core::tPortGroup *sensor_output;
   SenseTask sense_task;
 
 //----------------------------------------------------------------------
@@ -226,6 +226,37 @@ public:
 
   tSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
 
+  /*!
+   * \return Parent port group of all controller inputs
+   */
+  inline finroc::core::tPortGroup& GetControllerInputs()
+  {
+    return *controller_input;
+  }
+
+  /*!
+   * \return Parent port group of all controller outputs
+   */
+  inline finroc::core::tPortGroup& GetControllerOutputs()
+  {
+    return *controller_output;
+  }
+
+  /*!
+   * \return Parent port group of all sensor inputs
+   */
+  inline finroc::core::tPortGroup& GetSensorInputs()
+  {
+    return *sensor_input;
+  }
+
+  /*!
+   * \return Parent port group of all sensor outputs
+   */
+  inline finroc::core::tPortGroup& GetSensorOutputs()
+  {
+    return *sensor_output;
+  }
 };
 
 //----------------------------------------------------------------------

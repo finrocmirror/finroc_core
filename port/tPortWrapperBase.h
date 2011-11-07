@@ -256,6 +256,14 @@ public:
   }
 
   /*!
+   * \return Primary parent framework element
+   */
+  inline tFrameworkElement* GetParent()
+  {
+    return wrapped->GetParent();
+  }
+
+  /*!
    * \return Wrapped port. For rare case that someone really needs to access ports.
    */
   inline T* GetWrapped()
