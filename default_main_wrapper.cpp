@@ -23,6 +23,7 @@
  *
  * \author  Tobias Foehst
  * \author  Bernd-Helge Schaefer
+ * \author  Max Reichardt
  *
  * \date    2010-12-09
  *
@@ -84,6 +85,7 @@ bool run_main_loop = false;
 bool pause_at_startup = false;
 int network_port = 4444;
 bool links_are_unique = true;
+finroc::util::tString connect_to;
 
 //----------------------------------------------------------------------
 // HandleSignalSIGINT
@@ -195,6 +197,21 @@ bool UniqueHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
 }
 
 //----------------------------------------------------------------------
+// ConnectHandler
+//----------------------------------------------------------------------
+bool ConnectHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
+{
+  rrlib::getopt::tOption connect_option(name_to_option_map.at("connect"));
+  if (connect_option->IsActive())
+  {
+    connect_to = boost::any_cast<const char *>(connect_option->GetValue());
+    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Connecting to ", connect_to);
+  }
+
+  return true;
+}
+
+//----------------------------------------------------------------------
 // main
 //----------------------------------------------------------------------
 int main(int argc, char **argv)
@@ -218,6 +235,7 @@ int main(int argc, char **argv)
   rrlib::getopt::AddValue("log-config", 'l', "Log config file", &LogConfigHandler);
   rrlib::getopt::AddValue("config-file", 'c', "Parameter config file", &ParameterConfigHandler);
   rrlib::getopt::AddValue("port", 'p', "Network port to use", &PortHandler);
+  rrlib::getopt::AddValue("connect", 0, "TCP address of finroc application to connect to (default: localhost:<port>)", &ConnectHandler);
   rrlib::getopt::AddFlag("pause", 0, "Pause program at startup", &PauseHandler);
   rrlib::getopt::AddFlag("port-links-are-not-unique", 0, "Port links in this part are not unique in P2P network (=> host name is prepended in GUI, for instance).", &UniqueHandler);
 
@@ -241,7 +259,11 @@ int main(int argc, char **argv)
   }
 
   // Create and connect TCP peer
-  finroc::tcp::tTCPPeer* tcp_peer = new finroc::tcp::tTCPPeer(finroc::util::tStringBuilder("localhost:") + network_port, "", finroc::tcp::tTCPPeer::eFULL, network_port, finroc::tcp::tTCPPeer::cDEFAULT_FILTER, true);
+  if (connect_to.Length() == 0)
+  {
+    connect_to = finroc::util::tString("localhost:") + network_port;
+  }
+  finroc::tcp::tTCPPeer* tcp_peer = new finroc::tcp::tTCPPeer(connect_to, "", finroc::tcp::tTCPPeer::eFULL, network_port, finroc::tcp::tTCPPeer::cDEFAULT_FILTER, true);
   tcp_peer->Init();
   try
   {
