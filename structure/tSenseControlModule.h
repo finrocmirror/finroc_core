@@ -165,7 +165,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tControllerInput(const ARGS&... args)
+    explicit tControllerInput(const ARGS&... args)
         : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cINPUT_PORT, GetContainer, args...)
     {}
 
@@ -181,7 +181,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tControllerOutput(const ARGS&... args)
+    explicit tControllerOutput(const ARGS&... args)
         : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cOUTPUT_PORT, GetContainer, args...)
     {}
 
@@ -197,7 +197,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tSensorInput(const ARGS&... args)
+    explicit tSensorInput(const ARGS&... args)
         : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cINPUT_PORT, GetContainer, args...)
     {}
 
@@ -213,7 +213,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tSensorOutput(const ARGS&... args)
+    explicit tSensorOutput(const ARGS&... args)
         : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cOUTPUT_PORT, GetContainer, args...)
     {}
 

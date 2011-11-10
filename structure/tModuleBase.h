@@ -159,7 +159,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tParameter(const ARGS&... args)
+    explicit tParameter(const ARGS&... args)
         : tConveniencePort < T, tModuleBase, finroc::core::tParameter<T>>(0u, GetContainer, args...)
     {
       assert(this->GetWrapped()->GetParent()->DescriptionEquals("Parameters"));
@@ -180,7 +180,7 @@ public:
   public:
 
     // constructors taking description as tString
-    tStructureParameter(const util::tString& description)
+    explicit tStructureParameter(const util::tString& description)
         : finroc::core::tStructureParameter<T>(description, this->FindParent())
     {
       this->UpdateCurrentPortNameIndex();
@@ -214,7 +214,7 @@ public:
     }
 
     // constructors taking description as const char*
-    tStructureParameter(const char* description)
+    explicit tStructureParameter(const char* description)
         : finroc::core::tStructureParameter<T>(description, this->FindParent())
     {
       this->UpdateCurrentPortNameIndex();
@@ -254,7 +254,7 @@ public:
     }
 
     template < bool NOSTRING = !std::is_same<T, util::tString>::value >
-    tStructureParameter(typename std::enable_if<NOSTRING, const T>::type& default_value)
+    explicit tStructureParameter(typename std::enable_if<NOSTRING, const T>::type& default_value)
         : finroc::core::tStructureParameter<T>(this->GetPortName(), this->FindParent(), default_value)
     {
     }

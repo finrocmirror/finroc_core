@@ -130,7 +130,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tControllerInput(const ARGS&... args)
+    explicit tControllerInput(const ARGS&... args)
         : tConveniencePort < T, tGroup, tPort<T> > (tPortFlags::cINPUT_PROXY, GetContainer, args...)
     {}
 
@@ -146,7 +146,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tControllerOutput(const ARGS&... args)
+    explicit tControllerOutput(const ARGS&... args)
         : tConveniencePort < T, tGroup, tPort<T> > (tPortFlags::cOUTPUT_PROXY, GetContainer, args...)
     {}
 
@@ -162,7 +162,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tSensorInput(const ARGS&... args)
+    explicit tSensorInput(const ARGS&... args)
         : tConveniencePort < T, tGroup, tPort<T> >(tPortFlags::cINPUT_PROXY, GetContainer, args...)
     {}
 
@@ -178,7 +178,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tSensorOutput(const ARGS&... args)
+    explicit tSensorOutput(const ARGS&... args)
         : tConveniencePort < T, tGroup, tPort<T>>(tPortFlags::cOUTPUT_PROXY, GetContainer, args...)
     {}
 
@@ -198,7 +198,7 @@ public:
   public:
 
     // constructors taking description as tString
-    tStructureParameter(const util::tString& description)
+    explicit tStructureParameter(const util::tString& description)
         : finroc::core::tStructureParameter<T>(description, this->FindParent())
     {
       this->UpdateCurrentPortNameIndex();
@@ -232,7 +232,7 @@ public:
     }
 
     // constructors taking description as const char*
-    tStructureParameter(const char* description)
+    explicit tStructureParameter(const char* description)
         : finroc::core::tStructureParameter<T>(description, this->FindParent())
     {
       this->UpdateCurrentPortNameIndex();
@@ -272,7 +272,7 @@ public:
     }
 
     template < bool NOSTRING = !std::is_same<T, util::tString>::value >
-    tStructureParameter(typename std::enable_if<NOSTRING, const T>::type& default_value)
+    explicit tStructureParameter(typename std::enable_if<NOSTRING, const T>::type& default_value)
         : finroc::core::tStructureParameter<T>(this->GetPortName(), this->FindParent(), default_value)
     {
     }
@@ -324,7 +324,7 @@ public:
     }
 
     // constructors taking parent and description as const char*
-    tStructureParameter(tGroup* parent, const char* description)
+    explicit tStructureParameter(tGroup* parent, const char* description)
         : finroc::core::tStructureParameter<T>(this->GetPortName(), parent)
     {
       this->UpdateCurrentPortNameIndex();

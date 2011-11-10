@@ -140,7 +140,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tInput(const ARGS&... args)
+    explicit tInput(const ARGS&... args)
         : tConveniencePort < T, tModule, tPort<T>>(tPortFlags::cINPUT_PORT, GetContainer, args...)
     {}
 
@@ -156,7 +156,7 @@ public:
   {
   public:
     template<typename ... ARGS>
-    tOutput(const ARGS&... args)
+    explicit tOutput(const ARGS&... args)
         : tConveniencePort < T, tModule, tPort<T>>(tPortFlags::cOUTPUT_PORT, GetContainer, args...)
     {}
 
