@@ -223,6 +223,14 @@ protected:
 
   virtual ~tAbstractPort();
 
+  /*!
+   * Print notification that port is not ready in debug mode.
+   * (this is not RT-capable in debug mode)
+   *
+   * \param extra_message Message after standard message (what is done now?)
+   */
+  void PrintNotReadyMessage(const char* extra_message);
+
   virtual void PrepareDelete();
 
   /*!

@@ -143,7 +143,11 @@ private:
   inline void PublishImpl(const tPortDataManager* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
   {
     assert((data->GetType() != NULL) && "Port data type not initialized");
-    assert(IsInitialized() || cINFORM_LISTENERS);
+    if (!(IsInitialized() || cINFORM_LISTENERS))
+    {
+      PrintNotReadyMessage("Ignoring publishing request.");
+      return;
+    }
 
     // assign
     util::tArrayWrapper<tPortBase*>* dests = cREVERSE ? edges_dest.GetIterable() : edges_src.GetIterable();

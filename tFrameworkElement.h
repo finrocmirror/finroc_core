@@ -324,16 +324,6 @@ protected:
   tFrameworkElement* GetChildElement(const util::tString& name, int name_index, bool only_globally_unique_children, tFrameworkElement* root);
 
   /*!
-   * Is Runtime element a child of the specified Runtime element?
-   * (also considers links)
-   *
-   * \param re Possible parent of this Runtime element
-   * \param ignore_delete_flag Perform check even if delete flag is already set on object (deprecated in C++!)
-   * \return Answer
-   */
-  bool IsChildOf(tFrameworkElement* re, bool ignore_delete_flag) const;
-
-  /*!
    * Create link to this framework element
    *
    * \param parent Parent framework element
@@ -732,6 +722,16 @@ public:
   {
     return IsChildOf(re, false);
   }
+
+  /*!
+   * Is Runtime element a child of the specified Runtime element?
+   * (also considers links)
+   *
+   * \param re Possible parent of this Runtime element
+   * \param ignore_delete_flag Perform check even if delete flag is already set on object (deprecated in C++ - except of directly calling on runtime change)
+   * \return Answer
+   */
+  bool IsChildOf(tFrameworkElement* re, bool ignore_delete_flag) const;
 
   /*!
    * \return true before element is officially declared as being initialized

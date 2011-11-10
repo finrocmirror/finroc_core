@@ -155,7 +155,11 @@ private:
   inline void PublishImpl(tThreadLocalCache* tc, tCCPortDataManagerTL* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
   {
     assert((data->GetObject()->GetType() != NULL) && "Port data type not initialized");
-    assert((IsInitialized() || cINFORM_LISTENERS) && "Port not initialized");
+    if (!(IsInitialized() || cINFORM_LISTENERS))
+    {
+      PrintNotReadyMessage("Ignoring publishing request.");
+      return;
+    }
 
     util::tArrayWrapper<tCCPortBase*>* dests = cREVERSE ? edges_dest.GetIterable() : edges_src.GetIterable();
 

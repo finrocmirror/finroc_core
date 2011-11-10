@@ -135,7 +135,7 @@ void tThreadContainerThread::Run()
 
 void tThreadContainerThread::RuntimeChange(int8 change_type, tFrameworkElement* element)
 {
-  if (element->IsChildOf(this->thread_container))
+  if (element->IsChildOf(this->thread_container, true))
   {
     reschedule = true;
   }

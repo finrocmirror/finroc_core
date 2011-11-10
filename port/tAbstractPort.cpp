@@ -557,6 +557,18 @@ void tAbstractPort::PrepareDelete()
   DisconnectAll();
 }
 
+void tAbstractPort::PrintNotReadyMessage(const char* extra_message)
+{
+  if (IsDeleted())
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, log_domain, "Port is about to be deleted. ", extra_message, " (This may happen occasionally due to non-blocking nature)");
+  }
+  else
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Port has not been initialized yet and thus cannot be used. Fix your application. ", extra_message);
+  }
+}
+
 uint tAbstractPort::ProcessFlags(const tPortCreationInfoBase& pci)
 {
   uint flags = pci.flags;
