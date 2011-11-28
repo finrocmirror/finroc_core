@@ -20,19 +20,19 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef core__parameter__tStructureParameterImplNumeric_h__
-#define core__parameter__tStructureParameterImplNumeric_h__
+#ifndef core__parameter__tStaticParameterImplNumeric_h__
+#define core__parameter__tStaticParameterImplNumeric_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tBounds.h"
-#include "core/parameter/tStructureParameterBase.h"
+#include "core/parameter/tStaticParameterBase.h"
 #include "core/port/cc/tCCPortDataManager.h"
 #include "rrlib/serialization/tGenericObject.h"
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "core/datatype/tNumber.h"
-#include "core/parameter/tStructureParameter.h"
+#include "core/parameter/tStaticParameter.h"
 
 namespace finroc
 {
@@ -41,10 +41,10 @@ namespace core
 /*!
  * \author Max Reichardt
  *
- * Numeric Structure parameter.
+ * Numeric static parameter implementation.
  */
 template<typename T>
-class tStructureParameterImplNumeric : public tStructureParameterImplStandard<tNumber>
+class tStaticParameterImplNumeric : public tStaticParameterImplStandard<tNumber>
 {
 private:
 
@@ -104,8 +104,8 @@ private:
 
 public:
 
-  tStructureParameterImplNumeric(const util::tString& name, T default_value = 0, tUnit* unit = &tUnit::cNO_UNIT, bool constructor_prototype = false) :
-      tStructureParameterImplStandard<tNumber>(name, constructor_prototype),
+  tStaticParameterImplNumeric(const util::tString& name, T default_value = 0, tUnit* unit = &tUnit::cNO_UNIT, bool constructor_prototype = false) :
+      tStaticParameterImplStandard<tNumber>(name, constructor_prototype),
       unit(unit),
       bounds(),
       default_val(default_value)
@@ -116,8 +116,8 @@ public:
     }
   }
 
-  tStructureParameterImplNumeric(const util::tString& name, T default_value, tBounds<T> bounds, tUnit* unit = &tUnit::cNO_UNIT, bool constructor_prototype = false) :
-      tStructureParameterImplStandard<tNumber>(name, constructor_prototype),
+  tStaticParameterImplNumeric(const util::tString& name, T default_value, tBounds<T> bounds, tUnit* unit = &tUnit::cNO_UNIT, bool constructor_prototype = false) :
+      tStaticParameterImplStandard<tNumber>(name, constructor_prototype),
       unit(unit),
       bounds(bounds),
       default_val(default_value)
@@ -128,9 +128,18 @@ public:
     }
   }
 
-  virtual ::finroc::core::tStructureParameterBase* DeepCopy()
+  tStaticParameterImplNumeric(const tPortCreationInfo<T>& pci) :
+      tStaticParameterImplStandard<tNumber>(pci),
+      unit(pci.unit),
+      bounds(pci.GetBounds()),
+      default_val(pci.default_value_set ? *pci.GetDefault() : (typeid(T).name() == typeid(unsigned int).name() ? pci.flags : 0))
   {
-    return new tStructureParameterImplNumeric<T>(GetName(), default_val, bounds, unit, false);
+    Set(default_val);
+  }
+
+  virtual ::finroc::core::tStaticParameterBase* DeepCopy()
+  {
+    return new tStaticParameterImplNumeric<T>(GetName(), default_val, bounds, unit, false);
   }
 
   /*!
@@ -172,4 +181,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // core__parameter__tStructureParameterImplNumeric_h__
+#endif // core__parameter__tStaticParameterImplNumeric_h__

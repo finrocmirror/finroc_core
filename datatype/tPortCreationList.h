@@ -61,7 +61,7 @@ class tAbstractPort;
  * \author Max Reichardt
  *
  * List of ports to create.
- * Is only meant to be used in StructureParameters
+ * Is only meant to be used in StaticParameters
  * For this reason, it is not real-time capable and a little more memory-efficient.
  */
 class tPortCreationList : public rrlib::serialization::tSerializable, public rrlib::serialization::tStlUnsuitable

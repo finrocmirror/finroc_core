@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef core__parameter__tStructureParameterBase_h__
-#define core__parameter__tStructureParameterBase_h__
+#ifndef core__parameter__tStaticParameterBase_h__
+#define core__parameter__tStaticParameterBase_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
@@ -56,12 +56,12 @@ class tFrameworkElement;
 /*!
  * \author Max Reichardt
  *
- * Structure Parameter class
+ * Static Parameter class
  * (Generic base class without template type)
  */
-class tStructureParameterBase : util::tUncopyable
+class tStaticParameterBase : util::tUncopyable
 {
-  friend class tStructureParameterList;
+  friend class tStaticParameterList;
 private:
 
   /*! Name of parameter */
@@ -71,15 +71,21 @@ private:
   rrlib::serialization::tDataTypeBase type;
 
   /*! Current parameter value (in CreateModuleAction-prototypes this is null) */
-  rrlib::serialization::tGenericObject* value;
+  std::unique_ptr<rrlib::serialization::tGenericObject> value;
+
+  /*! Last parameter value (to detect whether value has changed) */
+  std::unique_ptr<rrlib::serialization::tGenericObject> last_value;
+
+  /*! Is current value enforced (typically hard-coded)? In this case, any config file entries or command line parameters are ignored */
+  bool enforce_current_value;
 
   /*!
-   * StructureParameterBase whose value buffer to use.
+   * StaticParameterBase whose value buffer to use.
    * Typically, this is set to this.
    * However, it is possible to attach this parameter to another (outer) parameter.
    * In this case they share the same buffer: This parameter uses useValueOf.valPointer(), too.
    */
-  tStructureParameterBase* use_value_of;
+  tStaticParameterBase* use_value_of;
 
   /*! Index in parameter list */
   int list_index;
@@ -91,7 +97,7 @@ private:
   util::tString command_line_option;
 
   /*!
-   * Name of outer parameter if parameter is configured by structure parameter of finstructable group
+   * Name of outer parameter if parameter is configured by static parameter of finstructable group
    * (usually set by finstructable group containing module with this parameter)
    */
   util::tString outer_parameter_attachment;
@@ -102,13 +108,14 @@ private:
   /*!
    * Place in Configuration tree, this parameter is configured from (nodes are separated with '/')
    * (usually set by finstructable group containing module with this parameter)
+   * (starting with '/' => absolute link - otherwise relative)
    */
   util::tString config_entry;
 
   /*! Was configEntry set by finstruct? */
   bool config_entry_set_by_finstruct;
 
-  /*! Is this a proxy for other structure parameters? (as used in finstructable groups) */
+  /*! Is this a proxy for other static parameters? (as used in finstructable groups) */
   bool structure_parameter_proxy;
 
 public:
@@ -131,7 +138,7 @@ private:
    *
    * \return Parameter containing buffer we are using/sharing.
    */
-  tStructureParameterBase* GetParameterWithBuffer()
+  tStaticParameterBase* GetParameterWithBuffer()
   {
     if (use_value_of == this)
     {
@@ -145,7 +152,7 @@ private:
    *
    * \return Parameter containing buffer we are using/sharing.
    */
-  const tStructureParameterBase* GetParameterWithBuffer() const
+  const tStaticParameterBase* GetParameterWithBuffer() const
   {
     if (use_value_of == this)
     {
@@ -183,28 +190,25 @@ public:
    * \param type DataType of parameter
    * \param constructor_prototype Is this a CreteModuleActionPrototype (no buffer will be allocated)
    */
-  tStructureParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy = false);
+  tStaticParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy = false);
+
+  virtual ~tStaticParameterBase();
 
   /*!
-   * Attach this structure parameter to another one.
+   * Attach this static parameter to another one.
    * They will share the same value/buffer.
    *
    * \param other Other parameter to attach this one to. Use null or this to detach.
    */
-  void AttachTo(tStructureParameterBase* other);
+  void AttachTo(tStaticParameterBase* other);
 
   /*!
    * (should be overridden by subclasses)
    * \return Deep copy of parameter (without value)
    */
-  virtual tStructureParameterBase* DeepCopy()
+  virtual tStaticParameterBase* DeepCopy()
   {
     throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
-  }
-
-  virtual ~tStructureParameterBase()
-  {
-    delete value;
   }
 
   void Deserialize(rrlib::serialization::tInputStream& is, tFrameworkElement* parameterized);
@@ -233,12 +237,31 @@ public:
   }
 
   /*!
-   * \return Is this a proxy for other structure parameters? (only used in finstructable groups)
+   * \return Has parameter changed since last call to "ResetChanged" (or creation).
    */
-  bool IsStructureParameterProxy() const
+  bool HasChanged();
+
+  /*!
+   * \return Is this a proxy for other static parameters? (only used in finstructable groups)
+   */
+  bool IsStaticParameterProxy() const
   {
     return structure_parameter_proxy;
   }
+
+  /*!
+   * Load value (from any config file entries or command line or whereever)
+   *
+   * \param parent Parent framework element
+   */
+  void LoadValue(tFrameworkElement* parent);
+
+  /*!
+   * Reset "changed flag".
+   * The current value will now be the one any new value is compared with when
+   * checking whether value has changed.
+   */
+  void ResetChanged();
 
   void Serialize(rrlib::serialization::tOutputStream& os) const;
 
@@ -264,12 +287,11 @@ public:
    */
   inline rrlib::serialization::tGenericObject* ValPointer() const
   {
-    return GetParameterWithBuffer()->value;
+    return GetParameterWithBuffer()->value.get();
   }
-
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // core__parameter__tStructureParameterBase_h__
+#endif // core__parameter__tStaticParameterBase_h__

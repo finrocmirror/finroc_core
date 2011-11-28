@@ -52,7 +52,10 @@ class tParameterInfo : public tFinrocAnnotation
 {
 private:
 
-  /*! Place in Configuration tree, this parameter is configured from (nodes are separated with dots) */
+  /*!
+   * Place in Configuration tree, this parameter is configured from (nodes are separated with '/')
+   * (starting with '/' => absolute link - otherwise relative)
+   */
   util::tString config_entry;
 
   /*! Was config entry set from finstruct? */

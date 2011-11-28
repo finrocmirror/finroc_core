@@ -28,7 +28,7 @@
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/tFrameworkElement.h"
-#include "core/parameter/tStructureParameter.h"
+#include "core/parameter/tStaticParameter.h"
 
 namespace rrlib
 {
@@ -59,12 +59,9 @@ class tFinstructableGroup : public tFrameworkElement
 public:
 
   /*! contains name of XML to use */
-  tStructureParameter<util::tString> xml_file;
+  tStaticParameter<util::tString> xml_file;
 
 private:
-
-  /*! contains name of XML that is currently used (variable is used to detect changes to xmlFile parameter) */
-  util::tString current_xml_file;
 
   /*! Temporary variable for save operation: List to store connected ports in */
   util::tSimpleList<tAbstractPort*> connect_tmp;
@@ -184,6 +181,8 @@ public:
    */
   static void AddDependency(const rrlib::serialization::tDataTypeBase& dt);
 
+  virtual void EvaluateStaticParameters();
+
   /*!
    * Is this finstructable group the one responsible for saving parameter's config entry?
    *
@@ -191,12 +190,6 @@ public:
    * \return Answer.
    */
   bool IsResponsibleForConfigFileConnections(tFrameworkElement* ap) const;
-
-  virtual void PostChildInit()
-  {
-    ::finroc::core::tFrameworkElement::PostChildInit();
-    StructureParametersChanged();
-  }
 
   /*!
    * Save contents of group back to Xml file
@@ -224,8 +217,6 @@ public:
    * Perform some static initialization w.r.t. to state at program startup
    */
   static void StaticInit();
-
-  virtual void StructureParametersChanged();
 
   void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode* root);
 

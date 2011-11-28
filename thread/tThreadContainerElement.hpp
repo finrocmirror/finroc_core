@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/thread/tThreadContainerElement.h"
-#include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tStaticParameterList.h"
 #include "core/tAnnotatable.h"
 #include "core/thread/tExecutionControl.h"
 #include "core/tFrameworkElement.h"

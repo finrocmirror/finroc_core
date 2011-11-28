@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/serialization/tDataType.h"
-#include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tStaticParameterList.h"
 
 namespace finroc
 {
@@ -36,10 +36,10 @@ namespace core
  * \author Max Reichardt
  *
  * Parameters used to instantiate a module
- * Are stored separately from Structure parameters.
+ * Are stored separately from static parameters.
  * Therefore, we need an extra class for this.
  */
-class tConstructorParameters : public tStructureParameterList
+class tConstructorParameters : public tStaticParameterList
 {
 public:
 

@@ -32,7 +32,7 @@ namespace core
 {
 class tFrameworkElement;
 class tConstructorParameters;
-class tStructureParameterList;
+class tStaticParameterList;
 
 /*!
  * \author Max Reichardt
@@ -67,7 +67,7 @@ public:
   /*!
    * \return Returns types of parameters that the create method requires
    */
-  virtual const tStructureParameterList* GetParameterTypes() const = 0;
+  virtual const tStaticParameterList* GetParameterTypes() const = 0;
 
   // returns .so file in which address provided as argument is found by dladdr
   util::tString GetBinary(void* addr)

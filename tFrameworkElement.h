@@ -313,6 +313,16 @@ protected:
   virtual ~tFrameworkElement();
 
   /*!
+   * Called whenever static parameters of this framework element need to be (re)evaluated.
+   * (can be overridden to handle this event)
+   *
+   * This typically happens at initialization and when user changes them via finstruct.
+   * (This is never called when thread in surrounding thread container is running.)
+   * (This must only be called with lock on runtime registry.)
+   */
+  virtual void EvaluateStaticParameters() {}
+
+  /*!
    * Helper for above
    *
    * \param name (relative) Qualified name
@@ -463,6 +473,12 @@ public:
    * \return Result
    */
   bool DescriptionEquals(const util::tString& other) const;
+
+  /*!
+   * Trigger evaluation of static parameters in this framework element and all of its children.
+   * (This must never be called when thread in surrounding thread container is running.)
+   */
+  void DoStaticParameterEvaluation();
 
   /*!
    * \return Returns constant and non-constant flags
@@ -816,6 +832,11 @@ public:
   }
 
   /*!
+   * \param node Common parent config file node for all child parameter config entries (starting with '/' => absolute link - otherwise relative).
+   */
+  void SetConfigNode(const util::tString& node);
+
+  /*!
    * \param description New Port description
    * (only valid/possible before, element is initialized)
    */
@@ -850,14 +871,6 @@ public:
    * \param params Parameters that module was created with (may be null)
    */
   void SetFinstructed(tCreateFrameworkElementAction* create_action, tConstructorParameters* params);
-
-  /*!
-   * Called whenever a structure parameter on this framework element changed
-   * (can be overridden to handle this event)
-   */
-  virtual void StructureParametersChanged()
-  {
-  }
 
   virtual const util::tString ToString() const
   {

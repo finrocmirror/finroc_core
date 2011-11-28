@@ -92,26 +92,26 @@ tGroup::~tGroup()
 ////----------------------------------------------------------------------
 //void tGroup::SetParameter(size_t index, const finroc::util::tString &new_value)
 //{
-//  finroc::core::tStructureParameterList* spl = static_cast<finroc::core::tStructureParameterList*>(this->GetAnnotation(finroc::core::tStructureParameterList::cTYPE));
-//  finroc::core::tStructureParameterBase* param = spl->Get(index);
+//  finroc::core::tStaticParameterList* spl = static_cast<finroc::core::tStaticParameterList*>(this->GetAnnotation(finroc::core::tStaticParameterList::cTYPE));
+//  finroc::core::tStaticParameterBase* param = spl->Get(index);
 //  param->Set(new_value);
 //
 //  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> updating parameter with name: " << param->GetName();
 //
-//  this->StructureParametersChanged();
+//  this->StaticParametersChanged();
 //}
 //
 //void tGroup::SetParameter(const finroc::util::tString &name, const finroc::util::tString &new_value)
 //{
 //  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetDescription() << "::SetParameter(" << name << ", " << new_value << ") called";
 //
-//  finroc::core::tStructureParameterList* spl = static_cast<finroc::core::tStructureParameterList*>(this->GetAnnotation(finroc::core::tStructureParameterList::cTYPE));
+//  finroc::core::tStaticParameterList* spl = static_cast<finroc::core::tStaticParameterList*>(this->GetAnnotation(finroc::core::tStaticParameterList::cTYPE));
 //
 //  size_t dimension = spl->Size();
-//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> analysing structure parameter ist of size " << dimension;
+//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> analysing static parameter list of size " << dimension;
 //  for (size_t i = 0; i < dimension; ++i)
 //  {
-//    finroc::core::tStructureParameterBase* param = spl->Get(i);
+//    finroc::core::tStaticParameterBase* param = spl->Get(i);
 //    if (param->GetName() == name)
 //    {
 //      this->SetParameter(i, new_value);

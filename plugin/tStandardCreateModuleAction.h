@@ -34,7 +34,7 @@ namespace core
 {
 class tFrameworkElement;
 class tConstructorParameters;
-class tStructureParameterList;
+class tStaticParameterList;
 
 /*!
  * \author Max Reichardt
@@ -103,7 +103,7 @@ public:
     return type_name;
   }
 
-  virtual const tStructureParameterList* GetParameterTypes() const
+  virtual const tStaticParameterList* GetParameterTypes() const
   {
     return NULL;
   }

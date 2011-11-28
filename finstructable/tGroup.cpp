@@ -21,7 +21,7 @@
  */
 #include "core/finstructable/tGroup.h"
 #include "core/tAnnotatable.h"
-#include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tStaticParameterList.h"
 
 namespace finroc
 {

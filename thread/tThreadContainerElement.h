@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/parameter/tStructureParameter.h"
+#include "core/parameter/tStaticParameter.h"
 #include "core/datatype/tBounds.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/thread/tThreadContainerThread.h"
@@ -53,13 +53,13 @@ private:
   using BASE::log_domain;
 
   /*! Should this container contain a real-time thread? */
-  tStructureParameter<bool> rt_thread;
+  tStaticParameter<bool> rt_thread;
 
   /*! Thread cycle time */
-  tStructureParameter<int> cycle_time;
+  tStaticParameter<int> cycle_time;
 
   /*! Warn on cycle time exceed */
-  tStructureParameter<bool> warn_on_cycle_time_exceed;
+  tStaticParameter<bool> warn_on_cycle_time_exceed;
 
   /*! Thread - while program is running - in pause mode null */
   std::shared_ptr<tThreadContainerThread> thread;

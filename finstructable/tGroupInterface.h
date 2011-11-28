@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/plugin/tConstructorCreateModuleAction.h"
-#include "core/parameter/tStructureParameter.h"
+#include "core/parameter/tStaticParameter.h"
 #include "core/datatype/tPortCreationList.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/port/tPortGroup.h"
@@ -53,7 +53,7 @@ public:
 private:
 
   /*! List of ports */
-  tStructureParameter<tPortCreationList> ports;
+  tStaticParameter<tPortCreationList> ports;
 
   /*! CreateModuleAction */
   static tStandardCreateModuleAction<tGroupInterface> cCREATE_ACTION;

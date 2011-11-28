@@ -20,13 +20,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef core__parameter__tStructureParameterImplStandard_h__
-#define core__parameter__tStructureParameterImplStandard_h__
+#ifndef core__parameter__tStaticParameterImplStandard_h__
+#define core__parameter__tStaticParameterImplStandard_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/serialization/tDataTypeBase.h"
-#include "core/parameter/tStructureParameterBase.h"
+#include "core/parameter/tStaticParameterBase.h"
 #include "rrlib/serialization/tGenericObject.h"
 
 namespace finroc
@@ -36,7 +36,7 @@ namespace core
 /*!
  * \author Max Reichardt
  *
- * Structure Parameter.
+ * Static Parameter.
  *
  * Structure paratemers are more or less construction parameters
  * of modules and groups.
@@ -48,7 +48,7 @@ namespace core
  * the attribute tree.
  */
 template<typename T>
-class tStructureParameterImplStandard : public tStructureParameterBase
+class tStaticParameterImplStandard : public tStaticParameterBase
 {
 public:
 
@@ -57,14 +57,14 @@ public:
    * \param default_value default value in string representation
    * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
    */
-  tStructureParameterImplStandard(const util::tString& name, const util::tString& default_value, bool constructor_prototype = false) :
-      tStructureParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
+  tStaticParameterImplStandard(const util::tString& name, const util::tString& default_value, bool constructor_prototype = false) :
+      tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
   {
     if ((!constructor_prototype) && default_value.Length() > 0)
     {
       try
       {
-        tStructureParameterBase::Set(default_value);
+        tStaticParameterBase::Set(default_value);
       }
       catch (const util::tException& e)
       {
@@ -78,8 +78,8 @@ public:
    * \param default_value default value
    * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
    */
-  tStructureParameterImplStandard(const util::tString& name, const T& default_value, bool constructor_prototype = false) :
-      tStructureParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
+  tStaticParameterImplStandard(const util::tString& name, const T& default_value, bool constructor_prototype = false) :
+      tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
   {
     if (!constructor_prototype)
     {
@@ -94,13 +94,27 @@ public:
    * (disabled for bool to avoid ambiguities with first constructor)
    */
   template < bool NONBOOL = !std::is_same<bool, T>::value >
-  tStructureParameterImplStandard(const typename std::enable_if<NONBOOL, util::tString>::type& name, bool constructor_prototype = false) :
-      tStructureParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
+  tStaticParameterImplStandard(const typename std::enable_if<NONBOOL, util::tString>::type& name, bool constructor_prototype = false) :
+      tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
   {}
 
-  virtual ::finroc::core::tStructureParameterBase* DeepCopy()
+  tStaticParameterImplStandard(const tPortCreationInfo<T>& pci) :
+      tStaticParameterBase(pci.description, rrlib::serialization::tDataType<T>(), false)
   {
-    return new tStructureParameterImplStandard<T>(GetName(), false);
+    if (pci.default_value_set)
+    {
+      SetValue(*pci.GetDefault());
+    }
+  }
+
+  tStaticParameterImplStandard(const tPortCreationInfoBase& pci) :
+      tStaticParameterBase(pci.description, rrlib::serialization::tDataType<T>(), false)
+  {
+  }
+
+  virtual ::finroc::core::tStaticParameterBase* DeepCopy()
+  {
+    return new tStaticParameterImplStandard<T>(GetName(), false);
   }
 
   /*!
@@ -119,7 +133,7 @@ public:
    */
   inline T* GetValue()
   {
-    rrlib::serialization::tGenericObject* go = ::finroc::core::tStructureParameterBase::ValPointer();
+    rrlib::serialization::tGenericObject* go = ::finroc::core::tStaticParameterBase::ValPointer();
     return go->GetData<T>();
   }
 
@@ -128,7 +142,7 @@ public:
    */
   inline void SetValue(const T& new_value)
   {
-    rrlib::serialization::tGenericObject* go = ::finroc::core::tStructureParameterBase::ValPointer();
+    rrlib::serialization::tGenericObject* go = ::finroc::core::tStaticParameterBase::ValPointer();
     rrlib::serialization::sSerialization::DeepCopy(new_value, *(go->GetData<T>()));
   }
 
@@ -149,7 +163,7 @@ public:
    */
   virtual void Set(const util::tString& new_value)
   {
-    tStructureParameterBase::Set(new_value);
+    tStaticParameterBase::Set(new_value);
   }
 
 };
@@ -157,4 +171,4 @@ public:
 } // namespace finroc
 } // namespace core
 
-#endif // core__parameter__tStructureParameterImplStandard_h__
+#endif // core__parameter__tStaticParameterImplStandard_h__

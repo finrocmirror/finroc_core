@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/parameter/tConstructorParameters.h"
-#include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tStaticParameterList.h"
 #include "core/plugin/tCreateFrameworkElementAction.h"
 
 #include "core/plugin/tParamType.h"
@@ -35,7 +35,7 @@ namespace finroc
 {
 namespace core
 {
-class tStructureParameterBase;
+class tStaticParameterBase;
 
 /*!
  * \author Max Reichardt
@@ -48,9 +48,9 @@ class tConstructorCreateModuleActionBase : public util::tUncopyableObject, publi
 protected:
 
   /*!
-   * StructureParameterList
+   * StaticParameterList
    */
-  mutable tStructureParameterList spl;
+  mutable tStaticParameterList spl;
 
 public:
 
@@ -120,7 +120,7 @@ private:
    *
    * \param param
    */
-  inline void Add(tStructureParameterBase* param) const
+  inline void Add(tStaticParameterBase* param) const
   {
     if (param != NULL)
     {
@@ -131,7 +131,7 @@ private:
   /*!
    * builds parameter list, if it's not built already
    */
-  void CheckStructureParameterList() const;
+  void CheckStaticParameterList() const;
 
 public:
 
@@ -196,9 +196,9 @@ public:
     return SP12::Get(p->Get(11));
   }
 
-  virtual const tStructureParameterList* GetParameterTypes() const
+  virtual const tStaticParameterList* GetParameterTypes() const
   {
-    CheckStructureParameterList();
+    CheckStaticParameterList();
     return &(spl);
   }
 

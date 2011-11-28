@@ -20,14 +20,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef core__parameter__tStructureParameterImplString_h__
-#define core__parameter__tStructureParameterImplString_h__
+#ifndef core__parameter__tStaticParameterImplString_h__
+#define core__parameter__tStaticParameterImplString_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/parameter/tStructureParameterBase.h"
+#include "core/parameter/tStaticParameterBase.h"
 #include "core/datatype/tCoreString.h"
-#include "core/parameter/tStructureParameterImplStandard.h"
+#include "core/parameter/tStaticParameterImplStandard.h"
 #include "rrlib/serialization/tDataTypeBase.h"
 
 namespace finroc
@@ -37,21 +37,32 @@ namespace core
 /*!
  * \author Max Reichardt
  *
- * String StructureParameter class for convenience
+ * String StaticParameter class for convenience
  */
-class tStructureParameterImplString : public tStructureParameterImplStandard<tCoreString>
+class tStaticParameterImplString : public tStaticParameterImplStandard<tCoreString>
 {
 public:
 
-  tStructureParameterImplString(const util::tString& name, const util::tString& default_value, bool constructor_prototype = false) :
-      tStructureParameterImplStandard<tCoreString>(name, default_value, constructor_prototype)
+  tStaticParameterImplString(const util::tString& name, const util::tString& default_value, bool constructor_prototype = false) :
+      tStaticParameterImplStandard<tCoreString>(name, default_value, constructor_prototype)
   {
   }
 
-  tStructureParameterImplString(const util::tString& name, bool constructor_prototype = false) :
-      tStructureParameterImplStandard<tCoreString>(name, "", constructor_prototype)
+  tStaticParameterImplString(const util::tString& name, bool constructor_prototype = false) :
+      tStaticParameterImplStandard<tCoreString>(name, "", constructor_prototype)
   {
   }
+
+  template <typename T>
+  tStaticParameterImplString(const tPortCreationInfo<T>& pci) :
+      tStaticParameterImplStandard<tCoreString>(pci)
+  {
+    if (pci.default_value_set)
+    {
+      SetValue(*pci.GetDefault());
+    }
+  }
+
 
   /*!
    * \return Current value
@@ -85,13 +96,13 @@ public:
     SetValue(s);
   }
 
-  virtual ::finroc::core::tStructureParameterBase* DeepCopy()
+  virtual ::finroc::core::tStaticParameterBase* DeepCopy()
   {
-    return new tStructureParameterImplString(GetName(), "", false);
+    return new tStaticParameterImplString(GetName(), "", false);
   }
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // core__parameter__tStructureParameterImplString_h__
+#endif // core__parameter__tStaticParameterImplString_h__

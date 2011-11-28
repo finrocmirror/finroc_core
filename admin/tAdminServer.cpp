@@ -29,7 +29,7 @@
 #include "rrlib/serialization/tOutputStream.h"
 #include "core/plugin/tCreateFrameworkElementAction.h"
 #include "core/plugin/tPlugins.h"
-#include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tStaticParameterList.h"
 #include "core/tFinrocAnnotation.h"
 #include "rrlib/serialization/tDataTypeBase.h"
 #include "core/parameter/tConfigFile.h"
@@ -45,7 +45,7 @@
 #include "rrlib/serialization/tStringInputStream.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/parameter/tConstructorParameters.h"
-#include "core/parameter/tStructureParameterBase.h"
+#include "core/parameter/tStaticParameterBase.h"
 #include "core/finstructable/tFinstructableGroup.h"
 #include "core/parameter/tParameterInfo.h"
 
@@ -142,7 +142,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
       }
       else
       {
-        tStructureParameterList::cEMPTY.Serialize(co);
+        tStaticParameterList::cEMPTY.Serialize(co);
       }
     }
   }
@@ -475,7 +475,7 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortD
             rrlib::serialization::tInputStream ci(params_buffer.get());
             for (size_t i = 0u; i < params->Size(); i++)
             {
-              tStructureParameterBase* param = params->Get(i);
+              tStaticParameterBase* param = params->Get(i);
               util::tString s = ci.ReadString();
               try
               {

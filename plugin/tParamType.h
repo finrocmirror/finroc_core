@@ -23,7 +23,7 @@
 #define core__plugin__tParamType_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-#include "core/parameter/tStructureParameter.h"
+#include "core/parameter/tStaticParameter.h"
 
 namespace finroc
 {
@@ -38,14 +38,14 @@ public:
 };
 
 /**
- * Helper template that maps constructor parameter types on StructureParameter classes
+ * Helper template that maps constructor parameter types on StaticParameter classes
  */
 
 template <typename T, bool ENUM, bool PTR>
 struct tParamTypeBase
 {
-  typedef tStructureParameterImplStandard<T> t;
-  static T Get(tStructureParameterBase* x)
+  typedef tStaticParameterImplStandard<T> t;
+  static T Get(tStaticParameterBase* x)
   {
     return *(static_cast<t*>(x)->GetValue());
   }
@@ -61,8 +61,8 @@ struct tParamType : tParamTypeBase<T, std::is_enum<T>::value, std::is_pointer<T>
 template <typename T>
 struct tParamTypeBase<T, false, true>
 {
-  typedef tStructureParameterImplStandard<typename std::remove_pointer<T>::type> t;
-  static T Get(tStructureParameterBase* x)
+  typedef tStaticParameterImplStandard<typename std::remove_pointer<T>::type> t;
+  static T Get(tStaticParameterBase* x)
   {
     return static_cast<t*>(x)->GetValue();
   }
@@ -75,8 +75,8 @@ struct tParamTypeBase<T, false, true>
 template <typename T>
 struct tNumParamType
 {
-  typedef tStructureParameterImplNumeric<T> t;
-  static T Get(tStructureParameterBase* x)
+  typedef tStaticParameterImplNumeric<T> t;
+  static T Get(tStaticParameterBase* x)
   {
     return static_cast<t*>(x)->Get();
   }
@@ -98,8 +98,8 @@ template <> struct tParamType<uint64_t> : tNumParamType<uint64_t> {};
 template <>
 struct tParamType<const char*>
 {
-  typedef tStructureParameterImplString t;
-  static const char* Get(tStructureParameterBase* x)
+  typedef tStaticParameterImplString t;
+  static const char* Get(tStaticParameterBase* x)
   {
     return static_cast<t*>(x)->GetValue()->GetBuffer().GetCString();
   }
@@ -112,8 +112,8 @@ struct tParamType<const char*>
 template <>
 struct tParamType<std::string>
 {
-  typedef tStructureParameterImplString t;
-  static std::string Get(tStructureParameterBase* x)
+  typedef tStaticParameterImplString t;
+  static std::string Get(tStaticParameterBase* x)
   {
     return static_cast<t*>(x)->GetValue()->GetBuffer().GetStdString();
   }
@@ -126,8 +126,8 @@ struct tParamType<std::string>
 template <>
 struct tParamType<util::tString>
 {
-  typedef tStructureParameterImplString t;
-  static util::tString Get(tStructureParameterBase* x)
+  typedef tStaticParameterImplString t;
+  static util::tString Get(tStaticParameterBase* x)
   {
     return static_cast<t*>(x)->Get();
   }
@@ -140,8 +140,8 @@ struct tParamType<util::tString>
 template <>
 struct tParamType<bool>
 {
-  typedef tStructureParameterImplStandard<bool> t;
-  static bool Get(tStructureParameterBase* x)
+  typedef tStaticParameterImplStandard<bool> t;
+  static bool Get(tStaticParameterBase* x)
   {
     return static_cast<t*>(x)->Get();
   }
@@ -155,7 +155,7 @@ template <>
 struct tParamType<tEmpty>
 {
   typedef tEmpty t;
-  static tEmpty Get(tStructureParameterBase* x)
+  static tEmpty Get(tStaticParameterBase* x)
   {
     assert(false);
     return tEmpty();

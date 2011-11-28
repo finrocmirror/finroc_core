@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/plugin/tConnectionListener.h"
-#include "core/parameter/tStructureParameter.h"
+#include "core/parameter/tStaticParameter.h"
 #include "core/tFrameworkElement.h"
 
 namespace finroc
@@ -61,7 +61,7 @@ private:
   bool first_connect;
 
   /*! if set, this module automatically connects to this address */
-  tStructureParameter<util::tString> auto_connect_to;
+  tStaticParameter<util::tString> auto_connect_to;
 
 public:
 
@@ -119,6 +119,8 @@ public:
    * Disconnect connection
    */
   void Disconnect();
+
+  virtual void EvaluateStaticParameters();
 
   inline void FireConnectionEvent(int e)
   {
@@ -183,8 +185,6 @@ public:
   inline void SetLoopTime(int64 ms)
   {
   }
-
-  virtual void StructureParametersChanged();
 
   virtual const util::tString ToString() const
   {

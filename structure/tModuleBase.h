@@ -44,7 +44,7 @@
 // Internal includes with ""
 //----------------------------------------------------------------------
 #include "core/parameter/tParameter.h"
-#include "core/parameter/tStructureParameter.h"
+#include "core/parameter/tStaticParameter.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/structure/tConveniencePort.h"
 #include "core/structure/tStructureElementRegister.h"
@@ -175,171 +175,22 @@ public:
 
 
   template < typename T = double >
-  class tStructureParameter : public finroc::core::tStructureParameter<T>, tConveniencePortBase<tModuleBase>
+  class tStaticParameter : public tConveniencePort < T, tModuleBase, finroc::core::tStaticParameter<T> >
   {
   public:
-
-    // constructors taking description as tString
-    explicit tStructureParameter(const util::tString& description)
-        : finroc::core::tStructureParameter<T>(description, this->FindParent())
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tStructureParameter(const util::tString& description, const util::tString& default_value)
-        : finroc::core::tStructureParameter<T>(description, this->FindParent(), default_value)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NOSTRING = !std::is_same<T, util::tString>::value >
-    tStructureParameter(typename std::enable_if<NOSTRING, const util::tString&>::type description, const T& default_value)
-        : finroc::core::tStructureParameter<T>(description, this->FindParent(), default_value)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(typename std::enable_if<NUMERIC, const util::tString&>::type description, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT))
-        : finroc::core::tParameter<T>(description, this->FindParent(), default_value, unit)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(typename std::enable_if<NUMERIC, const util::tString&>::type description, const T& default_value, tBounds<T> b, tUnit* unit = &(tUnit::cNO_UNIT))
-        : finroc::core::tParameter<T>(description, this->FindParent(), default_value, b, unit)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    // constructors taking description as const char*
-    explicit tStructureParameter(const char* description)
-        : finroc::core::tStructureParameter<T>(description, this->FindParent())
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tStructureParameter(const char* description, const util::tString& default_value)
-        : finroc::core::tStructureParameter<T>(description, this->FindParent(), default_value)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NOSTRING = !std::is_same<T, util::tString>::value >
-    tStructureParameter(typename std::enable_if<NOSTRING, const char*>::type description, const T& default_value)
-        : finroc::core::tStructureParameter<T>(description, this->FindParent(), default_value)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(typename std::enable_if<NUMERIC, const char*>::type description, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT))
-        : finroc::core::tParameter<T>(description, this->FindParent(), default_value, unit)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(typename std::enable_if<NUMERIC, const char*>::type description, const T& default_value, tBounds<T> b, tUnit* unit = &(tUnit::cNO_UNIT))
-        : finroc::core::tParameter<T>(description, this->FindParent(), default_value, b, unit)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    // constructors when relying on auto-generated descriptions in initializer list
-    tStructureParameter()
-        : finroc::core::tStructureParameter<T>(this->GetPortName(), this->FindParent())
+    template<typename ... ARGS>
+    explicit tStaticParameter(const ARGS&... args)
+        : tConveniencePort < T, tModuleBase, finroc::core::tStaticParameter<T> >(0u, GetContainer, args...)
     {
     }
 
-    template < bool NOSTRING = !std::is_same<T, util::tString>::value >
-    explicit tStructureParameter(typename std::enable_if<NOSTRING, const T>::type& default_value)
-        : finroc::core::tStructureParameter<T>(this->GetPortName(), this->FindParent(), default_value)
+  private:
+    static tFrameworkElement* GetContainer(tModuleBase* module)
     {
+      return module;
     }
-
-    template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(typename std::enable_if<NUMERIC, const T>::type& default_value, tUnit* unit)
-        : finroc::core::tParameter<T>(this->GetPortName(), this->FindParent(), default_value, unit)
-    {
-    }
-
-    template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(typename std::enable_if<NUMERIC, const T>::type& default_value, tBounds<T> b, tUnit* unit = &(tUnit::cNO_UNIT))
-        : finroc::core::tParameter<T>(this->GetPortName(), this->FindParent(), default_value, b, unit)
-    {
-    }
-
-    // constructors taking parent and description as tString
-    tStructureParameter(tModuleBase* parent, const util::tString& description)
-        : finroc::core::tStructureParameter<T>(description, parent)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tStructureParameter(tModuleBase* parent, const util::tString& description, const util::tString& default_value)
-        : finroc::core::tStructureParameter<T>(description, parent, default_value)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NOSTRING = !std::is_same<T, util::tString>::value >
-    tStructureParameter(tModuleBase* parent, typename std::enable_if<NOSTRING, const util::tString&>::type description, const T& default_value)
-        : finroc::core::tStructureParameter<T>(description, parent, default_value)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(tModuleBase* parent, typename std::enable_if<NUMERIC, const util::tString&>::type description, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT))
-        : finroc::core::tParameter<T>(description, parent, default_value, unit)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(tModuleBase* parent, typename std::enable_if<NUMERIC, const util::tString&>::type description, const T& default_value, tBounds<T> b, tUnit* unit = &(tUnit::cNO_UNIT))
-        : finroc::core::tParameter<T>(description, parent, default_value, b, unit)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    // constructors taking parent and description as const char*
-    tStructureParameter(tModuleBase* parent, const char* description)
-        : finroc::core::tStructureParameter<T>(this->GetPortName(), parent)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    tStructureParameter(tModuleBase* parent, const char* description, const util::tString& default_value)
-        : finroc::core::tStructureParameter<T>(this->GetPortName(), parent, default_value)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NOSTRING = !std::is_same<T, util::tString>::value >
-    tStructureParameter(tModuleBase* parent, typename std::enable_if<NOSTRING, const char*>::type description, const T& default_value)
-        : finroc::core::tStructureParameter<T>(this->GetPortName(), parent, default_value)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(tModuleBase* parent, typename std::enable_if<NUMERIC, const char*>::type description, const T& default_value, tUnit* unit = &(tUnit::cNO_UNIT))
-        : finroc::core::tParameter<T>(this->GetPortName(), parent, default_value, unit)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
-    template < bool NUMERIC = tPortTypeMap<T>::numeric >
-    tStructureParameter(tModuleBase* parent, typename std::enable_if<NUMERIC, const char*>::type description, const T& default_value, tBounds<T> b, tUnit* unit = &(tUnit::cNO_UNIT))
-        : finroc::core::tParameter<T>(this->GetPortName(), parent, default_value, b, unit)
-    {
-      this->UpdateCurrentPortNameIndex();
-    }
-
   };
+
 };
 
 //----------------------------------------------------------------------

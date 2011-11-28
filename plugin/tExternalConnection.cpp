@@ -23,7 +23,7 @@
 #include "core/tRuntimeEnvironment.h"
 #include "core/tCoreFlags.h"
 #include "core/tLockOrderLevels.h"
-#include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tStaticParameterList.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
@@ -63,28 +63,7 @@ void tExternalConnection::Disconnect()
   FireConnectionEvent(tConnectionListener::cNOT_CONNECTED);
 }
 
-void tExternalConnection::PostConnect(const util::tString& address)
-{
-  last_address = address;
-  first_connect = false;
-  FireConnectionEvent(tConnectionListener::cCONNECTED);
-}
-
-void tExternalConnection::PrepareDelete()
-{
-  util::tLock lock1(this);
-  try
-  {
-    Disconnect();
-  }
-  catch (const util::tException& e)
-  {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
-  }
-  ::finroc::core::tFrameworkElement::PrepareDelete();
-}
-
-void tExternalConnection::StructureParametersChanged()
+void tExternalConnection::EvaluateStaticParameters()
 {
   util::tString s = auto_connect_to.Get();
   if (s.Length() > 0)
@@ -116,6 +95,27 @@ void tExternalConnection::StructureParametersChanged()
       }
     }
   }
+}
+
+void tExternalConnection::PostConnect(const util::tString& address)
+{
+  last_address = address;
+  first_connect = false;
+  FireConnectionEvent(tConnectionListener::cCONNECTED);
+}
+
+void tExternalConnection::PrepareDelete()
+{
+  util::tLock lock1(this);
+  try
+  {
+    Disconnect();
+  }
+  catch (const util::tException& e)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
+  }
+  ::finroc::core::tFrameworkElement::PrepareDelete();
 }
 
 } // namespace finroc

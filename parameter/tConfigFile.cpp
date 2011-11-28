@@ -263,12 +263,16 @@ bool tConfigFile::HasEntry(const util::tString& entry)
 
 void tConfigFile::LoadParameterValues()
 {
-  tFrameworkElement* ann = static_cast<tFrameworkElement*>(GetAnnotated());
-  assert((ann != NULL));
+  LoadParameterValues(static_cast<tFrameworkElement*>(GetAnnotated()));
+}
+
+void tConfigFile::LoadParameterValues(tFrameworkElement* fe)
+{
+  assert((fe != NULL));
   {
-    util::tLock lock2(ann->GetRegistryLock());  // nothing should change while we're doing this
+    util::tLock lock2(fe->GetRegistryLock());  // nothing should change while we're doing this
     tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
-    fet.TraverseElementTree(ann, this, true, temp_buffer);
+    fet.TraverseElementTree(fe, this, true, temp_buffer);
   }
 }
 

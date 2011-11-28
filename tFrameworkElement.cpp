@@ -26,8 +26,10 @@
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tRuntimeListener.h"
 #include "rrlib/finroc_core_utils/tGarbageCollector.h"
-#include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tStaticParameterList.h"
+#include "core/parameter/tStaticParameterBase.h"
 #include "core/parameter/tConfigFile.h"
+#include "core/parameter/tConfigNode.h"
 #include "rrlib/serialization/tOutputStream.h"
 #include "core/port/tAbstractPort.h"
 
@@ -242,6 +244,52 @@ bool tFrameworkElement::DescriptionEquals(const util::tString& other) const
         return false;
       }
       return primary.description.Equals(other);
+    }
+  }
+}
+
+void tFrameworkElement::DoStaticParameterEvaluation()
+{
+  util::tLock lock2(GetRegistryLock());
+
+  tStaticParameterList* spl = GetAnnotation<tStaticParameterList>();
+  if (spl != NULL)
+  {
+
+    // Reevaluate parameters and check whether they have changed
+    bool changed = false;
+    for (size_t i = 0; i < spl->Size(); i++)
+    {
+      spl->Get(i)->LoadValue(this);
+      changed |= spl->Get(i)->HasChanged();
+    }
+
+    if (changed)
+    {
+      EvaluateStaticParameters();
+
+      // Reset change flags for all parameters
+      for (size_t i = 0; i < spl->Size(); i++)
+      {
+        spl->Get(i)->ResetChanged();
+      }
+
+      // initialize any new child elements
+      if (IsReady())
+      {
+        Init();
+      }
+    }
+  }
+
+  // evaluate children's static parameters
+  util::tArrayWrapper<tLink*>* iterable = children.GetIterable();
+  for (int i = 0, n = iterable->Size(); i < n; i++)
+  {
+    tLink* child = iterable->Get(i);
+    if (child != NULL && child->IsPrimaryLink() && (!child->GetChild()->IsDeleted()))
+    {
+      child->GetChild()->DoStaticParameterEvaluation();
     }
   }
 }
@@ -610,6 +658,8 @@ void tFrameworkElement::InitImpl()
       flags |= tCoreFlags::cREADY;
     }
 
+    DoStaticParameterEvaluation();
+
     NotifyAnnotationsInitialized();
   }
 
@@ -819,6 +869,38 @@ util::tMutexLockOrder& tFrameworkElement::RuntimeLockHelper() const
   return this->obj_mutex;
 }
 
+void tFrameworkElement::SetConfigNode(const util::tString& node)
+{
+  util::tLock lock2(GetRegistryLock());
+  tConfigNode* cn = GetAnnotation<tConfigNode>();
+  if (cn != NULL)
+  {
+    if (cn->node.Equals(node))
+    {
+      return;
+    }
+    cn->node = node;
+  }
+  else
+  {
+    cn = new tConfigNode(node);
+    AddAnnotation(cn);
+  }
+
+  // reevaluate static parameters
+  DoStaticParameterEvaluation();
+
+  // reload parameters
+  if (IsReady())
+  {
+    tConfigFile* cf = tConfigFile::Find(this);
+    if (cf != NULL)
+    {
+      cf->LoadParameterValues(this);
+    }
+  }
+}
+
 void tFrameworkElement::SetDescription(const util::tString& description)
 {
   assert((!GetFlag(tCoreFlags::cIS_RUNTIME)));
@@ -833,7 +915,7 @@ void tFrameworkElement::SetDescription(const util::tString& description)
 void tFrameworkElement::SetFinstructed(tCreateFrameworkElementAction* create_action, tConstructorParameters* params)
 {
   assert((!GetFlag(tCoreFlags::cFINSTRUCTED)));
-  tStructureParameterList* list = tStructureParameterList::GetOrCreate(this);
+  tStaticParameterList* list = tStaticParameterList::GetOrCreate(this);
   list->SetCreateAction(create_action);
   SetFlag(tCoreFlags::cFINSTRUCTED);
   if (params != NULL)

@@ -21,7 +21,7 @@
  */
 #include "core/finstructable/tGroupInterface.h"
 #include "core/tAnnotatable.h"
-#include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tStaticParameterList.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tPortFlags.h"
 

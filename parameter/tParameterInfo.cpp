@@ -27,6 +27,7 @@
 #include "rrlib/serialization/tStringInputStream.h"
 #include "core/port/tAbstractPort.h"
 #include "core/parameter/tConfigFile.h"
+#include "core/parameter/tConfigNode.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/cc/tCCPortBase.h"
@@ -180,44 +181,48 @@ void tParameterInfo::LoadValue(bool ignore_ready)
 
       // config file entry
       tConfigFile* cf = tConfigFile::Find(ann);
-      if (cf != NULL && config_entry.Length() > 0 && cf->HasEntry(config_entry))
+      if (cf != NULL && config_entry.Length() > 0)
       {
-        rrlib::xml2::tXMLNode& node = cf->GetEntry(config_entry, false);
-        if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
+        util::tString full_config_entry = tConfigNode::GetFullConfigEntry(ann, config_entry);
+        if (cf->HasEntry(full_config_entry))
         {
-          tCCPortBase* port = static_cast<tCCPortBase*>(ann);
-          tCCPortDataManagerTL* c = tThreadLocalCache::Get()->GetUnusedBuffer(port->GetDataType());
-          try
+          rrlib::xml2::tXMLNode& node = cf->GetEntry(full_config_entry, false);
+          if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
           {
-            c->GetObject()->Deserialize(node);
-            port->BrowserPublishRaw(c);
-            return;
+            tCCPortBase* port = static_cast<tCCPortBase*>(ann);
+            tCCPortDataManagerTL* c = tThreadLocalCache::Get()->GetUnusedBuffer(port->GetDataType());
+            try
+            {
+              c->GetObject()->Deserialize(node);
+              port->BrowserPublishRaw(c);
+              return;
+            }
+            catch (const util::tException& e)
+            {
+              FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", full_config_entry, "': ", e);
+              c->RecycleUnused();
+            }
           }
-          catch (const util::tException& e)
+          else if (tFinrocTypeInfo::IsStdType(ann->GetDataType()))
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", config_entry, "': ", e);
-            c->RecycleUnused();
+            tPortBase* port = static_cast<tPortBase*>(ann);
+            tPortDataManager* pd = port->GetUnusedBufferRaw();
+            try
+            {
+              pd->GetObject()->Deserialize(node);
+              port->BrowserPublish(pd);
+              return;
+            }
+            catch (const util::tException& e)
+            {
+              FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", full_config_entry, "': ", e);
+              pd->RecycleUnused();
+            }
           }
-        }
-        else if (tFinrocTypeInfo::IsStdType(ann->GetDataType()))
-        {
-          tPortBase* port = static_cast<tPortBase*>(ann);
-          tPortDataManager* pd = port->GetUnusedBufferRaw();
-          try
+          else
           {
-            pd->GetObject()->Deserialize(node);
-            port->BrowserPublish(pd);
-            return;
+            throw util::tRuntimeException("Port Type not supported as a parameter", CODE_LOCATION_MACRO);
           }
-          catch (const util::tException& e)
-          {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", config_entry, "': ", e);
-            pd->RecycleUnused();
-          }
-        }
-        else
-        {
-          throw util::tRuntimeException("Port Type not supported as a parameter", CODE_LOCATION_MACRO);
         }
       }
 

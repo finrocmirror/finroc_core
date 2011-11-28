@@ -25,7 +25,8 @@
 #include "core/datatype/tXML.h"
 #include "core/parameter/tParameter.h"
 #include "core/parameter/tConfigFile.h"
-#include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tConfigNode.h"
+#include "core/parameter/tStaticParameterList.h"
 #include "core/thread/tExecutionControl.h"
 #include "core/thread/tPeriodicFrameworkElementTask.h"
 
@@ -35,8 +36,9 @@ template class rrlib::serialization::tDataType<finroc::core::tCoreString>;
 template class rrlib::serialization::tDataType<finroc::core::tDataTypeReference>;
 template class rrlib::serialization::tDataType<finroc::core::tPortCreationList>;
 template class rrlib::serialization::tDataType<finroc::core::tConfigFile>;
+template class rrlib::serialization::tDataType<finroc::core::tConfigNode>;
 template class rrlib::serialization::tDataType<finroc::core::tParameterInfo>;
-template class rrlib::serialization::tDataType<finroc::core::tStructureParameterList>;
+template class rrlib::serialization::tDataType<finroc::core::tStaticParameterList>;
 template class rrlib::serialization::tDataType<finroc::core::tExecutionControl>;
 template class rrlib::serialization::tDataType<finroc::core::tPeriodicFrameworkElementTask>;
 template class rrlib::serialization::tDataType<finroc::core::tXML>;

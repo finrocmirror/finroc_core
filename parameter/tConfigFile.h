@@ -159,6 +159,13 @@ public:
   void LoadParameterValues();
 
   /*!
+   * set parameters of all framework element's child nodes to current values in tree
+   *
+   * \param fe Framework element
+   */
+  void LoadParameterValues(tFrameworkElement* fe);
+
+  /*!
    * Saves configuration file back to HDD
    */
   void SaveFile();

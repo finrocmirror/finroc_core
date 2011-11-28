@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef core__parameter__tStructureParameterList_h__
-#define core__parameter__tStructureParameterList_h__
+#ifndef core__parameter__tStaticParameterList_h__
+#define core__parameter__tStaticParameterList_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
@@ -50,7 +50,7 @@ namespace finroc
 {
 namespace core
 {
-class tStructureParameterBase;
+class tStaticParameterBase;
 class tFrameworkElement;
 class tConstructorParameters;
 class tCreateFrameworkElementAction;
@@ -58,14 +58,14 @@ class tCreateFrameworkElementAction;
 /*!
  * \author Max Reichardt
  *
- * List of structure parameters
+ * List of static parameters
  */
-class tStructureParameterList : public tFinrocAnnotation
+class tStaticParameterList : public tFinrocAnnotation
 {
 private:
 
   /*! List of parameters */
-  util::tSimpleList<tStructureParameterBase*> parameters;
+  util::tSimpleList<tStaticParameterBase*> parameters;
 
   /*!
    * Index of CreateModuleAction that was used to create framework element
@@ -76,10 +76,10 @@ private:
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataType<tStructureParameterList> cTYPE;
+  static rrlib::serialization::tDataType<tStaticParameterList> cTYPE;
 
   /*! Empty parameter list */
-  static tStructureParameterList cEMPTY;
+  static tStaticParameterList cEMPTY;
 
 private:
 
@@ -89,13 +89,13 @@ private:
 public:
 
   // slightly ugly... but safe
-  tStructureParameterList(tStructureParameterBase* p1, tStructureParameterBase* p2 = NULL, tStructureParameterBase* p3 = NULL,
-                          tStructureParameterBase* p4 = NULL, tStructureParameterBase* p5 = NULL, tStructureParameterBase* p6 = NULL,
-                          tStructureParameterBase* p7 = NULL, tStructureParameterBase* p8 = NULL, tStructureParameterBase* p9 = NULL,
-                          tStructureParameterBase* p10 = NULL, tStructureParameterBase* p11 = NULL, tStructureParameterBase* p12 = NULL,
-                          tStructureParameterBase* p13 = NULL, tStructureParameterBase* p14 = NULL, tStructureParameterBase* p15 = NULL,
-                          tStructureParameterBase* p16 = NULL, tStructureParameterBase* p17 = NULL, tStructureParameterBase* p18 = NULL,
-                          tStructureParameterBase* p19 = NULL, tStructureParameterBase* p20 = NULL) :
+  tStaticParameterList(tStaticParameterBase* p1, tStaticParameterBase* p2 = NULL, tStaticParameterBase* p3 = NULL,
+                       tStaticParameterBase* p4 = NULL, tStaticParameterBase* p5 = NULL, tStaticParameterBase* p6 = NULL,
+                       tStaticParameterBase* p7 = NULL, tStaticParameterBase* p8 = NULL, tStaticParameterBase* p9 = NULL,
+                       tStaticParameterBase* p10 = NULL, tStaticParameterBase* p11 = NULL, tStaticParameterBase* p12 = NULL,
+                       tStaticParameterBase* p13 = NULL, tStaticParameterBase* p14 = NULL, tStaticParameterBase* p15 = NULL,
+                       tStaticParameterBase* p16 = NULL, tStaticParameterBase* p17 = NULL, tStaticParameterBase* p18 = NULL,
+                       tStaticParameterBase* p19 = NULL, tStaticParameterBase* p20 = NULL) :
       tFinrocAnnotation(),
       parameters(),
       create_action(-1)
@@ -122,16 +122,16 @@ public:
     Add(p20);
   }
 
-  tStructureParameterList();
+  tStaticParameterList();
 
   /*!
    * Add parameter to list
    *
    * \param param Parameter
    */
-  void Add(tStructureParameterBase* param);
+  void Add(tStaticParameterBase* param);
 
-  virtual ~tStructureParameterList()
+  virtual ~tStaticParameterList()
   {
     Clear();
     ;
@@ -148,7 +148,7 @@ public:
    * \param i Index
    * \return Parameter with specified index
    */
-  inline tStructureParameterBase* Get(int i) const
+  inline tStaticParameterBase* Get(int i) const
   {
     return parameters.Get(i);
   }
@@ -162,12 +162,12 @@ public:
   }
 
   /*!
-   * Get or create StructureParameterList for Framework element
+   * Get or create StaticParameterList for Framework element
    *
    * \param fe Framework element
-   * \return StructureParameterList
+   * \return StaticParameterList
    */
-  static tStructureParameterList* GetOrCreate(tFrameworkElement* fe);
+  static tStaticParameterList* GetOrCreate(tFrameworkElement* fe);
 
   /*!
    * If this is constructor parameter prototype: create instance that can be filled with values
@@ -208,6 +208,6 @@ public:
 
 #include "rrlib/serialization/tDataType.h"
 
-extern template class ::rrlib::serialization::tDataType<finroc::core::tStructureParameterList>;
+extern template class ::rrlib::serialization::tDataType<finroc::core::tStaticParameterList>;
 
-#endif // core__parameter__tStructureParameterList_h__
+#endif // core__parameter__tStaticParameterList_h__

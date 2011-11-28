@@ -22,7 +22,7 @@
 #include "core/finstructable/tFinstructableGroup.h"
 #include "core/tCoreFlags.h"
 #include "core/tAnnotatable.h"
-#include "core/parameter/tStructureParameterList.h"
+#include "core/parameter/tStaticParameterList.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/tAbstractPort.h"
@@ -60,7 +60,6 @@ static std::set<std::string> startup_loaded_finroc_libs;
 tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, uint flags) :
     tFrameworkElement(parent, name, flags | tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
     xml_file("XML file", this, ""),
-    current_xml_file(""),
     connect_tmp(),
     link_tmp(""),
     save_parameter_config_entries(false),
@@ -71,7 +70,6 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
 tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_, uint flags) :
     tFrameworkElement(parent, name, flags | tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
     xml_file("XML file", this, ""),
-    current_xml_file(""),
     connect_tmp(),
     link_tmp(""),
     save_parameter_config_entries(false),
@@ -111,6 +109,24 @@ void tFinstructableGroup::AddDependency(const rrlib::serialization::tDataTypeBas
     }
   }
 }
+
+void tFinstructableGroup::EvaluateStaticParameters()
+{
+  util::tLock lock1(this);
+  if (xml_file.HasChanged())
+  {
+    //if (this.childCount() == 0) { // TODO: original intension: changing xml files to mutliple existing ones in finstruct shouldn't load all of them
+    if (util::sFiles::FinrocFileExists(xml_file.Get()))
+    {
+      LoadXml(xml_file.Get());
+    }
+    else
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Cannot find XML file ", xml_file.Get(), ". Creating empty group. You may edit and save this group using finstruct.");
+    }
+  }
+}
+
 
 tAbstractPort* tFinstructableGroup::GetChildPort(const util::tString& link)
 {
@@ -188,12 +204,11 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     }
     created = action->CreateModule(parent, name, spl);
     created->SetFinstructed(action, spl);
-    created->Init();
     if (parameters != NULL)
     {
-      (static_cast<tStructureParameterList*>(created->GetAnnotation(tStructureParameterList::cTYPE)))->Deserialize(*parameters);
-      created->StructureParametersChanged();
+      (static_cast<tStaticParameterList*>(created->GetAnnotation(tStaticParameterList::cTYPE)))->Deserialize(*parameters);
     }
+    created->Init();
 
     // continue with children
     for (; child_node != node.GetChildrenEnd(); ++child_node)
@@ -291,10 +306,10 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
       for (rrlib::xml2::tXMLNode::const_iterator node = root.GetChildrenBegin(); node != root.GetChildrenEnd(); ++node)
       {
         util::tString name = node->GetName();
-        if (name.Equals("structureparameter"))
+        if (name.Equals("staticparameter"))
         {
-          tStructureParameterList* spl = tStructureParameterList::GetOrCreate(this);
-          spl->Add(new tStructureParameterBase(node->GetStringAttribute("name"), rrlib::serialization::tDataTypeBase(), false, true));
+          tStaticParameterList* spl = tStaticParameterList::GetOrCreate(this);
+          spl->Add(new tStaticParameterBase(node->GetStringAttribute("name"), rrlib::serialization::tDataTypeBase(), false, true));
         }
         else if (name.Equals("element"))
         {
@@ -396,11 +411,11 @@ void tFinstructableGroup::SaveXml()
     util::tLock lock2(GetRegistryLock());
     saving_thread = util::tThread::CurrentThreadRaw();
     dependencies_tmp.clear();
-    util::tString save_to = util::sFiles::GetFinrocFileToSaveTo(current_xml_file);
+    util::tString save_to = util::sFiles::GetFinrocFileToSaveTo(xml_file.Get());
     if (save_to.Length() == 0)
     {
-      util::tString save_to_alt = util::sFiles::GetFinrocFileToSaveTo(current_xml_file.Replace('/', '_'));
-      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "There does not seem to be any suitable location for: '", current_xml_file, "' . For now, using '", save_to_alt, "'.");
+      util::tString save_to_alt = util::sFiles::GetFinrocFileToSaveTo(xml_file.Get().Replace('/', '_'));
+      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "There does not seem to be any suitable location for: '", xml_file.Get(), "' . For now, using '", save_to_alt, "'.");
       save_to = save_to_alt;
     }
     FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving XML: ", save_to);
@@ -416,15 +431,15 @@ void tFinstructableGroup::SaveXml()
       }
 
       // serialize proxy parameters
-      tStructureParameterList* spl = GetAnnotation<tStructureParameterList>();
+      tStaticParameterList* spl = GetAnnotation<tStaticParameterList>();
       if (spl != NULL)
       {
         for (size_t i = 0; i < spl->Size(); i++)
         {
-          tStructureParameterBase* sp = spl->Get(i);
-          if (sp->IsStructureParameterProxy())
+          tStaticParameterBase* sp = spl->Get(i);
+          if (sp->IsStaticParameterProxy())
           {
-            rrlib::xml2::tXMLNode& proxy = root.AddChildNode("structureparameter");
+            rrlib::xml2::tXMLNode& proxy = root.AddChildNode("staticparameter");
             proxy.SetAttribute("name", sp->GetName());
           }
         }
@@ -501,7 +516,7 @@ void tFinstructableGroup::ScanForCommandLineArgsHelper(std::vector<util::tString
   for (rrlib::xml2::tXMLNode::const_iterator node = parent.GetChildrenBegin(); node != parent.GetChildrenEnd(); ++node)
   {
     util::tString name(node->GetName());
-    if (node->HasAttribute("cmdline") && (name.Equals("structureparameter") || name.Equals("parameter")))
+    if (node->HasAttribute("cmdline") && (name.Equals("staticparameter") || name.Equals("parameter")))
     {
       result.push_back(node->GetStringAttribute("cmdline"));
     }
@@ -515,7 +530,7 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
   ::finroc::core::tFrameworkElement* fe = NULL;
   while ((fe = ci.Next()) != NULL)
   {
-    tStructureParameterList* spl = static_cast<tStructureParameterList*>(fe->GetAnnotation(tStructureParameterList::cTYPE));
+    tStaticParameterList* spl = static_cast<tStaticParameterList*>(fe->GetAnnotation(tStaticParameterList::cTYPE));
     tConstructorParameters* cps = static_cast<tConstructorParameters*>(fe->GetAnnotation(tConstructorParameters::cTYPE));
     if (fe->IsReady() && fe->GetFlag(tCoreFlags::cFINSTRUCTED))
     {
@@ -553,24 +568,6 @@ void tFinstructableGroup::StaticInit()
 {
   startup_type_count = rrlib::serialization::tDataTypeBase::GetTypeCount();
   startup_loaded_finroc_libs = sDynamicLoading::GetLoadedFinrocLibraries();
-}
-
-void tFinstructableGroup::StructureParametersChanged()
-{
-  util::tLock lock1(this);
-  if (!current_xml_file.Equals(xml_file.Get()))
-  {
-    current_xml_file = xml_file.Get();
-    //if (this.childCount() == 0) { // TODO: original intension: changing xml files to mutliple existing ones in finstruct shouldn't load all of them
-    if (util::sFiles::FinrocFileExists(current_xml_file))
-    {
-      LoadXml(current_xml_file);
-    }
-    else
-    {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Cannot find XML file ", current_xml_file, ". Creating empty group. You may edit and save this group using finstruct.");
-    }
-  }
 }
 
 void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode* root)

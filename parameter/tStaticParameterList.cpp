@@ -19,8 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/parameter/tStructureParameterList.h"
-#include "core/parameter/tStructureParameterBase.h"
+#include "core/parameter/tStaticParameterList.h"
+#include "core/parameter/tStaticParameterBase.h"
 #include "rrlib/serialization/tInputStream.h"
 #include "core/tFrameworkElement.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
@@ -32,15 +32,15 @@ namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataType<tStructureParameterList> tStructureParameterList::cTYPE;
-tStructureParameterList tStructureParameterList::cEMPTY;
+rrlib::serialization::tDataType<tStaticParameterList> tStaticParameterList::cTYPE;
+tStaticParameterList tStaticParameterList::cEMPTY;
 
-tStructureParameterList::tStructureParameterList() :
+tStaticParameterList::tStaticParameterList() :
     parameters(),
     create_action(-1)
 {}
 
-void tStructureParameterList::Add(tStructureParameterBase* param)
+void tStaticParameterList::Add(tStaticParameterBase* param)
 {
   if (param != NULL)
   {
@@ -49,7 +49,7 @@ void tStructureParameterList::Add(tStructureParameterBase* param)
   }
 }
 
-void tStructureParameterList::Clear()
+void tStaticParameterList::Clear()
 {
   for (int i = parameters.Size() - 1; i >= 0; i--)
   {
@@ -57,7 +57,7 @@ void tStructureParameterList::Clear()
   }
 }
 
-void tStructureParameterList::Deserialize(rrlib::serialization::tInputStream& is)
+void tStaticParameterList::Deserialize(rrlib::serialization::tInputStream& is)
 {
   if (GetAnnotated() == NULL)
   {
@@ -73,19 +73,19 @@ void tStructureParameterList::Deserialize(rrlib::serialization::tInputStream& is
     tFrameworkElement* ann = static_cast<tFrameworkElement*>(GetAnnotated());
     for (size_t i = 0u; i < parameters.Size(); i++)
     {
-      tStructureParameterBase* param = parameters.Get(i);
+      tStaticParameterBase* param = parameters.Get(i);
       param->Deserialize(is, ann);
     }
-    ann->StructureParametersChanged();
+    ann->DoStaticParameterEvaluation();
   }
 }
 
-void tStructureParameterList::Deserialize(const rrlib::xml2::tXMLNode& node)
+void tStaticParameterList::Deserialize(const rrlib::xml2::tXMLNode& node)
 {
   Deserialize(node, false);
 }
 
-void tStructureParameterList::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context)
+void tStaticParameterList::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context)
 {
   size_t number_of_children = std::distance(node.GetChildrenBegin(), node.GetChildrenEnd());
   if (number_of_children != Size())
@@ -96,38 +96,38 @@ void tStructureParameterList::Deserialize(const rrlib::xml2::tXMLNode& node, boo
   rrlib::xml2::tXMLNode::const_iterator child = node.GetChildrenBegin();
   for (int i = 0; i < count; i++)
   {
-    tStructureParameterBase* param = Get(i);
+    tStaticParameterBase* param = Get(i);
     param->Deserialize(*child, finstruct_context, static_cast<tFrameworkElement*>(GetAnnotated()));
     ++child;
   }
 }
 
 
-tStructureParameterList* tStructureParameterList::GetOrCreate(tFrameworkElement* fe)
+tStaticParameterList* tStaticParameterList::GetOrCreate(tFrameworkElement* fe)
 {
-  tStructureParameterList* result = static_cast<tStructureParameterList*>(fe->GetAnnotation(cTYPE));
+  tStaticParameterList* result = static_cast<tStaticParameterList*>(fe->GetAnnotation(cTYPE));
   if (result == NULL)
   {
-    result = new tStructureParameterList();
+    result = new tStaticParameterList();
     fe->AddAnnotation(result);
   }
   return result;
 }
 
-tConstructorParameters* tStructureParameterList::Instantiate() const
+tConstructorParameters* tStaticParameterList::Instantiate() const
 {
   tConstructorParameters* cp = new tConstructorParameters();
-  tStructureParameterList* c = cp;
+  tStaticParameterList* c = cp;
   c->create_action = create_action;
   for (size_t i = 0u; i < parameters.Size(); i++)
   {
-    tStructureParameterBase* p = parameters.Get(i);
+    tStaticParameterBase* p = parameters.Get(i);
     c->Add(p->DeepCopy());
   }
   return cp;
 }
 
-void tStructureParameterList::Serialize(rrlib::serialization::tOutputStream& os) const
+void tStaticParameterList::Serialize(rrlib::serialization::tOutputStream& os) const
 {
   os.WriteInt(create_action);
   os.WriteInt(parameters.Size());
@@ -137,17 +137,17 @@ void tStructureParameterList::Serialize(rrlib::serialization::tOutputStream& os)
   }
 }
 
-void tStructureParameterList::Serialize(rrlib::xml2::tXMLNode& node) const
+void tStaticParameterList::Serialize(rrlib::xml2::tXMLNode& node) const
 {
   Serialize(node, false);
 }
 
-void tStructureParameterList::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const
+void tStaticParameterList::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const
 {
   for (size_t i = 0u; i < Size(); i++)
   {
     rrlib::xml2::tXMLNode& child = node.AddChildNode("parameter");
-    tStructureParameterBase* param = Get(i);
+    tStaticParameterBase* param = Get(i);
     child.SetAttribute("name", param->GetName());
     param->Serialize(child, finstruct_context);
   }

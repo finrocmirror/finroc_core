@@ -63,6 +63,11 @@ public:
     return default_value.get();
   }
 
+  const T* GetDefault() const
+  {
+    return default_value.get();
+  }
+
 };
 
 template <typename T>
@@ -90,6 +95,11 @@ public:
   }
 
   T* GetDefault()
+  {
+    return &default_value;
+  }
+
+  const T* GetDefault() const
   {
     return &default_value;
   }
@@ -174,7 +184,7 @@ public:
    *               argument, it is interpreted as flags (because every port needs flags).
    */
   template <typename ARG1, typename ... TArgs>
-  tPortCreationInfo(const ARG1& arg1, const TArgs&... rest) :
+  explicit tPortCreationInfo(const ARG1& arg1, const TArgs&... rest) :
       tPortCreationInfoBase(),
       default_value_set(),
       bounds_set(false),
@@ -245,7 +255,7 @@ public:
    * \return Bounds for port
    */
   template < bool BOUNDABLE = boundable >
-  typename std::enable_if<BOUNDABLE, tBounds<T>>::type GetBounds()
+  typename std::enable_if<BOUNDABLE, tBounds<T>>::type GetBounds() const
   {
     return storage.bounds;
   }
@@ -254,6 +264,18 @@ public:
    * \return Pointer to default value
    */
   T* GetDefault()
+  {
+    if (!default_value_set)
+    {
+      FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG_WARNING, "Default value was not set");
+    }
+    return storage.GetDefault();
+  }
+
+  /*!
+   * \return Pointer to default value
+   */
+  const T* GetDefault() const
   {
     if (!default_value_set)
     {
