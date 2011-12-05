@@ -171,7 +171,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
   blackboard::tBlackboardManager::GetInstance();
   __attribute__((unused))
   blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>* server2 = new blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>("testbb");
-  blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> client("testbb", NULL, false);
+  blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> client("testbb", NULL, false, true);
   //client.autoConnect();
   tFrameworkElement::InitAll();
 

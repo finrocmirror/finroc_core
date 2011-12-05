@@ -252,6 +252,10 @@ void tFrameworkElement::DoStaticParameterEvaluation()
 {
   util::tLock lock2(GetRegistryLock());
 
+  // all parameters attached to any of the module's parameters
+  util::tSimpleList<tStaticParameterBase*> attached_parameters;
+  util::tSimpleList<tStaticParameterBase*> attached_parameters_tmp;
+
   tStaticParameterList* spl = GetAnnotation<tStaticParameterList>();
   if (spl != NULL)
   {
@@ -260,8 +264,10 @@ void tFrameworkElement::DoStaticParameterEvaluation()
     bool changed = false;
     for (size_t i = 0; i < spl->Size(); i++)
     {
-      spl->Get(i)->LoadValue(this);
+      spl->Get(i)->LoadValue();
       changed |= spl->Get(i)->HasChanged();
+      spl->Get(i)->GetAllAttachedParameters(attached_parameters_tmp);
+      attached_parameters.AddAll(attached_parameters_tmp);
     }
 
     if (changed)
@@ -290,6 +296,15 @@ void tFrameworkElement::DoStaticParameterEvaluation()
     if (child != NULL && child->IsPrimaryLink() && (!child->GetChild()->IsDeleted()))
     {
       child->GetChild()->DoStaticParameterEvaluation();
+    }
+  }
+
+  // evaluate any attached parameters that have changed, too
+  for (size_t i = 0; i < attached_parameters.Size(); i++)
+  {
+    if (attached_parameters.Get(i)->HasChanged())
+    {
+      attached_parameters.Get(i)->GetParentList()->GetAnnotated()->DoStaticParameterEvaluation();
     }
   }
 }

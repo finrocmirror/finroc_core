@@ -228,8 +228,8 @@ public:
       //Plugins.getInstance().addPlugin(new Blackboard2Plugin());
       //bbServer = new BlackboardServer(blackboardName);
       sbb_server = new blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>(blackboard_name);
-      bb_client = std::shared_ptr<blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> >(new blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer>(partner_blackboard_name, NULL));
-      local_bb_client = std::shared_ptr<blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> >(new blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer>(blackboard_name, NULL));
+      bb_client = std::shared_ptr<blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> >(new blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer>(partner_blackboard_name));
+      local_bb_client = std::shared_ptr<blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer> >(new blackboard::tBlackboardClient<rrlib::serialization::tMemoryBuffer>(blackboard_name));
     }
   }
 

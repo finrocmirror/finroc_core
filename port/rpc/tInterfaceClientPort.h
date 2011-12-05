@@ -118,6 +118,15 @@ public:
   }
 
   /*!
+   * \return Handle of server that handles calls (can be used to detect whether we're connected to a different server). 0 if not connected to a server.
+   */
+  int GetServerHandle()
+  {
+    tInterfacePort* server = GetServer();
+    return server ? server->GetHandle() : 0;
+  }
+
+  /*!
    * \return Is server for port in remote runtime environment?
    */
   inline bool HasRemoteServer()

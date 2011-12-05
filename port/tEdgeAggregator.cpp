@@ -42,7 +42,7 @@ void tEdgeAggregator::EdgeAdded(tAbstractPort* source, tAbstractPort* target)
 {
   tEdgeAggregator* src = GetAggregator(source);
   tEdgeAggregator* dest = GetAggregator(target);
-  if (src != NULL && dest != NULL)
+  if (src != NULL && dest != NULL && (!tFinrocTypeInfo::IsMethodType(source->GetDataType())))
   {
     //System.out.println("edgeAdded: " + src.getQualifiedName() + "->" + dest.getQualifiedName() + " (because of " + source.getQualifiedName() + "->" + target.getQualifiedName() + ")");
     src->EdgeAdded(dest);
@@ -69,7 +69,7 @@ void tEdgeAggregator::EdgeRemoved(tAbstractPort* source, tAbstractPort* target)
 {
   tEdgeAggregator* src = GetAggregator(source);
   tEdgeAggregator* dest = GetAggregator(target);
-  if (src != NULL && dest != NULL)
+  if (src != NULL && dest != NULL && (!tFinrocTypeInfo::IsMethodType(source->GetDataType())))
   {
     //System.out.println("edgeRemoved: " + src.getQualifiedName() + "->" + dest.getQualifiedName() + " (because of " + source.getQualifiedName() + "->" + target.getQualifiedName() + ")");
     src->EdgeRemoved(dest);

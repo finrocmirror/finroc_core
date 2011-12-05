@@ -52,6 +52,7 @@ namespace finroc
 namespace core
 {
 class tFrameworkElement;
+class tStaticParameterList;
 
 /*!
  * \author Max Reichardt
@@ -87,6 +88,9 @@ private:
    */
   tStaticParameterBase* use_value_of;
 
+  /** List that this structure parameter is member of */
+  tStaticParameterList* parent_list;
+
   /*! Index in parameter list */
   int list_index;
 
@@ -117,6 +121,9 @@ private:
 
   /*! Is this a proxy for other static parameters? (as used in finstructable groups) */
   bool structure_parameter_proxy;
+
+  /*! List of attached parameters */
+  util::tSimpleList<tStaticParameterBase*> attached_parameters;
 
 public:
 
@@ -173,15 +180,13 @@ private:
    * Set commandLineOption and configEntry.
    * Check if they changed and possibly load value.
    */
-  void UpdateAndPossiblyLoad(const util::tString& command_line_option_tmp, const util::tString& configEntryTmp, tFrameworkElement* parameterized);
+  void UpdateAndPossiblyLoad(const util::tString& command_line_option_tmp, const util::tString& configEntryTmp);
 
   /*!
    * Check whether change to outerParameterAttachment occured and perform any
    * changes required.
-   *
-   * \param parameterized Parameterized framework element.
    */
-  void UpdateOuterParameterAttachment(tFrameworkElement* parameterized);
+  void UpdateOuterParameterAttachment();
 
 public:
 
@@ -190,7 +195,7 @@ public:
    * \param type DataType of parameter
    * \param constructor_prototype Is this a CreteModuleActionPrototype (no buffer will be allocated)
    */
-  tStaticParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy = false);
+  tStaticParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy = false, const util::tString& config_entry = "");
 
   virtual ~tStaticParameterBase();
 
@@ -211,9 +216,14 @@ public:
     throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
   }
 
-  void Deserialize(rrlib::serialization::tInputStream& is, tFrameworkElement* parameterized);
+  void Deserialize(rrlib::serialization::tInputStream& is);
 
-  void Deserialize(const rrlib::xml2::tXMLNode& node, bool finstructContext, tFrameworkElement* parameterized);
+  void Deserialize(const rrlib::xml2::tXMLNode& node, bool finstructContext);
+
+  /*!
+   * \param result Result buffer for all attached parameters (including those from parameters this parameter is possibly (indirectly) attached to)
+   */
+  void GetAllAttachedParameters(util::tSimpleList<tStaticParameterBase*>& result);
 
   const char* GetLogDescription()
   {
@@ -226,6 +236,14 @@ public:
   inline util::tString GetName()
   {
     return name;
+  }
+
+  /*!
+   * \return List that this structure parameter is member of
+   */
+  tStaticParameterList* GetParentList()
+  {
+    return parent_list;
   }
 
   /*!
@@ -251,10 +269,8 @@ public:
 
   /*!
    * Load value (from any config file entries or command line or whereever)
-   *
-   * \param parent Parent framework element
    */
-  void LoadValue(tFrameworkElement* parent);
+  void LoadValue();
 
   /*!
    * Reset "changed flag".
@@ -281,6 +297,13 @@ public:
   virtual void Set(const util::tString& s);
 
   /*!
+   * \param outer_parameter_attachment Name of outer parameter of finstructable group to configure parameter with.
+   * (set by finstructable group containing module with this parameter)
+   * \param create_outer Create outer parameter if it does not exist yet?
+   */
+  void SetOuterParameterAttachment(const util::tString& outer_parameter_attachment, bool create_outer);
+
+  /*!
    * (Internal helper function to make expressions shorter)
    *
    * \return value or ccValue, depending on data type
@@ -289,6 +312,7 @@ public:
   {
     return GetParameterWithBuffer()->value.get();
   }
+
 };
 
 } // namespace finroc

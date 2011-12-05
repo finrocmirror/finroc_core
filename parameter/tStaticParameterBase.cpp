@@ -36,20 +36,22 @@ namespace finroc
 {
 namespace core
 {
-tStaticParameterBase::tStaticParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy) :
+tStaticParameterBase::tStaticParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy, const util::tString& config_entry) :
     name(name_),
     type(type_),
     value(),
     last_value(),
     enforce_current_value(false),
     use_value_of(this),
+    parent_list(NULL),
     list_index(0),
     command_line_option(),
     outer_parameter_attachment(),
     create_outer_parameter(false),
-    config_entry(),
+    config_entry(config_entry),
     config_entry_set_by_finstruct(false),
-    structure_parameter_proxy(structure_parameter_proxy)
+    structure_parameter_proxy(structure_parameter_proxy),
+    attached_parameters()
 {
   if (!constructor_prototype)
   {
@@ -63,7 +65,16 @@ tStaticParameterBase::~tStaticParameterBase()
 
 void tStaticParameterBase::AttachTo(tStaticParameterBase* other)
 {
+  if (use_value_of != this)
+  {
+    use_value_of->attached_parameters.RemoveElem(this);
+  }
   use_value_of = other == NULL ? this : other;
+  if (use_value_of != this)
+  {
+    use_value_of->attached_parameters.Add(this);
+  }
+
   tStaticParameterBase* sp = GetParameterWithBuffer();
   if (sp->type.GetInfo() == NULL)
   {
@@ -88,7 +99,7 @@ void tStaticParameterBase::CreateBuffer(rrlib::serialization::tDataTypeBase type
   assert(sp->value);
 }
 
-void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is, tFrameworkElement* parameterized)
+void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is)
 {
   if (RemoteValue())
   {
@@ -106,8 +117,8 @@ void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is, t
   util::tString config_entry_tmp = is.ReadString();
   config_entry_set_by_finstruct = is.ReadBoolean();
   enforce_current_value = is.ReadBoolean();
-  UpdateOuterParameterAttachment(parameterized);
-  UpdateAndPossiblyLoad(command_line_option_tmp, config_entry_tmp, parameterized);
+  UpdateOuterParameterAttachment();
+  UpdateAndPossiblyLoad(command_line_option_tmp, config_entry_tmp);
 
   if (is.ReadBoolean())
   {
@@ -122,7 +133,7 @@ void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is, t
   }
 }
 
-void tStaticParameterBase::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstructContext, tFrameworkElement* parameterized)
+void tStaticParameterBase::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstructContext)
 {
   rrlib::serialization::tDataTypeBase dt = type;
   if (node.HasAttribute("type"))
@@ -150,12 +161,12 @@ void tStaticParameterBase::Deserialize(const rrlib::xml2::tXMLNode& node, bool f
   if (node.HasAttribute("attachouter"))
   {
     outer_parameter_attachment = node.GetStringAttribute("attachouter");
-    UpdateOuterParameterAttachment(parameterized);
+    UpdateOuterParameterAttachment();
   }
   else
   {
     outer_parameter_attachment = "";
-    UpdateOuterParameterAttachment(parameterized);
+    UpdateOuterParameterAttachment();
   }
   util::tString config_entry_tmp;
   if (node.HasAttribute("config"))
@@ -168,12 +179,51 @@ void tStaticParameterBase::Deserialize(const rrlib::xml2::tXMLNode& node, bool f
     config_entry_tmp = "";
   }
 
-  UpdateAndPossiblyLoad(command_line_option_tmp, config_entry_tmp, parameterized);
+  UpdateAndPossiblyLoad(command_line_option_tmp, config_entry_tmp);
 }
 
-void tStaticParameterBase::LoadValue(tFrameworkElement* parent)
+void tStaticParameterBase::GetAllAttachedParameters(util::tSimpleList<tStaticParameterBase*>& result)
 {
-  if (!enforce_current_value)
+  result.Clear();
+  result.Add(this);
+
+  for (size_t i = 0; i < result.Size(); i++)
+  {
+    tStaticParameterBase* param = result.Get(i);
+    if (param->use_value_of != NULL && param->use_value_of != this && (!result.Contains(param)))
+    {
+      result.Add(param->use_value_of);
+    }
+    for (size_t j = 0; j < param->attached_parameters.Size(); j++)
+    {
+      tStaticParameterBase* at = param->attached_parameters.Get(j);
+      if (at != this && (!result.Contains(at)))
+      {
+        result.Add(at);
+      }
+    }
+  }
+}
+
+bool tStaticParameterBase::HasChanged()
+{
+  tStaticParameterBase* sp = GetParameterWithBuffer();
+  if (sp->value.get() == last_value.get())
+  {
+    return false;
+  }
+  if ((!sp->value) || (!last_value))
+  {
+    return true;
+  }
+  return !rrlib::serialization::sSerialization::Equals(*sp->value, *last_value);
+}
+
+void tStaticParameterBase::LoadValue()
+{
+  tFrameworkElement* parent = parent_list->GetAnnotated();
+
+  if (use_value_of == this && (!enforce_current_value))
   {
     // command line
     tFrameworkElement* fg = parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
@@ -225,32 +275,18 @@ void tStaticParameterBase::LoadValue(tFrameworkElement* parent)
   }
 }
 
-bool tStaticParameterBase::HasChanged()
-{
-  tStaticParameterBase* sp = GetParameterWithBuffer();
-  if (sp->value.get() == sp->last_value.get())
-  {
-    return false;
-  }
-  if ((!sp->value) || (!sp->last_value))
-  {
-    return true;
-  }
-  return !rrlib::serialization::sSerialization::Equals(*sp->value, *sp->last_value);
-}
-
 void tStaticParameterBase::ResetChanged()
 {
   tStaticParameterBase* sp = GetParameterWithBuffer();
 
   assert(sp->value);
-  if ((!sp->last_value) || sp->last_value->GetType() != sp->value->GetType())
+  if ((!last_value) || last_value->GetType() != sp->value->GetType())
   {
-    sp->last_value.reset(sp->value->GetType().CreateInstanceGeneric());
+    last_value.reset(sp->value->GetType().CreateInstanceGeneric());
   }
-  assert(sp->last_value);
+  assert(last_value);
 
-  rrlib::serialization::sSerialization::DeepCopy(*sp->value, *sp->last_value);
+  rrlib::serialization::sSerialization::DeepCopy(*sp->value, *last_value);
 }
 
 void tStaticParameterBase::Serialize(rrlib::serialization::tOutputStream& os) const
@@ -321,7 +357,15 @@ void tStaticParameterBase::Set(const util::tString& s)
   }
 }
 
-void tStaticParameterBase::UpdateAndPossiblyLoad(const util::tString& command_line_option_tmp, const util::tString& config_entry_tmp, tFrameworkElement* parameterized)
+void tStaticParameterBase::SetOuterParameterAttachment(const util::tString& outer_parameter_attachment, bool create_outer)
+{
+  this->outer_parameter_attachment = outer_parameter_attachment;
+  create_outer_parameter = create_outer;
+
+  UpdateOuterParameterAttachment();
+}
+
+void tStaticParameterBase::UpdateAndPossiblyLoad(const util::tString& command_line_option_tmp, const util::tString& config_entry_tmp)
 {
   bool cmdline_changed = !command_line_option.Equals(command_line_option_tmp);
   bool config_entry_changed = !config_entry.Equals(config_entry_tmp);
@@ -330,13 +374,13 @@ void tStaticParameterBase::UpdateAndPossiblyLoad(const util::tString& command_li
 
   if (use_value_of == this && (cmdline_changed || config_entry_changed))
   {
-    LoadValue(parameterized);
+    LoadValue();
   }
 }
 
-void tStaticParameterBase::UpdateOuterParameterAttachment(tFrameworkElement* parameterized)
+void tStaticParameterBase::UpdateOuterParameterAttachment()
 {
-  if (parameterized == NULL)
+  if (parent_list == NULL)
   {
     return;
   }
@@ -354,7 +398,7 @@ void tStaticParameterBase::UpdateOuterParameterAttachment(tFrameworkElement* par
     {
 
       // find parameter to attach to
-      tFrameworkElement* fg = parameterized->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
+      tFrameworkElement* fg = parent_list->GetAnnotated()->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
       if (fg == NULL)
       {
         FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "No parent finstructable group. Ignoring...");

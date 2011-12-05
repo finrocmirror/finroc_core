@@ -113,7 +113,7 @@ void tFinstructableGroup::AddDependency(const rrlib::serialization::tDataTypeBas
 void tFinstructableGroup::EvaluateStaticParameters()
 {
   util::tLock lock1(this);
-  if (xml_file.HasChanged())
+  if (xml_file.HasChanged() && xml_file.Get().Length() > 0)
   {
     //if (this.childCount() == 0) { // TODO: original intension: changing xml files to mutliple existing ones in finstruct shouldn't load all of them
     if (util::sFiles::FinrocFileExists(xml_file.Get()))

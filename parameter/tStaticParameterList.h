@@ -153,6 +153,8 @@ public:
     return parameters.Get(i);
   }
 
+  tFrameworkElement* GetAnnotated();
+
   /*!
    * \return Index of CreateModuleAction that was used to create framework element
    */

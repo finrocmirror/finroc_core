@@ -88,6 +88,29 @@ public:
   }
 
   /*!
+   * Attach this static parameter to another one.
+   * They will share the same value/buffer.
+   *
+   * \param other Other parameter to attach this one to. Use null or this to detach.
+   */
+  void AttachTo(tStaticParameter<T>& other)
+  {
+    impl->AttachTo(other.impl);
+  }
+
+  /*!
+   * Attach to parameter in outer framework element (e.g. group).
+   *
+   * \param outer_parameter_attachment Name of outer parameter of finstructable group to configure parameter with.
+   * (set by finstructable group containing module with this parameter)
+   * \param create_outer Create outer parameter if it does not exist yet?
+   */
+  void AttachToOuterParameter(const util::tString& outer_parameter_attachment = "", bool create_outer = true)
+  {
+    impl->SetOuterParameterAttachment(outer_parameter_attachment.Length() > 0 ? outer_parameter_attachment : impl->GetName(), create_outer);
+  }
+
+  /*!
    * \return Current parameter value
    * (reference without lock for T = std::string)
    * (without additional locks value is deleted, when parameter is - which doesn't happen while a module is running)
@@ -135,9 +158,9 @@ public:
    * The current value will now be the one any new value is compared with when
    * checking whether value has changed.
    */
-  inline bool ResetChanged()
+  inline void ResetChanged()
   {
-    return impl->ResetChanged();
+    impl->ResetChanged();
   }
 
   /*!
@@ -157,6 +180,7 @@ public:
   {
     SetValue(new_value);
   }
+
 };
 
 } // namespace finroc

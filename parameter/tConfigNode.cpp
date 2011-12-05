@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2010 Max Reichardt,
+ * Copyright (C) 2011 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or

@@ -45,6 +45,7 @@ void tStaticParameterList::Add(tStaticParameterBase* param)
   if (param != NULL)
   {
     param->list_index = parameters.Size();
+    param->parent_list = this;
     parameters.Add(param);
   }
 }
@@ -74,7 +75,7 @@ void tStaticParameterList::Deserialize(rrlib::serialization::tInputStream& is)
     for (size_t i = 0u; i < parameters.Size(); i++)
     {
       tStaticParameterBase* param = parameters.Get(i);
-      param->Deserialize(is, ann);
+      param->Deserialize(is);
     }
     ann->DoStaticParameterEvaluation();
   }
@@ -97,11 +98,15 @@ void tStaticParameterList::Deserialize(const rrlib::xml2::tXMLNode& node, bool f
   for (int i = 0; i < count; i++)
   {
     tStaticParameterBase* param = Get(i);
-    param->Deserialize(*child, finstruct_context, static_cast<tFrameworkElement*>(GetAnnotated()));
+    param->Deserialize(*child, finstruct_context);
     ++child;
   }
 }
 
+tFrameworkElement* tStaticParameterList::GetAnnotated()
+{
+  return static_cast<tFrameworkElement*>(tFinrocAnnotation::GetAnnotated());
+}
 
 tStaticParameterList* tStaticParameterList::GetOrCreate(tFrameworkElement* fe)
 {
