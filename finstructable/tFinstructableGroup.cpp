@@ -242,7 +242,7 @@ bool tFinstructableGroup::IsResponsibleForConfigFileConnections(tFrameworkElemen
   tConfigFile* cf = tConfigFile::Find(ap);
   if (cf == NULL)
   {
-    return false;
+    return this->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP) == NULL;
   }
   tFrameworkElement* config_element = static_cast<tFrameworkElement*>(cf->GetAnnotated());
   const tFrameworkElement* responsible = config_element->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP) ? config_element : config_element->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
@@ -587,7 +587,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
       if (!IsResponsibleForConfigFileConnections(ap))
       {
 
-        if (outermostGroup && info->GetCommandLineOption().Length() >= 0)
+        if (outermostGroup && info->GetCommandLineOption().Length() > 0)
         {
           rrlib::xml2::tXMLNode& config = root->AddChildNode("parameter");
           config.SetAttribute("link", GetEdgeLink(ap));
