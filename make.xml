@@ -4,6 +4,7 @@
   <finroclibrary name="core" libs="dl">
     <sources exclude="default_main_wrapper.* test/** finstructable/pFinstructed.cpp">
       **.cpp
+      **.h
     </sources>
   </finroclibrary>
   
