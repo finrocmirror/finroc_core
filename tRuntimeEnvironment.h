@@ -27,7 +27,6 @@
 
 #include "core/tCoreRegister.h"
 #include "core/tFrameworkElement.h"
-#include "rrlib/finroc_core_utils/container/tConcurrentMap.h"
 #include "core/tRuntimeListener.h"
 #include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
@@ -65,13 +64,13 @@ public:
     tRuntimeEnvironment* const outer_class_ptr;
 
     /*! Global register of all ports. Allows accessing ports with simple handle. */
-    std::shared_ptr<tCoreRegister<tAbstractPort*> > ports;
+    std::shared_ptr<tCoreRegister<tAbstractPort*>> ports;
 
     /*! Global register of all framework elements (except of ports) */
     tCoreRegister<tFrameworkElement*> elements;
 
     /*! Edges dealing with linked ports */
-    util::tConcurrentMap<util::tString, tLinkEdge*> link_edges;
+    std::map<std::string, tLinkEdge*> link_edges;
 
     /*! List with runtime listeners */
     tRuntimeListenerManager listeners;
@@ -85,7 +84,7 @@ public:
   public:
 
     /*! Lock to thread local cache list */
-    std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > infos_lock;
+    std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*>> infos_lock;
 
     /*! Mutex */
     mutable util::tMutexLockOrder obj_mutex;
@@ -94,7 +93,7 @@ public:
         outer_class_ptr(outer_class_ptr_),
         ports(new tCoreRegister<tAbstractPort*>(true)),
         elements(false),
-        link_edges(NULL),
+        link_edges(),
         listeners(),
         temp_buffer(),
         alternative_link_roots(),

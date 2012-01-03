@@ -26,6 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tReusableTL.h"
+#include "rrlib/finroc_core_utils/tGarbageCollector.h"
 #include "rrlib/serialization/tGenericObjectManager.h"
 
 namespace finroc
@@ -43,13 +44,18 @@ protected:
 
   virtual void DeleteThis()
   {
-    this->~tReusableGenericObjectManagerTL();
-    delete GetObject();
+    util::tGarbageCollector::DeleteRT(this);
   }
 
 public:
 
   tReusableGenericObjectManagerTL() {}
+
+  virtual void CustomDelete(bool called_from_gc)
+  {
+    this->~tReusableGenericObjectManagerTL();
+    delete GetObject();
+  }
 
   inline util::tString GetContentString() const
   {

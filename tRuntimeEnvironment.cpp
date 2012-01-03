@@ -72,15 +72,15 @@ void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge* edge
   FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, edge_log, "Adding link edge connecting to ", link);
   {
     util::tLock lock2(registry);
-    tLinkEdge* interested = registry.link_edges.Get(link);
-    if (interested == NULL)
+    if (registry.link_edges.find(link.GetStdString()) == registry.link_edges.end())
     {
       // add first edge
-      registry.link_edges.Put(link, edge);
+      registry.link_edges[link.GetStdString()] = edge;
     }
     else
     {
       // insert edge
+      tLinkEdge* interested = registry.link_edges[link.GetStdString()];
       tLinkEdge* next = interested->GetNext();
       interested->SetNext(edge);
       edge->SetNext(next);
@@ -270,16 +270,16 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* e
 {
   {
     util::tLock lock2(registry);
-    tLinkEdge* current = registry.link_edges.Get(link);
+    tLinkEdge* current = registry.link_edges[link.GetStdString()];
     if (current == edge)
     {
       if (current->GetNext() == NULL)    // remove entries for this link completely
       {
-        registry.link_edges.Remove(link);
+        registry.link_edges.erase(link.GetStdString());
       }
       else    // remove first element
       {
-        registry.link_edges.Put(link, current->GetNext());
+        registry.link_edges[link.GetStdString()] = current->GetNext();
       }
     }
     else    // remove element out of linked list
@@ -305,7 +305,7 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tAbstractPor
 {
   {
     util::tLock lock2(registry);
-    for (tLinkEdge* current = registry.link_edges.Get(link); current != NULL; current = current->GetNext())
+    for (tLinkEdge* current = registry.link_edges[link.GetStdString()]; current != NULL; current = current->GetNext())
     {
       if (current->GetPortHandle() == partner_port->GetHandle())
       {
@@ -350,11 +350,15 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement* ele
           ap->GetQualifiedLink(registry.temp_buffer, i);
           util::tString s = registry.temp_buffer.ToString();
           FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_2, edge_log, "Checking link ", s, " with respect to link edges");
-          tLinkEdge* le = registry.link_edges.Get(s);
-          while (le != NULL)
+
+          if (registry.link_edges.find(s.GetStdString()) != registry.link_edges.end())
           {
-            le->LinkAdded(this, s, ap);
-            le = le->GetNext();
+            tLinkEdge* le = registry.link_edges[s.GetStdString()];
+            while (le != NULL)
+            {
+              le->LinkAdded(this, s, ap);
+              le = le->GetNext();
+            }
           }
         }
 
