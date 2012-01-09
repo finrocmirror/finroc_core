@@ -81,6 +81,7 @@ void tModuleBase::CheckParameters()
 {
   if (parameters_changed.parameters_changed)
   {
+    ProcessChangedFlags(*parameters);
     parameters_changed.parameters_changed = false;
     ParametersChanged();
   }
@@ -91,25 +92,17 @@ void tModuleBase::tParameterChangeDetector::PortChanged(tAbstractPort* origin, c
   parameters_changed = true;
 }
 
-bool tModuleBase::HasAnyPortChanged(tEdgeAggregator* ea)
+bool tModuleBase::ProcessChangedFlags(tFrameworkElement& port_group)
 {
-  bool result = false;
-  tChildIterator ci(ea);
+  bool any_changed = false;
+  tChildIterator ci(&port_group);
   tAbstractPort* ap = NULL;
   while ((ap = ci.NextPort()) != NULL)
   {
-    result |= ap->HasChanged();
-  }
-  return result;
-}
-
-void tModuleBase::ResetChangedFlags(tEdgeAggregator* ea)
-{
-  tChildIterator ci(ea);
-  tAbstractPort* ap = NULL;
-  while ((ap = ci.NextPort()) != NULL)
-  {
+    bool changed = ap->HasChanged();
     ap->ResetChanged();
+    any_changed |= changed;
+    ap->SetCustomChangedFlag(changed);
   }
+  return any_changed;
 }
-

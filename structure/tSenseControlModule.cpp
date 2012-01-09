@@ -70,10 +70,12 @@ tSenseControlModule::tSenseControlModule(tFrameworkElement *parent, const util::
     controller_input(new tPortGroup(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA, tPortFlags::cINPUT_PORT)),
     controller_output(new tPortGroup(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA, tPortFlags::cOUTPUT_PORT)),
     control_task(this),
+    controller_input_changed(true),
 
     sensor_input(new tPortGroup(this, "Sensor Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA, tPortFlags::cINPUT_PORT)),
     sensor_output(new tPortGroup(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA, tPortFlags::cOUTPUT_PORT)),
-    sense_task(this)
+    sense_task(this),
+    sensor_input_changed(true)
 {
   controller_input->AddAnnotation(new tPeriodicFrameworkElementTask(this->controller_input, this->controller_output, &this->control_task));
   sensor_input->AddAnnotation(new tPeriodicFrameworkElementTask(this->sensor_input, this->sensor_output, &this->sense_task));
@@ -104,8 +106,8 @@ tSenseControlModule::ControlTask::ControlTask(tSenseControlModule *module)
 void tSenseControlModule::ControlTask::ExecuteTask()
 {
   this->module->CheckParameters();
+  this->module->controller_input_changed = this->module->ProcessChangedFlags(this->module->GetControllerInputs());
   this->module->Control();
-  this->module->ResetChangedFlags(this->module->controller_input);
 }
 
 //----------------------------------------------------------------------
@@ -121,6 +123,6 @@ tSenseControlModule::SenseTask::SenseTask(tSenseControlModule *module)
 void tSenseControlModule::SenseTask::ExecuteTask()
 {
   this->module->CheckParameters();
+  this->module->sensor_input_changed = this->module->ProcessChangedFlags(this->module->GetSensorInputs());
   this->module->Sense();
-  this->module->ResetChangedFlags(this->module->sensor_input);
 }

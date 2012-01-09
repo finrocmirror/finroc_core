@@ -69,7 +69,8 @@ tModule::tModule(tFrameworkElement *parent, const util::tString &name)
 
     input(new tPortGroup(this, "Input", tEdgeAggregator::cIS_INTERFACE, tPortFlags::cINPUT_PORT)),
     output(new tPortGroup(this, "Output", tEdgeAggregator::cIS_INTERFACE, tPortFlags::cOUTPUT_PORT)),
-    update_task(this)
+    update_task(this),
+    input_changed(true)
 {
   this->AddAnnotation(new tPeriodicFrameworkElementTask(this->input, this->output, &this->update_task));
 }
@@ -93,6 +94,6 @@ tModule::UpdateTask::UpdateTask(tModule *module)
 void tModule::UpdateTask::ExecuteTask()
 {
   this->module->CheckParameters();
+  this->module->input_changed = this->module->ProcessChangedFlags(this->module->GetInputs());
   this->module->Update();
-  this->module->ResetChangedFlags(this->module->input);
 }

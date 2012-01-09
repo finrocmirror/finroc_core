@@ -86,6 +86,13 @@ private:
   /*! Has port changed since last reset? (see constants above) */
   volatile int8 changed;
 
+  /*!
+   * Has port changed since last reset? Flag for use by custom API - not used/accessed by core port classes.
+   * Defined here, because it shouldn't require any more memory due to alignment.
+   * Alternative would be letting the API allocate an extra memory block per port, just to store this.
+   */
+  int8 custom_changed_flag;
+
   /*! Edges emerging from this port - raw lists seem the most reasonable approach here */
   tEdgeList<>* edges_src;
 
@@ -463,6 +470,14 @@ public:
   void GetConnectionPartners(util::tSimpleList<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges, bool finstructed_edges_only = false);
 
   /*!
+   * \return Has port changed since last reset? (Flag for use by custom API - not used/accessed by core port classes.)
+   */
+  int8 GetCustomChangedFlag()
+  {
+    return custom_changed_flag;
+  }
+
+  /*!
    * \return Type of port data
    */
   inline const rrlib::serialization::tDataTypeBase GetDataType() const
@@ -699,6 +714,14 @@ public:
   inline void SetChanged(int8 change_constant)
   {
     changed = change_constant;
+  }
+
+  /*!
+   * \param new_value New value for custom changed flag (for use by custom API - not used/accessed by core port classes.)
+   */
+  void SetCustomChangedFlag(int8 new_value)
+  {
+    custom_changed_flag = new_value;
   }
 
   /*!

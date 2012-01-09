@@ -85,6 +85,9 @@ class tModule : public tModuleBase
   finroc::core::tPortGroup *output;
   UpdateTask update_task;
 
+  /*! Has any input port changed since last cycle? */
+  bool input_changed;
+
 //----------------------------------------------------------------------
 // Protected methods
 //----------------------------------------------------------------------
@@ -99,13 +102,13 @@ public:
 
   /*!
    * May be called in Update() method to check
-   * whether any input port has changed.
+   * whether any input port has changed, since last call to Update().
    *
-   * (Changed flags are reset after Update() is called)
+   * (Changed flags are reset automatically)
    */
   bool InputChanged()
   {
-    return HasAnyPortChanged(input);
+    return input_changed;
   }
 
   /**

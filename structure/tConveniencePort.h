@@ -143,6 +143,26 @@ public:
   template<typename A1, typename ... ARest>
   tConveniencePort(uint flags, tFrameworkElement*(*getContainer)(BASE*), const A1& arg1, const ARest&... rest) : PORT(CreatePCI(flags, getContainer, arg1, rest...)) {}
 
+  /*!
+   * (relevant for input ports and parameters only)
+   *
+   * \return Has port changed since last reset?
+   */
+  bool HasChanged()
+  {
+    return HasChanged(this);
+  }
+
+  /*!
+   * Resets port's changed flag
+   * (both "real" port's and the one for the custom API)
+   * (usually does not need to called - only if you want to ignore more changes)
+   */
+  void ResetChanged()
+  {
+    ResetChanged(this);
+  }
+
 protected:
 
   /*!
@@ -184,6 +204,28 @@ protected:
       result.parent = getContainer(static_cast<BASE*>(result.parent));
     }
     return result;
+  }
+
+private:
+
+  /*! Helper methods for different kinds of base classes */
+  static bool HasChanged(tPort<T>* p)
+  {
+    return p->GetWrapped()->GetCustomChangedFlag() != 0;
+  }
+  static bool HasChanged(tStaticParameter<T>* p)
+  {
+    return p->HasChanged();
+  }
+
+  void ResetChanged(tPort<T>* p)
+  {
+    p->ResetChanged();
+    p->GetWrapped()->SetCustomChangedFlag(0);
+  }
+  void ResetChanged(tStaticParameter<T>* p)
+  {
+    p->ResetChanged();
   }
 };
 

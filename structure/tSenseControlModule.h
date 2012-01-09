@@ -93,9 +93,15 @@ class tSenseControlModule : public tModuleBase
   finroc::core::tPortGroup *controller_output;
   ControlTask control_task;
 
+  /*! Has any controller input port changed since last cycle? */
+  bool controller_input_changed;
+
   finroc::core::tPortGroup *sensor_input;
   finroc::core::tPortGroup *sensor_output;
   SenseTask sense_task;
+
+  /*! Has any sensor input port changed since last cycle? */
+  bool sensor_input_changed;
 
 //----------------------------------------------------------------------
 // Protected methods
@@ -113,24 +119,24 @@ public:
 
   /*!
    * May be called in Sense() method to check
-   * whether any sensor input port has changed.
+   * whether any sensor input port has changed, since last call to Sense().
    *
-   * (Changed flags are reset after Sense() is called)
+   * (Changed flags are reset automatically)
    */
   bool SensorInputChanged()
   {
-    return HasAnyPortChanged(sensor_input);
+    return sensor_input_changed;
   }
 
   /*!
    * May be called in Control() method to check
-   * whether any controller input port has changed.
+   * whether any controller input port has changed, since last call to Control().
    *
-   * (Changed flags are reset after Control() is called)
+   * (Changed flags are reset automatically)
    */
   bool ControllerInputChanged()
   {
-    return HasAnyPortChanged(controller_input);
+    return controller_input_changed;
   }
 
   /**

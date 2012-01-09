@@ -113,20 +113,18 @@ protected:
   virtual void ParametersChanged() {}
 
   /*!
-   * Has any port in edge aggregator changed?
-   * (should only be called by module classes such as tModule and tSenseControlModule)
+   * (Automatically called)
+   * Checks and resets all changed flags of ports in specified port group
+   * and set custom API changed flags accordingly.
    *
-   * \param ea Edge aggregator to check
-   */
-  bool HasAnyPortChanged(tEdgeAggregator* ea);
-
-  /*!
-   * Reset changed flags of all ports
-   * (should only be called by module classes such as tModule and tSenseControlModule)
+   * This way, all changed flags can be reset automatically without the risk
+   * of missing a change
+   * (which could happen when resetting after Update()/Sense()/Control() call).
    *
-   * \param ea Edge aggregator containing ports to be reset
+   * \param port_group Port group to process
+   * \return Has any port changed since last call?
    */
-  void ResetChangedFlags(tEdgeAggregator* ea);
+  bool ProcessChangedFlags(tFrameworkElement& port_group);
 
 public:
 
@@ -148,7 +146,7 @@ public:
   }
 
   /*!
-   * (Should only be called by abstract module classes succh as tModule and tSenseControlModule)
+   * (Should only be called by abstract module classes such as tModule and tSenseControlModule)
    *
    * Calls ParametersChanged() if a parameter change was detected and resets change flag
    */
