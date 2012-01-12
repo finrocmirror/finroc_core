@@ -158,7 +158,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tParameter(const ARGS&... args)
-        : tConveniencePort < T, tModuleBase, finroc::core::tParameter<T>>(0u, GetContainer, args...)
+        : tConveniencePort < T, tModuleBase, finroc::core::tParameter<T>>(GetContainer, args...)
     {
       assert(this->GetWrapped()->GetParent()->DescriptionEquals("Parameters"));
       this->AddPortListener(&static_cast<tModuleBase*>(this->GetWrapped()->GetParent()->GetParent())->parameters_changed);
@@ -178,7 +178,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tStaticParameter(const ARGS&... args)
-        : tConveniencePort < T, tModuleBase, finroc::core::tStaticParameter<T> >(0u, GetContainer, args...)
+        : tConveniencePort < T, tModuleBase, finroc::core::tStaticParameter<T> >(GetContainer, args...)
     {
     }
 

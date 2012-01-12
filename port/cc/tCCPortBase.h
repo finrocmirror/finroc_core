@@ -158,6 +158,10 @@ private:
     if (!(IsInitialized() || cINFORM_LISTENERS))
     {
       PrintNotReadyMessage("Ignoring publishing request.");
+
+      // Possibly recycle
+      data->AddLock();
+      data->ReleaseLock();
       return;
     }
 

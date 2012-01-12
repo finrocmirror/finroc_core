@@ -146,6 +146,10 @@ private:
     if (!(IsInitialized() || cINFORM_LISTENERS))
     {
       PrintNotReadyMessage("Ignoring publishing request.");
+
+      // Possibly recycle
+      data->GetCurReference()->GetRefCounter()->AddLock();
+      data->GetCurReference()->GetRefCounter()->ReleaseLock();
       return;
     }
 

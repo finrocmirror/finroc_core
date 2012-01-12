@@ -52,7 +52,7 @@ class tPortGroup : public tEdgeAggregator
 private:
 
   /*! Default flags for any ports to be created in this Group */
-  const int default_port_flags;
+  const uint default_port_flags;
 
 public:
 
@@ -181,6 +181,13 @@ public:
     DisconnectAll(incoming, outgoing, start_with.GetWrapped());
   }
 
+  /*!
+   * \return Default flags for any ports to be created in this Group
+   */
+  uint GetDefaultPortFlags()
+  {
+    return default_port_flags;
+  }
 };
 
 } // namespace finroc

@@ -172,7 +172,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tControllerInput(const ARGS&... args)
-        : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cINPUT_PORT, GetContainer, args...)
+        : tConveniencePort < T, tSenseControlModule, tPort<T>>(GetContainer, args...)
     {}
 
   private:
@@ -188,7 +188,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tControllerOutput(const ARGS&... args)
-        : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cOUTPUT_PORT, GetContainer, args...)
+        : tConveniencePort < T, tSenseControlModule, tPort<T>>(GetContainer, args...)
     {}
 
   private:
@@ -204,7 +204,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tSensorInput(const ARGS&... args)
-        : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cINPUT_PORT, GetContainer, args...)
+        : tConveniencePort < T, tSenseControlModule, tPort<T>>(GetContainer, args...)
     {}
 
   private:
@@ -220,7 +220,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tSensorOutput(const ARGS&... args)
-        : tConveniencePort < T, tSenseControlModule, tPort<T>>(tPortFlags::cOUTPUT_PORT, GetContainer, args...)
+        : tConveniencePort < T, tSenseControlModule, tPort<T>>(GetContainer, args...)
     {}
 
   private:
@@ -230,7 +230,12 @@ public:
     }
   };
 
-  tSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
+  /*!
+   * \param parent Parent
+   * \param name Name of module
+   * \param share_so_and_ci_ports Share sensor output and controller input ports so that they can be accessed from other runtime environments?
+   */
+  tSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name, bool share_so_and_ci_ports = false);
 
   /*!
    * \return Parent port group of all controller inputs

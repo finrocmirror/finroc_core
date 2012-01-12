@@ -68,14 +68,14 @@ using namespace rrlib::logging;
 //----------------------------------------------------------------------
 // tGroup constructors
 //----------------------------------------------------------------------
-tGroup::tGroup(tFrameworkElement *parent, const util::tString &name, const util::tString &structure_config_file)
+tGroup::tGroup(tFrameworkElement *parent, const util::tString &name, const util::tString &structure_config_file, bool share_so_and_ci_ports)
     : tFinstructableGroup(parent, name, structure_config_file),
 
-    controller_input(new tPortGroup(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA, tPortFlags::cINPUT_PROXY)),
+    controller_input(new tPortGroup(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA, tPortFlags::cINPUT_PROXY | (share_so_and_ci_ports ? tCoreFlags::cSHARED : 0))),
     controller_output(new tPortGroup(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA, tPortFlags::cOUTPUT_PROXY)),
 
     sensor_input(new tPortGroup(this, "Sensor Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA, tPortFlags::cINPUT_PROXY)),
-    sensor_output(new tPortGroup(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA, tPortFlags::cOUTPUT_PROXY)),
+    sensor_output(new tPortGroup(this, "Sensor Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cSENSOR_DATA, tPortFlags::cOUTPUT_PROXY | (share_so_and_ci_ports ? tCoreFlags::cSHARED : 0))),
     auto_name_port_count(0),
     count_for_type(NULL)
 {

@@ -42,6 +42,7 @@
 // Internal includes with ""
 //----------------------------------------------------------------------
 #include "core/structure/tStructureElementRegister.h"
+#include "core/port/tPortGroup.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -113,7 +114,7 @@ class tConveniencePort : public PORT, public tConveniencePortBase<BASE>
 {
 public:
 
-  tConveniencePort(uint flags, tFrameworkElement*(*getContainer)(BASE*)) : PORT(tPortCreationInfo<T>(this->GetPortName(), getContainer(this->FindParent()), flags)) {}
+  tConveniencePort(tFrameworkElement*(*getContainer)(BASE*)) : PORT(CreateStandardPCI(this->GetPortName(), getContainer(this->FindParent()))) {}
 
   /*!
    * Constructor takes variadic argument list... just any properties you want to assign to port.
@@ -141,7 +142,7 @@ public:
    * numeric type: The first numeric argument is interpreted as default_value.
    */
   template<typename A1, typename ... ARest>
-  tConveniencePort(uint flags, tFrameworkElement*(*getContainer)(BASE*), const A1& arg1, const ARest&... rest) : PORT(CreatePCI(flags, getContainer, arg1, rest...)) {}
+  tConveniencePort(tFrameworkElement*(*getContainer)(BASE*), const A1& arg1, const ARest&... rest) : PORT(CreatePCI(getContainer, arg1, rest...)) {}
 
   /*!
    * (relevant for input ports and parameters only)
@@ -166,15 +167,30 @@ public:
 protected:
 
   /*!
-   * Create port creation info for this convenience port
+   * Create port creation info for this convenience port (non-template constructor)
+   */
+  tPortCreationInfo<T> CreateStandardPCI(const util::tString& name, tFrameworkElement* parent)
+  {
+    tPortCreationInfo<T> result;
+    result.description = name;
+    result.parent = parent;
+    if (result.parent && typeid(*result.parent) == typeid(tPortGroup))
+    {
+      result.flags |= static_cast<tPortGroup*>(result.parent)->GetDefaultPortFlags();
+    }
+    return result;
+  }
+
+  /*!
+   * Create port creation info for this convenience port (template constructor
    */
   template<typename A1, typename ... ARest>
-  tPortCreationInfo<T> CreatePCI(uint flags, tFrameworkElement*(*getContainer)(BASE*), const A1& arg1, const ARest&... rest)
+  tPortCreationInfo<T> CreatePCI(tFrameworkElement*(*getContainer)(BASE*), const A1& arg1, const ARest&... rest)
   {
     tPortCreationInfo<T> result;
     if (internal::tIsString<A1>::value)
     {
-      result = tPortCreationInfo<T>(arg1, rest..., flags);
+      result = tPortCreationInfo<T>(arg1, rest...);
       if (result.description.Length() == 0)
       {
         result.description = this->GetPortName();
@@ -193,7 +209,7 @@ protected:
     }
     else
     {
-      result = tPortCreationInfo<T>(this->GetPortName(), arg1, rest..., flags);
+      result = tPortCreationInfo<T>(this->GetPortName(), arg1, rest...);
     }
     if (result.parent == NULL)
     {
@@ -202,6 +218,10 @@ protected:
     else
     {
       result.parent = getContainer(static_cast<BASE*>(result.parent));
+    }
+    if (result.parent && typeid(*result.parent) == typeid(tPortGroup))
+    {
+      result.flags |= static_cast<tPortGroup*>(result.parent)->GetDefaultPortFlags();
     }
     return result;
   }

@@ -131,7 +131,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tControllerInput(const ARGS&... args)
-        : tConveniencePort < T, tGroup, tPort<T> > (tPortFlags::cINPUT_PROXY, GetContainer, args...)
+        : tConveniencePort < T, tGroup, tPort<T> > (GetContainer, args...)
     {}
 
   private:
@@ -147,7 +147,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tControllerOutput(const ARGS&... args)
-        : tConveniencePort < T, tGroup, tPort<T> > (tPortFlags::cOUTPUT_PROXY, GetContainer, args...)
+        : tConveniencePort < T, tGroup, tPort<T> > (GetContainer, args...)
     {}
 
   private:
@@ -163,7 +163,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tSensorInput(const ARGS&... args)
-        : tConveniencePort < T, tGroup, tPort<T> >(tPortFlags::cINPUT_PROXY, GetContainer, args...)
+        : tConveniencePort < T, tGroup, tPort<T> >(GetContainer, args...)
     {}
 
   private:
@@ -179,7 +179,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tSensorOutput(const ARGS&... args)
-        : tConveniencePort < T, tGroup, tPort<T>>(tPortFlags::cOUTPUT_PROXY, GetContainer, args...)
+        : tConveniencePort < T, tGroup, tPort<T>>(GetContainer, args...)
     {}
 
   private:
@@ -199,7 +199,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tStaticParameter(const ARGS&... args)
-        : tConveniencePort < T, tGroup, finroc::core::tStaticParameter<T> >(0u, GetContainer, args...)
+        : tConveniencePort < T, tGroup, finroc::core::tStaticParameter<T> >(GetContainer, args...)
     {
     }
 
@@ -210,7 +210,13 @@ public:
     }
   };
 
-  tGroup(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name, const finroc::util::tString &structure_config_file);
+  /*!
+   * \param parent Parent
+   * \param name Name of module
+   * \param structure_config_file XML
+   * \param share_so_and_ci_ports Share sensor output and controller input ports so that they can be accessed from other runtime environments?
+   */
+  tGroup(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name, const finroc::util::tString &structure_config_file, bool share_so_and_ci_ports = false);
 
   virtual ~tGroup();
 
