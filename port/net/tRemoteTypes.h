@@ -85,13 +85,6 @@ private:
   /*! Remote Global default update time */
   int16 global_default;
 
-public:
-
-  /*! Log domain for edges */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "remote_types");
-
-private:
-
   /*!
    * Init remote data type information from input stream buffer.
    * (call only once!)

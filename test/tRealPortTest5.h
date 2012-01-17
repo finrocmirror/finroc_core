@@ -50,9 +50,6 @@ public:
 
   static tRuntimeEnvironment* re;
 
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "test");
-
   tRealPortTest5() {}
 
   inline static util::tString GetLogDescription()

@@ -100,17 +100,17 @@ void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& gro
   }
   if (start_with != NULL)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Port ", start_with->GetQualifiedName(), " no child of ", this->GetQualifiedName(), ". Did not connect anything.");
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Port ", start_with->GetQualifiedName(), " no child of ", this->GetQualifiedName(), ". Did not connect anything.");
   }
   if (count > 0)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Could only connect ", (org_count - count), " ports (", org_count, " desired).");
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could only connect ", (org_count - count), " ports (", org_count, " desired).");
   }
 }
 
 tAbstractPort* tPortGroup::CreatePort(const util::tString& name, rrlib::serialization::tDataTypeBase type, int extra_flags)
 {
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating port ", name, " in IOVector ", this->GetQualifiedLink());
+  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", this->GetQualifiedLink());
   tAbstractPort* ap = NULL;
   if (tFinrocTypeInfo::IsStdType(type))
   {
@@ -126,7 +126,7 @@ tAbstractPort* tPortGroup::CreatePort(const util::tString& name, rrlib::serializ
   }
   else
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Cannot create port with type: ", type.GetName());
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot create port with type: ", type.GetName());
   }
   if (ap != NULL)
   {

@@ -78,7 +78,7 @@ tCreateFrameworkElementAction* tPlugins::LoadModuleType(const util::tString& gro
     }
   }
 
-  FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Could not find/load module ", name, " in ", group);
+  FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not find/load module ", name, " in ", group);
   return NULL;
 }
 

@@ -83,7 +83,7 @@ void tThreadContainerThread::MainLoopCallback()
         }
 
         // ok, we didn't find module to continue with... (loop)
-        FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Detected loop: doing traceback");
+        FINROC_LOG_PRINT_TO(thread_containers, rrlib::logging::eLL_WARNING, "Detected loop: doing traceback");
         trace_back.Clear();
         tPeriodicFrameworkElementTask* current = tasks.Get(0);
         trace_back.Add(current);
@@ -103,7 +103,7 @@ void tThreadContainerThread::MainLoopCallback()
           }
           if (end)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Choosing ", current->incoming->GetQualifiedName(), " as next element");
+            FINROC_LOG_PRINT_TO(thread_containers, rrlib::logging::eLL_WARNING, "Choosing ", current->incoming->GetQualifiedName(), " as next element");
             schedule.Add(current);
             tasks.RemoveElem(current);
 

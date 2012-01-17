@@ -101,9 +101,6 @@ public:
 
 public:
 
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "test");
-
   static const bool cCC_TESTS = false, cSTD_TESTS = false;
 
   static const bool cBB_TESTS = true;
@@ -469,7 +466,7 @@ public:
         }
         catch (const blackboard::tBBLockException& ex)
         {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Read-locking blackboard failed");
+          FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Read-locking blackboard failed");
         }
       }
 

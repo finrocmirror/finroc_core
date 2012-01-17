@@ -78,11 +78,6 @@ private:
   /*! CreateModuleAction */
   static tStandardCreateModuleAction<tFinstructableGroup> cCREATE_ACTION;
 
-public:
-
-  /*! Log domain for edges */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(edge_log, "finstructable");
-
 private:
 
   /*!

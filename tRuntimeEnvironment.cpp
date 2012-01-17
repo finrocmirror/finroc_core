@@ -69,7 +69,7 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
 
 void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge* edge)
 {
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, edge_log, "Adding link edge connecting to ", link);
+  FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Adding link edge connecting to ", link);
   {
     util::tLock lock2(registry);
     if (registry.link_edges.find(link.GetStdString()) == registry.link_edges.end())
@@ -296,7 +296,7 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* e
         prev = current;
         current = current->GetNext();
       }
-      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, log_domain, "warning: Could not remove link edge for link: ", link);
+      FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_WARNING, "warning: Could not remove link edge for link: ", link);
     }
   }
 }
@@ -349,7 +349,7 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement* ele
         {
           ap->GetQualifiedLink(registry.temp_buffer, i);
           util::tString s = registry.temp_buffer.ToString();
-          FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_2, edge_log, "Checking link ", s, " with respect to link edges");
+          FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_2, "Checking link ", s, " with respect to link edges");
 
           if (registry.link_edges.find(s.GetStdString()) != registry.link_edges.end())
           {

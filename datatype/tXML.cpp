@@ -37,7 +37,7 @@ tXML::tXML() :
 
 void tXML::Deserialize(const rrlib::xml2::tXMLNode& node)
 {
-  Set(node.GetFirstChild().GetXMLDump(true));
+  Set(node.FirstChild().GetXMLDump(true));
 }
 
 void tXML::Serialize(rrlib::xml2::tXMLNode& node) const
@@ -46,7 +46,7 @@ void tXML::Serialize(rrlib::xml2::tXMLNode& node) const
   if (s.Length() > 0)
   {
     rrlib::xml2::tXMLDocument doc(static_cast<const void*>(s.GetCString()), s.Length() + 1);
-    node.AddChildNode(doc.GetRootNode(), true);
+    node.AddChildNode(doc.RootNode(), true);
   }
 }
 

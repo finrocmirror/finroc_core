@@ -101,7 +101,7 @@ void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vecto
   }
   flags_ |= tmp;
 
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Creating port ", name, " in IOVector ", io_vector_->GetQualifiedLink());
+  FINROC_LOG_PRINT_TO(port_creation_list, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", io_vector_->GetQualifiedLink());
   if (tFinrocTypeInfo::IsStdType(dt))
   {
     ap = new tPortBase(tPortCreationInfoBase(name, io_vector_, dt, flags_));
@@ -116,7 +116,7 @@ void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vecto
   }
   else
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Cannot create port with type: ", dt.GetName());
+    FINROC_LOG_PRINT_TO(port_creation_list, rrlib::logging::eLL_WARNING, "Cannot create port with type: ", dt.GetName());
   }
   if (ap != NULL)
   {
@@ -178,10 +178,10 @@ void tPortCreationList::Deserialize(const rrlib::xml2::tXMLNode& node)
     util::tSimpleList<tAbstractPort*> ports;
     GetPorts(io_vector, ports);
     size_t i = 0u;
-    for (rrlib::xml2::tXMLNode::const_iterator port = node.GetChildrenBegin(); port != node.GetChildrenEnd(); ++port, ++i)
+    for (rrlib::xml2::tXMLNode::const_iterator port = node.ChildrenBegin(); port != node.ChildrenEnd(); ++port, ++i)
     {
       tAbstractPort* ap = i < ports.Size() ? ports.Get(i) : NULL;
-      util::tString port_name = port->GetName();
+      util::tString port_name = port->Name();
       assert((port_name.Equals("port")));
       bool b = false;
       if (show_output_port_selection)

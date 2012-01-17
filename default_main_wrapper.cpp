@@ -41,17 +41,21 @@ extern "C"
 {
 #include <libgen.h>
 }
+
+#include "rrlib/logging/configuration.h"
+#include "rrlib/finroc_core_utils/log/log_definitions.h"
+#include "rrlib/finroc_core_utils/sFiles.h"
+
+#include "plugins/tcp/tTCPServer.h"
+#include "plugins/tcp/tTCPPeer.h"
+
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
-#include "rrlib/logging/definitions.h"
 
 #include "core/tRuntimeEnvironment.h"
 #include "core/parameter/tConfigFile.h"
 #include "core/thread/tExecutionControl.h"
-#include "rrlib/finroc_core_utils/sFiles.h"
-#include "plugins/tcp/tTCPServer.h"
-#include "plugins/tcp/tTCPPeer.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -124,7 +128,7 @@ bool LogConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
   rrlib::getopt::tOption log_config(name_to_option_map.at("log-config"));
   if (log_config->IsActive())
   {
-    rrlib::logging::tLogDomainRegistry::GetInstance()->ConfigureFromFile(boost::any_cast<const char *>(log_config->GetValue()));
+    rrlib::logging::ConfigureFromFile(boost::any_cast<const char *>(log_config->GetValue()));
   }
 
   return true;

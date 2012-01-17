@@ -77,7 +77,7 @@ bool ParseXMLArg(const finroc::util::tString& arg, finroc::util::tString& group_
       try
       {
         rrlib::xml2::tXMLDocument doc(finroc::util::sFiles::GetFinrocXMLDocument(xml_name, false));
-        rrlib::xml2::tXMLNode& root = doc.GetRootNode();
+        rrlib::xml2::tXMLNode& root = doc.RootNode();
         if (root.HasAttribute("defaultname"))
         {
           group_name = root.GetStringAttribute("defaultname");

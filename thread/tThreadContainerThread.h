@@ -53,11 +53,6 @@ private:
   /*! temp buffer */
   util::tStringBuilder tmp;
 
-public:
-
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "thread_container");
-
 private:
 
   /*!

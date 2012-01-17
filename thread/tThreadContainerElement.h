@@ -50,8 +50,6 @@ class tThreadContainerElement : public BASE, public tStartAndPausable
 {
 private:
 
-  using BASE::log_domain;
-
   /*! Should this container contain a real-time thread? */
   tStaticParameter<bool> rt_thread;
 

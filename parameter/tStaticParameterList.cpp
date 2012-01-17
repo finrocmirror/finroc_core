@@ -88,13 +88,13 @@ void tStaticParameterList::Deserialize(const rrlib::xml2::tXMLNode& node)
 
 void tStaticParameterList::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context)
 {
-  size_t number_of_children = std::distance(node.GetChildrenBegin(), node.GetChildrenEnd());
+  size_t number_of_children = std::distance(node.ChildrenBegin(), node.ChildrenEnd());
   if (number_of_children != Size())
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Parameter list size and number of xml parameters differ. Trying anyway");
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Parameter list size and number of xml parameters differ. Trying anyway");
   }
   int count = std::min(number_of_children, Size());
-  rrlib::xml2::tXMLNode::const_iterator child = node.GetChildrenBegin();
+  rrlib::xml2::tXMLNode::const_iterator child = node.ChildrenBegin();
   for (int i = 0; i < count; i++)
   {
     tStaticParameterBase* param = Get(i);

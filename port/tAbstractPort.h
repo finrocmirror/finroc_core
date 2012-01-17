@@ -132,12 +132,6 @@ public:
   /*! constants for port change status */
   static const int8 cNO_CHANGE = 0, cCHANGED = 1, cCHANGED_INITIAL = 2;
 
-  /*! Log domain for initial pushing */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(initial_push_log, "initial_pushes");
-
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "ports");
-
 private:
 
   /*!

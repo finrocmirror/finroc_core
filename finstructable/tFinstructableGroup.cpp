@@ -82,7 +82,7 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
   }
 }
 
@@ -122,7 +122,7 @@ void tFinstructableGroup::EvaluateStaticParameters()
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Cannot find XML file ", xml_file.Get(), ". Creating empty group. You may edit and save this group using finstruct.");
+      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot find XML file ", xml_file.Get(), ". Creating empty group. You may edit and save this group using finstruct.");
     }
   }
 }
@@ -173,20 +173,20 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     tCreateFrameworkElementAction* action = tPlugins::GetInstance()->LoadModuleType(group, type);
     if (action == NULL)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Failed to instantiate element. No module type ", group, "/", type, " available. Skipping...");
+      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to instantiate element. No module type ", group, "/", type, " available. Skipping...");
       return;
     }
 
     // read parameters
-    rrlib::xml2::tXMLNode::const_iterator child_node = node.GetChildrenBegin();
+    rrlib::xml2::tXMLNode::const_iterator child_node = node.ChildrenBegin();
     const rrlib::xml2::tXMLNode* parameters = NULL;
     const rrlib::xml2::tXMLNode* constructor_params = NULL;
-    util::tString p_name = child_node->GetName();
+    util::tString p_name = child_node->Name();
     if (p_name.Equals("constructor"))
     {
       constructor_params = &(*child_node);
       ++child_node;
-      p_name = child_node->GetName();
+      p_name = child_node->Name();
     }
     if (p_name.Equals("parameters"))
     {
@@ -211,29 +211,29 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     created->Init();
 
     // continue with children
-    for (; child_node != node.GetChildrenEnd(); ++child_node)
+    for (; child_node != node.ChildrenEnd(); ++child_node)
     {
-      util::tString name2 = child_node->GetName();
+      util::tString name2 = child_node->Name();
       if (name2.Equals("element"))
       {
         Instantiate(*child_node, created);
       }
       else
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Unknown XML tag: ", name2);
+        FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Unknown XML tag: ", name2);
       }
     }
 
   }
   catch (const rrlib::xml2::tXML2WrapperException& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Failed to instantiate element. Skipping...");
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to instantiate element. Skipping...");
     LogException(e);
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Failed to instantiate element. Skipping...");
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, e);
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to instantiate element. Skipping...");
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, e);
   }
 }
 
@@ -265,9 +265,9 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
     util::tLock lock2(GetRegistryLock());
     try
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, log_domain, "Loading XML: ", xml_file_);
+      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Loading XML: ", xml_file_);
       rrlib::xml2::tXMLDocument doc(util::sFiles::GetFinrocXMLDocument(xml_file_, false));
-      rrlib::xml2::tXMLNode& root = doc.GetRootNode();
+      rrlib::xml2::tXMLNode& root = doc.RootNode();
       link_tmp = GetQualifiedName() + "/";
       if (main_name.Length() == 0 && root.HasAttribute("defaultname"))
       {
@@ -297,15 +297,15 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
             std::set<std::string> loaded_libs = sDynamicLoading::GetLoadedFinrocLibraries();
             if (loaded_libs.find(dep) == loaded_libs.end())
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Dependency ", dep, " is not available.");
+              FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Dependency ", dep, " is not available.");
             }
           }
         }
       }
 
-      for (rrlib::xml2::tXMLNode::const_iterator node = root.GetChildrenBegin(); node != root.GetChildrenEnd(); ++node)
+      for (rrlib::xml2::tXMLNode::const_iterator node = root.ChildrenBegin(); node != root.ChildrenEnd(); ++node)
       {
-        util::tString name = node->GetName();
+        util::tString name = node->Name();
         if (name.Equals("staticparameter"))
         {
           tStaticParameterList* spl = tStaticParameterList::GetOrCreate(this);
@@ -323,7 +323,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
           tAbstractPort* dest_port = GetChildPort(dest);
           if (src_port == NULL && dest_port == NULL)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Cannot create edge because neither port is available: ", src, ", ", dest);
+            FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot create edge because neither port is available: ", src, ", ", dest);
           }
           else if (src_port == NULL || src_port->IsVolatile())    // source volatile
           {
@@ -344,7 +344,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
           tAbstractPort* parameter = GetChildPort(param);
           if (parameter == NULL)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Cannot set config entry, because parameter is not available: ", param);
+            FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot set config entry, because parameter is not available: ", param);
           }
           else
           {
@@ -352,7 +352,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
             bool outermost_group = GetParent() == tRuntimeEnvironment::GetInstance();
             if (pi == NULL)
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Port is not parameter: ", param);
+              FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Port is not parameter: ", param);
             }
             else
             {
@@ -370,21 +370,21 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
               }
               catch (std::exception& e)
               {
-                FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Unable to load parameter value: ", param, ". ", e);
+                FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Unable to load parameter value: ", param, ". ", e);
               }
             }
           }
         }
         else
         {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Unknown XML tag: ", name);
+          FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Unknown XML tag: ", name);
         }
       }
-      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, log_domain, "Loading XML successful");
+      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Loading XML successful");
     }
     catch (const std::exception& e)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, log_domain, "Loading XML failed: ", xml_file_);
+      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Loading XML failed: ", xml_file_);
       LogException(e);
     }
   }
@@ -393,7 +393,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
 void tFinstructableGroup::LogException(const std::exception& e)
 {
   const char* msg = e.what();
-  FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, msg);
+  FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, msg);
 }
 
 util::tString tFinstructableGroup::QualifyLink(const util::tString& link)
@@ -415,10 +415,10 @@ void tFinstructableGroup::SaveXml()
     if (save_to.Length() == 0)
     {
       util::tString save_to_alt = util::sFiles::GetFinrocFileToSaveTo(xml_file.Get().Replace('/', '_'));
-      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "There does not seem to be any suitable location for: '", xml_file.Get(), "' . For now, using '", save_to_alt, "'.");
+      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "There does not seem to be any suitable location for: '", xml_file.Get(), "' . For now, using '", save_to_alt, "'.");
       save_to = save_to_alt;
     }
-    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving XML: ", save_to);
+    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Saving XML: ", save_to);
     rrlib::xml2::tXMLDocument doc;
     try
     {
@@ -475,13 +475,13 @@ void tFinstructableGroup::SaveXml()
       }
 
       doc.WriteToFile(save_to);
-      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving successful.");
+      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Saving successful.");
 
     }
     catch (const rrlib::xml2::tXML2WrapperException& e)
     {
       const char* msg = e.what();
-      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, log_domain, "Saving failed: ", msg);
+      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Saving failed: ", msg);
       throw util::tException(msg);
     }
   }
@@ -496,14 +496,14 @@ std::vector<util::tString> tFinstructableGroup::ScanForCommandLineArgs(const uti
     rrlib::xml2::tXMLDocument doc(util::sFiles::GetFinrocXMLDocument(finroc_file, false));
     try
     {
-      RRLIB_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG, log_domain, "Scanning for command line options in ", finroc_file);
-      rrlib::xml2::tXMLNode& root = doc.GetRootNode();
+      RRLIB_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG, "Scanning for command line options in ", finroc_file);
+      rrlib::xml2::tXMLNode& root = doc.RootNode();
       ScanForCommandLineArgsHelper(result, root);
-      RRLIB_LOG_PRINTF_STATIC(rrlib::logging::eLL_DEBUG, log_domain, "Scanning successful. Found %d additional options.", result.size());
+      RRLIB_LOG_PRINTF_STATIC(rrlib::logging::eLL_DEBUG, "Scanning successful. Found %d additional options.", result.size());
     }
     catch (std::exception& e)
     {
-      RRLIB_LOG_PRINT_STATIC(rrlib::logging::eLL_WARNING, log_domain, "FinstructableGroup", "Scanning failed: ", finroc_file, e);
+      RRLIB_LOG_PRINT_STATIC(rrlib::logging::eLL_WARNING, "FinstructableGroup", "Scanning failed: ", finroc_file, e);
     }
   }
   catch (std::exception& e)
@@ -513,9 +513,9 @@ std::vector<util::tString> tFinstructableGroup::ScanForCommandLineArgs(const uti
 
 void tFinstructableGroup::ScanForCommandLineArgsHelper(std::vector<util::tString>& result, const rrlib::xml2::tXMLNode& parent)
 {
-  for (rrlib::xml2::tXMLNode::const_iterator node = parent.GetChildrenBegin(); node != parent.GetChildrenEnd(); ++node)
+  for (rrlib::xml2::tXMLNode::const_iterator node = parent.ChildrenBegin(); node != parent.ChildrenEnd(); ++node)
   {
-    util::tString name(node->GetName());
+    util::tString name(node->Name());
     if (node->HasAttribute("cmdline") && (name.Equals("staticparameter") || name.Equals("parameter")))
     {
       result.push_back(node->GetStringAttribute("cmdline"));

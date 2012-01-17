@@ -78,9 +78,6 @@ public:
   /*! Data Type */
   static rrlib::serialization::tDataTypeBase cTYPE;
 
-  /*! Log domain */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(edge_log, "parameter");
-
 protected:
 
   virtual void AnnotatedObjectInitialized();

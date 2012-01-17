@@ -251,9 +251,6 @@ public:
   /*! Helper variable - e.g. for blackboards */
   int lock_iD;
 
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "port_data");
-
 protected:
 
   /*!

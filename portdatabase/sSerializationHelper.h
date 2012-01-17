@@ -72,9 +72,6 @@ private:
     is >> (*port_data2);
   }
 
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "data_types");
-
 public:
 
   sSerializationHelper() {}

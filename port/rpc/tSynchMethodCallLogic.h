@@ -41,11 +41,6 @@ class tAbstractCall;
  */
 class tSynchMethodCallLogic : public util::tUncopyableObject
 {
-public:
-
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "rpc");
-
 private:
 
   /*!

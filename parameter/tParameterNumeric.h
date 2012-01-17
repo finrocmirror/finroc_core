@@ -42,8 +42,6 @@ class tUnit;
 template<typename T>
 class tParameterNumeric : public tParameterBase<T>
 {
-  using tPortWrapperBase<tCCPortBase>::log_domain;
-
   /*!
    * Caches numeric value of parameter port (optimization)
    */

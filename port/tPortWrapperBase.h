@@ -57,9 +57,6 @@ protected:
 
 public:
 
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "ports");
-
   tPortWrapperBase() :
       wrapped(NULL)
   {}

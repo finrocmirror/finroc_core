@@ -111,7 +111,7 @@ rrlib::serialization::tDataTypeBase tRemoteTypes::ReadType(rrlib::serialization:
   int types_size = types.Size();  // to avoid warning
   if (uid < 0 || uid >= types_size)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, "Corrupt type information from received from connection partner: ", uid);
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Corrupt type information from received from connection partner: ", uid);
     throw util::tRuntimeException("Corrupt type information from received from connection partner", CODE_LOCATION_MACRO);
   }
 

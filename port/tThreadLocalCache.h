@@ -102,11 +102,6 @@ private:
 
   util::tSimpleList<tCCPortDataManager*> cc_inter_auto_locks;
 
-protected:
-
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "thread_local_cache");
-
 public:
 
   // maybe TODO: reuse old ThreadLocalInfo objects for other threads - well - would cause a lot of "Verschnitt"

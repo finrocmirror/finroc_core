@@ -132,9 +132,6 @@ public:
   /*! Data Type */
   static rrlib::serialization::tDataTypeBase cTYPE;
 
-  /*! Log domain for edges */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "port_creation_list");
-
 private:
 
   /*!

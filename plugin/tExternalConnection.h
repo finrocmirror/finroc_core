@@ -63,11 +63,6 @@ private:
   /*! if set, this module automatically connects to this address */
   tStaticParameter<util::tString> auto_connect_to;
 
-public:
-
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "connections");
-
 protected:
 
   /*!

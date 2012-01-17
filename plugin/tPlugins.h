@@ -50,13 +50,6 @@ private:
   /*! List with actions to create external connections */
   util::tSimpleList<tCreateExternalConnectionAction*> external_connections;
 
-public:
-
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "plugins");
-
-private:
-
   void FindAndLoadPlugins();
 
   inline static const char* GetLogDescription()
@@ -79,7 +72,7 @@ public:
    */
   inline void AddModuleType(tCreateFrameworkElementAction* cma)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Adding module type: ", cma->GetName(), " (", cma->GetModuleGroup(), ")");
+    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Adding module type: ", cma->GetName(), " (", cma->GetModuleGroup(), ")");
     GetModuleTypes().Add(cma);
   }
 

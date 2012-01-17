@@ -66,9 +66,6 @@ private:
   /*! CreateModuleAction */
   static tStandardCreateModuleAction<tFinstructableThreadContainer> cCREATE_ACTION;
 
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "framework_elements");
-
 public:
 
   /*!
@@ -94,7 +91,7 @@ public:
     }
     catch (const util::tException& e)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
+      FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_ERROR, e);
     }
   }
 };

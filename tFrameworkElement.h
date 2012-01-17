@@ -188,12 +188,6 @@ public:
    */
   mutable util::tMutexLockOrder obj_mutex;
 
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "framework_elements");
-
-  /*! Log domain for edges */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(edge_log, "edges");
-
 private:
 
   /*!

@@ -125,11 +125,6 @@ private:
   /*! List of attached parameters */
   util::tSimpleList<tStaticParameterBase*> attached_parameters;
 
-public:
-
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "parameters");
-
 private:
 
   /*!

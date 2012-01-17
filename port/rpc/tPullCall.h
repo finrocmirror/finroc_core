@@ -62,9 +62,6 @@ public:
   /*! when received through network and executed in separate thread: Port to call pull on and port to send result back over */
   tNetPort* port;
 
-  /*! Log domain for this class */
-  RRLIB_LOG_CREATE_NAMED_DOMAIN(log_domain, "rpc");
-
 private:
 
   /*!

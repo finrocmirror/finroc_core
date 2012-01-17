@@ -141,7 +141,7 @@ void tVoid4Method<HANDLER, P1, P2, P3, P4>::ExecuteFromMethodCallObject(tMethodC
   catch (const tMethodCallException& e)
   {
     // don't send anything back
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, log_domain, e);
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
   }
   call->Recycle();
 }

@@ -65,7 +65,7 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tSt
   //          parent.addChild(primary);
   //      }
 
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Constructing FrameworkElement");
+  FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Constructing FrameworkElement");
 }
 
 void tFrameworkElement::AddChild(tLink* child)
@@ -158,7 +158,7 @@ void tFrameworkElement::CheckPublish()
     if (!GetFlag(tCoreFlags::cPUBLISHED) && AllParentsReady())
     {
       SetFlag(tCoreFlags::cPUBLISHED);
-      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Publishing");
+      FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Publishing");
       PublishUpdatedInfo(tRuntimeListener::cADD);
     }
 
@@ -197,7 +197,7 @@ tFrameworkElement::~tFrameworkElement()
 {
   ;
   assert(((GetFlag(tCoreFlags::cDELETED) || GetFlag(tCoreFlags::cIS_RUNTIME))) && "Frameworkelement was not deleted with managedDelete()");
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "FrameworkElement destructor");
+  FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "FrameworkElement destructor");
   if (!GetFlag(tCoreFlags::cIS_RUNTIME))
   {
     // synchronizes on runtime - so no elements will be deleted while runtime is locked
@@ -746,7 +746,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
         return;
       }
 
-      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "FrameworkElement managedDelete");
+      FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "FrameworkElement managedDelete");
 
       // synchronizes on runtime - so no elements will be deleted while runtime is locked
       {
@@ -754,7 +754,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
 
         NotifyAnnotationsDelete();
 
-        FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, log_domain, "Deleting");
+        FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Deleting");
         //System.out.println("Deleting " + toString() + " (" + hashCode() + ")");
         assert(!GetFlag(tCoreFlags::cDELETED));
         assert(((primary.GetParent() != NULL) | GetFlag(tCoreFlags::cIS_RUNTIME)));
