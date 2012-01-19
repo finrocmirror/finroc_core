@@ -189,6 +189,20 @@ public:
     }
   };
 
+  /*!
+   * When storing convenience ports in std::unique pointers, this class can be used as deleter so that
+   * actual wrapped port is also deleted.
+   */
+  class tPortDeleter
+  {
+  public:
+    template <typename T>
+    void operator()(tPortWrapperBase<T>* ptr) const
+    {
+      ptr->GetWrapped()->ManagedDelete();
+      delete ptr;
+    }
+  };
 };
 
 //----------------------------------------------------------------------

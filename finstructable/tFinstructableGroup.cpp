@@ -496,14 +496,14 @@ std::vector<util::tString> tFinstructableGroup::ScanForCommandLineArgs(const uti
     rrlib::xml2::tXMLDocument doc(util::sFiles::GetFinrocXMLDocument(finroc_file, false));
     try
     {
-      RRLIB_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG, "Scanning for command line options in ", finroc_file);
+      FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG, "Scanning for command line options in ", finroc_file);
       rrlib::xml2::tXMLNode& root = doc.RootNode();
       ScanForCommandLineArgsHelper(result, root);
-      RRLIB_LOG_PRINTF_STATIC(rrlib::logging::eLL_DEBUG, "Scanning successful. Found %d additional options.", result.size());
+      FINROC_LOG_PRINTF_STATIC(rrlib::logging::eLL_DEBUG, "Scanning successful. Found %d additional options.", result.size());
     }
     catch (std::exception& e)
     {
-      RRLIB_LOG_PRINT_STATIC(rrlib::logging::eLL_WARNING, "FinstructableGroup", "Scanning failed: ", finroc_file, e);
+      FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_WARNING, "FinstructableGroup", "Scanning failed: ", finroc_file, e);
     }
   }
   catch (std::exception& e)
