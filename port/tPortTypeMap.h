@@ -178,6 +178,7 @@ template<>
 struct tPortTypeMapBase<std::string, false, false, false> : tStdPortTypeMap<tCoreString>
 {
   typedef tStaticParameterImplString tStaticParameterImpl;
+  typedef tParameterBase<std::string> tParameterImpl;
 };
 
 // Finroc String
@@ -185,6 +186,7 @@ template<>
 struct tPortTypeMapBase<util::tString, false, false, false> : tStdPortTypeMap<tCoreString>
 {
   typedef tStaticParameterImplString tStaticParameterImpl;
+  typedef tParameterBase<util::tString> tParameterImpl;
 };
 
 // CC type
