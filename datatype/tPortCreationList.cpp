@@ -137,7 +137,9 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
     list.Clear();
     for (size_t i = 0u; i < size; i++)
     {
-      list.Add(tEntry(is.ReadString(), is.ReadString(), is.ReadBoolean()));
+      const util::tString name = is.ReadString();
+      const util::tString type = is.ReadString();
+      list.Add(tEntry(name, type, is.ReadBoolean()));
     }
   }
   else
@@ -288,6 +290,7 @@ tPortCreationList::tEntry::tEntry(const util::tString& name_, const util::tStrin
 {
   rrlib::serialization::tStringInputStream sis(type_);
   this->type.Deserialize(sis);
+  assert(this->type.Get() != NULL);
 }
 
 } // namespace finroc

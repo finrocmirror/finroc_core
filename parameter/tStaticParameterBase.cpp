@@ -97,6 +97,7 @@ void tStaticParameterBase::CreateBuffer(rrlib::serialization::tDataTypeBase type
   tStaticParameterBase* sp = GetParameterWithBuffer();
   sp->value.reset(type.CreateInstanceGeneric());
   assert(sp->value);
+  assert(type_ != tStaticParameterList::cTYPE);
 }
 
 void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is)
@@ -239,7 +240,7 @@ void tStaticParameterBase::LoadValue()
         }
         catch (std::exception& e)
         {
-          RRLIB_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", GetName(), "' from command line argument '", arg, "': ", e);
+          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", GetName(), "' from command line argument '", arg, "': ", e);
         }
       }
     }
@@ -267,7 +268,7 @@ void tStaticParameterBase::LoadValue()
           }
           catch (std::exception& e)
           {
-            RRLIB_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", GetName(), "' from config entry '", full_config_entry, "': ", e);
+            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", GetName(), "' from config entry '", full_config_entry, "': ", e);
           }
         }
       }
@@ -286,7 +287,9 @@ void tStaticParameterBase::ResetChanged()
   }
   assert(last_value);
 
+  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_2, "Resetting change for buffers of type ", sp->value->GetType().GetName());
   rrlib::serialization::sSerialization::DeepCopy(*sp->value, *last_value);
+  assert(!HasChanged());
 }
 
 void tStaticParameterBase::Serialize(rrlib::serialization::tOutputStream& os) const
