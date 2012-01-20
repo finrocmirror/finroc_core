@@ -360,6 +360,19 @@ void tStaticParameterBase::Set(const util::tString& s)
   }
 }
 
+void tStaticParameterBase::SetConfigEntry(const util::tString& config_entry)
+{
+  config_entry_set_by_finstruct = false;
+  if (!config_entry.Equals(this->config_entry))
+  {
+    this->config_entry = config_entry;
+    if (GetParentList() && GetParentList()->GetAnnotated() && GetParentList()->GetAnnotated()->IsReady())
+    {
+      LoadValue();
+    }
+  }
+}
+
 void tStaticParameterBase::SetOuterParameterAttachment(const util::tString& outer_parameter_attachment, bool create_outer)
 {
   this->outer_parameter_attachment = outer_parameter_attachment;

@@ -220,6 +220,14 @@ public:
    */
   void GetAllAttachedParameters(util::tSimpleList<tStaticParameterBase*>& result);
 
+  /*!
+   * \return Place in Configuration tree, this parameter is configured from
+   */
+  util::tString GetConfigEntry()
+  {
+    return config_entry;
+  }
+
   const char* GetLogDescription()
   {
     return name.GetCString();
@@ -290,6 +298,12 @@ public:
    * \param s serialized as string
    */
   virtual void Set(const util::tString& s);
+
+  /*!
+   * \param config_entry Place in Configuration tree, this parameter is configured from.
+   * Immediately loads this value if parent module is initialized.
+   */
+  void SetConfigEntry(const util::tString& config_entry);
 
   /*!
    * \param outer_parameter_attachment Name of outer parameter of finstructable group to configure parameter with.
