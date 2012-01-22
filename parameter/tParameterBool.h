@@ -53,7 +53,7 @@ class tParameterBool : public tParameterBase<bool>
     volatile bool current_value;
 
     tBoolCache() :
-        current_value(false)
+      current_value(false)
     {}
 
     virtual void PortChanged(tAbstractPort* origin, const bool& value)
@@ -70,8 +70,8 @@ public:
 
   template<typename ... ARGS>
   tParameterBool(const ARGS&... args) :
-      tParameterBase<bool>(args...),
-      cache(new tBoolCache())
+    tParameterBase<bool>(args...),
+    cache(new tBoolCache())
   {
     this->AddPortListener(cache.get());
     cache->current_value = Get();

@@ -31,8 +31,8 @@ tInterfaceClientPort::tInterfaceClientPort(const util::tString& description, tFr
 }
 
 tInterfaceClientPort::tPortImpl::tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type, tInterfacePort::tType client) :
-    tInterfacePort(description, parent, type, client),
-    outer_class_ptr(outer_class_ptr_)
+  tInterfacePort(description, parent, type, client),
+  outer_class_ptr(outer_class_ptr_)
 {
 }
 

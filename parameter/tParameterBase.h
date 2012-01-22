@@ -51,7 +51,7 @@ public:
 
   template<typename ... ARGS>
   tParameterBase(const ARGS&... args) :
-      tPort<T>(tPortCreationInfo<T>(args..., tPortFlags::cINPUT_PORT))
+    tPort<T>(tPortCreationInfo<T>(args..., tPortFlags::cINPUT_PORT))
   {
     this->wrapped->AddAnnotation(new tParameterInfo());
     tPortCreationInfo<T> pci(args...);

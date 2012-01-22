@@ -47,10 +47,10 @@ namespace core
 rrlib::serialization::tDataTypeBase tParameterInfo::cTYPE = rrlib::serialization::tDataType<tParameterInfo>();
 
 tParameterInfo::tParameterInfo() :
-    config_entry(),
-    entry_set_from_finstruct(false),
-    command_line_option(),
-    finstruct_default()
+  config_entry(),
+  entry_set_from_finstruct(false),
+  command_line_option(),
+  finstruct_default()
 {}
 
 void tParameterInfo::AnnotatedObjectInitialized()

@@ -50,7 +50,7 @@ public:
    * (see FrameworkElement for parameter description)
    */
   tThreadContainer(tFrameworkElement* parent, const util::tString& description, uint flags = 0) :
-      tThreadContainerElement<tGroup>(parent, description, flags)
+    tThreadContainerElement<tGroup>(parent, description, flags)
   {}
 };
 
@@ -72,7 +72,7 @@ public:
    * (see FrameworkElement for parameter description)
    */
   tFinstructableThreadContainer(tFrameworkElement* parent, const util::tString& description, uint flags = 0) :
-      tThreadContainerElement<tFinstructableGroup>(parent, description, flags)
+    tThreadContainerElement<tFinstructableGroup>(parent, description, flags)
   {}
 
   /*!
@@ -83,7 +83,7 @@ public:
    * (see FrameworkElement for other parameter description)
    */
   tFinstructableThreadContainer(tFrameworkElement* parent, const util::tString& description, const util::tString& xml_file, uint flags = 0) :
-      tThreadContainerElement<tFinstructableGroup>(parent, description, flags)
+    tThreadContainerElement<tFinstructableGroup>(parent, description, flags)
   {
     try
     {

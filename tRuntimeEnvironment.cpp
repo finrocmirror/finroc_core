@@ -55,11 +55,11 @@ bool tRuntimeEnvironment::active = false;
 util::tMutexLockOrder tRuntimeEnvironment::static_class_mutex(tLockOrderLevels::cFIRST);
 
 tRuntimeEnvironment::tRuntimeEnvironment() :
-    tFrameworkElement(NULL, "Runtime", tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cIS_RUNTIME, tLockOrderLevels::cRUNTIME_ROOT),
-    registry(this),
-    creation_time(util::tTime::GetPrecise()),
-    command_line_args(),
-    unrelated(NULL)
+  tFrameworkElement(NULL, "Runtime", tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cIS_RUNTIME, tLockOrderLevels::cRUNTIME_ROOT),
+  registry(this),
+  creation_time(util::tTime::GetPrecise()),
+  command_line_args(),
+  unrelated(NULL)
 {
   assert(instance.get() == NULL);
   instance = std::shared_ptr<tRuntimeEnvironment>(this);

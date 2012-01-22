@@ -88,8 +88,8 @@ private:
 public:
 
   tRemoteCoreRegister() :
-      obj_mutex(),
-      elements(cLEVEL_ONE_BLOCK_SIZE)
+    obj_mutex(),
+    elements(cLEVEL_ONE_BLOCK_SIZE)
   {}
 
   virtual ~tRemoteCoreRegister();
@@ -135,10 +135,10 @@ public:
     util::tArrayWrapper<T>* cur_lvl2_block;
 
     tIterator(tRemoteCoreRegister* const outer_class_ptr_) :
-        outer_class_ptr(outer_class_ptr_),
-        lvl1_idx(-1),
-        lvl2_idx(tRemoteCoreRegister::cLEVEL_TWO_BLOCK_SIZE),
-        cur_lvl2_block(NULL)
+      outer_class_ptr(outer_class_ptr_),
+      lvl1_idx(-1),
+      lvl2_idx(tRemoteCoreRegister::cLEVEL_TWO_BLOCK_SIZE),
+      cur_lvl2_block(NULL)
     {}
 
     /*! @return Next element in RemoteCoreRegister */

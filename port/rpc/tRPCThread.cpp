@@ -30,8 +30,8 @@ namespace finroc
 namespace core
 {
 tRPCThread::tRPCThread() :
-    tCoreLoopThreadBase(0),
-    next_task(NULL)
+  tCoreLoopThreadBase(0),
+  next_task(NULL)
 {
 }
 

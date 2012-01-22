@@ -31,7 +31,7 @@ namespace core
 rrlib::serialization::tDataTypeBase tXML::cTYPE = rrlib::serialization::tDataType<tXML>();
 
 tXML::tXML() :
-    tCoreString()
+  tCoreString()
 {
 }
 

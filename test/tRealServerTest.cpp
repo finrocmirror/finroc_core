@@ -29,7 +29,7 @@ namespace finroc
 namespace core
 {
 tRealServerTest::tRealServerTest(int stop_cycle) :
-    tNetworkTestSuite("ServerBlackboard", "ClientBlackboard", stop_cycle)
+  tNetworkTestSuite("ServerBlackboard", "ClientBlackboard", stop_cycle)
 {
 }
 

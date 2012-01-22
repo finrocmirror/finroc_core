@@ -68,9 +68,9 @@ public:
 
     template <typename ... ARGS>
     tTestStdPort(const ARGS& ... args) :
-        tPort<rrlib::serialization::tMemoryBuffer>(args...),
-        os(),
-        is()
+      tPort<rrlib::serialization::tMemoryBuffer>(args...),
+      os(),
+      is()
     {
     }
 
@@ -128,32 +128,32 @@ public:
   blackboard::tSingleBufferedBlackboardServer<rrlib::serialization::tMemoryBuffer>* sbb_server;
 
   tNetworkTestSuite(const util::tString& bb_name, const util::tString& partner_bBName, int stop_cycle_) :
-      util::tLogUser(),
-      blackboard_name(bb_name),
-      partner_blackboard_name(partner_bBName),
-      stop_cycle(stop_cycle_),
-      cc_push_out(),
-      cc_pull_push_out(),
-      cc_rev_push_out(),
-      cc_rev_push_out_local(),
-      cc_qOut(),
-      cc_push_in(),
-      cc_pull_push_in(),
-      cc_rev_push_in(),
-      cc_qIn(),
-      std_push_out(),
-      std_pull_push_out(),
-      std_rev_push_out(),
-      std_rev_push_out_local(),
-      std_qOut(),
-      std_push_in(),
-      std_pull_push_in(),
-      std_rev_push_in(),
-      std_qIn(),
-      bb_client(),
-      local_bb_client(),
-      bb_server(NULL),
-      sbb_server(NULL)
+    util::tLogUser(),
+    blackboard_name(bb_name),
+    partner_blackboard_name(partner_bBName),
+    stop_cycle(stop_cycle_),
+    cc_push_out(),
+    cc_pull_push_out(),
+    cc_rev_push_out(),
+    cc_rev_push_out_local(),
+    cc_qOut(),
+    cc_push_in(),
+    cc_pull_push_in(),
+    cc_rev_push_in(),
+    cc_qIn(),
+    std_push_out(),
+    std_pull_push_out(),
+    std_rev_push_out(),
+    std_rev_push_out_local(),
+    std_qOut(),
+    std_push_in(),
+    std_pull_push_in(),
+    std_rev_push_in(),
+    std_qIn(),
+    bb_client(),
+    local_bb_client(),
+    bb_server(NULL),
+    sbb_server(NULL)
   {
     tRuntimeEnvironment::GetInstance();
     tThreadLocalCache::Get();

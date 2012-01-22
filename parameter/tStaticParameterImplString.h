@@ -44,18 +44,18 @@ class tStaticParameterImplString : public tStaticParameterImplStandard<tCoreStri
 public:
 
   tStaticParameterImplString(const util::tString& name, const util::tString& default_value, bool constructor_prototype = false) :
-      tStaticParameterImplStandard<tCoreString>(name, default_value, constructor_prototype)
+    tStaticParameterImplStandard<tCoreString>(name, default_value, constructor_prototype)
   {
   }
 
   tStaticParameterImplString(const util::tString& name, bool constructor_prototype = false) :
-      tStaticParameterImplStandard<tCoreString>(name, "", constructor_prototype)
+    tStaticParameterImplStandard<tCoreString>(name, "", constructor_prototype)
   {
   }
 
   template <typename T>
   tStaticParameterImplString(const tPortCreationInfo<T>& pci) :
-      tStaticParameterImplStandard<tCoreString>(pci)
+    tStaticParameterImplStandard<tCoreString>(pci)
   {
     if (pci.default_value_set)
     {

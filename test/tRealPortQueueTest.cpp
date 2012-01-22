@@ -38,7 +38,7 @@ volatile int tRealPortQueueTest::cPUBLISH_LIMIT;
 util::tAtomicInt tRealPortQueueTest::finished(0);
 
 tRealPortQueueTest::tRealPortQueueTest(bool pos) :
-    positive_count(pos)
+  positive_count(pos)
 {
 }
 

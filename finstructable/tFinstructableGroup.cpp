@@ -58,22 +58,22 @@ static int startup_type_count = 0;
 static std::set<std::string> startup_loaded_finroc_libs;
 
 tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, uint flags) :
-    tFrameworkElement(parent, name, flags | tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
-    xml_file("XML file", this, ""),
-    connect_tmp(),
-    link_tmp(""),
-    save_parameter_config_entries(false),
-    main_name()
+  tFrameworkElement(parent, name, flags | tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
+  xml_file("XML file", this, ""),
+  connect_tmp(),
+  link_tmp(""),
+  save_parameter_config_entries(false),
+  main_name()
 {
 }
 
 tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_, uint flags) :
-    tFrameworkElement(parent, name, flags | tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
-    xml_file("XML file", this, ""),
-    connect_tmp(),
-    link_tmp(""),
-    save_parameter_config_entries(false),
-    main_name()
+  tFrameworkElement(parent, name, flags | tCoreFlags::cFINSTRUCTABLE_GROUP | tCoreFlags::cALLOWS_CHILDREN, -1),
+  xml_file("XML file", this, ""),
+  connect_tmp(),
+  link_tmp(""),
+  save_parameter_config_entries(false),
+  main_name()
 {
   // this(parent,name);
   try
@@ -247,7 +247,8 @@ bool tFinstructableGroup::IsResponsibleForConfigFileConnections(tFrameworkElemen
   tFrameworkElement* config_element = static_cast<tFrameworkElement*>(cf->GetAnnotated());
   const tFrameworkElement* responsible = config_element->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP) ? config_element : config_element->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
   if (responsible == NULL)
-  { // ok, config file is probably attached to runtime. Choose outer-most finstructable group.
+  {
+    // ok, config file is probably attached to runtime. Choose outer-most finstructable group.
     responsible = this;
     const tFrameworkElement* tmp;
     while ((tmp = responsible->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP)) != NULL)
@@ -507,7 +508,7 @@ std::vector<util::tString> tFinstructableGroup::ScanForCommandLineArgs(const uti
     }
   }
   catch (std::exception& e)
-    {}
+  {}
   return result;
 }
 

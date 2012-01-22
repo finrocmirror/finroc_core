@@ -33,8 +33,8 @@ const uint tEdgeAggregator::cCONTROLLER_DATA;
 const uint tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS;
 
 tEdgeAggregator::tEdgeAggregator(tFrameworkElement* parent_, const util::tString& description_, uint flags_) :
-    tFrameworkElement(parent_, description_, flags_ | tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cEDGE_AGGREGATOR, parent_ == NULL ? tLockOrderLevels::cLEAF_GROUP : -1),
-    emerging_edges(0u, 5u)
+  tFrameworkElement(parent_, description_, flags_ | tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cEDGE_AGGREGATOR, parent_ == NULL ? tLockOrderLevels::cLEAF_GROUP : -1),
+  emerging_edges(0u, 5u)
 {
 }
 

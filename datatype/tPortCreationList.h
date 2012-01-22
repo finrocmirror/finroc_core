@@ -73,7 +73,7 @@ public:
    */
   struct tEntry
   {
-public:
+  public:
 
     /*! Port name */
     util::tString name;

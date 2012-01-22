@@ -65,7 +65,7 @@ using namespace finroc::core::structure;
 // tSenseControlModule constructors
 //----------------------------------------------------------------------
 tSenseControlModule::tSenseControlModule(tFrameworkElement *parent, const util::tString &name, bool share_so_and_ci_ports)
-    : tModuleBase(parent, name),
+  : tModuleBase(parent, name),
 
     controller_input(new tPortGroup(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA, tPortFlags::cINPUT_PORT | (share_so_and_ci_ports ? tCoreFlags::cSHARED : 0))),
     controller_output(new tPortGroup(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA, tPortFlags::cOUTPUT_PORT)),
@@ -97,7 +97,7 @@ void tSenseControlModule::Sense()
 // tSenseControlModule::ControlTask constructors
 //----------------------------------------------------------------------
 tSenseControlModule::ControlTask::ControlTask(tSenseControlModule *module)
-    : module(module)
+  : module(module)
 {}
 
 //----------------------------------------------------------------------
@@ -114,7 +114,7 @@ void tSenseControlModule::ControlTask::ExecuteTask()
 // tSenseControlModule::SenseTask constructors
 //----------------------------------------------------------------------
 tSenseControlModule::SenseTask::SenseTask(tSenseControlModule *module)
-    : module(module)
+  : module(module)
 {}
 
 //----------------------------------------------------------------------

@@ -58,7 +58,7 @@ public:
    * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
    */
   tStaticParameterImplStandard(const util::tString& name, const util::tString& default_value, bool constructor_prototype = false) :
-      tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
+    tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
   {
     if ((!constructor_prototype) && default_value.Length() > 0)
     {
@@ -79,7 +79,7 @@ public:
    * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
    */
   tStaticParameterImplStandard(const util::tString& name, const T& default_value, bool constructor_prototype = false) :
-      tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
+    tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
   {
     if (!constructor_prototype)
     {
@@ -95,11 +95,11 @@ public:
    */
   template < bool NONBOOL = !std::is_same<bool, T>::value >
   tStaticParameterImplStandard(const typename std::enable_if<NONBOOL, util::tString>::type& name, bool constructor_prototype = false) :
-      tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
+    tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
   {}
 
   tStaticParameterImplStandard(const tPortCreationInfo<T>& pci) :
-      tStaticParameterBase(pci.description, rrlib::serialization::tDataType<T>(), false)
+    tStaticParameterBase(pci.description, rrlib::serialization::tDataType<T>(), false)
   {
     if (pci.default_value_set)
     {
@@ -108,7 +108,7 @@ public:
   }
 
   tStaticParameterImplStandard(const tPortCreationInfoBase& pci) :
-      tStaticParameterBase(pci.description, rrlib::serialization::tDataType<T>(), false, false, pci.config_entry)
+    tStaticParameterBase(pci.description, rrlib::serialization::tDataType<T>(), false, false, pci.config_entry)
   {
   }
 

@@ -62,7 +62,7 @@ protected:
 public:
 
   tCCPortQueue(int max_length) :
-      util::tWonderQueueBounded<tCCPortDataManager, tCCPortQueueElement>(max_length)
+    util::tWonderQueueBounded<tCCPortDataManager, tCCPortQueueElement>(max_length)
   {
   }
 

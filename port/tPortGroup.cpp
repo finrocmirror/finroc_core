@@ -31,8 +31,8 @@ namespace core
 {
 
 tPortGroup::tPortGroup(tFrameworkElement* parent, const util::tString& name, uint flags, int default_port_flags) :
-    tEdgeAggregator(parent, name, flags),
-    default_port_flags(default_port_flags)
+  tEdgeAggregator(parent, name, flags),
+  default_port_flags(default_port_flags)
 {
 }
 

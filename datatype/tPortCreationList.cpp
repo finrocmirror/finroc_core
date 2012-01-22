@@ -42,11 +42,11 @@ const uint tPortCreationList::cRELEVANT_FLAGS;
 rrlib::serialization::tDataTypeBase tPortCreationList::cTYPE = rrlib::serialization::tDataType<tPortCreationList>();
 
 tPortCreationList::tPortCreationList() :
-    show_output_port_selection(false),
-    list(),
-    io_vector(NULL),
-    flags(-1),
-    listener(NULL)
+  show_output_port_selection(false),
+  list(),
+  io_vector(NULL),
+  flags(-1),
+  listener(NULL)
 {}
 
 void tPortCreationList::Add(const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output)
@@ -284,9 +284,9 @@ void tPortCreationList::Serialize(rrlib::xml2::tXMLNode& node) const
 }
 
 tPortCreationList::tEntry::tEntry(const util::tString& name_, const util::tString& type_, bool output_port_) :
-    name(name_),
-    type(),
-    output_port(output_port_)
+  name(name_),
+  type(),
+  output_port(output_port_)
 {
   rrlib::serialization::tStringInputStream sis(type_);
   this->type.Deserialize(sis);

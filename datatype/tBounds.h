@@ -62,19 +62,19 @@ public:
   /*! dummy constructor for no bounds */
   template < bool INIT0 = std::is_fundamental<T>::value >
   tBounds(typename std::enable_if<INIT0, void>::type* v = 0) :
-      min(0),
-      max(0),
-      action(eNONE),
-      out_of_bounds_default(0)
+    min(0),
+    max(0),
+    action(eNONE),
+    out_of_bounds_default(0)
   {
   }
 
   template < bool INIT0 = std::is_fundamental<T>::value >
   tBounds(typename std::enable_if < !INIT0, void >::type* v = 0) :
-      min(),
-      max(),
-      action(eNONE),
-      out_of_bounds_default()
+    min(),
+    max(),
+    action(eNONE),
+    out_of_bounds_default()
   {
   }
 
@@ -83,10 +83,10 @@ public:
    * \param max Maximum bound
    */
   tBounds(T min_, T max_) :
-      min(min_),
-      max(max_),
-      action(true ? eADJUST_TO_RANGE : eDISCARD),
-      out_of_bounds_default()
+    min(min_),
+    max(max_),
+    action(true ? eADJUST_TO_RANGE : eDISCARD),
+    out_of_bounds_default()
   {
     // this(min,max,true);
   }
@@ -97,10 +97,10 @@ public:
    * \param adjust_to_range Adjust values lying outside to range (or rather discard them)?
    */
   tBounds(T min_, T max_, bool adjust_to_range) :
-      min(min_),
-      max(max_),
-      action(adjust_to_range ? eADJUST_TO_RANGE : eDISCARD),
-      out_of_bounds_default()
+    min(min_),
+    max(max_),
+    action(adjust_to_range ? eADJUST_TO_RANGE : eDISCARD),
+    out_of_bounds_default()
   {
   }
 
@@ -110,10 +110,10 @@ public:
    * \param out_of_bounds_default Default value when value is out of bounds
    */
   tBounds(T min_, T max_, tNumber out_of_bounds_default_) :
-      min(min_),
-      max(max_),
-      action(eAPPLY_DEFAULT),
-      out_of_bounds_default()
+    min(min_),
+    max(max_),
+    action(eAPPLY_DEFAULT),
+    out_of_bounds_default()
   {
     this->out_of_bounds_default = out_of_bounds_default_.Value<T>();
   }

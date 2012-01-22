@@ -44,8 +44,8 @@ tPortCreationInfo<T> tSingletonPort<T>::AdjustPci(tPortCreationInfo<T> pci)
 
 template<typename T>
 tSingletonPort<T>::tPortImpl<T>::tPortImpl(tPortCreationInfo<T> pci, T& singleton) :
-    tPortBase(pci),
-    singleton_value(singleton)
+  tPortBase(pci),
+  singleton_value(singleton)
 {
 }
 

@@ -34,15 +34,15 @@ const uint tFrameworkElementInfo::cPARENT_FLAGS_TO_STORE;
 const uint tFrameworkElementInfo::cEDGE_AGG_PARENT_FLAGS_TO_STORE;
 
 tFrameworkElementInfo::tFrameworkElementInfo() :
-    links(),
-    link_count(0),
-    handle(0),
-    type(NULL),
-    flags(0),
-    strategy(0),
-    min_net_update_time(0),
-    connections(),
-    op_code(0)
+  links(),
+  link_count(0),
+  handle(0),
+  type(NULL),
+  flags(0),
+  strategy(0),
+  min_net_update_time(0),
+  connections(),
+  op_code(0)
 {
 }
 

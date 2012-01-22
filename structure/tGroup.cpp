@@ -74,7 +74,7 @@ namespace structure
 // tGroup constructors
 //----------------------------------------------------------------------
 tGroup::tGroup(tFrameworkElement *parent, const util::tString &name, const util::tString &structure_config_file, bool share_so_and_ci_ports)
-    : tFinstructableGroup(parent, name, structure_config_file),
+  : tFinstructableGroup(parent, name, structure_config_file),
 
     controller_input(new tPortGroup(this, "Controller Input", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA, tPortFlags::cINPUT_PROXY | (share_so_and_ci_ports ? tCoreFlags::cSHARED : 0))),
     controller_output(new tPortGroup(this, "Controller Output", tEdgeAggregator::cIS_INTERFACE | tEdgeAggregator::cCONTROLLER_DATA, tPortFlags::cOUTPUT_PROXY)),

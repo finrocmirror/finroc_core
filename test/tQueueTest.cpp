@@ -229,7 +229,7 @@ void tQueueTest::TestTL()
 }
 
 tQueueTest::tNamedQueueable::tNamedQueueable(const util::tString& name_) :
-    name(name_)
+  name(name_)
 {
 }
 

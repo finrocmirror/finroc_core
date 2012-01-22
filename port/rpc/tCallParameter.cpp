@@ -32,9 +32,9 @@ namespace core
 const int8 tCallParameter::cNULLPARAM, tCallParameter::cNUMBER, tCallParameter::cOBJECT;
 
 tCallParameter::tCallParameter() :
-    number(),
-    value(),
-    type(0)
+  number(),
+  value(),
+  type(0)
 {
 }
 

@@ -78,7 +78,7 @@ util::tString tAdminServer::cQUALIFIED_PORT_NAME = "Unrelated/Administration";
 const int tAdminServer::cNOTHING, tAdminServer::cSTOPPED, tAdminServer::cSTARTED, tAdminServer::cBOTH;
 
 tAdminServer::tAdminServer() :
-    tInterfaceServerPort(cPORT_NAME, NULL, cDATA_TYPE, NULL, tCoreFlags::cSHARED)
+  tInterfaceServerPort(cPORT_NAME, NULL, cDATA_TYPE, NULL, tCoreFlags::cSHARED)
 {
   SetCallHandler(this);
 }

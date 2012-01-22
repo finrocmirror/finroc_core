@@ -31,10 +31,10 @@ std::shared_ptr<tConstant> tConstant::cNO_MIN_TIME_LIMIT;
 std::shared_ptr<tConstant> tConstant::cNO_MAX_TIME_LIMIT;
 
 tConstant::tConstant(const util::tString& name, tNumber value_) :
-    tUnit(name, value_.GetUnit()),
-    constant_id(static_cast<int8>(constand_id_counter.GetAndIncrement())),
-    value(value_),
-    unit(value_.GetUnit())
+  tUnit(name, value_.GetUnit()),
+  constant_id(static_cast<int8>(constand_id_counter.GetAndIncrement())),
+  value(value_),
+  unit(value_.GetUnit())
 {
   if (typeid(*unit) == typeid(tConstant))
   {

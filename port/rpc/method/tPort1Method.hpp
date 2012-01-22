@@ -34,7 +34,7 @@ namespace core
 {
 template<typename HANDLER, typename R, typename P1>
 tPort1Method<HANDLER, R, P1>::tPort1Method(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, bool handle_in_extra_thread, int default_net_timeout) :
-    tAbstractNonVoidMethod(port_interface, name, p1_name, cNO_PARAM, cNO_PARAM, cNO_PARAM, handle_in_extra_thread, default_net_timeout)
+  tAbstractNonVoidMethod(port_interface, name, p1_name, cNO_PARAM, cNO_PARAM, cNO_PARAM, handle_in_extra_thread, default_net_timeout)
 {
 }
 

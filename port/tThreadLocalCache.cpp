@@ -45,23 +45,23 @@ std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCac
 util::tAtomicInt tThreadLocalCache::thread_uid_counter(1);
 
 tThreadLocalCache::tThreadLocalCache() :
-    infos_lock(infos),
-    method_syncher(NULL),
-    thread_uid(thread_uid_counter.GetAndIncrement()),
-    auto_locks(),
-    cc_auto_locks(),
-    cc_inter_auto_locks(),
-    data(NULL),
-    ref(NULL),
-    last_written_to_port(tCoreRegister<>::cMAX_ELEMENTS),
-    cc_type_pools(tFinrocTypeInfo::cMAX_CCTYPES),
-    method_calls(new util::tReusablesPool<tMethodCall>()),
-    pull_calls(new util::tReusablesPool<tPullCall>()),
-    pq_fragments(new util::tReusablesPool<tPortQueueElement>()),
-    ccpq_fragments(new util::tReusablesPool<tCCPortQueueElement>()),
-    input_packet_processor(),
-    thread_id(util::sThreadUtil::GetCurrentThreadId()),
-    port_register(tRuntimeEnvironment::GetInstance()->GetPorts())
+  infos_lock(infos),
+  method_syncher(NULL),
+  thread_uid(thread_uid_counter.GetAndIncrement()),
+  auto_locks(),
+  cc_auto_locks(),
+  cc_inter_auto_locks(),
+  data(NULL),
+  ref(NULL),
+  last_written_to_port(tCoreRegister<>::cMAX_ELEMENTS),
+  cc_type_pools(tFinrocTypeInfo::cMAX_CCTYPES),
+  method_calls(new util::tReusablesPool<tMethodCall>()),
+  pull_calls(new util::tReusablesPool<tPullCall>()),
+  pq_fragments(new util::tReusablesPool<tPortQueueElement>()),
+  ccpq_fragments(new util::tReusablesPool<tCCPortQueueElement>()),
+  input_packet_processor(),
+  thread_id(util::sThreadUtil::GetCurrentThreadId()),
+  port_register(tRuntimeEnvironment::GetInstance()->GetPorts())
 {
   FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating ThreadLocalCache for thread ", util::tThread::CurrentThread()->GetName());
 }

@@ -27,151 +27,151 @@ namespace finroc
 namespace core
 {
 tPortCreationInfoBase::tPortCreationInfoBase(uint flags_) :
-    send_buffer_size(-1),
-    alt_send_buffer_size(-1),
-    unit(&(tUnit::cNO_UNIT)),
-    max_queue_size(16),
-    flags(flags_),
-    min_net_update_interval(-1),
-    data_type(NULL),
-    parent(NULL),
-    manages_ports(false),
-    description(""),
-    lock_order(-1)
+  send_buffer_size(-1),
+  alt_send_buffer_size(-1),
+  unit(&(tUnit::cNO_UNIT)),
+  max_queue_size(16),
+  flags(flags_),
+  min_net_update_interval(-1),
+  data_type(NULL),
+  parent(NULL),
+  manages_ports(false),
+  description(""),
+  lock_order(-1)
 {
 }
 
 tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, uint flags_) :
-    send_buffer_size(-1),
-    alt_send_buffer_size(-1),
-    unit(&(tUnit::cNO_UNIT)),
-    max_queue_size(16),
-    flags(flags_),
-    min_net_update_interval(-1),
-    data_type(NULL),
-    parent(NULL),
-    manages_ports(false),
-    description(description_),
-    lock_order(-1)
+  send_buffer_size(-1),
+  alt_send_buffer_size(-1),
+  unit(&(tUnit::cNO_UNIT)),
+  max_queue_size(16),
+  flags(flags_),
+  min_net_update_interval(-1),
+  data_type(NULL),
+  parent(NULL),
+  manages_ports(false),
+  description(description_),
+  lock_order(-1)
 {
 }
 
 tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, const rrlib::serialization::tDataTypeBase& data_type_, uint flags_) :
-    send_buffer_size(-1),
-    alt_send_buffer_size(-1),
-    unit(&(tUnit::cNO_UNIT)),
-    max_queue_size(16),
-    flags(flags_),
-    min_net_update_interval(-1),
-    data_type(data_type_),
-    parent(NULL),
-    manages_ports(false),
-    description(description_),
-    lock_order(-1)
+  send_buffer_size(-1),
+  alt_send_buffer_size(-1),
+  unit(&(tUnit::cNO_UNIT)),
+  max_queue_size(16),
+  flags(flags_),
+  min_net_update_interval(-1),
+  data_type(data_type_),
+  parent(NULL),
+  manages_ports(false),
+  description(description_),
+  lock_order(-1)
 {
 }
 
 tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, const rrlib::serialization::tDataTypeBase& data_type_, uint flags_) :
-    send_buffer_size(-1),
-    alt_send_buffer_size(-1),
-    unit(&(tUnit::cNO_UNIT)),
-    max_queue_size(16),
-    flags(flags_),
-    min_net_update_interval(-1),
-    data_type(data_type_),
-    parent(parent_),
-    manages_ports(false),
-    description(description_),
-    lock_order(-1)
+  send_buffer_size(-1),
+  alt_send_buffer_size(-1),
+  unit(&(tUnit::cNO_UNIT)),
+  max_queue_size(16),
+  flags(flags_),
+  min_net_update_interval(-1),
+  data_type(data_type_),
+  parent(parent_),
+  manages_ports(false),
+  description(description_),
+  lock_order(-1)
 {
 }
 
 tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, uint flags_) :
-    send_buffer_size(-1),
-    alt_send_buffer_size(-1),
-    unit(&(tUnit::cNO_UNIT)),
-    max_queue_size(16),
-    flags(flags_),
-    min_net_update_interval(-1),
-    data_type(NULL),
-    parent(parent_),
-    manages_ports(false),
-    description(description_),
-    lock_order(-1)
+  send_buffer_size(-1),
+  alt_send_buffer_size(-1),
+  unit(&(tUnit::cNO_UNIT)),
+  max_queue_size(16),
+  flags(flags_),
+  min_net_update_interval(-1),
+  data_type(NULL),
+  parent(parent_),
+  manages_ports(false),
+  description(description_),
+  lock_order(-1)
 {
 }
 
 tPortCreationInfoBase::tPortCreationInfoBase(const rrlib::serialization::tDataTypeBase& data_type_, uint flags_) :
-    send_buffer_size(-1),
-    alt_send_buffer_size(-1),
-    unit(&(tUnit::cNO_UNIT)),
-    max_queue_size(16),
-    flags(flags_),
-    min_net_update_interval(-1),
-    data_type(data_type_),
-    parent(NULL),
-    manages_ports(false),
-    description(""),
-    lock_order(-1)
+  send_buffer_size(-1),
+  alt_send_buffer_size(-1),
+  unit(&(tUnit::cNO_UNIT)),
+  max_queue_size(16),
+  flags(flags_),
+  min_net_update_interval(-1),
+  data_type(data_type_),
+  parent(NULL),
+  manages_ports(false),
+  description(""),
+  lock_order(-1)
 {
 }
 
 tPortCreationInfoBase::tPortCreationInfoBase() :
-    send_buffer_size(-1),
-    alt_send_buffer_size(-1),
-    unit(&(tUnit::cNO_UNIT)),
-    max_queue_size(16),
-    flags(0),
-    min_net_update_interval(-1),
-    data_type(NULL),
-    parent(NULL),
-    manages_ports(false),
-    description(""),
-    lock_order(-1)
+  send_buffer_size(-1),
+  alt_send_buffer_size(-1),
+  unit(&(tUnit::cNO_UNIT)),
+  max_queue_size(16),
+  flags(0),
+  min_net_update_interval(-1),
+  data_type(NULL),
+  parent(NULL),
+  manages_ports(false),
+  description(""),
+  lock_order(-1)
 {}
 
 tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_) :
-    send_buffer_size(-1),
-    alt_send_buffer_size(-1),
-    unit(&(tUnit::cNO_UNIT)),
-    max_queue_size(16),
-    flags(0),
-    min_net_update_interval(-1),
-    data_type(NULL),
-    parent(NULL),
-    manages_ports(false),
-    description(description_),
-    lock_order(-1)
+  send_buffer_size(-1),
+  alt_send_buffer_size(-1),
+  unit(&(tUnit::cNO_UNIT)),
+  max_queue_size(16),
+  flags(0),
+  min_net_update_interval(-1),
+  data_type(NULL),
+  parent(NULL),
+  manages_ports(false),
+  description(description_),
+  lock_order(-1)
 {
 }
 
 tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, uint flags_, int q_size) :
-    send_buffer_size(-1),
-    alt_send_buffer_size(-1),
-    unit(&(tUnit::cNO_UNIT)),
-    max_queue_size(q_size),
-    flags(flags_ | tPortFlags::cHAS_QUEUE | tPortFlags::cUSES_QUEUE),
-    min_net_update_interval(-1),
-    data_type(NULL),
-    parent(NULL),
-    manages_ports(false),
-    description(description_),
-    lock_order(-1)
+  send_buffer_size(-1),
+  alt_send_buffer_size(-1),
+  unit(&(tUnit::cNO_UNIT)),
+  max_queue_size(q_size),
+  flags(flags_ | tPortFlags::cHAS_QUEUE | tPortFlags::cUSES_QUEUE),
+  min_net_update_interval(-1),
+  data_type(NULL),
+  parent(NULL),
+  manages_ports(false),
+  description(description_),
+  lock_order(-1)
 {
 }
 
 tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, const rrlib::serialization::tDataTypeBase& data_type_, uint flags_, int q_size) :
-    send_buffer_size(-1),
-    alt_send_buffer_size(-1),
-    unit(&(tUnit::cNO_UNIT)),
-    max_queue_size(q_size),
-    flags(flags_ | tPortFlags::cHAS_QUEUE | tPortFlags::cUSES_QUEUE),
-    min_net_update_interval(-1),
-    data_type(data_type_),
-    parent(NULL),
-    manages_ports(false),
-    description(description_),
-    lock_order(-1)
+  send_buffer_size(-1),
+  alt_send_buffer_size(-1),
+  unit(&(tUnit::cNO_UNIT)),
+  max_queue_size(q_size),
+  flags(flags_ | tPortFlags::cHAS_QUEUE | tPortFlags::cUSES_QUEUE),
+  min_net_update_interval(-1),
+  data_type(data_type_),
+  parent(NULL),
+  manages_ports(false),
+  description(description_),
+  lock_order(-1)
 {
 }
 

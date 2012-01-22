@@ -35,7 +35,7 @@ namespace core
 {
 template<typename HANDLER, typename P1, typename P2, typename P3>
 tVoid3Method<HANDLER, P1, P2, P3>::tVoid3Method(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, bool handle_in_extra_thread) :
-    tAbstractVoidMethod(port_interface, name, p1_name, p2_name, p3_name, cNO_PARAM, handle_in_extra_thread)
+  tAbstractVoidMethod(port_interface, name, p1_name, p2_name, p3_name, cNO_PARAM, handle_in_extra_thread)
 {
 }
 

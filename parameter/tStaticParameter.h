@@ -79,7 +79,7 @@ public:
    */
   template <typename ... ARGS>
   tStaticParameter(const ARGS&... args) :
-      impl(NULL)
+    impl(NULL)
   {
     tPortCreationInfo<T> pci(args...);
     impl = new tImpl(pci);
@@ -140,7 +140,7 @@ public:
    * (not available for numeric and string types)
    */
   template < bool ENABLED = std::is_same<tImpl, tStaticParameterImplStandard<T>>::value >
-  inline T* GetValue(typename std::enable_if<ENABLED, void*>::type dummy = NULL)
+      inline T* GetValue(typename std::enable_if<ENABLED, void*>::type dummy = NULL)
   {
     return impl->GetValue();
   }

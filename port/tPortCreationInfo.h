@@ -48,7 +48,7 @@ class tStorage
   std::shared_ptr<T> default_value;
 public:
   tStorage() :
-      default_value()
+    default_value()
   {}
 
   void SetDefault(const T& t)
@@ -79,14 +79,14 @@ class tStorage<T, true>
 public:
   template < bool F = std::is_fundamental<T>::value >
   tStorage(typename std::enable_if<F, void>::type* v = 0) :
-      bounds(),
-      default_value(0)
+    bounds(),
+    default_value(0)
   {}
 
   template < bool F = std::is_fundamental<T>::value >
   tStorage(typename std::enable_if < !F, void >::type* v = 0) :
-      bounds(),
-      default_value()
+    bounds(),
+    default_value()
   {}
 
   void SetDefault(const T& t)
@@ -154,12 +154,12 @@ public:
   bool description_set;
 
   tPortCreationInfo() :
-      tPortCreationInfoBase(),
-      default_value_set(false),
-      bounds_set(false),
-      description_set(false),
-      storage(),
-      unsigned_int_arg_count(0)
+    tPortCreationInfoBase(),
+    default_value_set(false),
+    bounds_set(false),
+    description_set(false),
+    storage(),
+    unsigned_int_arg_count(0)
   {
   }
 
@@ -185,12 +185,12 @@ public:
    */
   template <typename ARG1, typename ... TArgs>
   explicit tPortCreationInfo(const ARG1& arg1, const TArgs&... rest) :
-      tPortCreationInfoBase(),
-      default_value_set(),
-      bounds_set(false),
-      description_set(false),
-      storage(),
-      unsigned_int_arg_count(CountUnsignedIntArgs(arg1, rest...))
+    tPortCreationInfoBase(),
+    default_value_set(),
+    bounds_set(false),
+    description_set(false),
+    storage(),
+    unsigned_int_arg_count(CountUnsignedIntArgs(arg1, rest...))
   {
     ProcessFirstArg<ARG1>(arg1);
     ProcessArgs(rest...);
@@ -331,7 +331,7 @@ private:
   }
 
   template <typename A>
-  void ProcessArg(const typename std::enable_if<internal::tIsNumeric<T>::value && internal::tIsNumeric<A>::value, A>::type& arg)
+  void ProcessArg(const typename std::enable_if < internal::tIsNumeric<T>::value && internal::tIsNumeric<A>::value, A >::type& arg)
   {
     // numeric type and numeric argument => first numeric argument is default value (or possibly flag)
     if (!default_value_set)

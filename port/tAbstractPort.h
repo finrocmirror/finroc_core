@@ -76,7 +76,7 @@ protected:
   {
   public:
     tEdgeList() :
-        util::tSafeConcurrentlyIterableList<T, tRuntimeSettings::cEDGE_LIST_SIZE_INCREASE_FACTOR>(tRuntimeSettings::cEDGE_LIST_DEFAULT_SIZE)
+      util::tSafeConcurrentlyIterableList<T, tRuntimeSettings::cEDGE_LIST_SIZE_INCREASE_FACTOR>(tRuntimeSettings::cEDGE_LIST_DEFAULT_SIZE)
     {}
 
   };

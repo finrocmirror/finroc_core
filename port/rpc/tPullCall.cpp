@@ -36,10 +36,10 @@ namespace finroc
 namespace core
 {
 tPullCall::tPullCall() :
-    tAbstractCall(),
-    intermediate_assign(false),
-    cc_pull(false),
-    port(NULL)
+  tAbstractCall(),
+  intermediate_assign(false),
+  cc_pull(false),
+  port(NULL)
 {
   Reset();
 }

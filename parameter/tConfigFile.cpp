@@ -43,10 +43,10 @@ util::tString tConfigFile::cXML_BRANCH_NAME = "node";
 util::tString tConfigFile::cXML_LEAF_NAME = "value";
 
 tConfigFile::tConfigFile(const util::tString& filename_) :
-    wrapped(),
-    filename(filename_),
-    temp_buffer(),
-    active(true)
+  wrapped(),
+  filename(filename_),
+  temp_buffer(),
+  active(true)
 {
   if (util::sFiles::FinrocFileExists(filename_))
   {
@@ -69,10 +69,10 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
 }
 
 tConfigFile::tConfigFile() :
-    wrapped(),
-    filename(),
-    temp_buffer(),
-    active(true)
+  wrapped(),
+  filename(),
+  temp_buffer(),
+  active(true)
 {
   wrapped.AddRootNode(cXML_BRANCH_NAME);
 }

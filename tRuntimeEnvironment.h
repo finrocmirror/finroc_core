@@ -90,15 +90,15 @@ public:
     mutable util::tMutexLockOrder obj_mutex;
 
     tRegistry(tRuntimeEnvironment* const outer_class_ptr_) :
-        outer_class_ptr(outer_class_ptr_),
-        ports(new tCoreRegister<tAbstractPort*>(true)),
-        elements(false),
-        link_edges(),
-        listeners(),
-        temp_buffer(),
-        alternative_link_roots(),
-        infos_lock(),
-        obj_mutex(tLockOrderLevels::cRUNTIME_REGISTER)
+      outer_class_ptr(outer_class_ptr_),
+      ports(new tCoreRegister<tAbstractPort*>(true)),
+      elements(false),
+      link_edges(),
+      listeners(),
+      temp_buffer(),
+      alternative_link_roots(),
+      infos_lock(),
+      obj_mutex(tLockOrderLevels::cRUNTIME_REGISTER)
     {}
 
   };

@@ -66,8 +66,8 @@ private:
 public:
 
   tMultiTypePortDataBufferPool() :
-      pools(2u),
-      obj_mutex(tLockOrderLevels::cINNER_MOST - 20)
+    pools(2u),
+    obj_mutex(tLockOrderLevels::cINNER_MOST - 20)
   {}
 
   /*!

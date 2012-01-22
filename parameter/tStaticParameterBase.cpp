@@ -37,21 +37,21 @@ namespace finroc
 namespace core
 {
 tStaticParameterBase::tStaticParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy, const util::tString& config_entry) :
-    name(name_),
-    type(type_),
-    value(),
-    last_value(),
-    enforce_current_value(false),
-    use_value_of(this),
-    parent_list(NULL),
-    list_index(0),
-    command_line_option(),
-    outer_parameter_attachment(),
-    create_outer_parameter(false),
-    config_entry(config_entry),
-    config_entry_set_by_finstruct(false),
-    structure_parameter_proxy(structure_parameter_proxy),
-    attached_parameters()
+  name(name_),
+  type(type_),
+  value(),
+  last_value(),
+  enforce_current_value(false),
+  use_value_of(this),
+  parent_list(NULL),
+  list_index(0),
+  command_line_option(),
+  outer_parameter_attachment(),
+  create_outer_parameter(false),
+  config_entry(config_entry),
+  config_entry_set_by_finstruct(false),
+  structure_parameter_proxy(structure_parameter_proxy),
+  attached_parameters()
 {
   if (!constructor_prototype)
   {
@@ -229,7 +229,8 @@ void tStaticParameterBase::LoadValue()
     // command line
     tFrameworkElement* fg = parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
     if (command_line_option.Length() > 0 && (fg == NULL || fg->GetParent() == tRuntimeEnvironment::GetInstance()))
-    { // outermost group?
+    {
+      // outermost group?
       util::tString arg = tRuntimeEnvironment::GetInstance()->GetCommandLineArgument(command_line_option);
       if (arg.Length() > 0)
       {

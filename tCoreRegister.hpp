@@ -44,12 +44,12 @@ const int tCoreRegister<T>::cDELETE_MARK;
 
 template<typename T>
 tCoreRegister<T>::tCoreRegister(bool positive_indices) :
-    sign(positive_indices ? 0 : 0x80000000),
-    current_element_index(0),
-    elements(cMAX_ELEMENTS),
-    element_uid(cMAX_ELEMENTS),
-    elem_count(0),
-    obj_mutex()
+  sign(positive_indices ? 0 : 0x80000000),
+  current_element_index(0),
+  elements(cMAX_ELEMENTS),
+  element_uid(cMAX_ELEMENTS),
+  elem_count(0),
+  obj_mutex()
 {
 }
 

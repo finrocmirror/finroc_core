@@ -27,12 +27,12 @@ namespace finroc
 namespace core
 {
 tPortDataBufferPool::tPortDataBufferPool() :
-    data_type(NULL)
+  data_type(NULL)
 {
 }
 
 tPortDataBufferPool::tPortDataBufferPool(const rrlib::serialization::tDataTypeBase& data_type_, int initial_size) :
-    data_type(data_type_)
+  data_type(data_type_)
 {
   for (int i = 0; i < initial_size; i++)
   {

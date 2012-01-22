@@ -65,13 +65,13 @@ util::tSimpleList<tUnit*> tUnit::screen;
 tUnit tUnit::Pixel(tUnit::screen, "Pixel", 1);
 
 tUnit::tUnit(util::tSimpleList<tUnit*>& group_, const util::tString& description_, double factor_) :
-    factor(factor_),
-    group(group_),
-    description(description_),
-    index(group_.Size()),
-    uid(uid_counter),
-    factors(),
-    is_aConstant(false)
+  factor(factor_),
+  group(group_),
+  description(description_),
+  index(group_.Size()),
+  uid(uid_counter),
+  factors(),
+  is_aConstant(false)
 {
   group_.Add(this);
   uid_lookup_table_temp.Add(this);
@@ -79,13 +79,13 @@ tUnit::tUnit(util::tSimpleList<tUnit*>& group_, const util::tString& description
 }
 
 tUnit::tUnit(const util::tString& description_, tUnit* u) :
-    factor(u->factor),
-    group(u->group),
-    description(description_),
-    index(u->index),
-    uid(u->uid),
-    factors(u->factors),
-    is_aConstant(true)
+  factor(u->factor),
+  group(u->group),
+  description(description_),
+  index(u->index),
+  uid(u->uid),
+  factors(u->factors),
+  is_aConstant(true)
 {
 }
 

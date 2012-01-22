@@ -28,9 +28,9 @@ namespace finroc
 namespace core
 {
 tFrameworkElementTreeFilter::tFrameworkElementTreeFilter() :
-    relevant_flags(tCoreFlags::cSTATUS_FLAGS),
-    flag_result(tCoreFlags::cREADY | tCoreFlags::cPUBLISHED),
-    paths(new util::tSimpleList<util::tString>())
+  relevant_flags(tCoreFlags::cSTATUS_FLAGS),
+  flag_result(tCoreFlags::cREADY | tCoreFlags::cPUBLISHED),
+  paths(new util::tSimpleList<util::tString>())
 {
   // this(CoreFlags.STATUS_FLAGS,CoreFlags.READY | CoreFlags.PUBLISHED,getEmptyString());
   if (GetEmptyString().Length() > 0)
@@ -40,9 +40,9 @@ tFrameworkElementTreeFilter::tFrameworkElementTreeFilter() :
 }
 
 tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_) :
-    relevant_flags(relevant_flags_),
-    flag_result(flag_result_),
-    paths(new util::tSimpleList<util::tString>())
+  relevant_flags(relevant_flags_),
+  flag_result(flag_result_),
+  paths(new util::tSimpleList<util::tString>())
 {
   // this(relevantFlags,flagResult,getEmptyString());
   if (GetEmptyString().Length() > 0)
@@ -52,9 +52,9 @@ tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, u
 }
 
 tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_, const util::tString& paths_) :
-    relevant_flags(relevant_flags_),
-    flag_result(flag_result_),
-    paths(new util::tSimpleList<util::tString>())
+  relevant_flags(relevant_flags_),
+  flag_result(flag_result_),
+  paths(new util::tSimpleList<util::tString>())
 {
   if (paths_.Length() > 0)
   {

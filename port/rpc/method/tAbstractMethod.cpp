@@ -29,12 +29,12 @@ namespace core
 const char* tAbstractMethod::cNO_PARAM = "NO_PARAMETER";
 
 tAbstractMethod::tAbstractMethod(tPortInterface& port_interface, const util::tString& name_, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread_) :
-    name(name_),
-    parameter_names(4),
-    parameter_count(4),
-    handle_in_extra_thread(handle_in_extra_thread_),
-    method_id(0),
-    type(NULL)
+  name(name_),
+  parameter_names(4),
+  parameter_count(4),
+  handle_in_extra_thread(handle_in_extra_thread_),
+  method_id(0),
+  type(NULL)
 {
   static util::tString no_param(cNO_PARAM);
   parameter_names[0] = p1_name;
@@ -53,15 +53,15 @@ tAbstractMethod::tAbstractMethod(tPortInterface& port_interface, const util::tSt
 }
 
 tAbstractVoidMethod::tAbstractVoidMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread) :
-    tAbstractMethod(port_interface, name, p1_name, p2_name, p3_name, p4_name, handle_in_extra_thread)
+  tAbstractMethod(port_interface, name, p1_name, p2_name, p3_name, p4_name, handle_in_extra_thread)
 {
 }
 
 const int tAbstractNonVoidMethod::cDEFAULT_NET_TIMEOUT;
 
 tAbstractNonVoidMethod::tAbstractNonVoidMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread, int default_net_timeout_) :
-    tAbstractMethod(port_interface, name, p1_name, p2_name, p3_name, p4_name, handle_in_extra_thread),
-    default_net_timeout(default_net_timeout_)
+  tAbstractMethod(port_interface, name, p1_name, p2_name, p3_name, p4_name, handle_in_extra_thread),
+  default_net_timeout(default_net_timeout_)
 {
 }
 

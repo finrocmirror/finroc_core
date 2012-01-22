@@ -66,12 +66,12 @@ public:
    * \param dest Destination aggregator
    */
   tAggregatedEdge(tEdgeAggregator* src, tEdgeAggregator* dest) :
-      edge_count(0),
-      source(src),
-      destination(dest),
-      creation_time(util::tTime::GetPrecise()),
-      publish_count(0),
-      publish_size(0)
+    edge_count(0),
+    source(src),
+    destination(dest),
+    creation_time(util::tTime::GetPrecise()),
+    publish_count(0),
+    publish_size(0)
   {
   }
 

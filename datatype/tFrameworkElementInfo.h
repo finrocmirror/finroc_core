@@ -83,8 +83,8 @@ public:
     bool finstructed;
 
     tConnectionInfo(int handle, bool finstructed) :
-        handle(handle),
-        finstructed(finstructed)
+      handle(handle),
+      finstructed(finstructed)
     {}
   };
 

@@ -93,12 +93,12 @@ private:
 public:
 
   tMethodCallSyncher() :
-      index(0),
-      thread(NULL),
-      thread_uid(0),
-      obj_mutex(tLockOrderLevels::cINNER_MOST - 300),
-      method_return(NULL),
-      current_method_call_index(0)
+    index(0),
+    thread(NULL),
+    thread_uid(0),
+    obj_mutex(tLockOrderLevels::cINNER_MOST - 300),
+    method_return(NULL),
+    current_method_call_index(0)
   {}
 
   /*!

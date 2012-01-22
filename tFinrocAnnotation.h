@@ -94,8 +94,8 @@ protected:
 public:
 
   tFinrocAnnotation() :
-      next_annotation(NULL),
-      annotated(NULL)
+    next_annotation(NULL),
+    annotated(NULL)
   {}
 
   /*!

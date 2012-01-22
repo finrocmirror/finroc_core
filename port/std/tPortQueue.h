@@ -62,7 +62,7 @@ protected:
 public:
 
   tPortQueue(int max_length) :
-      util::tWonderQueueBounded<tPortDataReference, tPortQueueElement>(max_length)
+    util::tWonderQueueBounded<tPortDataReference, tPortQueueElement>(max_length)
   {
   }
 

@@ -105,10 +105,10 @@ private:
 public:
 
   tStaticParameterImplNumeric(const util::tString& name, T default_value = 0, tUnit* unit = &tUnit::cNO_UNIT, bool constructor_prototype = false) :
-      tStaticParameterImplStandard<tNumber>(name, constructor_prototype),
-      unit(unit),
-      bounds(),
-      default_val(default_value)
+    tStaticParameterImplStandard<tNumber>(name, constructor_prototype),
+    unit(unit),
+    bounds(),
+    default_val(default_value)
   {
     if (!constructor_prototype)
     {
@@ -117,10 +117,10 @@ public:
   }
 
   tStaticParameterImplNumeric(const util::tString& name, T default_value, tBounds<T> bounds, tUnit* unit = &tUnit::cNO_UNIT, bool constructor_prototype = false) :
-      tStaticParameterImplStandard<tNumber>(name, constructor_prototype),
-      unit(unit),
-      bounds(bounds),
-      default_val(default_value)
+    tStaticParameterImplStandard<tNumber>(name, constructor_prototype),
+    unit(unit),
+    bounds(bounds),
+    default_val(default_value)
   {
     if (!constructor_prototype)
     {
@@ -129,10 +129,10 @@ public:
   }
 
   tStaticParameterImplNumeric(const tPortCreationInfo<T>& pci) :
-      tStaticParameterImplStandard<tNumber>(pci),
-      unit(pci.unit),
-      bounds(pci.GetBounds()),
-      default_val(pci.default_value_set ? *pci.GetDefault() : (typeid(T).name() == typeid(unsigned int).name() ? pci.flags : 0))
+    tStaticParameterImplStandard<tNumber>(pci),
+    unit(pci.unit),
+    bounds(pci.GetBounds()),
+    default_val(pci.default_value_set ? *pci.GetDefault() : (typeid(T).name() == typeid(unsigned int).name() ? pci.flags : 0))
   {
     Set(default_val);
   }

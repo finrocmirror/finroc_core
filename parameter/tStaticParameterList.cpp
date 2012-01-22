@@ -36,8 +36,8 @@ rrlib::serialization::tDataType<tStaticParameterList> tStaticParameterList::cTYP
 tStaticParameterList tStaticParameterList::cEMPTY;
 
 tStaticParameterList::tStaticParameterList() :
-    parameters(),
-    create_action(-1)
+  parameters(),
+  create_action(-1)
 {}
 
 void tStaticParameterList::Add(tStaticParameterBase* param)

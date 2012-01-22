@@ -31,12 +31,12 @@ namespace core
 rrlib::serialization::tDataTypeBase tExecutionControl::cTYPE = rrlib::serialization::tDataType<tExecutionControl>();
 
 tExecutionControl::tExecutionControl(tStartAndPausable& implementation_) :
-    implementation(&(implementation_))
+  implementation(&(implementation_))
 {
 }
 
 tExecutionControl::tExecutionControl() :
-    implementation(NULL)
+  implementation(NULL)
 {
   throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
 }

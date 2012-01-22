@@ -65,7 +65,7 @@ using namespace finroc::core::structure;
 // tModule constructors
 //----------------------------------------------------------------------
 tModule::tModule(tFrameworkElement *parent, const util::tString &name)
-    : tModuleBase(parent, name),
+  : tModuleBase(parent, name),
 
     input(new tPortGroup(this, "Input", tEdgeAggregator::cIS_INTERFACE, tPortFlags::cINPUT_PORT)),
     output(new tPortGroup(this, "Output", tEdgeAggregator::cIS_INTERFACE, tPortFlags::cOUTPUT_PORT)),
@@ -85,7 +85,7 @@ void tModule::Update()
 // tModule::UpdateTask constructors
 //----------------------------------------------------------------------
 tModule::UpdateTask::UpdateTask(tModule *module)
-    : module(module)
+  : module(module)
 {}
 
 //----------------------------------------------------------------------

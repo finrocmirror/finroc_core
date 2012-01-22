@@ -29,7 +29,7 @@ namespace core
 rrlib::serialization::tDataTypeBase tDataTypeReference::cTYPE = rrlib::serialization::tDataType<tDataTypeReference>();
 
 tDataTypeReference::tDataTypeReference() :
-    referenced(tNumber::cTYPE)
+  referenced(tNumber::cTYPE)
 {
 }
 

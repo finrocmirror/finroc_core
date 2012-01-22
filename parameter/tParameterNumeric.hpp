@@ -43,7 +43,7 @@ void tParameterNumeric<T>::Set(T v)
 
 template<typename T>
 tParameterNumeric<T>::tNumberCache::tNumberCache() :
-    current_value(0)
+  current_value(0)
 {
 }
 

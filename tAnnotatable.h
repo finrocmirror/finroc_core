@@ -77,8 +77,8 @@ protected:
 public:
 
   tAnnotatable() :
-      first_annotation(NULL),
-      obj_mutex()
+    first_annotation(NULL),
+    obj_mutex()
   {}
 
   /*!

@@ -15,16 +15,16 @@ namespace finroc
 namespace core
 {
 tThreadContainerThread::tThreadContainerThread(tFrameworkElement* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed) :
-    tCoreLoopThreadBase(default_cycle_time, warn_on_cycle_time_exceed),
-    thread_container(thread_container_),
-    reschedule(true),
-    schedule(),
-    tasks(),
-    non_sensor_tasks(),
-    trace(),
-    trace_back(),
-    filter(),
-    tmp()
+  tCoreLoopThreadBase(default_cycle_time, warn_on_cycle_time_exceed),
+  thread_container(thread_container_),
+  reschedule(true),
+  schedule(),
+  tasks(),
+  non_sensor_tasks(),
+  trace(),
+  trace_back(),
+  filter(),
+  tmp()
 {
   this->SetName(util::tStringBuilder("ThreadContainer ") + thread_container_->GetDescription());
 }

@@ -61,8 +61,8 @@ public:
    * \param type_name Name of module type
    */
   tStandardCreateModuleAction(const util::tString& type_name_) :
-      group(),
-      type_name(type_name_)
+    group(),
+    type_name(type_name_)
   {
     tPlugins::GetInstance()->AddModuleType(this);
 
@@ -75,8 +75,8 @@ public:
    * \param module_class Module class (only needed in Java)
    */
   tStandardCreateModuleAction(const util::tString& type_name_, const util::tTypedClass<T>& module_class) :
-      group(),
-      type_name(type_name_)
+    group(),
+    type_name(type_name_)
   {
     tPlugins::GetInstance()->AddModuleType(this);
 

@@ -31,12 +31,12 @@ namespace finroc
 namespace core
 {
 tExternalConnection::tExternalConnection(const util::tString& description, const util::tString& default_address) :
-    tFrameworkElement(tRuntimeEnvironment::GetInstance(), description, tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cNETWORK_ELEMENT, tLockOrderLevels::cLEAF_GROUP),
-    last_address(default_address),
-    connected(false),
-    listener(),
-    first_connect(true),
-    auto_connect_to("Autoconnect to", this, "")
+  tFrameworkElement(tRuntimeEnvironment::GetInstance(), description, tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cNETWORK_ELEMENT, tLockOrderLevels::cLEAF_GROUP),
+  last_address(default_address),
+  connected(false),
+  listener(),
+  first_connect(true),
+  auto_connect_to("Autoconnect to", this, "")
 {
 }
 

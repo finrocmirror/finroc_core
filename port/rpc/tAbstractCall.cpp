@@ -38,12 +38,12 @@ const util::tString const_array_tAbstractCall_0[6] = {"NONE", "SYNCH_CALL", "ASY
 const size_t tAbstractCall::cMAX_PARAMS;
 
 tAbstractCall::tAbstractCall() :
-    syncher_iD(-1),
-    thread_uid(0),
-    method_call_index(0),
-    local_port_handle(0),
-    remote_port_handle(0),
-    status(cNONE)
+  syncher_iD(-1),
+  thread_uid(0),
+  method_call_index(0),
+  local_port_handle(0),
+  remote_port_handle(0),
+  status(cNONE)
 {
   //callerStack = new CallStack(maxCallDepth);
 }

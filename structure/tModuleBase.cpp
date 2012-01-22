@@ -63,7 +63,7 @@ using namespace finroc::core::structure;
 // tModuleBase constructors
 //----------------------------------------------------------------------
 tModuleBase::tModuleBase(tFrameworkElement *parent, const util::tString &name)
-    : tFrameworkElement(parent, name),
+  : tFrameworkElement(parent, name),
     parameters(new tFrameworkElement(this, "Parameters")),
     parameters_changed(),
     auto_name_port_count(0),

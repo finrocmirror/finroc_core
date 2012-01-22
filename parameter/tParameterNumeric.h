@@ -68,8 +68,8 @@ public:
 
   template<typename ... ARGS>
   tParameterNumeric(const ARGS&... args) :
-      tParameterBase<T>(args...),
-      cache(new tNumberCache())
+    tParameterBase<T>(args...),
+    cache(new tNumberCache())
   {
     cache->current_value = this->Get();
     this->AddPortListener(cache.get());

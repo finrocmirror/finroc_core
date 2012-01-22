@@ -31,7 +31,7 @@ namespace core
 rrlib::serialization::tDataTypeBase tConfigNode::cTYPE = rrlib::serialization::tDataType<tConfigNode>();
 
 tConfigNode::tConfigNode(const util::tString& node) :
-    node(node)
+  node(node)
 {
 }
 

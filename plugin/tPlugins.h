@@ -60,8 +60,8 @@ private:
 public:
 
   tPlugins() :
-      plugins(),
-      external_connections()
+    plugins(),
+    external_connections()
   {}
 
   /*!

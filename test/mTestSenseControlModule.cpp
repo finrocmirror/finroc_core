@@ -64,7 +64,7 @@ finroc::core::tStandardCreateModuleAction<mTestSenseControlModule> mTestSenseCon
 // mTestSenseControlModule constructors
 //----------------------------------------------------------------------
 mTestSenseControlModule::mTestSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name)
-    : tSenseControlModule(parent, name),
+  : tSenseControlModule(parent, name),
 
     counter(0)
 {}

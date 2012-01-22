@@ -48,10 +48,10 @@ tPortCreationInfo<T> tInputStreamPort<T>::ProcessPCI(tPortCreationInfo<T> pci, c
 
 template<typename T>
 tInputStreamPort<T>::tPortImpl<T>::tPortImpl(tPortCreationInfo<T> pci, tInputPacketProcessor<T>* user_, tNewConnectionHandler* conn_handler_) :
-    tPortBase(ProcessPci(pci)),
-    dequeue_buffer(),
-    user(user_),
-    conn_handler(conn_handler_)
+  tPortBase(ProcessPci(pci)),
+  dequeue_buffer(),
+  user(user_),
+  conn_handler(conn_handler_)
 {
 }
 

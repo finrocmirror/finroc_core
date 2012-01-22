@@ -28,44 +28,44 @@ namespace finroc
 namespace core
 {
 tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_) :
-    tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, 0)), type_, -1)),
-    type(type_),
-    edges_src(),
-    edges_dest(),
-    buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+  tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, 0)), type_, -1)),
+  type(type_),
+  edges_src(),
+  edges_dest(),
+  buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
   // this(new PortCreationInfo(description,parent,dataType,0),type,-1);
   InitLists(&(edges_src), &(edges_dest));
 }
 
 tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags) :
-    tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, custom_flags)), type_, -1)),
-    type(type_),
-    edges_src(),
-    edges_dest(),
-    buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+  tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, custom_flags)), type_, -1)),
+  type(type_),
+  edges_src(),
+  edges_dest(),
+  buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
   // this(new PortCreationInfo(description,parent,dataType,customFlags),type,-1);
   InitLists(&(edges_src), &(edges_dest));
 }
 
 tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level) :
-    tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, custom_flags)), type_, lock_level)),
-    type(type_),
-    edges_src(),
-    edges_dest(),
-    buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+  tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, custom_flags)), type_, lock_level)),
+  type(type_),
+  edges_src(),
+  edges_dest(),
+  buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
   // this(new PortCreationInfo(description,parent,dataType,customFlags),type,lockLevel);
   InitLists(&(edges_src), &(edges_dest));
 }
 
 tInterfacePort::tInterfacePort(tPortCreationInfoBase pci, tInterfacePort::tType type_, int lock_level) :
-    tAbstractPort(ProcessPci(pci, type_, lock_level)),
-    type(type_),
-    edges_src(),
-    edges_dest(),
-    buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+  tAbstractPort(ProcessPci(pci, type_, lock_level)),
+  type(type_),
+  edges_src(),
+  edges_dest(),
+  buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
   InitLists(&(edges_src), &(edges_dest));
 }

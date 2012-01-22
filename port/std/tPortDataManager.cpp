@@ -26,17 +26,17 @@ namespace finroc
 namespace core
 {
 tPortDataManager tPortDataManager::cPROTOTYPE;
-size_t tPortDataManager::cREF_COUNTERS_OFFSET = ((char*)&(tPortDataManager::cPROTOTYPE.ref_counters[0])) - ((char*)&(tPortDataManager::cPROTOTYPE));
+size_t tPortDataManager::cREF_COUNTERS_OFFSET = ((char*) & (tPortDataManager::cPROTOTYPE.ref_counters[0])) - ((char*) & (tPortDataManager::cPROTOTYPE));
 
 const size_t tPortDataManager::cNUMBER_OF_REFERENCES;
 const size_t tPortDataManager::cREF_INDEX_MASK;
 
 tPortDataManager::tPortDataManager() :
-    ref_counters(),
-    unused(true),
-    derived_from(NULL),
-    reuse_counter(0),
-    lock_iD(0)
+  ref_counters(),
+  unused(true),
+  derived_from(NULL),
+  reuse_counter(0),
+  lock_iD(0)
 {
   //log(LogLevel.LL_DEBUG_VERBOSE_1, logDomain, "Creating PortDataManager"); //<" + dt.getName() + "> - data: " + data);
 }

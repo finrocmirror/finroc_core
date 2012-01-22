@@ -87,10 +87,10 @@ private:
 public:
 
   tFinrocTypeInfo() :
-      type(eSTD),
-      update_time(-1),
-      cc_index(-1),
-      port_interface(NULL)
+    type(eSTD),
+    update_time(-1),
+    cc_index(-1),
+    port_interface(NULL)
   {}
 
   /*!

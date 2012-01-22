@@ -30,8 +30,8 @@ namespace core
 tRPCThreadPool* tRPCThreadPool::instance = util::tAutoDeleter::AddStatic(new tRPCThreadPool());
 
 tRPCThreadPool::tRPCThreadPool() :
-    unused_threads(),
-    obj_mutex(tLockOrderLevels::cINNER_MOST - 100)
+  unused_threads(),
+  obj_mutex(tLockOrderLevels::cINNER_MOST - 100)
 {
 }
 

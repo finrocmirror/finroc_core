@@ -32,8 +32,8 @@ namespace core
 std::shared_ptr<tStreamCommitThread> tStreamCommitThread::instance;
 
 tStreamCommitThread::tStreamCommitThread() :
-    tCoreLoopThreadBase(tRuntimeSettings::cSTREAM_THREAD_CYCLE_TIME->GetValue(), false),
-    callbacks(4u, 4u)
+  tCoreLoopThreadBase(tRuntimeSettings::cSTREAM_THREAD_CYCLE_TIME->GetValue(), false),
+  callbacks(4u, 4u)
 {
   SetName("StreamCommitThread");
 }

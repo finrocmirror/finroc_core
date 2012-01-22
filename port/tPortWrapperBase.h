@@ -58,7 +58,7 @@ protected:
 public:
 
   tPortWrapperBase() :
-      wrapped(NULL)
+    wrapped(NULL)
   {}
 
   /*!

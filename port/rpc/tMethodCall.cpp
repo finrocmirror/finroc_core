@@ -32,14 +32,14 @@ namespace finroc
 namespace core
 {
 tMethodCall::tMethodCall() :
-    tAbstractCall(),
-    method(NULL),
-    port_interface_type(NULL),
-    handler(NULL),
-    ret_handler(NULL),
-    net_port(NULL),
-    net_timeout(0),
-    source_net_port(NULL)
+  tAbstractCall(),
+  method(NULL),
+  port_interface_type(NULL),
+  handler(NULL),
+  ret_handler(NULL),
+  net_port(NULL),
+  net_timeout(0),
+  source_net_port(NULL)
 {
 }
 

@@ -67,15 +67,15 @@ class tAdminServer : public tInterfaceServerPort, public tAbstractMethodCallHand
   /*! Struct for callback parameters for GET_PARAMETER_INFO method */
   struct tCallbackParameters
   {
-public:
+  public:
 
     rrlib::serialization::tOutputStream* co;
 
     tConfigFile* cf;
 
     tCallbackParameters(tConfigFile* cf2, rrlib::serialization::tOutputStream* co2) :
-        co(co2),
-        cf(cf2)
+      co(co2),
+      cf(cf2)
     {
     }
 

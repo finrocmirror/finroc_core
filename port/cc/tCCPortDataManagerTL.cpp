@@ -29,9 +29,9 @@ namespace core
 const size_t tCCPortDataManagerTL::cREF_INDEX_MASK;
 
 tCCPortDataManagerTL::tCCPortDataManagerTL() :
-    reuse_counter(0),
-    owner_thread(util::sThreadUtil::GetCurrentThreadId()),
-    ref_counter(0)
+  reuse_counter(0),
+  owner_thread(util::sThreadUtil::GetCurrentThreadId()),
+  ref_counter(0)
 {
 }
 

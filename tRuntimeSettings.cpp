@@ -43,8 +43,8 @@ tParameter<int>* tRuntimeSettings::cGARBAGE_COLLECTOR_SAFETY_PERIOD;
 const bool tRuntimeSettings::cCOLLECT_EDGE_STATISTICS;
 
 tRuntimeSettings::tRuntimeSettings() :
-    tFrameworkElement(new tFrameworkElement(tRuntimeEnvironment::GetInstance(), "Settings"), "Core"),
-    update_time_listener()
+  tFrameworkElement(new tFrameworkElement(tRuntimeEnvironment::GetInstance(), "Settings"), "Core"),
+  update_time_listener()
 {
   cWARN_ON_CYCLE_TIME_EXCEED = util::tAutoDeleter::AddStatic(new tParameter<bool>("WARN_ON_CYCLE_TIME_EXCEED", this, true));
   cDEFAULT_CYCLE_TIME = util::tAutoDeleter::AddStatic(new tParameter<long long int>("DEFAULT_CYCLE_TIME", this, 50LL, tBounds<long long int>(1, 2000)));

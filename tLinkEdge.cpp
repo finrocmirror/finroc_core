@@ -28,11 +28,11 @@ namespace finroc
 namespace core
 {
 tLinkEdge::tLinkEdge(const util::tString& source_link_, int target_handle, bool finstructed) :
-    source_link(source_link_),
-    target_link(""),
-    port_handle(target_handle),
-    next(NULL),
-    finstructed(finstructed)
+  source_link(source_link_),
+  target_link(""),
+  port_handle(target_handle),
+  next(NULL),
+  finstructed(finstructed)
 {
   // this(sourceLink_,"",targetHandle);
   if (source_link.Length() > 0)
@@ -46,11 +46,11 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, int target_handle, bool 
 }
 
 tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& target_link_, bool finstructed) :
-    source_link(source_link_),
-    target_link(target_link_),
-    port_handle(-1),
-    next(NULL),
-    finstructed(finstructed)
+  source_link(source_link_),
+  target_link(target_link_),
+  port_handle(-1),
+  next(NULL),
+  finstructed(finstructed)
 {
   // this(sourceLink_,targetLink_,-1);
   if (source_link.Length() > 0)
@@ -64,11 +64,11 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& tar
 }
 
 tLinkEdge::tLinkEdge(int source_handle, const util::tString& target_link_, bool finstructed) :
-    source_link(""),
-    target_link(target_link_),
-    port_handle(source_handle),
-    next(NULL),
-    finstructed(finstructed)
+  source_link(""),
+  target_link(target_link_),
+  port_handle(source_handle),
+  next(NULL),
+  finstructed(finstructed)
 {
   // this("",targetLink_,sourceHandle);
   if (source_link.Length() > 0)
@@ -82,11 +82,11 @@ tLinkEdge::tLinkEdge(int source_handle, const util::tString& target_link_, bool 
 }
 
 tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& target_link_, int port_handle_, bool finstructed) :
-    source_link(source_link_),
-    target_link(target_link_),
-    port_handle(port_handle_),
-    next(NULL),
-    finstructed(finstructed)
+  source_link(source_link_),
+  target_link(target_link_),
+  port_handle(port_handle_),
+  next(NULL),
+  finstructed(finstructed)
 {
   if (source_link.Length() > 0)
   {

@@ -122,50 +122,50 @@ public:
   }
 
   tNumber() :
-      lval(0),
-      num_type(eINT),
-      unit(&tUnit::cNO_UNIT)
+    lval(0),
+    num_type(eINT),
+    unit(&tUnit::cNO_UNIT)
   {
   }
 
   tNumber(uint32_t value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-      ival(value_),
-      num_type(eINT),
-      unit(unit_)
+    ival(value_),
+    num_type(eINT),
+    unit(unit_)
   {
   }
 
   tNumber(int value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-      ival(value_),
-      num_type(eINT),
-      unit(unit_)
+    ival(value_),
+    num_type(eINT),
+    unit(unit_)
   {
   }
 
   tNumber(int64 value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-      lval(value_),
-      num_type(eLONG),
-      unit(unit_)
+    lval(value_),
+    num_type(eLONG),
+    unit(unit_)
   {
   }
 
   tNumber(double value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-      dval(value_),
-      num_type(eDOUBLE),
-      unit(unit_)
+    dval(value_),
+    num_type(eDOUBLE),
+    unit(unit_)
   {
   }
 
   tNumber(float value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-      fval(value_),
-      num_type(eFLOAT),
-      unit(unit_)
+    fval(value_),
+    num_type(eFLOAT),
+    unit(unit_)
   {
   }
 
   tNumber(const util::tNumber& value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-      num_type(),
-      unit(NULL)
+    num_type(),
+    unit(NULL)
   {
     SetValue(value_, unit_);
   }

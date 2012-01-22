@@ -64,7 +64,7 @@ finroc::core::tStandardCreateModuleAction<mTestModule> mTestModule::cCREATE_ACTI
 // mTestModule constructors
 //----------------------------------------------------------------------
 mTestModule::mTestModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name)
-    : tModule(parent, name),
+  : tModule(parent, name),
 
     counter(0)
 {}

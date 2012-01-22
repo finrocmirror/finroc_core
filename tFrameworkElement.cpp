@@ -38,13 +38,13 @@ namespace finroc
 namespace core
 {
 tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tString& description_, uint flags_, int lock_order_) :
-    primary(this),
-    flag_mutex(),
-    creater_thread_uid(util::sThreadUtil::GetCurrentThreadId()),
-    const_flags(flags_ & tCoreFlags::cCONSTANT_FLAGS),
-    flags(flags_ & tCoreFlags::cNON_CONSTANT_FLAGS),
-    children(GetFlag(tCoreFlags::cALLOWS_CHILDREN) ? 4 : 0, GetFlag(tCoreFlags::cALLOWS_CHILDREN) ? 4 : 0),
-    obj_mutex(GetLockOrder(flags_, parent_, lock_order_), GetFlag(tCoreFlags::cIS_RUNTIME) ? util::tInteger::cMIN_VALUE : tRuntimeEnvironment::GetInstance()->RegisterElement(this))
+  primary(this),
+  flag_mutex(),
+  creater_thread_uid(util::sThreadUtil::GetCurrentThreadId()),
+  const_flags(flags_ & tCoreFlags::cCONSTANT_FLAGS),
+  flags(flags_ & tCoreFlags::cNON_CONSTANT_FLAGS),
+  children(GetFlag(tCoreFlags::cALLOWS_CHILDREN) ? 4 : 0, GetFlag(tCoreFlags::cALLOWS_CHILDREN) ? 4 : 0),
+  obj_mutex(GetLockOrder(flags_, parent_, lock_order_), GetFlag(tCoreFlags::cIS_RUNTIME) ? util::tInteger::cMIN_VALUE : tRuntimeEnvironment::GetInstance()->RegisterElement(this))
 {
   assert(((flags_ & tCoreFlags::cSTATUS_FLAGS) == 0));
 
@@ -976,41 +976,41 @@ void tFrameworkElement::WriteDescription(rrlib::serialization::tOutputStream& os
 }
 
 tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent) :
-    next_elem(NULL),
-    last(NULL),
-    flags(0),
-    result(0),
-    cur_parent(NULL)
+  next_elem(NULL),
+  last(NULL),
+  flags(0),
+  result(0),
+  cur_parent(NULL)
 {
   Reset(parent);
 }
 
 tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, uint flags_) :
-    next_elem(NULL),
-    last(NULL),
-    flags(0),
-    result(0),
-    cur_parent(NULL)
+  next_elem(NULL),
+  last(NULL),
+  flags(0),
+  result(0),
+  cur_parent(NULL)
 {
   Reset(parent, flags_);
 }
 
 tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, uint flags_, uint result_) :
-    next_elem(NULL),
-    last(NULL),
-    flags(0),
-    result(0),
-    cur_parent(NULL)
+  next_elem(NULL),
+  last(NULL),
+  flags(0),
+  result(0),
+  cur_parent(NULL)
 {
   Reset(parent, flags_, result_);
 }
 
 tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement* parent, uint flags_, uint result_, bool include_non_ready) :
-    next_elem(NULL),
-    last(NULL),
-    flags(0),
-    result(0),
-    cur_parent(NULL)
+  next_elem(NULL),
+  last(NULL),
+  flags(0),
+  result(0),
+  cur_parent(NULL)
 {
   Reset(parent, flags_, result_, include_non_ready);
 }

@@ -96,9 +96,9 @@ public:
                        tStaticParameterBase* p13 = NULL, tStaticParameterBase* p14 = NULL, tStaticParameterBase* p15 = NULL,
                        tStaticParameterBase* p16 = NULL, tStaticParameterBase* p17 = NULL, tStaticParameterBase* p18 = NULL,
                        tStaticParameterBase* p19 = NULL, tStaticParameterBase* p20 = NULL) :
-      tFinrocAnnotation(),
-      parameters(),
-      create_action(-1)
+    tFinrocAnnotation(),
+    parameters(),
+    create_action(-1)
   {
     Add(p1);
     Add(p2);

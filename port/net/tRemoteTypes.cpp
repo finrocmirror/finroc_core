@@ -33,10 +33,10 @@ namespace finroc
 namespace core
 {
 tRemoteTypes::tRemoteTypes() :
-    types(200u, 2u),
-    update_times(200u, 2u),
-    local_types_sent(0),
-    global_default(0)
+  types(200u, 2u),
+  update_times(200u, 2u),
+  local_types_sent(0),
+  global_default(0)
 {
 }
 
@@ -176,15 +176,15 @@ void tRemoteTypes::WriteType(rrlib::serialization::tOutputStream& os, rrlib::ser
 }
 
 tRemoteTypes::tEntry::tEntry() :
-    local_data_type(NULL),
-    types_checked(0),
-    name()
+  local_data_type(NULL),
+  types_checked(0),
+  name()
 {}
 
 tRemoteTypes::tEntry::tEntry(rrlib::serialization::tDataTypeBase local) :
-    local_data_type(local),
-    types_checked(0),
-    name()
+  local_data_type(local),
+  types_checked(0),
+  name()
 {
 }
 

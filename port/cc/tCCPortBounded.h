@@ -105,8 +105,8 @@ public:
    * \param pci Construction parameters in Port Creation Info Object
    */
   tCCPortBounded(tPortCreationInfo<T> pci) :
-      tCCPortBase(ProcessPciBNP(pci)),
-      bounds(pci.GetBounds())
+    tCCPortBase(ProcessPciBNP(pci)),
+    bounds(pci.GetBounds())
   {
   }
 

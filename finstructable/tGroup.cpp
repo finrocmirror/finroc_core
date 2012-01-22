@@ -30,8 +30,8 @@ namespace core
 tStandardCreateModuleAction<tGroup> tGroup::cCREATE_ACTION("Group", util::tTypedClass<tGroup>());
 
 tGroup::tGroup(tFrameworkElement* parent, const util::tString& description, uint flags) :
-    tPortGroup(parent, description, flags, 0),
-    ports("Ports", this)
+  tPortGroup(parent, description, flags, 0),
+  ports("Ports", this)
 {
   ports.GetValue()->InitialSetup(this, 0, true);
 }

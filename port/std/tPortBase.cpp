@@ -30,18 +30,18 @@ namespace finroc
 namespace core
 {
 tPortBase::tPortBase(tPortCreationInfoBase pci) :
-    tAbstractPort(ProcessPci(pci)),
-    edges_src(),
-    edges_dest(),
-    default_value(CreateDefaultValue(pci.data_type)),
-    value(),
-    cur_data_type(this->data_type),
-    buffer_pool(HasSpecialReuseQueue() ? NULL : new tPortDataBufferPool(this->data_type, IsOutputPort() ? 2 : 0)),
-    multi_buffer_pool(HasSpecialReuseQueue() ? new tMultiTypePortDataBufferPool() : NULL),
-    standard_assign(!GetFlag(tPortFlags::cNON_STANDARD_ASSIGN) && (!GetFlag(tPortFlags::cHAS_QUEUE))),
-    queue(GetFlag(tPortFlags::cHAS_QUEUE) ? new tPortQueue(pci.max_queue_size) : NULL),
-    pull_request_handler(NULL),
-    port_listener()
+  tAbstractPort(ProcessPci(pci)),
+  edges_src(),
+  edges_dest(),
+  default_value(CreateDefaultValue(pci.data_type)),
+  value(),
+  cur_data_type(this->data_type),
+  buffer_pool(HasSpecialReuseQueue() ? NULL : new tPortDataBufferPool(this->data_type, IsOutputPort() ? 2 : 0)),
+  multi_buffer_pool(HasSpecialReuseQueue() ? new tMultiTypePortDataBufferPool() : NULL),
+  standard_assign(!GetFlag(tPortFlags::cNON_STANDARD_ASSIGN) && (!GetFlag(tPortFlags::cHAS_QUEUE))),
+  queue(GetFlag(tPortFlags::cHAS_QUEUE) ? new tPortQueue(pci.max_queue_size) : NULL),
+  pull_request_handler(NULL),
+  port_listener()
 {
   assert((tFinrocTypeInfo::IsStdType(pci.data_type)));
   InitLists(&(edges_src), &(edges_dest));

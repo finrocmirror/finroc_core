@@ -29,20 +29,20 @@ namespace core
 rrlib::serialization::tDataTypeBase tPeriodicFrameworkElementTask::cTYPE = rrlib::serialization::tDataType<tPeriodicFrameworkElementTask>();
 
 tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, util::tTask* task_) :
-    task(task_),
-    incoming(incoming_ports),
-    outgoing(outgoing_ports),
-    previous_tasks(),
-    next_tasks()
+  task(task_),
+  incoming(incoming_ports),
+  outgoing(outgoing_ports),
+  previous_tasks(),
+  next_tasks()
 {
 }
 
 tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask() :
-    task(NULL),
-    incoming(NULL),
-    outgoing(NULL),
-    previous_tasks(),
-    next_tasks()
+  task(NULL),
+  incoming(NULL),
+  outgoing(NULL),
+  previous_tasks(),
+  next_tasks()
 {
   throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
 }

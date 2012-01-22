@@ -32,19 +32,19 @@ namespace finroc
 namespace core
 {
 tCCPortBase::tCCPortBase(tPortCreationInfoBase pci) :
-    tAbstractPort(pci),
-    edges_src(),
-    edges_dest(),
-    cc_type_index(tFinrocTypeInfo::Get(GetDataType()).GetCCIndex()),
-    default_value(CreateDefaultValue(pci.data_type)),
-    value(NULL),
-    owned_data(NULL),
-    standard_assign(!GetFlag(tPortFlags::cNON_STANDARD_ASSIGN) && (!GetFlag(tPortFlags::cHAS_QUEUE))),
-    port_index(GetHandle() & tCoreRegister<>::cELEM_INDEX_MASK),
-    queue(GetFlag(tPortFlags::cHAS_QUEUE) ? new tCCPortQueue(pci.max_queue_size) : NULL),
-    port_listener(),
-    pull_request_handler(NULL),
-    unit(pci.unit)
+  tAbstractPort(pci),
+  edges_src(),
+  edges_dest(),
+  cc_type_index(tFinrocTypeInfo::Get(GetDataType()).GetCCIndex()),
+  default_value(CreateDefaultValue(pci.data_type)),
+  value(NULL),
+  owned_data(NULL),
+  standard_assign(!GetFlag(tPortFlags::cNON_STANDARD_ASSIGN) && (!GetFlag(tPortFlags::cHAS_QUEUE))),
+  port_index(GetHandle() & tCoreRegister<>::cELEM_INDEX_MASK),
+  queue(GetFlag(tPortFlags::cHAS_QUEUE) ? new tCCPortQueue(pci.max_queue_size) : NULL),
+  port_listener(),
+  pull_request_handler(NULL),
+  unit(pci.unit)
 {
   assert((tFinrocTypeInfo::IsCCType(pci.data_type)));
   InitLists(&(edges_src), &(edges_dest));

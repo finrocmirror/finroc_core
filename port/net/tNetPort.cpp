@@ -39,11 +39,11 @@ namespace core
 const int tNetPort::cPULL_TIMEOUT;
 
 tNetPort::tNetPort(tPortCreationInfoBase pci, util::tObject* belongs_to_) :
-    wrapped(NULL),
-    belongs_to(belongs_to_),
-    remote_handle(0),
-    ftype(tFinrocTypeInfo::Get(pci.data_type).GetType()),
-    last_update(util::tLong::cMIN_VALUE)
+  wrapped(NULL),
+  belongs_to(belongs_to_),
+  remote_handle(0),
+  ftype(tFinrocTypeInfo::Get(pci.data_type).GetType()),
+  last_update(util::tLong::cMIN_VALUE)
 {
   // keep most these flags
   uint f = pci.flags & (tPortFlags::cACCEPTS_DATA | tPortFlags::cEMITS_DATA | tPortFlags::cMAY_ACCEPT_REVERSE_DATA | tPortFlags::cIS_OUTPUT_PORT | tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT | tPortFlags::cNON_STANDARD_ASSIGN | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cFINSTRUCTED);
@@ -203,8 +203,8 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
 }
 
 tNetPort::tCCNetPort::tCCNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci) :
-    tCCPortBase(pci),
-    outer_class_ptr(outer_class_ptr_)
+  tCCPortBase(pci),
+  outer_class_ptr(outer_class_ptr_)
 {
   ::finroc::core::tCCPortBase::AddPortListenerRaw(outer_class_ptr);
   ::finroc::core::tCCPortBase::SetPullRequestHandler(this);
@@ -327,8 +327,8 @@ bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
 }
 
 tNetPort::tStdNetPort::tStdNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci) :
-    tPortBase(pci),
-    outer_class_ptr(outer_class_ptr_)
+  tPortBase(pci),
+  outer_class_ptr(outer_class_ptr_)
 {
   ::finroc::core::tPortBase::AddPortListenerRaw(outer_class_ptr);
   ::finroc::core::tPortBase::SetPullRequestHandler(this);
@@ -440,8 +440,8 @@ const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, in
 }
 
 tNetPort::tInterfaceNetPortImpl::tInterfaceNetPortImpl(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci) :
-    tInterfaceNetPort(pci),
-    outer_class_ptr(outer_class_ptr_)
+  tInterfaceNetPort(pci),
+  outer_class_ptr(outer_class_ptr_)
 {
   //setCallHandler(this);
 }

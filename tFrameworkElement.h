@@ -99,10 +99,10 @@ public:
   public:
 
     tLink(tFrameworkElement* const outer_class_ptr_) :
-        outer_class_ptr(outer_class_ptr_),
-        description(),
-        parent(NULL),
-        next(NULL)
+      outer_class_ptr(outer_class_ptr_),
+      description(),
+      parent(NULL),
+      next(NULL)
     {}
 
     virtual ~tLink()

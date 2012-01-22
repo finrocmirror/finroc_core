@@ -59,21 +59,21 @@ protected:
 public:
 
   tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type) :
-      tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer),
-      handler(NULL)
+    tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer),
+    handler(NULL)
   {
   }
 
   tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type, tAbstractMethodCallHandler* ch, uint custom_flags = 0) :
-      tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags),
-      handler(NULL)
+    tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags),
+    handler(NULL)
   {
     SetCallHandler(ch);
   }
 
   tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type, tAbstractMethodCallHandler* ch, uint custom_flags, int lock_level) :
-      tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags, lock_level),
-      handler(NULL)
+    tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags, lock_level),
+    handler(NULL)
   {
     SetCallHandler(ch);
   }

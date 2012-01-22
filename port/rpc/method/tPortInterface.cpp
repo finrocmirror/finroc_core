@@ -28,10 +28,10 @@ namespace finroc
 namespace core
 {
 tPortInterface::tPortInterface(const util::tString& name_, bool shutdown_runtime_on_delete_) :
-    methods(),
-    my_type(NULL),
-    name(name_),
-    shutdown_runtime_on_delete(shutdown_runtime_on_delete_)
+  methods(),
+  my_type(NULL),
+  name(name_),
+  shutdown_runtime_on_delete(shutdown_runtime_on_delete_)
 {
 }
 

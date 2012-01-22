@@ -131,7 +131,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tControllerInput(const ARGS&... args)
-        : tConveniencePort < T, tGroup, tPort<T> > (GetContainer, args...)
+      : tConveniencePort < T, tGroup, tPort<T> > (GetContainer, args...)
     {}
 
   private:
@@ -147,7 +147,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tControllerOutput(const ARGS&... args)
-        : tConveniencePort < T, tGroup, tPort<T> > (GetContainer, args...)
+      : tConveniencePort < T, tGroup, tPort<T> > (GetContainer, args...)
     {}
 
   private:
@@ -163,7 +163,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tSensorInput(const ARGS&... args)
-        : tConveniencePort < T, tGroup, tPort<T> >(GetContainer, args...)
+      : tConveniencePort < T, tGroup, tPort<T> >(GetContainer, args...)
     {}
 
   private:
@@ -179,7 +179,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tSensorOutput(const ARGS&... args)
-        : tConveniencePort < T, tGroup, tPort<T>>(GetContainer, args...)
+      : tConveniencePort < T, tGroup, tPort<T>>(GetContainer, args...)
     {}
 
   private:
@@ -199,7 +199,7 @@ public:
   public:
     template<typename ... ARGS>
     explicit tStaticParameter(const ARGS&... args)
-        : tConveniencePort < T, tGroup, finroc::core::tStaticParameter<T> >(GetContainer, args...)
+      : tConveniencePort < T, tGroup, finroc::core::tStaticParameter<T> >(GetContainer, args...)
     {
     }
 
