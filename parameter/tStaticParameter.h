@@ -181,6 +181,10 @@ public:
     SetValue(new_value);
   }
 
+  void SetConfigEntry(const util::tString& config_entry)
+  {
+    this->impl->SetConfigEntry(config_entry);
+  }
 };
 
 } // namespace finroc
