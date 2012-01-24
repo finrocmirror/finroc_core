@@ -289,7 +289,8 @@ void tStaticParameterBase::ResetChanged()
   assert(last_value);
 
   FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_2, "Resetting change for buffers of type ", sp->value->GetType().GetName());
-  rrlib::serialization::sSerialization::DeepCopy(*sp->value, *last_value);
+  //rrlib::serialization::sSerialization::DeepCopy(*sp->value, *last_value);
+  last_value->DeepCopyFrom(sp->value.get());
   assert(!HasChanged());
 }
 
