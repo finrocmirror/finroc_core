@@ -29,6 +29,7 @@
 #include "core/datatype/tUnit.h"
 #include "rrlib/serialization/tStringOutputStream.h"
 #include "rrlib/serialization/tSerializable.h"
+#include <endian.h>
 
 namespace rrlib
 {
@@ -53,7 +54,7 @@ class tNumber : public rrlib::serialization::tSerializable
 {
 public:
 
-  enum tType { eINT, eLONG, eFLOAT, eDOUBLE, eCONSTANT };
+  enum tType { eINT, eFLOAT, eDOUBLE, eCONSTANT };
 
 private:
 
@@ -66,8 +67,7 @@ private:
   /*! Current numerical data */
   union
   {
-    int ival;
-    int64 lval;
+    int64 ival;
     double dval;
     float fval;
   };
@@ -118,64 +118,44 @@ public:
   {
     unit = from.unit;
     num_type = from.num_type;
-    lval = from.lval; // will copy any type of value
+    ival = from.ival; // will copy any type of value
   }
 
   tNumber() :
-    lval(0),
+    ival(0),
     num_type(eINT),
     unit(&tUnit::cNO_UNIT)
   {
   }
 
-  tNumber(uint32_t value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-    ival(value_),
+  /*! constructor for all integral types. */
+  template<typename T>
+  tNumber(T value, typename std::enable_if<std::is_integral<T>::value, tUnit>::type* unit = &tUnit::cNO_UNIT) :
+    ival(value),
     num_type(eINT),
-    unit(unit_)
+    unit(unit)
   {
   }
 
-  tNumber(int value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-    ival(value_),
-    num_type(eINT),
-    unit(unit_)
-  {
-  }
-
-  tNumber(int64 value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-    lval(value_),
-    num_type(eLONG),
-    unit(unit_)
-  {
-  }
-
-  tNumber(double value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-    dval(value_),
+  tNumber(double value, tUnit* unit = &tUnit::cNO_UNIT) :
+    dval(value),
     num_type(eDOUBLE),
-    unit(unit_)
+    unit(unit)
   {
   }
 
-  tNumber(float value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-    fval(value_),
+  tNumber(float value, tUnit* unit = &tUnit::cNO_UNIT) :
+    fval(value),
     num_type(eFLOAT),
-    unit(unit_)
+    unit(unit)
   {
-  }
-
-  tNumber(const util::tNumber& value_, tUnit* unit_ = &tUnit::cNO_UNIT) :
-    num_type(),
-    unit(NULL)
-  {
-    SetValue(value_, unit_);
   }
 
   inline void CopyFrom(const tNumber& source)
   {
     num_type = source.num_type;
     unit = source.unit;
-
-    lval = source.lval;
+    ival = source.ival;
   }
 
   virtual void Deserialize(rrlib::serialization::tInputStream& ois);
@@ -190,8 +170,6 @@ public:
     {
     case eINT:
       return static_cast<T>(ival);
-    case eLONG:
-      return static_cast<T>(lval);
     case eDOUBLE:
       return static_cast<T>(dval);
     case eFLOAT:
@@ -204,30 +182,17 @@ public:
     }
   }
 
-  inline virtual double DoubleValue() const
+  inline double DoubleValue() const
   {
     return Value<double>();
   }
 
   bool Equals(const tNumber& other) const;
 
-  inline virtual float FloatValue() const
+  inline float FloatValue() const
   {
     return Value<float>();
   }
-
-  //    // CCPortData standard implementation
-  //    @JavaOnly @Override public void assign(CCPortData other) {
-  //        CoreNumber cn = (CoreNumber)other;
-  //        numType = cn.numType;
-  //        value = cn.value;
-  //        unit = cn.unit;
-  //    }
-  //
-  //    @Override @JavaOnly
-  //    public DataType<CoreNumber> getType() {
-  //        return TYPE;
-  //    }
 
   inline static rrlib::serialization::tDataTypeBase GetDataType()
   {
@@ -240,7 +205,7 @@ public:
    */
   inline tUnit* GetUnit() const;
 
-  inline virtual int IntValue() const
+  inline int IntValue() const
   {
     return Value<int>();
   }
@@ -268,12 +233,7 @@ public:
     return num_type == eINT && ival == i && this->unit == unit_;
   }
 
-  inline bool IsLong(int64 i, tUnit* unit_) const
-  {
-    return num_type == eLONG && lval == i && this->unit == unit_;
-  }
-
-  inline virtual int64 LongValue() const
+  inline int64 LongValue() const
   {
     return Value<int64>();
   }
@@ -297,115 +257,40 @@ public:
   }
 
   // All kinds of variations of setters
-  inline void SetValue(int value_)
+  template<typename T>
+  inline void SetValue(T value, typename std::enable_if<std::is_integral<T>::value, tUnit>::type* unit = &tUnit::cNO_UNIT)
   {
-    SetValue(value_, &(tUnit::cNO_UNIT));
-  }
-
-  inline void SetValue(int value_, tUnit* unit_)
-  {
-    ival = value_;
-    this->unit = unit_;
+    this->ival = value;
+    this->unit = unit;
     num_type = eINT;
   }
 
-  inline void SetValue(long long int value_)
+  inline void SetValue(float value, tUnit* unit = &tUnit::cNO_UNIT)
   {
-    SetValue(value_, &(tUnit::cNO_UNIT));
-  }
-
-  inline void SetValue(long long int value_, tUnit* unit_)
-  {
-    lval = value_;
-    this->unit = unit_;
-    num_type = eLONG;
-  }
-
-  inline void SetValue(float value_)
-  {
-    SetValue(value_, &(tUnit::cNO_UNIT));
-  }
-
-  inline void SetValue(float value_, tUnit* unit_)
-  {
-    fval = value_;
-    this->unit = unit_;
+    this->fval = value;
+    this->unit = unit;
     num_type = eFLOAT;
   }
 
-  inline void SetValue(double value_)
+  inline void SetValue(double value, tUnit* unit = &tUnit::cNO_UNIT)
   {
-    SetValue(value_, &(tUnit::cNO_UNIT));
-  }
-
-  inline void SetValue(double value_, tUnit* unit_)
-  {
-    dval = value_;
-    this->unit = unit_;
+    this->dval = value;
+    this->unit = unit;
     num_type = eDOUBLE;
   }
 
-  void SetValue(tConstant* value_);
+  void SetValue(tConstant* value);
 
-  inline void SetValue(const util::tNumber& value_)
+  void SetValue(const tNumber& value)
   {
-    SetValue(value_, &(tUnit::cNO_UNIT));
-  }
-
-  void SetValue(const util::tNumber& value_, tUnit* unit_);
-
-  void SetValue(const uint32_t& t)
-  {
-    SetValue((int32_t)t);
-  }
-  void SetValue(const uint32_t& t, tUnit* u)
-  {
-    SetValue((int32_t)t, u);
-  }
-  void SetValue(long int t)
-  {
-    if (sizeof(long int) == 4)
-    {
-      SetValue((int32_t)t);
-    }
-    else
-    {
-      SetValue((long long int)t);
-    }
-  }
-  void SetValue(long int t, tUnit* u)
-  {
-    if (sizeof(long int) == 4)
-    {
-      SetValue((int32_t)t, u);
-    }
-    else
-    {
-      SetValue((long long int)t, u);
-    }
-  }
-  void SetValue(unsigned long int t)
-  {
-    SetValue((long int)t);
-  }
-  void SetValue(unsigned long int t, tUnit* u)
-  {
-    SetValue((long int)t, u);
-  }
-  void SetValue(unsigned long long int t)
-  {
-    SetValue((int64_t)t);
-  }
-  void SetValue(unsigned long long int t, tUnit* u)
-  {
-    SetValue((int64_t)t, u);
+    this->unit = value.unit;
+    this->num_type = value.num_type;
+    this->ival = value.ival;
   }
 
-  void SetValue(const tNumber& value_);
-
-  void SetValue(const tNumber& value_, tUnit* u)
+  void SetValue(const tNumber& value, tUnit* u)
   {
-    SetValue(value_);
+    SetValue(value);
     SetUnit(u);
   }
 
@@ -422,9 +307,7 @@ public:
     switch (num_type)
     {
     case eINT:
-      return ival < other.Value<int>();
-    case eLONG:
-      return lval < other.Value<int64_t>();
+      return ival < other.Value<int64_t>();
     case eDOUBLE:
       return dval < other.Value<double>();
     case eFLOAT:
@@ -441,28 +324,22 @@ public:
   T* GetValuePtr();
 };
 
-template <typename T, size_t cSIZE>
-struct tCoreNumberPointerGetterBase
+template <typename T>
+struct tCoreNumberPointerGetter
 {
   static T* GetDataPtr(tNumber* num)
   {
     num->SetValue(num->Value<T>());
-    return (T*)(&num->ival);  // TODO: this only works on little endian
+#if __BYTE_ORDER == __ORDER_BIG_ENDIAN
+    assert(sizeof(ival) - sizeof(T) >= 0);
+    char* tmp = (char*)(num->ival);
+    tmp += (sizeof(ival) - sizeof(T));
+    return (T*)tmp;
+#else
+    return (T*)(num->ival);
+#endif
   }
 };
-
-template <typename T>
-struct tCoreNumberPointerGetterBase<T, 8>
-{
-  static T* GetDataPtr(tNumber* num)
-  {
-    num->SetValue(num->Value<T>());
-    return (T*)(&num->lval);
-  }
-};
-
-template <typename T>
-struct tCoreNumberPointerGetter : tCoreNumberPointerGetterBase < T, sizeof(T) > {};
 
 template <>
 struct tCoreNumberPointerGetter<float>

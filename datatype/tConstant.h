@@ -74,7 +74,7 @@ private:
    * \param name Name of constant;
    * \param value Value of constant;
    */
-  tConstant(const util::tString& name, tNumber value_);
+  tConstant(const util::tString& name, const tNumber& value_);
 
 public:
 

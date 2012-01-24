@@ -48,7 +48,7 @@ void tNumber::Deserialize(rrlib::serialization::tInputStream& ois)
     SetValue(ois.ReadDouble());
     break;
   case cINT32:
-    SetValue(static_cast<int>(ois.ReadInt()));
+    SetValue(ois.ReadInt());
     break;
   case cFLOAT32:
 
@@ -101,7 +101,7 @@ void tNumber::Deserialize(rrlib::serialization::tStringInputStream& is)
   }
   else
   {
-    num_type = eLONG;
+    num_type = eINT;
     try
     {
       int64 l = util::tLong::ParseLong(num);
@@ -124,8 +124,7 @@ void tNumber::Deserialize(rrlib::serialization::tStringInputStream& is)
 
 bool tNumber::Equals(const tNumber& o) const
 {
-  bool value_matches = (lval == o.lval);
-  return o.num_type == num_type && o.unit == unit && value_matches;
+  return o.num_type == num_type && o.unit == unit && ival == o.ival;
 }
 
 tConstant* tNumber::GetConstant() const
@@ -135,9 +134,9 @@ tConstant* tNumber::GetConstant() const
 
 void tNumber::Serialize(rrlib::serialization::tOutputStream& oos) const
 {
-  if (num_type == eLONG || num_type == eINT)
+  if (num_type == eINT)
   {
-    int64 value = (num_type == eLONG) ? lval : ival;
+    int64 value = ival;
     if (value >= cMIN_BARRIER && value <= 63)
     {
       oos.WriteByte(PrepFirstByte(static_cast<int8>(value)));
@@ -181,43 +180,10 @@ void tNumber::Serialize(rrlib::serialization::tOutputStream& oos) const
   }
 }
 
-void tNumber::SetValue(tConstant* value_)
+void tNumber::SetValue(tConstant* value)
 {
-  this->unit = value_;
+  this->unit = value;
   num_type = eCONSTANT;
-}
-
-void tNumber::SetValue(const util::tNumber& value_, tUnit* unit_)
-{
-  if (typeid(value_) == typeid(int64))
-  {
-    SetValue(value_.LongValue(), unit_);
-  }
-  else if (typeid(value_) == typeid(int))
-  {
-    SetValue(value_.IntValue(), unit_);
-  }
-  else if (typeid(value_) == typeid(float))
-  {
-    SetValue(value_.FloatValue(), unit_);
-  }
-  else if (typeid(value_) == typeid(tNumber))
-  {
-    CopyFrom(static_cast<const tNumber&>(value_));
-    this->unit = unit_;
-  }
-  else
-  {
-    SetValue(value_.DoubleValue(), unit_);
-  }
-}
-
-void tNumber::SetValue(const tNumber& value_)
-{
-  this->unit = value_.unit;
-  this->num_type = value_.num_type;
-
-  this->dval = value_.dval;
 }
 
 const util::tString tNumber::ToString() const
@@ -226,11 +192,8 @@ const util::tString tNumber::ToString() const
   {
   case eCONSTANT:
     return GetConstant()->ToString();
-
   case eINT:
     return util::tStringBuilder(ival) + unit->ToString();
-  case eLONG:
-    return util::tStringBuilder(lval) + unit->ToString();
   case eFLOAT:
     return util::tStringBuilder(fval) + unit->ToString();
   case eDOUBLE:
