@@ -14,7 +14,7 @@ namespace finroc
 {
 namespace core
 {
-tThreadContainerThread::tThreadContainerThread(tFrameworkElement* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed) :
+tThreadContainerThread::tThreadContainerThread(tFrameworkElement* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed, tPort<long> last_cycle_execution_time) :
   tCoreLoopThreadBase(default_cycle_time, warn_on_cycle_time_exceed),
   thread_container(thread_container_),
   reschedule(true),
@@ -24,7 +24,8 @@ tThreadContainerThread::tThreadContainerThread(tFrameworkElement* thread_contain
   trace(),
   trace_back(),
   filter(),
-  tmp()
+  tmp(),
+  last_cycle_execution_time(last_cycle_execution_time)
 {
   this->SetName(util::tStringBuilder("ThreadContainer ") + thread_container_->GetDescription());
 }
@@ -121,6 +122,7 @@ void tThreadContainerThread::MainLoopCallback()
   }
 
   // execute tasks
+  last_cycle_execution_time.Publish(GetLastCycleTime());
   for (size_t i = 0u; i < schedule.Size(); i++)
   {
     schedule.Get(i)->task->ExecuteTask();

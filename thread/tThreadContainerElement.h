@@ -31,6 +31,7 @@
 #include "core/thread/tThreadContainerThread.h"
 #include "core/finstructable/tGroup.h"
 #include "core/thread/tStartAndPausable.h"
+#include "core/port/tPort.h"
 
 namespace finroc
 {
@@ -48,7 +49,6 @@ namespace core
 template <typename BASE>
 class tThreadContainerElement : public BASE, public tStartAndPausable
 {
-private:
 
   /*! Should this container contain a real-time thread? */
   tStaticParameter<bool> rt_thread;
@@ -62,6 +62,9 @@ private:
   /*! Thread - while program is running - in pause mode null */
   std::shared_ptr<tThreadContainerThread> thread;
 
+  /*! Port to publish time spent in last call to MainLoopCallback() */
+  core::tPort<long> last_cycle_execution_time;
+
   /*!
    * Stop thread in thread container (does not block - call join thread to block until thread has terminated)
    */
@@ -70,10 +73,10 @@ private:
 public:
 
   /*!
-   * \param description Name
-   * \param parent parent
+   * All constructor parameters are forwarded to class BASE (usually parent, description, flags)
    */
-  tThreadContainerElement(tFrameworkElement* parent, const util::tString& description, uint flags = 0);
+  template <typename ... ARGS>
+  tThreadContainerElement(const ARGS&... args);
 
   virtual ~tThreadContainerElement();
 

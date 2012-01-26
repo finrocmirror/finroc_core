@@ -32,12 +32,14 @@ namespace core
 {
 
 template <typename BASE>
-tThreadContainerElement<BASE>::tThreadContainerElement(tFrameworkElement* parent, const util::tString& description, uint flags) :
-  BASE(parent, description, flags),
+template <typename ... ARGS>
+tThreadContainerElement<BASE>::tThreadContainerElement(const ARGS&... args) :
+  BASE(args...),
   rt_thread("Realtime Thread", this, false),
   cycle_time("Cycle Time", this, 40, tBounds<int>(1, 60000, true)),
   warn_on_cycle_time_exceed("Warn on cycle time exceed", this, true),
-  thread()
+  thread(),
+  last_cycle_execution_time("Last Cycle execution time", this, tPortFlags::cOUTPUT_PORT, tUnit::ms)
 {
   this->AddAnnotation(new tExecutionControl(*this));
 }
@@ -84,7 +86,7 @@ template <typename BASE>
 void tThreadContainerElement<BASE>::StartExecution()
 {
   assert((thread.get() == NULL));
-  thread = util::sThreadUtil::GetThreadSharedPtr(new tThreadContainerThread(this, cycle_time.Get(), warn_on_cycle_time_exceed.Get()));
+  thread = util::sThreadUtil::GetThreadSharedPtr(new tThreadContainerThread(this, cycle_time.Get(), warn_on_cycle_time_exceed.Get(), last_cycle_execution_time));
   if (rt_thread.Get())
   {
     util::sThreadUtil::MakeThreadRealtime(thread);

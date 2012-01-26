@@ -12,6 +12,7 @@
 #include "core/port/tEdgeAggregator.h"
 #include "core/thread/tCoreLoopThreadBase.h"
 #include "core/tRuntimeListener.h"
+#include "core/port/tPort.h"
 
 namespace finroc
 {
@@ -53,6 +54,9 @@ private:
   /*! temp buffer */
   util::tStringBuilder tmp;
 
+  /*! Port to publish time spent in last call to MainLoopCallback() */
+  tPort<long> last_cycle_execution_time;
+
 private:
 
   /*!
@@ -65,7 +69,7 @@ private:
 
 public:
 
-  tThreadContainerThread(tFrameworkElement* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed);
+  tThreadContainerThread(tFrameworkElement* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed, tPort<long> last_cycle_execution_time);
 
   /*!
    * \param fe Framework element
