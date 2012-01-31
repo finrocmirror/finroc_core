@@ -122,7 +122,9 @@ public:
    */
   inline util::tArrayWrapper<tAggregatedEdge*>* GetEmergingEdges()
   {
-    return emerging_edges.GetIterable();
+    util::tArrayWrapper<tAggregatedEdge*>* iter = emerging_edges.GetIterable();
+    assert(iter != NULL);
+    return iter;
   }
 
   /*!

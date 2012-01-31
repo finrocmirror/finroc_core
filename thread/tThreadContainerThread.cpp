@@ -166,9 +166,20 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
   trace.Add(outgoing);
 
   util::tArrayWrapper<tAggregatedEdge*>* out_edges = outgoing->GetEmergingEdges();
+  assert(out_edges != NULL);
   for (size_t i = 0u; i < out_edges->Size(); i++)
   {
-    tEdgeAggregator* dest = out_edges->Get(i)->destination;
+    tAggregatedEdge* temp = out_edges->Get(i);
+    if (temp == NULL)
+    {
+      FINROC_LOG_PRINT_TO(thread_containers, rrlib::logging::eLL_WARNING, "Out Edge ", i , " is NULL ... skipping.\n");
+      continue;
+    }
+    assert(temp != NULL);
+
+    tEdgeAggregator* dest = temp->destination;
+
+    assert(dest != NULL);
     if (!trace.Contains(dest))
     {
       // ok, have we reached another task?
