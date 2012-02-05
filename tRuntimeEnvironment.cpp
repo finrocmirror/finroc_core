@@ -33,7 +33,6 @@
 #include "rrlib/finroc_core_utils/container/tBoundedQElementContainer.h"
 #include "rrlib/finroc_core_utils/stream/tChunkedBuffer.h"
 #include "core/admin/tAdminServer.h"
-#include "core/port/stream/tStreamCommitThread.h"
 #include "core/plugin/tPlugins.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tFrameworkElementTreeFilter.h"
@@ -220,10 +219,6 @@ tRuntimeEnvironment* tRuntimeEnvironment::InitialInit()
   //ConfigFile.init(conffile);
   tRuntimeSettings::StaticInit();  // can be done now... or last
   ::finroc::core::tFrameworkElement::InitAll();
-
-  tStreamCommitThread::StaticInit();
-  // Start thread
-  tStreamCommitThread::GetInstance()->Start();
 
   //Load plugins
   tPlugins::StaticInit();
