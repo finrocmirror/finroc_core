@@ -69,7 +69,7 @@ void tPortBase::BrowserPublish(const tPortDataManager* data)
   PublishImpl<false, cCHANGED, true>(data);
 }
 
-tPortDataManager* tPortBase::CreateDefaultValue(const rrlib::serialization::tDataTypeBase& dt)
+tPortDataManager* tPortBase::CreateDefaultValue(const rrlib::rtti::tDataTypeBase& dt)
 {
   tPortDataManager* pdm = tPortDataManager::Create(dt);  //new PortDataManager(dt, null);
   pdm->GetCurrentRefCounter()->SetLocks(static_cast<int8>(2));

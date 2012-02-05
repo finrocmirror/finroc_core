@@ -56,7 +56,7 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, 
 {
 }
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, const rrlib::serialization::tDataTypeBase& data_type_, uint flags_) :
+tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -71,7 +71,7 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, 
 {
 }
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, const rrlib::serialization::tDataTypeBase& data_type_, uint flags_) :
+tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -101,7 +101,7 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, 
 {
 }
 
-tPortCreationInfoBase::tPortCreationInfoBase(const rrlib::serialization::tDataTypeBase& data_type_, uint flags_) :
+tPortCreationInfoBase::tPortCreationInfoBase(const rrlib::rtti::tDataTypeBase& data_type_, uint flags_) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -160,7 +160,7 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, 
 {
 }
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, const rrlib::serialization::tDataTypeBase& data_type_, uint flags_, int q_size) :
+tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_, int q_size) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -190,7 +190,7 @@ tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_des
   return pci2;
 }
 
-tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_description, tFrameworkElement* parent_, const rrlib::serialization::tDataTypeBase& type)
+tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_description, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& type)
 {
   tPortCreationInfoBase pci2(*this);
   pci2.description = new_description;
@@ -199,7 +199,7 @@ tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_des
   return pci2;
 }
 
-tPortCreationInfoBase tPortCreationInfoBase::Derive(const rrlib::serialization::tDataTypeBase& type)
+tPortCreationInfoBase tPortCreationInfoBase::Derive(const rrlib::rtti::tDataTypeBase& type)
 {
   tPortCreationInfoBase pci2(*this);
   pci2.data_type = type;

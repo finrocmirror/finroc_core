@@ -25,8 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
-#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/portdatabase/tReusableGenericObjectManager.h"
 
 #include "core/port/tCombinedPointer.h"
@@ -217,7 +216,7 @@ public:
   template<typename T>
   friend class tPort;
   friend class tPortDataReference;
-  friend class rrlib::serialization::tDataTypeBase;
+  friend class rrlib::rtti::tDataTypeBase;
 private:
 
   /*! Reference counters in this manager - 8 bytes in C++ (due to mean tricks) ... probably > 60 bytes in Java */
@@ -292,7 +291,7 @@ public:
    * \param data_type Data type
    * \return Manager
    */
-  inline static tPortDataManager* Create(const rrlib::serialization::tDataTypeBase& data_type)
+  inline static tPortDataManager* Create(const rrlib::rtti::tDataTypeBase& data_type)
   {
     return static_cast<tPortDataManager*>(data_type.CreateInstanceGeneric<tPortDataManager>()->GetManager());
   }
@@ -355,7 +354,7 @@ public:
   /*!
    * \return Type of managed object
    */
-  inline rrlib::serialization::tDataTypeBase GetType() const
+  inline rrlib::rtti::tDataTypeBase GetType() const
   {
     return GetObject()->GetType();
   }

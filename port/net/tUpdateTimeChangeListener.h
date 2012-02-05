@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/tListenerManager.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 
 namespace finroc
 {
@@ -50,17 +50,17 @@ public:
    * \param dt DataType - null for global change
    * \param new_update_time new update time
    */
-  virtual void UpdateTimeChanged(rrlib::serialization::tDataTypeBase dt, int16 new_update_time) = 0;
+  virtual void UpdateTimeChanged(rrlib::rtti::tDataTypeBase dt, int16 new_update_time) = 0;
 
 public:
 
-  class tManager : public util::tListenerManager<rrlib::serialization::tDataTypeBase, util::tObject, tUpdateTimeChangeListener, tUpdateTimeChangeListener::tManager>
+  class tManager : public util::tListenerManager<rrlib::rtti::tDataTypeBase, util::tObject, tUpdateTimeChangeListener, tUpdateTimeChangeListener::tManager>
   {
   public:
 
     tManager() {}
 
-    inline void SingleNotify(tUpdateTimeChangeListener* listener, rrlib::serialization::tDataTypeBase* origin, const util::tObject* parameter, int call_id)
+    inline void SingleNotify(tUpdateTimeChangeListener* listener, rrlib::rtti::tDataTypeBase* origin, const util::tObject* parameter, int call_id)
     {
       listener->UpdateTimeChanged(*origin, static_cast<int16>(call_id));
     }

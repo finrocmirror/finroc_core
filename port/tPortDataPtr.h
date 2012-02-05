@@ -82,7 +82,7 @@ public:
 private:
   friend class tPort<T>;
   friend class tPortUtilHelper;
-  friend class tPortDataPtr<rrlib::serialization::tGenericObject>;
+  friend class tPortDataPtr<rrlib::rtti::tGenericObject>;
   friend class tPortDataPtr<const T>;
 
   /** Pointer to data */
@@ -100,7 +100,7 @@ private:
 
   static inline T* GetData(tManager* mgr)
   {
-    rrlib::serialization::tGenericObject* go = mgr->GetObject();
+    rrlib::rtti::tGenericObject* go = mgr->GetObject();
     return go->GetData<T>();
   }
 
@@ -111,7 +111,7 @@ private:
     {
       return NULL;
     }
-    rrlib::serialization::tGenericObject* go = mgr->GetObject();
+    rrlib::rtti::tGenericObject* go = mgr->GetObject();
     return go->GetData<T>();
   }
 
@@ -165,10 +165,10 @@ public:
   }
 
   // Move assignment (GenericObject to T)
-  template < typename G = rrlib::serialization::tGenericObject >
+  template < typename G = rrlib::rtti::tGenericObject >
   tPortDataPtr& operator=(tPortDataPtr < typename std::enable_if < !std::is_same<T, G>::value, G >::type > && o)
   {
-    rrlib::serialization::tGenericObject* go = o.data;
+    rrlib::rtti::tGenericObject* go = o.data;
     data = (go == NULL) ? NULL : go->GetData<T>();
     o.data = NULL;
     manager = (o.manager == NULL) ? NULL : static_cast<tManager*>(o.manager);
@@ -265,13 +265,13 @@ public:
 };
 
 template <>
-class tPortDataPtr<rrlib::serialization::tGenericObject> : public tPortDataPtrBase
+class tPortDataPtr<rrlib::rtti::tGenericObject> : public tPortDataPtrBase
 {
 public:
   typedef tReusableGenericObjectManager tManager;
 
 private:
-  typedef rrlib::serialization::tGenericObject T;
+  typedef rrlib::rtti::tGenericObject T;
 
   friend class tPort<T>;
   friend class tPortUtil<T>;

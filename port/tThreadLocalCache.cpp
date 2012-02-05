@@ -22,8 +22,7 @@
 #include "core/port/tThreadLocalCache.h"
 #include "core/tRuntimeEnvironment.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
-#include "rrlib/serialization/tGenericObjectManager.h"
-#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/rpc/tMethodCallSyncher.h"
@@ -66,9 +65,9 @@ tThreadLocalCache::tThreadLocalCache() :
   FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating ThreadLocalCache for thread ", util::tThread::CurrentThread()->GetName());
 }
 
-void tThreadLocalCache::AddAutoLock(rrlib::serialization::tGenericObject* obj)
+void tThreadLocalCache::AddAutoLock(rrlib::rtti::tGenericObject* obj)
 {
-  rrlib::serialization::tGenericObjectManager* mgr = obj->GetManager();
+  rrlib::rtti::tGenericObjectManager* mgr = obj->GetManager();
   if (tFinrocTypeInfo::IsCCType(obj->GetType()))
   {
     if (typeid(*mgr) == typeid(tCCPortDataManager))
@@ -93,7 +92,7 @@ void tThreadLocalCache::AddAutoLock(tCCPortDataManagerTL* obj)
   cc_auto_locks.Add(obj);
 }
 
-tCCPortDataBufferPool* tThreadLocalCache::CreateCCPool(const rrlib::serialization::tDataTypeBase& data_type, int16 uid)
+tCCPortDataBufferPool* tThreadLocalCache::CreateCCPool(const rrlib::rtti::tDataTypeBase& data_type, int16 uid)
 {
   tCCPortDataBufferPool* pool = new tCCPortDataBufferPool(data_type, 10);  // create 10 buffers by default
   cc_type_pools[uid] = pool;
@@ -182,7 +181,7 @@ tMethodCallSyncher* tThreadLocalCache::GetMethodSyncher()
   return method_syncher;
 }
 
-tCCPortDataManager* tThreadLocalCache::GetUnusedInterThreadBuffer(const rrlib::serialization::tDataTypeBase& data_type)
+tCCPortDataManager* tThreadLocalCache::GetUnusedInterThreadBuffer(const rrlib::rtti::tDataTypeBase& data_type)
 {
   tCCPortDataManager* buf = GetCCPool(data_type)->GetUnusedInterThreadBuffer();
   //System.out.println("Getting unused interthread buffer: " + buf.hashCode());

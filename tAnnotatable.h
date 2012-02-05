@@ -24,16 +24,8 @@
 #define core__tAnnotatable_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
-
-namespace rrlib
-{
-namespace serialization
-{
-class tDataTypeBase;
-} // namespace rrlib
-} // namespace serialization
+#include "rrlib/rtti/rtti.h"
 
 namespace finroc
 {
@@ -94,7 +86,7 @@ public:
   template <typename A>
   A* GetAnnotation() const
   {
-    return static_cast<A*>(GetAnnotation(rrlib::serialization::tDataType<A>()));
+    return static_cast<A*>(GetAnnotation(rrlib::rtti::tDataType<A>()));
   }
 
   /*!
@@ -103,7 +95,7 @@ public:
    * \param type Data type of annotation we're looking for
    * \return Annotation. Null if framework element has no annotation of this type.
    */
-  tFinrocAnnotation* GetAnnotation(const rrlib::serialization::tDataTypeBase& dt) const;
+  tFinrocAnnotation* GetAnnotation(const rrlib::rtti::tDataTypeBase& dt) const;
 
 };
 

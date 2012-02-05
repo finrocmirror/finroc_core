@@ -27,7 +27,7 @@
 
 #include "core/port/rpc/tMethodCallException.h"
 #include "core/port/rpc/tCallParameter.h"
-#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/portdatabase/tSerializableReusable.h"
 
 #include "core/port/rpc/tParameterUtil.h"
@@ -149,7 +149,7 @@ public:
     return local_port_handle;
   }
 
-  tPortDataPtr<rrlib::serialization::tGenericObject> GetParamGeneric(int index);
+  tPortDataPtr<rrlib::rtti::tGenericObject> GetParamGeneric(int index);
 
   /*!
    * \return Destination port handle - only used while call is enqueued in network queue

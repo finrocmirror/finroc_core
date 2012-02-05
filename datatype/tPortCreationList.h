@@ -27,29 +27,12 @@
 
 #include "core/tCoreFlags.h"
 #include "core/port/tPortFlags.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tFrameworkElement.h"
 #include "core/datatype/tDataTypeReference.h"
 
-#include "rrlib/serialization/tSerializable.h"
-#include "rrlib/serialization/tStlContainerSuitable.h"
-
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
-
-namespace rrlib
-{
-namespace xml2
-{
-class tXMLNode;
-} // namespace rrlib
-} // namespace xml2
+#include "rrlib/serialization/serialization.h"
 
 namespace finroc
 {
@@ -64,7 +47,7 @@ class tAbstractPort;
  * Is only meant to be used in StaticParameters
  * For this reason, it is not real-time capable and a little more memory-efficient.
  */
-class tPortCreationList : public rrlib::serialization::tSerializable, public rrlib::serialization::tStlUnsuitable
+class tPortCreationList : public rrlib::serialization::tSerializable, public rrlib::rtti::tIsListType<false, false>, boost::noncopyable
 {
 public:
 
@@ -130,7 +113,7 @@ private:
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataTypeBase cTYPE;
+  static rrlib::rtti::tDataTypeBase cTYPE;
 
 private:
 
@@ -145,7 +128,7 @@ private:
    * \param output output port
    * \param prototype Port prototype (only interesting for listener)
    */
-  void CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, uint flags_, const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output, tAbstractPort* prototype);
+  void CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, uint flags_, const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output, tAbstractPort* prototype);
 
   /*!
    * Returns all child ports of specified framework element
@@ -166,7 +149,7 @@ public:
    * \param dt Data type
    * \param output Output port? (possibly irrelevant)
    */
-  void Add(const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output);
+  void Add(const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output);
 
   /*!
    * Applies changes to another IO vector
@@ -222,8 +205,8 @@ public:
 } // namespace finroc
 } // namespace core
 
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/rtti/tDataType.h"
 
-extern template class ::rrlib::serialization::tDataType<finroc::core::tPortCreationList>;
+extern template class ::rrlib::rtti::tDataType<finroc::core::tPortCreationList>;
 
 #endif // core__datatype__tPortCreationList_h__

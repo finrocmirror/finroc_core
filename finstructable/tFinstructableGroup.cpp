@@ -94,7 +94,7 @@ void tFinstructableGroup::AddDependency(const util::tString& dependency)
   }
 }
 
-void tFinstructableGroup::AddDependency(const rrlib::serialization::tDataTypeBase& dt)
+void tFinstructableGroup::AddDependency(const rrlib::rtti::tDataTypeBase& dt)
 {
   if (dt.GetUid() >= startup_type_count)
   {
@@ -310,7 +310,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
         if (name.Equals("staticparameter"))
         {
           tStaticParameterList* spl = tStaticParameterList::GetOrCreate(this);
-          spl->Add(new tStaticParameterBase(node->GetStringAttribute("name"), rrlib::serialization::tDataTypeBase(), false, true));
+          spl->Add(new tStaticParameterBase(node->GetStringAttribute("name"), rrlib::rtti::tDataTypeBase(), false, true));
         }
         else if (name.Equals("element"))
         {
@@ -567,7 +567,7 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
 
 void tFinstructableGroup::StaticInit()
 {
-  startup_type_count = rrlib::serialization::tDataTypeBase::GetTypeCount();
+  startup_type_count = rrlib::rtti::tDataTypeBase::GetTypeCount();
   startup_loaded_finroc_libs = sDynamicLoading::GetLoadedFinrocLibraries();
 }
 

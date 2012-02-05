@@ -20,13 +20,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tDataTypeReference.h"
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/rtti/tDataType.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataTypeBase tDataTypeReference::cTYPE = rrlib::serialization::tDataType<tDataTypeReference>();
+rrlib::rtti::tDataTypeBase tDataTypeReference::cTYPE = rrlib::rtti::tDataType<tDataTypeReference>();
 
 tDataTypeReference::tDataTypeReference() :
   referenced(tNumber::cTYPE)

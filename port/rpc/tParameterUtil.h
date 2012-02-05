@@ -41,7 +41,7 @@ namespace core
 
 namespace tParamaterUtilHelper
 {
-tCCPortDataManager* GetInterThreadBuffer(rrlib::serialization::tDataTypeBase dt);
+tCCPortDataManager* GetInterThreadBuffer(rrlib::rtti::tDataTypeBase dt);
 }
 
 // Pass-By-Value variant
@@ -70,8 +70,8 @@ public:
   {
     p->type = tCallParameter::cOBJECT;
     static_assert(typeutil::tIsCCType<T>::value, "Only CC types may be passed by value");
-    tCCPortDataManager* mgr = tParamaterUtilHelper::GetInterThreadBuffer(rrlib::serialization::tDataType<T>());
-    p->value = tPortDataPtr<rrlib::serialization::tGenericObject>(mgr->GetObject(), mgr);
+    tCCPortDataManager* mgr = tParamaterUtilHelper::GetInterThreadBuffer(rrlib::rtti::tDataType<T>());
+    p->value = tPortDataPtr<rrlib::rtti::tGenericObject>(mgr->GetObject(), mgr);
   }
 };
 

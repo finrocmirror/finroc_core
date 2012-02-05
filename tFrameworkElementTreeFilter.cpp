@@ -20,8 +20,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/tFrameworkElementTreeFilter.h"
-#include "rrlib/serialization/tInputStream.h"
-#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {

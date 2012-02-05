@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/parameter/tStaticParameterList.h"
 
 namespace finroc
@@ -44,7 +44,7 @@ class tConstructorParameters : public tStaticParameterList
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataType<tConstructorParameters> cTYPE;
+  static rrlib::rtti::tDataType<tConstructorParameters> cTYPE;
 
   tConstructorParameters() {}
 };

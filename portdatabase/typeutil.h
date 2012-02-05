@@ -24,8 +24,8 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include <type_traits>
-#include "rrlib/serialization/deepcopy.h"
-#include "rrlib/serialization/tTypeTraitsVector.h"
+#include "rrlib/rtti/sStaticTypeInfo.h"
+#include "rrlib/rtti/type_traits.h"
 
 namespace finroc
 {
@@ -62,9 +62,9 @@ struct tIsCCType
 /*!
  * Equivalent for runtime "cheap copy" type identification
  */
-inline bool IsCCType(const rrlib::serialization::tDataTypeBase& dt)
+inline bool IsCCType(const rrlib::rtti::tDataTypeBase& dt)
 {
-  return dt.GetSize() <= 256 && ((dt.GetTypeTraits() & rrlib::serialization::trait_flags::cHAS_TRIVIAL_DESTRUCTOR) != 0);
+  return dt.GetSize() <= 256 && ((dt.GetTypeTraits() & rrlib::rtti::trait_flags::cHAS_TRIVIAL_DESTRUCTOR) != 0);
 }
 
 /*!
@@ -135,7 +135,7 @@ template <typename T>
 inline static void ApplyChange(T& obj, const T& transaction, ...)
 {
   //obj = transaction;
-  rrlib::serialization::sSerialization::DeepCopy(transaction, obj, NULL);
+  rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(transaction, obj, NULL);
 }
 
 template <typename T>

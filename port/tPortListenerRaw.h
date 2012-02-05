@@ -40,7 +40,7 @@ class tAbstractPort;
 class tPortListenerRaw : public util::tInterface
 {
 public:
-  typedef rrlib::serialization::tGenericObjectManager tGenericObjectManager;
+  typedef rrlib::rtti::tGenericObjectManager tGenericObjectManager;
 
   /*!
    * Called whenever port's value has changed
@@ -55,13 +55,13 @@ public:
 /*!
  * Manager for port listeners
  */
-class tPortListenerManager : public util::tListenerManager<tAbstractPort, rrlib::serialization::tGenericObjectManager, tPortListenerRaw, tPortListenerManager>
+class tPortListenerManager : public util::tListenerManager<tAbstractPort, rrlib::rtti::tGenericObjectManager, tPortListenerRaw, tPortListenerManager>
 {
 public:
 
   tPortListenerManager() {}
 
-  inline void SingleNotify(tPortListenerRaw* listener, tAbstractPort* origin, const rrlib::serialization::tGenericObjectManager* parameter, int cCallId)
+  inline void SingleNotify(tPortListenerRaw* listener, tAbstractPort* origin, const rrlib::rtti::tGenericObjectManager* parameter, int cCallId)
   {
     listener->PortChangedRaw(origin, parameter);
   }

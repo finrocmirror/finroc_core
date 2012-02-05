@@ -26,19 +26,11 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/tRuntimeListener.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/rtti.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tEdgeAggregator.h"
 #include "core/tFrameworkElementTreeFilter.h"
-
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -100,7 +92,7 @@ private:
   int handle;
 
   /*! Type of port data */
-  rrlib::serialization::tDataTypeBase type;
+  rrlib::rtti::tDataTypeBase type;
 
   /*! Port Flags */
   uint flags;
@@ -174,7 +166,7 @@ public:
   /*!
    * \return Type of port data
    */
-  inline rrlib::serialization::tDataTypeBase GetDataType() const
+  inline rrlib::rtti::tDataTypeBase GetDataType() const
   {
     return type;
   }

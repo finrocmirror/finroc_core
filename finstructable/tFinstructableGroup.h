@@ -174,7 +174,7 @@ public:
    *
    * \param dt Data type required to instantiate this .xml
    */
-  static void AddDependency(const rrlib::serialization::tDataTypeBase& dt);
+  static void AddDependency(const rrlib::rtti::tDataTypeBase& dt);
 
   virtual void EvaluateStaticParameters();
 

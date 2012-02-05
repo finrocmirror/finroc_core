@@ -25,10 +25,9 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/parameter/tStaticParameterBase.h"
 #include "core/parameter/tStaticParameterList.h"
-#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/tPortTypeMap.h"
 #include "core/parameter/tStaticParameterImplStandard.h"
 #include "core/parameter/tStaticParameterImplString.h"

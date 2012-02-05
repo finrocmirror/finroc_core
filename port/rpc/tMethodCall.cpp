@@ -20,12 +20,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tMethodCall.h"
-#include "rrlib/serialization/tInputStream.h"
 #include "core/port/rpc/method/tPortInterface.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
 #include "core/port/rpc/method/tAbstractMethod.h"
-#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {
@@ -43,7 +41,7 @@ tMethodCall::tMethodCall() :
 {
 }
 
-void tMethodCall::DeserializeCall(rrlib::serialization::tInputStream& is, const rrlib::serialization::tDataTypeBase& dt, bool skip_parameters)
+void tMethodCall::DeserializeCall(rrlib::serialization::tInputStream& is, const rrlib::rtti::tDataTypeBase& dt, bool skip_parameters)
 {
   //assert(skipParameters || (dt != null && dt.isMethodType())) : "Method type required here";
   port_interface_type = dt;
@@ -78,7 +76,7 @@ void tMethodCall::ExecuteTask()
   }
 }
 
-void tMethodCall::PrepareExecution(tAbstractMethod* method_, const rrlib::serialization::tDataTypeBase& port_interface, tAbstractMethodCallHandler* handler_, tAbstractAsyncReturnHandler* ret_handler_)
+void tMethodCall::PrepareExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, tAbstractMethodCallHandler* handler_, tAbstractAsyncReturnHandler* ret_handler_)
 {
   assert((this->method == NULL && this->handler == NULL && method_ != NULL));
   this->method = method_;
@@ -103,7 +101,7 @@ void tMethodCall::PrepareForwardSyncRemoteExecution(tInterfaceNetPort* source, t
   this->net_port = dest;
 }
 
-void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::serialization::tDataTypeBase& port_interface, tAbstractAsyncReturnHandler* ret_handler_, tInterfaceNetPort* net_port_, int net_timeout_)
+void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, tAbstractAsyncReturnHandler* ret_handler_, tInterfaceNetPort* net_port_, int net_timeout_)
 {
   assert((this->method == NULL && this->handler == NULL && method_ != NULL));
   this->method = method_;
@@ -114,7 +112,7 @@ void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrl
   this->net_timeout = net_timeout_;
 }
 
-void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::serialization::tDataTypeBase& port_interface, int net_timeout_)
+void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, int net_timeout_)
 {
   assert((this->method == NULL && this->handler == NULL && method_ != NULL));
   this->method = method_;
@@ -142,7 +140,7 @@ void tMethodCall::Serialize(rrlib::serialization::tOutputStream& oos) const
   ::finroc::core::tAbstractCall::Serialize(oos);
 }
 
-void tMethodCall::SetMethod(tAbstractMethod* m, const rrlib::serialization::tDataTypeBase& port_interface)
+void tMethodCall::SetMethod(tAbstractMethod* m, const rrlib::rtti::tDataTypeBase& port_interface)
 {
   method = m;
   port_interface_type = port_interface;

@@ -28,13 +28,6 @@
 #include "core/port/rpc/tInterfacePort.h"
 #include "core/port/tPortWrapperBase.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tDataTypeBase;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -62,7 +55,7 @@ class tInterfaceClientPort : public tPortWrapperBase<tInterfacePort>
 
   public:
 
-    tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type, tInterfacePort::tType client);
+    tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type, tInterfacePort::tType client);
 
   };
 
@@ -92,7 +85,7 @@ protected:
 
 public:
 
-  tInterfaceClientPort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& type);
+  tInterfaceClientPort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type);
 
   /*!
    * Get buffer to use in method call (has one lock)
@@ -102,7 +95,7 @@ public:
    * \return Unused buffer of type
    */
   template <typename T>
-  inline tPortDataPtr<T> GetBufferForCall(const rrlib::serialization::tDataTypeBase& dt = NULL)
+  inline tPortDataPtr<T> GetBufferForCall(const rrlib::rtti::tDataTypeBase& dt = NULL)
   {
     return this->wrapped->GetBufferForCall<T>(dt);
   }

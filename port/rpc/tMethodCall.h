@@ -25,17 +25,9 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/serialization/serialization.h"
 #include "core/port/rpc/tAbstractCall.h"
 #include "rrlib/finroc_core_utils/thread/tTask.h"
-
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -70,7 +62,7 @@ private:
    * (method may belong to multiple - so this is the one
    *  we wan't to actually use)
    */
-  rrlib::serialization::tDataTypeBase port_interface_type;
+  rrlib::rtti::tDataTypeBase port_interface_type;
 
   /*! Needed when executed as a task: Handler that will handle this call */
   tAbstractMethodCallHandler* handler;
@@ -112,7 +104,7 @@ public:
    * \param skip_parameters Skip deserialization of parameter stuff? (for cases when port has been deleted;
    * in this case we need to jump to skip target afterwards)
    */
-  void DeserializeCall(rrlib::serialization::tInputStream& is, const rrlib::serialization::tDataTypeBase& dt, bool skip_parameters);
+  void DeserializeCall(rrlib::serialization::tInputStream& is, const rrlib::rtti::tDataTypeBase& dt, bool skip_parameters);
 
   virtual void ExecuteTask();
 
@@ -140,7 +132,7 @@ public:
   /*!
    * \return Data type of interface that method belongs to
    */
-  inline const rrlib::serialization::tDataTypeBase GetPortInterfaceType()
+  inline const rrlib::rtti::tDataTypeBase GetPortInterfaceType()
   {
     return port_interface_type;
   }
@@ -153,7 +145,7 @@ public:
    * \param handler Handler (server port) that will handle method
    * \param ret_handler asynchronous return handler (required for method calls with return value)
    */
-  void PrepareExecution(tAbstractMethod* method_, const rrlib::serialization::tDataTypeBase& port_interface, tAbstractMethodCallHandler* handler_, tAbstractAsyncReturnHandler* ret_handler_);
+  void PrepareExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, tAbstractMethodCallHandler* handler_, tAbstractAsyncReturnHandler* ret_handler_);
 
   /*!
    * Prepare method call object for blocking remote execution in another thread (as a task)
@@ -182,7 +174,7 @@ public:
    * \param net_port Port over which call is sent
    * \param net_timeout Network timeout in ms for call
    */
-  void PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::serialization::tDataTypeBase& port_interface, tAbstractAsyncReturnHandler* ret_handler_, tInterfaceNetPort* net_port_, int net_timeout_);
+  void PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, tAbstractAsyncReturnHandler* ret_handler_, tInterfaceNetPort* net_port_, int net_timeout_);
 
   /*!
    * Prepare method call object for blocking remote execution in same thread (as a task)
@@ -191,7 +183,7 @@ public:
    * \param port_interface Data type of interface that method belongs to
    * \param net_timeout Network timeout in ms for call
    */
-  void PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::serialization::tDataTypeBase& port_interface, int net_timeout_);
+  void PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, int net_timeout_);
 
   void Recycle();
 
@@ -201,7 +193,7 @@ public:
    * \param m The Method that will be called (may not be changed - to avoid ugly programming errors)
    * \param port_interface Data type of interface that method belongs to
    */
-  void SetMethod(tAbstractMethod* m, const rrlib::serialization::tDataTypeBase& port_interface);
+  void SetMethod(tAbstractMethod* m, const rrlib::rtti::tDataTypeBase& port_interface);
 
   virtual void CustomDelete(bool b)
   {

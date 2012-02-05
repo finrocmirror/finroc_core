@@ -23,7 +23,6 @@
 #include "core/port/tPort.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/tThreadLocalCache.h"
-#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/cc/tCCPortBase.h"
 
 namespace finroc
@@ -32,7 +31,7 @@ namespace core
 {
 void tParameterBool::Set(bool b)
 {
-  tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(rrlib::serialization::tDataType<bool>());
+  tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(rrlib::rtti::tDataType<bool>());
   (*(cb->GetObject()->GetData<bool>())) = b;
   (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
   cache->current_value = b;

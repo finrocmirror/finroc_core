@@ -31,7 +31,7 @@ namespace finroc
 {
 namespace core
 {
-tCCPortDataBufferPool::tCCPortDataBufferPool(const rrlib::serialization::tDataTypeBase& data_type_, int initial_size) :
+tCCPortDataBufferPool::tCCPortDataBufferPool(const rrlib::rtti::tDataTypeBase& data_type_, int initial_size) :
   thread_local_cache_infos(tThreadLocalCache::Get()->GetInfosLock()),
   returned_buffers(),
   inter_threads(new util::tReusablesPool<tCCPortDataManager>()),

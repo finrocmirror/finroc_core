@@ -20,13 +20,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/thread/tPeriodicFrameworkElementTask.h"
-#include "rrlib/serialization/tDataType.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataTypeBase tPeriodicFrameworkElementTask::cTYPE = rrlib::serialization::tDataType<tPeriodicFrameworkElementTask>();
+rrlib::rtti::tDataTypeBase tPeriodicFrameworkElementTask::cTYPE = rrlib::rtti::tDataType<tPeriodicFrameworkElementTask>();
 
 tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, util::tTask* task_) :
   task(task_),

@@ -27,7 +27,7 @@
 
 #include "core/port/tAbstractPort.h"
 #include "core/port/tPortCreationInfoBase.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tThreadLocalCache.h"
 
@@ -95,9 +95,9 @@ protected:
    * \return Unused buffer of type
    */
   template <typename T>
-  inline tPortDataPtr<T> GetBufferForCall(const rrlib::serialization::tDataTypeBase& dt = NULL)
+  inline tPortDataPtr<T> GetBufferForCall(const rrlib::rtti::tDataTypeBase& dt = NULL)
   {
-    tPortDataManager* mgr = GetUnusedBufferRaw(dt != NULL ? dt : rrlib::serialization::tDataType<T>());
+    tPortDataManager* mgr = GetUnusedBufferRaw(dt != NULL ? dt : rrlib::rtti::tDataType<T>());
     mgr->GetCurrentRefCounter()->SetOrAddLocks((int8_t)1);
     return tPortDataPtr<T>(mgr);
   }
@@ -127,11 +127,11 @@ protected:
 
 public:
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_);
+  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_);
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags);
+  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags);
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level);
+  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level);
 
   tInterfacePort(tPortCreationInfoBase pci, tInterfacePort::tType type_, int lock_level);
 
@@ -162,14 +162,14 @@ public:
    * \param dt Data type of object to get buffer of
    * \return Unused buffer of type
    */
-  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::serialization::tDataTypeBase dt);
+  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::rtti::tDataTypeBase dt);
 
   /*!
    * (for cc types only)
    * \param dt Data type of object to get buffer of
    * \return Unused buffer of type
    */
-  inline tCCPortDataManager* GetUnusedCCBuffer(const rrlib::serialization::tDataTypeBase& dt)
+  inline tCCPortDataManager* GetUnusedCCBuffer(const rrlib::rtti::tDataTypeBase& dt)
   {
     assert((tFinrocTypeInfo::IsCCType(dt)));
     return tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(dt);

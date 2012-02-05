@@ -28,15 +28,7 @@
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
 #include "core/tFrameworkElement.h"
-#include "rrlib/serialization/tSerializable.h"
-
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
+#include "rrlib/serialization/serialization.h"
 
 namespace finroc
 {

@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 
 namespace finroc
 {
@@ -39,9 +39,9 @@ class tPortInterface;
  * RPC interface data type.
  * (Should only be created once per data type with name and methods constructor!)
  */
-class tRPCInterfaceType : public rrlib::serialization::tDataTypeBase
+class tRPCInterfaceType : public rrlib::rtti::tDataTypeBase
 {
-  static rrlib::serialization::tDataTypeBase::tDataTypeInfoRaw* GetDataTypeInfo(const util::tString& name);
+  static rrlib::rtti::tDataTypeBase::tDataTypeInfoRaw* GetDataTypeInfo(const util::tString& name);
 
 public:
 

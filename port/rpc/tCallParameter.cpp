@@ -20,10 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tCallParameter.h"
-#include "rrlib/serialization/tInputStream.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
-#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {
@@ -49,7 +47,7 @@ void tCallParameter::Deserialize(rrlib::serialization::tInputStream& is)
   {
     assert((value == NULL));
     //value = (GenericObject)is.readObjectInInterThreadContainer(null);
-    rrlib::serialization::tGenericObject* go = is.ReadObject(NULL, this);
+    rrlib::rtti::tGenericObject* go = rrlib::rtti::ReadObject(is, NULL, this);
     value = Lock(go);
     tPortDataManager* pdm = value.GetManagerT<tPortDataManager>();
     if (pdm != NULL)
@@ -59,20 +57,20 @@ void tCallParameter::Deserialize(rrlib::serialization::tInputStream& is)
   }
 }
 
-tPortDataPtr<rrlib::serialization::tGenericObject> tCallParameter::Lock(rrlib::serialization::tGenericObject* tmp)
+tPortDataPtr<rrlib::rtti::tGenericObject> tCallParameter::Lock(rrlib::rtti::tGenericObject* tmp)
 {
   bool cc_type = tFinrocTypeInfo::IsCCType(tmp->GetType());
 
   if (cc_type)
   {
     tCCPortDataManager* mgr = (tCCPortDataManager*)tmp->GetManager();
-    return tPortDataPtr<rrlib::serialization::tGenericObject>(tmp, mgr);
+    return tPortDataPtr<rrlib::rtti::tGenericObject>(tmp, mgr);
   }
   else
   {
     tPortDataManager* mgr = (tPortDataManager*)tmp->GetManager();
     mgr->GetCurrentRefCounter()->SetOrAddLocks(1);
-    return tPortDataPtr<rrlib::serialization::tGenericObject>(tmp, mgr);
+    return tPortDataPtr<rrlib::rtti::tGenericObject>(tmp, mgr);
   }
 
 }
@@ -92,7 +90,7 @@ void tCallParameter::Serialize(rrlib::serialization::tOutputStream& oos) const
   }
   else if (type == cOBJECT)
   {
-    oos.WriteObject(value.get());
+    rrlib::rtti::WriteObject(oos, value.get());
     tPortDataManager* pdm = value.GetManagerT<tPortDataManager>();
     if (pdm != NULL)
     {

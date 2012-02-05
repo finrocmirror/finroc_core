@@ -25,9 +25,8 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/parameter/tStaticParameterBase.h"
-#include "rrlib/serialization/tGenericObject.h"
 
 namespace finroc
 {
@@ -58,7 +57,7 @@ public:
    * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
    */
   tStaticParameterImplStandard(const util::tString& name, const util::tString& default_value, bool constructor_prototype = false) :
-    tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
+    tStaticParameterBase(name, rrlib::rtti::tDataType<T>(), constructor_prototype)
   {
     if ((!constructor_prototype) && default_value.Length() > 0)
     {
@@ -79,7 +78,7 @@ public:
    * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
    */
   tStaticParameterImplStandard(const util::tString& name, const T& default_value, bool constructor_prototype = false) :
-    tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
+    tStaticParameterBase(name, rrlib::rtti::tDataType<T>(), constructor_prototype)
   {
     if (!constructor_prototype)
     {
@@ -95,11 +94,11 @@ public:
    */
   template < bool NONBOOL = !std::is_same<bool, T>::value >
   tStaticParameterImplStandard(const typename std::enable_if<NONBOOL, util::tString>::type& name, bool constructor_prototype = false) :
-    tStaticParameterBase(name, rrlib::serialization::tDataType<T>(), constructor_prototype)
+    tStaticParameterBase(name, rrlib::rtti::tDataType<T>(), constructor_prototype)
   {}
 
   tStaticParameterImplStandard(const tPortCreationInfo<T>& pci) :
-    tStaticParameterBase(pci.description, rrlib::serialization::tDataType<T>(), false)
+    tStaticParameterBase(pci.description, rrlib::rtti::tDataType<T>(), false)
   {
     if (pci.default_value_set)
     {
@@ -108,7 +107,7 @@ public:
   }
 
   tStaticParameterImplStandard(const tPortCreationInfoBase& pci) :
-    tStaticParameterBase(pci.description, rrlib::serialization::tDataType<T>(), false, false, pci.config_entry)
+    tStaticParameterBase(pci.description, rrlib::rtti::tDataType<T>(), false, false, pci.config_entry)
   {
   }
 
@@ -133,7 +132,7 @@ public:
    */
   inline T* GetValue()
   {
-    rrlib::serialization::tGenericObject* go = ::finroc::core::tStaticParameterBase::ValPointer();
+    rrlib::rtti::tGenericObject* go = ::finroc::core::tStaticParameterBase::ValPointer();
     return go->GetData<T>();
   }
 
@@ -142,8 +141,8 @@ public:
    */
   inline void SetValue(const T& new_value)
   {
-    rrlib::serialization::tGenericObject* go = ::finroc::core::tStaticParameterBase::ValPointer();
-    rrlib::serialization::sSerialization::DeepCopy(new_value, *(go->GetData<T>()));
+    rrlib::rtti::tGenericObject* go = ::finroc::core::tStaticParameterBase::ValPointer();
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(new_value, *(go->GetData<T>()));
   }
 
   /*!

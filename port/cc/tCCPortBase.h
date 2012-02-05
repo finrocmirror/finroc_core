@@ -33,20 +33,11 @@
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/tFrameworkElement.h"
-#include "rrlib/serialization/tGenericObjectManager.h"
-#include "rrlib/serialization/sSerialization.h"
-#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/port/cc/tCCPortDataRef.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "core/tRuntimeSettings.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tDataTypeBase;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -132,7 +123,7 @@ protected:
 private:
 
   // helper for direct member initialization in C++
-  inline static tCCPortDataManager* CreateDefaultValue(const rrlib::serialization::tDataTypeBase& dt)
+  inline static tCCPortDataManager* CreateDefaultValue(const rrlib::rtti::tDataTypeBase& dt)
   {
     return static_cast<tCCPortDataManager*>(dt.CreateInstanceGeneric<tCCPortDataManager>()->GetManager());
   }
@@ -444,7 +435,7 @@ public:
    *
    * \return Dequeued first/oldest element in queue
    */
-  inline rrlib::serialization::tGenericObject* DequeueSingleAutoLockedRaw()
+  inline rrlib::rtti::tGenericObject* DequeueSingleAutoLockedRaw()
   {
     tCCPortDataManager* result = DequeueSingleUnsafeRaw();
     if (result == NULL)
@@ -472,7 +463,7 @@ public:
   /*!
    * \return Current data with auto-lock (can only be unlocked with ThreadLocalCache auto-unlock)
    */
-  inline const rrlib::serialization::tGenericObject* GetAutoLockedRaw()
+  inline const rrlib::rtti::tGenericObject* GetAutoLockedRaw()
   {
     tThreadLocalCache* tc = tThreadLocalCache::Get();
 
@@ -503,7 +494,7 @@ public:
    * \return Buffer with default value. Can be used to change default value
    * for port. However, this should be done before the port is used.
    */
-  inline rrlib::serialization::tGenericObject* GetDefaultBufferRaw()
+  inline rrlib::rtti::tGenericObject* GetDefaultBufferRaw()
   {
     assert(((!IsReady())) && "please set default value _before_ initializing port");
     return default_value->GetObject();
@@ -535,7 +526,7 @@ public:
    *
    * \param buffer Buffer to copy current data
    */
-  inline void GetRaw(rrlib::serialization::tGenericObjectManager* buffer)
+  inline void GetRaw(rrlib::rtti::tGenericObjectManager* buffer)
   {
     GetRaw(buffer->GetObject());
   }
@@ -545,7 +536,7 @@ public:
    *
    * \param buffer Buffer to copy current data to
    */
-  inline void GetRaw(rrlib::serialization::tGenericObject* buffer)
+  inline void GetRaw(rrlib::rtti::tGenericObject* buffer)
   {
     GetRaw(buffer, false);
   }
@@ -556,7 +547,7 @@ public:
    * \param buffer Buffer to copy current data to
    * \param dont_pull Do not attempt to pull data - even if port is on push strategy
    */
-  void GetRaw(rrlib::serialization::tGenericObject* buffer, bool dont_pull);
+  void GetRaw(rrlib::rtti::tGenericObject* buffer, bool dont_pull);
 
   /*!
    * Copy current value to buffer (Most efficient get()-version)
@@ -571,7 +562,7 @@ public:
       for (; ;)
       {
         tCCPortDataRef* val = value;
-        rrlib::serialization::sSerialization::DeepCopy(*val->GetData()->GetData<T>(), buffer, NULL);
+        rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*val->GetData()->GetData<T>(), buffer, NULL);
         if (val == value)    // still valid??
         {
           return;
@@ -581,7 +572,7 @@ public:
     else
     {
       tCCPortDataManagerTL* dc = PullValueRaw();
-      rrlib::serialization::sSerialization::DeepCopy(*dc->GetObject()->GetData<T>(), buffer, NULL);
+      rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*dc->GetObject()->GetData<T>(), buffer, NULL);
       dc->ReleaseLock();
     }
   }

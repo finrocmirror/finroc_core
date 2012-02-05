@@ -27,7 +27,7 @@
 
 #include "core/datatype/tBounds.h"
 #include "core/port/tPortCreationInfo.h"
-#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/datatype/tNumber.h"
 #include "core/port/cc/tCCPortDataRef.h"

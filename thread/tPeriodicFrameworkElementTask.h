@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/port/tEdgeAggregator.h"
 #include "core/tFinrocAnnotation.h"
@@ -54,7 +54,7 @@ struct tPeriodicFrameworkElementTask : public tFinrocAnnotation
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataTypeBase cTYPE;
+  static rrlib::rtti::tDataTypeBase cTYPE;
 
   /*! Task to execute */
   util::tTask* task;
@@ -96,8 +96,8 @@ public:
 } // namespace finroc
 } // namespace core
 
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/rtti/tDataType.h"
 
-extern template class ::rrlib::serialization::tDataType<finroc::core::tPeriodicFrameworkElementTask>;
+extern template class rrlib::rtti::tDataType<finroc::core::tPeriodicFrameworkElementTask>;
 
 #endif // core__thread__tPeriodicFrameworkElementTask_h__

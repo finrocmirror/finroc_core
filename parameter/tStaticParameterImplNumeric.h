@@ -29,8 +29,7 @@
 #include "core/datatype/tBounds.h"
 #include "core/parameter/tStaticParameterBase.h"
 #include "core/port/cc/tCCPortDataManager.h"
-#include "rrlib/serialization/tGenericObject.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/datatype/tNumber.h"
 #include "core/parameter/tStaticParameter.h"
 
@@ -62,7 +61,7 @@ private:
    */
   inline tNumber* GetBuffer()
   {
-    rrlib::serialization::tGenericObject* go = ValPointer();
+    rrlib::rtti::tGenericObject* go = ValPointer();
     return go->GetData<tNumber>();
   }
 

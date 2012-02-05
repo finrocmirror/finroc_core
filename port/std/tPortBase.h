@@ -27,12 +27,11 @@
 
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/port/tAbstractPort.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/port/tPortCreationInfoBase.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/std/tPortDataReference.h"
 #include "core/port/std/tPortQueue.h"
-#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/tFrameworkElement.h"
 #include "core/port/tMultiTypePortDataBufferPool.h"
@@ -82,7 +81,7 @@ protected:
   util::tAtomicPtr<tPortDataReference> value;
 
   /*! Current type of port data - relevant for ports with multi type buffer pool */
-  const rrlib::serialization::tDataTypeBase cur_data_type;
+  const rrlib::rtti::tDataTypeBase cur_data_type;
 
   /*! Pool with reusable buffers that are published to this port... by any thread */
   tPortDataBufferPool* buffer_pool;
@@ -117,7 +116,7 @@ protected:
 private:
 
   // helper for direct member initialization in C++
-  static tPortDataManager* CreateDefaultValue(const rrlib::serialization::tDataTypeBase& dt);
+  static tPortDataManager* CreateDefaultValue(const rrlib::rtti::tDataTypeBase& dt);
 
   inline void NotifyListeners(tPublishCache* pc)
   {
@@ -479,7 +478,7 @@ public:
    * \return Buffer with default value. Can be used to change default value
    * for port. However, this should be done before the port is used.
    */
-  inline rrlib::serialization::tGenericObject* GetDefaultBufferRaw()
+  inline rrlib::rtti::tGenericObject* GetDefaultBufferRaw()
   {
     assert(((!IsReady())) && "please set default value _before_ initializing port");
     return default_value->GetObject();
@@ -534,7 +533,7 @@ public:
     return buffer_pool == NULL ? multi_buffer_pool->GetUnusedBuffer(cur_data_type) : buffer_pool->GetUnusedBuffer();
   }
 
-  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::serialization::tDataTypeBase dt)
+  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::rtti::tDataTypeBase dt)
   {
     assert((multi_buffer_pool != NULL));
     return multi_buffer_pool->GetUnusedBuffer(dt);

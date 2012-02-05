@@ -20,8 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tFrameworkElementInfo.h"
-#include "rrlib/serialization/tInputStream.h"
-#include "rrlib/serialization/tOutputStream.h"
+#include "rrlib/serialization/serialization.h"
 #include "core/tFrameworkElement.h"
 #include "core/port/tAbstractPort.h"
 
@@ -90,7 +89,7 @@ void tFrameworkElementInfo::Deserialize(rrlib::serialization::tInputStream& is, 
   // possibly read port specific info
   if ((flags & tCoreFlags::cIS_PORT) > 0)
   {
-    type = is.ReadType();
+    is >> type;
     strategy = is.ReadShort();
     min_net_update_time = is.ReadShort();
 
@@ -197,7 +196,7 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
   {
     tAbstractPort* port = static_cast<tAbstractPort*>(fe);
 
-    tp.WriteType(port->GetDataType());
+    tp << port->GetDataType();
     tp.WriteShort(port->GetStrategy());
     tp.WriteShort(port->GetMinNetUpdateInterval());
 

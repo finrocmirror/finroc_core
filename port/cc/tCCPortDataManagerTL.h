@@ -31,14 +31,6 @@
 
 #include "core/port/tCombinedPointer.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tDataTypeBase;
-} // namespace rrlib
-} // namespace serialization
-
 namespace finroc
 {
 namespace core
@@ -100,27 +92,10 @@ public:
     ref_counter += count;
   }
 
-  //    // object parameter only used in Java
-  //    public CCPortDataManagerTL(DataTypeBase type, @Ptr @CppDefault("NULL") Object object) {
-  //        portData = new GenericObjectInstance<T>(type, object);
-  //        ownerThread = ThreadUtil.getCurrentThreadId();
-  //    }
-
   virtual ~tCCPortDataManagerTL()
   {
     //finroc::util::System::out.println(finroc::util::StringBuilder("Deleting container ") + this);
   }
-
-  //    /** Assign other data to this container */
-  //    public void assign(@Const CCPortData other) {
-  //        portData.assign(other);
-  //    }
-  //
-  //    /** Copy current data to other object */
-  //    @ConstMethod public void assignTo(CCPortData buffer) {
-  //        portData.assignTo(buffer);
-  //    }
-  //
 
   /*!
    * \param other Other object
@@ -145,7 +120,7 @@ public:
    * \param data_type Data type
    * \return Manager
    */
-  inline static tCCPortDataManagerTL* Create(const rrlib::serialization::tDataTypeBase& data_type)
+  inline static tCCPortDataManagerTL* Create(const rrlib::rtti::tDataTypeBase& data_type)
   {
     return static_cast<tCCPortDataManagerTL*>(data_type.CreateInstanceGeneric<tCCPortDataManagerTL>()->GetManager());
   }
@@ -247,21 +222,6 @@ public:
   {
     return util::tStringBuilder("CCPortDataContainer: ") + GetContentString();
   }
-
-//
-//    void setData(const T& data) {
-//        setData(&data);
-//    }
-//
-//
-//    /**
-//     * Assign new value to container
-//     *
-//     * \param data new value
-//     */
-//    public void setData(@Const @Ptr T data) {
-//        portData.assign((CCPortData)data);
-//    }
 
 };
 

@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/datatype/tNumber.h"
 #include "core/datatype/tCoreString.h"
 
@@ -41,29 +41,29 @@ namespace core
 class tDataTypeReference : public rrlib::serialization::tSerializable
 {
   /*! referenced data type */
-  rrlib::serialization::tDataTypeBase referenced;
+  rrlib::rtti::tDataTypeBase referenced;
 
 public:
 
   /*! Data Type of tDataTypeReference */
-  static rrlib::serialization::tDataTypeBase cTYPE;
+  static rrlib::rtti::tDataTypeBase cTYPE;
 
   tDataTypeReference();
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
-    referenced = rrlib::serialization::tDataTypeBase::FindType(is.ReadString());
+    referenced = rrlib::rtti::tDataTypeBase::FindType(is.ReadString());
   }
 
   virtual void Deserialize(rrlib::serialization::tStringInputStream& s)
   {
-    referenced = rrlib::serialization::tDataTypeBase::FindType(s.ReadAll());
+    referenced = rrlib::rtti::tDataTypeBase::FindType(s.ReadAll());
   }
 
   /*!
    * \return Referenced data type - null if it doesn't exist in this runtime
    */
-  inline rrlib::serialization::tDataTypeBase Get() const
+  inline rrlib::rtti::tDataTypeBase Get() const
   {
     return referenced;
   }
@@ -81,7 +81,7 @@ public:
   /*!
    * \param dt new DataType to reference
    */
-  inline void Set(rrlib::serialization::tDataTypeBase dt)
+  inline void Set(rrlib::rtti::tDataTypeBase dt)
   {
     referenced = dt;
   }
@@ -91,6 +91,6 @@ public:
 } // namespace finroc
 } // namespace core
 
-extern template class ::rrlib::serialization::tDataType<finroc::core::tDataTypeReference>;
+extern template class ::rrlib::rtti::tDataType<finroc::core::tDataTypeReference>;
 
 #endif // core__datatype__tDataTypeReference_h__

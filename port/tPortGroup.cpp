@@ -108,7 +108,7 @@ void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& gro
   }
 }
 
-tAbstractPort* tPortGroup::CreatePort(const util::tString& name, rrlib::serialization::tDataTypeBase type, int extra_flags)
+tAbstractPort* tPortGroup::CreatePort(const util::tString& name, rrlib::rtti::tDataTypeBase type, int extra_flags)
 {
   FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", this->GetQualifiedLink());
   tAbstractPort* ap = NULL;

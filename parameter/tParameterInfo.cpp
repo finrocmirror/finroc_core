@@ -20,11 +20,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/parameter/tParameterInfo.h"
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/rtti/rtti.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tFrameworkElement.h"
-#include "rrlib/serialization/tInputStream.h"
-#include "rrlib/serialization/tStringInputStream.h"
+#include "rrlib/serialization/serialization.h"
 #include "core/port/tAbstractPort.h"
 #include "core/parameter/tConfigFile.h"
 #include "core/parameter/tConfigNode.h"
@@ -33,18 +32,16 @@
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/tThreadLocalCache.h"
-#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/std/tPortBase.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/cc/tCCPortDataManager.h"
-#include "rrlib/serialization/tTypedObject.h"
 #include "core/tRuntimeEnvironment.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataTypeBase tParameterInfo::cTYPE = rrlib::serialization::tDataType<tParameterInfo>();
+rrlib::rtti::tDataTypeBase tParameterInfo::cTYPE = rrlib::rtti::tDataType<tParameterInfo>();
 
 tParameterInfo::tParameterInfo() :
   config_entry(),

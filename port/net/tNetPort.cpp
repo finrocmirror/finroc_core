@@ -20,11 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/net/tNetPort.h"
-#include "rrlib/serialization/tInputStream.h"
-#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
-#include "rrlib/serialization/tOutputStream.h"
 #include "core/port/std/tPortQueueFragmentRaw.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/std/tPortDataReference.h"
@@ -97,7 +95,7 @@ void tNetPort::ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int
     ci.SetFactory(pb);
     do
     {
-      pb->PublishFromNet(static_cast<tPortDataManager*>(ci.ReadObject(wrapped->GetDataType(), NULL)->GetManager()), changed_flag);
+      pb->PublishFromNet(static_cast<tPortDataManager*>(rrlib::rtti::ReadObject(ci, wrapped->GetDataType(), NULL)->GetManager()), changed_flag);
     }
     while (ci.ReadBoolean());
     ci.SetFactory(NULL);
@@ -107,7 +105,7 @@ void tNetPort::ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int
     tCCNetPort* pb = static_cast<tCCNetPort*>(wrapped);
     do
     {
-      pb->PublishFromNet(static_cast<tCCPortDataManagerTL*>(ci.ReadObject(wrapped->GetDataType(), NULL)->GetManager()), changed_flag);
+      pb->PublishFromNet(static_cast<tCCPortDataManagerTL*>(rrlib::rtti::ReadObject(ci, wrapped->GetDataType(), NULL)->GetManager()), changed_flag);
     }
     while (ci.ReadBoolean());
   }
@@ -149,7 +147,7 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
     if (!use_q)
     {
       tPortDataManager* pd = pb->GetLockedUnsafeRaw(true);
-      co.WriteObject(pd->GetObject());
+      rrlib::rtti::WriteObject(co, pd->GetObject());
       pd->ReleaseLock();
     }
     else
@@ -164,7 +162,7 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
           co.WriteBoolean(true);
         }
         first = false;
-        co.WriteObject(pd->GetManager()->GetObject());
+        rrlib::rtti::WriteObject(co, pd->GetManager()->GetObject());
         pd->GetManager()->ReleaseLock();
       }
     }
@@ -175,7 +173,7 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
     if (!use_q)
     {
       tCCPortDataManager* ccitc = pb->GetInInterThreadContainer(true);
-      co.WriteObject(ccitc->GetObject());
+      rrlib::rtti::WriteObject(co, ccitc->GetObject());
       ccitc->Recycle2();
     }
     else
@@ -190,7 +188,7 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
           co.WriteBoolean(true);
         }
         first = false;
-        co.WriteObject(pd->GetObject());
+        rrlib::rtti::WriteObject(co, pd->GetObject());
         pd->Recycle2();
       }
     }
@@ -311,7 +309,7 @@ bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
     }
     else
     {
-      tPortDataPtr<rrlib::serialization::tGenericObject> o = pc->GetParamGeneric(0);
+      tPortDataPtr<rrlib::rtti::tGenericObject> o = pc->GetParamGeneric(0);
       tCCPortDataManager* c = static_cast<tCCPortDataManager*>(o->GetManager());
       result_buffer->GetObject()->DeepCopyFrom(c->GetObject(), NULL);
 
@@ -420,7 +418,7 @@ const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, in
     }
     else
     {
-      tPortDataPtr<rrlib::serialization::tGenericObject> o = pc->GetParamGeneric(0);
+      tPortDataPtr<rrlib::rtti::tGenericObject> o = pc->GetParamGeneric(0);
       tPortDataManager* pd = static_cast<tPortDataManager*>(o->GetManager());
       int locks = 0;  // Java: we already have one lock
       pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - locks)));

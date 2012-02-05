@@ -25,9 +25,9 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
+#include "rrlib/serialization/serialization.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "rrlib/serialization/tTypeEncoder.h"
 
 namespace rrlib
 {
@@ -55,7 +55,7 @@ class tRemoteTypes : public util::tLogUser, public rrlib::serialization::tTypeEn
   private:
 
     /*! local data type that represents the same time - null if there is no such type in local runtime environment */
-    rrlib::serialization::tDataTypeBase local_data_type;
+    rrlib::rtti::tDataTypeBase local_data_type;
 
     /*! Number of local types checked to resolve type */
     int16 types_checked;
@@ -67,7 +67,7 @@ class tRemoteTypes : public util::tLogUser, public rrlib::serialization::tTypeEn
 
     tEntry();
 
-    tEntry(rrlib::serialization::tDataTypeBase local);
+    tEntry(rrlib::rtti::tDataTypeBase local);
 
   };
 
@@ -116,7 +116,7 @@ public:
    * \param data_type Local Data Type
    * \return Remote default minimum network update interval for this type
    */
-  int16 GetTime(const rrlib::serialization::tDataTypeBase& data_type);
+  int16 GetTime(const rrlib::rtti::tDataTypeBase& data_type);
 
   /*!
    * \return Has this object been initialized?
@@ -126,7 +126,7 @@ public:
     return types.Size() != 0;
   }
 
-  virtual rrlib::serialization::tDataTypeBase ReadType(rrlib::serialization::tInputStream& is);
+  virtual rrlib::rtti::tDataTypeBase ReadType(rrlib::serialization::tInputStream& is);
 
   /*!
    * Set new update time for specified Type
@@ -134,17 +134,17 @@ public:
    * \param type_uid Type uid
    * \param new_time new update time
    */
-  void SetTime(rrlib::serialization::tDataTypeBase dt, int16 new_time);
+  void SetTime(rrlib::rtti::tDataTypeBase dt, int16 new_time);
 
   /*!
    * \return Have new types been added since last update?
    */
   inline bool TypeUpdateNecessary()
   {
-    return rrlib::serialization::tDataTypeBase::GetTypeCount() > local_types_sent;
+    return rrlib::rtti::tDataTypeBase::GetTypeCount() > local_types_sent;
   }
 
-  virtual void WriteType(rrlib::serialization::tOutputStream& os, rrlib::serialization::tDataTypeBase dt);
+  virtual void WriteType(rrlib::serialization::tOutputStream& os, rrlib::rtti::tDataTypeBase dt);
 
 };
 

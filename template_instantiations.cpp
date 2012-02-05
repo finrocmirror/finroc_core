@@ -30,18 +30,18 @@
 #include "core/thread/tExecutionControl.h"
 #include "core/thread/tPeriodicFrameworkElementTask.h"
 
-template class rrlib::serialization::tDataType<finroc::core::tNumber>;
-template class rrlib::serialization::tDataType<bool>;
-template class rrlib::serialization::tDataType<finroc::core::tCoreString>;
-template class rrlib::serialization::tDataType<finroc::core::tDataTypeReference>;
-template class rrlib::serialization::tDataType<finroc::core::tPortCreationList>;
-template class rrlib::serialization::tDataType<finroc::core::tConfigFile>;
-template class rrlib::serialization::tDataType<finroc::core::tConfigNode>;
-template class rrlib::serialization::tDataType<finroc::core::tParameterInfo>;
-template class rrlib::serialization::tDataType<finroc::core::tStaticParameterList>;
-template class rrlib::serialization::tDataType<finroc::core::tExecutionControl>;
-template class rrlib::serialization::tDataType<finroc::core::tPeriodicFrameworkElementTask>;
-template class rrlib::serialization::tDataType<finroc::core::tXML>;
+template class rrlib::rtti::tDataType<finroc::core::tNumber>;
+template class rrlib::rtti::tDataType<bool>;
+template class rrlib::rtti::tDataType<finroc::core::tCoreString>;
+template class rrlib::rtti::tDataType<finroc::core::tDataTypeReference>;
+template class rrlib::rtti::tDataType<finroc::core::tPortCreationList>;
+template class rrlib::rtti::tDataType<finroc::core::tConfigFile>;
+template class rrlib::rtti::tDataType<finroc::core::tConfigNode>;
+template class rrlib::rtti::tDataType<finroc::core::tParameterInfo>;
+template class rrlib::rtti::tDataType<finroc::core::tStaticParameterList>;
+template class rrlib::rtti::tDataType<finroc::core::tExecutionControl>;
+template class rrlib::rtti::tDataType<finroc::core::tPeriodicFrameworkElementTask>;
+template class rrlib::rtti::tDataType<finroc::core::tXML>;
 
 namespace finroc
 {

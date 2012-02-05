@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/cc/tCCPortDataManager.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/container/tWonderQueue.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPool.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPoolTL.h"
@@ -61,7 +61,7 @@ private:
 public:
 
   /*! Data Type of buffers in pool */
-  const rrlib::serialization::tDataTypeBase data_type;
+  const rrlib::rtti::tDataTypeBase data_type;
 
 private:
 
@@ -91,7 +91,7 @@ public:
   /*!
    * \param data_type Type of buffers in pool
    */
-  tCCPortDataBufferPool(const rrlib::serialization::tDataTypeBase& data_type_, int initial_size);
+  tCCPortDataBufferPool(const rrlib::rtti::tDataTypeBase& data_type_, int initial_size);
 
   virtual void CustomDelete(bool called_from_gc)
   {

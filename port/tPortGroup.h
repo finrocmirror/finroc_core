@@ -164,7 +164,7 @@ public:
    * \param extra_flags Any extra flags for port
    * \return Created port
    */
-  tAbstractPort* CreatePort(const util::tString& name, rrlib::serialization::tDataTypeBase type, int extra_flags = 0);
+  tAbstractPort* CreatePort(const util::tString& name, rrlib::rtti::tDataTypeBase type, int extra_flags = 0);
 
   /*!
    * Disconnect all of port group's ports

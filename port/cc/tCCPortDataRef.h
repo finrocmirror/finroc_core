@@ -27,13 +27,6 @@
 
 #include "core/port/tCombinedPointer.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tGenericObject;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -66,7 +59,7 @@ public:
   /*!
    * \return Referenced port data
    */
-  inline rrlib::serialization::tGenericObject* GetData()
+  inline rrlib::rtti::tGenericObject* GetData()
   {
     return GetContainer()->GetObject();
   }

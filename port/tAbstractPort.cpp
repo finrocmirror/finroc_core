@@ -33,7 +33,7 @@
 #include "core/tCoreFlags.h"
 #include "core/port/net/tNetPort.h"
 #include "core/port/tEdgeAggregator.h"
-#include "rrlib/serialization/tOutputStream.h"
+#include "rrlib/serialization/serialization.h"
 #include "core/tFinrocAnnotation.h"
 
 namespace finroc
@@ -210,7 +210,7 @@ void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
   }
 }
 
-rrlib::serialization::tGenericObject* tAbstractPort::CreateGenericObject(rrlib::serialization::tDataTypeBase dt, void* factory_parameter)
+rrlib::rtti::tGenericObject* tAbstractPort::CreateGenericObject(const rrlib::rtti::tDataTypeBase& dt, void* factory_parameter)
 {
   if (tFinrocTypeInfo::IsStdType(dt))
   {
@@ -842,7 +842,7 @@ void tAbstractPort::SetReversePushStrategy(bool push)
   }
 }
 
-void tAbstractPort::UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, rrlib::serialization::tGenericObject* data)
+void tAbstractPort::UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, rrlib::rtti::tGenericObject* data)
 {
   tEdgeAggregator::UpdateEdgeStatistics(source, target, tFinrocTypeInfo::EstimateDataSize(data));
 }

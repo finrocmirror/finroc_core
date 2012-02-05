@@ -27,7 +27,7 @@
 
 #include "rrlib/finroc_core_utils/container/tReusable.h"
 #include "rrlib/finroc_core_utils/tGarbageCollector.h"
-#include "rrlib/serialization/tGenericObjectManager.h"
+#include "rrlib/rtti/rtti.h"
 
 namespace finroc
 {
@@ -38,7 +38,7 @@ namespace core
  *
  * Reusable GenericObjectManager
  */
-class tReusableGenericObjectManager : public util::tReusable, public rrlib::serialization::tGenericObjectManager
+class tReusableGenericObjectManager : public util::tReusable, public rrlib::rtti::tGenericObjectManager
 {
 protected:
 

@@ -38,7 +38,7 @@ void tFinrocAnnotation::Append(tFinrocAnnotation* ann)
   }
 }
 
-tFinrocAnnotation* tFinrocAnnotation::FindParentWithAnnotation(tFrameworkElement* fe, const rrlib::serialization::tDataTypeBase& type)
+tFinrocAnnotation* tFinrocAnnotation::FindParentWithAnnotation(tFrameworkElement* fe, const rrlib::rtti::tDataTypeBase& type)
 {
   tFinrocAnnotation* ann = fe->GetAnnotation(type);
   if (ann != NULL)
@@ -60,7 +60,7 @@ void tFinrocAnnotation::InitDataType()
     return;  // already set
   }
 
-  type = rrlib::serialization::tDataTypeBase::FindTypeByRtti(typeid(*this).name());
+  type = rrlib::rtti::tDataTypeBase::FindTypeByRtti(typeid(*this).name());
 
   assert((this->type != NULL) && "Unknown Object type");
 }

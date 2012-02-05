@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "core/portdatabase/sSerializationHelper.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/cc/tCCPortDataManager.h"
@@ -69,13 +69,13 @@ private:
   util::tString name;
 
   /*! DataType of parameter */
-  rrlib::serialization::tDataTypeBase type;
+  rrlib::rtti::tDataTypeBase type;
 
   /*! Current parameter value (in CreateModuleAction-prototypes this is null) */
-  std::unique_ptr<rrlib::serialization::tGenericObject> value;
+  std::unique_ptr<rrlib::rtti::tGenericObject> value;
 
   /*! Last parameter value (to detect whether value has changed) */
-  std::unique_ptr<rrlib::serialization::tGenericObject> last_value;
+  std::unique_ptr<rrlib::rtti::tGenericObject> last_value;
 
   /*! Is current value enforced (typically hard-coded)? In this case, any config file entries or command line parameters are ignored */
   bool enforce_current_value;
@@ -133,7 +133,7 @@ private:
    *
    * \param type Type
    */
-  void CreateBuffer(rrlib::serialization::tDataTypeBase type_);
+  void CreateBuffer(rrlib::rtti::tDataTypeBase type_);
 
   /*!
    * Internal helper method to get parameter containing buffer we are using/sharing.
@@ -190,7 +190,7 @@ public:
    * \param type DataType of parameter
    * \param constructor_prototype Is this a CreteModuleActionPrototype (no buffer will be allocated)
    */
-  tStaticParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy = false, const util::tString& config_entry = "");
+  tStaticParameterBase(const util::tString& name_, rrlib::rtti::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy = false, const util::tString& config_entry = "");
 
   virtual ~tStaticParameterBase();
 
@@ -252,7 +252,7 @@ public:
   /*!
    * \return DataType of parameter
    */
-  inline rrlib::serialization::tDataTypeBase GetType()
+  inline rrlib::rtti::tDataTypeBase GetType()
   {
     return type;
   }
@@ -317,7 +317,7 @@ public:
    *
    * \return value or ccValue, depending on data type
    */
-  inline rrlib::serialization::tGenericObject* ValPointer() const
+  inline rrlib::rtti::tGenericObject* ValPointer() const
   {
     return GetParameterWithBuffer()->value.get();
   }

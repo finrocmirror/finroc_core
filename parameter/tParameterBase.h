@@ -30,7 +30,6 @@
 #include "core/port/tAbstractPort.h"
 #include "core/parameter/tParameterInfo.h"
 #include "core/port/tPort.h"
-#include "rrlib/serialization/tDataTypeBase.h"
 
 namespace finroc
 {

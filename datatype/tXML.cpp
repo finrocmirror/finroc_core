@@ -21,14 +21,13 @@
  */
 #include "core/datatype/tXML.h"
 
-#include "rrlib/serialization/tDataType.h"
 #include "rrlib/xml2_wrapper/tXMLDocument.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataTypeBase tXML::cTYPE = rrlib::serialization::tDataType<tXML>();
+rrlib::rtti::tDataTypeBase tXML::cTYPE = rrlib::rtti::tDataType<tXML>();
 
 tXML::tXML() :
   tCoreString()

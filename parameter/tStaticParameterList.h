@@ -25,26 +25,11 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/rtti/rtti.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tPlugins.h"
 #include "core/tFinrocAnnotation.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
-
-namespace rrlib
-{
-namespace xml2
-{
-class tXMLNode;
-} // namespace rrlib
-} // namespace xml2
 
 namespace finroc
 {
@@ -76,7 +61,7 @@ private:
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataType<tStaticParameterList> cTYPE;
+  static rrlib::rtti::tDataType<tStaticParameterList> cTYPE;
 
   /*! Empty parameter list */
   static tStaticParameterList cEMPTY;
@@ -208,8 +193,6 @@ public:
 } // namespace finroc
 } // namespace core
 
-#include "rrlib/serialization/tDataType.h"
-
-extern template class ::rrlib::serialization::tDataType<finroc::core::tStaticParameterList>;
+extern template class ::rrlib::rtti::tDataType<finroc::core::tStaticParameterList>;
 
 #endif // core__parameter__tStaticParameterList_h__

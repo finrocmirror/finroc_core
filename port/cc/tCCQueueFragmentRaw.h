@@ -29,13 +29,6 @@
 #include "core/port/cc/tCCPortDataManager.h"
 #include "rrlib/finroc_core_utils/container/tQueueFragment.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tGenericObject;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -60,7 +53,7 @@ public:
    *
    * \return Next element in QueueFragment
    */
-  inline rrlib::serialization::tGenericObject* DequeueAutoLocked()
+  inline rrlib::rtti::tGenericObject* DequeueAutoLocked()
   {
     tCCPortDataManager* tmp = ::finroc::util::tQueueFragment<tCCPortDataManager, tCCPortQueueElement>::Dequeue();
     if (tmp == NULL)

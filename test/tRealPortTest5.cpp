@@ -30,10 +30,7 @@
 #include "plugins/blackboard/tBlackboardBuffer.h"
 #include "core/port/tPortCreationInfo.h"
 #include "core/port/tPortFlags.h"
-#include "rrlib/serialization/tOutputStream.h"
-#include "rrlib/serialization/tInputStream.h"
 #include "plugins/blackboard/tSingleBufferedBlackboardServer.h"
-#include "rrlib/serialization/tMemoryBuffer.h"
 #include "plugins/blackboard/tBlackboardClient.h"
 #include "plugins/blackboard/tBlackboardWriteAccess.h"
 #include "plugins/blackboard/tBBLockException.h"
@@ -189,7 +186,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
   }
 
   tPortDataPtr<std::vector<tMemoryBuffer> > buf = client.GetUnusedChangeBuffer();
-  rrlib::serialization::sSerialization::ResizeVector(*buf, 1);
+  rrlib::rtti::ResizeVector(*buf, 1);
   rrlib::serialization::tOutputStream co(&buf->at(0));
   co.WriteInt(0x4BCDEF12);
   co.Close();

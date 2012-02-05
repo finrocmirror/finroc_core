@@ -30,13 +30,6 @@
 #include "core/port/std/tPortDataReference.h"
 #include "rrlib/finroc_core_utils/container/tQueueFragment.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tGenericObject;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -61,7 +54,7 @@ public:
    *
    * \return Next element in QueueFragment
    */
-  inline rrlib::serialization::tGenericObject* DequeueAutoLocked()
+  inline rrlib::rtti::tGenericObject* DequeueAutoLocked()
   {
     tPortDataManager* tmp = DequeueUnsafe();
     tThreadLocalCache::Get()->AddAutoLock(tmp);

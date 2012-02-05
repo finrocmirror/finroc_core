@@ -25,17 +25,9 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/rtti.h"
 #include "rrlib/xml2_wrapper/tXMLDocument.h"
 #include "core/tFinrocAnnotation.h"
-
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
 
 namespace rrlib
 {
@@ -84,7 +76,7 @@ private:
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataTypeBase cTYPE;
+  static rrlib::rtti::tDataTypeBase cTYPE;
 
   /*!
    * \param file File name of configuration file (loaded if it exists already)
@@ -176,8 +168,6 @@ public:
 } // namespace finroc
 } // namespace core
 
-#include "rrlib/serialization/tDataType.h"
-
-extern template class ::rrlib::serialization::tDataType<finroc::core::tConfigFile>;
+extern template class rrlib::rtti::tDataType<finroc::core::tConfigFile>;
 
 #endif // core__parameter__tConfigFile_h__

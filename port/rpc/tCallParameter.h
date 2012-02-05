@@ -27,7 +27,7 @@
 
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/datatype/tNumber.h"
-#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/rtti/rtti.h"
 
 #include "core/port/tPortDataPtr.h"
 
@@ -62,14 +62,14 @@ public:
   tNumber number;
 
   /*! Object Parameter */
-  tPortDataPtr<rrlib::serialization::tGenericObject> value;
+  tPortDataPtr<rrlib::rtti::tGenericObject> value;
 
   /*! Type of parameter (see constants at beginning of class) */
   int8 type;
 
 private:
 
-  tPortDataPtr<rrlib::serialization::tGenericObject> Lock(rrlib::serialization::tGenericObject* tmp);
+  tPortDataPtr<rrlib::rtti::tGenericObject> Lock(rrlib::rtti::tGenericObject* tmp);
 
 public:
 

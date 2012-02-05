@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/tFinrocAnnotation.h"
 
 namespace finroc
@@ -45,7 +45,7 @@ class tConfigNode : public tFinrocAnnotation
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataTypeBase cTYPE;
+  static rrlib::rtti::tDataTypeBase cTYPE;
 
   /*! Config file entry for node (starting with '/' => absolute link - otherwise relative) */
   util::tString node;
@@ -76,8 +76,6 @@ public:
 } // namespace finroc
 } // namespace core
 
-#include "rrlib/serialization/tDataType.h"
-
-extern template class ::rrlib::serialization::tDataType<finroc::core::tConfigNode>;
+extern template class rrlib::rtti::tDataType<finroc::core::tConfigNode>;
 
 #endif // core__parameter__tConfigNode_h__

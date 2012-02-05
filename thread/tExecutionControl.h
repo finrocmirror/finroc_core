@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "core/tFinrocAnnotation.h"
 #include "core/thread/tStartAndPausable.h"
 
@@ -45,7 +45,7 @@ class tExecutionControl : public tFinrocAnnotation
 public:
 
   /*! Data Type */
-  static rrlib::serialization::tDataTypeBase cTYPE;
+  static rrlib::rtti::tDataTypeBase cTYPE;
 
   /*! Wrapped StartAndPausable */
   tStartAndPausable* implementation;
@@ -119,8 +119,8 @@ public:
 } // namespace finroc
 } // namespace core
 
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/rtti/tDataType.h"
 
-extern template class ::rrlib::serialization::tDataType<finroc::core::tExecutionControl>;
+extern template class ::rrlib::rtti::tDataType<finroc::core::tExecutionControl>;
 
 #endif // core__thread__tExecutionControl_h__

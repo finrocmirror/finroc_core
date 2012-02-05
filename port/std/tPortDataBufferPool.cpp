@@ -31,7 +31,7 @@ tPortDataBufferPool::tPortDataBufferPool() :
 {
 }
 
-tPortDataBufferPool::tPortDataBufferPool(const rrlib::serialization::tDataTypeBase& data_type_, int initial_size) :
+tPortDataBufferPool::tPortDataBufferPool(const rrlib::rtti::tDataTypeBase& data_type_, int initial_size) :
   data_type(data_type_)
 {
   for (int i = 0; i < initial_size; i++)

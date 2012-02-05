@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tPortCreationList.h"
-#include "rrlib/serialization/tDataType.h"
+#include "rrlib/rtti/tDataType.h"
 #include "core/port/tAbstractPort.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
@@ -28,10 +28,8 @@
 #include "core/port/tPortCreationInfoBase.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/rpc/tInterfacePort.h"
-#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/serialization/serialization.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "rrlib/serialization/tOutputStream.h"
-#include "rrlib/serialization/tStringInputStream.h"
 #include "core/finstructable/tFinstructableGroup.h"
 
 namespace finroc
@@ -39,7 +37,7 @@ namespace finroc
 namespace core
 {
 const uint tPortCreationList::cRELEVANT_FLAGS;
-rrlib::serialization::tDataTypeBase tPortCreationList::cTYPE = rrlib::serialization::tDataType<tPortCreationList>();
+rrlib::rtti::tDataTypeBase tPortCreationList::cTYPE = rrlib::rtti::tDataType<tPortCreationList>();
 
 tPortCreationList::tPortCreationList() :
   show_output_port_selection(false),
@@ -49,7 +47,7 @@ tPortCreationList::tPortCreationList() :
   listener(NULL)
 {}
 
-void tPortCreationList::Add(const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output)
+void tPortCreationList::Add(const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output)
 {
   {
     util::tLock lock2(io_vector);
@@ -79,7 +77,7 @@ void tPortCreationList::ApplyChanges(tFrameworkElement* io_vector_, uint flags_)
   }
 }
 
-void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, uint flags_, const util::tString& name, rrlib::serialization::tDataTypeBase dt, bool output, tAbstractPort* prototype)
+void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, uint flags_, const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output, tAbstractPort* prototype)
 {
   if (ap != NULL && ap->DescriptionEquals(name) && ap->GetDataType() == dt && (ap->GetAllFlags() & cRELEVANT_FLAGS) == (flags_ & cRELEVANT_FLAGS))
   {
@@ -155,7 +153,7 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
         tAbstractPort* ap = i < ports.Size() ? ports.Get(i) : NULL;
         util::tString name = is.ReadString();
         util::tString dt_name = is.ReadString();
-        rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::FindType(dt_name);
+        rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(dt_name);
         if (dt == NULL)
         {
           throw util::tRuntimeException(util::tStringBuilder("Type ") + dt_name + " not available", CODE_LOCATION_MACRO);
@@ -191,7 +189,7 @@ void tPortCreationList::Deserialize(const rrlib::xml2::tXMLNode& node)
         b = port->GetBoolAttribute("output");
       }
       util::tString dt_name = port->GetStringAttribute("type");
-      rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::FindType(dt_name);
+      rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(dt_name);
       if (dt == NULL)
       {
         throw util::tRuntimeException(util::tStringBuilder("Type ") + dt_name + " not available", CODE_LOCATION_MACRO);

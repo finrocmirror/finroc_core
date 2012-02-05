@@ -26,16 +26,9 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/serialization/tSerializable.h"
-#include "rrlib/serialization/tDataTypeBase.h"
-#include "rrlib/serialization/tTypedObject.h"
+#include "rrlib/rtti/tDataTypeBase.h"
+#include "rrlib/rtti/tTypedObject.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tGenericObject;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -55,7 +48,7 @@ private:
 
   //TODO: SFINAE check whether stream operator is implemented
   template<typename T>
-  static void Serialize(rrlib::serialization::tOutputStream& os, const T* const port_data2, rrlib::serialization::tDataTypeBase type)
+  static void Serialize(rrlib::serialization::tOutputStream& os, const T* const port_data2, rrlib::rtti::tDataTypeBase type)
   {
     os << (*port_data2);
   }
@@ -67,7 +60,7 @@ private:
 
   //TODO: SFINAE check whether stream operator is implemented
   template<typename T>
-  inline static void Deserialize(rrlib::serialization::tInputStream& is, T* port_data2, rrlib::serialization::tDataTypeBase type)
+  inline static void Deserialize(rrlib::serialization::tInputStream& is, T* port_data2, rrlib::rtti::tDataTypeBase type)
   {
     is >> (*port_data2);
   }
@@ -81,7 +74,7 @@ public:
    * \param s String to deserialize from
    * \return Data type (null - if type is not available in this runtime)
    */
-  static rrlib::serialization::tDataTypeBase GetTypedStringDataType(const rrlib::serialization::tDataTypeBase& expected, const util::tString& s);
+  static rrlib::rtti::tDataTypeBase GetTypedStringDataType(const rrlib::rtti::tDataTypeBase& expected, const util::tString& s);
 
   /*!
    * Deserialize object from string
@@ -100,7 +93,7 @@ public:
    * \param s String to deserialize from
    * \return Typed object
    */
-  static rrlib::serialization::tGenericObject* TypedStringDeserialize(const rrlib::serialization::tDataTypeBase& expected, tMultiTypePortDataBufferPool* buffer_pool, const util::tString& s);
+  static rrlib::rtti::tGenericObject* TypedStringDeserialize(const rrlib::rtti::tDataTypeBase& expected, tMultiTypePortDataBufferPool* buffer_pool, const util::tString& s);
 
   /*!
    * Serialize object to string
@@ -109,7 +102,7 @@ public:
    * \param expected Expected data type
    * \param cs Typed object
    */
-  inline static util::tString TypedStringSerialize(const rrlib::serialization::tDataTypeBase& expected, rrlib::serialization::tTypedObject* cs)
+  inline static util::tString TypedStringSerialize(const rrlib::rtti::tDataTypeBase& expected, rrlib::rtti::tTypedObject* cs)
   {
     return TypedStringSerialize(expected, cs, cs->GetType());
   }
@@ -122,7 +115,7 @@ public:
    * \param cs object
    * \param cs_type Type of object
    */
-  static util::tString TypedStringSerialize(const rrlib::serialization::tDataTypeBase& expected, rrlib::serialization::tSerializable* cs, rrlib::serialization::tDataTypeBase cs_type);
+  static util::tString TypedStringSerialize(const rrlib::rtti::tDataTypeBase& expected, rrlib::serialization::tSerializable* cs, rrlib::rtti::tDataTypeBase cs_type);
 
 };
 

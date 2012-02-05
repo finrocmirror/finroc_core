@@ -25,10 +25,8 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/datatype/tUnit.h"
-#include "rrlib/serialization/tStringOutputStream.h"
-#include "rrlib/serialization/tSerializable.h"
 #include <endian.h>
 
 namespace rrlib
@@ -84,7 +82,7 @@ public:
   static tNumber cZERO;
 
   /*! Register Data type */
-  static const rrlib::serialization::tDataTypeBase cTYPE;
+  static const rrlib::rtti::tDataTypeBase cTYPE;
 
   // number serialization:
   // (1st type byte) - last bit unit
@@ -194,7 +192,7 @@ public:
     return Value<float>();
   }
 
-  inline static rrlib::serialization::tDataTypeBase GetDataType()
+  inline static rrlib::rtti::tDataTypeBase GetDataType()
   {
     assert((cTYPE != NULL));
     return cTYPE;
@@ -372,10 +370,9 @@ T* tNumber::GetValuePtr()
 } // namespace finroc
 } // namespace core
 
-#include "rrlib/serialization/tDataType.h"
 #include "core/datatype/tConstant.h"
 
-extern template class ::rrlib::serialization::tDataType<finroc::core::tNumber>;
+extern template class rrlib::rtti::tDataType<finroc::core::tNumber>;
 
 namespace finroc
 {

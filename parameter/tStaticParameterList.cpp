@@ -21,18 +21,16 @@
  */
 #include "core/parameter/tStaticParameterList.h"
 #include "core/parameter/tStaticParameterBase.h"
-#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/tFrameworkElement.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "rrlib/serialization/tTypedObject.h"
 #include "core/parameter/tConstructorParameters.h"
-#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataType<tStaticParameterList> tStaticParameterList::cTYPE;
+rrlib::rtti::tDataType<tStaticParameterList> tStaticParameterList::cTYPE;
 tStaticParameterList tStaticParameterList::cEMPTY;
 
 tStaticParameterList::tStaticParameterList() :

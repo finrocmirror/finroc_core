@@ -25,7 +25,7 @@ namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataType<tConstructorParameters> tConstructorParameters::cTYPE;
+rrlib::rtti::tDataType<tConstructorParameters> tConstructorParameters::cTYPE;
 
 } // namespace finroc
 } // namespace core

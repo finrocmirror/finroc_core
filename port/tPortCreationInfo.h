@@ -53,9 +53,9 @@ public:
 
   void SetDefault(const T& t)
   {
-    rrlib::serialization::tDataType<T> dt;
+    rrlib::rtti::tDataType<T> dt;
     default_value.reset(static_cast<T*>(dt.CreateInstance()));
-    rrlib::serialization::sSerialization::DeepCopy(t, *this->default_value);
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *this->default_value);
   }
 
   T* GetDefault()

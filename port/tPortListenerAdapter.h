@@ -30,7 +30,7 @@
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tNumber.h"
-#include "rrlib/serialization/tGenericObjectManager.h"
+#include "rrlib/rtti/tGenericObjectManager.h"
 
 namespace finroc
 {

@@ -27,7 +27,7 @@
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tLockOrderLevels.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "core/port/std/tPortDataBufferPool.h"
 
 namespace finroc
@@ -61,7 +61,7 @@ private:
    * \param data_type DataType of buffer to create
    * \return Returns unused buffer of possibly newly created pool
    */
-  tPortDataManager* PossiblyCreatePool(rrlib::serialization::tDataTypeBase data_type);
+  tPortDataManager* PossiblyCreatePool(rrlib::rtti::tDataTypeBase data_type);
 
 public:
 
@@ -74,7 +74,7 @@ public:
    * \param data_type DataType of returned buffer.
    * \return Returns unused buffer. If there are no buffers that can be reused, a new buffer is allocated.
    */
-  inline tPortDataManager* GetUnusedBuffer(rrlib::serialization::tDataTypeBase data_type)
+  inline tPortDataManager* GetUnusedBuffer(rrlib::rtti::tDataTypeBase data_type)
   {
     // search for correct pool
     for (size_t i = 0u, n = pools.Size(); i < n; i++)

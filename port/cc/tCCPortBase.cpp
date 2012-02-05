@@ -83,7 +83,7 @@ void tCCPortBase::BrowserPublishRaw(tCCPortDataManagerTL* buffer)
 bool tCCPortBase::ContainsDefaultValue()
 {
   tCCPortDataManager* c = GetInInterThreadContainer();
-  bool result = c->GetObject()->GetType() == default_value->GetObject()->GetType() && rrlib::serialization::sSerialization::Equals(*c->GetObject(), *default_value->GetObject());
+  bool result = c->GetObject()->GetType() == default_value->GetObject()->GetType() && c->GetObject()->Equals(*default_value->GetObject());
   c->Recycle2();
   return result;
 }
@@ -178,7 +178,7 @@ tCCPortDataManager* tCCPortBase::GetPullInInterthreadContainerRaw(bool intermedi
   return ret;
 }
 
-void tCCPortBase::GetRaw(rrlib::serialization::tGenericObject* buffer, bool dont_pull)
+void tCCPortBase::GetRaw(rrlib::rtti::tGenericObject* buffer, bool dont_pull)
 {
   if (PushStrategy() || dont_pull)
   {

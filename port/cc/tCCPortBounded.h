@@ -26,7 +26,7 @@
 
 #include "core/datatype/tBounds.h"
 #include "core/port/tPortCreationInfo.h"
-#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/cc/tCCPortDataRef.h"
 #include "core/port/tThreadLocalCache.h"
@@ -85,14 +85,14 @@ protected:
         T* cnc = container->GetObject()->GetData<T>();
         tc->data = container;
         tc->ref = container->GetCurrentRef();
-        rrlib::serialization::sSerialization::DeepCopy(bounds.ToBounds(*val), *cnc);
+        rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(bounds.ToBounds(*val), *cnc);
       }
       else if (bounds.ApplyDefault())
       {
         tc->data = tc->GetUnusedBuffer(tNumber::cTYPE);
         T* cnc = tc->data->GetObject()->GetData<T>();
         tc->ref = tc->data->GetCurrentRef();
-        rrlib::serialization::sSerialization::DeepCopy(bounds.GetOutOfBoundsDefault(), *cnc);
+        rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(bounds.GetOutOfBoundsDefault(), *cnc);
         tc->data->SetRefCounter(0);  // locks will be added during assign
       }
     }
@@ -140,7 +140,7 @@ public:
       {
         tCCPortDataManagerTL* buf = tThreadLocalCache::GetFast()->GetUnusedBuffer(GetDataType());
         T* cnc = buf->GetObject()->GetData<T>();
-        rrlib::serialization::sSerialization::DeepCopy(bounds.ToBounds(*val), *cnc);
+        rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(bounds.ToBounds(*val), *cnc);
         ::finroc::core::tCCPortBase::Publish(buf);
       }
       else if (bounds.ApplyDefault())

@@ -23,7 +23,7 @@
 #define core__port__tPortUtil_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-#include "rrlib/serialization/tGenericObjectWrapper.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/port/tPortTypeMap.h"
 #include "core/port/tPortDataPtr.h"
 
@@ -88,7 +88,7 @@ public:
   static void GetValue(tPortType* port, T& result)
   {
     tManager* mgr = port->GetLockedUnsafeRaw();
-    rrlib::serialization::sSerialization::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
     mgr->ReleaseLock();
   }
 
@@ -97,7 +97,7 @@ public:
     tManager* mgr = port->DequeueSingleUnsafeRaw();
     if (mgr != NULL)
     {
-      rrlib::serialization::sSerialization::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
+      rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
       mgr->ReleaseLock();
       return true;
     }
@@ -116,14 +116,14 @@ public:
     {
       return NULL;
     }
-    rrlib::serialization::tGenericObject* go = mgr->GetObject();
+    rrlib::rtti::tGenericObject* go = mgr->GetObject();
     return go->GetData<T>();
   }
 
   static void SetDefault(tPortType* port, const T& t)
   {
-    rrlib::serialization::tGenericObject* go = port->GetDefaultBufferRaw();
-    rrlib::serialization::sSerialization::DeepCopy(t, *(go->GetData<T>()), NULL);
+    rrlib::rtti::tGenericObject* go = port->GetDefaultBufferRaw();
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *(go->GetData<T>()), NULL);
   }
 
   static void Publish(tPortType* port, tConstDataPtr& t)
@@ -141,7 +141,7 @@ public:
   static void CopyAndPublish(tPortType* port, const T& t)
   {
     tDataPtr buf = GetUnusedBuffer(port);
-    rrlib::serialization::sSerialization::DeepCopy(t, *buf);
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *buf);
     Publish(port, buf);
   }
 
@@ -277,7 +277,7 @@ public:
 
   static void SetDefault(tPortType* port, const T& t)
   {
-    rrlib::serialization::tGenericObject* go = port->GetDefaultBufferRaw();
+    rrlib::rtti::tGenericObject* go = port->GetDefaultBufferRaw();
     go->GetData<tNumber>()->SetValue(t, port->GetUnit());
 
     // publish for value caching in Parameter classes
@@ -382,7 +382,7 @@ public:
     tManager* mgr = port->DequeueSingleUnsafeRaw();
     if (mgr != NULL)
     {
-      rrlib::serialization::sSerialization::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
+      rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
       mgr->Recycle2();
       return true;
     }
@@ -396,7 +396,7 @@ public:
 
   static const T* DequeueSingleAutoLocked(tPortType* port)
   {
-    rrlib::serialization::tGenericObject* go = port->DequeueSingleAutoLockedRaw();
+    rrlib::rtti::tGenericObject* go = port->DequeueSingleAutoLockedRaw();
     if (go == NULL)
     {
       return NULL;
@@ -406,12 +406,12 @@ public:
 
   static void SetDefault(tPortType* port, const T& t)
   {
-    rrlib::serialization::tGenericObject* go = port->GetDefaultBufferRaw();
-    rrlib::serialization::sSerialization::DeepCopy(t, *(go->GetData<T>()), NULL);
+    rrlib::rtti::tGenericObject* go = port->GetDefaultBufferRaw();
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *(go->GetData<T>()), NULL);
 
     // publish for value caching in Parameter classes
     tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
-    rrlib::serialization::sSerialization::DeepCopy(t, *(mgr->GetObject()->GetData<T>()), NULL);
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *(mgr->GetObject()->GetData<T>()), NULL);
     port->BrowserPublishRaw(mgr);
   }
 
@@ -446,7 +446,7 @@ public:
   static void CopyAndPublish(tPortType* port, const T& t)
   {
     tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
-    rrlib::serialization::sSerialization::DeepCopy(t, *(mgr->GetObject()->GetData<T>()), NULL);
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *(mgr->GetObject()->GetData<T>()), NULL);
     port->Publish(mgr);
   }
 
@@ -548,7 +548,7 @@ public:
     {
       return NULL;
     }
-    rrlib::serialization::tGenericObject* go = mgr->GetObject();
+    rrlib::rtti::tGenericObject* go = mgr->GetObject();
     return &go->GetData<tCoreString>()->GetBuffer().GetStdStringRef();
   }
 

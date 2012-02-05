@@ -25,16 +25,9 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tTypedObject.h"
-#include "rrlib/serialization/tStlContainerSuitable.h"
-
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
+#include "rrlib/serialization/serialization.h"
+#include "rrlib/rtti/tIsListType.h"
+#include "rrlib/rtti/tTypedObject.h"
 
 namespace finroc
 {
@@ -51,7 +44,7 @@ class tFrameworkElement;
  * If annotation should be available over the net (e.g. in finstruct),
  * the serialization methods need to be overridden.
  */
-class tFinrocAnnotation : public rrlib::serialization::tTypedObject, public rrlib::serialization::tStlUnsuitable, public rrlib::serialization::tNoSharedPtrListType
+class tFinrocAnnotation : public rrlib::rtti::tTypedObject, public rrlib::rtti::tIsListType<false, false>, boost::noncopyable
 {
   friend class tFrameworkElement;
   friend class tAnnotatable;
@@ -89,7 +82,7 @@ protected:
    * \param type Data Type
    * \return Annotation of first parent that has one - or null
    */
-  static tFinrocAnnotation* FindParentWithAnnotation(tFrameworkElement* fe, const rrlib::serialization::tDataTypeBase& type);
+  static tFinrocAnnotation* FindParentWithAnnotation(tFrameworkElement* fe, const rrlib::rtti::tDataTypeBase& type);
 
 public:
 

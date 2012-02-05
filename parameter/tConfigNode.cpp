@@ -21,14 +21,13 @@
  */
 #include "core/parameter/tConfigNode.h"
 #include "core/parameter/tConfigFile.h"
-#include "rrlib/serialization/tDataType.h"
 #include "core/tFrameworkElement.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataTypeBase tConfigNode::cTYPE = rrlib::serialization::tDataType<tConfigNode>();
+rrlib::rtti::tDataTypeBase tConfigNode::cTYPE = rrlib::rtti::tDataType<tConfigNode>();
 
 tConfigNode::tConfigNode(const util::tString& node) :
   node(node)

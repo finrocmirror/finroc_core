@@ -43,13 +43,6 @@
 #include "core/port/std/tPortQueueElement.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tGenericObject;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -145,7 +138,7 @@ private:
 
   tThreadLocalCache();
 
-  tCCPortDataBufferPool* CreateCCPool(const rrlib::serialization::tDataTypeBase& data_type, int16 uid);
+  tCCPortDataBufferPool* CreateCCPool(const rrlib::rtti::tDataTypeBase& data_type, int16 uid);
 
   tMethodCall* CreateMethodCall();
 
@@ -156,7 +149,7 @@ private:
    */
   void FinalDelete();
 
-  inline tCCPortDataBufferPool* GetCCPool(const rrlib::serialization::tDataTypeBase& data_type)
+  inline tCCPortDataBufferPool* GetCCPool(const rrlib::rtti::tDataTypeBase& data_type)
   {
     return GetCCPool(tFinrocTypeInfo::Get(data_type).GetCCIndex());
   }
@@ -180,7 +173,7 @@ public:
    *
    * \param obj Object
    */
-  void AddAutoLock(rrlib::serialization::tGenericObject* obj);
+  void AddAutoLock(rrlib::rtti::tGenericObject* obj);
 
   /*!
    * Add object that will be automatically unlocked/recycled
@@ -281,7 +274,7 @@ public:
     return GetCCPool(cc_type_index)->GetUnusedBuffer();
   }
 
-  inline tCCPortDataManagerTL* GetUnusedBuffer(const rrlib::serialization::tDataTypeBase& data_type)
+  inline tCCPortDataManagerTL* GetUnusedBuffer(const rrlib::rtti::tDataTypeBase& data_type)
   {
     return GetCCPool(data_type)->GetUnusedBuffer();
   }
@@ -300,7 +293,7 @@ public:
     return pf;
   }
 
-  tCCPortDataManager* GetUnusedInterThreadBuffer(const rrlib::serialization::tDataTypeBase& data_type);
+  tCCPortDataManager* GetUnusedInterThreadBuffer(const rrlib::rtti::tDataTypeBase& data_type);
 
   inline tMethodCall* GetUnusedMethodCall()
   {

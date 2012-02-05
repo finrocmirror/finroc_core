@@ -22,11 +22,8 @@
 #include "core/parameter/tStaticParameterBase.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tThreadLocalCache.h"
-#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/rtti/rtti.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "rrlib/serialization/tTypedObject.h"
-#include "rrlib/serialization/tOutputStream.h"
-#include "rrlib/serialization/tStringInputStream.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/finstructable/tFinstructableGroup.h"
 #include "core/parameter/tConfigFile.h"
@@ -36,7 +33,7 @@ namespace finroc
 {
 namespace core
 {
-tStaticParameterBase::tStaticParameterBase(const util::tString& name_, rrlib::serialization::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy, const util::tString& config_entry) :
+tStaticParameterBase::tStaticParameterBase(const util::tString& name_, rrlib::rtti::tDataTypeBase type_, bool constructor_prototype, bool structure_parameter_proxy, const util::tString& config_entry) :
   name(name_),
   type(type_),
   value(),
@@ -92,7 +89,7 @@ void tStaticParameterBase::AttachTo(tStaticParameterBase* other)
   }
 }
 
-void tStaticParameterBase::CreateBuffer(rrlib::serialization::tDataTypeBase type_)
+void tStaticParameterBase::CreateBuffer(rrlib::rtti::tDataTypeBase type_)
 {
   tStaticParameterBase* sp = GetParameterWithBuffer();
   sp->value.reset(type.CreateInstanceGeneric());
@@ -109,7 +106,8 @@ void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is)
   else
   {
     is.ReadString();
-    is.ReadType();
+    rrlib::rtti::tDataTypeBase dt;
+    is >> dt;
   }
 
   util::tString command_line_option_tmp = is.ReadString();
@@ -136,13 +134,13 @@ void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is)
 
 void tStaticParameterBase::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstructContext)
 {
-  rrlib::serialization::tDataTypeBase dt = type;
+  rrlib::rtti::tDataTypeBase dt = type;
   if (node.HasAttribute("type"))
   {
-    dt = rrlib::serialization::tDataTypeBase::FindType(node.GetStringAttribute("type"));
+    dt = rrlib::rtti::tDataTypeBase::FindType(node.GetStringAttribute("type"));
   }
   enforce_current_value = node.HasAttribute("enforcevalue") && node.GetBoolAttribute("enforcevalue");
-  rrlib::serialization::tTypedObject* val = ValPointer();
+  rrlib::rtti::tTypedObject* val = ValPointer();
   if (val == NULL || val->GetType() != dt)
   {
     CreateBuffer(dt);
@@ -217,7 +215,7 @@ bool tStaticParameterBase::HasChanged()
   {
     return true;
   }
-  return !rrlib::serialization::sSerialization::Equals(*sp->value, *last_value);
+  return !sp->value->Equals(*last_value);
 }
 
 void tStaticParameterBase::LoadValue()
@@ -297,14 +295,14 @@ void tStaticParameterBase::ResetChanged()
 void tStaticParameterBase::Serialize(rrlib::serialization::tOutputStream& os) const
 {
   os.WriteString(name);
-  os.WriteType(type);
+  os << type;
   os.WriteString(command_line_option);
   os.WriteString(outer_parameter_attachment);
   os.WriteBoolean(create_outer_parameter);
   os.WriteString(config_entry);
   os.WriteBoolean(config_entry_set_by_finstruct);
   os.WriteBoolean(enforce_current_value);
-  rrlib::serialization::tTypedObject* val = ValPointer();
+  rrlib::rtti::tTypedObject* val = ValPointer();
 
   os.WriteBoolean(val != NULL);
   if (val != NULL)
@@ -316,7 +314,7 @@ void tStaticParameterBase::Serialize(rrlib::serialization::tOutputStream& os) co
 void tStaticParameterBase::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const
 {
   assert(!(node.HasAttribute("type") || node.HasAttribute("cmdline") || node.HasAttribute("config") || node.HasAttribute("attachouter")));
-  rrlib::serialization::tTypedObject* val = ValPointer();
+  rrlib::rtti::tTypedObject* val = ValPointer();
   if (val->GetType() != type || structure_parameter_proxy)
   {
     node.SetAttribute("type", val->GetType().GetName());
@@ -349,8 +347,8 @@ void tStaticParameterBase::Set(const util::tString& s)
   else
   {
     assert((type != NULL));
-    rrlib::serialization::tDataTypeBase dt = sSerializationHelper::GetTypedStringDataType(type, s);
-    rrlib::serialization::tTypedObject* val = ValPointer();
+    rrlib::rtti::tDataTypeBase dt = sSerializationHelper::GetTypedStringDataType(type, s);
+    rrlib::rtti::tTypedObject* val = ValPointer();
     if (val->GetType() != dt)
     {
       CreateBuffer(dt);

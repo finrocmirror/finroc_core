@@ -28,7 +28,7 @@
 #include "core/parameter/tStaticParameterBase.h"
 #include "core/datatype/tCoreString.h"
 #include "core/parameter/tStaticParameterImplStandard.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 
 namespace finroc
 {

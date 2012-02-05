@@ -27,14 +27,6 @@
 
 #include "core/portdatabase/tReusableGenericObjectManager.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tDataTypeBase;
-} // namespace rrlib
-} // namespace serialization
-
 namespace finroc
 {
 namespace core
@@ -52,17 +44,6 @@ class tCCPortDataManager : public tReusableGenericObjectManager
 public:
 
   tCCPortDataManager() {}
-
-  //    /** Assign other data to this container */
-  //    public void assign(@Const CCPortData other) {
-  //        portData.assign(other);
-  //    }
-  //
-  //    /** Assign data in this container to other data */
-  //    @ConstMethod public void assignTo(CCPortData other) {
-  //        portData.assignTo(other);
-  //    }
-  //
 
   /*!
    * \param other Other object
@@ -87,7 +68,7 @@ public:
    * \param data_type Data type
    * \return Manager
    */
-  inline static tCCPortDataManager* Create(const rrlib::serialization::tDataTypeBase& data_type)
+  inline static tCCPortDataManager* Create(const rrlib::rtti::tDataTypeBase& data_type)
   {
     return static_cast<tCCPortDataManager*>(data_type.CreateInstanceGeneric<tCCPortDataManager>()->GetManager());
   }
@@ -115,21 +96,6 @@ public:
   {
     return util::tStringBuilder("CCPortDataManager: ") + GetContentString();
   }
-
-//
-//    void setData(const T& data) {
-//        setData(&data);
-//    }
-//
-//
-//    /**
-//     * Assign new value to container
-//     *
-//     * \param data new value
-//     */
-//    public void setData(@Const @Ptr T data) {
-//        portData.assign((CCPortData)data);
-//    }
 
 };
 

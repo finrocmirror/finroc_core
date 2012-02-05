@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/portdatabase/tFinrocTypeInfo.h"
-#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/tRuntimeSettings.h"
 
 namespace finroc
@@ -31,7 +31,7 @@ int tFinrocTypeInfo::initialized_types = 0;
 const int tFinrocTypeInfo::cMAX_TYPES;
 const int tFinrocTypeInfo::cMAX_CCTYPES;
 
-int tFinrocTypeInfo::EstimateDataSize(rrlib::serialization::tGenericObject* data)
+int tFinrocTypeInfo::EstimateDataSize(rrlib::rtti::tGenericObject* data)
 {
   if (IsCCType(data->GetType()))
   {
@@ -43,13 +43,13 @@ int tFinrocTypeInfo::EstimateDataSize(rrlib::serialization::tGenericObject* data
   }
 }
 
-rrlib::serialization::tDataTypeBase tFinrocTypeInfo::GetFromCCIndex(int16 cc_type_index)
+rrlib::rtti::tDataTypeBase tFinrocTypeInfo::GetFromCCIndex(int16 cc_type_index)
 {
   for (int16 i = 0; i < cMAX_TYPES; i++)
   {
     if (Get(i).GetType() == eCC && Get(i).cc_index == cc_type_index)
     {
-      return rrlib::serialization::tDataTypeBase::GetType(i);
+      return rrlib::rtti::tDataTypeBase::GetType(i);
     }
   }
   throw util::tRuntimeException("Type not found", CODE_LOCATION_MACRO);
@@ -77,18 +77,18 @@ void tFinrocTypeInfo::InitMoreTypes()
   static util::tAtomicInt last_cc_index(0);
   static util::tMutex mutex;
   util::tLock lock(mutex); // we need exclusive access on index variables
-  for (; initialized_types < rrlib::serialization::tDataTypeBase::GetTypeCount(); initialized_types++)
+  for (; initialized_types < rrlib::rtti::tDataTypeBase::GetTypeCount(); initialized_types++)
   {
     tFinrocTypeInfo& finfo = InfoArray()[initialized_types];
     if (finfo.type == eSTD)
     {
-      rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::GetType((short)initialized_types);
+      rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::GetType((short)initialized_types);
       if (typeutil::IsCCType(dt))
       {
         finfo.type = eCC;
         if (dt.GetRttiName() == typeid(bool).name() ||
-            ((dt.GetTypeTraits() & rrlib::serialization::trait_flags::cIS_INTEGRAL) == 0 &&
-             (dt.GetTypeTraits() & rrlib::serialization::trait_flags::cIS_FLOATING_POINT) == 0))
+            ((dt.GetTypeTraits() & rrlib::rtti::trait_flags::cIS_INTEGRAL) == 0 &&
+             (dt.GetTypeTraits() & rrlib::rtti::trait_flags::cIS_FLOATING_POINT) == 0))
         {
           // increase cc index if we have no numeric type
           finfo.cc_index = static_cast<int16>(last_cc_index.GetAndIncrement());

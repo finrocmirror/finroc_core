@@ -21,9 +21,7 @@
  */
 #include "core/test/tSerializationTests.h"
 #include "core/datatype/tNumber.h"
-#include "rrlib/serialization/tMemoryBuffer.h"
-#include "rrlib/serialization/tOutputStream.h"
-#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/serialization/serialization.h"
 
 namespace finroc
 {

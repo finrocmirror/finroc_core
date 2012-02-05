@@ -22,13 +22,12 @@
 #include "core/tFrameworkElement.h"
 #include "core/tFrameworkElementTreeFilter.h"
 #include "core/thread/tExecutionControl.h"
-#include "rrlib/serialization/tDataType.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataTypeBase tExecutionControl::cTYPE = rrlib::serialization::tDataType<tExecutionControl>();
+rrlib::rtti::tDataTypeBase tExecutionControl::cTYPE = rrlib::rtti::tDataType<tExecutionControl>();
 
 tExecutionControl::tExecutionControl(tStartAndPausable& implementation_) :
   implementation(&(implementation_))

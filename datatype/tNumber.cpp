@@ -20,18 +20,16 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/datatype/tNumber.h"
-#include "rrlib/serialization/tDataType.h"
-#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/rtti/tDataType.h"
+#include "rrlib/serialization/serialization.h"
 #include "core/datatype/tConstant.h"
-#include "rrlib/serialization/tStringInputStream.h"
-#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {
 namespace core
 {
 tNumber tNumber::cZERO(0);
-const rrlib::serialization::tDataTypeBase tNumber::cTYPE = rrlib::serialization::tDataType<tNumber>("Number");
+const rrlib::rtti::tDataTypeBase tNumber::cTYPE = rrlib::rtti::tDataType<tNumber>("Number");
 const int8 tNumber::cINT64, tNumber::cINT32, tNumber::cINT16, tNumber::cFLOAT64, tNumber::cFLOAT32, tNumber::cCONST, tNumber::cMIN_BARRIER;
 
 void tNumber::Deserialize(rrlib::serialization::tInputStream& ois)

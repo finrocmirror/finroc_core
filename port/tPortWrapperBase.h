@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tThreadLocalCache.h"
 
@@ -182,7 +182,7 @@ public:
    * \return Annotation. Null if port has no annotation of this type.
    */
   template <typename A>
-  inline A* GetAnnotation(rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataType<A>())
+  inline A* GetAnnotation(rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataType<A>())
   {
     return static_cast<A*>(wrapped->GetAnnotation(dt));
   }
@@ -214,7 +214,7 @@ public:
   /*!
    * \return Type of port data
    */
-  inline const rrlib::serialization::tDataTypeBase GetDataType() const
+  inline const rrlib::rtti::tDataTypeBase GetDataType() const
   {
     return wrapped->GetDataType();
   }

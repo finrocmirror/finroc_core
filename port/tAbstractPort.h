@@ -27,20 +27,13 @@
 
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
 #include "core/tRuntimeSettings.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/port/tPortFlags.h"
 #include "core/port/tPortCreationInfoBase.h"
 #include "core/tFrameworkElement.h"
-#include "rrlib/serialization/tFactory.h"
+#include "rrlib/rtti/tFactory.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tGenericObject;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -64,7 +57,7 @@ class tPortDataManager;
  * In many cases this (non-blocking) behaviour is intended.
  * However, to avoid that, synchronize to runtime before calling.
  */
-class tAbstractPort : public tFrameworkElement, public rrlib::serialization::tFactory
+class tAbstractPort : public tFrameworkElement, public rrlib::rtti::tFactory
 {
 protected:
 
@@ -119,7 +112,7 @@ private:
 protected:
 
   /*! Type of port data */
-  const rrlib::serialization::tDataTypeBase data_type;
+  const rrlib::rtti::tDataTypeBase data_type;
 
   /*! Minimum network update interval. Value < 0 means default for this type */
   int16 min_net_update_time;
@@ -277,7 +270,7 @@ protected:
    * \param target Target port
    * \param data Data that was sent
    */
-  void UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, rrlib::serialization::tGenericObject* data);
+  void UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, rrlib::rtti::tGenericObject* data);
 
   template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   /*!
@@ -389,12 +382,12 @@ public:
    */
   void ConnectToTarget(tFrameworkElement* dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available = true);
 
-  virtual std::shared_ptr<void> CreateBuffer(rrlib::serialization::tDataTypeBase dt)
+  virtual std::shared_ptr<void> CreateBuffer(const rrlib::rtti::tDataTypeBase& dt)
   {
     return std::shared_ptr<void>(dt.CreateInstance());
   }
 
-  virtual rrlib::serialization::tGenericObject* CreateGenericObject(rrlib::serialization::tDataTypeBase dt, void* factory_parameter);
+  virtual rrlib::rtti::tGenericObject* CreateGenericObject(const rrlib::rtti::tDataTypeBase& dt, void* factory_parameter);
 
   /*!
    * disconnects all edges
@@ -474,7 +467,7 @@ public:
   /*!
    * \return Type of port data
    */
-  inline const rrlib::serialization::tDataTypeBase GetDataType() const
+  inline const rrlib::rtti::tDataTypeBase GetDataType() const
   {
     return data_type;
   }
@@ -536,7 +529,7 @@ public:
    *
    * This method is only supported by a subset of ports that have a MultiTypePortDataBufferPool
    */
-  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::serialization::tDataTypeBase dt)
+  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::rtti::tDataTypeBase dt)
   {
     throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
   }

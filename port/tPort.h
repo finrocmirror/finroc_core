@@ -67,7 +67,7 @@ protected:
    */
   inline static tPortCreationInfo<T> ProcessPci(tPortCreationInfo<T> pci)
   {
-    pci.data_type = rrlib::serialization::tDataType<typename tPortTypeMap<T>::tPortDataType>();
+    pci.data_type = rrlib::rtti::tDataType<typename tPortTypeMap<T>::tPortDataType>();
     return pci;
   }
 
@@ -293,7 +293,7 @@ public:
    */
   inline T* GetDefaultBuffer()
   {
-    rrlib::serialization::tGenericObject* go = wrapped->GetDefaultBufferRaw();
+    rrlib::rtti::tGenericObject* go = wrapped->GetDefaultBufferRaw();
     return go->GetData<T>();
   }
 

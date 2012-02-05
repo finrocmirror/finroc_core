@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 
 namespace finroc
@@ -51,7 +51,7 @@ private:
 public:
 
   /*! Data type for this port interface - the last one in case there are multiple (e.g. for different types of blackboards) - set by DataTypeRegister */
-  rrlib::serialization::tDataTypeBase my_type;
+  rrlib::rtti::tDataTypeBase my_type;
 
   /*! Name of port interface */
   util::tString name;
@@ -90,7 +90,7 @@ public:
   /*!
    * \return Data type of this port interface (must have been set before)
    */
-  inline const rrlib::serialization::tDataTypeBase GetDataType()
+  inline const rrlib::rtti::tDataTypeBase GetDataType()
   {
     assert((my_type != NULL));
     return my_type;
@@ -111,7 +111,7 @@ public:
    *
    * \param data_type Data type that has this port interface
    */
-  inline void SetDataType(const rrlib::serialization::tDataTypeBase& data_type)
+  inline void SetDataType(const rrlib::rtti::tDataTypeBase& data_type)
   {
     assert((tFinrocTypeInfo::Get(data_type).GetPortInterface() == this));
     my_type = data_type;

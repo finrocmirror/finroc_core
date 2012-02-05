@@ -26,23 +26,19 @@
 #include "core/tRuntimeEnvironment.h"
 #include "core/tFrameworkElementTreeFilter.h"
 #include "core/thread/tExecutionControl.h"
-#include "rrlib/serialization/tOutputStream.h"
 #include "core/plugin/tCreateFrameworkElementAction.h"
 #include "core/plugin/tPlugins.h"
 #include "core/parameter/tStaticParameterList.h"
 #include "core/tFinrocAnnotation.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/parameter/tConfigFile.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/cc/tCCPortBase.h"
-#include "rrlib/serialization/tGenericObject.h"
-#include "rrlib/serialization/sSerialization.h"
+#include "rrlib/serialization/serialization.h"
 #include "core/port/std/tPortBase.h"
 #include "core/port/std/tPortDataManager.h"
-#include "rrlib/serialization/tInputStream.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/tThreadLocalCache.h"
-#include "rrlib/serialization/tStringInputStream.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/parameter/tConstructorParameters.h"
 #include "core/parameter/tStaticParameterBase.h"
@@ -118,7 +114,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
   assert((method == &(cGET_CREATE_MODULE_ACTIONS)) || (method == &(cLOAD_MODULE_LIBRARY)) || (method == &(cGET_MODULE_LIBRARIES)));
 
   tPortDataPtr<rrlib::serialization::tMemoryBuffer> mb = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
-  rrlib::serialization::tOutputStream co(mb.get(), rrlib::serialization::tOutputStream::eNames);
+  rrlib::serialization::tOutputStream co(mb.get(), rrlib::serialization::eNames);
 
   if (method == &(cGET_MODULE_LIBRARIES))
   {
@@ -157,7 +153,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
   {
     ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
     tFinrocAnnotation* result = NULL;
-    rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::FindType(type->ToString());
+    rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(type->ToString());
     if (fe != NULL && fe->IsReady() && dt != NULL)
     {
       result = fe->GetAnnotation(dt);
@@ -174,8 +170,8 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
     else
     {
       tPortDataPtr<rrlib::serialization::tMemoryBuffer> buf = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
-      rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::tOutputStream::eNames);
-      co.WriteType(result->GetType());
+      rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::eNames);
+      co << result->GetType();
       result->Serialize(co);
       co.Close();
       return buf;
@@ -201,7 +197,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
 
     tConfigFile* cf = tConfigFile::Find(fe);
     tPortDataPtr<rrlib::serialization::tMemoryBuffer> buf = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
-    rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::tOutputStream::eNames);
+    rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::eNames);
     if (cf == NULL)
     {
       co.WriteBoolean(false);
@@ -261,8 +257,8 @@ tPortDataPtr<tCoreString> tAdminServer::HandleCall(const tAbstractMethod* method
     {
       tPortDataPtr<tCoreString> cs = this->GetBufferForReturn<tCoreString>();
       tCCPortBase* p = static_cast<tCCPortBase*>(ap);
-      const rrlib::serialization::tGenericObject* go = p->GetAutoLockedRaw();
-      cs->Set(rrlib::serialization::sSerialization::Serialize(*go));
+      const rrlib::rtti::tGenericObject* go = p->GetAutoLockedRaw();
+      cs->Set(rrlib::serialization::Serialize(*go));
       p->ReleaseAutoLocks();
       return cs;
     }
@@ -271,7 +267,7 @@ tPortDataPtr<tCoreString> tAdminServer::HandleCall(const tAbstractMethod* method
       tPortDataPtr<tCoreString> cs = this->GetBufferForReturn<tCoreString>();
       tPortBase* p = static_cast<tPortBase*>(ap);
       tPortDataManager* go = p->GetAutoLockedRaw();
-      cs->Set(rrlib::serialization::sSerialization::Serialize(*go->GetObject()));
+      cs->Set(rrlib::serialization::Serialize(*go->GetObject()));
       p->ReleaseAutoLocks();
       return cs;
     }
@@ -358,8 +354,9 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int port_handle, tPor
       util::tLock lock3(port);
       if (port->IsReady())
       {
-        rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::tInputStream::eNames);
-        rrlib::serialization::tDataTypeBase dt = ci.ReadType();
+        rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::eNames);
+        rrlib::rtti::tDataTypeBase dt;
+        ci >> dt;
         if (tFinrocTypeInfo::IsCCType(port->GetDataType()) && tFinrocTypeInfo::IsCCType(dt))
         {
           tCCPortBase* p = static_cast<tCCPortBase*>(port);
@@ -427,8 +424,9 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortD
     }
     else
     {
-      rrlib::serialization::tInputStream ci(params_buffer.get(), rrlib::serialization::tInputStream::eNames);
-      rrlib::serialization::tDataTypeBase dt = ci.ReadType();
+      rrlib::serialization::tInputStream ci(params_buffer.get(), rrlib::serialization::eNames);
+      rrlib::rtti::tDataTypeBase dt;
+      ci >> dt;
       if (dt == NULL)
       {
         FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Data type not available. Cancelling setting of annotation.");

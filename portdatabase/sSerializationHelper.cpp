@@ -20,25 +20,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/portdatabase/sSerializationHelper.h"
-#include "rrlib/serialization/tStringInputStream.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
-#include "rrlib/serialization/tGenericObject.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/tMultiTypePortDataBufferPool.h"
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/port/tThreadLocalCache.h"
-#include "rrlib/serialization/sSerialization.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataTypeBase sSerializationHelper::GetTypedStringDataType(const rrlib::serialization::tDataTypeBase& expected, const util::tString& s)
+rrlib::rtti::tDataTypeBase sSerializationHelper::GetTypedStringDataType(const rrlib::rtti::tDataTypeBase& expected, const util::tString& s)
 {
   if (s.StartsWith("\\("))
   {
     util::tString st = s.Substring(2, s.IndexOf(")"));
-    rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::FindType(st);
+    rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(st);
     return dt;
   }
   return expected;
@@ -55,9 +53,9 @@ void sSerializationHelper::TypedStringDeserialize(rrlib::serialization::tSeriali
   cs->Deserialize(sis);
 }
 
-rrlib::serialization::tGenericObject* sSerializationHelper::TypedStringDeserialize(const rrlib::serialization::tDataTypeBase& expected, tMultiTypePortDataBufferPool* buffer_pool, const util::tString& s)
+rrlib::rtti::tGenericObject* sSerializationHelper::TypedStringDeserialize(const rrlib::rtti::tDataTypeBase& expected, tMultiTypePortDataBufferPool* buffer_pool, const util::tString& s)
 {
-  rrlib::serialization::tDataTypeBase type = GetTypedStringDataType(expected, s);
+  rrlib::rtti::tDataTypeBase type = GetTypedStringDataType(expected, s);
   util::tString s2 = s;
   if (s2.StartsWith("\\("))
   {
@@ -72,16 +70,16 @@ rrlib::serialization::tGenericObject* sSerializationHelper::TypedStringDeseriali
   }
   else
   {
-    rrlib::serialization::tGenericObject* buffer = tFinrocTypeInfo::IsStdType(type) ? buffer_pool->GetUnusedBuffer(type)->GetObject() : tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(type)->GetObject();
+    rrlib::rtti::tGenericObject* buffer = tFinrocTypeInfo::IsStdType(type) ? buffer_pool->GetUnusedBuffer(type)->GetObject() : tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(type)->GetObject();
     rrlib::serialization::tStringInputStream sis(s2);
     buffer->Deserialize(sis);
     return buffer;
   }
 }
 
-util::tString sSerializationHelper::TypedStringSerialize(const rrlib::serialization::tDataTypeBase& expected, rrlib::serialization::tSerializable* cs, rrlib::serialization::tDataTypeBase cs_type)
+util::tString sSerializationHelper::TypedStringSerialize(const rrlib::rtti::tDataTypeBase& expected, rrlib::serialization::tSerializable* cs, rrlib::rtti::tDataTypeBase cs_type)
 {
-  util::tString s = rrlib::serialization::sSerialization::Serialize(*cs);
+  util::tString s = rrlib::serialization::Serialize(*cs);
   if (expected != cs_type)
   {
     return util::tStringBuilder("\\(") + cs_type.GetName() + ")" + s;

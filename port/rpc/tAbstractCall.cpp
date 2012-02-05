@@ -20,8 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tAbstractCall.h"
-#include "rrlib/serialization/tInputStream.h"
-#include "rrlib/serialization/tOutputStream.h"
+#include "rrlib/serialization/serialization.h"
 #include "core/datatype/tNumber.h"
 #include "core/port/rpc/tMethodCallSyncher.h"
 
@@ -66,12 +65,12 @@ void tAbstractCall::DeserializeImpl(rrlib::serialization::tInputStream& is, bool
   }
 }
 
-tPortDataPtr<rrlib::serialization::tGenericObject> tAbstractCall::GetParamGeneric(int index)
+tPortDataPtr<rrlib::rtti::tGenericObject> tAbstractCall::GetParamGeneric(int index)
 {
   tCallParameter& p = params[index];
   if (p.type == tCallParameter::cNULLPARAM || p.value == NULL)
   {
-    return tPortDataPtr<rrlib::serialization::tGenericObject>();
+    return tPortDataPtr<rrlib::rtti::tGenericObject>();
   }
   else
   {

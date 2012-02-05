@@ -22,10 +22,9 @@
 #include "core/parameter/tParameter.h"
 
 #include "core/port/net/tRemoteTypes.h"
-#include "rrlib/serialization/tInputStream.h"
+#include "rrlib/serialization/serialization.h"
 #include "core/parameter/tParameterNumeric.h"
 #include "core/tRuntimeSettings.h"
-#include "rrlib/serialization/tOutputStream.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 
 namespace finroc
@@ -61,8 +60,8 @@ void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
     ci.ReadByte();
 
     util::tString name = ci.ReadString();
-    int16 checked_types = rrlib::serialization::tDataTypeBase::GetTypeCount();
-    rrlib::serialization::tDataTypeBase local = rrlib::serialization::tDataTypeBase::FindType(name);
+    int16 checked_types = rrlib::rtti::tDataTypeBase::GetTypeCount();
+    rrlib::rtti::tDataTypeBase local = rrlib::rtti::tDataTypeBase::FindType(name);
     ls << "- " << name << " (" << next << ") - " << (local != NULL  && (!tFinrocTypeInfo::IsUnknownType(local)) ? "available here, too" : "not available here") << std::endl;
     int types_size = types.Size();  // to avoid warning
     assert((next == types_size));
@@ -77,7 +76,7 @@ void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
     types.Add(e, true);
     if (local != NULL)
     {
-      while (static_cast<int16>(update_times.Size()) < rrlib::serialization::tDataTypeBase::GetTypeCount())
+      while (static_cast<int16>(update_times.Size()) < rrlib::rtti::tDataTypeBase::GetTypeCount())
       {
         update_times.Add(static_cast<int16>(-1), true);
       }
@@ -88,7 +87,7 @@ void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
   FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, ls.str());
 }
 
-int16 tRemoteTypes::GetTime(const rrlib::serialization::tDataTypeBase& data_type)
+int16 tRemoteTypes::GetTime(const rrlib::rtti::tDataTypeBase& data_type)
 {
   assert(((Initialized())) && "Not initialized");
   while (static_cast<int16>(update_times.Size()) <= data_type.GetUid())
@@ -98,7 +97,7 @@ int16 tRemoteTypes::GetTime(const rrlib::serialization::tDataTypeBase& data_type
   return update_times.GetIterable()->Get(data_type.GetUid());
 }
 
-rrlib::serialization::tDataTypeBase tRemoteTypes::ReadType(rrlib::serialization::tInputStream& is)
+rrlib::rtti::tDataTypeBase tRemoteTypes::ReadType(rrlib::serialization::tInputStream& is)
 {
   int16 uid = is.ReadShort();
   if (uid == -2)
@@ -116,11 +115,11 @@ rrlib::serialization::tDataTypeBase tRemoteTypes::ReadType(rrlib::serialization:
   }
 
   tEntry& e = types.GetIterable()->Get(uid);
-  if (e.local_data_type == NULL && e.types_checked < rrlib::serialization::tDataTypeBase::GetTypeCount())
+  if (e.local_data_type == NULL && e.types_checked < rrlib::rtti::tDataTypeBase::GetTypeCount())
   {
     // we have more types locally... maybe we can resolve missing types now
-    e.types_checked = rrlib::serialization::tDataTypeBase::GetTypeCount();
-    e.local_data_type = rrlib::serialization::tDataTypeBase::FindType(e.name);
+    e.types_checked = rrlib::rtti::tDataTypeBase::GetTypeCount();
+    e.local_data_type = rrlib::rtti::tDataTypeBase::FindType(e.name);
   }
   return e.local_data_type;
 }
@@ -132,10 +131,10 @@ void tRemoteTypes::SerializeLocalDataTypes(rrlib::serialization::tOutputStream& 
     int t = tRuntimeSettings::cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME->GetValue();
     co.WriteShort(static_cast<int16>(t));
   }
-  int16 type_count = rrlib::serialization::tDataTypeBase::GetTypeCount();
+  int16 type_count = rrlib::rtti::tDataTypeBase::GetTypeCount();
   for (int16 i = local_types_sent, n = type_count; i < n; i++)
   {
-    rrlib::serialization::tDataTypeBase dt = rrlib::serialization::tDataTypeBase::GetType(i);
+    rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::GetType(i);
 
     co.WriteShort(dt.GetUid());
     co.WriteShort(tFinrocTypeInfo::Get(i).GetUpdateTime());
@@ -146,7 +145,7 @@ void tRemoteTypes::SerializeLocalDataTypes(rrlib::serialization::tOutputStream& 
   local_types_sent = type_count;
 }
 
-void tRemoteTypes::SetTime(rrlib::serialization::tDataTypeBase dt, int16 new_time)
+void tRemoteTypes::SetTime(rrlib::rtti::tDataTypeBase dt, int16 new_time)
 {
   assert(((Initialized())) && "Not initialized");
   if (dt == NULL)
@@ -156,7 +155,7 @@ void tRemoteTypes::SetTime(rrlib::serialization::tDataTypeBase dt, int16 new_tim
   }
   else
   {
-    while (static_cast<int16>(update_times.Size()) < rrlib::serialization::tDataTypeBase::GetTypeCount())
+    while (static_cast<int16>(update_times.Size()) < rrlib::rtti::tDataTypeBase::GetTypeCount())
     {
       update_times.Add(static_cast<int16>(-1), true);
     }
@@ -164,9 +163,9 @@ void tRemoteTypes::SetTime(rrlib::serialization::tDataTypeBase dt, int16 new_tim
   }
 }
 
-void tRemoteTypes::WriteType(rrlib::serialization::tOutputStream& os, rrlib::serialization::tDataTypeBase dt)
+void tRemoteTypes::WriteType(rrlib::serialization::tOutputStream& os, rrlib::rtti::tDataTypeBase dt)
 {
-  int count = rrlib::serialization::tDataTypeBase::GetTypeCount();
+  int count = rrlib::rtti::tDataTypeBase::GetTypeCount();
   if (count > local_types_sent)
   {
     os.WriteShort(-2);
@@ -181,7 +180,7 @@ tRemoteTypes::tEntry::tEntry() :
   name()
 {}
 
-tRemoteTypes::tEntry::tEntry(rrlib::serialization::tDataTypeBase local) :
+tRemoteTypes::tEntry::tEntry(rrlib::rtti::tDataTypeBase local) :
   local_data_type(local),
   types_checked(0),
   name()

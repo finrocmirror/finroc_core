@@ -20,24 +20,21 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/parameter/tConfigFile.h"
-#include "rrlib/serialization/tDataType.h"
 #include "rrlib/finroc_core_utils/sFiles.h"
 #include "rrlib/xml2_wrapper/tXML2WrapperException.h"
-#include "rrlib/serialization/tTypedObject.h"
-#include "rrlib/serialization/tInputStream.h"
 #include "core/tFrameworkElement.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "core/tFrameworkElementTreeFilter.h"
 #include "core/tCoreFlags.h"
-#include "rrlib/serialization/tOutputStream.h"
+#include "rrlib/serialization/serialization.h"
 #include "core/parameter/tParameterInfo.h"
 
 namespace finroc
 {
 namespace core
 {
-rrlib::serialization::tDataTypeBase tConfigFile::cTYPE = rrlib::serialization::tDataType<tConfigFile>();
+rrlib::rtti::tDataTypeBase tConfigFile::cTYPE = rrlib::rtti::tDataType<tConfigFile>();
 util::tString tConfigFile::cSEPARATOR = "/";
 util::tString tConfigFile::cXML_BRANCH_NAME = "node";
 util::tString tConfigFile::cXML_LEAF_NAME = "value";

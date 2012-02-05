@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/datatype/tUnit.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 
 namespace finroc
 {
@@ -62,7 +62,7 @@ public:
   int16 min_net_update_interval;
 
   /*! Data type of port */
-  rrlib::serialization::tDataTypeBase data_type;
+  rrlib::rtti::tDataTypeBase data_type;
 
   /*! Parent of port */
   tFrameworkElement* parent;
@@ -87,13 +87,13 @@ public:
 
   tPortCreationInfoBase(const util::tString& description_, uint flags_);
 
-  tPortCreationInfoBase(const util::tString& description_, const rrlib::serialization::tDataTypeBase& data_type_, uint flags_);
+  tPortCreationInfoBase(const util::tString& description_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_);
 
-  tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, const rrlib::serialization::tDataTypeBase& data_type_, uint flags_);
+  tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_);
 
   tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, uint flags_);
 
-  tPortCreationInfoBase(const rrlib::serialization::tDataTypeBase& data_type_, uint flags_);
+  tPortCreationInfoBase(const rrlib::rtti::tDataTypeBase& data_type_, uint flags_);
 
   tPortCreationInfoBase();
 
@@ -101,7 +101,7 @@ public:
 
   tPortCreationInfoBase(const util::tString& description_, uint flags_, int q_size);
 
-  tPortCreationInfoBase(const util::tString& description_, const rrlib::serialization::tDataTypeBase& data_type_, uint flags_, int q_size);
+  tPortCreationInfoBase(const util::tString& description_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_, int q_size);
 
   // derive methods: Copy port creation info and change something
 
@@ -109,9 +109,9 @@ public:
 
   tPortCreationInfoBase Derive(const util::tString& new_description, tFrameworkElement* parent_);
 
-  tPortCreationInfoBase Derive(const util::tString& new_description, tFrameworkElement* parent_, const rrlib::serialization::tDataTypeBase& type);
+  tPortCreationInfoBase Derive(const util::tString& new_description, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& type);
 
-  tPortCreationInfoBase Derive(const rrlib::serialization::tDataTypeBase& type);
+  tPortCreationInfoBase Derive(const rrlib::rtti::tDataTypeBase& type);
 
   tPortCreationInfoBase Derive(uint flags_);
 

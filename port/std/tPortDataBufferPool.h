@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 #include "core/port/std/tPortDataManager.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPoolCR.h"
 
@@ -45,7 +45,7 @@ class tPortDataBufferPool : public util::tReusablesPoolCR<tPortDataManager>
 public:
 
   /*! Data Type of buffers in pool */
-  const rrlib::serialization::tDataTypeBase data_type;
+  const rrlib::rtti::tDataTypeBase data_type;
 
 private:
 
@@ -82,7 +82,7 @@ public:
   /*!
    * \param data_type Type of buffers in pool
    */
-  tPortDataBufferPool(const rrlib::serialization::tDataTypeBase& data_type_, int initial_size);
+  tPortDataBufferPool(const rrlib::rtti::tDataTypeBase& data_type_, int initial_size);
 
   /*!
    * Is final so it is not used polymorphically -

@@ -30,7 +30,7 @@ namespace core
 namespace tParamaterUtilHelper
 {
 
-tCCPortDataManager* GetInterThreadBuffer(rrlib::serialization::tDataTypeBase dt)
+tCCPortDataManager* GetInterThreadBuffer(rrlib::rtti::tDataTypeBase dt)
 {
   return tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(dt);
 }

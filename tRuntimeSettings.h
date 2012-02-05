@@ -28,7 +28,7 @@
 #include "core/tFrameworkElement.h"
 #include "core/port/tPortListener.h"
 #include "core/port/net/tUpdateTimeChangeListener.h"
-#include "rrlib/serialization/tDataTypeBase.h"
+#include "rrlib/rtti/tDataTypeBase.h"
 
 namespace finroc
 {
@@ -124,7 +124,7 @@ public:
    * \param dt Datatype whose default time has changed
    * \param time New time
    */
-  inline void NotifyUpdateTimeChangeListener(rrlib::serialization::tDataTypeBase dt, int16 time)
+  inline void NotifyUpdateTimeChangeListener(rrlib::rtti::tDataTypeBase dt, int16 time)
   {
     update_time_listener.Notify(&(dt), NULL, time);
   }

@@ -27,7 +27,7 @@ namespace finroc
 {
 namespace core
 {
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_) :
+tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_) :
   tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, 0)), type_, -1)),
   type(type_),
   edges_src(),
@@ -38,7 +38,7 @@ tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkEleme
   InitLists(&(edges_src), &(edges_dest));
 }
 
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags) :
+tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags) :
   tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, custom_flags)), type_, -1)),
   type(type_),
   edges_src(),
@@ -49,7 +49,7 @@ tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkEleme
   InitLists(&(edges_src), &(edges_dest));
 }
 
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::serialization::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level) :
+tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level) :
   tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, custom_flags)), type_, lock_level)),
   type(type_),
   edges_src(),
@@ -108,7 +108,7 @@ tInterfacePort* tInterfacePort::GetServer()
   }
 }
 
-tPortDataManager* tInterfacePort::GetUnusedBufferRaw(rrlib::serialization::tDataTypeBase dt)
+tPortDataManager* tInterfacePort::GetUnusedBufferRaw(rrlib::rtti::tDataTypeBase dt)
 {
   assert((!tFinrocTypeInfo::IsCCType(dt)));
   assert((buf_pool != NULL));

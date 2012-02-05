@@ -20,7 +20,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/rpc/tPullCall.h"
-#include "rrlib/serialization/tInputStream.h"
 #include "core/port/net/tNetPort.h"
 #include "core/port/tAbstractPort.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
@@ -29,7 +28,6 @@
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/port/std/tPortBase.h"
 #include "core/port/std/tPortDataManager.h"
-#include "rrlib/serialization/tOutputStream.h"
 
 namespace finroc
 {
@@ -68,7 +66,7 @@ void tPullCall::ExecuteTask()
       tCCPortDataManager* cpd = cp->GetPullInInterthreadContainerRaw(true, true);
       RecycleParameters();
 
-      tPortDataPtr<rrlib::serialization::tGenericObject> tmp(cpd->GetObject(), cpd);
+      tPortDataPtr<rrlib::rtti::tGenericObject> tmp(cpd->GetObject(), cpd);
       AddParam(0, tmp);
 
       SetStatusReturn();
@@ -80,7 +78,7 @@ void tPullCall::ExecuteTask()
       tPortDataManager* pd = p->GetPullLockedUnsafe(true, true);
       RecycleParameters();
 
-      tPortDataPtr<rrlib::serialization::tGenericObject> tmp(pd->GetObject(), pd);
+      tPortDataPtr<rrlib::rtti::tGenericObject> tmp(pd->GetObject(), pd);
       AddParam(0, tmp);
 
       SetStatusReturn();

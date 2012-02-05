@@ -85,8 +85,8 @@ public:
     tManager* mgr = wrapped.DequeueUnsafe();
     if (mgr != NULL)
     {
-      rrlib::serialization::tGenericObject* go = mgr->GetObject();
-      rrlib::serialization::sSerialization::DeepCopy(*(go->GetData<T>()), result);
+      rrlib::rtti::tGenericObject* go = mgr->GetObject();
+      rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*(go->GetData<T>()), result);
       mgr->HandlePointerRelease();
       return true;
     }
@@ -101,7 +101,7 @@ public:
    */
   inline const T* DequeueAutoLocked()
   {
-    rrlib::serialization::tGenericObject* go = wrapped.DequeueAutoLocked();
+    rrlib::rtti::tGenericObject* go = wrapped.DequeueAutoLocked();
     if (go == NULL)
     {
       return NULL;
@@ -167,8 +167,8 @@ public:
     if (mgr != NULL)
     {
       tNumber num;
-      rrlib::serialization::tGenericObject* go = mgr->GetObject();
-      rrlib::serialization::sSerialization::DeepCopy(*(go->GetData<tNumber>()), num);
+      rrlib::rtti::tGenericObject* go = mgr->GetObject();
+      rrlib::rtti::sStaticTypeInfo<tNumber>::DeepCopy(*(go->GetData<tNumber>()), num);
       mgr->HandlePointerRelease();
       if (unit != num.GetUnit() && unit != &tUnit::cNO_UNIT && num.GetUnit() != &tUnit::cNO_UNIT)
       {

@@ -28,19 +28,19 @@ namespace finroc
 namespace core
 {
 tRPCInterfaceType::tRPCInterfaceType(const util::tString& name, tPortInterface* methods) :
-  rrlib::serialization::tDataTypeBase(GetDataTypeInfo(name))
+  rrlib::rtti::tDataTypeBase(GetDataTypeInfo(name))
 {
   tFinrocTypeInfo::Get(*this).Init(methods);
 }
 
-rrlib::serialization::tDataTypeBase::tDataTypeInfoRaw* tRPCInterfaceType::GetDataTypeInfo(const util::tString& name)
+rrlib::rtti::tDataTypeBase::tDataTypeInfoRaw* tRPCInterfaceType::GetDataTypeInfo(const util::tString& name)
 {
-  ::rrlib::serialization::tDataTypeBase dt = FindType(name);
+  ::rrlib::rtti::tDataTypeBase dt = FindType(name);
   if (dt != NULL)
   {
     return const_cast<tDataTypeBase::tDataTypeInfoRaw*>(dt.GetInfo());
   }
-  rrlib::serialization::tDataTypeBase::tDataTypeInfoRaw* info = util::tAutoDeleter::AddStatic(new rrlib::serialization::tDataTypeBase::tDataTypeInfoRaw());
+  rrlib::rtti::tDataTypeBase::tDataTypeInfoRaw* info = util::tAutoDeleter::AddStatic(new rrlib::rtti::tDataTypeBase::tDataTypeInfoRaw());
   info->SetName(name);
   return info;
 }

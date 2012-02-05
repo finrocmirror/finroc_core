@@ -25,15 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/serialization/tDataTypeBase.h"
-
-namespace rrlib
-{
-namespace serialization
-{
-class tGenericObject;
-} // namespace rrlib
-} // namespace serialization
+#include "rrlib/rtti/tDataTypeBase.h"
 
 namespace finroc
 {
@@ -99,13 +91,13 @@ public:
    * \param data Transferred data
    * \return estimated size
    */
-  static int EstimateDataSize(rrlib::serialization::tGenericObject* data);
+  static int EstimateDataSize(rrlib::rtti::tGenericObject* data);
 
   /*!
    * \param type Data Type
    * \return Finroc type info for type
    */
-  inline static tFinrocTypeInfo& Get(const rrlib::serialization::tDataTypeBase& type_)
+  inline static tFinrocTypeInfo& Get(const rrlib::rtti::tDataTypeBase& type_)
   {
     return Get(type_.GetUid());
   }
@@ -134,17 +126,17 @@ public:
   /*!
    * \return DataType this info is about
    */
-  inline rrlib::serialization::tDataTypeBase GetDataType()
+  inline rrlib::rtti::tDataTypeBase GetDataType()
   {
     short uid = static_cast<short>(this - InfoArray());
-    return rrlib::serialization::tDataTypeBase::GetType(uid);
+    return rrlib::rtti::tDataTypeBase::GetType(uid);
   }
 
   /*!
    * \param cc_type_index CC Index
    * \return Data type with this index
    */
-  static rrlib::serialization::tDataTypeBase GetFromCCIndex(int16 cc_type_index);
+  static rrlib::rtti::tDataTypeBase GetFromCCIndex(int16 cc_type_index);
 
   /*!
    * \return the portInterface
@@ -195,7 +187,7 @@ public:
    * \param dt Data type to look this up for
    * \return is this a "cheap copy" port data type?
    */
-  inline static bool IsCCType(const rrlib::serialization::tDataTypeBase& dt)
+  inline static bool IsCCType(const rrlib::rtti::tDataTypeBase& dt)
   {
     return Get(dt).GetType() == eCC;
   }
@@ -204,7 +196,7 @@ public:
    * \param dt Data type to look this up for
    * \return is this a RPC interface port data type?
    */
-  inline static bool IsMethodType(const rrlib::serialization::tDataTypeBase& dt)
+  inline static bool IsMethodType(const rrlib::rtti::tDataTypeBase& dt)
   {
     return Get(dt).GetType() == eMETHOD;
   }
@@ -213,7 +205,7 @@ public:
    * \param dt Data type to look this up for
    * \return is this a standard port data type?
    */
-  inline static bool IsStdType(const rrlib::serialization::tDataTypeBase& dt)
+  inline static bool IsStdType(const rrlib::rtti::tDataTypeBase& dt)
   {
     return Get(dt).GetType() == eSTD;
   }
@@ -222,7 +214,7 @@ public:
    * \param dt Data type to look this up for
    * \return It this an unknown type
    */
-  inline static bool IsUnknownType(rrlib::serialization::tDataTypeBase dt)
+  inline static bool IsUnknownType(rrlib::rtti::tDataTypeBase dt)
   {
     return Get(dt).GetType() >= eUNKNOWN_STD;
   }

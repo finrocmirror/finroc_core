@@ -21,7 +21,7 @@
  */
 #include "core/port/tPortFlags.h"
 #include "core/port/stream/tNewConnectionHandler.h"
-#include "rrlib/serialization/tGenericObject.h"
+#include "rrlib/rtti/rtti.h"
 #include "core/port/std/tPortDataReference.h"
 #include "core/tFrameworkElement.h"
 
