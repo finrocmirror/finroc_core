@@ -44,12 +44,10 @@ class tFrameworkElement;
  *
  * This Port class is used in applications.
  * It kind of provides the API for PortBase backend, which it wraps.
- * and is a generic wrapper for the type-less PortBase.
- *
- * In C++ code for correct casting is generated.
+ * It is a generic wrapper for the type-less PortBase.
  */
 template<typename T>
-class tPort : public tPortWrapperBase<typename tPortTypeMap<T>::tPortBaseType>
+class tPort : public tPortWrapperBase
 {
 protected:
 
@@ -89,7 +87,6 @@ public:
   // typedefs
   typedef tPortDataPtr<T> tDataPtr;
   typedef typename tPortTypeMap<T>::tPortBaseType tPortBaseType;
-  using tPortWrapperBase<tPortBaseType>::wrapped;
 
   /*!
    * Constructor takes variadic argument list... just any properties you want to assign to port.
@@ -131,12 +128,12 @@ public:
 
   void AddPortListener(tPortListener<tPortDataPtr<const T> >* listener)
   {
-    wrapped->AddPortListenerRaw(listener);
+    static_cast<tPortBaseType*>(wrapped)->AddPortListenerRaw(listener);
   }
 
   void AddPortListener(tPortListener<>* listener)
   {
-    wrapped->AddPortListenerRaw(listener);
+    static_cast<tPortBaseType*>(wrapped)->AddPortListenerRaw(listener);
   }
 
   /*!
@@ -144,7 +141,7 @@ public:
    */
   inline void AddPortListener(tPortListener<T>* listener)
   {
-    wrapped->AddPortListenerRaw(listener);
+    static_cast<tPortBaseType*>(wrapped)->AddPortListenerRaw(listener);
   }
 
   /*!
@@ -154,7 +151,7 @@ public:
    */
   inline void DequeueAll(tPortQueueFragment<T>& fragment)
   {
-    fragment.DequeueFromPort(wrapped);
+    fragment.DequeueFromPort(static_cast<tPortBaseType*>(wrapped));
   }
 
   /*!
@@ -169,7 +166,7 @@ public:
    */
   inline tPortDataPtr<const T> Dequeue()
   {
-    return tPortUtil<T>::DequeueSingle(wrapped);
+    return tPortUtil<T>::DequeueSingle(static_cast<tPortBaseType*>(wrapped));
   }
 
   /*!
@@ -185,7 +182,7 @@ public:
    */
   inline bool Dequeue(T& result)
   {
-    return tPortUtil<T>::DequeueSingle(wrapped, result);
+    return tPortUtil<T>::DequeueSingle(static_cast<tPortBaseType*>(wrapped), result);
   }
 
   /*!
@@ -200,7 +197,7 @@ public:
    */
   inline const T* DequeueAutoLocked()
   {
-    return tPortUtil<T>::DequeueSingleAutoLocked(wrapped);
+    return tPortUtil<T>::DequeueSingleAutoLocked(static_cast<tPortBaseType*>(wrapped));
   }
 
   /*!
@@ -218,7 +215,7 @@ public:
   inline T Get(typename std::enable_if<CC, void>::type* v = NULL)
   {
     T t;
-    tPortUtil<T>::GetValue(this->wrapped, t);
+    tPortUtil<T>::GetValue(static_cast<tPortBaseType*>(wrapped), t);
     return t;
   }
 
@@ -232,7 +229,7 @@ public:
    */
   inline const void Get(T& result)
   {
-    return tPortUtil<T>::GetValue(wrapped, result);
+    return tPortUtil<T>::GetValue(static_cast<tPortBaseType*>(wrapped), result);
   }
 
   /*!
@@ -242,41 +239,8 @@ public:
    */
   inline const T* GetAutoLocked()
   {
-    return tPortUtil<T>::GetAutoLocked(wrapped);
+    return tPortUtil<T>::GetAutoLocked(static_cast<tPortBaseType*>(wrapped));
   }
-
-  //    /**
-  //     * \param pullRequestHandler Object that handles pull requests - null if there is none (typical case)
-  //     */
-  //    public void setPullRequestHandler(PullRequestHandler pullRequestHandler) {
-  //        wrapped.setPullRequestHandler(pullRequestHandler);
-  //    }
-
-  //    /**
-  //     * Does port (still) have this value?
-  //     * (calling this is only safe, when pd is locked)
-  //     *
-  //     * \param pd Port value
-  //     * \return Answer
-  //     */
-  //    @InCpp("return getHelper(PortUtil<T>::publish(wrapped));")
-  //    @ConstMethod public boolean valueIs(@Const @Ptr T pd) {
-  //        if (hasCCType()) {
-  //            return ((CCPortBase)wrapped).valueIs(pd);
-  //        } else {
-  //            return ((PortBase)wrapped).valueIs(pd);
-  //        }
-  //    }
-  //
-  //
-  //    boolean valueIs(std::shared_ptr<const T>& pd) const {
-  //        return valueIs(pd._get());
-  //    }
-  //
-  //    boolean valueIs(const T& pd) const {
-  //        return value
-  //    }
-  //
 
   /*!
    * \return Bounds as they are currently set
@@ -284,7 +248,7 @@ public:
   template < bool BOUNDABLE = tPortTypeMap<T>::boundable >
   inline const typename std::enable_if<BOUNDABLE, tBounds<T>>::type GetBounds() const
   {
-    return tPortUtil<T>::GetBounds(wrapped);
+    return tPortUtil<T>::GetBounds(static_cast<tPortBaseType*>(wrapped));
   }
 
   /*!
@@ -293,7 +257,7 @@ public:
    */
   inline T* GetDefaultBuffer()
   {
-    rrlib::rtti::tGenericObject* go = wrapped->GetDefaultBufferRaw();
+    rrlib::rtti::tGenericObject* go = static_cast<tPortBaseType*>(wrapped)->GetDefaultBufferRaw();
     return go->GetData<T>();
   }
 
@@ -306,7 +270,7 @@ public:
    */
   inline tPortDataPtr<const T> GetPointer()
   {
-    return tPortUtil<T>::GetValueWithLock(wrapped);
+    return tPortUtil<T>::GetValueWithLock(static_cast<tPortBaseType*>(wrapped));
   }
 
   /*!
@@ -319,7 +283,7 @@ public:
    */
   inline tPortDataPtr<const T> GetPull(bool intermediate_assign)
   {
-    return tPortUtil<T>::GetPull(wrapped, intermediate_assign);
+    return tPortUtil<T>::GetPull(static_cast<tPortBaseType*>(wrapped), intermediate_assign);
   }
 
   /*!
@@ -331,7 +295,15 @@ public:
    */
   inline tPortDataPtr<T> GetUnusedBuffer()
   {
-    return tPortUtil<T>::GetUnusedBuffer(wrapped);
+    return tPortUtil<T>::GetUnusedBuffer(static_cast<tPortBaseType*>(wrapped));
+  }
+
+  /*!
+   * \return Wrapped port. For rare case that someone really needs to access ports.
+   */
+  inline tPortBaseType* GetWrapped()
+  {
+    return static_cast<tPortBaseType*>(wrapped);
   }
 
   /*!
@@ -351,7 +323,7 @@ public:
    */
   inline void Publish(tPortDataPtr<const T> && data)
   {
-    tPortUtil<T>::Publish(wrapped, data);
+    tPortUtil<T>::Publish(static_cast<tPortBaseType*>(wrapped), data);
   }
 
   // Publish Data Buffer. This data will be forwarded to any connected ports.
@@ -361,27 +333,27 @@ public:
   // This publish()-variant is efficient when using CC types, but can be extremely costly with large data types)
   inline void Publish(const T& data)
   {
-    tPortUtil<T>::CopyAndPublish(wrapped, data);
+    tPortUtil<T>::CopyAndPublish(static_cast<tPortBaseType*>(wrapped), data);
   }
 
   inline void Publish(tPortDataPtr<T> && data)
   {
-    tPortUtil<T>::Publish(wrapped, data);
+    tPortUtil<T>::Publish(static_cast<tPortBaseType*>(wrapped), data);
   }
 
   inline void Publish(tPortDataPtr<T>& data)
   {
-    tPortUtil<T>::Publish(wrapped, data);
+    tPortUtil<T>::Publish(static_cast<tPortBaseType*>(wrapped), data);
   }
 
   inline void Publish(tPortDataPtr<const T>& data)
   {
-    tPortUtil<T>::Publish(wrapped, data);
+    tPortUtil<T>::Publish(static_cast<tPortBaseType*>(wrapped), data);
   }
 
   void RemovePortListener(tPortListener<tPortDataPtr<const T> >* listener)
   {
-    wrapped->RemovePortListenerRaw(listener);
+    static_cast<tPortBaseType*>(wrapped)->RemovePortListenerRaw(listener);
   }
 
   /*!
@@ -389,7 +361,7 @@ public:
    */
   inline void RemovePortListener(tPortListener<T>* listener)
   {
-    wrapped->RemovePortListenerRaw(listener);
+    static_cast<tPortBaseType*>(wrapped)->RemovePortListenerRaw(listener);
   }
 
   /*!
@@ -401,7 +373,7 @@ public:
   template < bool BOUNDABLE = tPortTypeMap<T>::boundable >
   inline void SetBounds(const typename std::enable_if<BOUNDABLE, tBounds<T>>::type& b)
   {
-    tPortUtil<T>::SetBounds(wrapped, b);
+    tPortUtil<T>::SetBounds(static_cast<tPortBaseType*>(wrapped), b);
   }
 
   /*!
@@ -413,7 +385,7 @@ public:
   virtual void SetDefault(const T& t)
   {
     assert(!this->IsReady() && "please set default value _before_ initializing port");
-    tPortUtil<T>::SetDefault(wrapped, t);
+    tPortUtil<T>::SetDefault(static_cast<tPortBaseType*>(wrapped), t);
   }
 
 };

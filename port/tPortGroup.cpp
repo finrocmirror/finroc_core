@@ -43,7 +43,7 @@ void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& gro
   tAbstractPort* p = NULL;
   while ((p = ci.NextPort()) != NULL)
   {
-    util::tString name(p->GetDescription());
+    util::tString name(p->GetName());
     if (p == start_with)
     {
       start_with = NULL;

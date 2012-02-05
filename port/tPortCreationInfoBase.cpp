@@ -36,12 +36,12 @@ tPortCreationInfoBase::tPortCreationInfoBase(uint flags_) :
   data_type(NULL),
   parent(NULL),
   manages_ports(false),
-  description(""),
+  name(""),
   lock_order(-1)
 {
 }
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, uint flags_) :
+tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, uint flags_) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -51,12 +51,12 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, 
   data_type(NULL),
   parent(NULL),
   manages_ports(false),
-  description(description_),
+  name(name_),
   lock_order(-1)
 {
 }
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_) :
+tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -66,12 +66,12 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, 
   data_type(data_type_),
   parent(NULL),
   manages_ports(false),
-  description(description_),
+  name(name_),
   lock_order(-1)
 {
 }
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_) :
+tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -81,12 +81,12 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, 
   data_type(data_type_),
   parent(parent_),
   manages_ports(false),
-  description(description_),
+  name(name_),
   lock_order(-1)
 {
 }
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, uint flags_) :
+tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, tFrameworkElement* parent_, uint flags_) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -96,7 +96,7 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, 
   data_type(NULL),
   parent(parent_),
   manages_ports(false),
-  description(description_),
+  name(name_),
   lock_order(-1)
 {
 }
@@ -111,7 +111,7 @@ tPortCreationInfoBase::tPortCreationInfoBase(const rrlib::rtti::tDataTypeBase& d
   data_type(data_type_),
   parent(NULL),
   manages_ports(false),
-  description(""),
+  name(""),
   lock_order(-1)
 {
 }
@@ -126,11 +126,11 @@ tPortCreationInfoBase::tPortCreationInfoBase() :
   data_type(NULL),
   parent(NULL),
   manages_ports(false),
-  description(""),
+  name(""),
   lock_order(-1)
 {}
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_) :
+tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -140,12 +140,12 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_) 
   data_type(NULL),
   parent(NULL),
   manages_ports(false),
-  description(description_),
+  name(name_),
   lock_order(-1)
 {
 }
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, uint flags_, int q_size) :
+tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, uint flags_, int q_size) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -155,12 +155,12 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, 
   data_type(NULL),
   parent(NULL),
   manages_ports(false),
-  description(description_),
+  name(name_),
   lock_order(-1)
 {
 }
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_, int q_size) :
+tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_, int q_size) :
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
   unit(&(tUnit::cNO_UNIT)),
@@ -170,30 +170,30 @@ tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& description_, 
   data_type(data_type_),
   parent(NULL),
   manages_ports(false),
-  description(description_),
+  name(name_),
   lock_order(-1)
 {
 }
 
-tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_description)
+tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_name)
 {
   tPortCreationInfoBase pci2(*this);
-  pci2.description = new_description;
+  pci2.name = new_name;
   return pci2;
 }
 
-tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_description, tFrameworkElement* parent_)
+tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_name, tFrameworkElement* parent_)
 {
   tPortCreationInfoBase pci2(*this);
-  pci2.description = new_description;
+  pci2.name = new_name;
   pci2.parent = parent_;
   return pci2;
 }
 
-tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_description, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& type)
+tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_name, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& type)
 {
   tPortCreationInfoBase pci2(*this);
-  pci2.description = new_description;
+  pci2.name = new_name;
   pci2.parent = parent_;
   pci2.data_type = type;
   return pci2;

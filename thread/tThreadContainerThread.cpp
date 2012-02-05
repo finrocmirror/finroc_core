@@ -27,7 +27,7 @@ tThreadContainerThread::tThreadContainerThread(tFrameworkElement* thread_contain
   tmp(),
   last_cycle_execution_time(last_cycle_execution_time)
 {
-  this->SetName(util::tStringBuilder("ThreadContainer ") + thread_container_->GetDescription());
+  this->SetName(util::tStringBuilder("ThreadContainer ") + thread_container_->GetName());
 }
 
 void tThreadContainerThread::MainLoopCallback()

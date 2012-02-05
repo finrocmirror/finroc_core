@@ -127,11 +127,11 @@ protected:
 
 public:
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_);
+  tInterfacePort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_);
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags);
+  tInterfacePort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags);
 
-  tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level);
+  tInterfacePort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level);
 
   tInterfacePort(tPortCreationInfoBase pci, tInterfacePort::tType type_, int lock_level);
 

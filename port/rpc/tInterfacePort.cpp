@@ -27,36 +27,36 @@ namespace finroc
 {
 namespace core
 {
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_) :
-  tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, 0)), type_, -1)),
+tInterfacePort::tInterfacePort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_) :
+  tAbstractPort(ProcessPci((tPortCreationInfoBase(name, parent, data_type, 0)), type_, -1)),
   type(type_),
   edges_src(),
   edges_dest(),
   buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
-  // this(new PortCreationInfo(description,parent,dataType,0),type,-1);
+  // this(new PortCreationInfo(name,parent,dataType,0),type,-1);
   InitLists(&(edges_src), &(edges_dest));
 }
 
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags) :
-  tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, custom_flags)), type_, -1)),
+tInterfacePort::tInterfacePort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags) :
+  tAbstractPort(ProcessPci((tPortCreationInfoBase(name, parent, data_type, custom_flags)), type_, -1)),
   type(type_),
   edges_src(),
   edges_dest(),
   buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
-  // this(new PortCreationInfo(description,parent,dataType,customFlags),type,-1);
+  // this(new PortCreationInfo(name,parent,dataType,customFlags),type,-1);
   InitLists(&(edges_src), &(edges_dest));
 }
 
-tInterfacePort::tInterfacePort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level) :
-  tAbstractPort(ProcessPci((tPortCreationInfoBase(description, parent, data_type, custom_flags)), type_, lock_level)),
+tInterfacePort::tInterfacePort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& data_type, tInterfacePort::tType type_, uint custom_flags, int lock_level) :
+  tAbstractPort(ProcessPci((tPortCreationInfoBase(name, parent, data_type, custom_flags)), type_, lock_level)),
   type(type_),
   edges_src(),
   edges_dest(),
   buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
 {
-  // this(new PortCreationInfo(description,parent,dataType,customFlags),type,lockLevel);
+  // this(new PortCreationInfo(name,parent,dataType,customFlags),type,lockLevel);
   InitLists(&(edges_src), &(edges_dest));
 }
 

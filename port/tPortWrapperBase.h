@@ -28,13 +28,13 @@
 #include "rrlib/rtti/tDataTypeBase.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tThreadLocalCache.h"
+#include "core/port/tAbstractPort.h"
 
 namespace finroc
 {
 namespace core
 {
 class tFinrocAnnotation;
-class tAbstractPort;
 class tFrameworkElement;
 
 /*!
@@ -47,13 +47,12 @@ class tFrameworkElement;
  * - Only parts of the API meant to be used by the application developer are exposed.
  * - Connect() methods can be hidden/reimplemented (via name hiding). This can be used to enforce that only certain connections can be created at compile time.
  */
-template<typename T>
-class tPortWrapperBase : public util::tObject
+class tPortWrapperBase
 {
 protected:
 
   /*! Wrapped port */
-  T* wrapped;
+  tAbstractPort* wrapped;
 
 public:
 
@@ -86,7 +85,7 @@ public:
    *
    * \param source Source port
    */
-  inline void ConnectToSource(const tPortWrapperBase<T>& source)
+  inline void ConnectToSource(const tPortWrapperBase& source)
   {
     wrapped->ConnectToSource(source.wrapped);
   }
@@ -129,7 +128,7 @@ public:
    *
    * \param target Target port
    */
-  inline void ConnectToTarget(const tPortWrapperBase<T>& target)
+  inline void ConnectToTarget(const tPortWrapperBase& target)
   {
     wrapped->ConnectToTarget(target.wrapped);
   }
@@ -164,18 +163,6 @@ public:
   }
 
   /*!
-   * Are description of this element and String 'other' identical?
-   * (result is identical to getDescription().equals(other); but more efficient in C++)
-   *
-   * \param other Other String
-   * \return Result
-   */
-  inline bool DescriptionEquals(const util::tString& other) const
-  {
-    return wrapped->DescriptionEquals(other);
-  }
-
-  /*!
    * Get annotation of specified type
    *
    * \param type Data type of annotation we're looking for
@@ -188,12 +175,12 @@ public:
   }
 
   /*!
-   * same as getDescription()
-   * except that we return a const char* in C++ - this way, no memory needs to be allocated
+   * Same as getName()
+   * (except that we return a const char*)
    */
-  inline const char* GetCDescription() const
+  inline const char* GetCName() const
   {
-    return wrapped->GetCDescription();
+    return wrapped->GetCName();
   }
 
   // using this operator, it can be checked conveniently in PortListener's portChanged()
@@ -228,18 +215,9 @@ public:
   }
 
   /*!
-   * \return Name/Description
+   * \return Log description
    */
-  inline const util::tString GetDescription() const
-  {
-    return wrapped->GetDescription();
-  }
-
-  /*!
-   * @return
-   * @see org.finroc.core.FrameworkElement#getLogDescription()
-   */
-  inline util::tString GetLogDescription() const
+  inline const tFrameworkElement& GetLogDescription() const
   {
     return wrapped->GetLogDescription();
   }
@@ -253,6 +231,14 @@ public:
   }
 
   /*!
+   * \return Name of this framework element
+   */
+  inline const util::tString GetName() const
+  {
+    return wrapped->GetName();
+  }
+
+  /*!
    * \return Primary parent framework element
    */
   inline tFrameworkElement* GetParent()
@@ -263,7 +249,7 @@ public:
   /*!
    * \return Wrapped port. For rare case that someone really needs to access ports.
    */
-  inline T* GetWrapped()
+  inline tAbstractPort* GetWrapped()
   {
     return wrapped;
   }
@@ -312,6 +298,18 @@ public:
   inline bool IsReady() const
   {
     return wrapped->IsReady();
+  }
+
+  /*!
+   * Are name of this element and String 'other' identical?
+   * (result is identical to getName().equals(other); but more efficient in C++)
+   *
+   * \param other Other String
+   * \return Result
+   */
+  inline bool NameEquals(const util::tString& other) const
+  {
+    return wrapped->NameEquals(other);
   }
 
   /*!
@@ -399,7 +397,7 @@ namespace finroc
 {
 namespace core
 {
-template <typename T> inline bool operator==(const tAbstractPort* p, tPortWrapperBase<T> pw)
+inline bool operator==(const tAbstractPort* p, tPortWrapperBase pw)
 {
   return pw == p;
 }

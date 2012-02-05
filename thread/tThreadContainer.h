@@ -49,8 +49,8 @@ public:
   /*!
    * (see FrameworkElement for parameter description)
    */
-  tThreadContainer(tFrameworkElement* parent, const util::tString& description, uint flags = 0) :
-    tThreadContainerElement<tGroup>(parent, description, flags)
+  tThreadContainer(tFrameworkElement* parent, const util::tString& name, uint flags = 0) :
+    tThreadContainerElement<tGroup>(parent, name, flags)
   {}
 };
 
@@ -71,8 +71,8 @@ public:
   /*!
    * (see FrameworkElement for parameter description)
    */
-  tFinstructableThreadContainer(tFrameworkElement* parent, const util::tString& description, uint flags = 0) :
-    tThreadContainerElement<tFinstructableGroup>(parent, description, flags)
+  tFinstructableThreadContainer(tFrameworkElement* parent, const util::tString& name, uint flags = 0) :
+    tThreadContainerElement<tFinstructableGroup>(parent, name, flags)
   {}
 
   /*!

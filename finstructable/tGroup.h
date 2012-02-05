@@ -51,7 +51,7 @@ private:
 
 public:
 
-  tGroup(tFrameworkElement* parent, const util::tString& description, uint flags = 0);
+  tGroup(tFrameworkElement* parent, const util::tString& name, uint flags = 0);
 
 };
 

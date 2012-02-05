@@ -32,15 +32,15 @@ namespace core
 tStandardCreateModuleAction<tGroupInterface> tGroupInterface::cCREATE_ACTION("Default Interface", util::tTypedClass<tGroupInterface>());
 tConstructorCreateModuleAction<tGroupInterface, tGroupInterface::tDataClassification, tGroupInterface::tPortDirection, bool, bool> tGroupInterface::cCOMPLEX_CREATE_ACTION("Interface", util::tTypedClass<tGroupInterface>(), "Data classification, Port direction, Shared?, Unique Links");
 
-tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString& description) :
-  tPortGroup(parent, description, ::finroc::core::tEdgeAggregator::cIS_INTERFACE, 0),
+tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString& name) :
+  tPortGroup(parent, name, ::finroc::core::tEdgeAggregator::cIS_INTERFACE, 0),
   ports("Ports", this)
 {
   ports.GetValue()->InitialSetup(this, 0, true);
 }
 
-tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString& description, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link) :
-  tPortGroup(parent, description, ComputeFlags(data_class, shared, unique_link), ComputePortFlags(port_dir, shared, unique_link)),
+tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString& name, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link) :
+  tPortGroup(parent, name, ComputeFlags(data_class, shared, unique_link), ComputePortFlags(port_dir, shared, unique_link)),
   ports("Ports", this)
 {
   ports.GetValue()->InitialSetup(this, ComputePortFlags(port_dir, shared, unique_link), port_dir == eBOTH);

@@ -68,7 +68,7 @@ void tPortCreationList::ApplyChanges(tFrameworkElement* io_vector_, uint flags_)
     {
       tAbstractPort* ap1 = ports1.Get(i);
       tAbstractPort* ap2 = i < ports2.Size() ? ports2.Get(i) : NULL;
-      CheckPort(ap2, io_vector_, flags_, ap1->GetDescription(), ap1->GetDataType(), ap1->IsOutputPort(), ap1);
+      CheckPort(ap2, io_vector_, flags_, ap1->GetName(), ap1->GetDataType(), ap1->IsOutputPort(), ap1);
     }
     for (size_t i = ports1.Size(); i < ports2.Size(); i++)
     {
@@ -79,7 +79,7 @@ void tPortCreationList::ApplyChanges(tFrameworkElement* io_vector_, uint flags_)
 
 void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, uint flags_, const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output, tAbstractPort* prototype)
 {
-  if (ap != NULL && ap->DescriptionEquals(name) && ap->GetDataType() == dt && (ap->GetAllFlags() & cRELEVANT_FLAGS) == (flags_ & cRELEVANT_FLAGS))
+  if (ap != NULL && ap->NameEquals(name) && ap->GetDataType() == dt && (ap->GetAllFlags() & cRELEVANT_FLAGS) == (flags_ & cRELEVANT_FLAGS))
   {
     if ((!show_output_port_selection) || (output == ap->IsOutputPort()))
     {
@@ -248,7 +248,7 @@ void tPortCreationList::Serialize(rrlib::serialization::tOutputStream& os) const
       for (int i = 0; i < size; i++)
       {
         tAbstractPort* p = ports.Get(i);
-        os.WriteString(p->GetCDescription());
+        os.WriteString(p->GetCName());
         os.WriteString(p->GetDataType().GetName());
         os.WriteBoolean(p->IsOutputPort());
       }
@@ -269,7 +269,7 @@ void tPortCreationList::Serialize(rrlib::xml2::tXMLNode& node) const
     {
       tAbstractPort* p = ports.Get(i);
       rrlib::xml2::tXMLNode& child = node.AddChildNode("port");
-      child.SetAttribute("name", p->GetCDescription());
+      child.SetAttribute("name", p->GetCName());
       child.SetAttribute("type", p->GetDataType().GetName());
       tFinstructableGroup::AddDependency(p->GetDataType());
       if (show_output_port_selection)

@@ -73,7 +73,7 @@ class tThreadContainerElement : public BASE, public tStartAndPausable
 public:
 
   /*!
-   * All constructor parameters are forwarded to class BASE (usually parent, description, flags)
+   * All constructor parameters are forwarded to class BASE (usually parent, name, flags)
    */
   template <typename ... ARGS>
   tThreadContainerElement(const ARGS&... args);

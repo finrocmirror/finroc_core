@@ -30,8 +30,8 @@ namespace finroc
 {
 namespace core
 {
-tExternalConnection::tExternalConnection(const util::tString& description, const util::tString& default_address) :
-  tFrameworkElement(tRuntimeEnvironment::GetInstance(), description, tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cNETWORK_ELEMENT, tLockOrderLevels::cLEAF_GROUP),
+tExternalConnection::tExternalConnection(const util::tString& name, const util::tString& default_address) :
+  tFrameworkElement(tRuntimeEnvironment::GetInstance(), name, tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cNETWORK_ELEMENT, tLockOrderLevels::cLEAF_GROUP),
   last_address(default_address),
   connected(false),
   listener(),

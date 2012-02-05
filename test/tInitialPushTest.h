@@ -39,7 +39,7 @@ class tInitialPushTest : public util::tUncopyableObject
 {
   inline static void Print(tPort<int>& o2, int i)
   {
-    util::tSystem::out.Println(util::tStringBuilder("Port ") + o2.GetDescription() + ": " + o2.Get() + " (expected: " + i + ")");
+    util::tSystem::out.Println(util::tStringBuilder("Port ") + o2.GetName() + ": " + o2.Get() + " (expected: " + i + ")");
   }
 
 public:

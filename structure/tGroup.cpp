@@ -101,19 +101,19 @@ tGroup::~tGroup()
 //  finroc::core::tStaticParameterBase* param = spl->Get(index);
 //  param->Set(new_value);
 //
-//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> updating parameter with name: " << param->GetName();
+//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetName() << "::SetParameter>> updating parameter with name: " << param->GetName();
 //
 //  this->StaticParametersChanged();
 //}
 //
 //void tGroup::SetParameter(const finroc::util::tString &name, const finroc::util::tString &new_value)
 //{
-//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetDescription() << "::SetParameter(" << name << ", " << new_value << ") called";
+//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetName() << "::SetParameter(" << name << ", " << new_value << ") called";
 //
 //  finroc::core::tStaticParameterList* spl = static_cast<finroc::core::tStaticParameterList*>(this->GetAnnotation(finroc::core::tStaticParameterList::cTYPE));
 //
 //  size_t dimension = spl->Size();
-//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetDescription() << "::SetParameter>> analysing static parameter list of size " << dimension;
+//  FINROC_LOG_PRINT(eLL_DEBUG) << this->GetName() << "::SetParameter>> analysing static parameter list of size " << dimension;
 //  for (size_t i = 0; i < dimension; ++i)
 //  {
 //    finroc::core::tStaticParameterBase* param = spl->Get(i);

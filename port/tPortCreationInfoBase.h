@@ -73,8 +73,8 @@ public:
    */
   bool manages_ports;
 
-  /*! Port name/description */
-  util::tString description;
+  /*! Port name */
+  util::tString name;
 
   /*! Lock order */
   int lock_order;
@@ -85,31 +85,31 @@ public:
   /*! Default value of port */
   tPortCreationInfoBase(uint flags_);
 
-  tPortCreationInfoBase(const util::tString& description_, uint flags_);
+  tPortCreationInfoBase(const util::tString& name_, uint flags_);
 
-  tPortCreationInfoBase(const util::tString& description_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_);
+  tPortCreationInfoBase(const util::tString& name_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_);
 
-  tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_);
+  tPortCreationInfoBase(const util::tString& name_, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_);
 
-  tPortCreationInfoBase(const util::tString& description_, tFrameworkElement* parent_, uint flags_);
+  tPortCreationInfoBase(const util::tString& name_, tFrameworkElement* parent_, uint flags_);
 
   tPortCreationInfoBase(const rrlib::rtti::tDataTypeBase& data_type_, uint flags_);
 
   tPortCreationInfoBase();
 
-  tPortCreationInfoBase(const util::tString& description_);
+  tPortCreationInfoBase(const util::tString& name_);
 
-  tPortCreationInfoBase(const util::tString& description_, uint flags_, int q_size);
+  tPortCreationInfoBase(const util::tString& name_, uint flags_, int q_size);
 
-  tPortCreationInfoBase(const util::tString& description_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_, int q_size);
+  tPortCreationInfoBase(const util::tString& name_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_, int q_size);
 
   // derive methods: Copy port creation info and change something
 
-  tPortCreationInfoBase Derive(const util::tString& new_description);
+  tPortCreationInfoBase Derive(const util::tString& new_name);
 
-  tPortCreationInfoBase Derive(const util::tString& new_description, tFrameworkElement* parent_);
+  tPortCreationInfoBase Derive(const util::tString& new_name, tFrameworkElement* parent_);
 
-  tPortCreationInfoBase Derive(const util::tString& new_description, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& type);
+  tPortCreationInfoBase Derive(const util::tString& new_name, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& type);
 
   tPortCreationInfoBase Derive(const rrlib::rtti::tDataTypeBase& type);
 

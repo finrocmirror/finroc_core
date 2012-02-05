@@ -98,7 +98,7 @@ public:
   {}
 
   tStaticParameterImplStandard(const tPortCreationInfo<T>& pci) :
-    tStaticParameterBase(pci.description, rrlib::rtti::tDataType<T>(), false)
+    tStaticParameterBase(pci.name, rrlib::rtti::tDataType<T>(), false)
   {
     if (pci.default_value_set)
     {
@@ -107,7 +107,7 @@ public:
   }
 
   tStaticParameterImplStandard(const tPortCreationInfoBase& pci) :
-    tStaticParameterBase(pci.description, rrlib::rtti::tDataType<T>(), false, false, pci.config_entry)
+    tStaticParameterBase(pci.name, rrlib::rtti::tDataType<T>(), false, false, pci.config_entry)
   {
   }
 

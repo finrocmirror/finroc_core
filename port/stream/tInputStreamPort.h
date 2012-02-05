@@ -98,11 +98,11 @@ public:
 
 private:
 
-  static tPortCreationInfo<T> ProcessPCI(tPortCreationInfo<T> pci, const util::tString& description);
+  static tPortCreationInfo<T> ProcessPCI(tPortCreationInfo<T> pci, const util::tString& name);
 
 public:
 
-  tInputStreamPort(const util::tString& description, tPortCreationInfo<T> pci, tInputPacketProcessor<T>* user, tNewConnectionHandler* conn_handler);
+  tInputStreamPort(const util::tString& name, tPortCreationInfo<T> pci, tInputPacketProcessor<T>* user, tNewConnectionHandler* conn_handler);
 
 };
 

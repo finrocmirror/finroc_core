@@ -90,8 +90,7 @@ public:
   {
     ConnectImpl(0, &source, "", create_missing_ports, start_with, count, port_prefix, source_port_prefix);
   }
-  template <typename T>
-  void ConnectToSourceByName(tPortGroup& source, bool create_missing_ports, tPortWrapperBase<T> start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
+  void ConnectToSourceByName(tPortGroup& source, bool create_missing_ports, tPortWrapperBase start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
   {
     ConnectToSourceByName(source, create_missing_ports, start_with.GetWrapped(), count, port_prefix, source_port_prefix);
   }
@@ -110,8 +109,7 @@ public:
   {
     ConnectImpl(2, NULL, source_link, false, start_with, count, port_prefix, source_port_prefix);
   }
-  template <typename T>
-  void ConnectToSourceByName(const util::tString& source_link, tPortWrapperBase<T> start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
+  void ConnectToSourceByName(const util::tString& source_link, tPortWrapperBase start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
   {
     ConnectToSourceByName(source_link, start_with.GetWrapped(), count, port_prefix, source_port_prefix);
   }
@@ -130,8 +128,7 @@ public:
   {
     ConnectImpl(1, &target, "", create_missing_ports, start_with, count, port_prefix, target_port_prefix);
   }
-  template <typename T>
-  void ConnectToTargetByName(tPortGroup& target, bool create_missing_ports, tPortWrapperBase<T> start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& target_port_prefix = "")
+  void ConnectToTargetByName(tPortGroup& target, bool create_missing_ports, tPortWrapperBase start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& target_port_prefix = "")
   {
     ConnectToTargetByName(target, create_missing_ports, start_with.GetWrapped(), count, port_prefix, target_port_prefix);
   }
@@ -150,8 +147,7 @@ public:
   {
     ConnectImpl(3, NULL, target_link, false, start_with, count, port_prefix, target_port_prefix);
   }
-  template <typename T>
-  void ConnectToTargetByName(const util::tString& target_link, tPortWrapperBase<T> start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& target_port_prefix = "")
+  void ConnectToTargetByName(const util::tString& target_link, tPortWrapperBase start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& target_port_prefix = "")
   {
     ConnectToTargetByName(target_link, start_with.GetWrapped(), count, port_prefix, target_port_prefix);
   }
@@ -175,8 +171,7 @@ public:
    * \param count Number of ports to disconnect - starting with start port (-1 = all ports)
    */
   void DisconnectAll(bool incoming = true, bool outgoing = true, tAbstractPort* start_with = NULL, int count = -1);
-  template <typename T>
-  void DisconnectAll(bool incoming, bool outgoing, tPortWrapperBase<T> start_with, int count = -1)
+  void DisconnectAll(bool incoming, bool outgoing, tPortWrapperBase start_with, int count = -1)
   {
     DisconnectAll(incoming, outgoing, start_with.GetWrapped());
   }

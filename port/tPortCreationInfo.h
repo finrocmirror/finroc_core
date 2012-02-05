@@ -150,14 +150,14 @@ public:
   /*! Have bounds for port been set? */
   bool bounds_set;
 
-  /*! Has description for port been set? */
-  bool description_set;
+  /*! Has name for port been set? */
+  bool name_set;
 
   tPortCreationInfo() :
     tPortCreationInfoBase(),
     default_value_set(false),
     bounds_set(false),
-    description_set(false),
+    name_set(false),
     storage(),
     unsigned_int_arg_count(0)
   {
@@ -188,7 +188,7 @@ public:
     tPortCreationInfoBase(),
     default_value_set(),
     bounds_set(false),
-    description_set(false),
+    name_set(false),
     storage(),
     unsigned_int_arg_count(CountUnsignedIntArgs(arg1, rest...))
   {
@@ -355,10 +355,10 @@ private:
   template < bool STRING = internal::tIsString<T>::value >
   void SetString(const typename std::enable_if < !STRING, util::tString >::type& s)
   {
-    if (!description_set)
+    if (!name_set)
     {
-      description = s;
-      description_set = true;
+      name = s;
+      name_set = true;
     }
     else
     {
@@ -369,10 +369,10 @@ private:
   template < bool STRING = internal::tIsString<T>::value >
   void SetString(const typename std::enable_if<STRING, util::tString>::type& s)
   {
-    if (!description_set)
+    if (!name_set)
     {
-      description = s;
-      description_set = true;
+      name = s;
+      name_set = true;
     }
     else if (!default_value_set)
     {

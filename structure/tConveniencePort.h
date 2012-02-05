@@ -107,7 +107,7 @@ protected:
  *
  * Note for application developers:
  * Constructor takes variadic argument list... just any properties you want to assign to port (see tPort class).
- * However, unlike tPort, a string is only considered as description, if it is the first argument.
+ * However, unlike tPort, a string is only considered as name, if it is the first argument.
  */
 template <typename T, typename BASE, typename PORT>
 class tConveniencePort : public PORT, public tConveniencePortBase<BASE>
@@ -120,7 +120,7 @@ public:
    * Constructor takes variadic argument list... just any properties you want to assign to port.
    *
    * Unlike tPort, port name and parent are usually determined automatically (however, only possible when port is direct class member).
-   * If this is not possible/desired, description needs to be provided as first constructor argument - parent as arbitrary one.
+   * If this is not possible/desired, name needs to be provided as first constructor argument - parent as arbitrary one.
    *
    * So...
    *
@@ -172,7 +172,7 @@ protected:
   tPortCreationInfo<T> CreateStandardPCI(const util::tString& name, tFrameworkElement* parent)
   {
     tPortCreationInfo<T> result;
-    result.description = name;
+    result.name = name;
     result.parent = parent;
     if (result.parent && typeid(*result.parent) == typeid(tPortGroup))
     {
@@ -191,9 +191,9 @@ protected:
     if (internal::tIsString<A1>::value)
     {
       result = tPortCreationInfo<T>(arg1, rest...);
-      if (result.description.Length() == 0)
+      if (result.name.Length() == 0)
       {
-        result.description = this->GetPortName();
+        result.name = this->GetPortName();
       }
       else
       {

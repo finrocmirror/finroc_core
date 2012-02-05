@@ -51,21 +51,21 @@ protected:
 
 public:
 
-  tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type) :
-    tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer),
+  tInterfaceServerPort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type) :
+    tInterfacePort(name, parent, type, ::finroc::core::tInterfacePort::eServer),
     handler(NULL)
   {
   }
 
-  tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type, tAbstractMethodCallHandler* ch, uint custom_flags = 0) :
-    tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags),
+  tInterfaceServerPort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type, tAbstractMethodCallHandler* ch, uint custom_flags = 0) :
+    tInterfacePort(name, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags),
     handler(NULL)
   {
     SetCallHandler(ch);
   }
 
-  tInterfaceServerPort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type, tAbstractMethodCallHandler* ch, uint custom_flags, int lock_level) :
-    tInterfacePort(description, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags, lock_level),
+  tInterfaceServerPort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type, tAbstractMethodCallHandler* ch, uint custom_flags, int lock_level) :
+    tInterfacePort(name, parent, type, ::finroc::core::tInterfacePort::eServer, custom_flags, lock_level),
     handler(NULL)
   {
     SetCallHandler(ch);

@@ -87,8 +87,8 @@ public:
     // Outer class FrameworkElement
     tFrameworkElement* const outer_class_ptr;
 
-    /*! Description of Framework Element - in link context */
-    util::tString description;
+    /*! Name of Framework Element - in link context */
+    util::tString name;
 
     /*! Parent - Element in which this link was inserted */
     tFrameworkElement* parent;
@@ -100,7 +100,7 @@ public:
 
     tLink(tFrameworkElement* const outer_class_ptr_) :
       outer_class_ptr(outer_class_ptr_),
-      description(),
+      name(),
       parent(NULL),
       next(NULL)
     {}
@@ -118,11 +118,11 @@ public:
     }
 
     /*!
-     * \return Description of Framework Element - in link context
+     * \return Name of Framework Element - in link context
      */
-    inline util::tString GetDescription() const
+    inline util::tString GetName() const
     {
-      return description;
+      return name;
     }
 
     /*!
@@ -152,7 +152,7 @@ private:
 
   friend class tLock;
 
-  /*! Primary link to framework element - the place at which it actually is in FrameworkElement tree - contains description etc. */
+  /*! Primary link to framework element - the place at which it actually is in FrameworkElement tree - contains name etc. */
   tLink primary;
 
   /*!
@@ -427,12 +427,12 @@ protected:
 public:
 
   /*!
-   * \param description_ Description of framework element (will be shown in browser etc.) - may not be null
-   * \param parent_ Parent of framework element (only use non-initialized parent! otherwise null and addChild() later; meant only for convenience)
-   * \param flags_ Any special flags for framework element
-   * \param lock_order_ Custom value for lock order (needs to be larger than parent's) - negative indicates unused.
+   * \param name Name of framework element (will be shown in browser etc.)
+   * \param parent Parent of framework element (only use non-initialized parent! otherwise null and addChild() later; meant only for convenience)
+   * \param flags Any special flags for framework element
+   * \param lock_order Custom value for lock order (needs to be larger than parent's) - negative indicates unused.
    */
-  tFrameworkElement(tFrameworkElement* parent_ = NULL, const util::tString& description_ = "", uint flags_ = tCoreFlags::cALLOWS_CHILDREN, int lock_order_ = -1);
+  tFrameworkElement(tFrameworkElement* parent = NULL, const util::tString& name = "", uint flags = tCoreFlags::cALLOWS_CHILDREN, int lock_order = -1);
 
   /*!
    * Add Child to framework element
@@ -460,15 +460,6 @@ public:
   }
 
   /*!
-   * Are description of this element and String 'other' identical?
-   * (result is identical to getDescription().equals(other); but more efficient in C++)
-   *
-   * \param other Other String
-   * \return Result
-   */
-  bool DescriptionEquals(const util::tString& other) const;
-
-  /*!
    * Trigger evaluation of static parameters in this framework element and all of its children.
    * (This must never be called when thread in surrounding thread container is running.)
    */
@@ -483,16 +474,16 @@ public:
   }
 
   /*!
-   *  same as getDescription()
-   *  except that we return a const char* in C++ - this way, no memory needs to be allocated
-   */
-  const char* GetCDescription() const;
-
-  /*!
-   * \param name Description
-   * \return Returns first child with specified description - null if none exists
+   * \param name Name
+   * \return Returns first child with specified name - null if none exists
    */
   tFrameworkElement* GetChild(const util::tString& name) const;
+
+  /*!
+   * Same as getName()
+   * (except that we return a const char*)
+   */
+  const char* GetCName() const;
 
   /*!
    * \param name (relative) Qualified name
@@ -509,11 +500,6 @@ public:
   {
     return children.GetIterable();
   }
-
-  /*!
-   * \return Name/Description
-   */
-  const util::tString GetDescription() const;
 
   /*!
    * Is specified flag set?
@@ -568,6 +554,11 @@ public:
   {
     return *this;
   }
+
+  /*!
+   * \return Name of this framework element
+   */
+  const util::tString GetName() const;
 
   tConfigFile* GetConfigFile() const;
 
@@ -644,7 +635,7 @@ public:
 
   /*!
    * (Use StringBuilder version if efficiency or real-time is an issue)
-   * \return Concatenation of parent descriptions and this element's description
+   * \return Concatenation of parent names and this element's name
    */
   inline util::tString GetQualifiedName() const
   {
@@ -803,6 +794,15 @@ public:
   }
 
   /*!
+   * Are name of this element and String 'other' identical?
+   * (result is identical to getName().equals(other); but more efficient in C++)
+   *
+   * \param other Other String
+   * \return Result
+   */
+  bool NameEquals(const util::tString& other) const;
+
+  /*!
    * Helper for Debugging: Prints structure below this framework element to console
    */
   inline void PrintStructure()
@@ -831,10 +831,10 @@ public:
   void SetConfigNode(const util::tString& node);
 
   /*!
-   * \param description New Port description
+   * \param name New Port name
    * (only valid/possible before, element is initialized)
    */
-  void SetDescription(const util::tString& description);
+  void SetName(const util::tString& name);
 
   // for efficient streaming of fully-qualified framework element name
   void StreamQualifiedName(std::ostream& output) const
@@ -843,7 +843,7 @@ public:
     {
       StreamQualifiedParent(output);
     }
-    output << GetCDescription();
+    output << GetCName();
   }
 
   void StreamQualifiedParent(std::ostream& output) const
@@ -852,7 +852,7 @@ public:
     if (parent != NULL && (!parent->GetFlag(tCoreFlags::cIS_RUNTIME)))
     {
       parent->StreamQualifiedParent(output);
-      output << parent->GetCDescription();
+      output << parent->GetCName();
       output << "/";
     }
   }
@@ -868,16 +868,16 @@ public:
 
   virtual const util::tString ToString() const
   {
-    return GetDescription();
+    return GetName();
   }
 
   /*!
-   * Write description of link number i to Output stream
+   * Write name of link number i to Output stream
    *
    * \param os OutputStream
-   * \param i Link Number (0 is primary link/description)
+   * \param i Link Number (0 is primary link/name)
    */
-  void WriteDescription(rrlib::serialization::tOutputStream& os, int i) const;
+  void WriteName(rrlib::serialization::tOutputStream& os, int i) const;
 
 public:
 

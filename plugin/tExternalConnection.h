@@ -93,10 +93,10 @@ protected:
 public:
 
   /*!
-   * \param description Description of class
+   * \param name Name of class
    * \param default_address Default connection address (some string)
    */
-  tExternalConnection(const util::tString& description, const util::tString& default_address);
+  tExternalConnection(const util::tString& name, const util::tString& default_address);
 
   inline void AddConnectionListener(tConnectionListener* l)
   {

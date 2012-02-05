@@ -537,7 +537,7 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
     {
       // serialize framework element
       rrlib::xml2::tXMLNode& n = node.AddChildNode("element");
-      n.SetAttribute("name", fe->GetCDescription());
+      n.SetAttribute("name", fe->GetCName());
       tCreateFrameworkElementAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(spl->GetCreateAction());
       n.SetAttribute("group", cma->GetModuleGroup());
       if (cma->GetModuleGroup().EndsWith(".so"))

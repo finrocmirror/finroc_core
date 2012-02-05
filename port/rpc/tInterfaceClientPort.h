@@ -37,7 +37,7 @@ class tFrameworkElement;
 class tAbstractPort;
 
 /*! Base class for client interface ports */
-class tInterfaceClientPort : public tPortWrapperBase<tInterfacePort>
+class tInterfaceClientPort : public tPortWrapperBase
 {
   /*! Special Port class to load value when initialized */
   class tPortImpl : public tInterfacePort
@@ -55,7 +55,7 @@ class tInterfaceClientPort : public tPortWrapperBase<tInterfacePort>
 
   public:
 
-    tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type, tInterfacePort::tType client);
+    tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type, tInterfacePort::tType client);
 
   };
 
@@ -85,7 +85,7 @@ protected:
 
 public:
 
-  tInterfaceClientPort(const util::tString& description, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type);
+  tInterfaceClientPort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type);
 
   /*!
    * Get buffer to use in method call (has one lock)
@@ -97,7 +97,7 @@ public:
   template <typename T>
   inline tPortDataPtr<T> GetBufferForCall(const rrlib::rtti::tDataTypeBase& dt = NULL)
   {
-    return this->wrapped->GetBufferForCall<T>(dt);
+    return static_cast<tInterfacePort*>(this->wrapped)->GetBufferForCall<T>(dt);
   }
 
   /*!
@@ -107,7 +107,7 @@ public:
    */
   inline tInterfacePort* GetServer()
   {
-    return this->wrapped->GetServer();
+    return static_cast<tInterfacePort*>(this->wrapped)->GetServer();
   }
 
   /*!

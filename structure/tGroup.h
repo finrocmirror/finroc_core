@@ -104,7 +104,7 @@ public:
    * Constructors take a variadic argument list... just any properties you want to assign to port.
    *
    * Unlike tPort, port name and parent are usually determined automatically (however, only possible when port is direct class member).
-   * If this is not possible/desired, description needs to be provided as first constructor argument - parent as arbitrary one.
+   * If this is not possible/desired, name needs to be provided as first constructor argument - parent as arbitrary one.
    *
    * So...
    *

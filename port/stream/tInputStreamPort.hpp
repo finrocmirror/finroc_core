@@ -30,16 +30,16 @@ namespace finroc
 namespace core
 {
 template<typename T>
-tInputStreamPort<T>::tInputStreamPort(const util::tString& description, tPortCreationInfo<T> pci, tInputPacketProcessor<T>* user, tNewConnectionHandler* conn_handler)
+tInputStreamPort<T>::tInputStreamPort(const util::tString& name, tPortCreationInfo<T> pci, tInputPacketProcessor<T>* user, tNewConnectionHandler* conn_handler)
 {
-  this->wrapped = new tPortImpl<T*>(ProcessPCI(pci, description), user, conn_handler);
+  this->wrapped = new tPortImpl<T*>(ProcessPCI(pci, name), user, conn_handler);
 }
 
 template<typename T>
-tPortCreationInfo<T> tInputStreamPort<T>::ProcessPCI(tPortCreationInfo<T> pci, const util::tString& description)
+tPortCreationInfo<T> tInputStreamPort<T>::ProcessPCI(tPortCreationInfo<T> pci, const util::tString& name)
 {
   pci.max_queue_size = util::tInteger::cMAX_VALUE;   // unlimited size
-  pci.description = description;
+  pci.name = name;
   pci.SetFlag(tPortFlags::cHAS_AND_USES_QUEUE, true);
   pci.SetFlag(tPortFlags::cOUTPUT_PORT, false);
   //pci.setFlag(PortFlags.ACCEPTS_REVERSE_DATA, false);

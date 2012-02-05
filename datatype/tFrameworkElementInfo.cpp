@@ -183,7 +183,7 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
           {
             tp.WriteByte((parent->GetAllFlags() & tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS) >> 8);
           }
-          fe->WriteDescription(tp, i);
+          fe->WriteName(tp, i);
           tp.WriteInt(parent->GetHandle());
         }
       }

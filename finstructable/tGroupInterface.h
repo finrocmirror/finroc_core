@@ -88,22 +88,22 @@ public:
   /*!
    * Default constructor
    *
-   * \param description Interface description
+   * \param name Interface name
    * \param parent Parent element
    */
-  tGroupInterface(tFrameworkElement* parent, const util::tString& description);
+  tGroupInterface(tFrameworkElement* parent, const util::tString& name);
 
   /*!
    * Advanced constructor
    *
-   * \param description Interface description
+   * \param name Interface name
    * \param parent Parent element
    * \param data_class Classifies data in this interface
    * \param port_dir Which types of ports can be created in this interface?
    * \param shared Shared interface/ports?
    * \param unique_link Do ports habe globally unique link
    */
-  tGroupInterface(tFrameworkElement* parent, const util::tString& description, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link);
+  tGroupInterface(tFrameworkElement* parent, const util::tString& name, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link);
 
 };
 

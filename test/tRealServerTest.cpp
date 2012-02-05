@@ -37,7 +37,7 @@ void tRealServerTest::Main()
 {
   // create Server
   tcp::tTCPServer* server = new tcp::tTCPServer(4444, true, NULL);
-  server->GetDescription();  // dummy instruction... avoids warning
+  server->GetName();  // dummy instruction... avoids warning
   tFrameworkElement::InitAll();
   tRuntimeEnvironment::GetInstance()->PrintStructure();
 

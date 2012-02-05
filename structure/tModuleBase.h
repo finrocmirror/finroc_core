@@ -160,7 +160,7 @@ public:
     explicit tParameter(const ARGS&... args)
       : tConveniencePort < T, tModuleBase, finroc::core::tParameter<T>>(GetContainer, args...)
     {
-      assert(this->GetWrapped()->GetParent()->DescriptionEquals("Parameters"));
+      assert(this->GetWrapped()->GetParent()->NameEquals("Parameters"));
       this->AddPortListener(&static_cast<tModuleBase*>(this->GetWrapped()->GetParent()->GetParent())->parameters_changed);
     }
 
@@ -196,8 +196,7 @@ public:
   class tPortDeleter
   {
   public:
-    template <typename T>
-    void operator()(tPortWrapperBase<T>* ptr) const
+    void operator()(tPortWrapperBase* ptr) const
     {
       ptr->GetWrapped()->ManagedDelete();
       delete ptr;
