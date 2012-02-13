@@ -24,9 +24,8 @@
 #define core__parameter__tParameterInfo_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
 #include "rrlib/rtti/rtti.h"
-#include "rrlib/serialization/serialization.h"
+
 #include "core/tFinrocAnnotation.h"
 
 namespace rrlib
@@ -132,6 +131,15 @@ public:
   {
     return entry_set_from_finstruct;
   }
+
+  /*!
+   * Is finstructable group the one responsible for saving parameter's config entry?
+   *
+   * \param finstructable_group Finstructable group to check
+   * \param ap Framework element to check this for (usually parameter port)
+   * \return Answer.
+   */
+  static bool IsFinstructableGroupResponsibleForConfigFileConnections(const tFrameworkElement& finstructable_group, const tFrameworkElement& ap);
 
   /*!
    * load value from configuration file

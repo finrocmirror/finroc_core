@@ -24,16 +24,15 @@
 #define core__port__tAbstractPort_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
-#include "core/tRuntimeSettings.h"
-#include "rrlib/rtti/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
+#include "rrlib/rtti/tDataTypeBase.h"
+#include "rrlib/rtti/tFactory.h"
+
+#include "core/tRuntimeSettings.h"
 #include "core/port/tPortFlags.h"
 #include "core/port/tPortCreationInfoBase.h"
 #include "core/tFrameworkElement.h"
-#include "rrlib/rtti/tFactory.h"
-
 
 namespace finroc
 {
@@ -57,7 +56,7 @@ class tPortDataManager;
  * In many cases this (non-blocking) behaviour is intended.
  * However, to avoid that, synchronize to runtime before calling.
  */
-class tAbstractPort : public tFrameworkElement, public rrlib::rtti::tFactory
+class tAbstractPort : public tFrameworkElement
 {
 protected:
 
@@ -163,6 +162,8 @@ private:
 
 protected:
 
+  virtual ~tAbstractPort();
+
   /*!
    * Clear queue and unlock contents
    */
@@ -214,8 +215,6 @@ protected:
   virtual void NewConnection(tAbstractPort* partner)
   {
   }
-
-  virtual ~tAbstractPort();
 
   /*!
    * Print notification that port is not ready in debug mode.
@@ -382,13 +381,6 @@ public:
    */
   void ConnectToTarget(tFrameworkElement* dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available = true);
 
-  virtual std::shared_ptr<void> CreateBuffer(const rrlib::rtti::tDataTypeBase& dt)
-  {
-    return std::shared_ptr<void>(dt.CreateInstance());
-  }
-
-  virtual rrlib::rtti::tGenericObject* CreateGenericObject(const rrlib::rtti::tDataTypeBase& dt, void* factory_parameter);
-
   /*!
    * disconnects all edges
    */
@@ -413,14 +405,6 @@ public:
    * \param link Qualified link of connection partner
    */
   void DisconnectFrom(const util::tString& link);
-
-  /*!
-   * Find network port connected to this port that belongs to specified framework element
-   *
-   * \param belongs_to Instance (usually TCPServerConnection or RemoteServer) that this port belongs to
-   * \return Network port if it could be found - otherwise null
-   */
-  tNetPort* FindNetPort(util::tObject* belongs_to) const;
 
   /*!
    * Publish current data in the specified other port

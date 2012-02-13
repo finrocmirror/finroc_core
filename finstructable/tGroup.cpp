@@ -27,7 +27,7 @@ namespace finroc
 {
 namespace core
 {
-tStandardCreateModuleAction<tGroup> tGroup::cCREATE_ACTION("Group", util::tTypedClass<tGroup>());
+tStandardCreateModuleAction<tGroup> tGroup::cCREATE_ACTION("Group");
 
 tGroup::tGroup(tFrameworkElement* parent, const util::tString& name, uint flags) :
   tPortGroup(parent, name, flags, 0),

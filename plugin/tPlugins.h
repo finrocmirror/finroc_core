@@ -24,15 +24,13 @@
 #define core__plugin__tPlugins_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
-#include "core/plugin/tPlugin.h"
-#include "core/plugin/tCreateFrameworkElementAction.h"
 
 namespace finroc
 {
 namespace core
 {
+class tPlugin;
 class tCreateExternalConnectionAction;
 
 /*!
@@ -45,10 +43,12 @@ class tPlugins : public util::tUncopyableObject
 private:
 
   /*! All Plugins that are currently available */
-  util::tSimpleList<std::shared_ptr<tPlugin> > plugins;
+  util::tSimpleList<tPlugin*> plugins;
 
-  /*! List with actions to create external connections */
-  util::tSimpleList<tCreateExternalConnectionAction*> external_connections;
+  /*! Instantly initialize plugins when they are added? True after StaticInit() has been called */
+  bool instantly_initialize_plugins;
+
+  tPlugins();
 
   void FindAndLoadPlugins();
 
@@ -59,94 +59,22 @@ private:
 
 public:
 
-  tPlugins() :
-    plugins(),
-    external_connections()
-  {}
-
-  /*!
-   * Add Module Type
-   * (objects won't be deleted by this class)
-   *
-   * \param cma CreateFrameworkElementAction to add
-   */
-  inline void AddModuleType(tCreateFrameworkElementAction* cma)
-  {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Adding module type: ", cma->GetName(), " (", cma->GetModuleGroup(), ")");
-    GetModuleTypes().Add(cma);
-  }
-
   /*!
    * (possibly manually) add plugin
    *
    * \param p Plugin to add
    */
-  inline void AddPlugin(tPlugin* p)
-  {
-    plugins.Add(std::shared_ptr<tPlugin>(p));
-    p->Init();
-  }
-
-  /*!
-   * \return List with modules for external connections
-   */
-  inline util::tSimpleList<tCreateExternalConnectionAction*>* GetExternalConnections()
-  {
-    return &(external_connections);
-  }
+  void AddPlugin(tPlugin* p);
 
   /*!
    * \return Plugins singleton instance
    */
-  inline static tPlugins* GetInstance()
-  {
-    static tPlugins instance;
-    return &instance;
-  }
-
-  /*!
-   * \return List with modules that can be instantiated in this runtime using the standard mechanism
-   */
-  inline util::tSimpleList<tCreateFrameworkElementAction*>& GetModuleTypes()
-  {
-    static util::tSimpleList<tCreateFrameworkElementAction*> module_types;
-    return module_types;
-  }
-
-  /*!
-   * \return List with plugins (do not modify!)
-   */
-  inline util::tSimpleList<std::shared_ptr<tPlugin> >* GetPlugins()
-  {
-    return &(plugins);
-  }
-
-  /*!
-   * Returns/loads CreateFrameworkElementAction with specified name and specified .so file.
-   * (doesn't do any dynamic loading, if .so is already present)
-   *
-   * \param group Group (.jar or .so)
-   * \param name Module type name
-   * \return CreateFrameworkElementAction - null if it could not be found
-   */
-  tCreateFrameworkElementAction* LoadModuleType(const util::tString& group, const util::tString& name);
-
-  /*!
-   * Register module that can be used as external connection (e.g. in GUI)
-   *
-   * \param action Action to be registered
-   * \return Action to be registered (same as above)
-   */
-  tCreateExternalConnectionAction* RegisterExternalConnection(tCreateExternalConnectionAction* action);
+  static tPlugins* GetInstance();
 
   /*!
    * Loads plugins
    */
-  inline static void StaticInit()
-  {
-    tPlugins* p = GetInstance();
-    p->FindAndLoadPlugins();
-  }
+  static void StaticInit();
 
 };
 

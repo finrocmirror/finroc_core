@@ -46,13 +46,8 @@ namespace core
  *
  * Thread pool for remote procedure calls.
  */
-class tRPCThreadPool : public util::tUncopyableObject
+class tRPCThreadPool : public boost::noncopyable
 {
-private:
-
-  /*! Singleton instance */
-  static tRPCThreadPool* instance;
-
   /*! Pool of unused threads */
   util::tWonderQueue<tRPCThread> unused_threads;
 
@@ -61,11 +56,7 @@ public:
   /*! Lock order: locked before thread list in C++ */
   util::tMutexLockOrder obj_mutex;
 
-private:
-
   tRPCThreadPool();
-
-public:
 
   /*!
    * Enqueue unused Thread for reuse. Threads call this automatically
@@ -88,10 +79,7 @@ public:
   /*!
    * \return Singleton instance
    */
-  inline static tRPCThreadPool* GetInstance()
-  {
-    return instance;
-  }
+  static tRPCThreadPool& GetInstance();
 
 };
 

@@ -21,26 +21,46 @@
  */
 #include "core/portdatabase/tRPCInterfaceType.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
-#include "rrlib/finroc_core_utils/tAutoDeleter.h"
+#include "core/portdatabase/tPortFactory.h"
+#include "core/port/rpc/tInterfacePort.h"
 
 namespace finroc
 {
 namespace core
 {
+
+namespace internal
+{
+
+class tRPCPortFactory : public tPortFactory
+{
+  virtual tAbstractPort& CreatePort(const std::string& port_name, tFrameworkElement& parent, const rrlib::rtti::tDataTypeBase& dt, uint flags)
+  {
+    assert(tFinrocTypeInfo::IsMethodType(dt));
+    const int keep_flags = 1 & (~tPortFlags::cEMITS_DATA) & (~tPortFlags::cACCEPTS_DATA) & (~tPortFlags::cMAY_ACCEPT_REVERSE_DATA) & (~tPortFlags::cIS_OUTPUT_PORT);
+    return *(new tInterfacePort(port_name, &parent, dt, tInterfacePort::eRouting, flags & keep_flags));
+  }
+};
+
+}
+
 tRPCInterfaceType::tRPCInterfaceType(const util::tString& name, tPortInterface* methods) :
   rrlib::rtti::tDataTypeBase(GetDataTypeInfo(name))
 {
   tFinrocTypeInfo::Get(*this).Init(methods);
+  AddAnnotation<tPortFactory>(new internal::tRPCPortFactory());
 }
 
 rrlib::rtti::tDataTypeBase::tDataTypeInfoRaw* tRPCInterfaceType::GetDataTypeInfo(const util::tString& name)
 {
+  static std::vector<std::unique_ptr<rrlib::rtti::tDataTypeBase::tDataTypeInfoRaw>> auto_delete;
   ::rrlib::rtti::tDataTypeBase dt = FindType(name);
   if (dt != NULL)
   {
     return const_cast<tDataTypeBase::tDataTypeInfoRaw*>(dt.GetInfo());
   }
-  rrlib::rtti::tDataTypeBase::tDataTypeInfoRaw* info = util::tAutoDeleter::AddStatic(new rrlib::rtti::tDataTypeBase::tDataTypeInfoRaw());
+  rrlib::rtti::tDataTypeBase::tDataTypeInfoRaw* info = new rrlib::rtti::tDataTypeBase::tDataTypeInfoRaw();
+  auto_delete.emplace_back(info);
   info->SetName(name);
   return info;
 }

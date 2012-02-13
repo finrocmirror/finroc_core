@@ -19,15 +19,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/parameter/tConfigFile.h"
 #include "rrlib/finroc_core_utils/sFiles.h"
-#include "rrlib/xml2_wrapper/tXML2WrapperException.h"
-#include "core/tFrameworkElement.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "rrlib/xml2_wrapper/tXML2WrapperException.h"
+#include "rrlib/finroc_core_utils/container/tSimpleList.h"
+#include "rrlib/serialization/serialization.h"
+
+#include "core/parameter/tConfigFile.h"
+#include "core/tFrameworkElement.h"
 #include "core/tFrameworkElementTreeFilter.h"
 #include "core/tCoreFlags.h"
-#include "rrlib/serialization/serialization.h"
 #include "core/parameter/tParameterInfo.h"
 
 namespace finroc
@@ -358,3 +359,4 @@ void tConfigFile::TreeFilterCallback(tFrameworkElement* fe, bool loading_paramet
 } // namespace finroc
 } // namespace core
 
+template class rrlib::rtti::tDataType<finroc::core::tConfigFile>;

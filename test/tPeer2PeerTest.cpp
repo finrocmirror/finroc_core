@@ -30,6 +30,8 @@
 #include "core/tCoreFlags.h"
 #include "plugins/tcp/tTCPPeer.h"
 
+using namespace rrlib::logging;
+
 namespace finroc
 {
 namespace core
@@ -79,7 +81,7 @@ void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
       e.PrintStackTrace();
     }
     re->PrintStructure();
-    util::tSystem::out.Println(util::tStringBuilder("Input connections: ") + input.GetConnectionCount());
+    FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("Input connections: ") + input.GetConnectionCount());
   }
 }
 

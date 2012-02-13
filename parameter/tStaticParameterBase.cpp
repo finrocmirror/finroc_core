@@ -19,13 +19,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/parameter/tStaticParameterBase.h"
-#include "core/portdatabase/tFinrocTypeInfo.h"
-#include "core/port/tThreadLocalCache.h"
 #include "rrlib/rtti/rtti.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
+
+#include "core/parameter/tStaticParameterBase.h"
+#include "core/parameter/tStaticParameterList.h"
+#include "core/parameter/tParameterInfo.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
+#include "core/port/tThreadLocalCache.h"
 #include "core/tRuntimeEnvironment.h"
-#include "core/finstructable/tFinstructableGroup.h"
 #include "core/parameter/tConfigFile.h"
 #include "core/parameter/tConfigNode.h"
 
@@ -249,7 +251,7 @@ void tStaticParameterBase::LoadValue()
     {
       if (config_entry_set_by_finstruct)
       {
-        if (fg == NULL || (!static_cast<tFinstructableGroup*>(fg)->IsResponsibleForConfigFileConnections(parent)))
+        if (fg == NULL || (!tParameterInfo::IsFinstructableGroupResponsibleForConfigFileConnections(*fg, *parent)))
         {
           return;
         }

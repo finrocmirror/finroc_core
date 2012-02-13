@@ -37,12 +37,12 @@ tCCPortDataManagerTL::tCCPortDataManagerTL() :
 
 void tCCPortDataManagerTL::NonOwnerLockRelease(tCCPortDataBufferPool* owner)
 {
-  ::finroc::util::tObject* owner2 = this->owner;
+  util::tRawWonderQueueTL* owner2 = this->owner;
   if (owner_thread == util::sThreadUtil::GetCurrentThreadId())
   {
     ReleaseLock();
   }
-  else if (owner2 != NULL)
+  else if (owner2)
   {
     owner->ReleaseLock(this);
   }

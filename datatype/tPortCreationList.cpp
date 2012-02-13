@@ -19,17 +19,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/datatype/tPortCreationList.h"
-#include "rrlib/rtti/tDataType.h"
-#include "core/port/tAbstractPort.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "core/portdatabase/tFinrocTypeInfo.h"
-#include "core/port/std/tPortBase.h"
-#include "core/port/tPortCreationInfoBase.h"
-#include "core/port/cc/tCCPortBase.h"
-#include "core/port/rpc/tInterfacePort.h"
-#include "rrlib/serialization/serialization.h"
+#include "rrlib/rtti/rtti.h"
 #include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "rrlib/serialization/serialization.h"
+
+#include "core/datatype/tPortCreationList.h"
+#include "core/port/tAbstractPort.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
+#include "core/portdatabase/tPortFactory.h"
 #include "core/finstructable/tFinstructableGroup.h"
 
 namespace finroc
@@ -100,22 +98,7 @@ void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vecto
   flags_ |= tmp;
 
   FINROC_LOG_PRINT_TO(port_creation_list, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", io_vector_->GetQualifiedLink());
-  if (tFinrocTypeInfo::IsStdType(dt))
-  {
-    ap = new tPortBase(tPortCreationInfoBase(name, io_vector_, dt, flags_));
-  }
-  else if (tFinrocTypeInfo::IsCCType(dt))
-  {
-    ap = new tCCPortBase(tPortCreationInfoBase(name, io_vector_, dt, flags_));
-  }
-  else if (tFinrocTypeInfo::IsMethodType(dt))
-  {
-    ap = new tInterfacePort(name, io_vector_, dt, tInterfacePort::eRouting);
-  }
-  else
-  {
-    FINROC_LOG_PRINT_TO(port_creation_list, rrlib::logging::eLL_WARNING, "Cannot create port with type: ", dt.GetName());
-  }
+  ap = &tFinrocTypeInfo::GetPortFactory(dt).CreatePort(name, *io_vector_, dt, flags_);
   if (ap != NULL)
   {
     ap->Init();
@@ -294,3 +277,4 @@ tPortCreationList::tEntry::tEntry(const util::tString& name_, const util::tStrin
 } // namespace finroc
 } // namespace core
 
+template class rrlib::rtti::tDataType<finroc::core::tPortCreationList>;

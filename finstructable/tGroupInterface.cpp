@@ -29,7 +29,7 @@ namespace finroc
 {
 namespace core
 {
-tStandardCreateModuleAction<tGroupInterface> tGroupInterface::cCREATE_ACTION("Default Interface", util::tTypedClass<tGroupInterface>());
+tStandardCreateModuleAction<tGroupInterface> tGroupInterface::cCREATE_ACTION("Default Interface");
 tConstructorCreateModuleAction<tGroupInterface, tGroupInterface::tDataClassification, tGroupInterface::tPortDirection, bool, bool> tGroupInterface::cCOMPLEX_CREATE_ACTION("Interface", util::tTypedClass<tGroupInterface>(), "Data classification, Port direction, Shared?, Unique Links");
 
 tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString& name) :

@@ -60,6 +60,9 @@ namespace core
 template <typename T>
 class tParameterBase;
 template <typename T>
+class tParameterNumeric;
+class tParameterBool;
+template <typename T>
 class tStaticParameterImplNumeric;
 template <typename T>
 class tStaticParameterImplStandard;

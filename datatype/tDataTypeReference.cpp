@@ -36,3 +36,4 @@ tDataTypeReference::tDataTypeReference() :
 } // namespace finroc
 } // namespace core
 
+template class rrlib::rtti::tDataType<finroc::core::tDataTypeReference>;

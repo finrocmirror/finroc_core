@@ -24,17 +24,9 @@
 #define core__port__rpc__tRPCThread_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
-#include "core/thread/tCoreLoopThreadBase.h"
+#include "rrlib/finroc_core_utils/thread/tLoopThread.h"
+#include "rrlib/finroc_core_utils/thread/tTask.h"
 #include "rrlib/finroc_core_utils/container/tReusable.h"
-
-namespace finroc
-{
-namespace util
-{
-class tTask;
-} // namespace finroc
-} // namespace util
 
 namespace finroc
 {
@@ -45,7 +37,7 @@ namespace core
  *
  * (Helper) thread for remote procedure calls
  */
-class tRPCThread : public tCoreLoopThreadBase, public util::tReusable
+class tRPCThread : public finroc::util::tLoopThread, public util::tReusable
 {
 private:
 
@@ -65,11 +57,9 @@ public:
 
   virtual void MainLoopCallback();
 
-  virtual void StopThread()
-  {
-    util::tLock lock2(this);
-    monitor.Notify(lock2);
-  }
+  virtual void Run();
+
+  virtual void StopThread();
 
 };
 

@@ -25,8 +25,6 @@ namespace finroc
 {
 namespace core
 {
-tPortDataManager tPortDataManager::cPROTOTYPE;
-size_t tPortDataManager::cREF_COUNTERS_OFFSET = ((char*) & (tPortDataManager::cPROTOTYPE.ref_counters[0])) - ((char*) & (tPortDataManager::cPROTOTYPE));
 
 const size_t tPortDataManager::cNUMBER_OF_REFERENCES;
 const size_t tPortDataManager::cREF_INDEX_MASK;

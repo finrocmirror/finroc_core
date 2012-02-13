@@ -25,6 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/tListenerManager.h"
+#include "rrlib/rtti/rtti.h"
 
 namespace finroc
 {

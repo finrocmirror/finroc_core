@@ -22,7 +22,7 @@
  */
 #include "core/port/rpc/tInterfacePort.h"
 #include "core/port/rpc/tMethodCall.h"
-#include "core/port/tThreadLocalCache.h"
+#include "core/port/rpc/tThreadLocalRPCData.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
 #include "core/port/rpc/tInterfaceServerPort.h"
 #include "core/port/rpc/tMethodCallException.h"
@@ -47,7 +47,7 @@ void tVoid1Method<HANDLER, P1>::Call(tInterfaceClientPort port, tP1Arg p1, bool 
   tInterfacePort* ip = port.GetServer();
   if (ip != NULL && ip->GetType() == tInterfacePort::eNetwork)
   {
-    tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
+    tMethodCall* mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
     //1
     mc->AddParam(0, p1);
     mc->SetMethod(this, port.GetDataType());
@@ -68,11 +68,11 @@ void tVoid1Method<HANDLER, P1>::Call(tInterfaceClientPort port, tP1Arg p1, bool 
     }
     else
     {
-      tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
+      tMethodCall* mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
       //1
       mc->AddParam(0, p1);
       mc->PrepareExecution(this, port.GetDataType(), handler, NULL);
-      tRPCThreadPool::GetInstance()->ExecuteTask(mc);
+      tRPCThreadPool::GetInstance().ExecuteTask(mc);
     }
   }
   else

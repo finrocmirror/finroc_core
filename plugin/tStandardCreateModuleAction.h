@@ -64,22 +64,6 @@ public:
     group(),
     type_name(type_name_)
   {
-    tPlugins::GetInstance()->AddModuleType(this);
-
-    group = GetBinary((void*)CreateModuleImpl);
-  }
-
-  /*!
-   * \param group Name of module group
-   * \param type_name Name of module type
-   * \param module_class Module class (only needed in Java)
-   */
-  tStandardCreateModuleAction(const util::tString& type_name_, const util::tTypedClass<T>& module_class) :
-    group(),
-    type_name(type_name_)
-  {
-    tPlugins::GetInstance()->AddModuleType(this);
-
     group = GetBinary((void*)CreateModuleImpl);
   }
 

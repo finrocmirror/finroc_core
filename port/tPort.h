@@ -27,10 +27,9 @@
 
 #include "core/port/tPortWrapperBase.h"
 #include "core/port/tPortCreationInfo.h"
-#include "core/port/tPortListener.h"
-
 #include "core/port/tPortTypeMap.h"
 #include "core/port/tPortUtil.h"
+#include "core/port/tPortListener.h"
 #include "core/port/tPortQueueFragment.h"
 
 namespace finroc
@@ -390,19 +389,13 @@ public:
 
 };
 
-} // namespace finroc
-} // namespace core
-
-namespace finroc
-{
-namespace core
-{
 extern template class tPort<int>;
 extern template class tPort<long long int>;
 extern template class tPort<float>;
 extern template class tPort<double>;
 extern template class tPort<tNumber>;
 extern template class tPort<tCoreString>;
+extern template class tPort<std::string>;
 extern template class tPort<bool>;
 extern template class tPort<rrlib::serialization::tMemoryBuffer>;
 

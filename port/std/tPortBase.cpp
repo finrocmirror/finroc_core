@@ -22,13 +22,47 @@
 #include "core/port/std/tPortQueueFragmentRaw.h"
 
 #include "core/port/std/tPortBase.h"
+#include "core/port/cc/tCCPortBase.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
+#include "core/portdatabase/tPortFactory.h"
 #include "core/port/std/tPullRequestHandler.h"
 
 namespace finroc
 {
 namespace core
 {
+
+namespace internal
+{
+class tDataPortFactory : public tPortFactory
+{
+public:
+  tDataPortFactory()
+  {
+    tFinrocTypeInfo::SetDefaultPortFactory(*this);
+  }
+
+  virtual tAbstractPort& CreatePort(const std::string& port_name, tFrameworkElement& parent, const rrlib::rtti::tDataTypeBase& dt, uint flags)
+  {
+    tAbstractPort* ap = NULL;
+    assert(tFinrocTypeInfo::IsStdType(dt) || tFinrocTypeInfo::IsCCType(dt));
+    if (tFinrocTypeInfo::IsStdType(dt))
+    {
+      ap = new tPortBase(tPortCreationInfoBase(port_name, &parent, dt, flags));
+    }
+    else
+    {
+      ap = new tCCPortBase(tPortCreationInfoBase(port_name, &parent, dt, flags));
+    }
+    return *ap;
+  }
+};
+
+tDataPortFactory default_data_port_factory;
+
+}
+
+
 tPortBase::tPortBase(tPortCreationInfoBase pci) :
   tAbstractPort(ProcessPci(pci)),
   edges_src(),

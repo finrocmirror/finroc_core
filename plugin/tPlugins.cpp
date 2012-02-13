@@ -19,74 +19,51 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/tRuntimeEnvironment.h"
 
 #include "core/plugin/tPlugins.h"
-#include "core/plugin/tCreateExternalConnectionAction.h"
+#include "core/plugin/tPlugin.h"
 
 namespace finroc
 {
 namespace core
 {
 
+tPlugins::tPlugins() :
+  plugins(),
+  instantly_initialize_plugins(false)
+{}
+
+void tPlugins::AddPlugin(tPlugin* p)
+{
+  plugins.Add(p);
+
+  // TODO: This does not work - because plugin is not fully constructed yet
+  /*if (instantly_initialize_plugins)
+  {
+    p->Init();
+  }*/
+}
+
 void tPlugins::FindAndLoadPlugins()
 {
-  //TODO do properly
-  //TODO do properly
-  //TODO do properly
-  //TODO do properly
-  //TODO do properly
-  //JavaPlugins.loadAllDataTypesInPackage(BehaviourInfo.class);
-
-  // plugins.Add(new tMCA2Plugin());
+  //TODO implement: dynamic loading of all available finroc plugin .so files
 }
 
-tCreateFrameworkElementAction* tPlugins::LoadModuleType(const util::tString& group, const util::tString& name)
+tPlugins* tPlugins::GetInstance()
 {
-  // dynamically loaded .so files
-  static util::tSimpleList<util::tString> loaded;
-
-  // try to find module among existing modules
-  const util::tSimpleList<tCreateFrameworkElementAction*>& modules = GetModuleTypes();
-  for (size_t i = 0u; i < modules.Size(); i++)
-  {
-    tCreateFrameworkElementAction* cma = modules.Get(i);
-    if (cma->GetModuleGroup().Equals(group) && cma->GetName().Equals(name))
-    {
-      return cma;
-    }
-  }
-
-  // hmm... we didn't find it - have we already tried to load .so?
-  bool already_loaded = false;
-  for (size_t i = 0; i < loaded.Size(); i++)
-  {
-    if (loaded.Get(i).Equals(group))
-    {
-      already_loaded = true;
-      break;
-    }
-  }
-
-  if (!already_loaded)
-  {
-    loaded.Add(group);
-    std::set<std::string> loaded = sDynamicLoading::GetLoadedFinrocLibraries();
-    if (loaded.find(group) == loaded.end() && sDynamicLoading::DLOpen(group.GetCString()))
-    {
-      return LoadModuleType(group, name);
-    }
-  }
-
-  FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not find/load module ", name, " in ", group);
-  return NULL;
+  static tPlugins instance;
+  return &instance;
 }
 
-tCreateExternalConnectionAction* tPlugins::RegisterExternalConnection(tCreateExternalConnectionAction* action)
+void tPlugins::StaticInit()
 {
-  external_connections.Add(action);
-  GetModuleTypes().Add(action);
-  return action;
+  tPlugins* p = GetInstance();
+  p->FindAndLoadPlugins();
+  for (size_t i = 0; i < p->plugins.Size(); i++)
+  {
+    p->plugins.Get(i)->Init();
+  }
+  p->instantly_initialize_plugins = true;
 }
 
 } // namespace finroc

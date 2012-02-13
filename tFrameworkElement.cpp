@@ -19,18 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/parameter/tConstructorParameters.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/tGarbageCollector.h"
+#include "rrlib/serialization/tOutputStream.h"
 
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeEnvironment.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tRuntimeListener.h"
-#include "rrlib/finroc_core_utils/tGarbageCollector.h"
-#include "core/parameter/tStaticParameterList.h"
-#include "core/parameter/tStaticParameterBase.h"
-#include "core/parameter/tConfigFile.h"
-#include "core/parameter/tConfigNode.h"
-#include "rrlib/serialization/tOutputStream.h"
 #include "core/port/tAbstractPort.h"
 
 namespace finroc
@@ -76,58 +71,55 @@ void tFrameworkElement::AddChild(tLink* child)
   }
 
   // lock runtime (required to perform structural changes)
+  util::tLock lock2(GetRegistryLock());
+
+  // perform checks
+  assert(((child->GetChild()->IsConstructing())) && "tree structure is fixed for initialized children - is child initialized twice (?)");
+  assert(((child->GetChild()->IsCreator())) && "may only be called by child creator thread");
+  if (IsDeleted() || (child->parent != NULL && child->parent->IsDeleted()) || child->GetChild()->IsDeleted())
   {
-    util::tLock lock2(GetRegistryLock());
+    throw util::tRuntimeException("Child has been deleted or has deleted parent. Thread exit is likely the intended behaviour.", CODE_LOCATION_MACRO);
+  }
+  if (child->parent != NULL)
+  {
+    assert(((child->GetChild()->LockAfter(child->parent))) && "lockOrder level of child needs to be higher than of former parent");
+  }
+  assert(((child->GetChild()->LockAfter(this))) && "lockOrder level of child needs to be higher than of parent");
+  // avoid cycles
+  assert(child->GetChild() != this);
+  assert((!this->IsChildOf(child->GetChild())));
 
-    // perform checks
-    assert(((child->GetChild()->IsConstructing())) && "tree structure is fixed for initialized children - is child initialized twice (?)");
-    assert(((child->GetChild()->IsCreator())) && "may only be called by child creator thread");
-    if (IsDeleted() || (child->parent != NULL && child->parent->IsDeleted()) || child->GetChild()->IsDeleted())
-    {
-      throw util::tRuntimeException("Child has been deleted or has deleted parent. Thread exit is likely the intended behaviour.", CODE_LOCATION_MACRO);
-    }
-    if (child->parent != NULL)
-    {
-      assert(((child->GetChild()->LockAfter(child->parent))) && "lockOrder level of child needs to be higher than of former parent");
-    }
-    assert(((child->GetChild()->LockAfter(this))) && "lockOrder level of child needs to be higher than of parent");
-    // avoid cycles
-    assert(child->GetChild() != this);
-    assert((!this->IsChildOf(child->GetChild())));
+  // detach from former parent
+  if (child->parent != NULL)
+  {
+    //assert(!child.parent.isInitialized()) : "This is truly strange - should not happen";
+    child->parent->children.Remove(child);
+  }
 
-    // detach from former parent
-    if (child->parent != NULL)
+  // Check if child with same name already exists and possibly rename (?)
+  if (GetFlag(tCoreFlags::cAUTO_RENAME) && (!GetFlag(tCoreFlags::cIS_PORT)))
+  {
+    util::tString child_desc = child->GetName();
+    int postfix_index = 1;
+    util::tArrayWrapper<tLink*>* ch = children.GetIterable();
+    for (int i = 0, n = ch->Size(); i < n; i++)
     {
-      //assert(!child.parent.isInitialized()) : "This is truly strange - should not happen";
-      child->parent->children.Remove(child);
-    }
-
-    // Check if child with same name already exists and possibly rename (?)
-    if (GetFlag(tCoreFlags::cAUTO_RENAME) && (!GetFlag(tCoreFlags::cIS_PORT)))
-    {
-      util::tString child_desc = child->GetName();
-      int postfix_index = 1;
-      util::tArrayWrapper<tLink*>* ch = children.GetIterable();
-      for (int i = 0, n = ch->Size(); i < n; i++)
+      tLink* re = ch->Get(i);
+      if (re != NULL && re->GetName().Equals(child_desc))
       {
-        tLink* re = ch->Get(i);
-        if (re != NULL && re->GetName().Equals(child_desc))
-        {
-          // name clash
-          /*if (postfixIndex == 1) {
-              System.out.println("Warning: name conflict in " + getUid() + " - " + child.GetName());
-          }*/
-          re->GetChild()->SetName(child_desc + "[" + postfix_index + "]");
-          postfix_index++;
-          continue;
-        }
+        // name clash
+        /*if (postfixIndex == 1) {
+            System.out.println("Warning: name conflict in " + getUid() + " - " + child.GetName());
+        }*/
+        re->GetChild()->SetName(child_desc + "[" + postfix_index + "]");
+        postfix_index++;
+        continue;
       }
     }
-
-    child->parent = this;
-    children.Add(child, false);
-    // child.init(); - do this separately
   }
+
+  child->parent = this;
+  children.Add(child, false);
   // child.init(); - do this separately
 }
 
@@ -195,7 +187,6 @@ size_t tFrameworkElement::ChildCount() const
 
 tFrameworkElement::~tFrameworkElement()
 {
-  ;
   assert(((GetFlag(tCoreFlags::cDELETED) || GetFlag(tCoreFlags::cIS_RUNTIME))) && "Frameworkelement was not deleted with managedDelete()");
   FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "FrameworkElement destructor");
   if (!GetFlag(tCoreFlags::cIS_RUNTIME))
@@ -229,67 +220,6 @@ void tFrameworkElement::DeleteChildren()
   children.Clear();
 }
 
-void tFrameworkElement::DoStaticParameterEvaluation()
-{
-  util::tLock lock2(GetRegistryLock());
-
-  // all parameters attached to any of the module's parameters
-  util::tSimpleList<tStaticParameterBase*> attached_parameters;
-  util::tSimpleList<tStaticParameterBase*> attached_parameters_tmp;
-
-  tStaticParameterList* spl = GetAnnotation<tStaticParameterList>();
-  if (spl != NULL)
-  {
-
-    // Reevaluate parameters and check whether they have changed
-    bool changed = false;
-    for (size_t i = 0; i < spl->Size(); i++)
-    {
-      spl->Get(i)->LoadValue();
-      changed |= spl->Get(i)->HasChanged();
-      spl->Get(i)->GetAllAttachedParameters(attached_parameters_tmp);
-      attached_parameters.AddAll(attached_parameters_tmp);
-    }
-
-    if (changed)
-    {
-      EvaluateStaticParameters();
-
-      // Reset change flags for all parameters
-      for (size_t i = 0; i < spl->Size(); i++)
-      {
-        spl->Get(i)->ResetChanged();
-      }
-
-      // initialize any new child elements
-      if (IsReady())
-      {
-        Init();
-      }
-    }
-  }
-
-  // evaluate children's static parameters
-  util::tArrayWrapper<tLink*>* iterable = children.GetIterable();
-  for (int i = 0, n = iterable->Size(); i < n; i++)
-  {
-    tLink* child = iterable->Get(i);
-    if (child != NULL && child->IsPrimaryLink() && (!child->GetChild()->IsDeleted()))
-    {
-      child->GetChild()->DoStaticParameterEvaluation();
-    }
-  }
-
-  // evaluate any attached parameters that have changed, too
-  for (size_t i = 0; i < attached_parameters.Size(); i++)
-  {
-    if (attached_parameters.Get(i)->HasChanged())
-    {
-      attached_parameters.Get(i)->GetParentList()->GetAnnotated()->DoStaticParameterEvaluation();
-    }
-  }
-}
-
 tFrameworkElement* tFrameworkElement::GetChild(const util::tString& name) const
 {
   util::tArrayWrapper<tLink*>* iterable = children.GetIterable();
@@ -305,20 +235,18 @@ tFrameworkElement* tFrameworkElement::GetChild(const util::tString& name) const
     }
     else
     {
+      util::tLock lock4(GetRegistryLock());
+      if (IsDeleted())
       {
-        util::tLock lock4(GetRegistryLock());
-        if (IsDeleted())
-        {
-          return NULL;
-        }
-        if (child->GetChild()->IsDeleted())
-        {
-          continue;
-        }
-        if (child->GetName().Equals(name))
-        {
-          return child->GetChild();
-        }
+        return NULL;
+      }
+      if (child->GetChild()->IsDeleted())
+      {
+        continue;
+      }
+      if (child->GetName().Equals(name))
+      {
+        return child->GetChild();
       }
     }
   }
@@ -333,47 +261,44 @@ tFrameworkElement* tFrameworkElement::GetChildElement(const util::tString& name,
 tFrameworkElement* tFrameworkElement::GetChildElement(const util::tString& name, int name_index, bool only_globally_unique_children, tFrameworkElement* root)
 {
   // lock runtime (might not be absolutely necessary... ensures, however, that result is valid)
+  util::tLock lock2(GetRegistryLock());
+
+  if (IsDeleted())
   {
-    util::tLock lock2(GetRegistryLock());
+    return NULL;
+  }
 
-    if (IsDeleted())
-    {
-      return NULL;
-    }
+  if (name.CharAt(name_index) == '/')
+  {
+    return root->GetChildElement(name, name_index + 1, only_globally_unique_children, root);
+  }
 
-    if (name.CharAt(name_index) == '/')
+  only_globally_unique_children &= (!GetFlag(tCoreFlags::cGLOBALLY_UNIQUE_LINK));
+  util::tArrayWrapper<tLink*>* iterable = children.GetIterable();
+  for (int i = 0, n = iterable->Size(); i < n; i++)
+  {
+    tLink* child = iterable->Get(i);
+    if (child != NULL && name.RegionMatches(name_index, child->name, 0, child->name.Length()) && (!child->GetChild()->IsDeleted()))
     {
-      return root->GetChildElement(name, name_index + 1, only_globally_unique_children, root);
-    }
-
-    only_globally_unique_children &= (!GetFlag(tCoreFlags::cGLOBALLY_UNIQUE_LINK));
-    util::tArrayWrapper<tLink*>* iterable = children.GetIterable();
-    for (int i = 0, n = iterable->Size(); i < n; i++)
-    {
-      tLink* child = iterable->Get(i);
-      if (child != NULL && name.RegionMatches(name_index, child->name, 0, child->name.Length()) && (!child->GetChild()->IsDeleted()))
+      if (name.Length() == name_index + child->name.Length())
       {
-        if (name.Length() == name_index + child->name.Length())
+        if (!only_globally_unique_children || child->GetChild()->GetFlag(tCoreFlags::cGLOBALLY_UNIQUE_LINK))
         {
-          if (!only_globally_unique_children || child->GetChild()->GetFlag(tCoreFlags::cGLOBALLY_UNIQUE_LINK))
-          {
-            return child->GetChild();
-          }
-        }
-        if (name.CharAt(name_index + child->name.Length()) == '/')
-        {
-          tFrameworkElement* result = child->GetChild()->GetChildElement(name, name_index + child->name.Length() + 1, only_globally_unique_children, root);
-          if (result != NULL)
-          {
-            return result;
-          }
-          // continue, because links may contain '/'... (this is slightly ugly... better solution? TODO)
+          return child->GetChild();
         }
       }
+      if (name.CharAt(name_index + child->name.Length()) == '/')
+      {
+        tFrameworkElement* result = child->GetChild()->GetChildElement(name, name_index + child->name.Length() + 1, only_globally_unique_children, root);
+        if (result != NULL)
+        {
+          return result;
+        }
+        // continue, because links may contain '/'... (this is slightly ugly... better solution? TODO)
+      }
     }
-    return NULL;
-
   }
+  return NULL;
 }
 
 const char* tFrameworkElement::GetCName() const
@@ -410,10 +335,8 @@ size_t tFrameworkElement::GetLinkCount() const
   }
   else
   {
-    {
-      util::tLock lock3(GetRegistryLock());  // absolutely safe this way
-      return GetLinkCountHelper();
-    }
+    util::tLock lock3(GetRegistryLock());  // absolutely safe this way
+    return GetLinkCountHelper();
   }
 }
 
@@ -470,14 +393,12 @@ const util::tString tFrameworkElement::GetName() const
   }
   else
   {
+    util::tLock lock3(GetRegistryLock());  // synchronize, while name can be changed (C++ strings may not be thread safe...)
+    if (IsDeleted())
     {
-      util::tLock lock3(GetRegistryLock());  // synchronize, while name can be changed (C++ strings may not be thread safe...)
-      if (IsDeleted())
-      {
-        return "(deleted element)";
-      }
-      return primary.name.Length() == 0 ? "(anonymous)" : primary.name;
+      return "(deleted element)";
     }
+    return primary.name.Length() == 0 ? "(anonymous)" : primary.name;
   }
 }
 
@@ -492,22 +413,14 @@ void tFrameworkElement::GetNameHelper(util::tStringBuilder& sb, const tLink* l, 
   sb.Append(l->name);
 }
 
-tConfigFile* tFrameworkElement::GetConfigFile() const
-{
-  return tConfigFile::Find(this);
-}
-
-
 tFrameworkElement* tFrameworkElement::GetParent(int link_index) const
 {
+  util::tLock lock2(GetRegistryLock());  // absolutely safe this way
+  if (IsDeleted())
   {
-    util::tLock lock2(GetRegistryLock());  // absolutely safe this way
-    if (IsDeleted())
-    {
-      return NULL;
-    }
-    return GetLink(link_index)->parent;
+    return NULL;
   }
+  return GetLink(link_index)->parent;
 }
 
 tFrameworkElement* tFrameworkElement::GetParentWithFlags(uint flags_) const
@@ -516,24 +429,22 @@ tFrameworkElement* tFrameworkElement::GetParentWithFlags(uint flags_) const
   {
     return NULL;
   }
+  util::tLock lock2(GetRegistryLock());  // not really necessary after element has been initialized
+  if (IsDeleted())
   {
-    util::tLock lock2(GetRegistryLock());  // not really necessary after element has been initialized
-    if (IsDeleted())
-    {
-      return NULL;
-    }
-
-    tFrameworkElement* result = primary.parent;
-    while (!((result->GetAllFlags() & flags_) == flags_))
-    {
-      result = result->primary.parent;
-      if (result == NULL || result->IsDeleted())
-      {
-        break;
-      }
-    }
-    return result;
+    return NULL;
   }
+
+  tFrameworkElement* result = primary.parent;
+  while (!((result->GetAllFlags() & flags_) == flags_))
+  {
+    result = result->primary.parent;
+    if (result == NULL || result->IsDeleted())
+    {
+      break;
+    }
+  }
+  return result;
 }
 
 bool tFrameworkElement::GetQualifiedName(util::tStringBuilder& sb, const tLink* start, bool force_full_link) const
@@ -544,10 +455,8 @@ bool tFrameworkElement::GetQualifiedName(util::tStringBuilder& sb, const tLink* 
   }
   else
   {
-    {
-      util::tLock lock3(GetRegistryLock());  // synchronize while element is under construction
-      return GetQualifiedNameImpl(sb, start, force_full_link);
-    }
+    util::tLock lock3(GetRegistryLock());  // synchronize while element is under construction
+    return GetQualifiedNameImpl(sb, start, force_full_link);
   }
 }
 
@@ -588,30 +497,23 @@ tRuntimeEnvironment* tFrameworkElement::GetRuntime() const
   return tRuntimeEnvironment::GetInstance();
 }
 
-util::tMutexLockOrder& tFrameworkElement::GetThreadLocalCacheInfosLock() const
-{
-  return tRuntimeEnvironment::GetInstance()->GetRegistryHelper()->infos_lock->obj_mutex;
-}
-
 void tFrameworkElement::Init()
 {
+  util::tLock lock2(GetRuntime()->GetRegistryLock());
+  //SimpleList<FrameworkElement> publishThese = new SimpleList<FrameworkElement>();
+  // assert(getFlag(CoreFlags.IS_RUNTIME) || getParent().isReady());
+  if (IsDeleted())
   {
-    util::tLock lock2(GetRuntime()->GetRegistryLock());
-    //SimpleList<FrameworkElement> publishThese = new SimpleList<FrameworkElement>();
-    // assert(getFlag(CoreFlags.IS_RUNTIME) || getParent().isReady());
-    if (IsDeleted())
-    {
-      throw util::tRuntimeException("Cannot initialize deleted element", CODE_LOCATION_MACRO);
-    }
-
-    InitImpl();
-
-    CheckPublish();
-
-    /*for (@SizeT int i = 0, n = publishThese.size(); i < n; i++) {
-        publishThese.get(i).publishUpdatedInfo(RuntimeListener.ADD);
-    }*/
+    throw util::tRuntimeException("Cannot initialize deleted element", CODE_LOCATION_MACRO);
   }
+
+  InitImpl();
+
+  CheckPublish();
+
+  /*for (@SizeT int i = 0, n = publishThese.size(); i < n; i++) {
+      publishThese.get(i).publishUpdatedInfo(RuntimeListener.ADD);
+  }*/
 }
 
 void tFrameworkElement::InitAll()
@@ -654,8 +556,6 @@ void tFrameworkElement::InitImpl()
       flags |= tCoreFlags::cREADY;
     }
 
-    DoStaticParameterEvaluation();
-
     NotifyAnnotationsInitialized();
   }
 
@@ -663,32 +563,30 @@ void tFrameworkElement::InitImpl()
 
 bool tFrameworkElement::IsChildOf(tFrameworkElement* re, bool ignore_delete_flag) const
 {
+  util::tLock lock2(GetRegistryLock());  // absolutely safe this way
+  if ((!ignore_delete_flag) && IsDeleted())
   {
-    util::tLock lock2(GetRegistryLock());  // absolutely safe this way
-    if ((!ignore_delete_flag) && IsDeleted())
+    return false;
+  }
+  for (const tLink* l = &(primary); l != NULL; l = l->next)
+  {
+    if (l->parent == re)
     {
-      return false;
+      return true;
     }
-    for (const tLink* l = &(primary); l != NULL; l = l->next)
+    else if (l->parent == NULL)
     {
-      if (l->parent == re)
+      continue;
+    }
+    else
+    {
+      if (l->parent->IsChildOf(re))
       {
         return true;
       }
-      else if (l->parent == NULL)
-      {
-        continue;
-      }
-      else
-      {
-        if (l->parent->IsChildOf(re))
-        {
-          return true;
-        }
-      }
     }
-    return false;
   }
+  return false;
 }
 
 void tFrameworkElement::Link(tFrameworkElement* parent, const util::tString& link_name)
@@ -697,22 +595,20 @@ void tFrameworkElement::Link(tFrameworkElement* parent, const util::tString& lin
   assert((LockAfter(parent)));
 
   // lock runtime (required to perform structural changes)
+  util::tLock lock2(GetRegistryLock());
+  if (IsDeleted() || parent->IsDeleted())
   {
-    util::tLock lock2(GetRegistryLock());
-    if (IsDeleted() || parent->IsDeleted())
-    {
-      throw util::tRuntimeException("Element and/or parent has been deleted. Thread exit is likely the intended behaviour.", CODE_LOCATION_MACRO);
-    }
-
-    tLink* l = new tLink(this);
-    l->name = link_name;
-    l->parent = NULL;  // will be set in addChild
-    tLink* lprev = GetLinkInternal(GetLinkCount() - 1u);
-    assert(lprev->next == NULL);
-    lprev->next = l;
-    parent->AddChild(l);
-    //RuntimeEnvironment.getInstance().link(this, linkName);
+    throw util::tRuntimeException("Element and/or parent has been deleted. Thread exit is likely the intended behaviour.", CODE_LOCATION_MACRO);
   }
+
+  tLink* l = new tLink(this);
+  l->name = link_name;
+  l->parent = NULL;  // will be set in addChild
+  tLink* lprev = GetLinkInternal(GetLinkCount() - 1u);
+  assert(lprev->next == NULL);
+  lprev->next = l;
+  parent->AddChild(l);
+  //RuntimeEnvironment.getInstance().link(this, linkName);
 }
 
 void tFrameworkElement::ManagedDelete(tLink* dont_detach)
@@ -792,14 +688,12 @@ bool tFrameworkElement::NameEquals(const util::tString& other) const
   }
   else
   {
+    util::tLock lock3(GetRegistryLock());
+    if (IsDeleted())
     {
-      util::tLock lock3(GetRegistryLock());
-      if (IsDeleted())
-      {
-        return false;
-      }
-      return primary.name.Equals(other);
+      return false;
     }
+    return primary.name.Equals(other);
   }
 }
 
@@ -813,32 +707,30 @@ void tFrameworkElement::PrintStructure(rrlib::logging::tLogLevel ll)
 
 void tFrameworkElement::PrintStructure(int indent, std::stringstream& output)
 {
+  util::tLock lock2(GetRegistryLock());
+
+  // print element info
+  for (int i = 0; i < indent; i++)
   {
-    util::tLock lock2(GetRegistryLock());
+    output << " ";
+  }
 
-    // print element info
-    for (int i = 0; i < indent; i++)
+  if (IsDeleted())
+  {
+    output << "deleted FrameworkElement" << std::endl;
+    return;
+  }
+
+  output << GetCName() << " (" << (IsReady() ? (GetFlag(tCoreFlags::cPUBLISHED) ? "published" : "ready") : IsDeleted() ? "deleted" : "constructing") << ")" << std::endl;
+
+  // print child element info
+  util::tArrayWrapper<tLink*>* iterable = children.GetIterable();
+  for (int i = 0, n = iterable->Size(); i < n; i++)
+  {
+    tLink* child = iterable->Get(i);
+    if (child != NULL)
     {
-      output << " ";
-    }
-
-    if (IsDeleted())
-    {
-      output << "deleted FrameworkElement" << std::endl;
-      return;
-    }
-
-    output << GetCName() << " (" << (IsReady() ? (GetFlag(tCoreFlags::cPUBLISHED) ? "published" : "ready") : IsDeleted() ? "deleted" : "constructing") << ")" << std::endl;
-
-    // print child element info
-    util::tArrayWrapper<tLink*>* iterable = children.GetIterable();
-    for (int i = 0, n = iterable->Size(); i < n; i++)
-    {
-      tLink* child = iterable->Get(i);
-      if (child != NULL)
-      {
-        child->GetChild()->PrintStructure(indent + 2, output);
-      }
+      child->GetChild()->PrintStructure(indent + 2, output);
     }
   }
 }
@@ -861,11 +753,9 @@ void tFrameworkElement::PublishUpdatedInfo(int8 change_type)
 
 void tFrameworkElement::RemoveFlag(int flag)
 {
-  {
-    util::tLock lock2(flag_mutex);
-    assert((flag & tCoreFlags::cNON_CONSTANT_FLAGS) != 0);
-    flags &= ~flag;
-  }
+  util::tLock lock2(flag_mutex);
+  assert((flag & tCoreFlags::cNON_CONSTANT_FLAGS) != 0);
+  flags &= ~flag;
 }
 
 util::tMutexLockOrder& tFrameworkElement::RuntimeLockHelper() const
@@ -876,50 +766,6 @@ util::tMutexLockOrder& tFrameworkElement::RuntimeLockHelper() const
   }
 
   return this->obj_mutex;
-}
-
-void tFrameworkElement::SetConfigNode(const util::tString& node)
-{
-  util::tLock lock2(GetRegistryLock());
-  tConfigNode* cn = GetAnnotation<tConfigNode>();
-  if (cn != NULL)
-  {
-    if (cn->node.Equals(node))
-    {
-      return;
-    }
-    cn->node = node;
-  }
-  else
-  {
-    cn = new tConfigNode(node);
-    AddAnnotation(cn);
-  }
-
-  // reevaluate static parameters
-  DoStaticParameterEvaluation();
-
-  // reload parameters
-  if (IsReady())
-  {
-    tConfigFile* cf = tConfigFile::Find(this);
-    if (cf != NULL)
-    {
-      cf->LoadParameterValues(this);
-    }
-  }
-}
-
-void tFrameworkElement::SetFinstructed(tCreateFrameworkElementAction* create_action, tConstructorParameters* params)
-{
-  assert((!GetFlag(tCoreFlags::cFINSTRUCTED)));
-  tStaticParameterList* list = tStaticParameterList::GetOrCreate(this);
-  list->SetCreateAction(create_action);
-  SetFlag(tCoreFlags::cFINSTRUCTED);
-  if (params != NULL)
-  {
-    AddAnnotation(params);
-  }
 }
 
 void tFrameworkElement::SetFlag(int flag, bool value)
@@ -936,22 +782,19 @@ void tFrameworkElement::SetFlag(int flag, bool value)
 
 void tFrameworkElement::SetFlag(int flag)
 {
-  {
-    util::tLock lock2(flag_mutex);
-    assert((flag & tCoreFlags::cCONSTANT_FLAGS) == 0);
-    flags |= flag;
-  }
+  util::tLock lock2(flag_mutex);
+  assert((flag & tCoreFlags::cCONSTANT_FLAGS) == 0);
+  flags |= flag;
 }
 
 void tFrameworkElement::SetName(const util::tString& name)
 {
   assert((!GetFlag(tCoreFlags::cIS_RUNTIME)));
-  {
-    util::tLock lock2(GetRegistryLock());  // synchronize, C++ strings may not be thread safe...
-    assert((IsConstructing()));
-    assert((IsCreator()));
-    primary.name = name;
-  }
+
+  util::tLock lock2(GetRegistryLock());  // synchronize, C++ strings may not be thread safe...
+  assert((IsConstructing()));
+  assert((IsCreator()));
+  primary.name = name;
 }
 
 void tFrameworkElement::WriteName(rrlib::serialization::tOutputStream& os, int i) const
@@ -962,10 +805,8 @@ void tFrameworkElement::WriteName(rrlib::serialization::tOutputStream& os, int i
   }
   else
   {
-    {
-      util::tLock lock3(GetRegistryLock());  // synchronize, while name can be changed (C++ strings may not be thread safe...)
-      os.WriteString(IsDeleted() ? "deleted element" : GetLink(i)->name);
-    }
+    util::tLock lock3(GetRegistryLock());  // synchronize, while name can be changed (C++ strings may not be thread safe...)
+    os.WriteString(IsDeleted() ? "deleted element" : GetLink(i)->name);
   }
 }
 

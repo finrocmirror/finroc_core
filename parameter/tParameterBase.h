@@ -84,6 +84,7 @@ extern template class tParameterBase<float>;
 extern template class tParameterBase<double>;
 extern template class tParameterBase<tNumber>;
 extern template class tParameterBase<tCoreString>;
+extern template class tParameterBase<std::string>;
 extern template class tParameterBase<bool>;
 extern template class tParameterBase<rrlib::serialization::tMemoryBuffer>;
 

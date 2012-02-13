@@ -25,6 +25,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/tListenerManager.h"
 #include "core/port/tPortListenerRaw.h"
+#include "core/port/tPortDataPtr.h"
 #include "core/port/tThreadLocalCache.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/cc/tCCPortDataManager.h"

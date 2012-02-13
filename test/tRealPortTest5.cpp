@@ -36,6 +36,8 @@
 #include "plugins/blackboard/tBBLockException.h"
 #include "core/port/rpc/tMethodCallException.h"
 
+using namespace rrlib::logging;
+
 namespace finroc
 {
 namespace core
@@ -71,7 +73,7 @@ void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   input->GetWrapped()->ManagedDelete();
   output->GetWrapped()->ManagedDelete();
 
-  util::tSystem::out.Println("waiting");
+  FINROC_LOG_PRINT(eLL_USER, "waiting");
 }
 
 void tRealPortTest5::Run()
@@ -102,7 +104,7 @@ void tRealPortTest5::TestSimpleEdge()
   {
   }
 
-  int64 start = util::tSystem::CurrentTimeMillis();
+  int64 start = util::tTime::GetPrecise();
   int result = 0;
   for (int i = 0; i < cCYCLES; i++)
   {
@@ -111,8 +113,8 @@ void tRealPortTest5::TestSimpleEdge()
 
     result = input->Get();
   }
-  int64 time = util::tSystem::CurrentTimeMillis() - start;
-  util::tSystem::out.Println(util::tLong::ToString(time) + " " + result);
+  int64 time = util::tTime::GetPrecise() - start;
+  FINROC_LOG_PRINT(eLL_USER, util::tLong::ToString(time) + " " + result);
 }
 
 void tRealPortTest5::TestSimpleEdge2()
@@ -133,7 +135,7 @@ void tRealPortTest5::TestSimpleEdge2()
 
   const blackboard::tBlackboardBuffer* cbuf = input.GetAutoLocked();
   rrlib::serialization::tInputStream ci(cbuf);
-  util::tSystem::out.Println(ci.ReadInt());
+  FINROC_LOG_PRINT(eLL_USER, ci.ReadInt());
   input.ReleaseAutoLocks();
 
   try
@@ -144,7 +146,7 @@ void tRealPortTest5::TestSimpleEdge2()
   {
   }
 
-  int64 start = util::tSystem::CurrentTimeMillis();
+  int64 start = util::tTime::GetPrecise();
   int result = 0;
   for (int i = 0; i < cCYCLES; i++)
   {
@@ -159,8 +161,8 @@ void tRealPortTest5::TestSimpleEdge2()
     result = ci.ReadInt();
     input.ReleaseAutoLocks();
   }
-  int64 time = util::tSystem::CurrentTimeMillis() - start;
-  util::tSystem::out.Println(util::tLong::ToString(time) + " " + result);
+  int64 time = util::tTime::GetPrecise() - start;
+  FINROC_LOG_PRINT(eLL_USER, util::tLong::ToString(time) + " " + result);
 }
 
 void tRealPortTest5::TestSimpleEdgeBB()
@@ -203,11 +205,11 @@ void tRealPortTest5::TestSimpleEdgeBB()
 
   tPortDataPtr<const std::vector<tMemoryBuffer> > cbuf = client.Read();
   rrlib::serialization::tInputStream ci(&cbuf->at(0));
-  util::tSystem::out.Println(ci.ReadInt());
+  FINROC_LOG_PRINT(eLL_USER, ci.ReadInt());
 
   cbuf.reset();
 
-  int64 start = util::tSystem::CurrentTimeMillis();
+  int64 start = util::tTime::GetPrecise();
   int result = 0;
   int64 size = 0;
   for (int i = 0; i < cCYCLES; i++)
@@ -234,8 +236,8 @@ void tRealPortTest5::TestSimpleEdgeBB()
 
     cbuf.reset();
   }
-  int64 time = util::tSystem::CurrentTimeMillis() - start;
-  util::tSystem::out.Println(util::tLong::ToString(time) + " " + result + " " + size);
+  int64 time = util::tTime::GetPrecise() - start;
+  FINROC_LOG_PRINT(eLL_USER, util::tLong::ToString(time) + " " + result + " " + size);
   tRuntimeEnvironment::GetInstance()->PrintStructure();
 }
 
@@ -249,12 +251,12 @@ void tRealPortTest5::TestSimpleSet()
   {
   }
 
-  int64 start = util::tSystem::CurrentTimeMillis();
+  int64 start = util::tTime::GetPrecise();
   for (int i = 1; i < cCYCLES + 1; i++)
   {
     output->Publish(i);
   }
-  int64 time = util::tSystem::CurrentTimeMillis() - start;
+  int64 time = util::tTime::GetPrecise() - start;
 
   std::cout << time << " " << output->Get() << std::endl;
 }

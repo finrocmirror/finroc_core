@@ -19,33 +19,53 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/tThreadLocalCache.h"
-#include "core/tRuntimeEnvironment.h"
+
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "rrlib/rtti/rtti.h"
+#include "rrlib/util/patterns/singleton.h"
+
+#include "core/port/tThreadLocalCache.h"
+#include "core/tRuntimeEnvironment.h"
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/port/std/tPortDataManager.h"
-#include "core/port/rpc/tMethodCallSyncher.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/tAbstractPort.h"
 #include "core/port/std/tPortDataReference.h"
+#include "core/plugin/tPlugin.h"
 
 namespace finroc
 {
 namespace core
 {
-// This 'lock' ensures that Thread info is deallocated after last ThreadLocalCache
-util::tThreadInfoLock thread_info_lock = util::tThread::GetThreadInfoLock();
-// This 'lock' ensures that static AutoDeleter instance is deallocated after last ThreadLocalCache
-std::shared_ptr<util::tAutoDeleter> auto_deleter_lock(util::tAutoDeleter::GetStaticInstance());
-util::tFastStaticThreadLocal<tThreadLocalCache, tThreadLocalCache, util::tGarbageCollector::tFunctor> tThreadLocalCache::info;
+namespace internal
+{
+template <typename T>
+struct ThreadLocalCacheInfosCreator
+{
+  static T* Create()
+  {
+    return new T(tLockOrderLevels::cINNER_MOST - 100);
+  }
+  static void Destroy(T* object)
+  {
+    delete tThreadLocalCache::Get();
+    delete object;
+  }
+};
 
-std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCache::infos;
+}
+
+typedef rrlib::util::tSingletonHolder<util::tSimpleListWithMutex<tThreadLocalCache*>, rrlib::util::singleton::Longevity, internal::ThreadLocalCacheInfosCreator> tThreadLocalCacheInfos;
+static inline unsigned int GetLongevity(util::tSimpleListWithMutex<tThreadLocalCache*>*)
+{
+  return 0xEFFFFFFE; // delete after thread cleanup
+}
+
+__thread tThreadLocalCache* tThreadLocalCache::info = NULL;
+util::tMutexLockOrder* tThreadLocalCache::infos_mutex = &tThreadLocalCacheInfos::Instance().obj_mutex;
 util::tAtomicInt tThreadLocalCache::thread_uid_counter(1);
 
 tThreadLocalCache::tThreadLocalCache() :
-  infos_lock(infos),
-  method_syncher(NULL),
   thread_uid(thread_uid_counter.GetAndIncrement()),
   auto_locks(),
   cc_auto_locks(),
@@ -54,8 +74,6 @@ tThreadLocalCache::tThreadLocalCache() :
   ref(NULL),
   last_written_to_port(tCoreRegister<>::cMAX_ELEMENTS),
   cc_type_pools(tFinrocTypeInfo::cMAX_CCTYPES),
-  method_calls(new util::tReusablesPool<tMethodCall>()),
-  pull_calls(new util::tReusablesPool<tPullCall>()),
   pq_fragments(new util::tReusablesPool<tPortQueueElement>()),
   ccpq_fragments(new util::tReusablesPool<tCCPortQueueElement>()),
   input_packet_processor(),
@@ -63,6 +81,16 @@ tThreadLocalCache::tThreadLocalCache() :
   port_register(tRuntimeEnvironment::GetInstance()->GetPorts())
 {
   FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating ThreadLocalCache for thread ", util::tThread::CurrentThread()->GetName());
+}
+
+tThreadLocalCache::~tThreadLocalCache()
+{
+  util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
+  util::tLock l(infos);
+  tThreadLocalCache* tmp = this; // to cleanly remove const modifier
+  infos.RemoveElem(tmp);
+
+  FinalDelete();
 }
 
 void tThreadLocalCache::AddAutoLock(rrlib::rtti::tGenericObject* obj)
@@ -99,28 +127,29 @@ tCCPortDataBufferPool* tThreadLocalCache::CreateCCPool(const rrlib::rtti::tDataT
   return pool;
 }
 
-tMethodCall* tThreadLocalCache::CreateMethodCall()
+tThreadLocalCache* tThreadLocalCache::CreateThreadLocalCacheForThisThread()
 {
-  tMethodCall* result = new tMethodCall();
-  method_calls->Attach(result, false);
-  return result;
-}
-
-tPullCall* tThreadLocalCache::CreatePullCall()
-{
-  tPullCall* result = new tPullCall();
-  pull_calls->Attach(result, false);
-  return result;
+  util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
+  util::tLock lock4(infos);
+  tThreadLocalCache* tli = new tThreadLocalCache();
+  infos.Add(tli);
+  info = tli;
+  if (infos.Size() > 1)
+  {
+    util::tThread::CurrentThreadRaw()->LockObject(std::shared_ptr<tThreadLocalCache>(tli)); // for auto-deleting after thread finishes
+  }
+  return tli;
 }
 
 void tThreadLocalCache::DeleteInfoForPort(int port_index)
 {
   assert((port_index >= 0 && port_index <= tCoreRegister<>::cMAX_ELEMENTS));
   {
+    util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
     util::tLock lock2(infos);
-    for (int i = 0, n = infos->Size(); i < n; i++)
+    for (int i = 0, n = infos.Size(); i < n; i++)
     {
-      tThreadLocalCache* tli = infos->Get(i);
+      tThreadLocalCache* tli = infos.Get(i);
 
       // Release port data lock
       tCCPortDataManagerTL* pd = tli->last_written_to_port[port_index];
@@ -136,13 +165,7 @@ void tThreadLocalCache::DeleteInfoForPort(int port_index)
 
 void tThreadLocalCache::FinalDelete()
 {
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Deleting ThreadLocalCache");
-
-  /*! Return MethodCallSyncher to pool */
-  if (method_syncher != NULL && (!tRuntimeEnvironment::ShuttingDown()))
-  {
-    method_syncher->Release();
-  }
+  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Deleting ThreadLocalCache for thread ", util::tThread::CurrentThreadRaw()->GetName());
 
   /*! Delete local port data buffer pools */
   for (size_t i = 0u; i < cc_type_pools.length; i++)
@@ -153,13 +176,12 @@ void tThreadLocalCache::FinalDelete()
     }
   }
 
-  method_calls->ControlledDelete();
   pq_fragments->ControlledDelete();
-  pull_calls->ControlledDelete();
   ccpq_fragments->ControlledDelete();
 
   /*! Transfer ownership of remaining port data to ports */
   {
+    util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
     util::tLock lock2(infos);  // big lock - to make sure no ports are deleted at the same time which would result in a mess (note that CCPortBase desctructor has synchronized operation on infos)
     for (size_t i = 0u; i < last_written_to_port.length; i++)
     {
@@ -170,15 +192,6 @@ void tThreadLocalCache::FinalDelete()
       }
     }
   }
-}
-
-tMethodCallSyncher* tThreadLocalCache::GetMethodSyncher()
-{
-  if (method_syncher == NULL)
-  {
-    method_syncher = tMethodCallSyncher::GetFreeInstance(this);
-  }
-  return method_syncher;
 }
 
 tCCPortDataManager* tThreadLocalCache::GetUnusedInterThreadBuffer(const rrlib::rtti::tDataTypeBase& data_type)
@@ -207,11 +220,17 @@ void tThreadLocalCache::ReleaseAllLocks()
   cc_inter_auto_locks.Clear();
 }
 
-std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*> > tThreadLocalCache::StaticInit()
+namespace internal
 {
-  infos.reset(new util::tSimpleListWithMutex<tThreadLocalCache*>(tLockOrderLevels::cINNER_MOST - 100));
+class tThreadLocalCachePlugin : public tPlugin
+{
+  virtual void Init()
+  {
+    tThreadLocalCache::Get(); // Init for main thread
+  }
+};
 
-  return infos;
+static tThreadLocalCachePlugin thread_local_cache_plugin;
 }
 
 } // namespace finroc

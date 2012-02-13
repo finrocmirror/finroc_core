@@ -24,12 +24,13 @@
 #define core__tRuntimeEnvironment_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
+#include "rrlib/finroc_core_utils/container/tSimpleList.h"
+#include "rrlib/util/patterns/singleton/policies/creation/CreateUsingNew.h"
 
 #include "core/tCoreRegister.h"
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeListener.h"
-#include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tLockOrderLevels.h"
 
 namespace finroc
@@ -60,9 +61,6 @@ public:
     friend class tRuntimeEnvironment;
   private:
 
-    // Outer class RuntimeEnvironment
-    tRuntimeEnvironment* const outer_class_ptr;
-
     /*! Global register of all ports. Allows accessing ports with simple handle. */
     std::shared_ptr<tCoreRegister<tAbstractPort*>> ports;
 
@@ -83,34 +81,19 @@ public:
 
   public:
 
-    /*! Lock to thread local cache list */
-    std::shared_ptr<util::tSimpleListWithMutex<tThreadLocalCache*>> infos_lock;
-
     /*! Mutex */
     mutable util::tMutexLockOrder obj_mutex;
 
-    tRegistry(tRuntimeEnvironment* const outer_class_ptr_) :
-      outer_class_ptr(outer_class_ptr_),
-      ports(new tCoreRegister<tAbstractPort*>(true)),
-      elements(false),
-      link_edges(),
-      listeners(),
-      temp_buffer(),
-      alternative_link_roots(),
-      infos_lock(),
-      obj_mutex(tLockOrderLevels::cRUNTIME_REGISTER)
-    {}
+    tRegistry();
 
   };
 
   friend class tLinkEdge;
+  friend class rrlib::util::singleton::CreateUsingNew<tRuntimeEnvironment>;
 private:
 
   /*! Single final instance of above */
   tRegistry registry;
-
-  /*! Singleton instance of Runtime environment - shared pointer so that is cleanly deleted at shutdown */
-  static std::shared_ptr<tRuntimeEnvironment> instance;
 
   /*! Raw pointer to above - that also exists during destruction */
   static tRuntimeEnvironment* instance_raw_ptr;
@@ -136,6 +119,12 @@ private:
 
   tRuntimeEnvironment();
 
+  /*!
+   * Initializes the runtime environment. Needs to be called before any
+   * other operation (especially getInstance()) is called.
+   */
+  static void InitialInit();
+
 protected:
 
   /*!
@@ -158,6 +147,8 @@ protected:
 
 public:
 
+  virtual ~tRuntimeEnvironment();
+
   /*!
    * (usually called from main())
    * Register any relevant command line arguments at runtime.
@@ -177,8 +168,6 @@ public:
    * \param listener Listener to add
    */
   void AddListener(tRuntimeListener* listener);
-
-  virtual ~tRuntimeEnvironment();
 
   /*!
    * \return Timestamp when runtime environment was created
@@ -239,15 +228,6 @@ public:
   {
     return &(registry);
   }
-
-  /*!
-   * Initializes the runtime environment. Needs to be called before any
-   * other operation (especially getInstance()) is called.
-   *
-   * @parem conffile Config file (see etc directory)
-   * \return Singleton instance of Runtime environment
-   */
-  static tRuntimeEnvironment* InitialInit();
 
   /*!
    * Mark element as (soon completely) deleted at RuntimeEnvironment
@@ -320,31 +300,12 @@ public:
   }
 
   /*!
-   * Start executing all Modules and Thread Containers in runtime
-   */
-  void StartExecution();
-
-  /*!
-   * Stop executing all Modules and Thread Containers in runtime
-   */
-  void StopExecution();
-
-  void TreeFilterCallback(tFrameworkElement* fe, bool start);
-
-  /*!
    * Unregister framework element at RuntimeEnvironment.
    * This is done automatically and should not be called by a user.
    *
    * \param framework_element Element to remove
    */
   void UnregisterElement(tFrameworkElement* fe);
-
-  //! Can be placed in classes in order to ensure that RuntimeEnvironment will be deleted before its static members
-  class tStaticDeleter
-  {
-  public:
-    ~tStaticDeleter();
-  };
 
 };
 

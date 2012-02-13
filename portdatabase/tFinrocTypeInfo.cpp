@@ -19,17 +19,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "rrlib/rtti/rtti.h"
+
+#include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/tRuntimeSettings.h"
+#include "core/portdatabase/tPortFactory.h"
+#include "core/portdatabase/typeutil.h"
 
 namespace finroc
 {
 namespace core
 {
 int tFinrocTypeInfo::initialized_types = 0;
+tPortFactory* tFinrocTypeInfo::default_port_factory = NULL;
 const int tFinrocTypeInfo::cMAX_TYPES;
 const int tFinrocTypeInfo::cMAX_CCTYPES;
+
 
 int tFinrocTypeInfo::EstimateDataSize(rrlib::rtti::tGenericObject* data)
 {
@@ -53,6 +58,17 @@ rrlib::rtti::tDataTypeBase tFinrocTypeInfo::GetFromCCIndex(int16 cc_type_index)
     }
   }
   throw util::tRuntimeException("Type not found", CODE_LOCATION_MACRO);
+}
+
+tPortFactory& tFinrocTypeInfo::GetPortFactory(const rrlib::rtti::tDataTypeBase& dt)
+{
+  tPortFactory* f = dt.GetAnnotation<tPortFactory>();
+  if (!f)
+  {
+    assert(default_port_factory && "Please provide default factory if you want to use this feature.");
+    f = default_port_factory;
+  }
+  return *f;
 }
 
 tFinrocTypeInfo* tFinrocTypeInfo::InfoArray()
@@ -101,8 +117,6 @@ void tFinrocTypeInfo::InitMoreTypes()
 void tFinrocTypeInfo::SetUpdateTime(int16 new_update_time)
 {
   update_time = new_update_time;
-  //RuntimeSettings.getInstance().getSharedPorts().publishUpdatedDataTypeInfo(this);
-  tRuntimeSettings::GetInstance()->NotifyUpdateTimeChangeListener(GetDataType(), new_update_time);
 }
 
 } // namespace finroc

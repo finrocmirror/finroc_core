@@ -30,6 +30,7 @@ namespace finroc
 {
 namespace core
 {
+class tCreateFrameworkElementAction;
 
 /*!
  * \author Max Reichardt
@@ -39,16 +40,6 @@ namespace core
  */
 class sDynamicLoading
 {
-  // closes dlopen-ed libraries
-  class tDLCloser
-  {
-  public:
-    std::vector<void*> loaded;
-
-    tDLCloser() : loaded() {}
-    ~tDLCloser();
-  };
-
 public:
 
   /*!
@@ -79,6 +70,16 @@ public:
    * \return Returns vector with all available finroc libraries that haven't been loaded yet.
    */
   static std::vector<std::string> GetLoadableFinrocLibraries();
+
+  /*!
+   * Returns/loads CreateFrameworkElementAction with specified name and specified .so file.
+   * (doesn't do any dynamic loading, if .so is already present)
+   *
+   * \param group Group (.jar or .so)
+   * \param name Module type name
+   * \return CreateFrameworkElementAction - null if it could not be found
+   */
+  static tCreateFrameworkElementAction* LoadModuleType(const std::string& group, const std::string& name);
 };
 
 } // namespace finroc

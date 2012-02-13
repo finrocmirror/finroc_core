@@ -29,8 +29,8 @@ namespace core
 template class tThreadContainerElement<tGroup>;
 template class tThreadContainerElement<tFinstructableGroup>;
 
-tStandardCreateModuleAction<tThreadContainer> tThreadContainer::cCREATE_ACTION("ThreadContainer", util::tTypedClass<tThreadContainer>());
-tStandardCreateModuleAction<tFinstructableThreadContainer> tFinstructableThreadContainer::cCREATE_ACTION("FinstructableThreadContainer", util::tTypedClass<tFinstructableThreadContainer>());
+tStandardCreateModuleAction<tThreadContainer> tThreadContainer::cCREATE_ACTION("ThreadContainer");
+tStandardCreateModuleAction<tFinstructableThreadContainer> tFinstructableThreadContainer::cCREATE_ACTION("FinstructableThreadContainer");
 
 } // namespace finroc
 } // namespace core

@@ -19,15 +19,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/parameter/tParameterInfo.h"
 #include "rrlib/rtti/rtti.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "core/tFrameworkElement.h"
+#include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "rrlib/serialization/serialization.h"
+
+#include "core/parameter/tParameterInfo.h"
+#include "core/tFrameworkElement.h"
 #include "core/port/tAbstractPort.h"
 #include "core/parameter/tConfigFile.h"
 #include "core/parameter/tConfigNode.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
@@ -121,6 +122,28 @@ void tParameterInfo::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstru
   {
     finstruct_default = "";
   }
+}
+
+bool tParameterInfo::IsFinstructableGroupResponsibleForConfigFileConnections(const tFrameworkElement& finstructable_group, const tFrameworkElement& ap)
+{
+  tConfigFile* cf = tConfigFile::Find(&ap);
+  if (cf == NULL)
+  {
+    return finstructable_group.GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP) == NULL;
+  }
+  tFrameworkElement* config_element = static_cast<tFrameworkElement*>(cf->GetAnnotated());
+  const tFrameworkElement* responsible = config_element->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP) ? config_element : config_element->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
+  if (!responsible)
+  {
+    // ok, config file is probably attached to runtime. Choose outer-most finstructable group.
+    responsible = &finstructable_group;
+    const tFrameworkElement* tmp;
+    while ((tmp = responsible->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP)) != NULL)
+    {
+      responsible = tmp;
+    }
+  }
+  return responsible == &finstructable_group;
 }
 
 void tParameterInfo::LoadValue(bool ignore_ready)
@@ -359,3 +382,4 @@ void tParameterInfo::SetConfigEntry(const util::tString& config_entry_, bool fin
 } // namespace finroc
 } // namespace core
 
+template class rrlib::rtti::tDataType<finroc::core::tParameterInfo>;

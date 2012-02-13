@@ -26,6 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/thread/tThreadContainerElement.h"
+#include "core/finstructable/tGroup.h"
 #include "core/finstructable/tFinstructableGroup.h"
 
 namespace finroc

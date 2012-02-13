@@ -19,27 +19,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "rrlib/serialization/serialization.h"
+
 #include "core/port/tAbstractPort.h"
 #include "core/tLockOrderLevels.h"
 #include "core/tRuntimeListener.h"
 #include "core/tLinkEdge.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
-#include "core/port/std/tPortDataManager.h"
-#include "core/port/cc/tCCPortDataManagerTL.h"
-#include "core/port/tThreadLocalCache.h"
-#include "core/port/cc/tCCPortDataManager.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/tCoreFlags.h"
-#include "core/port/net/tNetPort.h"
 #include "core/port/tEdgeAggregator.h"
-#include "rrlib/serialization/serialization.h"
 #include "core/tFinrocAnnotation.h"
 
 namespace finroc
 {
 namespace core
 {
+
+class tNetPort;
+
 namespace internal
 {
 
@@ -62,11 +61,6 @@ public:
 
 tAbstractPort::~tAbstractPort()
 {
-  if (AsNetPort() != NULL)
-  {
-    tNetPort* nt = AsNetPort();
-    delete nt;
-  }
 
   //delete linksTo;
   delete link_edges;
@@ -210,29 +204,6 @@ void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
   }
 }
 
-rrlib::rtti::tGenericObject* tAbstractPort::CreateGenericObject(const rrlib::rtti::tDataTypeBase& dt, void* factory_parameter)
-{
-  if (tFinrocTypeInfo::IsStdType(dt))
-  {
-    return GetUnusedBufferRaw(dt)->GetObject();
-  }
-  else if (tFinrocTypeInfo::IsCCType(dt))
-  {
-    if (factory_parameter == NULL)
-    {
-      // get thread local buffer
-      return tThreadLocalCache::Get()->GetUnusedBuffer(dt)->GetObject();
-    }
-    else
-    {
-      // get interthread buffer
-      return tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(dt)->GetObject();
-    }
-  }
-  FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Cannot create buffer of type ", dt.GetName());
-  return NULL;
-}
-
 void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
 {
   {
@@ -335,28 +306,6 @@ void tAbstractPort::DisconnectFrom(const util::tString& link)
       DisconnectFrom(this);
     }
   }
-}
-
-tNetPort* tAbstractPort::FindNetPort(util::tObject* belongs_to) const
-{
-  if (belongs_to == NULL)
-  {
-    return NULL;
-  }
-  util::tArrayWrapper<tAbstractPort*>* it = IsOutputPort() ? edges_src->GetIterable() : edges_dest->GetIterable();
-  for (int i = 0, n = it->Size(); i < n; i++)
-  {
-    tAbstractPort* port = it->Get(i);
-    if (port != NULL && port->GetFlag(tCoreFlags::cNETWORK_ELEMENT))
-    {
-      tNetPort* np = port->AsNetPort();
-      if (np != NULL && np->GetBelongsTo() == belongs_to)
-      {
-        return np;
-      }
-    }
-  }
-  return NULL;
 }
 
 void tAbstractPort::ForwardStrategy(int16 strategy2, tAbstractPort* push_wanter)

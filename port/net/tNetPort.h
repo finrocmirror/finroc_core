@@ -30,10 +30,10 @@
 #include "core/port/rpc/tSynchMethodCallLogic.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tAbstractPort.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/port/tPortListener.h"
 #include "core/tFrameworkElement.h"
 #include "core/tCoreFlags.h"
+#include "core/tFinrocAnnotation.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCPullRequestHandler.h"
 #include "core/port/rpc/tCallable.h"
@@ -65,15 +65,8 @@ class tPortDataManager;
  * Port that is used for networking.
  * Uniform wrapper class for Std, CC, and Interface ports.
  */
-class tNetPort : public util::tLogUser, public tPortListener<>
+class tNetPort : public tPortListener<>, public tCallable<tPullCall>, public tFinrocAnnotation, public rrlib::rtti::tFactory
 {
-public:
-  class tCCNetPort; // inner class forward declaration
-public:
-  class tStdNetPort; // inner class forward declaration
-public:
-  class tInterfaceNetPortImpl; // inner class forward declaration
-private:
 
   /*! Wrapped port */
   tAbstractPort* wrapped;
@@ -182,6 +175,21 @@ public:
 
   tNetPort(tPortCreationInfoBase pci, util::tObject* belongs_to_);
 
+  virtual std::shared_ptr<void> CreateBuffer(const rrlib::rtti::tDataTypeBase& dt)
+  {
+    return std::shared_ptr<void>(dt.CreateInstance());
+  }
+
+  virtual rrlib::rtti::tGenericObject* CreateGenericObject(const rrlib::rtti::tDataTypeBase& dt, void* factory_parameter);
+
+  /*!
+   * Find network port connected to this port that belongs to specified object
+   *
+   * \param belongs_to Instance (usually TCPServerConnection or RemoteServer) that this port belongs to
+   * \return Network port if it could be found - otherwise null
+   */
+  static tNetPort* FindNetPort(tAbstractPort& port, util::tObject* belongs_to);
+
   /*!
    * \return TCPServerConnection or RemoteServer instance that this port belongs to
    */
@@ -222,6 +230,11 @@ public:
   inline void HandleCallReturnFromNet(tAbstractCall* mc)
   {
     tSynchMethodCallLogic::HandleMethodReturn(mc);
+  }
+
+  virtual void InvokeCall(tPullCall* call)
+  {
+    SendCallReturn(call);
   }
 
   inline bool IsCCType()

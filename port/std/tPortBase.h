@@ -29,6 +29,7 @@
 #include "core/port/tAbstractPort.h"
 #include "rrlib/rtti/rtti.h"
 #include "core/port/tPortCreationInfoBase.h"
+#include "core/port/tPortListenerRaw.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/std/tPortDataReference.h"
 #include "core/port/std/tPortQueue.h"
@@ -551,6 +552,14 @@ public:
   inline void Publish(const tPortDataManager* data)
   {
     PublishImpl<false, cCHANGED, false>(data);
+  }
+
+  /*!
+   * Releases all automatically acquired locks
+   */
+  static inline void ReleaseAutoLocks()
+  {
+    tThreadLocalCache::GetFast()->ReleaseAllLocks();
   }
 
   /*!

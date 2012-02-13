@@ -29,7 +29,6 @@
 #include "core/datatype/tBounds.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/thread/tThreadContainerThread.h"
-#include "core/finstructable/tGroup.h"
 #include "core/thread/tStartAndPausable.h"
 #include "core/port/tPort.h"
 

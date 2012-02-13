@@ -22,8 +22,8 @@
 #include "core/port/rpc/tSynchMethodCallLogic.h"
 #include "core/port/rpc/tMethodCallSyncher.h"
 #include "core/port/rpc/tAbstractCall.h"
-#include "core/port/tThreadLocalCache.h"
 #include "core/port/rpc/tMethodCallException.h"
+#include "core/port/rpc/tThreadLocalRPCData.h"
 
 namespace finroc
 {
@@ -38,7 +38,7 @@ void tSynchMethodCallLogic::HandleMethodReturn(tAbstractCall* call)
 
 tAbstractCall* tSynchMethodCallLogic::PerformSynchCallImpl(tAbstractCall* call, tCallable<tAbstractCall>* call_me, int64 timeout)
 {
-  tMethodCallSyncher* mcs = tThreadLocalCache::Get()->GetMethodSyncher();
+  tMethodCallSyncher* mcs = tThreadLocalRPCData::Get().GetMethodSyncher();
   tAbstractCall* ret = NULL;
   {
     util::tLock lock2(mcs);

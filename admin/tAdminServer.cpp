@@ -19,6 +19,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "rrlib/rtti/rtti.h"
+#include "rrlib/serialization/serialization.h"
+
 #include "core/admin/tAdminServer.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tAbstractPort.h"
@@ -28,18 +31,17 @@
 #include "core/thread/tExecutionControl.h"
 #include "core/plugin/tCreateFrameworkElementAction.h"
 #include "core/plugin/tPlugins.h"
+#include "core/plugin/sDynamicLoading.h"
+#include "core/plugin/runtime_construction_actions.h"
 #include "core/parameter/tStaticParameterList.h"
 #include "core/tFinrocAnnotation.h"
-#include "rrlib/rtti/rtti.h"
 #include "core/parameter/tConfigFile.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/cc/tCCPortBase.h"
-#include "rrlib/serialization/serialization.h"
 #include "core/port/std/tPortBase.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/tThreadLocalCache.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/parameter/tConstructorParameters.h"
 #include "core/parameter/tStaticParameterBase.h"
 #include "core/finstructable/tFinstructableGroup.h"
@@ -126,10 +128,10 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
   }
   else
   {
-    const util::tSimpleList<tCreateFrameworkElementAction*>& module_types = tPlugins::GetInstance()->GetModuleTypes();
-    for (size_t i = 0u; i < module_types.Size(); i++)
+    const std::vector<core::tCreateFrameworkElementAction*>& module_types = runtime_construction::GetConstructibleElements();
+    for (size_t i = 0u; i < module_types.size(); i++)
     {
-      const tCreateFrameworkElementAction& cma = *module_types.Get(i);
+      const tCreateFrameworkElementAction& cma = *module_types[i];
       co.WriteString(cma.GetName());
       co.WriteString(cma.GetModuleGroup());
       if (cma.GetParameterTypes() != NULL)
@@ -259,7 +261,7 @@ tPortDataPtr<tCoreString> tAdminServer::HandleCall(const tAbstractMethod* method
       tCCPortBase* p = static_cast<tCCPortBase*>(ap);
       const rrlib::rtti::tGenericObject* go = p->GetAutoLockedRaw();
       cs->Set(rrlib::serialization::Serialize(*go));
-      p->ReleaseAutoLocks();
+      tPortBase::ReleaseAutoLocks();
       return cs;
     }
     else if (tFinrocTypeInfo::IsStdType(ap->GetDataType()))
@@ -268,7 +270,7 @@ tPortDataPtr<tCoreString> tAdminServer::HandleCall(const tAbstractMethod* method
       tPortBase* p = static_cast<tPortBase*>(ap);
       tPortDataManager* go = p->GetAutoLockedRaw();
       cs->Set(rrlib::serialization::Serialize(*go->GetObject()));
-      p->ReleaseAutoLocks();
+      tPortBase::ReleaseAutoLocks();
       return cs;
     }
   }
@@ -457,7 +459,7 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortD
     {
       {
         util::tLock lock4(GetRegistryLock());
-        tCreateFrameworkElementAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(cma_index);
+        tCreateFrameworkElementAction* cma = runtime_construction::GetConstructibleElements()[cma_index];
         ::finroc::core::tFrameworkElement* parent = tRuntimeEnvironment::GetInstance()->GetElement(parent_handle);
         if (parent == NULL || (!parent->IsReady()))
         {
@@ -488,7 +490,7 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortD
             ci.Close();
           }
           ::finroc::core::tFrameworkElement* created = cma->CreateModule(parent, name->ToString(), params);
-          created->SetFinstructed(cma, params);
+          tFinstructableGroup::SetFinstructed(created, cma, params);
           created->Init();
           params = NULL;
 

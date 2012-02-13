@@ -225,12 +225,6 @@ private:
   /*! Value relevant for publishing thread only - is this still a unused buffer? */
   bool unused;
 
-  // Reference counter offset in class (offsetof-makro doesn't work here :-/ )
-  static size_t cREF_COUNTERS_OFFSET;
-
-  // PortDataManager prototype to obtain above offset
-  static tPortDataManager cPROTOTYPE;
-
   /*! PortDataManager that this manager is derived from - null if not derived */
   tPortDataManager* derived_from;
 
@@ -415,8 +409,11 @@ namespace finroc
 {
 namespace core
 {
+
 tPortDataManager* tPortDataManager::tRefCounter::GetManager()
 {
+  // Reference counter offset in class (offsetof-makro doesn't work here :-/ )
+  const size_t cREF_COUNTERS_OFFSET = ((char*) & ((tPortDataManager*)1000)->ref_counters[0]) - ((char*)1000);
   return (tPortDataManager*)((((size_t)this) & tCombinedPointerOps::cPOINTER_MASK) - cREF_COUNTERS_OFFSET); // memory layout allows doing this - shrinks class to <=33%
 }
 

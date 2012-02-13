@@ -27,16 +27,17 @@
  *
  */
 //----------------------------------------------------------------------
-#include "core/structure/tStructureElementRegister.h"
-#include "core/tRuntimeEnvironment.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include "core/tRuntimeEnvironment.h"
+#include "rrlib/util/patterns/singleton.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "core/structure/tStructureElementRegister.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -69,26 +70,35 @@ namespace core
 {
 namespace structure
 {
+namespace internal
+{
+struct tStructureElementStorage
+{
+  util::tMutex mutex;
+  std::vector<tInstantiatedModule> reg;
+  std::vector<tModulePorts> module_type_reg;
+};
+static inline unsigned int GetLongevity(internal::tStructureElementStorage*)
+{
+  return 20; // can be deleted after runtime environment
+}
+}
+
+typedef rrlib::util::tSingletonHolder<internal::tStructureElementStorage, rrlib::util::singleton::Longevity> tStructureElementStorageInstance;
 
 util::tMutex& tStructureElementRegister::GetMutex()
 {
-  static util::tMutex mutex;
-  static tRuntimeEnvironment::tStaticDeleter deleter; // make sure all framework elements are deleted before mutex
-  return mutex;
+  return tStructureElementStorageInstance::Instance().mutex;
 }
 
 std::vector<tInstantiatedModule>& tStructureElementRegister::GetRegister()
 {
-  static std::vector<tInstantiatedModule> reg;
-  static tRuntimeEnvironment::tStaticDeleter deleter; // make sure all framework elements are deleted before register
-  return reg;
+  return tStructureElementStorageInstance::Instance().reg;
 }
 
 std::vector<tModulePorts>& tStructureElementRegister::GetModuleTypeRegister()
 {
-  static std::vector<tModulePorts> reg;
-  static tRuntimeEnvironment::tStaticDeleter deleter; // make sure all framework elements are deleted before register
-  return reg;
+  return tStructureElementStorageInstance::Instance().module_type_reg;
 }
 
 void tStructureElementRegister::AddMemoryBlock(void* address, size_t size)

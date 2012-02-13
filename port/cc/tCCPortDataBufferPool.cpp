@@ -32,7 +32,6 @@ namespace finroc
 namespace core
 {
 tCCPortDataBufferPool::tCCPortDataBufferPool(const rrlib::rtti::tDataTypeBase& data_type_, int initial_size) :
-  thread_local_cache_infos(tThreadLocalCache::Get()->GetInfosLock()),
   returned_buffers(),
   inter_threads(new util::tReusablesPool<tCCPortDataManager>()),
   data_type(data_type_)
@@ -42,7 +41,6 @@ tCCPortDataBufferPool::tCCPortDataBufferPool(const rrlib::rtti::tDataTypeBase& d
     //enqueue(createBuffer());
     Attach(tCCPortDataManagerTL::Create(data_type_), true);
   }
-  assert(thread_local_cache_infos.get() != NULL);
 }
 
 void tCCPortDataBufferPool::ControlledDelete()
@@ -111,7 +109,7 @@ tCCPortDataBufferPool::~tCCPortDataBufferPool()
 
 util::tMutexLockOrder& tCCPortDataBufferPool::GetThreadLocalCacheInfosLock()
 {
-  return static_cast<util::tSimpleListWithMutex<tThreadLocalCache*>*>(thread_local_cache_infos.get())->obj_mutex;
+  return *tThreadLocalCache::infos_mutex;
 }
 
 void tCCPortDataBufferPool::ReleaseLock(tCCPortDataManagerTL* pd)

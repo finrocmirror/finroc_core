@@ -39,12 +39,15 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include "rrlib/finroc_core_utils/thread/tTask.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
 #include "core/parameter/tParameter.h"
 #include "core/parameter/tStaticParameter.h"
+#include "core/parameter/tConfigNode.h"
+#include "core/parameter/tConfigFile.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/structure/tConveniencePort.h"
 #include "core/structure/tStructureElementRegister.h"
@@ -146,6 +149,14 @@ public:
   }
 
   /*!
+   * Releases all automatically acquired locks
+   */
+  inline void ReleaseAutoLocks()
+  {
+    tThreadLocalCache::GetFast()->ReleaseAllLocks();
+  }
+
+  /*!
    * (Should only be called by abstract module classes such as tModule and tSenseControlModule)
    *
    * Calls ParametersChanged() if a parameter change was detected and resets change flag
@@ -202,6 +213,23 @@ public:
       delete ptr;
     }
   };
+
+  //TODO: refactor
+  /*!
+   * \param node Common parent config file node for all child parameter config entries (starting with '/' => absolute link - otherwise relative).
+   */
+  void SetConfigNode(const util::tString& node)
+  {
+    core::tConfigNode::SetConfigNode(this, node);
+  }
+
+  /*!
+   * \return Config file for module
+   */
+  tConfigFile* GetConfigFile() const
+  {
+    return tConfigFile::Find(this);
+  }
 };
 
 //----------------------------------------------------------------------

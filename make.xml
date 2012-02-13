@@ -1,12 +1,139 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <targets>
 
-  <finroclibrary name="core" libs="dl">
-    <sources exclude="default_main_wrapper.* test/** finstructable/pFinstructed.cpp">
-      **.cpp
-      **.h
+  <finroclibrary name="core">
+    <sources>
+      tAnnotatable.cpp
+      tCoreFlags.cpp
+      tCoreRegister.h
+      tFinrocAnnotation.cpp
+      tFrameworkElement.cpp
+      tFrameworkElementTreeFilter.cpp
+      tLinkEdge.cpp
+      tLockOrderLevels.cpp
+      tRuntimeEnvironment.cpp
+      tRuntimeListener.h
+      tRuntimeSettings.cpp
+      datatype/tConstant.cpp
+      datatype/tCoreString.cpp
+      datatype/tNumber.cpp
+      datatype/tUnit.cpp
+      port/tAbstractPort.cpp
+      port/tAggregatedEdge.h
+      port/tEdgeAggregator.cpp
+      port/tPortCreationInfoBase.cpp
+      port/tPortFlags.cpp
+      portdatabase/tFinrocTypeInfo.cpp
+      portdatabase/tPortFactory.h
+      portdatabase/typeutil.h
+      plugin/tPlugins.cpp
+      plugin/tPlugin.h
     </sources>
   </finroclibrary>
+
+  <finrocplugin name="data_ports">
+    <sources>
+      datatype/tBounds.h
+      datatype/tXML.cpp
+      port/tCombinedPointer.h
+      port/tMultiTypePortDataBufferPool.cpp
+      port/tPortCreationInfo.h
+      port/tPortListenerRaw.h
+      port/tPortTypeMap.h
+      port/tThreadLocalCache.cpp
+      port/cc/*.cpp
+      port/cc/*.h
+      port/std/*.cpp
+      port/std/*.h
+      portdatabase/sSerializationHelper.cpp
+      portdatabase/tReusableGenericObjectManager.h
+      portdatabase/tReusableGenericObjectManagerTL.h
+    </sources>
+  </finrocplugin>
+
+  <finrocplugin name="port_api">
+    <sources>
+      port/tPort.cpp
+      port/tPortDataPtr.h
+      port/tPortDataPtr.h
+      port/tPortGroup.cpp
+      port/tPortListener.h
+      port/tPortListenerAdapter.cpp
+      port/tPortQueueFragment.h
+      port/tPortUtil.h
+      port/tPortWrapperBase.h
+    </sources>
+  </finrocplugin>
+
+  <finrocplugin name="runtime_construction_actions" libs="dl">
+    <sources>
+      plugin/runtime_construction_actions.cpp
+      plugin/tConnectionListener.h
+      plugin/tConstructorCreateModuleAction.h
+      plugin/tConstructorCreateModuleActionImpl.h
+      plugin/tCreateExternalConnectionAction.h
+      plugin/tCreateFrameworkElementAction.cpp
+      plugin/tExternalConnection.cpp
+      plugin/tFunctionCreateModuleAction.h
+      plugin/tParamType.h
+      plugin/tStandardCreateModuleAction.h
+    </sources>
+  </finrocplugin>
+      
+  <finrocplugin name="runtime_construction" libs="dl">
+    <sources>
+      plugin/sDynamicLoading.cpp
+      finstructable/tFinstructableGroup.cpp
+      finstructable/tGroup.cpp
+      finstructable/tGroupInterface.cpp
+      admin/*.cpp
+      datatype/tDataTypeReference.cpp
+      datatype/tPortCreationList.cpp
+      thread/tThreadContainer.cpp
+    </sources>
+  </finrocplugin>
+
+  <finrocplugin name="network_base">
+    <sources>
+      datatype/tFrameworkElementInfo.cpp
+      port/net/*.cpp
+      port/net/*.h
+    </sources>
+  </finrocplugin>
+
+  <finrocplugin name="rpc_ports">
+    <sources>
+      portdatabase/tRPCInterfaceType.cpp
+      portdatabase/tSerializableReusable.h
+      port/rpc/**.cpp
+      port/rpc/**.h
+    </sources>
+  </finrocplugin>
+  
+  <finrocplugin name="parameters">
+    <sources>
+      parameter/*.cpp
+      parameter/*.h
+    </sources>
+  </finrocplugin>
+
+  <finrocplugin name="scheduling">
+    <sources>
+      thread/tCoreLoopThreadBase.cpp
+      thread/tExecutionControl.cpp
+      thread/tPeriodicFrameworkElementTask.cpp
+      thread/tStartAndPausable.h
+      thread/tThreadContainerElement.h
+      thread/tThreadContainerThread.cpp
+    </sources>
+  </finrocplugin>
+
+  <finrocplugin name="structure">
+    <sources>
+      structure/*.cpp
+      structure/*.h
+    </sources>
+  </finrocplugin>
   
   <finroclibrary name="main_wrapper">
     <sources>

@@ -102,7 +102,7 @@ void tRealClientTest::Main()
   catch (const util::tException& e1)
   {
     e1.PrintStackTrace();
-    util::tSystem::Exit(-1);
+    return;
   }
   tRuntimeEnvironment::GetInstance()->PrintStructure();
   ::finroc::core::tNetworkTestSuite::MainLoop();

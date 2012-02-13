@@ -19,18 +19,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/rpc/tRPCThreadPool.h"
-
+#include "core/port/tThreadLocalCache.h"
 #include "core/port/rpc/tRPCThread.h"
-#include "rrlib/finroc_core_utils/thread/tLoopThread.h"
-#include "rrlib/finroc_core_utils/thread/tTask.h"
+#include "core/port/rpc/tRPCThreadPool.h"
 
 namespace finroc
 {
 namespace core
 {
 tRPCThread::tRPCThread() :
-  tCoreLoopThreadBase(0),
+  tLoopThread(0),
   next_task(NULL)
 {
 }
@@ -49,7 +47,7 @@ void tRPCThread::MainLoopCallback()
     util::tLock lock2(this);
     if (next_task == NULL)
     {
-      tRPCThreadPool::GetInstance()->EnqueueThread(this);
+      tRPCThreadPool::GetInstance().EnqueueThread(this);
 
       if (!IsStopSignalSet())
       {
@@ -63,6 +61,18 @@ void tRPCThread::MainLoopCallback()
     next_task = NULL;
     tmp->ExecuteTask();
   }
+}
+
+void tRPCThread::Run()
+{
+  tThreadLocalCache::Get();
+  finroc::util::tLoopThread::Run();
+}
+
+void tRPCThread::StopThread()
+{
+  util::tLock lock2(this);
+  monitor.Notify(lock2);
 }
 
 } // namespace finroc

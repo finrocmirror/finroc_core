@@ -21,6 +21,7 @@
  */
 #include "core/parameter/tConfigNode.h"
 #include "core/parameter/tConfigFile.h"
+#include "core/parameter/tStaticParameterList.h"
 #include "core/tFrameworkElement.h"
 
 namespace finroc
@@ -74,6 +75,40 @@ util::tString tConfigNode::GetFullConfigEntry(tFrameworkElement* parent, const u
   return node + (node.EndsWith("/") ? "" : "/") + config_entry;
 }
 
+void tConfigNode::SetConfigNode(tFrameworkElement* fe, const util::tString& node)
+{
+  util::tLock lock2(fe->GetRegistryLock());
+  tConfigNode* cn = fe->GetAnnotation<tConfigNode>();
+  if (cn != NULL)
+  {
+    if (cn->node.Equals(node))
+    {
+      return;
+    }
+    cn->node = node;
+  }
+  else
+  {
+    cn = new tConfigNode(node);
+    fe->AddAnnotation(cn);
+  }
+
+  // reevaluate static parameters
+  tStaticParameterList::DoStaticParameterEvaluation(fe);
+
+  // reload parameters
+  if (fe->IsReady())
+  {
+    tConfigFile* cf = tConfigFile::Find(fe);
+    if (cf != NULL)
+    {
+      cf->LoadParameterValues(fe);
+    }
+  }
+}
+
+
 } // namespace finroc
 } // namespace core
 
+template class rrlib::rtti::tDataType<finroc::core::tConfigNode>;

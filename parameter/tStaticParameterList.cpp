@@ -38,6 +38,11 @@ tStaticParameterList::tStaticParameterList() :
   create_action(-1)
 {}
 
+tStaticParameterList::~tStaticParameterList()
+{
+  Clear();
+}
+
 void tStaticParameterList::Add(tStaticParameterBase* param)
 {
   if (param != NULL)
@@ -46,6 +51,11 @@ void tStaticParameterList::Add(tStaticParameterBase* param)
     param->parent_list = this;
     parameters.Add(param);
   }
+}
+
+void tStaticParameterList::AnnotatedObjectInitialized()
+{
+  DoStaticParameterEvaluation(GetAnnotated());
 }
 
 void tStaticParameterList::Clear()
@@ -75,7 +85,7 @@ void tStaticParameterList::Deserialize(rrlib::serialization::tInputStream& is)
       tStaticParameterBase* param = parameters.Get(i);
       param->Deserialize(is);
     }
-    ann->DoStaticParameterEvaluation();
+    DoStaticParameterEvaluation(ann);
   }
 }
 
@@ -98,6 +108,67 @@ void tStaticParameterList::Deserialize(const rrlib::xml2::tXMLNode& node, bool f
     tStaticParameterBase* param = Get(i);
     param->Deserialize(*child, finstruct_context);
     ++child;
+  }
+}
+
+void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement* fe)
+{
+  util::tLock lock2(fe->GetRegistryLock());
+
+  // all parameters attached to any of the module's parameters
+  util::tSimpleList<tStaticParameterBase*> attached_parameters;
+  util::tSimpleList<tStaticParameterBase*> attached_parameters_tmp;
+
+  tStaticParameterList* spl = fe->GetAnnotation<tStaticParameterList>();
+  if (spl != NULL)
+  {
+
+    // Reevaluate parameters and check whether they have changed
+    bool changed = false;
+    for (size_t i = 0; i < spl->Size(); i++)
+    {
+      spl->Get(i)->LoadValue();
+      changed |= spl->Get(i)->HasChanged();
+      spl->Get(i)->GetAllAttachedParameters(attached_parameters_tmp);
+      attached_parameters.AddAll(attached_parameters_tmp);
+    }
+
+    if (changed)
+    {
+      fe->EvaluateStaticParameters();
+
+      // Reset change flags for all parameters
+      for (size_t i = 0; i < spl->Size(); i++)
+      {
+        spl->Get(i)->ResetChanged();
+      }
+
+      // initialize any new child elements
+      if (fe->IsReady())
+      {
+        fe->Init();
+      }
+    }
+  }
+
+  // evaluate children's static parameters
+  const util::tArrayWrapper<tFrameworkElement::tLink*>* iterable = fe->GetChildren();
+  for (int i = 0, n = iterable->Size(); i < n; i++)
+  {
+    tFrameworkElement::tLink* child = iterable->Get(i);
+    if (child != NULL && child->IsPrimaryLink() && (!child->GetChild()->IsDeleted()))
+    {
+      DoStaticParameterEvaluation(child->GetChild());
+    }
+  }
+
+  // evaluate any attached parameters that have changed, too
+  for (size_t i = 0; i < attached_parameters.Size(); i++)
+  {
+    if (attached_parameters.Get(i)->HasChanged())
+    {
+      DoStaticParameterEvaluation(attached_parameters.Get(i)->GetParentList()->GetAnnotated());
+    }
   }
 }
 
@@ -160,3 +231,4 @@ void tStaticParameterList::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct
 } // namespace finroc
 } // namespace core
 
+template class rrlib::rtti::tDataType<finroc::core::tStaticParameterList>;

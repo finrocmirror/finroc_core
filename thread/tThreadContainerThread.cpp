@@ -1,9 +1,29 @@
-
-#include "core/thread/tThreadContainerThread.h"
-#include "core/thread/tThreadContainer.h"
-#include "core/thread/tPeriodicFrameworkElementTask.h"
+/**
+ * You received this file as part of an advanced experimental
+ * robotics framework prototype ('finroc')
+ *
+ * Copyright (C) 2011 Max Reichardt,
+ *   Robotics Research Lab, University of Kaiserslautern
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
 #include "rrlib/finroc_core_utils/thread/tLoopThread.h"
 #include "rrlib/finroc_core_utils/thread/tTask.h"
+
+#include "core/thread/tThreadContainerThread.h"
+#include "core/thread/tPeriodicFrameworkElementTask.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/tAbstractPort.h"
 #include "core/port/tAggregatedEdge.h"
@@ -27,7 +47,7 @@ tThreadContainerThread::tThreadContainerThread(tFrameworkElement* thread_contain
   tmp(),
   last_cycle_execution_time(last_cycle_execution_time)
 {
-  this->SetName(util::tStringBuilder("ThreadContainer ") + thread_container_->GetName());
+  this->SetName(std::string("ThreadContainer ") + thread_container_->GetCName());
 }
 
 void tThreadContainerThread::MainLoopCallback()

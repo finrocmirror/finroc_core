@@ -91,15 +91,15 @@ public:
     annotated(NULL)
   {}
 
+  virtual ~tFinrocAnnotation()
+  {
+  }
+
   /*!
    * Add another annotation to framework element
    * (added to end of linked list)
    */
   void Append(tFinrocAnnotation* ann);
-
-  virtual ~tFinrocAnnotation()
-  {
-  }
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {

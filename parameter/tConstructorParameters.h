@@ -47,6 +47,8 @@ public:
   static rrlib::rtti::tDataType<tConstructorParameters> cTYPE;
 
   tConstructorParameters() {}
+
+  virtual void AnnotatedObjectInitialized() {}
 };
 
 } // namespace finroc

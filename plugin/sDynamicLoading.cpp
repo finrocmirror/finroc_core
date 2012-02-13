@@ -19,33 +19,74 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/plugin/sDynamicLoading.h"
-#include "core/tRuntimeEnvironment.h"
 #include <fstream>
 #include <dlfcn.h>
 #include <boost/filesystem.hpp>
+#include "rrlib/util/patterns/singleton.h"
+
+#include "core/plugin/sDynamicLoading.h"
+#include "core/tRuntimeEnvironment.h"
+#include "core/plugin/tPlugin.h"
+#include "core/plugin/tCreateFrameworkElementAction.h"
+#include "core/plugin/runtime_construction_actions.h"
+#include "core/admin/tAdminServer.h"
+#include "core/finstructable/tFinstructableGroup.h"
 
 namespace finroc
 {
 namespace core
 {
-sDynamicLoading::tDLCloser::~tDLCloser()
+
+namespace internal
 {
-  tRuntimeEnvironment::Shutdown();
-  for (size_t i = 0; i < loaded.size(); i++)
+
+class tRuntimeConstructionPlugin : public core::tPlugin
+{
+public:
+  tRuntimeConstructionPlugin() {}
+
+  virtual void Init()
   {
-    dlclose(loaded[i]);
+    new core::tAdminServer();
+    core::tFinstructableGroup::StaticInit();
   }
+};
+
+static tRuntimeConstructionPlugin plugin;
+
+// closes dlopen-ed libraries
+class tDLCloser
+{
+public:
+  std::vector<void*> loaded;
+
+  tDLCloser() : loaded() {}
+
+  ~tDLCloser()
+  {
+    tRuntimeEnvironment::Shutdown();
+    for (size_t i = 0; i < loaded.size(); i++)
+    {
+      dlclose(loaded[i]);
+    }
+  }
+};
+
+static inline unsigned int GetLongevity(internal::tDLCloser*)
+{
+  return 0xFFFFFFFF; // unload code after everything else
 }
+
+}
+
+typedef rrlib::util::tSingletonHolder<internal::tDLCloser, rrlib::util::singleton::Longevity> tDLCloserInstance;
 
 bool sDynamicLoading::DLOpen(const char* open)
 {
-  static tDLCloser dlcloser;
-
   void* handle = dlopen(open, RTLD_NOW | RTLD_GLOBAL);
   if (handle)
   {
-    dlcloser.loaded.push_back(handle);
+    tDLCloserInstance::Instance().loaded.push_back(handle);
     return true;
   }
   FINROC_LOG_PRINTF(rrlib::logging::eLL_ERROR, "Error from dlopen: %s", dlerror());
@@ -162,6 +203,48 @@ std::vector<std::string> sDynamicLoading::GetLoadableFinrocLibraries()
   }
   return result;
 }
+
+core::tCreateFrameworkElementAction* sDynamicLoading::LoadModuleType(const std::string& group, const std::string& name)
+{
+  // dynamically loaded .so files
+  static std::vector<std::string> loaded;
+
+  // try to find module among existing modules
+  const std::vector<core::tCreateFrameworkElementAction*>& modules = runtime_construction::GetConstructibleElements();
+  for (size_t i = 0u; i < modules.size(); i++)
+  {
+    core::tCreateFrameworkElementAction* cma = modules[i];
+    if (cma->GetModuleGroup().Equals(group) && cma->GetName().Equals(name))
+    {
+      return cma;
+    }
+  }
+
+  // hmm... we didn't find it - have we already tried to load .so?
+  bool already_loaded = false;
+  for (size_t i = 0; i < loaded.size(); i++)
+  {
+    if (loaded[i].compare(group) == 0)
+    {
+      already_loaded = true;
+      break;
+    }
+  }
+
+  if (!already_loaded)
+  {
+    loaded.push_back(group);
+    std::set<std::string> loaded = core::sDynamicLoading::GetLoadedFinrocLibraries();
+    if (loaded.find(group) == loaded.end() && core::sDynamicLoading::DLOpen(group.c_str()))
+    {
+      return LoadModuleType(group, name);
+    }
+  }
+
+  FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not find/load module ", name, " in ", group);
+  return NULL;
+}
+
 
 } // namespace finroc
 } // namespace core

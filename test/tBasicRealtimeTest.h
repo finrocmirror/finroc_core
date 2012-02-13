@@ -55,15 +55,11 @@ public:
 
   tBasicRealtimeTest(const util::tString& name);
 
-  // ns
-
-  static void Main(::finroc::util::tArrayWrapper<util::tString>& args);
-
   virtual void Run();
 
   virtual const util::tString ToString() const
   {
-    return GetName() + " - Cycles: " + cycles.Get() + "; Max Latency: " + (max_latency.Get() / 1000) + " us; Average Latency: " + (total_latency.Get() / (1000 * std::max(1, cycles.Get()))) + " us";
+    return util::tString(GetName()) + " - Cycles: " + cycles.Get() + "; Max Latency: " + (max_latency.Get() / 1000) + " us; Average Latency: " + (total_latency.Get() / (1000 * std::max(1, cycles.Get()))) + " us";
   }
 
 };

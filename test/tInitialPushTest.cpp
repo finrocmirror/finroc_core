@@ -27,6 +27,8 @@
 #include "core/tFrameworkElement.h"
 #include "core/port/tThreadLocalCache.h"
 
+using namespace rrlib::logging;
+
 namespace finroc
 {
 namespace core
@@ -58,10 +60,10 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   in.ConnectToSource(out);
 
   // print output
-  util::tSystem::out.Println(util::tStringBuilder("NumIn (exp 23): ") + n_in.Get());
-  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
+  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumIn (exp 23): ") + n_in.Get());
+  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
   const blackboard::tBlackboardBuffer* bb2 = in.GetAutoLocked();
-  util::tSystem::out.Println(util::tStringBuilder("StdIn (exp 23): ") + bb2->GetBuffer()->GetInt(0u));
+  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("StdIn (exp 23): ") + bb2->GetBuffer()->GetInt(0u));
   tThreadLocalCache::GetFast()->ReleaseAllLocks();
 
   // strategy changes...
@@ -69,16 +71,16 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   n_out.Publish(42);
   //System.out.println("NumIn: " + nIn.getDoubleRaw());
   n_in.SetPushStrategy(true);
-  util::tSystem::out.Println(util::tStringBuilder("NumIn (expected 23 - because we have two sources => no push): ") + n_in.Get());
-  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
+  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumIn (expected 23 - because we have two sources => no push): ") + n_in.Get());
+  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
   n_rev_out.SetReversePushStrategy(false);
   n_out.Publish(12);
-  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
+  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
   n_rev_out.SetReversePushStrategy(true);
-  util::tSystem::out.Println(util::tStringBuilder("NumRevOut (exp 12): ") + n_rev_out.Get());
+  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumRevOut (exp 12): ") + n_rev_out.Get());
 
   // now for a complex net
-  util::tSystem::out.Println("\nNow for a complex net...");
+  FINROC_LOG_PRINT(eLL_USER, "\nNow for a complex net...");
 
   // o1->o2
   tPort<int> o1("o1", tPortFlags::cOUTPUT_PROXY);

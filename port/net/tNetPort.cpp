@@ -29,6 +29,7 @@
 #include "core/port/cc/tCCPortDataManager.h"
 #include "core/port/cc/tCCQueueFragmentRaw.h"
 #include "core/port/rpc/tMethodCallException.h"
+#include "core/port/rpc/tThreadLocalRPCData.h"
 
 namespace finroc
 {
@@ -64,6 +65,54 @@ tNetPort::tNetPort(tPortCreationInfoBase pci, util::tObject* belongs_to_) :
   pci.flags = f;
 
   wrapped = (IsMethodType() ? static_cast<tAbstractPort*>(new tInterfaceNetPortImpl(this, pci)) : (IsCCType() ? static_cast<tAbstractPort*>(new tCCNetPort(this, pci)) : static_cast<tAbstractPort*>(new tStdNetPort(this, pci))));
+  tTypedObject::type = rrlib::rtti::tDataType<tNetPort>();
+  wrapped->AddAnnotation(this);
+}
+
+rrlib::rtti::tGenericObject* tNetPort::CreateGenericObject(const rrlib::rtti::tDataTypeBase& dt, void* factory_parameter)
+{
+  if (tFinrocTypeInfo::IsStdType(dt))
+  {
+    return GetPort()->GetUnusedBufferRaw(dt)->GetObject();
+  }
+  else if (tFinrocTypeInfo::IsCCType(dt))
+  {
+    if (factory_parameter == NULL)
+    {
+      // get thread local buffer
+      return tThreadLocalCache::Get()->GetUnusedBuffer(dt)->GetObject();
+    }
+    else
+    {
+      // get interthread buffer
+      return tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(dt)->GetObject();
+    }
+  }
+  FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Cannot create buffer of type ", dt.GetName());
+  return NULL;
+}
+
+tNetPort* tNetPort::FindNetPort(tAbstractPort& port, util::tObject* belongs_to)
+{
+  if (!belongs_to)
+  {
+    return NULL;
+  }
+  util::tSimpleList<tAbstractPort*> result;
+  port.GetConnectionPartners(result, port.IsOutputPort(), !port.IsOutputPort());
+  for (int i = 0, n = result.Size(); i < n; i++)
+  {
+    tAbstractPort* port2 = result.Get(i);
+    if (port2 && port2->GetFlag(tCoreFlags::cNETWORK_ELEMENT))
+    {
+      tNetPort* np = port2->AsNetPort();
+      if (np && np->GetBelongsTo() == belongs_to)
+      {
+        return np;
+      }
+    }
+  }
+  return NULL;
 }
 
 void tNetPort::PropagateStrategyFromTheNet(int16 strategy)
@@ -92,7 +141,7 @@ void tNetPort::ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int
   if (IsStdType() || IsTransactionType())
   {
     tStdNetPort* pb = static_cast<tStdNetPort*>(wrapped);
-    ci.SetFactory(pb);
+    ci.SetFactory(this);
     do
     {
       pb->PublishFromNet(static_cast<tPortDataManager*>(rrlib::rtti::ReadObject(ci, wrapped->GetDataType(), NULL)->GetManager()), changed_flag);
@@ -297,7 +346,7 @@ void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataManagerTL* read_object, int
 
 bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer)
 {
-  tPullCall* pc = tThreadLocalCache::GetFast()->GetUnusedPullCall();
+  tPullCall* pc = tThreadLocalRPCData::Get().GetUnusedPullCall();
   pc->SetRemotePortHandle(outer_class_ptr->remote_handle);
   //          pc.setLocalPortHandle(getHandle());
   try
@@ -402,7 +451,7 @@ void tNetPort::tStdNetPort::PublishFromNet(tPortDataManager* read_object, int8 c
 const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, int8 add_locks)
 {
   assert((add_locks > 0));
-  tPullCall* pc = tThreadLocalCache::GetFast()->GetUnusedPullCall();
+  tPullCall* pc = tThreadLocalRPCData::Get().GetUnusedPullCall();
   pc->SetRemotePortHandle(outer_class_ptr->remote_handle);
   //          pc.setLocalPortHandle(getHandle());
   try

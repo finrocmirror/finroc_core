@@ -25,10 +25,10 @@
 #include "core/port/tThreadLocalCache.h"
 #include "rrlib/finroc_core_utils/tTime.h"
 
-namespace finroc
-{
-namespace core
-{
+using namespace finroc::core;
+using namespace finroc;
+using namespace rrlib::logging;
+
 const int tBasicRealtimeTest::cINTERVAL;
 
 tBasicRealtimeTest::tBasicRealtimeTest(const util::tString& name) :
@@ -39,30 +39,6 @@ tBasicRealtimeTest::tBasicRealtimeTest(const util::tString& name) :
 {
   port.Init();
   SetName(name);
-}
-
-void tBasicRealtimeTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
-{
-  tRuntimeEnvironment::GetInstance();
-
-  std::shared_ptr<tBasicRealtimeTest> rt = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("RT-Thread"));
-  std::shared_ptr<tBasicRealtimeTest> t = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("non-RT-Thread"));
-  util::sThreadUtil::MakeThreadRealtime(rt);
-  rt->Start();
-  t->Start();
-
-  while (true)
-  {
-    util::tSystem::out.Println(rt->ToString() + "   " + t->ToString());
-    try
-    {
-      ::finroc::util::tThread::Sleep(1000);
-    }
-    catch (const util::tInterruptedException& e)
-    {
-      break;
-    }
-  }
 }
 
 void tBasicRealtimeTest::Run()
@@ -87,15 +63,26 @@ void tBasicRealtimeTest::Run()
   }
 }
 
-} // namespace finroc
-} // namespace core
-
 int main(int argc__, char **argv__)
 {
-  ::finroc::util::tArrayWrapper< ::finroc::util::tString> sa(argc__ <= 0 ? 0 : (argc__ - 1));
-  for (int i = 1; i < argc__; i++)
+  tRuntimeEnvironment::GetInstance();
+
+  std::shared_ptr<tBasicRealtimeTest> rt = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("RT-Thread"));
+  std::shared_ptr<tBasicRealtimeTest> t = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("non-RT-Thread"));
+  util::sThreadUtil::MakeThreadRealtime(rt);
+  rt->Start();
+  t->Start();
+
+  while (true)
   {
-    sa[i - 1] = ::finroc::util::tString(argv__[i]);
+    FINROC_LOG_PRINT(eLL_USER, rt->ToString() + "   " + t->ToString());
+    try
+    {
+      ::finroc::util::tThread::Sleep(1000);
+    }
+    catch (const util::tInterruptedException& e)
+    {
+      break;
+    }
   }
-  ::finroc::core::tBasicRealtimeTest::Main(sa);
 }

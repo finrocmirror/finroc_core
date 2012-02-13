@@ -19,22 +19,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "rrlib/finroc_core_utils/sFiles.h"
+#include "rrlib/xml2_wrapper/tXML2WrapperException.h"
+#include "rrlib/xml2_wrapper/tXMLDocument.h"
+#include <set>
+
 #include "core/finstructable/tFinstructableGroup.h"
 #include "core/tCoreFlags.h"
 #include "core/tAnnotatable.h"
 #include "core/parameter/tStaticParameterList.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/tAbstractPort.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
 #include "core/plugin/tCreateFrameworkElementAction.h"
 #include "core/plugin/tPlugins.h"
+#include "core/plugin/sDynamicLoading.h"
+#include "core/plugin/runtime_construction_actions.h"
 #include "core/parameter/tConstructorParameters.h"
-#include "rrlib/xml2_wrapper/tXML2WrapperException.h"
-#include "rrlib/xml2_wrapper/tXMLDocument.h"
 #include "core/tFrameworkElementTreeFilter.h"
 #include "core/datatype/tCoreString.h"
-#include "rrlib/finroc_core_utils/sFiles.h"
 #include "core/tLinkEdge.h"
 #include "core/parameter/tParameterInfo.h"
 #include "core/parameter/tConfigFile.h"
@@ -43,7 +47,7 @@ namespace finroc
 {
 namespace core
 {
-tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup::cCREATE_ACTION("Finstructable Group", util::tTypedClass<tFinstructableGroup>());
+tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup::cCREATE_ACTION("Finstructable Group");
 
 /*! Thread currently saving finstructable group */
 static util::tThread* saving_thread = NULL;
@@ -170,7 +174,7 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     util::tString type = node.GetStringAttribute("type");
 
     // find action
-    tCreateFrameworkElementAction* action = tPlugins::GetInstance()->LoadModuleType(group, type);
+    tCreateFrameworkElementAction* action = sDynamicLoading::LoadModuleType(group, type);
     if (action == NULL)
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to instantiate element. No module type ", group, "/", type, " available. Skipping...");
@@ -203,7 +207,7 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
       spl->Deserialize(*constructor_params, true);
     }
     created = action->CreateModule(parent, name, spl);
-    created->SetFinstructed(action, spl);
+    SetFinstructed(created, action, spl);
     if (parameters != NULL)
     {
       (static_cast<tStaticParameterList*>(created->GetAnnotation(tStaticParameterList::cTYPE)))->Deserialize(*parameters);
@@ -239,24 +243,7 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
 
 bool tFinstructableGroup::IsResponsibleForConfigFileConnections(tFrameworkElement* ap) const
 {
-  tConfigFile* cf = tConfigFile::Find(ap);
-  if (cf == NULL)
-  {
-    return this->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP) == NULL;
-  }
-  tFrameworkElement* config_element = static_cast<tFrameworkElement*>(cf->GetAnnotated());
-  const tFrameworkElement* responsible = config_element->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP) ? config_element : config_element->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
-  if (responsible == NULL)
-  {
-    // ok, config file is probably attached to runtime. Choose outer-most finstructable group.
-    responsible = this;
-    const tFrameworkElement* tmp;
-    while ((tmp = responsible->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP)) != NULL)
-    {
-      responsible = tmp;
-    }
-  }
-  return responsible == this;
+  return tParameterInfo::IsFinstructableGroupResponsibleForConfigFileConnections(*this, *ap);
 }
 
 void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
@@ -538,7 +525,7 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
       // serialize framework element
       rrlib::xml2::tXMLNode& n = node.AddChildNode("element");
       n.SetAttribute("name", fe->GetCName());
-      tCreateFrameworkElementAction* cma = tPlugins::GetInstance()->GetModuleTypes().Get(spl->GetCreateAction());
+      tCreateFrameworkElementAction* cma = runtime_construction::GetConstructibleElements()[spl->GetCreateAction()];
       n.SetAttribute("group", cma->GetModuleGroup());
       if (cma->GetModuleGroup().EndsWith(".so"))
       {
@@ -562,6 +549,19 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
         SerializeChildren(n, fe);
       }
     }
+  }
+}
+
+void tFinstructableGroup::SetFinstructed(tFrameworkElement* fe, tCreateFrameworkElementAction* create_action, tConstructorParameters* params)
+{
+  assert((!fe->GetFlag(tCoreFlags::cFINSTRUCTED)));
+  tStaticParameterList* list = tStaticParameterList::GetOrCreate(fe);
+  const std::vector<core::tCreateFrameworkElementAction*>& v = runtime_construction::GetConstructibleElements();
+  list->SetCreateAction(static_cast<int>(std::find(v.begin(), v.end(), create_action) - v.begin()));
+  fe->SetFlag(tCoreFlags::cFINSTRUCTED);
+  if (params != NULL)
+  {
+    fe->AddAnnotation(params);
   }
 }
 

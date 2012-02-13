@@ -19,9 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/cc/tCCQueueFragmentRaw.h"
-
 #include "core/port/cc/tCCPortBase.h"
+#include "core/port/cc/tCCQueueFragmentRaw.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/tCoreRegister.h"
 #include "core/port/tPortFlags.h"
@@ -96,10 +95,8 @@ tCCPortBase::~tCCPortBase()
   default_value->Recycle2();
   if (owned_data != NULL)
   {
-    {
-      util::tLock lock3(GetThreadLocalCacheInfosLock());
-      owned_data->PostThreadReleaseLock();
-    }
+    util::tLock lock3(*tThreadLocalCache::infos_mutex);
+    owned_data->PostThreadReleaseLock();
   }
   // do not release lock on current value - this is done in one of the statements above
 

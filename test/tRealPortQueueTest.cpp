@@ -28,6 +28,8 @@
 #include "core/datatype/tNumber.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 
+using namespace rrlib::logging;
+
 namespace finroc
 {
 namespace core
@@ -58,41 +60,41 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   tFrameworkElement::InitAll();
   tRuntimeEnvironment::GetInstance()->PrintStructure();
 
-  util::tSystem::out.Println("test writing a lot to port...");
-  int64 start = util::tSystem::CurrentTimeMillis();
+  FINROC_LOG_PRINT_STATIC(eLL_USER, "test writing a lot to port...");
+  int64 start = util::tTime::GetPrecise();
   for (int i = 0; i < cCYCLES; i++)
   {
     output->Publish(i);
   }
-  int64 time = util::tSystem::CurrentTimeMillis() - start;
-  util::tSystem::out.Println(time);
+  int64 time = util::tTime::GetPrecise() - start;
+  FINROC_LOG_PRINT_STATIC(eLL_USER, time);
 
-  util::tSystem::out.Println("Reading contents of queue (single dq)...");
+  FINROC_LOG_PRINT_STATIC(eLL_USER, "Reading contents of queue (single dq)...");
   int cn = 0;
   while ((input.Dequeue(cn)))
   {
     PrintNum(cn);
   }
 
-  util::tSystem::out.Println("Writing two entries to queue...");
+  FINROC_LOG_PRINT_STATIC(eLL_USER, "Writing two entries to queue...");
   for (int i = 0; i < 2; i++)
   {
     output->Publish(i);
   }
 
-  util::tSystem::out.Println("Reading contents of queue (single dq)...");
+  FINROC_LOG_PRINT_STATIC(eLL_USER, "Reading contents of queue (single dq)...");
   while ((input.Dequeue(cn)))
   {
     PrintNum(cn);
   }
 
-  util::tSystem::out.Println("Writing 20 entries to queue...");
+  FINROC_LOG_PRINT_STATIC(eLL_USER, "Writing 20 entries to queue...");
   for (int i = 0; i < 20; i++)
   {
     output->Publish(i);
   }
 
-  util::tSystem::out.Println("Read contents of queue in fragment...");
+  FINROC_LOG_PRINT_STATIC(eLL_USER, "Read contents of queue in fragment...");
   tPortQueueFragment<int> frag;
   input.DequeueAll(frag);
   while (frag.Dequeue(cn))
@@ -101,7 +103,7 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   }
   tThreadLocalCache::Get()->ReleaseAllLocks();
 
-  util::tSystem::out.Println("Read contents of queue in fragment again...");
+  FINROC_LOG_PRINT_STATIC(eLL_USER, "Read contents of queue in fragment again...");
   input.DequeueAll(frag);
   while (frag.Dequeue(cn))
   {
@@ -109,13 +111,13 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   }
   tThreadLocalCache::Get()->ReleaseAllLocks();
 
-  util::tSystem::out.Println("Writing 3 entries to queue...");
+  FINROC_LOG_PRINT_STATIC(eLL_USER, "Writing 3 entries to queue...");
   for (int i = 0; i < 3; i++)
   {
     output->Publish(i);
   }
 
-  util::tSystem::out.Println("Read contents of queue in fragment...");
+  FINROC_LOG_PRINT_STATIC(eLL_USER, "Read contents of queue in fragment...");
   input.DequeueAll(frag);
   while (frag.Dequeue(cn))
   {
@@ -124,7 +126,7 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   tThreadLocalCache::Get()->ReleaseAllLocks();
 
   // now concurrently :-)
-  util::tSystem::out.Println("\nAnd now for Concurrency :-)  ...");
+  FINROC_LOG_PRINT_STATIC(eLL_USER, "\nAnd now for Concurrency :-)  ...");
 
   // connect to unlimited input
   output->ConnectToTarget(unlimited_input);
@@ -138,7 +140,7 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   // start writer threads
   std::shared_ptr<tRealPortQueueTest> thread1 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(true));
   std::shared_ptr<tRealPortQueueTest> thread2 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(false));
-  printf("Created threads %p and %p\n", thread1.get(), thread2.get());
+  FINROC_LOG_PRINTF_STATIC(eLL_USER, "Created threads %p and %p\n", thread1.get(), thread2.get());
   thread1->Start();
   thread2->Start();
 
@@ -150,7 +152,7 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
   int last_neg_unlimited_f = 0;
 
   int e = cCYCLES - 1;
-  start = util::tSystem::CurrentTimeMillis();
+  start = util::tTime::GetPrecise();
   cPUBLISH_LIMIT = cCYCLES;
   int cc = 0;
   while (true)
@@ -217,12 +219,12 @@ void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args
 
     if ((last_pos_limited == e || last_neg_limited == -e) && last_pos_unlimited == e && last_neg_unlimited == -e && last_pos_unlimited_f == e && last_neg_unlimited_f == -e)
     {
-      util::tSystem::out.Println("Yeah! Check Completed");
+      FINROC_LOG_PRINT_STATIC(eLL_USER, "Yeah! Check Completed");
       break;
     }
   }
-  time = util::tSystem::CurrentTimeMillis() - start;
-  util::tSystem::out.Println(time);
+  time = util::tTime::GetPrecise() - start;
+  FINROC_LOG_PRINT_STATIC(eLL_USER, time);
   finished.Set(1);
 }
 

@@ -25,6 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
+#include "core/port/tPort.h"
 #include "core/parameter/tParameterBool.h"
 #include "core/parameter/tParameterNumeric.h"
 
@@ -62,6 +63,7 @@ extern template class tParameter<float>;
 extern template class tParameter<double>;
 extern template class tParameter<tNumber>;
 extern template class tParameter<tCoreString>;
+extern template class tParameter<std::string>;
 extern template class tParameter<bool>;
 extern template class tParameter<rrlib::serialization::tMemoryBuffer>;
 

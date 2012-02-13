@@ -24,9 +24,10 @@
 #define core__port__rpc__tMethodCallSyncher_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include "rrlib/finroc_core_utils/thread/tThread.h"
 
 #include "core/tLockOrderLevels.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
 
 namespace finroc
 {

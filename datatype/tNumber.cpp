@@ -205,3 +205,4 @@ const util::tString tNumber::ToString() const
 } // namespace finroc
 } // namespace core
 
+template class rrlib::rtti::tDataType<finroc::core::tNumber>;

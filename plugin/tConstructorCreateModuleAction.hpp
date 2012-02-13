@@ -43,8 +43,6 @@ tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11,
   name(type_name),
   group()
 {
-  tPlugins::GetInstance()->AddModuleType(this);
-
   static const util::tString cPARAMETER = "Parameter ";
   std::vector<util::tString> names_temp = param_names.Split(",");
   util::tSimpleList<util::tString> names;

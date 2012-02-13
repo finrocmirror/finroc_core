@@ -24,9 +24,11 @@
 #define core__port__rpc__tPullCall_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
-#include "core/port/rpc/tAbstractCall.h"
 #include "rrlib/finroc_core_utils/thread/tTask.h"
+
+#include "core/port/tAbstractPort.h"
+#include "core/port/rpc/tAbstractCall.h"
+#include "core/port/rpc/tCallable.h"
 
 namespace rrlib
 {
@@ -40,7 +42,6 @@ namespace finroc
 {
 namespace core
 {
-class tNetPort;
 
 /*!
  * \author Max Reichardt
@@ -59,8 +60,11 @@ public:
   /*! Is this a pull call for a cc port? */
   bool cc_pull;
 
-  /*! when received through network and executed in separate thread: Port to call pull on and port to send result back over */
-  tNetPort* port;
+  /*! When received through network and executed in separate thread: Port to call pull on */
+  tAbstractPort* port;
+
+  /*! When received through network and executed in separate thread: Object to return result to */
+  tCallable<tPullCall>* return_to;
 
 private:
 
@@ -84,10 +88,12 @@ public:
    * Prepare Execution of call received over network in extra thread
    *
    * \param port Port to execute pull on and to return value over later
+   * \param return_to When received through network and executed in separate thread: Object to return result to
    */
-  inline void PrepareForExecution(tNetPort* port_)
+  inline void PrepareForExecution(tAbstractPort& port, tCallable<tPullCall>& return_to)
   {
-    this->port = port_;
+    this->port = &port;
+    this->return_to = &return_to;
   }
 
   virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;

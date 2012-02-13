@@ -24,11 +24,10 @@
 #define core__tFrameworkElement_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
-#include "core/tCoreFlags.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
-#include "core/port/tThreadLocalCache.h"
+
+#include "core/tCoreFlags.h"
 #include "core/tAnnotatable.h"
 
 namespace rrlib
@@ -45,9 +44,6 @@ namespace core
 {
 class tRuntimeEnvironment;
 class tAbstractPort;
-class tCreateFrameworkElementAction;
-class tConstructorParameters;
-class tConfigFile;
 
 /*!
  * \author Max Reichardt
@@ -145,11 +141,13 @@ public:
 
 public:
   class tChildIterator; // inner class forward declaration
+
+private:
+
   friend class util::tGarbageCollector;
   friend class tChildIterator;
   friend class tRuntimeEnvironment;
-private:
-
+  friend class tFinstructableGroup;
   friend class tLock;
 
   /*! Primary link to framework element - the place at which it actually is in FrameworkElement tree - contains name etc. */
@@ -307,16 +305,6 @@ protected:
   virtual ~tFrameworkElement();
 
   /*!
-   * Called whenever static parameters of this framework element need to be (re)evaluated.
-   * (can be overridden to handle this event)
-   *
-   * This typically happens at initialization and when user changes them via finstruct.
-   * (This is never called when thread in surrounding thread container is running.)
-   * (This must only be called with lock on runtime registry.)
-   */
-  virtual void EvaluateStaticParameters() {}
-
-  /*!
    * Helper for above
    *
    * \param name (relative) Qualified name
@@ -460,10 +448,14 @@ public:
   }
 
   /*!
-   * Trigger evaluation of static parameters in this framework element and all of its children.
-   * (This must never be called when thread in surrounding thread container is running.)
+   * Called whenever static parameters of this framework element need to be (re)evaluated.
+   * (can be overridden to handle this event)
+   *
+   * This typically happens at initialization and when user changes them via finstruct.
+   * (This is never called when thread in surrounding thread container is running.)
+   * (This must only be called with lock on runtime registry.)
    */
-  void DoStaticParameterEvaluation();
+  virtual void EvaluateStaticParameters() {}
 
   /*!
    * \return Returns constant and non-constant flags
@@ -559,8 +551,6 @@ public:
    * \return Name of this framework element
    */
   const util::tString GetName() const;
-
-  tConfigFile* GetConfigFile() const;
 
   /*!
    * \return Primary parent framework element
@@ -693,13 +683,6 @@ public:
   tRuntimeEnvironment* GetRuntime() const;
 
   /*!
-   * (for convenience)
-   * \return List with all thread local caches - Some cleanup methods require that this is locked
-   * (Only lock runtime for minimal periods of time!)
-   */
-  util::tMutexLockOrder& GetThreadLocalCacheInfosLock() const;
-
-  /*!
    * Initialize this framework element and all framework elements in sub tree that were created by this thread
    * and weren't initialized already.
    *
@@ -818,19 +801,6 @@ public:
   void PrintStructure(rrlib::logging::tLogLevel ll);
 
   /*!
-   * Releases all automatically acquired locks
-   */
-  inline void ReleaseAutoLocks()
-  {
-    tThreadLocalCache::GetFast()->ReleaseAllLocks();
-  }
-
-  /*!
-   * \param node Common parent config file node for all child parameter config entries (starting with '/' => absolute link - otherwise relative).
-   */
-  void SetConfigNode(const util::tString& node);
-
-  /*!
    * \param name New Port name
    * (only valid/possible before, element is initialized)
    */
@@ -856,15 +826,6 @@ public:
       output << "/";
     }
   }
-
-  /*!
-   * Mark element as finstructed
-   * (should only be called by AdminServer and CreateModuleActions)
-   *
-   * \param create_action Action with which framework element was created
-   * \param params Parameters that module was created with (may be null)
-   */
-  void SetFinstructed(tCreateFrameworkElementAction* create_action, tConstructorParameters* params);
 
   virtual const util::tString ToString() const
   {

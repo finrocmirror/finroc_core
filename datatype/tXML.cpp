@@ -57,3 +57,4 @@ void tXML::Set(const rrlib::xml2::tXMLNode& n)
 } // namespace finroc
 } // namespace core
 
+template class rrlib::rtti::tDataType<finroc::core::tXML>;

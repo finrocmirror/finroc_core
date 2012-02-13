@@ -94,3 +94,4 @@ void tExecutionControl::StartAll(tFrameworkElement* fe)
 } // namespace finroc
 } // namespace core
 
+template class rrlib::rtti::tDataType<finroc::core::tExecutionControl>;

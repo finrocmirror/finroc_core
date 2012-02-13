@@ -21,9 +21,7 @@
  */
 #include "core/port/tPortGroup.h"
 #include "core/port/tAbstractPort.h"
-#include "core/port/std/tPortBase.h"
-#include "core/port/cc/tCCPortBase.h"
-#include "core/port/rpc/tInterfacePort.h"
+#include "core/portdatabase/tPortFactory.h"
 
 namespace finroc
 {
@@ -111,23 +109,14 @@ void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& gro
 tAbstractPort* tPortGroup::CreatePort(const util::tString& name, rrlib::rtti::tDataTypeBase type, int extra_flags)
 {
   FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", this->GetQualifiedLink());
+
   tAbstractPort* ap = NULL;
-  if (tFinrocTypeInfo::IsStdType(type))
+  ap = &tFinrocTypeInfo::GetPortFactory(type).CreatePort(name, *this, type, default_port_flags | extra_flags);
+  if (ap != NULL)
   {
-    ap = new tPortBase(tPortCreationInfoBase(name, this, type, default_port_flags | extra_flags));
+    ap->Init();
   }
-  else if (tFinrocTypeInfo::IsCCType(type))
-  {
-    ap = new tCCPortBase(tPortCreationInfoBase(name, this, type, default_port_flags | extra_flags));
-  }
-  else if (tFinrocTypeInfo::IsMethodType(type))
-  {
-    ap = new tInterfacePort(name, this, type, tInterfacePort::eRouting);
-  }
-  else
-  {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot create port with type: ", type.GetName());
-  }
+
   if (ap != NULL)
   {
     ap->Init();

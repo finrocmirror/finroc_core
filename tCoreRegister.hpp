@@ -87,7 +87,7 @@ int tCoreRegister<T>::Add(const T& elem)
 
   // increment index
   IncrementCurElementIndex();
-
+  elem_count++;
   return handle;
 }
 

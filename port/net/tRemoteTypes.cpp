@@ -22,6 +22,7 @@
 #include "core/parameter/tParameter.h"
 
 #include "core/port/net/tRemoteTypes.h"
+#include "core/port/net/tNetworkSettings.h"
 #include "rrlib/serialization/serialization.h"
 #include "core/parameter/tParameterNumeric.h"
 #include "core/tRuntimeSettings.h"
@@ -128,7 +129,7 @@ void tRemoteTypes::SerializeLocalDataTypes(rrlib::serialization::tOutputStream& 
 {
   if (local_types_sent == 0)
   {
-    int t = tRuntimeSettings::cDEFAULT_MINIMUM_NETWORK_UPDATE_TIME->GetValue();
+    int t = tNetworkSettings::GetInstance().default_minimum_network_update_time.Get();
     co.WriteShort(static_cast<int16>(t));
   }
   int16 type_count = rrlib::rtti::tDataTypeBase::GetTypeCount();

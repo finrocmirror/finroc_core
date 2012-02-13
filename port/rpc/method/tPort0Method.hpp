@@ -22,7 +22,7 @@
  */
 #include "core/port/rpc/tInterfacePort.h"
 #include "core/port/rpc/tMethodCall.h"
-#include "core/port/tThreadLocalCache.h"
+#include "core/port/rpc/tThreadLocalRPCData.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
 #include "core/port/rpc/tMethodCallException.h"
 #include "core/port/rpc/tInterfaceServerPort.h"
@@ -44,7 +44,7 @@ R tPort0Method<HANDLER, R>::Call(tInterfaceClientPort port, int net_timeout)
   tInterfacePort* ip = port.GetServer();
   if (ip != NULL && ip->GetType() == tInterfacePort::eNetwork)
   {
-    tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
+    tMethodCall* mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
 
     mc->PrepareSyncRemoteExecution(this, port.GetDataType(), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());
     try
@@ -100,10 +100,10 @@ void tPort0Method<HANDLER, R>::CallAsync(tInterfaceClientPort port, tAsyncReturn
   tInterfacePort* ip = port.GetServer();
   if (ip != NULL && ip->GetType() == tInterfacePort::eNetwork)
   {
-    tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
+    tMethodCall* mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
 
     mc->PrepareSyncRemoteExecution(this, port.GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
-    tRPCThreadPool::GetInstance()->ExecuteTask(mc);
+    tRPCThreadPool::GetInstance().ExecuteTask(mc);
   }
   else if (ip != NULL && ip->GetType() == tInterfacePort::eServer)
   {
@@ -127,10 +127,10 @@ void tPort0Method<HANDLER, R>::CallAsync(tInterfaceClientPort port, tAsyncReturn
     }
     else
     {
-      tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
+      tMethodCall* mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
 
       mc->PrepareExecution(this, port.GetDataType(), mhandler, handler);
-      tRPCThreadPool::GetInstance()->ExecuteTask(mc);
+      tRPCThreadPool::GetInstance().ExecuteTask(mc);
     }
   }
   else

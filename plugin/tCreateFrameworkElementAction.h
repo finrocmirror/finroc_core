@@ -24,7 +24,6 @@
 #define core__plugin__tCreateFrameworkElementAction_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-#include "core/plugin/sDynamicLoading.h"
 
 namespace finroc
 {
@@ -39,10 +38,14 @@ class tStaticParameterList;
  *
  * Classes that implement this interface provide a generic method for
  * creating modules.
+ *
+ * When they are instantiated, they are automatically added to list of constructible elements.
  */
 class tCreateFrameworkElementAction : public util::tInterface
 {
 public:
+
+  tCreateFrameworkElementAction();
 
   /*!
    * Create Module (or Group)
@@ -69,12 +72,10 @@ public:
    */
   virtual const tStaticParameterList* GetParameterTypes() const = 0;
 
-  // returns .so file in which address provided as argument is found by dladdr
-  util::tString GetBinary(void* addr)
-  {
-    util::tString tmp(sDynamicLoading::GetBinary(addr));
-    return tmp.Substring(tmp.LastIndexOf("/") + 1);
-  }
+  /*!
+   * \return Returns .so file in which address provided as argument is found by dladdr
+   */
+  util::tString GetBinary(void* addr);
 
 };
 

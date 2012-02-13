@@ -22,6 +22,7 @@
 #include "core/port/tEdgeAggregator.h"
 #include "core/tLockOrderLevels.h"
 #include "core/port/tAbstractPort.h"
+#include "core/portdatabase/tFinrocTypeInfo.h"
 
 namespace finroc
 {

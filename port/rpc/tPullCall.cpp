@@ -19,10 +19,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/rpc/tPullCall.h"
-#include "core/port/net/tNetPort.h"
-#include "core/port/tAbstractPort.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+
+#include "core/port/rpc/tPullCall.h"
+#include "core/port/tAbstractPort.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/cc/tCCPortBase.h"
 #include "core/port/cc/tCCPortDataManager.h"
@@ -37,7 +37,8 @@ tPullCall::tPullCall() :
   tAbstractCall(),
   intermediate_assign(false),
   cc_pull(false),
-  port(NULL)
+  port(NULL),
+  return_to(NULL)
 {
   Reset();
 }
@@ -53,16 +54,16 @@ void tPullCall::ExecuteTask()
 {
   assert((port != NULL));
   {
-    util::tLock lock2(port->GetPort());
-    if (!port->GetPort()->IsReady())
+    util::tLock lock2(port);
+    if (!port->IsReady())
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "pull call received for port that will soon be deleted");
       Recycle();
     }
 
-    if (tFinrocTypeInfo::IsCCType(port->GetPort()->GetDataType()))
+    if (tFinrocTypeInfo::IsCCType(port->GetDataType()))
     {
-      tCCPortBase* cp = static_cast<tCCPortBase*>(port->GetPort());
+      tCCPortBase* cp = static_cast<tCCPortBase*>(port);
       tCCPortDataManager* cpd = cp->GetPullInInterthreadContainerRaw(true, true);
       RecycleParameters();
 
@@ -70,11 +71,11 @@ void tPullCall::ExecuteTask()
       AddParam(0, tmp);
 
       SetStatusReturn();
-      port->SendCallReturn(this);
+      return_to->InvokeCall(this);
     }
-    else if (tFinrocTypeInfo::IsStdType(port->GetPort()->GetDataType()))
+    else if (tFinrocTypeInfo::IsStdType(port->GetDataType()))
     {
-      tPortBase* p = static_cast<tPortBase*>(port->GetPort());
+      tPortBase* p = static_cast<tPortBase*>(port);
       tPortDataManager* pd = p->GetPullLockedUnsafe(true, true);
       RecycleParameters();
 
@@ -82,7 +83,7 @@ void tPullCall::ExecuteTask()
       AddParam(0, tmp);
 
       SetStatusReturn();
-      port->SendCallReturn(this);
+      return_to->InvokeCall(this);
     }
     else
     {
@@ -94,7 +95,7 @@ void tPullCall::ExecuteTask()
 
 void tPullCall::Serialize(rrlib::serialization::tOutputStream& oos) const
 {
-  ::finroc::core::tAbstractCall::Serialize(oos);
+  finroc::core::tAbstractCall::Serialize(oos);
   oos.WriteBoolean(intermediate_assign);
   oos.WriteBoolean(cc_pull);
 }

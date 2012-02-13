@@ -109,6 +109,8 @@ public:
 
   tStaticParameterList();
 
+  virtual ~tStaticParameterList();
+
   /*!
    * Add parameter to list
    *
@@ -116,11 +118,7 @@ public:
    */
   void Add(tStaticParameterBase* param);
 
-  virtual ~tStaticParameterList()
-  {
-    Clear();
-    ;
-  }
+  virtual void AnnotatedObjectInitialized();
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
@@ -128,6 +126,14 @@ public:
 
   // currently only used in FinstructableGroup
   void Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context);
+
+  /*!
+   * Trigger evaluation of static parameters in this framework element and all of its children.
+   * (This must never be called when thread in surrounding thread container is running.)
+   *
+   * \param fe Framework element of interest
+   */
+  static void DoStaticParameterEvaluation(tFrameworkElement* fe);
 
   /*!
    * \param i Index
@@ -174,10 +180,10 @@ public:
   /*!
    * \param create_action CreateModuleAction that was used to create framework element
    */
-  inline void SetCreateAction(tCreateFrameworkElementAction* create_action_)
+  inline void SetCreateAction(int create_action)
   {
     assert((this->create_action == -1));
-    this->create_action = tPlugins::GetInstance()->GetModuleTypes().IndexOf(create_action_);
+    this->create_action = create_action;
   }
 
   /*!

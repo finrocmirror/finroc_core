@@ -22,7 +22,7 @@
  */
 #include "core/port/rpc/tInterfacePort.h"
 #include "core/port/rpc/tMethodCall.h"
-#include "core/port/tThreadLocalCache.h"
+#include "core/port/rpc/tThreadLocalRPCData.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
 #include "core/port/rpc/tMethodCallException.h"
 #include "core/port/rpc/tInterfaceServerPort.h"
@@ -47,7 +47,7 @@ R tPort2Method<HANDLER, R, P1, P2>::Call(tInterfaceClientPort port, tP1Arg p1, t
   tInterfacePort* ip = port.GetServer();
   if (ip != NULL && ip->GetType() == tInterfacePort::eNetwork)
   {
-    tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
+    tMethodCall* mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
     //1
     mc->AddParam(0, p1);  //2
     mc->AddParam(1, p2);
@@ -114,12 +114,12 @@ void tPort2Method<HANDLER, R, P1, P2>::CallAsync(tInterfaceClientPort port, tAsy
   tInterfacePort* ip = port.GetServer();
   if (ip != NULL && ip->GetType() == tInterfacePort::eNetwork)
   {
-    tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
+    tMethodCall* mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
     //1
     mc->AddParam(0, p1);  //2
     mc->AddParam(1, p2);
     mc->PrepareSyncRemoteExecution(this, port.GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > 0 ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
-    tRPCThreadPool::GetInstance()->ExecuteTask(mc);
+    tRPCThreadPool::GetInstance().ExecuteTask(mc);
   }
   else if (ip != NULL && ip->GetType() == tInterfacePort::eServer)
   {
@@ -146,12 +146,12 @@ void tPort2Method<HANDLER, R, P1, P2>::CallAsync(tInterfaceClientPort port, tAsy
     }
     else
     {
-      tMethodCall* mc = tThreadLocalCache::GetFast()->GetUnusedMethodCall();
+      tMethodCall* mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
       //1
       mc->AddParam(0, p1);  //2
       mc->AddParam(1, p2);
       mc->PrepareExecution(this, port.GetDataType(), mhandler, handler);
-      tRPCThreadPool::GetInstance()->ExecuteTask(mc);
+      tRPCThreadPool::GetInstance().ExecuteTask(mc);
     }
   }
   else

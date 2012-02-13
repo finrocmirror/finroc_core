@@ -30,6 +30,7 @@
 #include "rrlib/rtti/tDataTypeBase.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/port/tThreadLocalCache.h"
+#include "core/port/tPortDataPtr.h"
 
 namespace finroc
 {

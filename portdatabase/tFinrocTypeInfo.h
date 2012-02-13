@@ -24,7 +24,6 @@
 #define core__portdatabase__tFinrocTypeInfo_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
 #include "rrlib/rtti/tDataTypeBase.h"
 
 namespace finroc
@@ -32,6 +31,7 @@ namespace finroc
 namespace core
 {
 class tPortInterface;
+class tPortFactory;
 
 /*!
  * \author Max Reichardt
@@ -60,6 +60,9 @@ private:
 
   /*! Number of initialized types */
   static int initialized_types;
+
+  /*! Default port factory */
+  static tPortFactory* default_port_factory;
 
 public:
 
@@ -131,6 +134,12 @@ public:
     short uid = static_cast<short>(this - InfoArray());
     return rrlib::rtti::tDataTypeBase::GetType(uid);
   }
+
+  /*!
+   * \dt Data type to get factory for
+   * \return Port factory for this data type
+   */
+  static tPortFactory& GetPortFactory(const rrlib::rtti::tDataTypeBase& dt);
 
   /*!
    * \param cc_type_index CC Index
@@ -217,6 +226,14 @@ public:
   inline static bool IsUnknownType(rrlib::rtti::tDataTypeBase dt)
   {
     return Get(dt).GetType() >= eUNKNOWN_STD;
+  }
+
+  /*!
+   * \param f Default port factory
+   */
+  static void SetDefaultPortFactory(tPortFactory& f)
+  {
+    default_port_factory = &f;
   }
 
   /*!

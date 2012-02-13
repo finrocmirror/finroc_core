@@ -19,15 +19,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "core/port/rpc/tRPCThreadPool.h"
-#include "rrlib/finroc_core_utils/tAutoDeleter.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
+#include "rrlib/util/patterns/singleton.h"
+#include "core/port/rpc/tRPCThreadPool.h"
 
 namespace finroc
 {
 namespace core
 {
-tRPCThreadPool* tRPCThreadPool::instance = util::tAutoDeleter::AddStatic(new tRPCThreadPool());
+typedef rrlib::util::tSingletonHolder<tRPCThreadPool, rrlib::util::singleton::Longevity> tRPCThreadPoolInstance;
+static inline unsigned int GetLongevity(tRPCThreadPool*)
+{
+  return 10; // delete after runtime environment
+}
 
 tRPCThreadPool::tRPCThreadPool() :
   unused_threads(),
@@ -51,6 +55,12 @@ void tRPCThreadPool::ExecuteTask(util::tTask* task)
   }
   r->ExecuteTask(task);
 }
+
+tRPCThreadPool& tRPCThreadPool::GetInstance()
+{
+  return tRPCThreadPoolInstance::Instance();
+}
+
 
 } // namespace finroc
 } // namespace core

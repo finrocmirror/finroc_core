@@ -23,7 +23,7 @@
 #ifndef core__plugin__tPlugin_h__
 #define core__plugin__tPlugin_h__
 
-#include "rrlib/finroc_core_utils/definitions.h"
+#include "core/plugin/tPlugins.h"
 
 namespace finroc
 {
@@ -33,17 +33,23 @@ namespace core
  * \author Max Reichardt
  *
  * One class in a Plugin/Library must implement this interface.
- *
- * The plugin class needs to have an empty constructor.
+ * It should be instantiated in a .cpp file.
  */
-class tPlugin : public util::tInterface
+class tPlugin : public boost::noncopyable
 {
 public:
 
   /*!
+   * Constructor registers plugin at tPlugins
+   */
+  tPlugin()
+  {
+    tPlugins::GetInstance()->AddPlugin(this);
+  }
+
+  /*!
    * This method is called once at initialization.
-   * Data types, modules, widgets etc. can/should be added to the central
-   * registry by calling the Plugin manager's approriate methods.
+   * Global parameters, data types, module types etc. may be added here.
    */
   virtual void Init() = 0;
 

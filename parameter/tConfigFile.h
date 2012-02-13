@@ -24,18 +24,10 @@
 #define core__parameter__tConfigFile_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
 #include "rrlib/rtti/rtti.h"
 #include "rrlib/xml2_wrapper/tXMLDocument.h"
-#include "core/tFinrocAnnotation.h"
 
-namespace rrlib
-{
-namespace xml2
-{
-class tXMLNode;
-} // namespace rrlib
-} // namespace xml2
+#include "core/tFinrocAnnotation.h"
 
 namespace finroc
 {

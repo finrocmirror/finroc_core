@@ -201,6 +201,16 @@ public:
   static std::vector<util::tString> ScanForCommandLineArgs(const util::tString& finroc_file);
 
   /*!
+   * Mark element as finstructed
+   * (should only be called by AdminServer and CreateModuleActions)
+   *
+   * \param fe Framework element to mark
+   * \param create_action Action with which framework element was created
+   * \param params Parameters that module was created with (may be null)
+   */
+  static void SetFinstructed(tFrameworkElement* fe, tCreateFrameworkElementAction* create_action, tConstructorParameters* params);
+
+  /*!
    * \param main_name Default name when group is main part
    */
   void SetMainName(const util::tString main_name)

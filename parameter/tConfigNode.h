@@ -71,6 +71,14 @@ public:
    */
   static util::tString GetFullConfigEntry(tFrameworkElement* parent, const util::tString& config_entry);
 
+  /*!
+   * Set config file node for the specified framework element.
+   *
+   * \param fe Framework element
+   * \param node Common parent config file node for all child parameter config entries (starting with '/' => absolute link - otherwise relative).
+   */
+  static void SetConfigNode(tFrameworkElement* fe, const util::tString& node);
+
 };
 
 } // namespace finroc

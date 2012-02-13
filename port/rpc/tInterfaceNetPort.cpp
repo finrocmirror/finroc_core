@@ -72,7 +72,7 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall* mc)
     else
     {
       mc->PrepareForwardSyncRemoteExecution(this, inp);  // always do this in extra thread
-      tRPCThreadPool::GetInstance()->ExecuteTask(mc);
+      tRPCThreadPool::GetInstance().ExecuteTask(mc);
       SendSyncCallReturn(mc);
     }
   }
@@ -96,7 +96,7 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall* mc)
       if (mc->GetMethod()->HandleInExtraThread())
       {
         mc->PrepareExecutionForCallFromNetwork(this, mhandler);
-        tRPCThreadPool::GetInstance()->ExecuteTask(mc);
+        tRPCThreadPool::GetInstance().ExecuteTask(mc);
         return;
       }
       else

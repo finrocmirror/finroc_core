@@ -24,6 +24,7 @@
 #define core__datatype__tConstant_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/finroc_core_utils/tAtomic.h"
 
 #include "core/datatype/tNumber.h"
 #include "core/datatype/tUnit.h"

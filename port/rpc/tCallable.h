@@ -36,7 +36,7 @@ namespace core
  * an AbstractCall object
  */
 template<typename T>
-class tCallable : public util::tInterface
+class tCallable
 {
 public:
 

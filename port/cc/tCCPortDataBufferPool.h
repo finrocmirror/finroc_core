@@ -50,8 +50,6 @@ class tCCPortDataBufferPool : public util::tReusablesPoolTL<tCCPortDataManagerTL
 {
 private:
 
-  std::shared_ptr<util::tObject> thread_local_cache_infos;
-
   /*! List/Queue with buffers returned by other threads */
   util::tWonderQueue<tCCPortQueueElement> returned_buffers;
 

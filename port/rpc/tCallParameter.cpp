@@ -48,6 +48,11 @@ void tCallParameter::Deserialize(rrlib::serialization::tInputStream& is)
     assert((value == NULL));
     //value = (GenericObject)is.readObjectInInterThreadContainer(null);
     rrlib::rtti::tGenericObject* go = rrlib::rtti::ReadObject(is, NULL, this);
+    if (!go)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Received object that could not be read. Throwing exception.");
+      throw util::tException("Object could not be read.");
+    }
     value = Lock(go);
     tPortDataManager* pdm = value.GetManagerT<tPortDataManager>();
     if (pdm != NULL)
