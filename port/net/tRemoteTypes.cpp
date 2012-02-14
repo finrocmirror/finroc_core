@@ -64,6 +64,7 @@ void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
     int16 checked_types = rrlib::rtti::tDataTypeBase::GetTypeCount();
     rrlib::rtti::tDataTypeBase local = rrlib::rtti::tDataTypeBase::FindType(name);
     ls << "- " << name << " (" << next << ") - " << (local != NULL  && (!tFinrocTypeInfo::IsUnknownType(local)) ? "available here, too" : "not available here") << std::endl;
+    __attribute__((unused)) // prevents warning in release mode
     int types_size = types.Size();  // to avoid warning
     assert((next == types_size));
     tEntry e(local);

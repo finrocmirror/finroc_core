@@ -53,7 +53,7 @@ public:
     tPort<T>(tPortCreationInfo<T>(args..., tPortFlags::cINPUT_PORT))
   {
     this->wrapped->AddAnnotation(new tParameterInfo());
-    tPortCreationInfo<T> pci(args...);
+    tPortCreationInfo<T> pci(args..., tPortFlags::cINPUT_PORT);
     SetConfigEntry(pci.config_entry);
   }
 
