@@ -128,12 +128,12 @@ void tAbstractCall::SetupAsynchCall()
   //callerStack.setSize(0);
 }
 
-void tAbstractCall::SetupSynchCall(tMethodCallSyncher* mcs)
+void tAbstractCall::SetupSynchCall(tMethodCallSyncher& mcs)
 {
   status = cSYNCH_CALL;
-  thread_uid = mcs->GetThreadUid();
-  SetSyncherID(mcs->GetIndex());
-  SetMethodCallIndex(mcs->GetAndUseNextCallIndex());
+  thread_uid = mcs.GetThreadUid();
+  SetSyncherID(mcs.GetIndex());
+  SetMethodCallIndex(mcs.GetAndUseNextCallIndex());
   //callerStack.setSize(0);
 }
 

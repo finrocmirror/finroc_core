@@ -26,12 +26,14 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/port/rpc/tCallable.h"
+#include "core/port/rpc/tAbstractCall.h"
+#include "core/port/rpc/tThreadLocalRPCData.h"
+#include "core/port/rpc/tMethodCallSyncher.h"
 
 namespace finroc
 {
 namespace core
 {
-class tAbstractCall;
 
 /*!
  * \author Max Reichardt
@@ -43,6 +45,8 @@ class tSynchMethodCallLogic : public util::tUncopyableObject
 {
 private:
 
+  tSynchMethodCallLogic() {}
+
   /*!
    * \return Description for logging
    */
@@ -51,46 +55,59 @@ private:
     return "SynchMethodCallLogic";
   }
 
-  /*!
-   * (Private Helper method - because we'd need a .hpp otherwise)
-   * Perform synchronous call. Thread will wait for return value (until timeout has passed).
-   *
-   * \param <T> Call type
-   * \param call Actual Call object
-   * \param call_me "Thing" that will be invoked/called with Call object
-   * \param timeout Timeout for call
-   * \return Returns call object - might be the same as in call parameter (likely - if call wasn't transferred via network)
-   */
-  static tAbstractCall* PerformSynchCallImpl(tAbstractCall* call, tCallable<tAbstractCall>* call_me, int64 timeout);
-
 public:
-
-  tSynchMethodCallLogic() {}
 
   /*!
    * Deliver/pass return value to calling/waiting thread.
    *
    * \param call Call object that (possibly) contains some return value
    */
-  static void HandleMethodReturn(tAbstractCall* call);
+  static void HandleMethodReturn(tAbstractCall::tPtr& call);
 
   /*!
    * Perform synchronous call. Thread will wait for return value (until timeout has passed).
+   * If something goes wrong, a tMethodCallException is thrown.
+   * Therefore, this should _always_ be called in a try/catch-block.
    *
    * \param <T> Call type
-   * \param call Actual Call object
+   * \param call Actual Call object (typically, swapped with another if call is transferred via network; just use this to obtain result)
    * \param call_me "Thing" that will be invoked/called with Call object
    * \param timeout Timeout for call
-   * \return Returns call object - might be the same as in call parameter (likely - if call wasn't transferred via network)
    */
   template <typename T>
-  inline static T* PerformSynchCall(T* call, tCallable<T>* call_me, int64 timeout)
+  inline static void PerformSynchCall(std::unique_ptr<T, tSerializableReusable::tRecycler>& call, tCallable<T>& call_me, int64 timeout)
   {
-    assert(((void*)(static_cast<tAbstractCall*>(call))) == ((void*)call)); // ensure safety for Callable cast
-    tCallable<tAbstractCall>* tmp = reinterpret_cast<tCallable<tAbstractCall>*>(call_me);
-    return static_cast<T*>(PerformSynchCallImpl(call, tmp, timeout));
-  }
+    tMethodCallSyncher& mcs = tThreadLocalRPCData::Get().GetMethodSyncher();
 
+    util::tLock lock2(mcs);
+    call->SetupSynchCall(mcs);
+    mcs.current_method_call_index = call->GetMethodCallIndex();
+    assert(mcs.method_return == NULL);
+    call_me.InvokeCall(call);
+    try
+    {
+      mcs.monitor.Wait(lock2, timeout);
+    }
+    catch (const util::tInterruptedException& e)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Synch method call interrupted... this shouldn't happen... usually");
+    }
+
+    // reset stuff for next call
+    mcs.GetAndUseNextCallIndex();  // Invalidate results of any incoming outdated returns
+    call = std::move(reinterpret_cast<std::unique_ptr<T, tSerializableReusable::tRecycler>&>(mcs.method_return));
+
+    if (!call)
+    {
+      throw tMethodCallException(tMethodCallException::eTIMEOUT, CODE_LOCATION_MACRO);
+    }
+    else if (call->HasException())
+    {
+      int8 type = 0;
+      call->GetParam(0, type);
+      throw tMethodCallException(type, CODE_LOCATION_MACRO);
+    }
+  }
 };
 
 } // namespace finroc

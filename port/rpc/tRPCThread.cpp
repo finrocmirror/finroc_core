@@ -29,15 +29,24 @@ namespace core
 {
 tRPCThread::tRPCThread() :
   tLoopThread(0),
-  next_task(NULL)
+  next_task(NULL),
+  next_reusable_task()
 {
 }
 
-void tRPCThread::ExecuteTask(util::tTask* t)
+void tRPCThread::ExecuteTask(util::tTask& t)
 {
   util::tLock lock1(this);
   assert((next_task == NULL));
-  next_task = t;
+  next_task = &t;
+  monitor.NotifyAll(lock1);
+}
+
+void tRPCThread::ExecuteTask(tSerializableReusableTask::tPtr& t)
+{
+  util::tLock lock1(this);
+  assert(!next_reusable_task);
+  next_reusable_task = std::move(t);
   monitor.NotifyAll(lock1);
 }
 
@@ -45,7 +54,7 @@ void tRPCThread::MainLoopCallback()
 {
   {
     util::tLock lock2(this);
-    if (next_task == NULL)
+    if (next_task == NULL && next_reusable_task.get() == NULL)
     {
       tRPCThreadPool::GetInstance().EnqueueThread(this);
 
@@ -55,11 +64,19 @@ void tRPCThread::MainLoopCallback()
       }
     }
   }
-  while (next_task != NULL)
+  while (next_task || next_reusable_task)
   {
-    util::tTask* tmp = next_task;
-    next_task = NULL;
-    tmp->ExecuteTask();
+    if (next_task)
+    {
+      util::tTask* tmp = next_task;
+      next_task = NULL;
+      tmp->ExecuteTask();
+    }
+    else
+    {
+      tSerializableReusableTask::tPtr tmp(std::move(next_reusable_task));
+      tmp->ExecuteTask(tmp);
+    }
   }
 }
 

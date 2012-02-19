@@ -51,6 +51,11 @@ class tRPCThreadPool : public boost::noncopyable
   /*! Pool of unused threads */
   util::tWonderQueue<tRPCThread> unused_threads;
 
+  /*!
+   * \return Unused RPC Thread
+   */
+  tRPCThread& GetUnusedThread();
+
 public:
 
   /*! Lock order: locked before thread list in C++ */
@@ -74,7 +79,14 @@ public:
    *
    * \param task Task
    */
-  void ExecuteTask(util::tTask* task);
+  void ExecuteTask(util::tTask& task)
+  {
+    GetUnusedThread().ExecuteTask(task);
+  }
+  void ExecuteTask(tSerializableReusableTask::tPtr task)
+  {
+    GetUnusedThread().ExecuteTask(task);
+  }
 
   /*!
    * \return Singleton instance

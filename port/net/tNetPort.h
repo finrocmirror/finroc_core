@@ -169,7 +169,7 @@ protected:
 
   virtual void PropagateStrategyOverTheNet() = 0;
 
-  virtual void SendCall(tAbstractCall* mc) = 0;
+  virtual void SendCall(tAbstractCall::tPtr& mc) = 0;
 
 public:
 
@@ -227,14 +227,15 @@ public:
    *
    * \param mc Call
    */
-  inline void HandleCallReturnFromNet(tAbstractCall* mc)
+  inline void HandleCallReturnFromNet(tAbstractCall::tPtr& mc)
   {
     tSynchMethodCallLogic::HandleMethodReturn(mc);
   }
 
-  virtual void InvokeCall(tPullCall* call)
+  virtual void InvokeCall(tPullCall::tPtr& call)
   {
-    SendCallReturn(call);
+    tAbstractCall::tPtr tmp(std::move(call));
+    SendCallReturn(tmp);
   }
 
   inline bool IsCCType()
@@ -278,7 +279,7 @@ public:
    */
   void ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int64 timestamp, int8 changed_flag);
 
-  virtual void SendCallReturn(tAbstractCall* mc) = 0;
+  virtual void SendCallReturn(tAbstractCall::tPtr& mc) = 0;
 
   /*!
    * \param last_update Last time the value was updated (used to make sure that minimum update interval is kept)
@@ -355,9 +356,10 @@ public:
       return outer_class_ptr;
     }
 
-    virtual void InvokeCall(tPullCall* call)
+    virtual void InvokeCall(tPullCall::tPtr& call)
     {
-      outer_class_ptr->SendCall(call);
+      tAbstractCall::tPtr tmp(std::move(call));
+      outer_class_ptr->SendCall(tmp);
     }
 
     virtual void NotifyDisconnect()
@@ -430,9 +432,10 @@ public:
       return outer_class_ptr;
     }
 
-    virtual void InvokeCall(tPullCall* call)
+    virtual void InvokeCall(tPullCall::tPtr& call)
     {
-      outer_class_ptr->SendCall(call);
+      tAbstractCall::tPtr tmp(std::move(call));
+      outer_class_ptr->SendCall(tmp);
     }
 
     virtual void NotifyDisconnect()
@@ -512,9 +515,10 @@ public:
       return outer_class_ptr;
     }
 
-    virtual void InvokeCall(tMethodCall* call)
+    virtual void InvokeCall(tMethodCall::tPtr& call)
     {
-      outer_class_ptr->SendCall(call);
+      tAbstractCall::tPtr tmp(std::move(call));
+      outer_class_ptr->SendCall(tmp);
     }
 
     virtual void NotifyDisconnect()
@@ -523,22 +527,20 @@ public:
       outer_class_ptr->NotifyDisconnect();
     }
 
-    virtual void SendAsyncCall(tMethodCall* mc)
+    virtual void SendAsyncCall(tMethodCall::tPtr& mc)
     {
       mc->SetupAsynchCall();
-      outer_class_ptr->SendCall(mc);
+      tAbstractCall::tPtr tmp(std::move(mc));
+      outer_class_ptr->SendCall(tmp);
     }
 
-    virtual void SendSyncCallReturn(tMethodCall* mc)
+    virtual void SendSyncCallReturn(tMethodCall::tPtr& mc)
     {
-      outer_class_ptr->SendCall(mc);
+      tAbstractCall::tPtr tmp(std::move(mc));
+      outer_class_ptr->SendCall(tmp);
     }
 
-    virtual tMethodCall* SynchCallOverTheNet(tMethodCall* mc, int timeout)
-    {
-      assert((mc->GetMethod() != NULL));
-      return tSynchMethodCallLogic::PerformSynchCall(mc, this, timeout);
-    }
+    virtual tMethodCall::tPtr SynchCallOverTheNet(tMethodCall::tPtr& mc, int timeout);
 
     inline void UpdateFlags(uint flags)
     {

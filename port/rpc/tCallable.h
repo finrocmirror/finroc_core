@@ -25,10 +25,13 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
+#include "core/portdatabase/tSerializableReusable.h"
+
 namespace finroc
 {
 namespace core
 {
+
 /*!
  * \author Max Reichardt
  *
@@ -45,7 +48,7 @@ public:
    *
    * \param call Call-object that contains call data and will possibly be updated/modified
    */
-  virtual void InvokeCall(T* call) = 0;
+  virtual void InvokeCall(std::unique_ptr<T, tSerializableReusable::tRecycler>& call) = 0;
 
 };
 

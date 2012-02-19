@@ -28,12 +28,12 @@
 #include "rrlib/finroc_core_utils/thread/tThread.h"
 
 #include "core/tLockOrderLevels.h"
+#include "core/port/rpc/tAbstractCall.h"
 
 namespace finroc
 {
 namespace core
 {
-class tAbstractCall;
 class tThreadLocalCache;
 
 /*!
@@ -76,7 +76,7 @@ public:
   //  boolean beforeQuickReturnCheck = false;
 
   /*! Return values for synchronous method calls are placed here */
-  tAbstractCall* volatile method_return;
+  tAbstractCall::tPtr method_return; // does not need to be volatile according to test programs with locks and sleeping
 
   //  /** Is thread currently waiting for return value? (only used in synchronized context - so may not be volatile) */
   //  boolean threadWaitingForReturn = false;
@@ -93,14 +93,7 @@ private:
 
 public:
 
-  tMethodCallSyncher() :
-    index(0),
-    thread(NULL),
-    thread_uid(0),
-    obj_mutex(tLockOrderLevels::cINNER_MOST - 300),
-    method_return(NULL),
-    current_method_call_index(0)
-  {}
+  tMethodCallSyncher();
 
   /*!
    * \param syncher_iD Index of syncher objects
@@ -158,7 +151,7 @@ public:
    *
    * \param mc MethodCall buffer containing return value
    */
-  void ReturnValue(tAbstractCall* mc);
+  void ReturnValue(tAbstractCall::tPtr& mc);
 
   static void StaticInit();
 

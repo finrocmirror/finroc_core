@@ -24,18 +24,18 @@
 #define core__port__rpc__method__tAbstractMethod_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
-#include "core/tRuntimeEnvironment.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 
+#include "core/tRuntimeEnvironment.h"
+
 #include "core/port/rpc/tParameterUtil.h"
+#include "core/port/rpc/tMethodCall.h"
 
 namespace finroc
 {
 namespace core
 {
 class tPortInterface;
-class tMethodCall;
 class tInterfaceNetPort;
 class tAbstractAsyncReturnHandler;
 class tAbstractMethodCallHandler;
@@ -98,7 +98,7 @@ public:
    * \param ret_handler Return handler
    * \param net_timeout Timeout for call
    */
-  virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall* call, tInterfaceNetPort* net_port, tAbstractAsyncReturnHandler* ret_handler, int net_timeout) = 0;
+  virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port, tAbstractAsyncReturnHandler& ret_handler, int net_timeout) = 0;
 
   /*!
    * If we have a method call object (either from network or from another thread):
@@ -108,7 +108,7 @@ public:
    * \param handler Handler to handle object (must not be null)
    * \param ret_handler Return handler (optional)
    */
-  virtual void ExecuteFromMethodCallObject(tMethodCall* call, tAbstractMethodCallHandler* handler, tAbstractAsyncReturnHandler* ret_handler) = 0;
+  virtual void ExecuteFromMethodCallObject(tMethodCall::tPtr& call, tAbstractMethodCallHandler& handler, tAbstractAsyncReturnHandler* ret_handler) = 0;
 
   inline int GetMethodId()
   {
@@ -131,18 +131,6 @@ public:
     return type;
   }
 
-  template <typename T>
-  bool HasLock(const T& t)
-  {
-    return tParameterUtil<T>::HasLock(t);
-  }
-
-  template <typename T>
-  void Cleanup(const T& t)
-  {
-    tParameterUtil<T>::Cleanup(t);
-  }
-
   inline bool HandleInExtraThread()
   {
     return handle_in_extra_thread;
@@ -153,35 +141,10 @@ public:
    */
   virtual bool IsVoidMethod() = 0;
 
-  template <typename T>
-  struct tArg
+  bool operator==(const tAbstractMethod& other) const
   {
-    typedef T type;
-  };
-
-  template <typename T>
-  struct tArg<tPortDataPtr<T> >
-  {
-    typedef tPortDataPtr<T>& type;
-  };
-
-};
-
-/*!
- * Method that does not return anything.
- * Such methods typically don't block.
- */
-class tAbstractVoidMethod : public tAbstractMethod
-{
-public:
-
-  tAbstractVoidMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread);
-
-  virtual bool IsVoidMethod()
-  {
-    return true;
+    return this == &other;
   }
-
 };
 
 /*!
@@ -222,6 +185,29 @@ public:
   }
 
 };
+
+namespace internal
+{
+
+/**
+ * Helper to count number of template arguments
+ */
+template<typename... TArgs>
+struct tCountArgs;
+
+template <>
+struct tCountArgs<>
+{
+  enum { value = 0 };
+};
+
+template<typename T, typename... TArgs>
+struct tCountArgs<T, TArgs...>
+{
+  enum { value = 1 + tCountArgs<TArgs...>::value };
+};
+
+}
 
 } // namespace finroc
 } // namespace core

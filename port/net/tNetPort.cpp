@@ -346,25 +346,16 @@ void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataManagerTL* read_object, int
 
 bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer)
 {
-  tPullCall* pc = tThreadLocalRPCData::Get().GetUnusedPullCall();
+  tPullCall::tPtr pc(tThreadLocalRPCData::Get().GetUnusedPullCall());
   pc->SetRemotePortHandle(outer_class_ptr->remote_handle);
   //          pc.setLocalPortHandle(getHandle());
   try
   {
-    pc = tSynchMethodCallLogic::PerformSynchCall(pc, this, cPULL_TIMEOUT);
-    if (pc->HasException())
-    {
-      GetRaw(result_buffer->GetObject(), true);
-    }
-    else
-    {
-      tPortDataPtr<rrlib::rtti::tGenericObject> o = pc->GetParamGeneric(0);
-      tCCPortDataManager* c = static_cast<tCCPortDataManager*>(o->GetManager());
-      result_buffer->GetObject()->DeepCopyFrom(c->GetObject(), NULL);
-
-    }
-    pc->Recycle();
-
+    tSynchMethodCallLogic::PerformSynchCall(pc, *this, cPULL_TIMEOUT);
+    assert(!pc->HasException());
+    tPortDataPtr<rrlib::rtti::tGenericObject> o = pc->GetParamGeneric(0);
+    tCCPortDataManager* c = static_cast<tCCPortDataManager*>(o->GetManager());
+    result_buffer->GetObject()->DeepCopyFrom(c->GetObject(), NULL);
   }
   catch (const tMethodCallException& e)
   {
@@ -451,37 +442,24 @@ void tNetPort::tStdNetPort::PublishFromNet(tPortDataManager* read_object, int8 c
 const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, int8 add_locks)
 {
   assert((add_locks > 0));
-  tPullCall* pc = tThreadLocalRPCData::Get().GetUnusedPullCall();
+  tPullCall::tPtr pc = tThreadLocalRPCData::Get().GetUnusedPullCall();
   pc->SetRemotePortHandle(outer_class_ptr->remote_handle);
   //          pc.setLocalPortHandle(getHandle());
   try
   {
-    pc = tSynchMethodCallLogic::PerformSynchCall(pc, this, cPULL_TIMEOUT);
-    if (pc->HasException())
-    {
-      // return local port data
-      tPortDataManager* pd = LockCurrentValueForRead();
-      pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - 1)));  // we already have one lock
-      pc->Recycle();
-      return pd;
-    }
-    else
-    {
-      tPortDataPtr<rrlib::rtti::tGenericObject> o = pc->GetParamGeneric(0);
-      tPortDataManager* pd = static_cast<tPortDataManager*>(o->GetManager());
-      int locks = 0;  // Java: we already have one lock
-      pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - locks)));
-      pc->Recycle();
-      return pd;
-    }
-
+    tSynchMethodCallLogic::PerformSynchCall(pc, *this, cPULL_TIMEOUT);
+    assert(!pc->HasException());
+    tPortDataPtr<rrlib::rtti::tGenericObject> o = pc->GetParamGeneric(0);
+    tPortDataManager* pd = static_cast<tPortDataManager*>(o->GetManager());
+    int locks = 0;  // Java: we already have one lock
+    pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - locks)));
+    return pd;
   }
   catch (const tMethodCallException& e)
   {
     // return local port data
     tPortDataManager* pd = LockCurrentValueForRead();
     pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - 1)));  // we already have one lock
-    pc->Recycle();
     return pd;
   }
 }
@@ -492,6 +470,14 @@ tNetPort::tInterfaceNetPortImpl::tInterfaceNetPortImpl(tNetPort* const outer_cla
 {
   //setCallHandler(this);
 }
+
+tMethodCall::tPtr tNetPort::tInterfaceNetPortImpl::SynchCallOverTheNet(tMethodCall::tPtr& mc, int timeout)
+{
+  assert((mc->GetMethod() != NULL));
+  tSynchMethodCallLogic::PerformSynchCall(mc, *this, timeout);
+  return std::move(mc);
+}
+
 
 } // namespace finroc
 } // namespace core

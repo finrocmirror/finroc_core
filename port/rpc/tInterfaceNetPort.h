@@ -27,12 +27,12 @@
 
 #include "core/port/tPortCreationInfoBase.h"
 #include "core/port/rpc/tInterfacePort.h"
+#include "core/port/rpc/tMethodCall.h"
 
 namespace finroc
 {
 namespace core
 {
-class tMethodCall;
 class tAbstractMethodCallHandler;
 
 /*!
@@ -52,7 +52,7 @@ public:
    * \param mc Method call
    * \param mhandler Server/Handler handling call
    */
-  void ExecuteCallFromNetwork(tMethodCall* mc, tAbstractMethodCallHandler* mhandler);
+  void ExecuteCallFromNetwork(tMethodCall::tPtr& mc, tAbstractMethodCallHandler& mhandler);
 
   /*!
    * Called in extra thread for network forwarding of a call
@@ -60,7 +60,7 @@ public:
    * \param mc Call to forward
    * \param net_port Port to forward call over
    */
-  void ExecuteNetworkForward(tMethodCall* mc, tInterfaceNetPort* net_port);
+  void ExecuteNetworkForward(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port);
 
   /*!
    * Process method call that was received from a network connection
@@ -68,14 +68,14 @@ public:
    * \param mc Received method call (takes responsibility of recycling it)
    * \return MethodCall containing result
    */
-  void ProcessCallFromNet(tMethodCall* mc);
+  void ProcessCallFromNet(tMethodCall::tPtr& mc);
 
   /*!
    * Send asynchronous call over network connection
    *
    * \param mc Call to send (recycles call including parameters afterwards)
    */
-  virtual void SendAsyncCall(tMethodCall* mc) = 0;
+  virtual void SendAsyncCall(tMethodCall::tPtr& mc) = 0;
 
   /*!
    * Send synchronous call return over network connection
@@ -83,7 +83,7 @@ public:
    *
    * \param mc Call to send (recycles call including parameters afterwards)
    */
-  virtual void SendSyncCallReturn(tMethodCall* mc) = 0;
+  virtual void SendSyncCallReturn(tMethodCall::tPtr& mc) = 0;
 
   /*!
    * Send synchronous call over network connection
@@ -93,7 +93,7 @@ public:
    * \param timeout Network timeout for call (should be larger than any timeout in call due to network delays)
    * \return Method Call object containing results (may be a different one than mc - transfers responsibility for it to caller)
    */
-  virtual tMethodCall* SynchCallOverTheNet(tMethodCall* mc, int timeout) = 0;
+  virtual tMethodCall::tPtr SynchCallOverTheNet(tMethodCall::tPtr& mc, int timeout) = 0;
 
 };
 

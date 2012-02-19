@@ -75,16 +75,16 @@ public:
     return *result;
   }
 
-  tMethodCallSyncher* GetMethodSyncher()
+  tMethodCallSyncher& GetMethodSyncher()
   {
     if (!method_syncher)
     {
       method_syncher = CreateMethodSyncher();
     }
-    return method_syncher;
+    return *method_syncher;
   }
 
-  inline tMethodCall* GetUnusedMethodCall()
+  inline tMethodCall::tPtr GetUnusedMethodCall()
   {
     tMethodCall* pf = method_calls->GetUnused();
     if (!pf)
@@ -92,19 +92,17 @@ public:
       pf = CreateMethodCall();
     }
     //pf.responsibleThread = ThreadUtil.getCurrentThreadId();
-    return pf;
+    return tMethodCall::tPtr(pf);
   }
 
-  inline tPullCall* GetUnusedPullCall()
+  inline tPullCall::tPtr GetUnusedPullCall()
   {
     tPullCall* pf = pull_calls->GetUnused();
     if (!pf)
     {
       pf = CreatePullCall();
     }
-    //pf.responsibleThread = ThreadUtil.getCurrentThreadId();
-    //System.out.println("Dequeueing pull call: " + pf.toString());
-    return pf;
+    return tPullCall::tPtr(pf);
   }
 
 };

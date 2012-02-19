@@ -52,11 +52,6 @@ tAbstractMethod::tAbstractMethod(tPortInterface& port_interface, const util::tSt
   port_interface.AddMethod(this);
 }
 
-tAbstractVoidMethod::tAbstractVoidMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread) :
-  tAbstractMethod(port_interface, name, p1_name, p2_name, p3_name, p4_name, handle_in_extra_thread)
-{
-}
-
 const int tAbstractNonVoidMethod::cDEFAULT_NET_TIMEOUT;
 
 tAbstractNonVoidMethod::tAbstractNonVoidMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread, int default_net_timeout_) :

@@ -52,23 +52,23 @@ namespace finroc
 namespace core
 {
 tPortInterface tAdminServer::cMETHODS("Admin Interface", true);
-tVoid2Method<tAdminServer*, int, int> tAdminServer::cCONNECT(tAdminServer::cMETHODS, "Connect", "source port handle", "destination port handle", false);
-tVoid2Method<tAdminServer*, int, int> tAdminServer::cDISCONNECT(tAdminServer::cMETHODS, "Disconnect", "source port handle", "destination port handle", false);
-tVoid2Method<tAdminServer*, int, int> tAdminServer::cDISCONNECT_ALL(tAdminServer::cMETHODS, "DisconnectAll", "source port handle", "dummy", false);
-tVoid3Method<tAdminServer*, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> tAdminServer::cSET_PORT_VALUE(tAdminServer::cMETHODS, "SetPortValue", "port handle", "data", "as string?", false);
-tPort0Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer> > tAdminServer::cGET_CREATE_MODULE_ACTIONS(tAdminServer::cMETHODS, "GetCreateModuleActions", false);
-tVoid4Method<tAdminServer*, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > tAdminServer::cCREATE_MODULE(tAdminServer::cMETHODS, "CreateModule", "create action index", "module name", "parent handle", "module creation parameters", false);
-tVoid1Method<tAdminServer*, int> tAdminServer::cSAVE_FINSTRUCTABLE_GROUP(tAdminServer::cMETHODS, "Save Finstructable Group", "finstructable handle", false);
-tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > tAdminServer::cGET_ANNOTATION(tAdminServer::cMETHODS, "Get Annotation", "handle", "annotation type", false);
-tVoid4Method<tAdminServer*, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > tAdminServer::cSET_ANNOTATION(tAdminServer::cMETHODS, "Set Annotation", "handle", "dummy", "dummy", "annotation", false);
-tVoid1Method<tAdminServer*, int> tAdminServer::cDELETE_ELEMENT(tAdminServer::cMETHODS, "Delete Framework element", "handle", false);
-tVoid1Method<tAdminServer*, int> tAdminServer::cSTART_EXECUTION(tAdminServer::cMETHODS, "Start execution", "Framework element handle", false);
-tVoid1Method<tAdminServer*, int> tAdminServer::cPAUSE_EXECUTION(tAdminServer::cMETHODS, "Pause execution", "Framework element handle", false);
-tPort1Method<tAdminServer*, int, int> tAdminServer::cIS_RUNNING(tAdminServer::cMETHODS, "Is Framework element running", "handle", false);
-tPort3Method<tAdminServer*, tPortDataPtr<tCoreString>, int, int, int > tAdminServer::cGET_PORT_VALUE_AS_STRING(tAdminServer::cMETHODS, "Get port value as string", "handle", "dummy", "dummy", false);
-tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > tAdminServer::cGET_PARAMETER_INFO(tAdminServer::cMETHODS, "GetParameterInfo", "handle", "dummy", false);
-tPort0Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>> tAdminServer::cGET_MODULE_LIBRARIES(tAdminServer::cMETHODS, "GetModuleLibraries", false);
-tPort2Method<tAdminServer*, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString>> tAdminServer::cLOAD_MODULE_LIBRARY(tAdminServer::cMETHODS, "LoadModuleLibrary", "dummy", "library name", false);
+tVoidMethod<tAdminServer, int, int> tAdminServer::cCONNECT(tAdminServer::cMETHODS, "Connect", "source port handle", "destination port handle", false);
+tVoidMethod<tAdminServer, int, int> tAdminServer::cDISCONNECT(tAdminServer::cMETHODS, "Disconnect", "source port handle", "destination port handle", false);
+tVoidMethod<tAdminServer, int, int> tAdminServer::cDISCONNECT_ALL(tAdminServer::cMETHODS, "DisconnectAll", "source port handle", "dummy", false);
+tVoidMethod<tAdminServer, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> tAdminServer::cSET_PORT_VALUE(tAdminServer::cMETHODS, "SetPortValue", "port handle", "data", "as string?", false);
+tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer> > tAdminServer::cGET_CREATE_MODULE_ACTIONS(tAdminServer::cMETHODS, "GetCreateModuleActions", false);
+tVoidMethod<tAdminServer, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > tAdminServer::cCREATE_MODULE(tAdminServer::cMETHODS, "CreateModule", "create action index", "module name", "parent handle", "module creation parameters", false);
+tVoidMethod<tAdminServer, int> tAdminServer::cSAVE_FINSTRUCTABLE_GROUP(tAdminServer::cMETHODS, "Save Finstructable Group", "finstructable handle", false);
+tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > tAdminServer::cGET_ANNOTATION(tAdminServer::cMETHODS, "Get Annotation", "handle", "annotation type", false);
+tVoidMethod<tAdminServer, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > tAdminServer::cSET_ANNOTATION(tAdminServer::cMETHODS, "Set Annotation", "handle", "dummy", "dummy", "annotation", false);
+tVoidMethod<tAdminServer, int> tAdminServer::cDELETE_ELEMENT(tAdminServer::cMETHODS, "Delete Framework element", "handle", false);
+tVoidMethod<tAdminServer, int> tAdminServer::cSTART_EXECUTION(tAdminServer::cMETHODS, "Start execution", "Framework element handle", false);
+tVoidMethod<tAdminServer, int> tAdminServer::cPAUSE_EXECUTION(tAdminServer::cMETHODS, "Pause execution", "Framework element handle", false);
+tMethod<tAdminServer, int, int> tAdminServer::cIS_RUNNING(tAdminServer::cMETHODS, "Is Framework element running", "handle", false);
+tMethod<tAdminServer, tPortDataPtr<tCoreString>, int, int, int > tAdminServer::cGET_PORT_VALUE_AS_STRING(tAdminServer::cMETHODS, "Get port value as string", "handle", "dummy", "dummy", false);
+tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > tAdminServer::cGET_PARAMETER_INFO(tAdminServer::cMETHODS, "GetParameterInfo", "handle", "dummy", false);
+tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>> tAdminServer::cGET_MODULE_LIBRARIES(tAdminServer::cMETHODS, "GetModuleLibraries", false);
+tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString>> tAdminServer::cLOAD_MODULE_LIBRARY(tAdminServer::cMETHODS, "LoadModuleLibrary", "dummy", "library name", false);
 
 tRPCInterfaceType tAdminServer::cDATA_TYPE("Administration method calls", &(tAdminServer::cMETHODS));
 util::tString tAdminServer::cPORT_NAME = "Administration";
@@ -111,14 +111,14 @@ void tAdminServer::GetExecutionControls(util::tSimpleList<tExecutionControl*>& r
   }
 }
 
-tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbstractMethod* method)
+tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const tAbstractMethod& method)
 {
-  assert((method == &(cGET_CREATE_MODULE_ACTIONS)) || (method == &(cLOAD_MODULE_LIBRARY)) || (method == &(cGET_MODULE_LIBRARIES)));
+  assert((method == cGET_CREATE_MODULE_ACTIONS) || (method == cLOAD_MODULE_LIBRARY) || (method == cGET_MODULE_LIBRARIES));
 
   tPortDataPtr<rrlib::serialization::tMemoryBuffer> mb = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
   rrlib::serialization::tOutputStream co(mb.get(), rrlib::serialization::eNames);
 
-  if (method == &(cGET_MODULE_LIBRARIES))
+  if (method == cGET_MODULE_LIBRARIES)
   {
     std::vector<std::string> libs = sDynamicLoading::GetLoadableFinrocLibraries();
     for (size_t i = 0; i < libs.size(); i++)
@@ -149,9 +149,9 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
   return mb;
 }
 
-tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbstractMethod* method, int handle, tPortDataPtr<tCoreString>& type)
+tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const tAbstractMethod& method, int handle, tPortDataPtr<tCoreString>& type)
 {
-  if (method == &(cGET_ANNOTATION))
+  if (method == cGET_ANNOTATION)
   {
     ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
     tFinrocAnnotation* result = NULL;
@@ -179,7 +179,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
       return buf;
     }
   }
-  else if (method == &(cLOAD_MODULE_LIBRARY))
+  else if (method == cLOAD_MODULE_LIBRARY)
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Loading library ", type->ToString());
     sDynamicLoading::DLOpen(type->ToString().GetCString());
@@ -187,7 +187,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
   }
   else
   {
-    assert((method == &(cGET_PARAMETER_INFO)));
+    assert((method == cGET_PARAMETER_INFO));
 
     ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
     if (fe == NULL || (!fe->IsReady()))
@@ -218,9 +218,9 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(tAbst
   }
 }
 
-int tAdminServer::HandleCall(const tAbstractMethod* method, int handle)
+int tAdminServer::HandleCall(const tAbstractMethod& method, int handle)
 {
-  assert(method == &(cIS_RUNNING));
+  assert(method == cIS_RUNNING);
   util::tSimpleList<tExecutionControl*> ecs;
   GetExecutionControls(ecs, handle);
 
@@ -249,9 +249,9 @@ int tAdminServer::HandleCall(const tAbstractMethod* method, int handle)
   }
 }
 
-tPortDataPtr<tCoreString> tAdminServer::HandleCall(const tAbstractMethod* method, int p1, int p2, int p3)
+tPortDataPtr<tCoreString> tAdminServer::HandleCall(const tAbstractMethod& method, int p1, int p2, int p3)
 {
-  assert((method == &(cGET_PORT_VALUE_AS_STRING)));
+  assert(method == cGET_PORT_VALUE_AS_STRING);
   ::finroc::core::tAbstractPort* ap = GetRuntime()->GetPort(p1);
   if (ap != NULL && ap->IsReady())
   {
@@ -278,12 +278,12 @@ tPortDataPtr<tCoreString> tAdminServer::HandleCall(const tAbstractMethod* method
   return tPortDataPtr<tCoreString>();
 }
 
-void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int p1, int p2)
+void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
 {
   tRuntimeEnvironment* re = tRuntimeEnvironment::GetInstance();
   ::finroc::core::tAbstractPort* src = re->GetPort(p1);
 
-  if (method == &(cDISCONNECT_ALL))
+  if (method == cDISCONNECT_ALL)
   {
     if (src == NULL)
     {
@@ -301,7 +301,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int p1, int p2)
     FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Can't (dis)connect ports that do not exists");
     return;
   }
-  if (method == &(cCONNECT))
+  if (method == cCONNECT)
   {
     if (src->IsVolatile() && dest->IsVolatile())
     {
@@ -324,7 +324,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int p1, int p2)
       FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Connected ports ", src->GetQualifiedName(), " ", dest->GetQualifiedName());
     }
   }
-  else if (method == &(cDISCONNECT))
+  else if (method == cDISCONNECT)
   {
     if (src->IsVolatile())
     {
@@ -346,9 +346,9 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int p1, int p2)
   }
 }
 
-void tAdminServer::HandleVoidCall(tAbstractMethod* method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int as_string)
+void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int as_string)
 {
-  assert((method == &(cSET_PORT_VALUE)));
+  assert(method == cSET_PORT_VALUE);
   ::finroc::core::tAbstractPort* port = tRuntimeEnvironment::GetInstance()->GetPort(port_handle);
   if (port != NULL && port->IsReady())
   {
@@ -413,10 +413,10 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int port_handle, tPor
   }
 }
 
-void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortDataPtr<tCoreString>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer)
+void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int cma_index, tPortDataPtr<tCoreString>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer)
 {
   tConstructorParameters* params = NULL;
-  if (method == &(cSET_ANNOTATION))
+  if (method == cSET_ANNOTATION)
   {
     assert(!name);
     ::finroc::core::tFrameworkElement* elem = tRuntimeEnvironment::GetInstance()->GetElement(cma_index);
@@ -453,7 +453,7 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortD
     }
 
   }
-  else if (method == &(cCREATE_MODULE))
+  else if (method == cCREATE_MODULE)
   {
     try
     {
@@ -516,9 +516,9 @@ void tAdminServer::HandleVoidCall(tAbstractMethod* method, int cma_index, tPortD
 
 }
 
-void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int handle)
+void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int handle)
 {
-  if (method == &(cDELETE_ELEMENT))
+  if (method == cDELETE_ELEMENT)
   {
     ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
     if (fe != NULL && (!fe->IsDeleted()))
@@ -533,7 +533,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int handle)
     return;
   }
 
-  if (method == &(cSTART_EXECUTION) || method == &(cPAUSE_EXECUTION))
+  if (method == cSTART_EXECUTION || method == cPAUSE_EXECUTION)
   {
     util::tSimpleList<tExecutionControl*> ecs;
     GetExecutionControls(ecs, handle);
@@ -541,7 +541,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int handle)
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Start/Pause command has not effect");
     }
-    if (method == &(cSTART_EXECUTION))
+    if (method == cSTART_EXECUTION)
     {
       for (size_t i = 0u; i < ecs.Size(); i++)
       {
@@ -551,7 +551,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int handle)
         }
       }
     }
-    else if (method == &(cPAUSE_EXECUTION))
+    else if (method == cPAUSE_EXECUTION)
     {
       for (size_t i = 0u; i < ecs.Size(); i++)
       {
@@ -564,7 +564,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod* method, int handle)
     return;
   }
 
-  assert((method == &(cSAVE_FINSTRUCTABLE_GROUP)));
+  assert(method == cSAVE_FINSTRUCTABLE_GROUP);
   ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
   if (fe != NULL && fe->IsReady() && fe->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP))
   {

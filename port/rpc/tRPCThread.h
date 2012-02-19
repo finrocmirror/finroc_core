@@ -28,6 +28,8 @@
 #include "rrlib/finroc_core_utils/thread/tTask.h"
 #include "rrlib/finroc_core_utils/container/tReusable.h"
 
+#include "core/portdatabase/tSerializableReusable.h"
+
 namespace finroc
 {
 namespace core
@@ -44,6 +46,9 @@ private:
   /*! Task to execute next */
   util::tTask* volatile next_task;
 
+  /*! Next reusable task */
+  tSerializableReusableTask::tPtr next_reusable_task;
+
 public:
 
   tRPCThread();
@@ -53,7 +58,8 @@ public:
    *
    * \param t Task to execute
    */
-  void ExecuteTask(util::tTask* t);
+  void ExecuteTask(util::tTask& t);
+  void ExecuteTask(tSerializableReusableTask::tPtr& t);
 
   virtual void MainLoopCallback();
 

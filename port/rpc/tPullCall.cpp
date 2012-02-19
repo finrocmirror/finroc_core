@@ -50,15 +50,16 @@ void tPullCall::Deserialize(rrlib::serialization::tInputStream& is)
   cc_pull = is.ReadBoolean();
 }
 
-void tPullCall::ExecuteTask()
+void tPullCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
 {
-  assert((port != NULL));
+  tPullCall::tPtr& self2 = reinterpret_cast<tPullCall::tPtr&>(self);
+  assert(port);
   {
     util::tLock lock2(port);
     if (!port->IsReady())
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "pull call received for port that will soon be deleted");
-      Recycle();
+      return;
     }
 
     if (tFinrocTypeInfo::IsCCType(port->GetDataType()))
@@ -68,10 +69,10 @@ void tPullCall::ExecuteTask()
       RecycleParameters();
 
       tPortDataPtr<rrlib::rtti::tGenericObject> tmp(cpd->GetObject(), cpd);
-      AddParam(0, tmp);
+      SetParameter(0, tmp);
 
       SetStatusReturn();
-      return_to->InvokeCall(this);
+      return_to->InvokeCall(self2);
     }
     else if (tFinrocTypeInfo::IsStdType(port->GetDataType()))
     {
@@ -80,15 +81,15 @@ void tPullCall::ExecuteTask()
       RecycleParameters();
 
       tPortDataPtr<rrlib::rtti::tGenericObject> tmp(pd->GetObject(), pd);
-      AddParam(0, tmp);
+      SetParameter(0, tmp);
 
       SetStatusReturn();
-      return_to->InvokeCall(this);
+      return_to->InvokeCall(self2);
     }
     else
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "pull call received for port with invalid data type");
-      Recycle();
+      return;
     }
   }
 }
@@ -98,6 +99,11 @@ void tPullCall::Serialize(rrlib::serialization::tOutputStream& oos) const
   finroc::core::tAbstractCall::Serialize(oos);
   oos.WriteBoolean(intermediate_assign);
   oos.WriteBoolean(cc_pull);
+}
+
+const util::tString tPullCall::ToString() const
+{
+  return util::tStringBuilder("PullCall (") + GetStatusString() + ", callid: " + ::finroc::core::tAbstractCall::GetMethodCallIndex() + ", threaduid: " + ::finroc::core::tAbstractCall::GetThreadUid() + ")";
 }
 
 } // namespace finroc
