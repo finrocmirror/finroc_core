@@ -60,6 +60,7 @@ int tCoreRegister<T>::Add(const T& elem)
 
   if (elem_count >= cMAX_ELEMENTS)
   {
+    FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_ERROR, "Cannot create any more elements, because the core register is full (", elem_count, " elements limit).");
     throw util::tRuntimeException("Register full", CODE_LOCATION_MACRO);
   }
 
