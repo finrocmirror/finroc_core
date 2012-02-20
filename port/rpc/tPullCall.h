@@ -50,7 +50,7 @@ namespace core
  *
  * (Caller stack will contain every port in chain - pulled value will be assigned to each of them)
  */
-class tPullCall : public tAbstractCall, public util::tTask
+class tPullCall : public tAbstractCall
 {
 public:
 
@@ -78,11 +78,13 @@ private:
 
 public:
 
+  typedef std::unique_ptr<tPullCall, tRecycler> tPtr;
+
   tPullCall();
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
-  virtual void ExecuteTask();
+  virtual void ExecuteTask(tSerializableReusableTask::tPtr& self);
 
   /*!
    * Prepare Execution of call received over network in extra thread
@@ -98,10 +100,7 @@ public:
 
   virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;
 
-  virtual const util::tString ToString() const
-  {
-    return util::tStringBuilder("PullCall (") + GetStatusString() + ", callid: " + ::finroc::core::tAbstractCall::GetMethodCallIndex() + ", threaduid: " + ::finroc::core::tAbstractCall::GetThreadUid() + ")";
-  }
+  virtual const util::tString ToString() const;
 
   virtual void CustomDelete(bool b)
   {

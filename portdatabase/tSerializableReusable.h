@@ -36,12 +36,16 @@ namespace core
  * \author Max Reichardt
  *
  * This is the base class for some classes that are both Serializable and Reusable
+ *
+ * They are all meant to be stored in a std::unique_ptr to ensure that they are always recycled
+ * when no longer referenced.
+ * Furthermore, it is ensured that they are not recycled more than once.
  */
 class tSerializableReusable : public util::tReusable, public rrlib::serialization::tSerializable
 {
-public:
+  friend class tRecycler;
 
-  tSerializableReusable() {}
+protected:
 
   /*!
    * Recycle call object - after calling this method, object is available in ReusablesPool it originated from
@@ -54,6 +58,39 @@ public:
     ::finroc::util::tReusable::Recycle();
   }
 
+  tSerializableReusable() {}
+
+public:
+
+  /*!
+   * Deleter for std::unique_ptr that will recycle object instead of deleting it
+   */
+  class tRecycler
+  {
+  public:
+    void operator()(tSerializableReusable* p) const
+    {
+      p->GenericRecycle();
+    }
+  };
+
+  typedef std::unique_ptr<tSerializableReusable, tRecycler> tPtr;
+};
+
+/*!
+ * Serializable reusable task (e.g. to be executed in separate thread).
+ */
+class tSerializableReusableTask : public tSerializableReusable
+{
+public:
+
+  typedef std::unique_ptr<tSerializableReusableTask, tRecycler> tPtr;
+
+  /*!
+   * Executes this task.
+   * \param self Unique pointer to self - for clean, safe recycling
+   */
+  virtual void ExecuteTask(tPtr& self) = 0;
 };
 
 } // namespace finroc

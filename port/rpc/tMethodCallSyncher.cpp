@@ -31,6 +31,15 @@ util::tMutex tMethodCallSyncher::static_class_mutex;
 const size_t tMethodCallSyncher::cMAX_THREADS;
 ::finroc::util::tArrayWrapper<tMethodCallSyncher> tMethodCallSyncher::slots(tMethodCallSyncher::cMAX_THREADS);
 
+tMethodCallSyncher::tMethodCallSyncher() :
+  index(0),
+  thread(NULL),
+  thread_uid(0),
+  obj_mutex(tLockOrderLevels::cINNER_MOST - 300),
+  method_return(),
+  current_method_call_index(0)
+{}
+
 int16 tMethodCallSyncher::GetAndUseNextCallIndex()
 {
   current_method_call_index++;
@@ -63,27 +72,27 @@ void tMethodCallSyncher::Reset()
   //      beforeQuickReturnCheck = false;
   thread_uid = 0;
   thread = NULL;
-  method_return = NULL;
+  method_return.reset();
   current_method_call_index = 0;
 }
 
-void tMethodCallSyncher::ReturnValue(tAbstractCall* mc)
+void tMethodCallSyncher::ReturnValue(tAbstractCall::tPtr& mc)
 {
   util::tLock lock1(this);
 
   if (GetThreadUid() != mc->GetThreadUid())
   {
-    mc->GenericRecycle();
+    mc.reset();
     return;  // waiting thread has already ended
   }
   if (current_method_call_index != mc->GetMethodCallIndex())
   {
-    mc->GenericRecycle();
+    mc.reset();
     return;  // outdated method result - timeout could have elapsed
   }
 
-  method_return = mc;
-  assert(((thread != NULL)) && "No thread to notify ??");
+  method_return = std::move(mc);
+  assert(thread != NULL && "No thread to notify ??");
   monitor.NotifyAll(lock1);
 }
 

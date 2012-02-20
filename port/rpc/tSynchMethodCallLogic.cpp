@@ -29,44 +29,11 @@ namespace finroc
 {
 namespace core
 {
-void tSynchMethodCallLogic::HandleMethodReturn(tAbstractCall* call)
+void tSynchMethodCallLogic::HandleMethodReturn(tAbstractCall::tPtr& call)
 {
   // return value
   tMethodCallSyncher* mcs = tMethodCallSyncher::Get(call->GetSyncherID());
   mcs->ReturnValue(call);
-}
-
-tAbstractCall* tSynchMethodCallLogic::PerformSynchCallImpl(tAbstractCall* call, tCallable<tAbstractCall>* call_me, int64 timeout)
-{
-  tMethodCallSyncher* mcs = tThreadLocalRPCData::Get().GetMethodSyncher();
-  tAbstractCall* ret = NULL;
-  {
-    util::tLock lock2(mcs);
-    call->SetupSynchCall(mcs);
-    mcs->current_method_call_index = call->GetMethodCallIndex();
-    assert((mcs->method_return == NULL));
-    call_me->InvokeCall(call);
-    try
-    {
-      mcs->monitor.Wait(lock2, timeout);
-    }
-    catch (const util::tInterruptedException& e)
-    {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Synch method call interrupted... this shouldn't happen... usually");
-    }
-
-    // reset stuff for next call
-    mcs->GetAndUseNextCallIndex();  // Invalidate results of any incoming outdated returns
-    ret = mcs->method_return;
-    mcs->method_return = NULL;
-
-    if (ret == NULL)
-    {
-      // (recycling is job of receiver)
-      throw tMethodCallException(tMethodCallException::eTIMEOUT, CODE_LOCATION_MACRO);
-    }
-  }
-  return ret;
 }
 
 } // namespace finroc

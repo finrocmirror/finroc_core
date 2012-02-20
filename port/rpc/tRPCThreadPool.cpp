@@ -39,21 +39,19 @@ tRPCThreadPool::tRPCThreadPool() :
 {
 }
 
-void tRPCThreadPool::ExecuteTask(util::tTask* task)
+tRPCThread& tRPCThreadPool::GetUnusedThread()
 {
   util::tLock lock1(this);
-
   tRPCThread* r = NULL;
-
   r = unused_threads.Dequeue();
 
-  if (r == NULL)
+  if (!r)
   {
     r = new tRPCThread();
     util::sThreadUtil::SetAutoDelete(*r);
     r->Start();
   }
-  r->ExecuteTask(task);
+  return *r;
 }
 
 tRPCThreadPool& tRPCThreadPool::GetInstance()

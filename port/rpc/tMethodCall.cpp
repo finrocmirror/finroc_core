@@ -51,28 +51,29 @@ void tMethodCall::DeserializeCall(rrlib::serialization::tInputStream& is, const 
   ::finroc::core::tAbstractCall::DeserializeImpl(is, skip_parameters);
 }
 
-void tMethodCall::ExecuteTask()
+void tMethodCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
 {
-  assert((method != NULL));
-  if (source_net_port != NULL)
+  tMethodCall::tPtr& self2 = reinterpret_cast<tMethodCall::tPtr&>(self);
+  assert(method);
+  if (source_net_port)
   {
-    if (net_port != NULL)    // sync network forward in another thread
+    if (net_port)    // sync network forward in another thread
     {
-      source_net_port->ExecuteNetworkForward(this, net_port);
+      source_net_port->ExecuteNetworkForward(self2, *net_port);
     }
     else    // sync network call in another thread
     {
-      source_net_port->ExecuteCallFromNetwork(this, handler);
+      source_net_port->ExecuteCallFromNetwork(self2, *handler);
     }
   }
-  else if (net_port == NULL)    // async call in another thread
+  else if (!net_port)    // async call in another thread
   {
-    assert((handler != NULL));
-    method->ExecuteFromMethodCallObject(this, handler, ret_handler);
+    assert(handler);
+    method->ExecuteFromMethodCallObject(self2, *handler, ret_handler);
   }
   else    // sync network call in another thread
   {
-    method->ExecuteAsyncNonVoidCallOverTheNet(this, net_port, ret_handler, net_timeout);
+    method->ExecuteAsyncNonVoidCallOverTheNet(self2, *net_port, *ret_handler, net_timeout);
   }
 }
 

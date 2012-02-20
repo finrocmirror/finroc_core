@@ -36,7 +36,7 @@ tInterfaceNetPort::tInterfaceNetPort(tPortCreationInfoBase pci) :
 {
 }
 
-void tInterfaceNetPort::ExecuteCallFromNetwork(tMethodCall* mc, tAbstractMethodCallHandler* mhandler)
+void tInterfaceNetPort::ExecuteCallFromNetwork(tMethodCall::tPtr& mc, tAbstractMethodCallHandler& mhandler)
 {
   mc->GetMethod()->ExecuteFromMethodCallObject(mc, mhandler, NULL);
   if (!mc->GetMethod()->IsVoidMethod())
@@ -45,11 +45,11 @@ void tInterfaceNetPort::ExecuteCallFromNetwork(tMethodCall* mc, tAbstractMethodC
   }
 }
 
-void tInterfaceNetPort::ExecuteNetworkForward(tMethodCall* mc, tInterfaceNetPort* net_port)
+void tInterfaceNetPort::ExecuteNetworkForward(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port)
 {
   try
   {
-    mc = net_port->SynchCallOverTheNet(mc, mc->GetNetTimeout());
+    net_port.SynchCallOverTheNet(mc, mc->GetNetTimeout());
   }
   catch (const tMethodCallException& e)
   {
@@ -58,11 +58,11 @@ void tInterfaceNetPort::ExecuteNetworkForward(tMethodCall* mc, tInterfaceNetPort
   SendSyncCallReturn(mc);
 }
 
-void tInterfaceNetPort::ProcessCallFromNet(tMethodCall* mc)
+void tInterfaceNetPort::ProcessCallFromNet(tMethodCall::tPtr& mc)
 {
   ::finroc::core::tInterfacePort* ip = GetServer();
   tAbstractMethod* m = mc->GetMethod();
-  if (ip != NULL && ip->GetType() == ::finroc::core::tInterfacePort::eNetwork)
+  if (ip && ip->GetType() == ::finroc::core::tInterfacePort::eNetwork)
   {
     tInterfaceNetPort* inp = static_cast<tInterfaceNetPort*>(ip);
     if (m->IsVoidMethod())
@@ -72,20 +72,15 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall* mc)
     else
     {
       mc->PrepareForwardSyncRemoteExecution(this, inp);  // always do this in extra thread
-      tRPCThreadPool::GetInstance().ExecuteTask(mc);
-      SendSyncCallReturn(mc);
+      tRPCThreadPool::GetInstance().ExecuteTask(std::move(mc));
     }
   }
-  else if (ip != NULL && ip->GetType() == ::finroc::core::tInterfacePort::eServer)
+  else if (ip && ip->GetType() == ::finroc::core::tInterfacePort::eServer)
   {
     tAbstractMethodCallHandler* mhandler = static_cast<tAbstractMethodCallHandler*>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (mhandler == NULL)
     {
       if (m->IsVoidMethod())
-      {
-        mc->Recycle();
-      }
-      else
       {
         mc->SetExceptionStatus(tMethodCallException::eNO_CONNECTION);
         SendSyncCallReturn(mc);
@@ -96,12 +91,12 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall* mc)
       if (mc->GetMethod()->HandleInExtraThread())
       {
         mc->PrepareExecutionForCallFromNetwork(this, mhandler);
-        tRPCThreadPool::GetInstance().ExecuteTask(mc);
+        tRPCThreadPool::GetInstance().ExecuteTask(std::move(mc));
         return;
       }
       else
       {
-        mc->GetMethod()->ExecuteFromMethodCallObject(mc, mhandler, NULL);
+        mc->GetMethod()->ExecuteFromMethodCallObject(mc, *mhandler, NULL);
         if (!m->IsVoidMethod())
         {
           SendSyncCallReturn(mc);
@@ -111,11 +106,7 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall* mc)
   }
   else
   {
-    if (m->IsVoidMethod())
-    {
-      mc->Recycle();
-    }
-    else
+    if (!m->IsVoidMethod())
     {
       mc->SetExceptionStatus(tMethodCallException::eNO_CONNECTION);
       SendSyncCallReturn(mc);

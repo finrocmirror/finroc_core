@@ -24,21 +24,12 @@
 #define core__port__rpc__tAbstractCall_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/rtti/rtti.h"
 
+#include "core/portdatabase/tSerializableReusable.h"
 #include "core/port/rpc/tMethodCallException.h"
 #include "core/port/rpc/tCallParameter.h"
-#include "rrlib/rtti/rtti.h"
-#include "core/portdatabase/tSerializableReusable.h"
-
 #include "core/port/rpc/tParameterUtil.h"
-
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -52,7 +43,7 @@ class tMethodCallSyncher;
  * This is the base abstract class for (possibly synchronous) calls
  * (such as Pull-Calls and method calls)
  */
-class tAbstractCall : public tSerializableReusable
+class tAbstractCall : public tSerializableReusableTask
 {
   friend class tMethodCallSyncher;
   friend class tSynchMethodCallLogic;
@@ -95,6 +86,11 @@ public:
 
 protected:
 
+  virtual void GenericRecycle()
+  {
+    Recycle();
+  }
+
   inline int16 GetMethodCallIndex() const
   {
     return method_call_index;
@@ -108,9 +104,20 @@ protected:
     return syncher_iD;
   }
 
+  void Recycle();
+
   inline void SetMethodCallIndex(int16 method_call_index_)
   {
     this->method_call_index = method_call_index_;
+  }
+
+  void SetParametersHelper(int arg_no) {}
+
+  template <typename Arg, typename ... TArgs>
+  void SetParametersHelper(int arg_no, Arg& arg, const TArgs&... args)
+  {
+    SetParameter(arg_no, arg);
+    SetParametersHelper(arg_no + 1, args...);
   }
 
   /*!
@@ -124,6 +131,8 @@ protected:
 
 public:
 
+  typedef std::unique_ptr<tAbstractCall, tRecycler> tPtr;
+
   /*!
    * \param max_call_depth Maximum size of call stack
    */
@@ -136,17 +145,18 @@ public:
 
   void DeserializeImpl(rrlib::serialization::tInputStream& is, bool skip_parameters);
 
-  virtual void GenericRecycle()
-  {
-    Recycle();
-  }
-
   /*!
    * \return Local port handle - only used while call is enqueued in network queue
    */
   inline int GetLocalPortHandle() const
   {
     return local_port_handle;
+  }
+
+  template <typename T>
+  void GetParam(int index, T& pd)
+  {
+    tParameterUtil<T>::GetParam(&(params[index]), pd);
   }
 
   tPortDataPtr<rrlib::rtti::tGenericObject> GetParamGeneric(int index);
@@ -190,26 +200,12 @@ public:
     return status == cASYNCH_RETURN || status == cSYNCH_RETURN || (include_exception && status == cCONNECTION_EXCEPTION);
   }
 
-  void Recycle();
-
   /*!
    * Recycle all parameters, but keep empty method call
    */
   void RecycleParameters();
 
   virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;
-
-  template <typename T>
-  void GetParam(int index, T& pd)
-  {
-    tParameterUtil<T>::GetParam(&(params[index]), pd);
-  }
-
-  template <typename T>
-  void AddParam(int index, T& pd)
-  {
-    tParameterUtil<T>::AddParam(&(params[index]), pd);
-  }
 
   inline void SetExceptionStatus(tMethodCallException::tType type)
   {
@@ -229,6 +225,24 @@ public:
   inline void SetLocalPortHandle(int local_port_handle_)
   {
     this->local_port_handle = local_port_handle_;
+  }
+
+  /*!
+   * Set Parameter with specified in index to specified value
+   */
+  template <typename T>
+  void SetParameter(int index, T& pd)
+  {
+    tParameterUtil<T>::AddParam(&(params[index]), pd);
+  }
+
+  /*!
+   * Set Parameters to specified values
+   */
+  template <typename ... TArgs>
+  void SetParameters(TArgs&... args)
+  {
+    SetParametersHelper(0, args...);
   }
 
   /*!
@@ -267,7 +281,7 @@ public:
    *
    * \param mcs MethodSyncher object to use
    */
-  void SetupSynchCall(tMethodCallSyncher* mcs);
+  void SetupSynchCall(tMethodCallSyncher& mcs);
 
 };
 

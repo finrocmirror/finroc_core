@@ -50,16 +50,6 @@ class tParameterUtilBase
 {
 public:
 
-  static void Cleanup(const T& t)
-  {
-    // do nothing
-  }
-
-  static bool HasLock(const T& t)
-  {
-    return true;
-  }
-
   static void GetParam(tCallParameter* p, T& val)
   {
     val = p->value->GetData<T>();
@@ -80,15 +70,6 @@ template <typename T, bool NUM>
 class tParameterUtilBase<tPortDataPtr<T>, NUM>
 {
 public:
-  static void Cleanup(const tPortDataPtr<T>& t)
-  {
-    // do nothing
-  }
-
-  static bool HasLock(const tPortDataPtr<T>& t)
-  {
-    return true;
-  }
 
   static void GetParam(tCallParameter* p, tPortDataPtr<T>& val)
   {
@@ -117,15 +98,6 @@ template <typename T>
 class tParameterUtilBase<T, true>
 {
 public:
-  static void Cleanup(const T& t)
-  {
-    // do nothing
-  }
-
-  static bool HasLock(const T& t)
-  {
-    return true;
-  }
 
   static void GetParam(tCallParameter* p, T& val)
   {

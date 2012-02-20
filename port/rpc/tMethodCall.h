@@ -50,7 +50,7 @@ class tInterfaceNetPort;
  * 3 long parameters and 2 object parameters. This should be
  * sufficient - since anything can be put into custom objects.
  */
-class tMethodCall : public tAbstractCall, public util::tTask
+class tMethodCall : public tAbstractCall
 {
 private:
 
@@ -86,7 +86,18 @@ private:
    */
   bool TypeCheck();
 
+protected:
+
+  virtual void GenericRecycle()
+  {
+    Recycle();
+  }
+
+  void Recycle();
+
 public:
+
+  typedef std::unique_ptr<tMethodCall, tRecycler> tPtr;
 
   /*! (Typically not instantiated directly - possible though) */
   tMethodCall();
@@ -106,12 +117,7 @@ public:
    */
   void DeserializeCall(rrlib::serialization::tInputStream& is, const rrlib::rtti::tDataTypeBase& dt, bool skip_parameters);
 
-  virtual void ExecuteTask();
-
-  virtual void GenericRecycle()
-  {
-    Recycle();
-  }
+  virtual void ExecuteTask(tSerializableReusableTask::tPtr& self);
 
   /*!
    * \return the methodID
@@ -184,8 +190,6 @@ public:
    * \param net_timeout Network timeout in ms for call
    */
   void PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, int net_timeout_);
-
-  void Recycle();
 
   virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;
 
