@@ -82,7 +82,7 @@ public:
     util::tLock lock2(mcs);
     call->SetupSynchCall(mcs);
     mcs.current_method_call_index = call->GetMethodCallIndex();
-    assert(mcs.method_return == NULL);
+    assert(mcs.method_return.get() == NULL);
     call_me.InvokeCall(call);
     try
     {
