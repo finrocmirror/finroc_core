@@ -42,10 +42,10 @@ namespace core
  *
  * The class is completely thread safe.
  *
- * Current format of handle is <1 bit sign><15 bit uid at index><16 bit index>
+ * Current default format of handle is <1 bit sign><15 bit uid at index><16 bit index>
  */
-template < typename T = finroc::util::tObject* >
-class tCoreRegister : public util::tUncopyableObject
+template <typename T>
+class tCoreRegister : public boost::noncopyable
 {
 private:
 
@@ -67,27 +67,26 @@ private:
   /*! number of elements in register */
   int elem_count;
 
-public:
-
   // for synchronization on an object of this class
   mutable util::tMutex obj_mutex;
 
   /*! Maximum number of elements */
-  static const int cMAX_ELEMENTS = 0xFFFF;
+  static int cMAX_ELEMENTS;
 
   /*! Maximum UID index */
-  static const int cMAX_UID = 0x7FFF;
+  static int cMAX_UID;
 
   /*! Element index mask */
-  static const int cELEM_INDEX_MASK = 0xFFFF;
+  static int cELEM_INDEX_MASK;
 
   /*! Element UID mask */
-  static const int cELEM_UID_MASK = 0x7FFF0000;
+  static int cELEM_UID_MASK;
 
   /*! Amount of bits the UID needs to be shifted */
-  static const int cUID_SHIFT = 16;
+  static int cUID_SHIFT;
 
-private:
+  /*! Has any core register been created? In this case the static variables cannot be changed anymore */
+  static bool register_created;
 
   /*!
    * Increment currentElementIndex taking MAX_ELEMENTS into account
@@ -129,6 +128,22 @@ public:
   }
 
   /*!
+   * \return Element index mask
+   */
+  static int GetElementIndexMask()
+  {
+    return cELEM_INDEX_MASK;
+  }
+
+  /*!
+   * \return Maximum number of elements
+   */
+  static int GetMaximumNumberOfElements()
+  {
+    return cMAX_ELEMENTS;
+  }
+
+  /*!
    * Mark specified framework element as (soon completely) deleted
    *
    * get() won't return it anymore.
@@ -145,6 +160,11 @@ public:
    */
   void Remove(int handle);
 
+  /*!
+   * Sets the maximum number of elements in core register.
+   * This may only be called before a core register was created.
+   */
+  static void SetMaximumNumberOfElements(int max_elements);
 };
 
 } // namespace finroc

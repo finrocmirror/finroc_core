@@ -39,7 +39,7 @@ tCCPortBase::tCCPortBase(tPortCreationInfoBase pci) :
   value(NULL),
   owned_data(NULL),
   standard_assign(!GetFlag(tPortFlags::cNON_STANDARD_ASSIGN) && (!GetFlag(tPortFlags::cHAS_QUEUE))),
-  port_index(GetHandle() & tCoreRegister<>::cELEM_INDEX_MASK),
+  port_index(GetHandle() & tCoreRegister<tAbstractPort*>::GetElementIndexMask()),
   queue(GetFlag(tPortFlags::cHAS_QUEUE) ? new tCCPortQueue(pci.max_queue_size) : NULL),
   port_listener(),
   pull_request_handler(NULL),

@@ -88,6 +88,7 @@ public:
 
   };
 
+  friend class tFrameworkElement;
   friend class tLinkEdge;
   friend class rrlib::util::singleton::CreateUsingNew<tRuntimeEnvironment>;
 private:
@@ -110,22 +111,18 @@ private:
   /*! Command line arguments (used by parameters, for instance). Needs to be manually filled (usually in main()). */
   std::map<std::string, std::string> command_line_args;
 
-public:
-
   /*! Framework element that contains all framework elements that have no parent specified */
   ::finroc::core::tFrameworkElement* unrelated;
 
-private:
-
   tRuntimeEnvironment();
+
+  virtual ~tRuntimeEnvironment();
 
   /*!
    * Initializes the runtime environment. Needs to be called before any
    * other operation (especially getInstance()) is called.
    */
   static void InitialInit();
-
-protected:
 
   /*!
    * (usually only called by LinkEdge)
@@ -137,6 +134,15 @@ protected:
   void AddLinkEdge(const util::tString& link, tLinkEdge* edge);
 
   /*!
+   * Register framework element at RuntimeEnvironment.
+   * This is done automatically and should not be called by a user.
+   *
+   * \param framework_element Element to register
+   * \return Handle of Framework element
+   */
+  int RegisterElement(tFrameworkElement* fe);
+
+  /*!
    * (usually only called by LinkEdge)
    * Remove link edge that is interested in specific link
    *
@@ -145,9 +151,15 @@ protected:
    */
   void RemoveLinkEdge(const util::tString& link, tLinkEdge* edge);
 
-public:
+  /*!
+   * Unregister framework element at RuntimeEnvironment.
+   * This is done automatically and should not be called by a user.
+   *
+   * \param framework_element Element to remove
+   */
+  void UnregisterElement(tFrameworkElement* fe);
 
-  virtual ~tRuntimeEnvironment();
+public:
 
   /*!
    * (usually called from main())
@@ -245,15 +257,6 @@ public:
   void PreElementInit(tFrameworkElement* element);
 
   /*!
-   * Register framework element at RuntimeEnvironment.
-   * This is done automatically and should not be called by a user.
-   *
-   * \param framework_element Element to register
-   * \return Handle of Framework element
-   */
-  int RegisterElement(tFrameworkElement* fe);
-
-  /*!
    * Remove linked edges from specified link to specified partner port
    *
    * \param link Link
@@ -298,14 +301,6 @@ public:
   {
     return util::tThread::StoppingThreads();
   }
-
-  /*!
-   * Unregister framework element at RuntimeEnvironment.
-   * This is done automatically and should not be called by a user.
-   *
-   * \param framework_element Element to remove
-   */
-  void UnregisterElement(tFrameworkElement* fe);
 
 };
 

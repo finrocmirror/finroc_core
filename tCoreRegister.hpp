@@ -25,19 +25,22 @@ namespace finroc
 namespace core
 {
 template<typename T>
-const int tCoreRegister<T>::cMAX_ELEMENTS;
+int tCoreRegister<T>::cMAX_ELEMENTS = 0xFFFF;
 
 template<typename T>
-const int tCoreRegister<T>::cMAX_UID;
+int tCoreRegister<T>::cMAX_UID = 0x7FFF;
 
 template<typename T>
-const int tCoreRegister<T>::cELEM_INDEX_MASK;
+int tCoreRegister<T>::cELEM_INDEX_MASK = 0xFFFF;
 
 template<typename T>
-const int tCoreRegister<T>::cELEM_UID_MASK;
+int tCoreRegister<T>::cELEM_UID_MASK = 0x7FFF0000;
 
 template<typename T>
-const int tCoreRegister<T>::cUID_SHIFT;
+int tCoreRegister<T>::cUID_SHIFT = 16;
+
+template<typename T>
+bool tCoreRegister<T>::register_created = false;
 
 template<typename T>
 const int tCoreRegister<T>::cDELETE_MARK;
@@ -51,12 +54,13 @@ tCoreRegister<T>::tCoreRegister(bool positive_indices) :
   elem_count(0),
   obj_mutex()
 {
+  register_created = true;
 }
 
 template<typename T>
 int tCoreRegister<T>::Add(const T& elem)
 {
-  util::tLock lock1(this);
+  util::tLock lock1(obj_mutex);
 
   if (elem_count >= cMAX_ELEMENTS)
   {
@@ -114,7 +118,7 @@ void tCoreRegister<T>::IncrementCurElementIndex()
 template<typename T>
 void tCoreRegister<T>::MarkDeleted(int handle)
 {
-  util::tLock lock1(this);
+  util::tLock lock1(obj_mutex);
   int index = handle & cELEM_INDEX_MASK;
   int uid = (handle & cELEM_UID_MASK) >> cUID_SHIFT;
   assert((elements.Get(index) != NULL));
@@ -125,7 +129,7 @@ void tCoreRegister<T>::MarkDeleted(int handle)
 template<typename T>
 void tCoreRegister<T>::Remove(int handle)
 {
-  util::tLock lock1(this);
+  util::tLock lock1(obj_mutex);
   int index = handle & cELEM_INDEX_MASK;
   int uid = (handle & cELEM_UID_MASK) >> cUID_SHIFT;
   int clean_cur_uid = element_uid.Get(index) & cMAX_UID;
@@ -139,6 +143,33 @@ void tCoreRegister<T>::Remove(int handle)
   {
     throw util::tRuntimeException("Element removed twice or does not exist", CODE_LOCATION_MACRO);
   }
+}
+
+template<typename T>
+void tCoreRegister<T>::SetMaximumNumberOfElements(int max_elements)
+{
+  if (register_created)
+  {
+    FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_ERROR, "Cannot change core register capacity after one was created.");
+    return;
+  }
+
+  // count bits
+  int tmp = max_elements;
+  cUID_SHIFT = 0;
+  while (tmp > 0)
+  {
+    tmp >>= 1;
+    cUID_SHIFT++;
+  }
+
+  // set variables
+  cMAX_ELEMENTS = max_elements;
+  cMAX_UID = (1 << (31 - cUID_SHIFT)) - 1;
+  cELEM_INDEX_MASK = (1 << cUID_SHIFT) - 1;
+  cELEM_UID_MASK = 0x7FFFFFFF & (~cELEM_INDEX_MASK);
+
+  FINROC_LOG_PRINTF_STATIC(rrlib::logging::eLL_DEBUG, "Changed maximum number of elements: %d (uid shift: %d, index mask: 0x%X, uid mask: 0x%X, max uid: 0x%X)", cMAX_ELEMENTS, cUID_SHIFT, cELEM_INDEX_MASK, cELEM_UID_MASK, cMAX_UID);
 }
 
 } // namespace finroc

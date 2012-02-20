@@ -215,6 +215,44 @@ bool ConnectHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
   return true;
 }
 
+bool MaxPortsHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
+{
+  rrlib::getopt::tOption max_ports(name_to_option_map.at("max-ports"));
+  if (max_ports->IsActive())
+  {
+    const char* max_string = boost::any_cast<const char *>(max_ports->GetValue());
+    int m = atoi(max_string);
+    if (m < 2 || m > 0xFFFFFF)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Invalid value for maximum number of ports: ", max_string, ". Please provide a value between 2 and 16.7 million");
+    }
+    else
+    {
+      finroc::core::tCoreRegister<finroc::core::tAbstractPort*>::SetMaximumNumberOfElements(m);
+    }
+  }
+  return true;
+}
+
+bool MaxElementsHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
+{
+  rrlib::getopt::tOption max_elements(name_to_option_map.at("max-elements"));
+  if (max_elements->IsActive())
+  {
+    const char* max_string = boost::any_cast<const char *>(max_elements->GetValue());
+    int m = atoi(max_string);
+    if (m < 2 || m > 0xFFFFFF)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Invalid value for maximum number of framework elements: ", max_string, ". Please provide a value between 2 and 16.7 million");
+    }
+    else
+    {
+      finroc::core::tCoreRegister<finroc::core::tFrameworkElement*>::SetMaximumNumberOfElements(m);
+    }
+  }
+  return true;
+}
+
 //----------------------------------------------------------------------
 // main
 //----------------------------------------------------------------------
@@ -240,6 +278,8 @@ int main(int argc, char **argv)
   rrlib::getopt::AddValue("config-file", 'c', "Parameter config file", &ParameterConfigHandler);
   rrlib::getopt::AddValue("port", 'p', "Network port to use", &PortHandler);
   rrlib::getopt::AddValue("connect", 0, "TCP address of finroc application to connect to (default: localhost:<port>)", &ConnectHandler);
+  rrlib::getopt::AddValue("max-ports", 0, "Maximum number of ports (default: 65535). Has significant impact on memory footprint.", &MaxPortsHandler);
+  rrlib::getopt::AddValue("max-elements", 0, "Maximum number of framework elements excluding ports (default: 65535).", &MaxElementsHandler);
   rrlib::getopt::AddFlag("pause", 0, "Pause program at startup", &PauseHandler);
   rrlib::getopt::AddFlag("port-links-are-not-unique", 0, "Port links in this part are not unique in P2P network (=> host name is prepended in GUI, for instance).", &UniqueHandler);
 

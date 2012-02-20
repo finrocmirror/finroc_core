@@ -72,7 +72,7 @@ tThreadLocalCache::tThreadLocalCache() :
   cc_inter_auto_locks(),
   data(NULL),
   ref(NULL),
-  last_written_to_port(tCoreRegister<>::cMAX_ELEMENTS),
+  last_written_to_port(tCoreRegister<tAbstractPort*>::GetMaximumNumberOfElements()),
   cc_type_pools(tFinrocTypeInfo::cMAX_CCTYPES),
   pq_fragments(new util::tReusablesPool<tPortQueueElement>()),
   ccpq_fragments(new util::tReusablesPool<tCCPortQueueElement>()),
@@ -143,7 +143,7 @@ tThreadLocalCache* tThreadLocalCache::CreateThreadLocalCacheForThisThread()
 
 void tThreadLocalCache::DeleteInfoForPort(int port_index)
 {
-  assert((port_index >= 0 && port_index <= tCoreRegister<>::cMAX_ELEMENTS));
+  assert((port_index >= 0 && port_index <= tCoreRegister<tAbstractPort*>::GetMaximumNumberOfElements()));
   {
     util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
     util::tLock lock2(infos);
