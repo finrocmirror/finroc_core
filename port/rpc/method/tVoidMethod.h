@@ -80,10 +80,14 @@ public:
    * (is performed in separate thread, if method object suggests so and server is on local machine)
    *
    * \param port Port that call is performed from (typically 'this')                   //1
-   * \param args Arguments for method call
    * \param force_same_thread Force that method call is performed by this thread on local machine (even if method call default is something else)
+   * \param args Arguments for method call
    */
-  void Call(tInterfaceClientPort port, TArgs... args, bool force_same_thread = false);
+  void Call(tInterfaceClientPort port, bool force_same_thread, TArgs... args);
+  inline void Call(tInterfaceClientPort port, TArgs... args)
+  {
+    Call(port, false, args...);
+  }
 
   virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port, tAbstractAsyncReturnHandler& ret_handler, int net_timeout)
   {

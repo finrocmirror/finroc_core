@@ -63,7 +63,7 @@ struct tVoidCallHandler<HANDLER, ARGNO>
 }
 
 template<typename HANDLER, typename ... TArgs>
-void tVoidMethod<HANDLER, TArgs...>::Call(tInterfaceClientPort port, TArgs... args, bool force_same_thread)
+void tVoidMethod<HANDLER, TArgs...>::Call(tInterfaceClientPort port, bool force_same_thread, TArgs... args)
 {
   tInterfacePort* ip = port.GetServer();
   if (ip && ip->GetType() == tInterfacePort::eNetwork)

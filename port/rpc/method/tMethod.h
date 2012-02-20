@@ -82,11 +82,15 @@ public:
    * (is performed in same thread and blocks)
    *
    * \param port Port that call is performed from (typically 'this')
-   * \param args Arguments for method call
    * \param net_timout Network timeout in ms (value <= 0 means method default)
+   * \param args Arguments for method call
    * \return return value of method
    */
-  R Call(tInterfaceClientPort port, TArgs... args, int net_timeout = -1);
+  R Call(tInterfaceClientPort port, int net_timeout, TArgs... args); // Note: originally, net_timeout was at the end with default. However, gcc 4.5 does not like this.
+  inline R Call(tInterfaceClientPort port, TArgs... args)
+  {
+    return Call(port, -1, args...);
+  }
 
   /*!
    * Asynchronously call method.
@@ -95,11 +99,15 @@ public:
    *
    * \param port Port that call is performed from (typically 'this')
    * \param handler AsyncReturnHandler that will handle return value.
-   * \param args Arguments for method call
    * \param net_timout Network timeout in ms (value <= 0 means method default)
    * \param force_same_thread Force that method call is performed by this thread on local machine (even if method call default is something else)
+   * \param args Arguments for method call
    */
-  void CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, TArgs... args, int net_timeout = -1, bool force_same_thread = false);
+  void CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, int net_timeout, bool force_same_thread, TArgs... args);
+  inline void CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, TArgs... args)
+  {
+    CallAsync(port, handler, -1, false, args...);
+  }
 
   virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port, tAbstractAsyncReturnHandler& ret_handler, int net_timeout);
 

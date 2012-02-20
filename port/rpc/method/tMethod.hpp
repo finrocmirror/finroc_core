@@ -62,7 +62,7 @@ struct tCallHandler<HANDLER, R, ARGNO>
 }
 
 template<typename HANDLER, typename R, typename ... TArgs>
-R tMethod<HANDLER, R, TArgs...>::Call(tInterfaceClientPort port, TArgs... args, int net_timeout)
+R tMethod<HANDLER, R, TArgs...>::Call(tInterfaceClientPort port, int net_timeout, TArgs... args)
 {
   tInterfacePort* ip = port.GetServer();
   if (ip && ip->GetType() == tInterfacePort::eNetwork)
@@ -92,7 +92,7 @@ R tMethod<HANDLER, R, TArgs...>::Call(tInterfaceClientPort port, TArgs... args, 
 }
 
 template<typename HANDLER, typename R, typename ... TArgs>
-void tMethod<HANDLER, R, TArgs...>::CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, TArgs... args, int net_timeout, bool force_same_thread)
+void tMethod<HANDLER, R, TArgs...>::CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, int net_timeout, bool force_same_thread, TArgs... args)
 {
   tInterfacePort* ip = port.GetServer();
   if (ip && ip->GetType() == tInterfacePort::eNetwork)
