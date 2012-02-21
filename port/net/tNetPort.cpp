@@ -359,6 +359,7 @@ bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
   }
   catch (const tMethodCallException& e)
   {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, "Pulling value via network connection failed: ", e.what());
     GetRaw(result_buffer->GetObject(), true);
   }
   return true;
@@ -457,6 +458,8 @@ const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, in
   }
   catch (const tMethodCallException& e)
   {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, "Pulling value via network connection failed: ", e.what());
+
     // return local port data
     tPortDataManager* pd = LockCurrentValueForRead();
     pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - 1)));  // we already have one lock

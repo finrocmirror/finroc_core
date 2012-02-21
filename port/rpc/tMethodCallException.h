@@ -58,6 +58,11 @@ public:
     return static_cast<int8>(type);
   }
 
+  virtual const char* what() const throw()
+  {
+    return (*make_builder::GetEnumStrings<tType>())[type];
+  }
+
 };
 
 } // namespace finroc

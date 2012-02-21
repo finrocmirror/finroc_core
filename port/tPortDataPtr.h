@@ -225,12 +225,12 @@ public:
 
   T* operator->() const
   {
+    assert(data != NULL);
     return Get();
   }
 
   T* Get() const
   {
-    assert(data != NULL);
     return data;
   }
 
@@ -377,12 +377,12 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
 
   T* operator->() const
   {
+    assert(data != NULL);
     return Get();
   }
 
   T* Get() const
   {
-    assert(data != NULL);
     return data;
   }
 
