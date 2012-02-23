@@ -57,7 +57,7 @@ tUnit tUnit::min(tUnit::time, "min", 60);
 tUnit tUnit::h(tUnit::time, "h", 3600);
 tUnit tUnit::day(tUnit::time, "day", 86400);
 util::tSimpleList<tUnit*> tUnit::angle;
-tUnit tUnit::deg(tUnit::angle, "deg", 57.295779506);
+tUnit tUnit::deg(tUnit::angle, "deg", 0.017453292);
 tUnit tUnit::rad(tUnit::angle, "rad", 1);
 util::tSimpleList<tUnit*> tUnit::frequency;
 tUnit tUnit::Hz(tUnit::frequency, "Hz", 1);
