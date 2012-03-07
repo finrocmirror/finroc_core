@@ -183,7 +183,9 @@ rrlib::xml2::tXMLNode& tConfigFile::GetEntry(const util::tString& entry, bool cr
       }
       else
       {
-        throw util::tRuntimeException("Node not found", CODE_LOCATION_MACRO);
+
+
+        throw util::tRuntimeException(util::tString("Node not found: ") + entry, CODE_LOCATION_MACRO);
       }
     }
   }
