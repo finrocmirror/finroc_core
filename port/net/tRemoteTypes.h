@@ -74,10 +74,10 @@ class tRemoteTypes : public util::tLogUser, public rrlib::serialization::tTypeEn
 private:
 
   /*! List with remote types - index is remote type id (=> mapping: remote type id => local type id */
-  util::tSafeConcurrentlyIterableList<tEntry> types;
+  util::tSafeConcurrentlyIterableList<tEntry, util::tNoMutex, 2> types;
 
   /*! List with remote type update times - index is local type id */
-  util::tSafeConcurrentlyIterableList<int16> update_times;
+  util::tSafeConcurrentlyIterableList<int16, util::tNoMutex, 2> update_times;
 
   /*! Number (max index) of local types already sent to remote runtime */
   int16 local_types_sent;

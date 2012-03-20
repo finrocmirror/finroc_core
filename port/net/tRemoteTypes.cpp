@@ -33,8 +33,8 @@ namespace finroc
 namespace core
 {
 tRemoteTypes::tRemoteTypes() :
-  types(200u, 2u),
-  update_times(200u, 2u),
+  types(200),
+  update_times(200),
   local_types_sent(0),
   global_default(0)
 {

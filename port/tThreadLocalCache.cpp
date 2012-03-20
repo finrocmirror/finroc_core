@@ -48,7 +48,7 @@ struct ThreadLocalCacheInfosCreator
   }
   static void Destroy(T* object)
   {
-    delete tThreadLocalCache::Get();
+    delete tThreadLocalCache::info;
     delete object;
   }
 };

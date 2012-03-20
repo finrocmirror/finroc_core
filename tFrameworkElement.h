@@ -172,7 +172,7 @@ protected:
   uint flags;
 
   /*! children - may contain null entries (for efficient thread-safe unsynchronized iteration) */
-  util::tSafeConcurrentlyIterableList<tLink*> children;
+  util::tSafeConcurrentlyIterableList<tLink*, util::tNoMutex> children;
 
 public:
 

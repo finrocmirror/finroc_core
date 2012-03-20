@@ -46,6 +46,8 @@ namespace core
 namespace internal
 {
 class tThreadLocalCachePlugin;
+template <typename T>
+class ThreadLocalCacheInfosCreator;
 }
 class tCCPortDataRef;
 class tPortDataManager;
@@ -67,6 +69,8 @@ class tThreadLocalCache : public tAnnotatable
 {
   friend class tRuntimeEnvironment;
   friend class internal::tThreadLocalCachePlugin;
+  template <typename T>
+  friend class internal::ThreadLocalCacheInfosCreator;
   friend class tCCPortBase;
   friend class tCCPortDataBufferPool;
 private:
@@ -192,7 +196,7 @@ public:
    */
   inline void AddAutoLock(tCCPortDataManager* obj)
   {
-    assert((obj != NULL));
+    assert(obj);
     cc_inter_auto_locks.Add(obj);
   }
 

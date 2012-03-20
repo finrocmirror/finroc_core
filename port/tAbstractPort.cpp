@@ -98,25 +98,23 @@ void tAbstractPort::CommitUpdateTimeChange()
 
 void tAbstractPort::ConnectToSource(const util::tString& src_link, bool finstructed)
 {
+  util::tLock lock2(GetRegistryLock());
+  if (IsDeleted())
   {
-    util::tLock lock2(GetRegistryLock());
-    if (IsDeleted())
+    return;
+  }
+  if (link_edges == NULL)    // lazy initialization
+  {
+    link_edges = new util::tSimpleList<tLinkEdge*>();
+  }
+  for (size_t i = 0u; i < link_edges->Size(); i++)
+  {
+    if (link_edges->Get(i)->GetSourceLink().Equals(src_link))
     {
       return;
     }
-    if (link_edges == NULL)    // lazy initialization
-    {
-      link_edges = new util::tSimpleList<tLinkEdge*>();
-    }
-    for (size_t i = 0u; i < link_edges->Size(); i++)
-    {
-      if (link_edges->Get(i)->GetSourceLink().Equals(src_link))
-      {
-        return;
-      }
-    }
-    link_edges->Add(new tLinkEdge(MakeAbsoluteLink(src_link), GetHandle(), finstructed));
   }
+  link_edges->Add(new tLinkEdge(MakeAbsoluteLink(src_link), GetHandle(), finstructed));
 }
 
 void tAbstractPort::ConnectToSource(tFrameworkElement* src_port_parent, const util::tString& src_port_name, bool warn_if_not_available)
@@ -135,47 +133,43 @@ void tAbstractPort::ConnectToSource(tFrameworkElement* src_port_parent, const ut
 
 void tAbstractPort::ConnectToTarget(tAbstractPort* target, bool finstructed)
 {
+  util::tLock lock2(GetRegistryLock());
+  if (IsDeleted())
   {
-    util::tLock lock2(GetRegistryLock());
-    if (IsDeleted())
-    {
-      return;
-    }
-    if (MayConnectTo(target) && (!IsConnectedTo(target)))
-    {
-      RawConnectToTarget(target, finstructed);
-      target->PropagateStrategy(NULL, this);
-      NewConnection(target);
-      target->NewConnection(this);
-      FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "creating Edge from ", GetQualifiedName(), " to ", target->GetQualifiedName());
+    return;
+  }
+  if (MayConnectTo(target) && (!IsConnectedTo(target)))
+  {
+    RawConnectToTarget(target, finstructed);
+    target->PropagateStrategy(NULL, this);
+    NewConnection(target);
+    target->NewConnection(this);
+    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "creating Edge from ", GetQualifiedName(), " to ", target->GetQualifiedName());
 
-      // check whether we need an initial reverse push
-      ConsiderInitialReversePush(target);
-    }
+    // check whether we need an initial reverse push
+    ConsiderInitialReversePush(target);
   }
 }
 
 void tAbstractPort::ConnectToTarget(const util::tString& dest_link, bool finstructed)
 {
+  util::tLock lock2(GetRegistryLock());
+  if (IsDeleted())
   {
-    util::tLock lock2(GetRegistryLock());
-    if (IsDeleted())
+    return;
+  }
+  if (link_edges == NULL)    // lazy initialization
+  {
+    link_edges = new util::tSimpleList<tLinkEdge*>();
+  }
+  for (size_t i = 0u; i < link_edges->Size(); i++)
+  {
+    if (link_edges->Get(i)->GetTargetLink().Equals(dest_link))
     {
       return;
     }
-    if (link_edges == NULL)    // lazy initialization
-    {
-      link_edges = new util::tSimpleList<tLinkEdge*>();
-    }
-    for (size_t i = 0u; i < link_edges->Size(); i++)
-    {
-      if (link_edges->Get(i)->GetTargetLink().Equals(dest_link))
-      {
-        return;
-      }
-    }
-    link_edges->Add(new tLinkEdge(GetHandle(), MakeAbsoluteLink(dest_link), finstructed));
   }
+  link_edges->Add(new tLinkEdge(GetHandle(), MakeAbsoluteLink(dest_link), finstructed));
 }
 
 void tAbstractPort::ConnectToTarget(tFrameworkElement* dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available)
@@ -206,51 +200,49 @@ void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
 
 void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
 {
+  util::tLock lock2(GetRegistryLock());
+
+  // remove link edges
+  if (link_edges != NULL)
   {
-    util::tLock lock2(GetRegistryLock());
-
-    // remove link edges
-    if (link_edges != NULL)
+    for (size_t i = 0u; i < link_edges->Size(); i++)
     {
-      for (size_t i = 0u; i < link_edges->Size(); i++)
+      tLinkEdge* le = link_edges->Get(i);
+      if ((incoming && le->GetSourceLink().Length() > 0) || (outgoing && le->GetTargetLink().Length() > 0))
       {
-        tLinkEdge* le = link_edges->Get(i);
-        if ((incoming && le->GetSourceLink().Length() > 0) || (outgoing && le->GetTargetLink().Length() > 0))
-        {
-          link_edges->Remove(i);
-          delete le;
-          i--;
-        }
+        link_edges->Remove(i);
+        delete le;
+        i--;
       }
     }
-    assert(((!incoming) || (!outgoing) || (link_edges == NULL) || (link_edges->Size() == 0)));
+  }
+  assert(((!incoming) || (!outgoing) || (link_edges == NULL) || (link_edges->Size() == 0)));
 
-    util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
-    if (outgoing)
+  util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
+  if (outgoing)
+  {
+    for (int i = 0, n = it->Size(); i < n; i++)
     {
-      for (int i = 0, n = it->Size(); i < n; i++)
+      tAbstractPort* target = it->Get(i);
+      if (target == NULL)
       {
-        tAbstractPort* target = it->Get(i);
-        if (target == NULL)
-        {
-          continue;
-        }
-        RemoveInternal(this, target);
+        continue;
       }
+      RemoveInternal(this, target);
     }
+  }
 
-    if (incoming)
+  if (incoming)
+  {
+    it = edges_dest->GetIterable();
+    for (int i = 0, n = it->Size(); i < n; i++)
     {
-      it = edges_dest->GetIterable();
-      for (int i = 0, n = it->Size(); i < n; i++)
+      tAbstractPort* target = it->Get(i);
+      if (target == NULL)
       {
-        tAbstractPort* target = it->Get(i);
-        if (target == NULL)
-        {
-          continue;
-        }
-        RemoveInternal(target, this);
+        continue;
       }
+      RemoveInternal(target, this);
     }
   }
 }
@@ -289,22 +281,20 @@ void tAbstractPort::DisconnectFrom(tAbstractPort* target)
 
 void tAbstractPort::DisconnectFrom(const util::tString& link)
 {
+  util::tLock lock2(GetRegistryLock());
+  for (size_t i = 0u; i < link_edges->Size(); i++)
   {
-    util::tLock lock2(GetRegistryLock());
-    for (size_t i = 0u; i < link_edges->Size(); i++)
+    tLinkEdge* le = link_edges->Get(i);
+    if (le->GetSourceLink().Equals(link) || le->GetTargetLink().Equals(link))
     {
-      tLinkEdge* le = link_edges->Get(i);
-      if (le->GetSourceLink().Equals(link) || le->GetTargetLink().Equals(link))
-      {
-        delete le;
-      }
+      delete le;
     }
+  }
 
-    tAbstractPort* ap = GetRuntime()->GetPort(link);
-    if (ap != NULL)
-    {
-      DisconnectFrom(this);
-    }
+  tAbstractPort* ap = GetRuntime()->GetPort(link);
+  if (ap != NULL)
+  {
+    DisconnectFrom(this);
   }
 }
 
@@ -538,85 +528,82 @@ uint tAbstractPort::ProcessFlags(const tPortCreationInfoBase& pci)
 
 bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort* new_connection_partner)
 {
+  util::tLock lock2(GetRegistryLock());
+
+  // step1: determine max queue length (strategy) for this port
+  int16 max = static_cast<int16>(std::min(GetStrategyRequirement(), util::tShort::cMAX_VALUE));
+  util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
+  util::tArrayWrapper<tAbstractPort*>* it_prev = edges_dest->GetIterable();
+  for (int i = 0, n = it->Size(); i < n; i++)
   {
-    util::tLock lock2(GetRegistryLock());
-
-    // step1: determine max queue length (strategy) for this port
-    int16 max = static_cast<int16>(std::min(GetStrategyRequirement(), util::tShort::cMAX_VALUE));
-    util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
-    util::tArrayWrapper<tAbstractPort*>* it_prev = edges_dest->GetIterable();
-    for (int i = 0, n = it->Size(); i < n; i++)
+    tAbstractPort* port = it->Get(i);
+    if (port != NULL)
     {
-      tAbstractPort* port = it->Get(i);
-      if (port != NULL)
-      {
-        max = static_cast<int16>(std::max(max, port->GetStrategy()));
-      }
+      max = static_cast<int16>(std::max(max, port->GetStrategy()));
     }
-
-    // has max length (strategy) for this port changed? => propagate to sources
-    bool change = (max != strategy);
-
-    // if origin wants a push - and we are a "source" port - provide this push (otherwise - "push wish" should be propagated further)
-    if (push_wanter != NULL)
-    {
-      bool source_port = (strategy >= 1 && max >= 1) || edges_dest->IsEmpty();
-      if (!source_port)
-      {
-        bool all_sources_reverse_pushers = true;
-        for (int i = 0, n = it_prev->Size(); i < n; i++)
-        {
-          tAbstractPort* port = it_prev->Get(i);
-          if (port != NULL && port->IsReady() && (!port->ReversePushStrategy()))
-          {
-            all_sources_reverse_pushers = false;
-            break;
-          }
-        }
-        source_port = all_sources_reverse_pushers;
-      }
-      if (source_port)
-      {
-        if (IsReady() && push_wanter->IsReady() && (!GetFlag(tPortFlags::cNO_INITIAL_PUSHING)) && (!push_wanter->GetFlag(tPortFlags::cNO_INITIAL_PUSHING)))
-        {
-          FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial push from ", GetQualifiedName(), " to ", push_wanter->GetQualifiedName());
-          InitialPushTo(push_wanter, false);
-        }
-        push_wanter = NULL;
-      }
-    }
-
-    // okay... do we wish to receive a push?
-    // yes if...
-    //  1) we are target of a new connection, have a push strategy, no other sources, and partner is no reverse push source
-    //  2) our strategy changed to push, and exactly one source
-    int other_sources = 0;
-    for (int i = 0, n = it_prev->Size(); i < n; i++)
-    {
-      tAbstractPort* port = it_prev->Get(i);
-      if (port != NULL && port->IsReady() && port != new_connection_partner)
-      {
-        other_sources++;
-      }
-    }
-    bool request_push = ((new_connection_partner != NULL) && (max >= 1) && (other_sources == 0) && (!new_connection_partner->ReversePushStrategy())) || ((max >= 1 && strategy < 1) && (other_sources == 1));
-
-    // register strategy change
-    if (change)
-    {
-      strategy = max;
-    }
-
-    ForwardStrategy(strategy, request_push ? this : NULL);  // forward strategy... do it anyway, since new ports may have been connected
-
-    if (change)    // do this last to ensure that all relevant strategies have been set, before any network updates occur
-    {
-      PublishUpdatedInfo(tRuntimeListener::cCHANGE);
-    }
-
-    return change;
-
   }
+
+  // has max length (strategy) for this port changed? => propagate to sources
+  bool change = (max != strategy);
+
+  // if origin wants a push - and we are a "source" port - provide this push (otherwise - "push wish" should be propagated further)
+  if (push_wanter != NULL)
+  {
+    bool source_port = (strategy >= 1 && max >= 1) || edges_dest->IsEmpty();
+    if (!source_port)
+    {
+      bool all_sources_reverse_pushers = true;
+      for (int i = 0, n = it_prev->Size(); i < n; i++)
+      {
+        tAbstractPort* port = it_prev->Get(i);
+        if (port != NULL && port->IsReady() && (!port->ReversePushStrategy()))
+        {
+          all_sources_reverse_pushers = false;
+          break;
+        }
+      }
+      source_port = all_sources_reverse_pushers;
+    }
+    if (source_port)
+    {
+      if (IsReady() && push_wanter->IsReady() && (!GetFlag(tPortFlags::cNO_INITIAL_PUSHING)) && (!push_wanter->GetFlag(tPortFlags::cNO_INITIAL_PUSHING)))
+      {
+        FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial push from ", GetQualifiedName(), " to ", push_wanter->GetQualifiedName());
+        InitialPushTo(push_wanter, false);
+      }
+      push_wanter = NULL;
+    }
+  }
+
+  // okay... do we wish to receive a push?
+  // yes if...
+  //  1) we are target of a new connection, have a push strategy, no other sources, and partner is no reverse push source
+  //  2) our strategy changed to push, and exactly one source
+  int other_sources = 0;
+  for (int i = 0, n = it_prev->Size(); i < n; i++)
+  {
+    tAbstractPort* port = it_prev->Get(i);
+    if (port != NULL && port->IsReady() && port != new_connection_partner)
+    {
+      other_sources++;
+    }
+  }
+  bool request_push = ((new_connection_partner != NULL) && (max >= 1) && (other_sources == 0) && (!new_connection_partner->ReversePushStrategy())) || ((max >= 1 && strategy < 1) && (other_sources == 1));
+
+  // register strategy change
+  if (change)
+  {
+    strategy = max;
+  }
+
+  ForwardStrategy(strategy, request_push ? this : NULL);  // forward strategy... do it anyway, since new ports may have been connected
+
+  if (change)    // do this last to ensure that all relevant strategies have been set, before any network updates occur
+  {
+    PublishUpdatedInfo(tRuntimeListener::cCHANGE);
+  }
+
+  return change;
 }
 
 void tAbstractPort::RawConnectToTarget(tAbstractPort* target, bool finstructed)
@@ -739,28 +726,24 @@ void tAbstractPort::SetMaxQueueLength(int queue_length)
 
 void tAbstractPort::SetMinNetUpdateInterval(int interval2)
 {
+  util::tLock lock2(GetRegistryLock());
+  int16 interval = static_cast<int16>(std::min(interval2, static_cast<int>(util::tShort::cMAX_VALUE)));
+  if (min_net_update_time != interval)
   {
-    util::tLock lock2(GetRegistryLock());
-    int16 interval = static_cast<int16>(std::min(interval2, static_cast<int>(util::tShort::cMAX_VALUE)));
-    if (min_net_update_time != interval)
-    {
-      min_net_update_time = interval;
-      CommitUpdateTimeChange();
-    }
+    min_net_update_time = interval;
+    CommitUpdateTimeChange();
   }
 }
 
 void tAbstractPort::SetPushStrategy(bool push)
 {
+  util::tLock lock2(GetRegistryLock());
+  if (push == GetFlag(tPortFlags::cPUSH_STRATEGY))
   {
-    util::tLock lock2(GetRegistryLock());
-    if (push == GetFlag(tPortFlags::cPUSH_STRATEGY))
-    {
-      return;
-    }
-    SetFlag(tPortFlags::cPUSH_STRATEGY, push);
-    PropagateStrategy(NULL, NULL);
+    return;
   }
+  SetFlag(tPortFlags::cPUSH_STRATEGY, push);
+  PropagateStrategy(NULL, NULL);
 }
 
 void tAbstractPort::SetReversePushStrategy(bool push)

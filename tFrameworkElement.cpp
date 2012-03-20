@@ -38,7 +38,7 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tSt
   creater_thread_uid(util::sThreadUtil::GetCurrentThreadId()),
   const_flags(flags & tCoreFlags::cCONSTANT_FLAGS),
   flags(flags & tCoreFlags::cNON_CONSTANT_FLAGS),
-  children(GetFlag(tCoreFlags::cALLOWS_CHILDREN) ? 4 : 0, GetFlag(tCoreFlags::cALLOWS_CHILDREN) ? 4 : 0),
+  children(GetFlag(tCoreFlags::cALLOWS_CHILDREN) ? 4 : 0),
   obj_mutex(GetLockOrder(flags, parent_, lock_order), GetFlag(tCoreFlags::cIS_RUNTIME) ? util::tInteger::cMIN_VALUE : tRuntimeEnvironment::GetInstance()->RegisterElement(this))
 {
   assert(((flags & tCoreFlags::cSTATUS_FLAGS) == 0));
@@ -217,6 +217,7 @@ void tFrameworkElement::DeleteChildren()
     }
   }
 
+  util::tLock lock(GetRegistryLock());
   children.Clear();
 }
 
