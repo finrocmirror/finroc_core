@@ -14,6 +14,7 @@
       tRuntimeEnvironment.cpp
       tRuntimeListener.h
       tRuntimeSettings.cpp
+      datatype/tBounds.h
       datatype/tConstant.cpp
       datatype/tCoreString.cpp
       datatype/tNumber.cpp
@@ -33,7 +34,6 @@
 
   <finrocplugin name="data_ports">
     <sources>
-      datatype/tBounds.h
       datatype/tXML.cpp
       port/tCombinedPointer.h
       port/tMultiTypePortDataBufferPool.cpp
@@ -53,6 +53,8 @@
 
   <finrocplugin name="port_api">
     <sources>
+      port/tGenericPortImpl.cpp
+      port/tGenericPort.h
       port/tPort.cpp
       port/tPortDataPtr.h
       port/tPortDataPtr.h
@@ -135,11 +137,11 @@
     </sources>
   </finrocplugin>
   
-  <finroclibrary name="main_wrapper">
+  <finrocplugin name="main_wrapper">
     <sources>
       default_main_wrapper.cpp
     </sources>
-  </finroclibrary>  
+  </finrocplugin>  
 
   <finrocprogram name="finroc">
     <sources>

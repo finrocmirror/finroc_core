@@ -111,7 +111,7 @@ public:
   tPort(const ARGS&... args)
   {
     tPortCreationInfo<T> pci(args...);
-    if (pci.bounds_set)
+    if (pci.BoundsSet())
     {
       wrapped = CreateBoundedPort(pci);
     }
@@ -119,9 +119,11 @@ public:
     {
       wrapped = new tPortBaseType(ProcessPci(pci));
     }
-    if (pci.default_value_set)
+    if (pci.DefaultValueSet())
     {
-      SetDefault(*(pci.GetDefault()));
+      T t = rrlib::rtti::sStaticTypeInfo<T>::CreateByValue();
+      pci.GetDefault(t);
+      SetDefault(t);
     }
   }
 
@@ -381,12 +383,27 @@ public:
    *
    * \param t new default
    */
-  virtual void SetDefault(const T& t)
+  void SetDefault(const T& t)
   {
-    assert(!this->IsReady() && "please set default value _before_ initializing port");
-    tPortUtil<T>::SetDefault(static_cast<tPortBaseType*>(wrapped), t);
+    rrlib::serialization::tStackMemoryBuffer<2048> buf;
+    rrlib::serialization::tOutputStream os(&buf);
+    os << t;
+    os.Close();
+    SetDefault(buf);
   }
 
+  /*!
+   * Set default value
+   * This must be done before the port is used/initialized.
+   *
+   * \param source Source from which default value is deserialized
+   */
+  void SetDefault(const rrlib::serialization::tConstSource& source)
+  {
+    assert(!this->IsReady() && "please set default value _before_ initializing port");
+    rrlib::serialization::tInputStream is(&source);
+    tPortUtil<T>::SetDefault(static_cast<tPortBaseType*>(wrapped), is);
+  }
 };
 
 extern template class tPort<int>;

@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -125,11 +125,6 @@ bool tNumber::Equals(const tNumber& o) const
   return o.num_type == num_type && o.unit == unit && ival == o.ival;
 }
 
-tConstant* tNumber::GetConstant() const
-{
-  return (static_cast<tConstant*>(unit));
-}
-
 void tNumber::Serialize(rrlib::serialization::tOutputStream& oos) const
 {
   if (num_type == eINT)
@@ -170,7 +165,7 @@ void tNumber::Serialize(rrlib::serialization::tOutputStream& oos) const
   else if (num_type == eCONSTANT)
   {
     oos.WriteByte(PrepFirstByte(cCONST));
-    oos.WriteByte((static_cast<tConstant*>(unit))->GetConstantId());
+    oos.WriteByte(constant->GetConstantId());
   }
   if (unit != &(tUnit::cNO_UNIT))
   {
@@ -180,7 +175,7 @@ void tNumber::Serialize(rrlib::serialization::tOutputStream& oos) const
 
 void tNumber::SetValue(tConstant* value)
 {
-  this->unit = value;
+  this->constant = value;
   num_type = eCONSTANT;
 }
 
@@ -189,7 +184,7 @@ const util::tString tNumber::ToString() const
   switch (num_type)
   {
   case eCONSTANT:
-    return GetConstant()->ToString();
+    return constant->ToString();
   case eINT:
     return util::tStringBuilder(ival) + unit->ToString();
   case eFLOAT:
@@ -201,6 +196,30 @@ const util::tString tNumber::ToString() const
     return "Internal Error... shouldn't happen... whatever";
   }
 }
+
+bool tNumber::operator<(const tNumber& other) const
+{
+  if (unit != &(tUnit::cNO_UNIT) && other.unit != &(tUnit::cNO_UNIT))
+  {
+    double o = other.unit->ConvertTo(other.dval, unit);
+    return o < dval;
+  }
+  switch (num_type)
+  {
+  case eINT:
+    return ival < other.Value<int64_t>();
+  case eDOUBLE:
+    return dval < other.Value<double>();
+  case eFLOAT:
+    return fval < other.Value<float>();
+  case eCONSTANT:
+    return constant->GetValue() < other;
+  default:
+    assert(false && "Possibly not a Number at this memory address?");
+    return 0;
+  }
+}
+
 
 } // namespace finroc
 } // namespace core

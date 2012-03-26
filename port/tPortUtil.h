@@ -120,10 +120,10 @@ public:
     return go->GetData<T>();
   }
 
-  static void SetDefault(tPortType* port, const T& t)
+  static void SetDefault(tPortType* port, rrlib::serialization::tInputStream& t)
   {
     rrlib::rtti::tGenericObject* go = port->GetDefaultBufferRaw();
-    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *(go->GetData<T>()), NULL);
+    t >> (*go);
   }
 
   static void Publish(tPortType* port, tConstDataPtr& t)
@@ -275,14 +275,17 @@ public:
     }
   }
 
-  static void SetDefault(tPortType* port, const T& t)
+  static void SetDefault(tPortType* port, rrlib::serialization::tInputStream& is)
   {
     rrlib::rtti::tGenericObject* go = port->GetDefaultBufferRaw();
-    go->GetData<tNumber>()->SetValue(t, port->GetUnit());
+    tNumber* n = go->GetData<tNumber>();
+    T t;
+    is >> t;
+    n->SetValue(t, port->GetUnit());
 
     // publish for value caching in Parameter classes
     tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(tNumber::cTYPE);
-    mgr->GetObject()->GetData<tNumber>()->SetValue(t, port->GetUnit());
+    mgr->GetObject()->DeepCopyFrom(go);
     port->BrowserPublishRaw(mgr);
   }
 
@@ -404,14 +407,14 @@ public:
     return go->GetData<T>();
   }
 
-  static void SetDefault(tPortType* port, const T& t)
+  static void SetDefault(tPortType* port, rrlib::serialization::tInputStream& t)
   {
     rrlib::rtti::tGenericObject* go = port->GetDefaultBufferRaw();
-    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *(go->GetData<T>()), NULL);
+    t >> (*go);
 
     // publish for value caching in Parameter classes
     tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
-    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *(mgr->GetObject()->GetData<T>()), NULL);
+    mgr->GetObject()->DeepCopyFrom(go);
     port->BrowserPublishRaw(mgr);
   }
 
@@ -552,9 +555,9 @@ public:
     return &go->GetData<tCoreString>()->GetBuffer().GetStdStringRef();
   }
 
-  static void SetDefault(tPortType* port, const std::string& t)
+  static void SetDefault(tPortType* port, rrlib::serialization::tInputStream& t)
   {
-    port->GetDefaultBufferRaw()->GetData<tCoreString>()->Set(t);
+    t >> (*port->GetDefaultBufferRaw()->GetData<tCoreString>());
   }
 
   static void Publish(tPortType* port, tConstDataPtr& t)

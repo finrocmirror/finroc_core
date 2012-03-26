@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -29,14 +29,6 @@
 #include "core/datatype/tUnit.h"
 #include <endian.h>
 
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
-
 namespace finroc
 {
 namespace core
@@ -48,7 +40,7 @@ class tConstant;
  *
  * This class stores numbers (with units) of different types.
  */
-class tNumber : public rrlib::serialization::tSerializable
+class tNumber
 {
 public:
 
@@ -74,7 +66,11 @@ private:
   tNumber::tType num_type;
 
   /*! Unit of data */
-  tUnit* unit;
+  union
+  {
+    tUnit* unit;         // if num_type != eCONSTANT;
+    tConstant* constant; // if num_type == eCONSTANT;
+  };
 
 public:
 
@@ -96,11 +92,6 @@ public:
   static const int8 cINT64 = -64, cINT32 = -63, cINT16 = -62, cFLOAT64 = -61, cFLOAT32 = -60, cCONST = -59, cMIN_BARRIER = -58;
 
 private:
-
-  /*!
-   * \return Current value Constant (only works if type is Type.CONSTANT)
-   */
-  tConstant* GetConstant() const;
 
   inline int8 PrepFirstByte(int8 value2) const
   {
@@ -156,29 +147,9 @@ public:
     ival = source.ival;
   }
 
-  virtual void Deserialize(rrlib::serialization::tInputStream& ois);
+  void Deserialize(rrlib::serialization::tInputStream& ois);
 
-  virtual void Deserialize(rrlib::serialization::tStringInputStream& is);
-
-  // returns raw numeric value
-  template <typename T>
-  T Value() const
-  {
-    switch (num_type)
-    {
-    case eINT:
-      return static_cast<T>(ival);
-    case eDOUBLE:
-      return static_cast<T>(dval);
-    case eFLOAT:
-      return static_cast<T>(fval);
-    case eCONSTANT:
-      return static_cast<T>(unit->GetValue().Value<T>());
-    default:
-      assert(false && "Possibly not a Number at this memory address?");
-      return 0;
-    }
-  }
+  void Deserialize(rrlib::serialization::tStringInputStream& is);
 
   inline double DoubleValue() const
   {
@@ -197,6 +168,9 @@ public:
     assert((cTYPE != NULL));
     return cTYPE;
   }
+
+  template <typename T>
+  T* GetValuePtr();
 
   /*!
    * \return Unit of data
@@ -236,9 +210,9 @@ public:
     return Value<int64>();
   }
 
-  virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;
+  void Serialize(rrlib::serialization::tOutputStream& oos) const;
 
-  virtual void Serialize(rrlib::serialization::tStringOutputStream& os) const
+  void Serialize(rrlib::serialization::tStringOutputStream& os) const
   {
     os.Append(ToString());
   }
@@ -292,34 +266,13 @@ public:
     SetUnit(u);
   }
 
+  const util::tString ToString() const;
 
-  virtual const util::tString ToString() const;
-
-  bool operator<(const tNumber& other) const
-  {
-    if (unit != &(tUnit::cNO_UNIT) && other.unit != &(tUnit::cNO_UNIT))
-    {
-      double o = other.unit->ConvertTo(other.dval, unit);
-      return o < dval;
-    }
-    switch (num_type)
-    {
-    case eINT:
-      return ival < other.Value<int64_t>();
-    case eDOUBLE:
-      return dval < other.Value<double>();
-    case eFLOAT:
-      return fval < other.Value<float>();
-    case eCONSTANT:
-      return unit->GetValue() < other;
-    default:
-      assert(false && "Possibly not a Number at this memory address?");
-      return 0;
-    }
-  }
-
+  // returns raw numeric value
   template <typename T>
-  T* GetValuePtr();
+  T Value() const;
+
+  bool operator<(const tNumber& other) const;
 };
 
 template <typename T>
@@ -367,6 +320,30 @@ T* tNumber::GetValuePtr()
 
 };
 
+inline rrlib::serialization::tOutputStream& operator<<(rrlib::serialization::tOutputStream& stream, const tNumber& n)
+{
+  n.Serialize(stream);
+  return stream;
+}
+
+inline rrlib::serialization::tInputStream& operator>>(rrlib::serialization::tInputStream& stream, tNumber& n)
+{
+  n.Deserialize(stream);
+  return stream;
+}
+
+inline rrlib::serialization::tStringOutputStream& operator<<(rrlib::serialization::tStringOutputStream& stream, const tNumber& n)
+{
+  n.Serialize(stream);
+  return stream;
+}
+
+inline rrlib::serialization::tStringInputStream& operator>>(rrlib::serialization::tStringInputStream& stream, tNumber& n)
+{
+  n.Deserialize(stream);
+  return stream;
+}
+
 } // namespace finroc
 } // namespace core
 
@@ -380,7 +357,26 @@ namespace core
 {
 tUnit* tNumber::GetUnit() const
 {
-  return num_type == eCONSTANT ? GetConstant()->unit : unit;
+  return num_type == eCONSTANT ? constant->GetValue().GetUnit() : unit;
+}
+
+template <typename T>
+T tNumber::Value() const
+{
+  switch (num_type)
+  {
+  case eINT:
+    return static_cast<T>(ival);
+  case eDOUBLE:
+    return static_cast<T>(dval);
+  case eFLOAT:
+    return static_cast<T>(fval);
+  case eCONSTANT:
+    return constant->Value<T>();
+  default:
+    assert(false && "Possibly not a Number at this memory address?");
+    return 0;
+  }
 }
 
 } // namespace finroc

@@ -133,12 +133,6 @@ tUnit* tUnit::GetUnit(const util::tString& unit_string)
   return &(cNO_UNIT);
 }
 
-const tNumber& tUnit::GetValue() const
-{
-  static tNumber default_value(util::tDouble::cNaN);
-  return default_value;
-}
-
 void tUnit::StaticInit()
 {
   CalculateFactors(length);

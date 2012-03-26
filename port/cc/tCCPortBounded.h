@@ -23,10 +23,11 @@
 #define core__port__cc__tCCPortBounded_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/rtti/rtti.h"
 
 #include "core/datatype/tBounds.h"
+#include "core/datatype/tNumber.h"
 #include "core/port/tPortCreationInfo.h"
-#include "rrlib/rtti/rtti.h"
 #include "core/port/cc/tCCPortDataManagerTL.h"
 #include "core/port/cc/tCCPortDataRef.h"
 #include "core/port/tThreadLocalCache.h"

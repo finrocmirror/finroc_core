@@ -25,8 +25,6 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "core/datatype/tNumber.h"
-
 namespace finroc
 {
 namespace core
@@ -38,7 +36,7 @@ namespace core
  * (Not meant to be used as port data)
  */
 template<typename T>
-class tBounds : public util::tObject
+class tBounds
 {
 public:
 
@@ -49,15 +47,16 @@ private:
   /*! Minimum and maximum bounds - Double for simplicity & efficiency reasons */
   T min, max;
 
+  /*!
+   * Action to perform when value is out of range
+   * Apply default value when value is out of range? (or rather adjust to minimum or maximum or discard value?)
+   */
   tOutOfBoundsAction action;
 
   /*! Default value when value is out of bounds */
   T out_of_bounds_default;
 
 public:
-
-  //    /** Data Type */
-  //    public final static DataType<Bounds> TYPE = new DataType<Bounds>(Bounds.class);
 
   /*! dummy constructor for no bounds */
   template < bool INIT0 = std::is_fundamental<T>::value >
@@ -81,24 +80,11 @@ public:
   /*!
    * \param min Minimum bound
    * \param max Maximum bound
-   */
-  tBounds(T min_, T max_) :
-    min(min_),
-    max(max_),
-    action(true ? eADJUST_TO_RANGE : eDISCARD),
-    out_of_bounds_default()
-  {
-    // this(min,max,true);
-  }
-
-  /*!
-   * \param min Minimum bound
-   * \param max Maximum bound
    * \param adjust_to_range Adjust values lying outside to range (or rather discard them)?
    */
-  tBounds(T min_, T max_, bool adjust_to_range) :
-    min(min_),
-    max(max_),
+  tBounds(T min, T max, bool adjust_to_range = true) :
+    min(min),
+    max(max),
     action(adjust_to_range ? eADJUST_TO_RANGE : eDISCARD),
     out_of_bounds_default()
   {
@@ -109,13 +95,14 @@ public:
    * \param max Maximum bound
    * \param out_of_bounds_default Default value when value is out of bounds
    */
-  tBounds(T min_, T max_, tNumber out_of_bounds_default_) :
-    min(min_),
-    max(max_),
+  template <bool B = std::is_same<T, bool>::value>
+  tBounds(T min, T max, typename std::enable_if < !B, T >::type out_of_bounds_default) :
+    min(min),
+    max(max),
     action(eAPPLY_DEFAULT),
     out_of_bounds_default()
   {
-    this->out_of_bounds_default = out_of_bounds_default_.Value<T>();
+    this->out_of_bounds_default = out_of_bounds_default;
   }
 
   /*!
@@ -161,6 +148,14 @@ public:
   /*!
    * \return Default value when value is out of bounds
    */
+  inline tOutOfBoundsAction GetOutOfBoundsAction() const
+  {
+    return action;
+  }
+
+  /*!
+   * \return Default value when value is out of bounds
+   */
   inline const T GetOutOfBoundsDefault() const
   {
     return out_of_bounds_default;
@@ -187,7 +182,7 @@ public:
     action = new_bounds.action;
     max = new_bounds.max;
     min = new_bounds.min;
-    out_of_bounds_default.SetValue(new_bounds.out_of_bounds_default);
+    out_of_bounds_default = new_bounds.out_of_bounds_default;
   }
 
   /*!
@@ -205,10 +200,37 @@ public:
       return max;
     }
     return val;
-
   }
-
 };
+
+template <typename T>
+inline rrlib::serialization::tOutputStream& operator<<(rrlib::serialization::tOutputStream& stream, const tBounds<T>& bounds)
+{
+  stream << bounds.GetMin() << bounds.GetMax() << bounds.GetOutOfBoundsAction();
+  if (bounds.GetOutOfBoundsAction() == tBounds<T>::eAPPLY_DEFAULT)
+  {
+    stream << bounds.GetOutOfBoundsDefault();
+  }
+  return stream;
+}
+
+template <typename T>
+inline rrlib::serialization::tInputStream& operator>>(rrlib::serialization::tInputStream& stream, tBounds<T>& bounds)
+{
+  T min, max, ood;
+  typename tBounds<T>::tOutOfBoundsAction action;
+  stream >> min >> max >> action;
+  if (action == tBounds<T>::eAPPLY_DEFAULT)
+  {
+    stream >> ood;
+    bounds = tBounds<T>(min, max, ood);
+  }
+  else
+  {
+    bounds = tBounds<T>(min, max, action == tBounds<T>::eADJUST_TO_RANGE);
+  }
+  return stream;
+}
 
 } // namespace finroc
 } // namespace core

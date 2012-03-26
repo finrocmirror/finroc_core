@@ -131,7 +131,7 @@ public:
     tStaticParameterImplStandard<tNumber>(pci),
     unit(pci.unit),
     bounds(pci.GetBounds()),
-    default_val(pci.default_value_set ? *pci.GetDefault() : (typeid(T).name() == typeid(unsigned int).name() ? pci.flags : 0))
+    default_val(pci.DefaultValueSet() ? pci.GetDefault() : (typeid(T).name() == typeid(unsigned int).name() ? pci.flags : 0))
   {
     Set(default_val);
   }

@@ -104,7 +104,6 @@ tCCPortBase::~tCCPortBase()
   {
     delete queue;
   }
-  ;
 }
 
 void tCCPortBase::DequeueAllRaw(tCCQueueFragmentRaw& fragment)

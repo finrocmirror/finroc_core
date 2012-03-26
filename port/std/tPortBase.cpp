@@ -80,7 +80,7 @@ tPortBase::tPortBase(tPortCreationInfoBase pci) :
   assert((tFinrocTypeInfo::IsStdType(pci.data_type)));
   InitLists(&(edges_src), &(edges_dest));
   value.Set(default_value->GetCurReference());
-  if (queue != NULL)
+  if (queue)
   {
     queue->Init();
   }

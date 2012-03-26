@@ -31,15 +31,10 @@ std::shared_ptr<tConstant> tConstant::cNO_MIN_TIME_LIMIT;
 std::shared_ptr<tConstant> tConstant::cNO_MAX_TIME_LIMIT;
 
 tConstant::tConstant(const util::tString& name, const tNumber& value_) :
-  tUnit(name, value_.GetUnit()),
   constant_id(static_cast<int8>(constand_id_counter.GetAndIncrement())),
   value(value_),
-  unit(value_.GetUnit())
+  name(name)
 {
-  if (typeid(*unit) == typeid(tConstant))
-  {
-    throw util::tRuntimeException("Constants not allowed as unit", CODE_LOCATION_MACRO);
-  }
   constants[constant_id] = this;
 }
 

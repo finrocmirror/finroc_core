@@ -134,7 +134,6 @@ private:
     port_listener.Notify(this, tc->data);
   }
 
-  template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cINFORM_LISTENERS>
   /*!
    * Publish data
    *
@@ -144,6 +143,7 @@ private:
    * \param changed_constant changedConstant to use
    * \param inform_listeners Inform this port's listeners on change? (usually only when value comes from browser)
    */
+  template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cINFORM_LISTENERS>
   inline void PublishImpl(tThreadLocalCache* tc, tCCPortDataManagerTL* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
   {
     assert((data->GetObject()->GetType() != NULL) && "Port data type not initialized");

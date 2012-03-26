@@ -26,100 +26,13 @@ namespace finroc
 {
 namespace core
 {
-tPortCreationInfoBase::tPortCreationInfoBase(uint flags_) :
-  send_buffer_size(-1),
-  alt_send_buffer_size(-1),
-  unit(&(tUnit::cNO_UNIT)),
-  max_queue_size(16),
-  flags(flags_),
-  min_net_update_interval(-1),
-  data_type(NULL),
-  parent(NULL),
-  manages_ports(false),
-  name(""),
-  lock_order(-1)
-{
-}
-
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, uint flags_) :
-  send_buffer_size(-1),
-  alt_send_buffer_size(-1),
-  unit(&(tUnit::cNO_UNIT)),
-  max_queue_size(16),
-  flags(flags_),
-  min_net_update_interval(-1),
-  data_type(NULL),
-  parent(NULL),
-  manages_ports(false),
-  name(name_),
-  lock_order(-1)
-{
-}
-
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_) :
-  send_buffer_size(-1),
-  alt_send_buffer_size(-1),
-  unit(&(tUnit::cNO_UNIT)),
-  max_queue_size(16),
-  flags(flags_),
-  min_net_update_interval(-1),
-  data_type(data_type_),
-  parent(NULL),
-  manages_ports(false),
-  name(name_),
-  lock_order(-1)
-{
-}
-
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_) :
-  send_buffer_size(-1),
-  alt_send_buffer_size(-1),
-  unit(&(tUnit::cNO_UNIT)),
-  max_queue_size(16),
-  flags(flags_),
-  min_net_update_interval(-1),
-  data_type(data_type_),
-  parent(parent_),
-  manages_ports(false),
-  name(name_),
-  lock_order(-1)
-{
-}
-
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, tFrameworkElement* parent_, uint flags_) :
-  send_buffer_size(-1),
-  alt_send_buffer_size(-1),
-  unit(&(tUnit::cNO_UNIT)),
-  max_queue_size(16),
-  flags(flags_),
-  min_net_update_interval(-1),
-  data_type(NULL),
-  parent(parent_),
-  manages_ports(false),
-  name(name_),
-  lock_order(-1)
-{
-}
-
-tPortCreationInfoBase::tPortCreationInfoBase(const rrlib::rtti::tDataTypeBase& data_type_, uint flags_) :
-  send_buffer_size(-1),
-  alt_send_buffer_size(-1),
-  unit(&(tUnit::cNO_UNIT)),
-  max_queue_size(16),
-  flags(flags_),
-  min_net_update_interval(-1),
-  data_type(data_type_),
-  parent(NULL),
-  manages_ports(false),
-  name(""),
-  lock_order(-1)
-{
-}
-
 tPortCreationInfoBase::tPortCreationInfoBase() :
+  default_value(),
+  bounds(),
+  name_set(false),
   send_buffer_size(-1),
   alt_send_buffer_size(-1),
-  unit(&(tUnit::cNO_UNIT)),
+  unit(&tUnit::cNO_UNIT),
   max_queue_size(16),
   flags(0),
   min_net_update_interval(-1),
@@ -130,93 +43,10 @@ tPortCreationInfoBase::tPortCreationInfoBase() :
   lock_order(-1)
 {}
 
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_) :
-  send_buffer_size(-1),
-  alt_send_buffer_size(-1),
-  unit(&(tUnit::cNO_UNIT)),
-  max_queue_size(16),
-  flags(0),
-  min_net_update_interval(-1),
-  data_type(NULL),
-  parent(NULL),
-  manages_ports(false),
-  name(name_),
-  lock_order(-1)
-{
-}
-
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, uint flags_, int q_size) :
-  send_buffer_size(-1),
-  alt_send_buffer_size(-1),
-  unit(&(tUnit::cNO_UNIT)),
-  max_queue_size(q_size),
-  flags(flags_ | tPortFlags::cHAS_QUEUE | tPortFlags::cUSES_QUEUE),
-  min_net_update_interval(-1),
-  data_type(NULL),
-  parent(NULL),
-  manages_ports(false),
-  name(name_),
-  lock_order(-1)
-{
-}
-
-tPortCreationInfoBase::tPortCreationInfoBase(const util::tString& name_, const rrlib::rtti::tDataTypeBase& data_type_, uint flags_, int q_size) :
-  send_buffer_size(-1),
-  alt_send_buffer_size(-1),
-  unit(&(tUnit::cNO_UNIT)),
-  max_queue_size(q_size),
-  flags(flags_ | tPortFlags::cHAS_QUEUE | tPortFlags::cUSES_QUEUE),
-  min_net_update_interval(-1),
-  data_type(data_type_),
-  parent(NULL),
-  manages_ports(false),
-  name(name_),
-  lock_order(-1)
-{
-}
-
-tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_name)
+tPortCreationInfoBase tPortCreationInfoBase::LockOrderDerive(int lock_order) const
 {
   tPortCreationInfoBase pci2(*this);
-  pci2.name = new_name;
-  return pci2;
-}
-
-tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_name, tFrameworkElement* parent_)
-{
-  tPortCreationInfoBase pci2(*this);
-  pci2.name = new_name;
-  pci2.parent = parent_;
-  return pci2;
-}
-
-tPortCreationInfoBase tPortCreationInfoBase::Derive(const util::tString& new_name, tFrameworkElement* parent_, const rrlib::rtti::tDataTypeBase& type)
-{
-  tPortCreationInfoBase pci2(*this);
-  pci2.name = new_name;
-  pci2.parent = parent_;
-  pci2.data_type = type;
-  return pci2;
-}
-
-tPortCreationInfoBase tPortCreationInfoBase::Derive(const rrlib::rtti::tDataTypeBase& type)
-{
-  tPortCreationInfoBase pci2(*this);
-  pci2.data_type = type;
-  return pci2;
-}
-
-tPortCreationInfoBase tPortCreationInfoBase::Derive(uint flags_)
-{
-  tPortCreationInfoBase pci2(*this);
-  pci2.flags = flags_;
-  return pci2;
-}
-
-tPortCreationInfoBase tPortCreationInfoBase::LockOrderDerive(int lock_order_)
-{
-  tPortCreationInfoBase pci2(*this);
-  pci2.lock_order = lock_order_;
+  pci2.lock_order = lock_order;
   return pci2;
 }
 
@@ -229,6 +59,19 @@ void tPortCreationInfoBase::SetFlag(uint flag, bool value)
   else
   {
     flags &= ~flag;
+  }
+}
+
+void tPortCreationInfoBase::SetString(const util::tString& s)
+{
+  if (!name_set)
+  {
+    name = s;
+    name_set = true;
+  }
+  else
+  {
+    config_entry = s;
   }
 }
 

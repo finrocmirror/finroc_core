@@ -57,9 +57,9 @@ public:
   tStaticParameterImplString(const tPortCreationInfo<T>& pci) :
     tStaticParameterImplStandard<tCoreString>(pci)
   {
-    if (pci.default_value_set)
+    if (pci.DefaultValueSet())
     {
-      SetValue(*pci.GetDefault());
+      SetValue(pci.GetDefault());
     }
   }
 

@@ -100,9 +100,10 @@ public:
   tStaticParameterImplStandard(const tPortCreationInfo<T>& pci) :
     tStaticParameterBase(pci.name, rrlib::rtti::tDataType<T>(), false)
   {
-    if (pci.default_value_set)
+    if (pci.DefaultValueSet())
     {
-      SetValue(*pci.GetDefault());
+      rrlib::serialization::tInputStream is(&pci.GetDefaultGeneric());
+      is >> *(ValPointer());
     }
   }
 

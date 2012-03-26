@@ -37,10 +37,8 @@ namespace core
  * \author Max Reichardt
  *
  * This class contains a set of constants.
- * A constant is derived from the Unit class.
- * This is not absolutely clean, but more efficient.
  */
-class tConstant : public tUnit
+class tConstant
 {
 private:
 
@@ -56,18 +54,15 @@ private:
   /*! Value of constant */
   tNumber value;
 
-public:
+  /*! name of constance */
+  util::tString name;
 
-  /*! Number type of constant */
-  //private CoreNumber2.Type type;
+public:
 
   /*! Constants */
   static std::shared_ptr<tConstant> cNO_MIN_TIME_LIMIT;
 
   static std::shared_ptr<tConstant> cNO_MAX_TIME_LIMIT;
-
-  /*! Unit of constant */
-  ::finroc::core::tUnit* unit;
 
 private:
 
@@ -96,7 +91,7 @@ public:
     return constant_id;
   }
 
-  virtual const tNumber& GetValue() const
+  const tNumber& GetValue() const
   {
     return value;
   }
@@ -105,6 +100,17 @@ public:
   {
     cNO_MIN_TIME_LIMIT = std::shared_ptr<tConstant>(new tConstant("No Limit", tNumber(-1, &(::finroc::core::tUnit::ms))));
     cNO_MAX_TIME_LIMIT = std::shared_ptr<tConstant>(new tConstant("No Limit", tNumber(util::tInteger::cMAX_VALUE, &(::finroc::core::tUnit::ms))));
+  }
+
+  util::tString ToString() const
+  {
+    return name;
+  }
+
+  template <typename T>
+  T Value() const
+  {
+    return value.Value<T>();
   }
 
 };

@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -23,87 +23,16 @@
 #ifndef core__port__tPortCreationInfo_h__
 #define core__port__tPortCreationInfo_h__
 
-#include "rrlib/finroc_core_utils/definitions.h"
-
 #include "core/port/tPortCreationInfoBase.h"
-#include "core/port/tPortFlags.h"
 #include "core/portdatabase/typeutil.h"
-#include "core/datatype/tBounds.h"
 
 namespace finroc
 {
 namespace core
 {
 
-template <typename T>
-class tPortCreationInfo;
-
 namespace internal
 {
-// only store bounds/default_value if we have cc type
-template <typename T, bool CC>
-class tStorage
-{
-  friend class tPortCreationInfo<T>;
-  std::shared_ptr<T> default_value;
-public:
-  tStorage() :
-    default_value()
-  {}
-
-  void SetDefault(const T& t)
-  {
-    rrlib::rtti::tDataType<T> dt;
-    default_value.reset(static_cast<T*>(dt.CreateInstance()));
-    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *this->default_value);
-  }
-
-  T* GetDefault()
-  {
-    return default_value.get();
-  }
-
-  const T* GetDefault() const
-  {
-    return default_value.get();
-  }
-
-};
-
-template <typename T>
-class tStorage<T, true>
-{
-  friend class tPortCreationInfo<T>;
-  tBounds<T> bounds;
-  T default_value;
-public:
-  template < bool F = std::is_fundamental<T>::value >
-  tStorage(typename std::enable_if<F, void>::type* v = 0) :
-    bounds(),
-    default_value(0)
-  {}
-
-  template < bool F = std::is_fundamental<T>::value >
-  tStorage(typename std::enable_if < !F, void >::type* v = 0) :
-    bounds(),
-    default_value()
-  {}
-
-  void SetDefault(const T& t)
-  {
-    default_value = t;
-  }
-
-  T* GetDefault()
-  {
-    return &default_value;
-  }
-
-  const T* GetDefault() const
-  {
-    return &default_value;
-  }
-};
 
 /*! type trait to determine whether a type is numeric */
 template <typename T>
@@ -121,14 +50,6 @@ struct tIsString
 
 }
 
-/*! Can be used to wrap lock order for tPortCreationInfo constructor */
-struct tLockOrder
-{
-  int wrapped;
-
-  tLockOrder(int i) : wrapped(i) {}
-};
-
 /*!
  * \author Max Reichardt
  *
@@ -144,21 +65,8 @@ class tPortCreationInfo : public tPortCreationInfoBase
 
 public:
 
-  /*! Has default value been set? */
-  bool default_value_set;
-
-  /*! Have bounds for port been set? */
-  bool bounds_set;
-
-  /*! Has name for port been set? */
-  bool name_set;
-
   tPortCreationInfo() :
     tPortCreationInfoBase(),
-    default_value_set(false),
-    bounds_set(false),
-    name_set(false),
-    storage(),
     unsigned_int_arg_count(0)
   {
   }
@@ -186,57 +94,54 @@ public:
   template <typename ARG1, typename ... TArgs>
   explicit tPortCreationInfo(const ARG1& arg1, const TArgs&... rest) :
     tPortCreationInfoBase(),
-    default_value_set(),
-    bounds_set(false),
-    name_set(false),
-    storage(),
     unsigned_int_arg_count(CountUnsignedIntArgs(arg1, rest...))
   {
     ProcessFirstArg<ARG1>(arg1);
     ProcessArgs(rest...);
   }
 
-  /*! Various set methods for different port properties */
-  void Set(tFrameworkElement* parent)
+  /*!
+   * \return Bounds for port
+   */
+  template < bool BOUNDABLE = boundable >
+  typename std::enable_if<BOUNDABLE, tBounds<T>>::type GetBounds() const
   {
-    this->parent = parent;
+    tBounds<T> result;
+    if (!BoundsSet())
+    {
+      FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG_WARNING, "Bounds were not set");
+      return result;
+    }
+    rrlib::serialization::tInputStream is(&bounds);
+    is >> result;
+    return result;
   }
 
-  void Set(const char* c)
+  /*!
+   * \return Default value
+   */
+  T GetDefault() const
   {
-    SetString(c);
+    T t;
+    GetDefault(t);
+    return t;
   }
 
-  void Set(int queue_size)
+  /*!
+   * \param buffer Buffer to store result in
+   */
+  void GetDefault(T& buffer) const
   {
-    max_queue_size = queue_size;
-    flags |= tPortFlags::cHAS_AND_USES_QUEUE;
+    if (!DefaultValueSet())
+    {
+      FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG_WARNING, "Default value was not set");
+      return;
+    }
+    rrlib::serialization::tInputStream is(&default_value);
+    is >> buffer;
   }
 
-  void Set(uint flags)
-  {
-    this->flags |= flags;
-  }
-
-  void Set(short min_net_update_interval)
-  {
-    this->min_net_update_interval = min_net_update_interval;
-  }
-
-  void Set(tUnit* unit)
-  {
-    this->unit = unit;
-  }
-
-  void Set(const tUnit& unit)
-  {
-    this->unit = const_cast<tUnit*>(&unit);
-  }
-
-  void Set(const tLockOrder& lo)
-  {
-    this->lock_order = lo.wrapped;
-  }
+  using tPortCreationInfoBase::Set;
 
   template < bool DISABLE = (std::is_integral<T>::value && sizeof(T) <= 4) || internal::tIsString<T>::value >
   void Set(const typename std::enable_if < !DISABLE, T >::type& default_value)
@@ -247,47 +152,11 @@ public:
   template < bool BOUNDABLE = boundable >
   void Set(const typename std::enable_if<BOUNDABLE, tBounds<T>>::type& bounds)
   {
-    storage.bounds = bounds;
-    bounds_set = true;
-  }
-
-  /*!
-   * \return Bounds for port
-   */
-  template < bool BOUNDABLE = boundable >
-  typename std::enable_if<BOUNDABLE, tBounds<T>>::type GetBounds() const
-  {
-    return storage.bounds;
-  }
-
-  /*!
-   * \return Pointer to default value
-   */
-  T* GetDefault()
-  {
-    if (!default_value_set)
-    {
-      FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG_WARNING, "Default value was not set");
-    }
-    return storage.GetDefault();
-  }
-
-  /*!
-   * \return Pointer to default value
-   */
-  const T* GetDefault() const
-  {
-    if (!default_value_set)
-    {
-      FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG_WARNING, "Default value was not set");
-    }
-    return storage.GetDefault();
+    rrlib::serialization::tOutputStream os(&this->bounds);
+    os << bounds;
   }
 
 private:
-
-  /*! Container for bounds in case of cc type */
-  internal::tStorage<T, typeutil::tIsCCType<T>::value> storage;
 
   /*! number of unsigned int arguments */
   int unsigned_int_arg_count;
@@ -298,9 +167,14 @@ private:
   {
     *this = a;
   }
+  template <typename A>
+  void ProcessFirstArg(const typename std::enable_if<std::is_same<A, tPortCreationInfoBase>::value, A>::type& a)
+  {
+    static_cast<tPortCreationInfoBase&>(*this) = a;
+  }
 
   template <typename A>
-  void ProcessFirstArg(const typename std::enable_if < !std::is_same<A, tPortCreationInfo>::value, A >::type& a)
+  void ProcessFirstArg(const typename std::enable_if < !(std::is_same<A, tPortCreationInfo>::value || std::is_same<A, tPortCreationInfoBase>::value), A >::type& a)
   {
     ProcessArg<A>(a);
   }
@@ -334,7 +208,7 @@ private:
   void ProcessArg(const typename std::enable_if < internal::tIsNumeric<T>::value && internal::tIsNumeric<A>::value, A >::type& arg)
   {
     // numeric type and numeric argument => first numeric argument is default value (or possibly flag)
-    if (!default_value_set)
+    if (!DefaultValueSet())
     {
       if (std::is_same<A, uint>::value && unsigned_int_arg_count <= 1)
       {
@@ -355,15 +229,7 @@ private:
   template < bool STRING = internal::tIsString<T>::value >
   void SetString(const typename std::enable_if < !STRING, util::tString >::type& s)
   {
-    if (!name_set)
-    {
-      name = s;
-      name_set = true;
-    }
-    else
-    {
-      config_entry = s;
-    }
+    tPortCreationInfoBase::SetString(s);
   }
 
   template < bool STRING = internal::tIsString<T>::value >
@@ -374,7 +240,7 @@ private:
       name = s;
       name_set = true;
     }
-    else if (!default_value_set)
+    else if (!DefaultValueSet())
     {
       SetDefault(s);
     }
@@ -386,12 +252,12 @@ private:
 
   void SetDefault(const T& default_val)
   {
-    if (default_value_set)
+    if (DefaultValueSet())
     {
       FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG_WARNING, "Default value already set");
     }
-    storage.SetDefault(default_val);
-    default_value_set = true;
+    rrlib::serialization::tOutputStream os(&default_value);
+    os << default_val;
   }
 
   /*! Helper to determine number of unsigned int arguments */

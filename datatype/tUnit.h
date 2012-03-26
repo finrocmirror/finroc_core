@@ -245,11 +245,6 @@ public:
   static tUnit* GetUnit(const util::tString& unit_string);
 
   /*!
-   * \return Value of constant - Double.NaN for normal units
-   */
-  virtual const tNumber& GetValue() const;
-
-  /*!
    * \return Is this class a constant ?
    */
   inline bool IsConstant() const
