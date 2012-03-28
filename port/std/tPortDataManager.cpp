@@ -34,7 +34,7 @@ tPortDataManager::tPortDataManager() :
   unused(true),
   derived_from(NULL),
   reuse_counter(0),
-  lock_iD(0)
+  lock_id(0)
 {
   //log(LogLevel.LL_DEBUG_VERBOSE_1, logDomain, "Creating PortDataManager"); //<" + dt.getName() + "> - data: " + data);
 }

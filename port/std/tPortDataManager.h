@@ -242,7 +242,7 @@ public:
   static const size_t cREF_INDEX_MASK = cNUMBER_OF_REFERENCES - 1u;
 
   /*! Helper variable - e.g. for blackboards */
-  int lock_iD;
+  int lock_id;
 
 protected:
 

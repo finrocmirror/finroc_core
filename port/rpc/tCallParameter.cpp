@@ -55,9 +55,17 @@ void tCallParameter::Deserialize(rrlib::serialization::tInputStream& is)
     }
     value = Lock(go);
     tPortDataManager* pdm = value.GetManagerT<tPortDataManager>();
-    if (pdm != NULL)
+    if (is.ReadBoolean())
     {
-      pdm->lock_iD = is.ReadInt();
+      int i = is.ReadInt();
+      if (pdm)
+      {
+        pdm->lock_id = i;
+      }
+    }
+    else if (pdm)
+    {
+      pdm->lock_id = 0;
     }
   }
 }
@@ -97,9 +105,12 @@ void tCallParameter::Serialize(rrlib::serialization::tOutputStream& oos) const
   {
     rrlib::rtti::WriteObject(oos, value.get());
     tPortDataManager* pdm = value.GetManagerT<tPortDataManager>();
-    if (pdm != NULL)
+
+    bool write_id = pdm && pdm->lock_id;
+    oos.WriteBoolean(write_id);
+    if (write_id)
     {
-      oos.WriteInt(pdm->lock_iD);
+      oos.WriteInt(pdm->lock_id);
     }
   }
 }
