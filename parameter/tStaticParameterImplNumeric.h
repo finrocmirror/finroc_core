@@ -130,7 +130,7 @@ public:
   tStaticParameterImplNumeric(const tPortCreationInfo<T>& pci) :
     tStaticParameterImplStandard<tNumber>(pci),
     unit(pci.unit),
-    bounds(pci.GetBounds()),
+    bounds(pci.BoundsSet() ? pci.GetBounds() : tBounds<T>()),
     default_val(pci.DefaultValueSet() ? pci.GetDefault() : (typeid(T).name() == typeid(unsigned int).name() ? pci.flags : 0))
   {
     Set(default_val);
