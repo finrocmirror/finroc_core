@@ -87,7 +87,18 @@ public:
 
   tGenericPortImplCC(const tPortCreationInfoBase& pci) :
     port(new tCCPortBase(pci))
-  {}
+  {
+    if (pci.DefaultValueSet())
+    {
+      rrlib::serialization::tInputStream is(&pci.GetDefaultGeneric());
+      is >> (*port->GetDefaultBufferRaw());
+
+      // publish for value caching in Parameter classes
+      tCCPortDataManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
+      mgr->GetObject()->DeepCopyFrom(port->GetDefaultBufferRaw());
+      port->BrowserPublishRaw(mgr);
+    }
+  }
 
   virtual void Get(rrlib::rtti::tGenericObject& result)
   {
@@ -120,7 +131,13 @@ public:
 
   tGenericPortImplStd(const tPortCreationInfoBase& pci) :
     port(new tPortBase(pci))
-  {}
+  {
+    if (pci.DefaultValueSet())
+    {
+      rrlib::serialization::tInputStream is(&pci.GetDefaultGeneric());
+      is >> (*port->GetDefaultBufferRaw());
+    }
+  }
 
   virtual void Get(rrlib::rtti::tGenericObject& result)
   {
