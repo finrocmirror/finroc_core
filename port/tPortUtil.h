@@ -47,6 +47,12 @@ public:
     }
     return mgr;
   }
+
+  template <typename M, typename T>
+  static bool HasManagerType(tPortDataPtr<T>& data)
+  {
+    return typeid(*data.manager) == typeid(M);
+  }
 };
 
 /*!
@@ -291,28 +297,28 @@ public:
 
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    if (typeid(*t.GetManager()) == typeid(tManagerTL))
+    if (tPortUtilHelper::HasManagerType<tManagerTL>(t))
     {
       port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
       t.reset();
     }
     else
     {
-      assert(typeid(*t.GetManager()) == typeid(tManager));
+      assert(tPortUtilHelper::HasManagerType<tManager>(t));
       CopyAndPublish(port, *t);
     }
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
-    if (typeid(*t.GetManager()) == typeid(tManagerTL))
+    if (tPortUtilHelper::HasManagerType<tManagerTL>(t))
     {
       port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
       t.reset();
     }
     else
     {
-      assert(typeid(*t.GetManager()) == typeid(tManager));
+      assert(tPortUtilHelper::HasManagerType<tManager>(t));
       CopyAndPublish(port, *t);
     }
   }
@@ -420,28 +426,28 @@ public:
 
   static void Publish(tPortType* port, tConstDataPtr& t)
   {
-    if (typeid(*t.GetManager()) == typeid(tManagerTL))
+    if (tPortUtilHelper::HasManagerType<tManagerTL>(t))
     {
       port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
       t.reset();
     }
     else
     {
-      assert(typeid(*t.GetManager()) == typeid(tManager));
+      assert(tPortUtilHelper::HasManagerType<tManager>(t));
       CopyAndPublish(port, *t);
     }
   }
 
   static void Publish(tPortType* port, tDataPtr& t)
   {
-    if (typeid(*t.GetManager()) == typeid(tManagerTL))
+    if (tPortUtilHelper::HasManagerType<tManagerTL>(t))
     {
       port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
       t.reset();
     }
     else
     {
-      assert(typeid(*t.GetManager()) == typeid(tManager));
+      assert(tPortUtilHelper::HasManagerType<tManager>(t));
       CopyAndPublish(port, *t);
     }
   }

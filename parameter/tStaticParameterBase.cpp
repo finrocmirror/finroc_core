@@ -412,7 +412,7 @@ void tStaticParameterBase::UpdateOuterParameterAttachment()
   else
   {
     tStaticParameterBase* sp = GetParameterWithBuffer();
-    if (!sp->GetName().Equals(outer_parameter_attachment))
+    if ((!sp->GetName().Equals(outer_parameter_attachment)) || (sp == this))
     {
 
       // find parameter to attach to

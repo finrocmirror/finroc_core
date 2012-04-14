@@ -56,12 +56,13 @@ util::tString tConfigNode::GetConfigNode(tFrameworkElement* fe)
         return result;
       }
     }
-    fe = fe->GetParent();
 
     if (fe == cf->GetAnnotated())
     {
       return result;
     }
+
+    fe = fe->GetParent();
   }
 }
 
