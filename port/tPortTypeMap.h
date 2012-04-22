@@ -30,7 +30,6 @@
 #include "core/port/cc/tCCPortBounded.h"
 #include "core/port/cc/tCCPortBoundedNumeric.h"
 #include "core/port/cc/tCCQueueFragmentRaw.h"
-#include "core/datatype/tCoreString.h"
 
 /*!
  * In Finroc, it is sometimes necessary to handle ports of very different types in a generic way.
@@ -178,19 +177,19 @@ struct tPortTypeMapBase<T, true, true, INT>
 
 // String
 template<>
-struct tPortTypeMapBase<std::string, false, false, false> : tStdPortTypeMap<tCoreString>
+struct tPortTypeMapBase<std::string, false, false, false> : tStdPortTypeMap<std::string>
 {
   typedef tStaticParameterImplString tStaticParameterImpl;
   typedef tParameterBase<std::string> tParameterImpl;
 };
 
-// Finroc String
-template<>
-struct tPortTypeMapBase<util::tString, false, false, false> : tStdPortTypeMap<tCoreString>
-{
-  typedef tStaticParameterImplString tStaticParameterImpl;
-  typedef tParameterBase<util::tString> tParameterImpl;
-};
+// Finroc String (if someday not identical to std::string)
+//template<>
+//struct tPortTypeMapBase<util::tString, false, false, false> : tStdPortTypeMap<tCoreString>
+//{
+//  typedef tStaticParameterImplString tStaticParameterImpl;
+//  typedef tParameterBase<util::tString> tParameterImpl;
+//};
 
 // CC type
 template<typename T, bool ENUM, bool INT>

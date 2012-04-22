@@ -44,7 +44,7 @@ tRealPortQueueTest::tRealPortQueueTest(bool pos) :
 {
 }
 
-void tRealPortQueueTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
+void tRealPortQueueTest::Main()
 {
   // Create number output port and input port with queue
   tRuntimeEnvironment::GetInstance();
@@ -245,10 +245,5 @@ void tRealPortQueueTest::Run()
 
 int main(int argc__, char **argv__)
 {
-  ::finroc::util::tArrayWrapper< ::finroc::util::tString> sa(argc__ <= 0 ? 0 : (argc__ - 1));
-  for (int i = 1; i < argc__; i++)
-  {
-    sa[i - 1] = ::finroc::util::tString(argv__[i]);
-  }
-  ::finroc::core::tRealPortQueueTest::Main(sa);
+  ::finroc::core::tRealPortQueueTest::Main();
 }

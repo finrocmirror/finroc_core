@@ -38,7 +38,7 @@ util::tString tCreateFrameworkElementAction::GetBinary(void* addr)
   Dl_info info;
   dladdr(addr, &info);
   util::tString tmp(info.dli_fname);
-  return tmp.Substring(tmp.LastIndexOf("/") + 1);
+  return tmp.substr(tmp.rfind("/") + 1);
 }
 
 } // namespace finroc

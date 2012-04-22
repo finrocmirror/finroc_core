@@ -64,7 +64,9 @@ public:
 
   inline util::tString GetContentString() const
   {
-    return util::tStringBuilder(GetObject()->GetType().GetName()) + " (" + GetObject()->GetRawDataPtr() + ")";
+    std::ostringstream os;
+    os << GetObject()->GetType().GetName() << " (" << GetObject()->GetRawDataPtr() << ")";
+    return os.str();
   }
 
 };

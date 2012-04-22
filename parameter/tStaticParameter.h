@@ -106,7 +106,7 @@ public:
    */
   void AttachToOuterParameter(const util::tString& outer_parameter_attachment = "", bool create_outer = true)
   {
-    impl->SetOuterParameterAttachment(outer_parameter_attachment.Length() > 0 ? outer_parameter_attachment : impl->GetName(), create_outer);
+    impl->SetOuterParameterAttachment(outer_parameter_attachment.length() > 0 ? outer_parameter_attachment : impl->GetName(), create_outer);
   }
 
   /*!
@@ -124,13 +124,13 @@ public:
   template < bool ENABLED = std::is_same<T, std::string>::value >
   const std::string& Get(typename std::enable_if<ENABLED, void*>::type dummy = NULL)
   {
-    return impl->GetValue()->GetBuffer().GetStdStringRef();
+    return *impl->GetValue();
   }
-  template < bool ENABLED = std::is_same<T, util::tString>::value >
-  const util::tString Get(typename std::enable_if<ENABLED, void*>::type dummy = NULL)
-  {
-    return impl->GetValue()->ToString();
-  }
+//  template < bool ENABLED = std::is_same<T, util::tString>::value >
+//  const util::tString Get(typename std::enable_if<ENABLED, void*>::type dummy = NULL)
+//  {
+//    return impl->GetValue()->ToString();
+//  }
 
   /*!
    * \return Current parameter value (without lock)

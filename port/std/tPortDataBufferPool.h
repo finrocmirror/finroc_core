@@ -57,10 +57,7 @@ private:
   /*!
    * \return Create new buffer/instance of port data
    */
-  inline tPortDataManager* CreateBufferRaw()
-  {
-    return tPortDataManager::Create(data_type);
-  }
+  tPortDataManager* CreateBufferRaw();
 
   /*!
    * Helper for above

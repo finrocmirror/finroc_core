@@ -111,12 +111,9 @@ void tRealClientTest::Main()
 } // namespace finroc
 } // namespace core
 
-int main(int argc__, char **argv__)
+int main(int argc, char **argv)
 {
-  ::finroc::util::tArrayWrapper< ::finroc::util::tString> sa(argc__ <= 0 ? 0 : (argc__ - 1));
-  for (int i = 1; i < argc__; i++)
-  {
-    sa[i - 1] = ::finroc::util::tString(argv__[i]);
-  }
-  ::finroc::core::tRealClientTest::Main(sa);
+  finroc::core::tRealClientTest rct(argc == 2 ? atoi(argv[1]) : -1);
+  rct.Main();
+  return 0;
 }

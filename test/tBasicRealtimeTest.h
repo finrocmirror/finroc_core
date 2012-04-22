@@ -59,7 +59,9 @@ public:
 
   virtual const util::tString ToString() const
   {
-    return util::tString(GetName()) + " - Cycles: " + cycles.Get() + "; Max Latency: " + (max_latency.Get() / 1000) + " us; Average Latency: " + (total_latency.Get() / (1000 * std::max(1, cycles.Get()))) + " us";
+    std::ostringstream os;
+    os << GetName() << " - Cycles: " << cycles.Get() << "; Max Latency: " << (max_latency.Get() / 1000) << " us; Average Latency: " << (total_latency.Get() / (1000 * std::max(1, cycles.Get()))) << " us";
+    return os.str();
   }
 
 };

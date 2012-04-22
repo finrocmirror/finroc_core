@@ -44,7 +44,7 @@ public:
 
   tPeer2PeerTest() {}
 
-  static void Main(::finroc::util::tArrayWrapper<util::tString>& args);
+  static void Main(int argc, char **argv);
 
 };
 

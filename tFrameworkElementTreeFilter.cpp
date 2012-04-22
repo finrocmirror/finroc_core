@@ -30,11 +30,6 @@ tFrameworkElementTreeFilter::tFrameworkElementTreeFilter() :
   flag_result(tCoreFlags::cREADY | tCoreFlags::cPUBLISHED),
   paths(new util::tSimpleList<util::tString>())
 {
-  // this(CoreFlags.STATUS_FLAGS,CoreFlags.READY | CoreFlags.PUBLISHED,getEmptyString());
-  if (GetEmptyString().Length() > 0)
-  {
-    this->paths->AddAll(GetEmptyString().Split(","));
-  }
 }
 
 tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_) :
@@ -42,11 +37,6 @@ tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, u
   flag_result(flag_result_),
   paths(new util::tSimpleList<util::tString>())
 {
-  // this(relevantFlags,flagResult,getEmptyString());
-  if (GetEmptyString().Length() > 0)
-  {
-    this->paths->AddAll(GetEmptyString().Split(","));
-  }
 }
 
 tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_, const util::tString& paths_) :
@@ -54,13 +44,15 @@ tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, u
   flag_result(flag_result_),
   paths(new util::tSimpleList<util::tString>())
 {
-  if (paths_.Length() > 0)
+  if (paths_.length() > 0)
   {
-    this->paths->AddAll(paths_.Split(","));
+    std::vector<util::tString> tmp;
+    boost::split(tmp, paths_, boost::is_any_of(","));
+    this->paths->AddAll(tmp);
   }
 }
 
-bool tFrameworkElementTreeFilter::Accept(tFrameworkElement* element, util::tStringBuilder& tmp, int ignore_flags) const
+bool tFrameworkElementTreeFilter::Accept(tFrameworkElement* element, std::string& tmp, int ignore_flags) const
 {
   if (element == NULL)
   {
@@ -78,7 +70,7 @@ bool tFrameworkElementTreeFilter::Accept(tFrameworkElement* element, util::tStri
     {
       element->GetQualifiedName(tmp);
 
-      if (tmp.StartsWith(paths->Get(i)))
+      if (boost::starts_with(tmp, paths->Get(i)))
       {
         return true;
       }

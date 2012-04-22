@@ -72,7 +72,7 @@ private:
   tFrameworkElementTreeFilter filter;
 
   /*! temp buffer */
-  util::tStringBuilder tmp;
+  std::string tmp;
 
   /*! Port to publish time spent in last call to MainLoopCallback() */
   tPort<long> last_cycle_execution_time;

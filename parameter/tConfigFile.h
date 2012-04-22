@@ -60,7 +60,7 @@ private:
   static util::tString cXML_LEAF_NAME;
 
   /*! Temp buffer - only used in synchronized context */
-  util::tStringBuilder temp_buffer;
+  std::string temp_buffer;
 
   /*! Is config file active? (false when config file is deleted via finstruct) */
   bool active;

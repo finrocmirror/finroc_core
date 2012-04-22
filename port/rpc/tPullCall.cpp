@@ -103,7 +103,9 @@ void tPullCall::Serialize(rrlib::serialization::tOutputStream& oos) const
 
 const util::tString tPullCall::ToString() const
 {
-  return util::tStringBuilder("PullCall (") + GetStatusString() + ", callid: " + ::finroc::core::tAbstractCall::GetMethodCallIndex() + ", threaduid: " + ::finroc::core::tAbstractCall::GetThreadUid() + ")";
+  std::ostringstream os;
+  os << "PullCall (" << GetStatusString() << ", callid: " << ::finroc::core::tAbstractCall::GetMethodCallIndex() << ", threaduid: " << ::finroc::core::tAbstractCall::GetThreadUid() << ")";
+  return os.str();
 }
 
 } // namespace finroc

@@ -60,7 +60,9 @@ void tPortDataManager::DangerousDirectRecycle()
 
 const util::tString tPortDataManager::ToString() const
 {
-  return util::tStringBuilder("PortDataManager for ") + GetContentString() + " (Locks: " + GetCurrentRefCounter()->GetLocks() + ")";
+  std::ostringstream os;
+  os << "PortDataManager for " << GetContentString() << " (Locks: " << GetCurrentRefCounter()->GetLocks() << ")";
+  return os.str();
 }
 
 } // namespace finroc

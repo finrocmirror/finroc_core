@@ -125,7 +125,7 @@ tUnit* tUnit::GetUnit(const util::tString& unit_string)
   for (size_t i = 0u; i < uid_lookup_table_temp.Size(); i++)
   {
     tUnit* u = uid_lookup_table_temp.Get(i);
-    if (u->description.Equals(unit_string))
+    if (boost::equals(u->description, unit_string))
     {
       return u;
     }

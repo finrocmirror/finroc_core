@@ -31,7 +31,6 @@ template class tPort<long long int>;
 template class tPort<float>;
 template class tPort<double>;
 template class tPort<tNumber>;
-template class tPort<tCoreString>;
 template class tPort<std::string>;
 template class tPort<bool>;
 template class tPort<rrlib::serialization::tMemoryBuffer>;

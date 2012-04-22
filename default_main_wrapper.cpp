@@ -36,6 +36,7 @@
 //----------------------------------------------------------------------
 #include <cstdlib>
 #include <csignal>
+#include <boost/lexical_cast.hpp>
 
 extern "C"
 {
@@ -303,9 +304,9 @@ int main(int argc, char **argv)
   }
 
   // Create and connect TCP peer
-  if (connect_to.Length() == 0)
+  if (connect_to.length() == 0)
   {
-    connect_to = finroc::util::tString("localhost:") + network_port;
+    connect_to = std::string("localhost:") + boost::lexical_cast<std::string>(network_port);
   }
   finroc::tcp::tTCPPeer* tcp_peer = new finroc::tcp::tTCPPeer(connect_to, "", finroc::tcp::tTCPPeer::eFULL, network_port, finroc::tcp::tTCPPeer::cDEFAULT_FILTER, true);
   tcp_peer->Init();

@@ -30,7 +30,7 @@ const char* tAbstractMethod::cNO_PARAM = "NO_PARAMETER";
 
 tAbstractMethod::tAbstractMethod(tPortInterface& port_interface, const util::tString& name_, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread_) :
   name(name_),
-  parameter_names(4),
+  parameter_names(),
   parameter_count(4),
   handle_in_extra_thread(handle_in_extra_thread_),
   method_id(0),
@@ -43,7 +43,7 @@ tAbstractMethod::tAbstractMethod(tPortInterface& port_interface, const util::tSt
   parameter_names[3] = p4_name;
   for (int i = 0; i < parameter_count; i++)
   {
-    if (parameter_names[i].Equals(no_param))
+    if (boost::equals(parameter_names[i], no_param))
     {
       parameter_count = i;
       break;

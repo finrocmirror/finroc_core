@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/port/std/tPortDataBufferPool.h"
+#include "core/tRuntimeSettings.h"
 #include "rrlib/finroc_core_utils/container/tAbstractReusablesPool.h"
 
 namespace finroc
@@ -48,6 +49,19 @@ tPortDataManager* tPortDataBufferPool::CreateBuffer()
   return pdm;
 }
 
+tPortDataManager* tPortDataBufferPool::CreateBufferRaw()
+{
+  tPortDataManager* result = tPortDataManager::Create(data_type);
+
+  // In case we have a string: allocate a certain buffer size (for RT capabilities with smaller payload)
+  if (data_type.GetRttiName() == typeid(util::tString).name())
+  {
+    result->GetObject()->GetData<util::tString>()->reserve(tRuntimeSettings::GetDefaultPortStringBufferSize());
+  }
+
+  return result;
+}
+
 void tPortDataBufferPool::PrintElement(int indent, const tPortDataManager* pdm, std::stringstream& output) const
 {
   if (pdm == NULL)
@@ -71,7 +85,7 @@ void tPortDataBufferPool::PrintStructure(int indent, std::stringstream& output) 
   {
     output << " ";
   }
-  output << util::tStringBuilder("PortDataBufferPool (") + data_type.GetName() + ")" << std::endl;
+  output << "PortDataBufferPool (" << data_type.GetName() << ")" << std::endl;
   PrintElement(indent + 2, GetLastCreated(), output);
 }
 

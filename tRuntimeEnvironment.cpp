@@ -94,15 +94,15 @@ void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge* edge
   FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Adding link edge connecting to ", link);
   {
     util::tLock lock2(registry);
-    if (registry.link_edges.find(link.GetStdString()) == registry.link_edges.end())
+    if (registry.link_edges.find(link) == registry.link_edges.end())
     {
       // add first edge
-      registry.link_edges[link.GetStdString()] = edge;
+      registry.link_edges[link] = edge;
     }
     else
     {
       // insert edge
-      tLinkEdge* interested = registry.link_edges[link.GetStdString()];
+      tLinkEdge* interested = registry.link_edges[link];
       tLinkEdge* next = interested->GetNext();
       interested->SetNext(edge);
       edge->SetNext(next);
@@ -192,6 +192,7 @@ void tRuntimeEnvironment::InitialInit()
 {
   util::tLock lock1(static_class_mutex);
   assert((!ShuttingDown()));
+  rrlib::rtti::tDataType<std::string>("String"); // Make sure std::string data type has name "String" - as in Java
 
   // Finish initializing static members of classes
   tUnit::StaticInit();  // can safely be done first
@@ -244,16 +245,16 @@ int tRuntimeEnvironment::RegisterElement(tFrameworkElement* fe)
 void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* edge)
 {
   util::tLock lock2(registry);
-  tLinkEdge* current = registry.link_edges[link.GetStdString()];
+  tLinkEdge* current = registry.link_edges[link];
   if (current == edge)
   {
     if (current->GetNext() == NULL)    // remove entries for this link completely
     {
-      registry.link_edges.erase(link.GetStdString());
+      registry.link_edges.erase(link);
     }
     else    // remove first element
     {
-      registry.link_edges[link.GetStdString()] = current->GetNext();
+      registry.link_edges[link] = current->GetNext();
     }
   }
   else    // remove element out of linked list
@@ -277,7 +278,7 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* e
 void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tAbstractPort* partner_port)
 {
   util::tLock lock2(registry);
-  for (tLinkEdge* current = registry.link_edges[link.GetStdString()]; current != NULL; current = current->GetNext())
+  for (tLinkEdge* current = registry.link_edges[link]; current != NULL; current = current->GetNext())
   {
     if (current->GetPortHandle() == partner_port->GetHandle())
     {
@@ -316,12 +317,12 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement* ele
       for (size_t i = 0u; i < ap->GetLinkCount(); i++)
       {
         ap->GetQualifiedLink(registry.temp_buffer, i);
-        util::tString s = registry.temp_buffer.ToString();
+        util::tString s = registry.temp_buffer;
         FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_2, "Checking link ", s, " with respect to link edges");
 
-        if (registry.link_edges.find(s.GetStdString()) != registry.link_edges.end())
+        if (registry.link_edges.find(s) != registry.link_edges.end())
         {
-          tLinkEdge* le = registry.link_edges[s.GetStdString()];
+          tLinkEdge* le = registry.link_edges[s];
           while (le != NULL)
           {
             le->LinkAdded(this, s, ap);

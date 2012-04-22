@@ -57,7 +57,7 @@ public:
     return "RealPortTest";
   }
 
-  static void Main(::finroc::util::tArrayWrapper<util::tString>& args);
+  static void Main();
 
   void Run();
 

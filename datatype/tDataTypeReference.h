@@ -27,7 +27,6 @@
 
 #include "rrlib/rtti/rtti.h"
 #include "core/datatype/tNumber.h"
-#include "core/datatype/tCoreString.h"
 
 namespace finroc
 {

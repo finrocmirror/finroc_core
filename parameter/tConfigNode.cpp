@@ -50,8 +50,8 @@ util::tString tConfigNode::GetConfigNode(tFrameworkElement* fe)
     tConfigNode* cn = fe->GetAnnotation<tConfigNode>();
     if (cn != NULL)
     {
-      result = cn->node + (cn->node.EndsWith("/") ? "" : "/") + result;
-      if (cn->node.StartsWith("/"))
+      result = cn->node + (boost::ends_with(cn->node, "/") ? "" : "/") + result;
+      if (cn->node[0] == '/')
       {
         return result;
       }
@@ -68,12 +68,12 @@ util::tString tConfigNode::GetConfigNode(tFrameworkElement* fe)
 
 util::tString tConfigNode::GetFullConfigEntry(tFrameworkElement* parent, const util::tString& config_entry)
 {
-  if (config_entry.StartsWith("/"))
+  if (config_entry[0] == '/')
   {
     return config_entry;
   }
   util::tString node = GetConfigNode(parent);
-  return node + (node.EndsWith("/") ? "" : "/") + config_entry;
+  return node + (boost::ends_with(node, "/") ? "" : "/") + config_entry;
 }
 
 void tConfigNode::SetConfigNode(tFrameworkElement* fe, const util::tString& node)
@@ -82,7 +82,7 @@ void tConfigNode::SetConfigNode(tFrameworkElement* fe, const util::tString& node
   tConfigNode* cn = fe->GetAnnotation<tConfigNode>();
   if (cn != NULL)
   {
-    if (cn->node.Equals(node))
+    if (boost::equals(cn->node, node))
     {
       return;
     }

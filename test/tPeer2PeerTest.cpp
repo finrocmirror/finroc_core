@@ -36,7 +36,7 @@ namespace finroc
 {
 namespace core
 {
-void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
+void tPeer2PeerTest::Main(int argc, char **argv)
 {
   tRuntimeEnvironment* re = tRuntimeEnvironment::GetInstance();
   tThreadLocalCache::Get();
@@ -52,9 +52,9 @@ void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 
   // Create TCP peer
   util::tString addr = "localhost:4444";
-  if (args.length > 0)
+  if (argc > 1)
   {
-    addr = args[0];
+    addr = argv[1];
   }
   tcp::tTCPPeer* peer = new tcp::tTCPPeer(addr, "", tcp::tTCPPeer::eFULL, 4444, tcp::tTCPPeer::cDEFAULT_FILTER, false);
   tFrameworkElement::InitAll();
@@ -81,19 +81,15 @@ void tPeer2PeerTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
       e.PrintStackTrace();
     }
     re->PrintStructure();
-    FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("Input connections: ") + input.GetConnectionCount());
+    FINROC_LOG_PRINT(eLL_USER, "Input connections: ", input.GetConnectionCount());
   }
 }
 
 } // namespace finroc
 } // namespace core
 
-int main(int argc__, char **argv__)
+int main(int argc, char **argv)
 {
-  ::finroc::util::tArrayWrapper< ::finroc::util::tString> sa(argc__ <= 0 ? 0 : (argc__ - 1));
-  for (int i = 1; i < argc__; i++)
-  {
-    sa[i - 1] = ::finroc::util::tString(argv__[i]);
-  }
-  ::finroc::core::tPeer2PeerTest::Main(sa);
+  ::finroc::core::tPeer2PeerTest::Main(argc, argv);
+  return 0;
 }

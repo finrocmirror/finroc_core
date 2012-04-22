@@ -33,9 +33,9 @@ namespace core
 {
 rrlib::rtti::tDataTypeBase sSerializationHelper::GetTypedStringDataType(const rrlib::rtti::tDataTypeBase& expected, const util::tString& s)
 {
-  if (s.StartsWith("\\("))
+  if (boost::starts_with(s, "\\("))
   {
-    util::tString st = s.Substring(2, s.IndexOf(")"));
+    util::tString st = s.substr(2, s.find(")") - 2);
     rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(st);
     return dt;
   }
@@ -45,9 +45,9 @@ rrlib::rtti::tDataTypeBase sSerializationHelper::GetTypedStringDataType(const rr
 void sSerializationHelper::TypedStringDeserialize(rrlib::serialization::tSerializable* cs, const util::tString& s)
 {
   util::tString s2 = s;
-  if (s2.StartsWith("\\("))
+  if (boost::starts_with(s2, "\\("))
   {
-    s2 = s2.Substring(s2.IndexOf(")") + 1);
+    s2 = s2.substr(s2.find(")") + 1);
   }
   rrlib::serialization::tStringInputStream sis(s2);
   cs->Deserialize(sis);
@@ -57,15 +57,15 @@ rrlib::rtti::tGenericObject* sSerializationHelper::TypedStringDeserialize(const 
 {
   rrlib::rtti::tDataTypeBase type = GetTypedStringDataType(expected, s);
   util::tString s2 = s;
-  if (s2.StartsWith("\\("))
+  if (boost::starts_with(s2, "\\("))
   {
-    s2 = s2.Substring(s2.IndexOf(")") + 1);
+    s2 = s2.substr(s2.find(")") + 1);
   }
 
   if (buffer_pool == NULL && tFinrocTypeInfo::IsStdType(type))    // skip object?
   {
     //toSkipTarget();
-    throw util::tRuntimeException(util::tStringBuilder("Buffer source does not support type ") + type.GetName(), CODE_LOCATION_MACRO);
+    throw util::tRuntimeException(std::string("Buffer source does not support type ") + type.GetName(), CODE_LOCATION_MACRO);
     //return null;
   }
   else
@@ -82,11 +82,11 @@ util::tString sSerializationHelper::TypedStringSerialize(const rrlib::rtti::tDat
   util::tString s = rrlib::serialization::Serialize(*cs);
   if (expected != cs_type)
   {
-    return util::tStringBuilder("\\(") + cs_type.GetName() + ")" + s;
+    return util::tString("\\(") + cs_type.GetName() + ")" + s;
   }
-  if (s.StartsWith("\\"))
+  if (s[0] == '\\')
   {
-    return util::tStringBuilder("\\") + s;
+    return util::tString("\\") + s;
   }
   return s;
 }

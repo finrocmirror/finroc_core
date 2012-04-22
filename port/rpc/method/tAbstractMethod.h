@@ -25,6 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include <array>
 
 #include "core/tRuntimeEnvironment.h"
 
@@ -61,7 +62,7 @@ private:
   util::tString name;
 
   /*! Parameter names */
-  ::finroc::util::tArrayWrapper<util::tString> parameter_names;
+  std::array<util::tString, 4> parameter_names;
 
   /*! Number of paramaters */
   int parameter_count;

@@ -242,33 +242,33 @@ private:
   /*!
    * Recursive Helper function for above
    *
-   * \param sb StringBuilder storing result
+   * \param sb Buffer storing result
    * \param l Link to continue with
    * \param abort_at_link_root Abort when an alternative link root is reached?
    */
-  static void GetNameHelper(util::tStringBuilder& sb, const tLink* l, bool abort_at_link_root);
+  static void GetNameHelper(util::tString& sb, const tLink* l, bool abort_at_link_root);
 
   /*!
    * Very efficient implementation of above.
    * (StringBuilder may be reused)
    *
-   * \param sb StringBuilder that will store result
+   * \param sb Buffer that will store result
    * \param start Link to start with
    * \param force_full_link Return full link from root (even if object has shorter globally unique link?)
    * \return Is this a globally unique link?
    */
-  bool GetQualifiedName(util::tStringBuilder& sb, const tLink* start, bool force_full_link) const;
+  bool GetQualifiedName(util::tString& sb, const tLink* start, bool force_full_link) const;
 
   /*!
    * Very efficient implementation of above.
    * (StringBuilder may be reused)
    *
-   * \param sb StringBuilder that will store result
+   * \param sb Buffer that will store result
    * \param start Link to start with
    * \param force_full_link Return full link from root (even if object has shorter globally unique link?)
    * \return Is this a globally unique link?
    */
-  bool GetQualifiedNameImpl(util::tStringBuilder& sb, const tLink* start, bool force_full_link) const;
+  bool GetQualifiedNameImpl(util::tString& sb, const tLink* start, bool force_full_link) const;
 
   /*!
    * Initializes element and all child elements that were created by this thread
@@ -580,19 +580,19 @@ public:
    */
   inline util::tString GetQualifiedLink() const
   {
-    util::tStringBuilder sb;
+    util::tString sb;
     GetQualifiedLink(sb);
-    return sb.ToString();
+    return sb;
   }
 
   /*!
    * Efficient variant of above.
    * (StringBuilder may be reused)
    *
-   * \param sb StringBuilder that will store result
+   * \param sb Buffer that will store result
    * \return Is this link globally unique?
    */
-  inline bool GetQualifiedLink(util::tStringBuilder& sb) const
+  inline bool GetQualifiedLink(util::tString& sb) const
   {
     return GetQualifiedLink(sb, &(primary));
   }
@@ -601,11 +601,11 @@ public:
    * Efficient variant of above.
    * (StringBuilder may be reused)
    *
-   * \param sb StringBuilder that will store result
+   * \param sb Buffer that will store result
    * \param link_index Index of link to start with
    * \return Is this link globally unique?
    */
-  inline bool GetQualifiedLink(util::tStringBuilder& sb, size_t link_index) const
+  inline bool GetQualifiedLink(util::tString& sb, size_t link_index) const
   {
     return GetQualifiedLink(sb, GetLink(link_index));
   }
@@ -614,11 +614,11 @@ public:
    * Efficient variant of above.
    * (StringBuilder may be reused)
    *
-   * \param sb StringBuilder that will store result
+   * \param sb Buffer that will store result
    * \param start Link to start with
    * \return Is this link globally unique?
    */
-  inline bool GetQualifiedLink(util::tStringBuilder& sb, const tLink* start) const
+  inline bool GetQualifiedLink(util::tString& sb, const tLink* start) const
   {
     return GetQualifiedName(sb, start, false);
   }
@@ -629,18 +629,18 @@ public:
    */
   inline util::tString GetQualifiedName() const
   {
-    util::tStringBuilder sb;
+    util::tString sb;
     GetQualifiedName(sb);
-    return sb.ToString();
+    return sb;
   }
 
   /*!
    * Efficient variant of above.
    * (StringBuilder may be reused)
    *
-   * \param sb StringBuilder that will store result
+   * \param sb Buffer that will store result
    */
-  inline void GetQualifiedName(util::tStringBuilder& sb) const
+  inline void GetQualifiedName(util::tString& sb) const
   {
     GetQualifiedName(sb, &(primary));
   }
@@ -649,10 +649,10 @@ public:
    * Efficient variant of above.
    * (StringBuilder may be reused)
    *
-   * \param sb StringBuilder that will store result
+   * \param sb Buffer that will store result
    * \param link_index Index of link to start with
    */
-  inline void GetQualifiedName(util::tStringBuilder& sb, size_t link_index) const
+  inline void GetQualifiedName(util::tString& sb, size_t link_index) const
   {
     GetQualifiedName(sb, GetLink(link_index));
   }
@@ -661,10 +661,10 @@ public:
    * Efficient variant of above.
    * (StringBuilder may be reused)
    *
-   * \param sb StringBuilder that will store result
+   * \param sb Buffer that will store result
    * \param start Link to start with
    */
-  inline void GetQualifiedName(util::tStringBuilder& sb, const tLink* start) const
+  inline void GetQualifiedName(util::tString& sb, const tLink* start) const
   {
     GetQualifiedName(sb, start, true);
   }

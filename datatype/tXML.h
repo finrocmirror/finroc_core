@@ -24,8 +24,7 @@
 #define core__datatype__tXML_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
-#include "core/datatype/tCoreString.h"
+#include "rrlib/rtti/rtti.h"
 
 namespace finroc
 {
@@ -37,8 +36,12 @@ namespace core
  * Custom XML data.
  * Special XML types may become subclasses of this.
  */
-class tXML : public tCoreString
+class tXML : public rrlib::serialization::tSerializable
 {
+  /*!
+   * Buffer with xml data
+   */
+  util::tString buffer;
 
 public:
 
@@ -47,7 +50,35 @@ public:
 
   tXML();
 
+  virtual void Deserialize(rrlib::serialization::tInputStream& is)
+  {
+    is >> buffer;
+  }
+
+  virtual void Deserialize(rrlib::serialization::tStringInputStream& is)
+  {
+    is >> buffer;
+  }
+
   virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
+
+  /*!
+   * \return XML content as text
+   */
+  inline util::tString Get() const
+  {
+    return buffer;
+  }
+
+  virtual void Serialize(rrlib::serialization::tOutputStream& os) const
+  {
+    os << buffer;
+  }
+
+  virtual void Serialize(rrlib::serialization::tStringOutputStream& os) const
+  {
+    os << buffer;
+  }
 
   virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
 
@@ -56,13 +87,22 @@ public:
    */
   inline void Set(const util::tString& s)
   {
-    tCoreString::Set(s);
+    buffer = s;
   }
 
   /*!
    * \param n Node to set buffer to
    */
   void Set(const rrlib::xml2::tXMLNode& n);
+
+  /*!
+   * (same as Get())
+   * \return XML content as text
+   */
+  inline util::tString ToString() const
+  {
+    return buffer;
+  }
 };
 
 } // namespace finroc

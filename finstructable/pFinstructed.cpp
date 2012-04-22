@@ -53,14 +53,15 @@ std::vector<finroc::util::tString> finroc_file_extra_args;
  */
 bool ParseXMLArg(const finroc::util::tString& arg, finroc::util::tString& group_name, finroc::util::tString& xml_name)
 {
-  if (!arg.Substring(arg.Length() - 7).Equals(".finroc"))
+  if (!boost::ends_with(arg, ".finroc"))
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error parsing argument: ", arg);
     return false;
   }
-  if (arg.Contains(":"))
+  if (arg.find(":") != std::string::npos)
   {
-    std::vector<finroc::util::tString> split = arg.Split(":");
+    std::vector<finroc::util::tString> split;
+    boost::split(split, arg, boost::is_any_of(":"));
     if (split.size() != 2)
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error parsing argument: ", arg);
@@ -88,14 +89,14 @@ bool ParseXMLArg(const finroc::util::tString& arg, finroc::util::tString& group_
         FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error scanning file: ", xml_name);
       }
     }
-    if (group_name.Length() == 0)
+    if (group_name.length() == 0)
     {
       group_name = arg;
-      if (arg.Contains("/"))
+      if (arg.find("/") != std::string::npos)
       {
-        group_name = arg.Substring(arg.LastIndexOf("/") + 1); // cut off path
+        group_name = arg.substr(arg.rfind("/") + 1); // cut off path
       }
-      group_name = group_name.Substring(0, group_name.Length() - 7); // cut off .finroc
+      group_name = group_name.substr(0, group_name.length() - 7); // cut off .finroc
     }
   }
   return true;
@@ -144,7 +145,7 @@ bool FinrocFileArgHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_
 {
   for (size_t i = 0; i < finroc_file_extra_args.size(); i++)
   {
-    rrlib::getopt::tOption extra_option(name_to_option_map.at(finroc_file_extra_args[i].GetCString()));
+    rrlib::getopt::tOption extra_option(name_to_option_map.at(finroc_file_extra_args[i].c_str()));
     if (extra_option->IsActive())
     {
       finroc::core::tRuntimeEnvironment::GetInstance()->AddCommandLineArgument(finroc_file_extra_args[i], boost::any_cast<const char *>(extra_option->GetValue()));
@@ -167,21 +168,21 @@ void StartUp()
   {
     finroc::util::tString arg(finroc_argv_copy[i]);
     finroc::util::tString main;
-    if (arg.StartsWith("--main="))
+    if (boost::starts_with(arg, "--main="))
     {
-      main = arg.Substring(7);
+      main = arg.substr(7);
     }
-    else if (i < (finroc_argc_copy - 1) && arg.Equals("-m"))
+    else if (i < (finroc_argc_copy - 1) && boost::equals(arg, "-m"))
     {
       i++;
       main = finroc_argv_copy[i];
     }
-    if (main.Length() > 0 && main.EndsWith(".finroc"))
+    if (main.length() > 0 && boost::ends_with(main, ".finroc"))
     {
       finroc_file_extra_args = finroc::core::tFinstructableGroup::ScanForCommandLineArgs(main);
       for (size_t i = 0; i < finroc_file_extra_args.size(); i++)
       {
-        rrlib::getopt::AddValue(finroc_file_extra_args[i].GetCString(), 0, "", &FinrocFileArgHandler);
+        rrlib::getopt::AddValue(finroc_file_extra_args[i].c_str(), 0, "", &FinrocFileArgHandler);
       }
       return;
     }
@@ -204,7 +205,7 @@ void InitMainGroup(finroc::core::tThreadContainer *main_thread, std::vector<char
   for (size_t i = 0; i < remaining_args.size(); i++)
   {
     finroc::util::tString arg(remaining_args[i]);
-    if (arg.Substring(arg.Length() - 4).Equals(".xml"))
+    if (boost::ends_with(arg, ".xml"))
     {
       finroc::util::tString group_name;
       finroc::util::tString xml_name;

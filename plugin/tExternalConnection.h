@@ -183,7 +183,7 @@ public:
 
   virtual const util::tString ToString() const
   {
-    return GetClass().GetSimpleName() + " - " + last_address;
+    return rrlib::rtti::tDataTypeBase::GetDataTypeNameFromRtti(typeid(*this).name()) + " - " + last_address;
   }
 
 };

@@ -63,7 +63,7 @@ public:
 
   tRealPortQueueTest(bool pos);
 
-  static void Main(::finroc::util::tArrayWrapper<util::tString>& args);
+  static void Main();
 
   virtual void Run();
 

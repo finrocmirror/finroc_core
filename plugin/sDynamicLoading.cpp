@@ -214,7 +214,7 @@ core::tCreateFrameworkElementAction* sDynamicLoading::LoadModuleType(const std::
   for (size_t i = 0u; i < modules.size(); i++)
   {
     core::tCreateFrameworkElementAction* cma = modules[i];
-    if (cma->GetModuleGroup().Equals(group) && cma->GetName().Equals(name))
+    if (boost::equals(cma->GetModuleGroup(), group) && boost::equals(cma->GetName(), name))
     {
       return cma;
     }

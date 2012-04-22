@@ -30,7 +30,7 @@ namespace core
 rrlib::rtti::tDataTypeBase tXML::cTYPE = rrlib::rtti::tDataType<tXML>();
 
 tXML::tXML() :
-  tCoreString()
+  buffer()
 {
 }
 
@@ -41,10 +41,9 @@ void tXML::Deserialize(const rrlib::xml2::tXMLNode& node)
 
 void tXML::Serialize(rrlib::xml2::tXMLNode& node) const
 {
-  util::tString s = ToString();
-  if (s.Length() > 0)
+  if (buffer.length() > 0)
   {
-    rrlib::xml2::tXMLDocument doc(static_cast<const void*>(s.GetCString()), s.Length() + 1);
+    rrlib::xml2::tXMLDocument doc(static_cast<const void*>(buffer.c_str()), buffer.length() + 1);
     node.AddChildNode(doc.RootNode(), true);
   }
 }

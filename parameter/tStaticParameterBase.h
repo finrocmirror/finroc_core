@@ -230,7 +230,7 @@ public:
 
   const char* GetLogDescription()
   {
-    return name.GetCString();
+    return name.c_str();
   }
 
   /*!

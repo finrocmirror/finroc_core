@@ -109,7 +109,7 @@ void tAbstractPort::ConnectToSource(const util::tString& src_link, bool finstruc
   }
   for (size_t i = 0u; i < link_edges->Size(); i++)
   {
-    if (link_edges->Get(i)->GetSourceLink().Equals(src_link))
+    if (boost::equals(link_edges->Get(i)->GetSourceLink(), src_link))
     {
       return;
     }
@@ -164,7 +164,7 @@ void tAbstractPort::ConnectToTarget(const util::tString& dest_link, bool finstru
   }
   for (size_t i = 0u; i < link_edges->Size(); i++)
   {
-    if (link_edges->Get(i)->GetTargetLink().Equals(dest_link))
+    if (boost::equals(link_edges->Get(i)->GetTargetLink(), dest_link))
     {
       return;
     }
@@ -208,7 +208,7 @@ void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
     for (size_t i = 0u; i < link_edges->Size(); i++)
     {
       tLinkEdge* le = link_edges->Get(i);
-      if ((incoming && le->GetSourceLink().Length() > 0) || (outgoing && le->GetTargetLink().Length() > 0))
+      if ((incoming && le->GetSourceLink().length() > 0) || (outgoing && le->GetTargetLink().length() > 0))
       {
         link_edges->Remove(i);
         delete le;
@@ -285,7 +285,7 @@ void tAbstractPort::DisconnectFrom(const util::tString& link)
   for (size_t i = 0u; i < link_edges->Size(); i++)
   {
     tLinkEdge* le = link_edges->Get(i);
-    if (le->GetSourceLink().Equals(link) || le->GetTargetLink().Equals(link))
+    if (boost::equals(le->GetSourceLink(), link) || boost::equals(le->GetTargetLink(), link))
     {
       delete le;
     }
@@ -460,15 +460,15 @@ bool tAbstractPort::IsEdgeFinstructed(int idx)
 
 util::tString tAbstractPort::MakeAbsoluteLink(const util::tString& rel_link)
 {
-  if (rel_link.StartsWith("/"))
+  if (rel_link[0] == '/')
   {
     return rel_link;
   }
   ::finroc::core::tFrameworkElement* relative_to = GetParent();
   util::tString rel_link2 = rel_link;
-  while (rel_link2.StartsWith("../"))
+  while (boost::starts_with(rel_link2, "../"));
   {
-    rel_link2 = rel_link2.Substring(3);
+    rel_link2 = rel_link2.substr(3);
     relative_to = relative_to->GetParent();
   }
   return relative_to->GetQualifiedLink() + "/" + rel_link2;

@@ -94,7 +94,7 @@ public:
 
   virtual const util::tString ToString() const
   {
-    return util::tStringBuilder("CCPortDataManager: ") + GetContentString();
+    return std::string("CCPortDataManager: ") + GetContentString();
   }
 
 };

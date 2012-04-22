@@ -35,11 +35,11 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, int target_handle, bool 
   finstructed(finstructed)
 {
   // this(sourceLink_,"",targetHandle);
-  if (source_link.Length() > 0)
+  if (source_link.length() > 0)
   {
     tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, this);
   }
-  if (target_link.Length() > 0)
+  if (target_link.length() > 0)
   {
     tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, this);
   }
@@ -53,11 +53,11 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& tar
   finstructed(finstructed)
 {
   // this(sourceLink_,targetLink_,-1);
-  if (source_link.Length() > 0)
+  if (source_link.length() > 0)
   {
     tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, this);
   }
-  if (target_link.Length() > 0)
+  if (target_link.length() > 0)
   {
     tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, this);
   }
@@ -71,11 +71,11 @@ tLinkEdge::tLinkEdge(int source_handle, const util::tString& target_link_, bool 
   finstructed(finstructed)
 {
   // this("",targetLink_,sourceHandle);
-  if (source_link.Length() > 0)
+  if (source_link.length() > 0)
   {
     tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, this);
   }
-  if (target_link.Length() > 0)
+  if (target_link.length() > 0)
   {
     tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, this);
   }
@@ -88,11 +88,11 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& tar
   next(NULL),
   finstructed(finstructed)
 {
-  if (source_link.Length() > 0)
+  if (source_link.length() > 0)
   {
     tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, this);
   }
-  if (target_link.Length() > 0)
+  if (target_link.length() > 0)
   {
     tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, this);
   }
@@ -102,11 +102,11 @@ tLinkEdge::~tLinkEdge()
 {
   {
     util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
-    if (source_link.Length() > 0)
+    if (source_link.length() > 0)
     {
       tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(source_link, this);
     }
-    if (target_link.Length() > 0)
+    if (target_link.length() > 0)
     {
       tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(target_link, this);
     }
@@ -117,9 +117,9 @@ void tLinkEdge::LinkAdded(tRuntimeEnvironment* re, const util::tString& link, tA
 {
   {
     util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
-    if (link.Equals(source_link))
+    if (link.compare(source_link) == 0)
     {
-      tAbstractPort* target = target_link.Length() > 0 ? re->GetPort(target_link) : re->GetPort(port_handle);
+      tAbstractPort* target = target_link.length() > 0 ? re->GetPort(target_link) : re->GetPort(port_handle);
       if (target != NULL)
       {
         port->ConnectToTarget(target, finstructed);
@@ -127,7 +127,7 @@ void tLinkEdge::LinkAdded(tRuntimeEnvironment* re, const util::tString& link, tA
     }
     else
     {
-      tAbstractPort* source = source_link.Length() > 0 ? re->GetPort(source_link) : re->GetPort(port_handle);
+      tAbstractPort* source = source_link.length() > 0 ? re->GetPort(source_link) : re->GetPort(port_handle);
       if (source != NULL)
       {
         port->ConnectToSource(source, finstructed);

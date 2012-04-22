@@ -142,7 +142,7 @@ void tFrameworkElementInfo::Reset()
   connections.Clear();
 }
 
-void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, tFrameworkElementTreeFilter element_filter, util::tStringBuilder& tmp)
+void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, tFrameworkElementTreeFilter element_filter, std::string& tmp)
 {
   tp.WriteByte(op_code_);  // write opcode (see base class)
 
@@ -166,7 +166,7 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
       {
         bool unique = fe->GetQualifiedLink(tmp, i);
         tp.WriteByte(1 | (unique ? tCoreFlags::cGLOBALLY_UNIQUE_LINK : 0));
-        tp.WriteString(tmp.Substring(1));
+        tp.WriteString(tmp.substr(1));
       }
     }
     else
@@ -213,14 +213,16 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
 
 const util::tString tFrameworkElementInfo::ToString() const
 {
+  std::ostringstream os;
   if (link_count > 0)
   {
-    return GetOpCodeString() + " " + links[0].name + " (" + handle + ") - parent: " + links[0].parent + " - flags: " + flags;
+    os << GetOpCodeString() << " " << links[0].name << " (" << handle << ") - parent: " << links[0].parent << " - flags: " << flags;
   }
   else
   {
-    return GetOpCodeString() + " (" + handle + ") - flags: " + flags;
+    os << GetOpCodeString() << " (" << handle << ") - flags: " << flags;
   }
+  return os.str();
 }
 
 } // namespace finroc

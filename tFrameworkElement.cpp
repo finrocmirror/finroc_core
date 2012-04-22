@@ -22,6 +22,7 @@
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "rrlib/finroc_core_utils/tGarbageCollector.h"
 #include "rrlib/serialization/tOutputStream.h"
+#include <boost/lexical_cast.hpp>
 
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeEnvironment.h"
@@ -105,13 +106,13 @@ void tFrameworkElement::AddChild(tLink* child)
     for (int i = 0, n = ch->Size(); i < n; i++)
     {
       tLink* re = ch->Get(i);
-      if (re != NULL && re->GetName().Equals(child_desc))
+      if (re != NULL && boost::equals(re->GetName(), child_desc))
       {
         // name clash
         /*if (postfixIndex == 1) {
             System.out.println("Warning: name conflict in " + getUid() + " - " + child.GetName());
         }*/
-        re->GetChild()->SetName(child_desc + "[" + postfix_index + "]");
+        re->GetChild()->SetName(child_desc + "[" + boost::lexical_cast<std::string>(postfix_index) + "]");
         postfix_index++;
         continue;
       }
@@ -229,7 +230,7 @@ tFrameworkElement* tFrameworkElement::GetChild(const util::tString& name) const
     tLink* child = iterable->Get(i);
     if (child->GetChild()->IsReady())
     {
-      if (child->GetName().Equals(name))
+      if (boost::equals(child->GetName(), name))
       {
         return child->GetChild();
       }
@@ -245,7 +246,7 @@ tFrameworkElement* tFrameworkElement::GetChild(const util::tString& name) const
       {
         continue;
       }
-      if (child->GetName().Equals(name))
+      if (boost::equals(child->GetName(), name))
       {
         return child->GetChild();
       }
@@ -269,7 +270,7 @@ tFrameworkElement* tFrameworkElement::GetChildElement(const util::tString& name,
     return NULL;
   }
 
-  if (name.CharAt(name_index) == '/')
+  if (name[name_index] == '/')
   {
     return root->GetChildElement(name, name_index + 1, only_globally_unique_children, root);
   }
@@ -279,18 +280,18 @@ tFrameworkElement* tFrameworkElement::GetChildElement(const util::tString& name,
   for (int i = 0, n = iterable->Size(); i < n; i++)
   {
     tLink* child = iterable->Get(i);
-    if (child != NULL && name.RegionMatches(name_index, child->name, 0, child->name.Length()) && (!child->GetChild()->IsDeleted()))
+    if (child != NULL && name.compare(name_index, child->name.length(), child->name) == 0 && (!child->GetChild()->IsDeleted()))
     {
-      if (name.Length() == name_index + child->name.Length())
+      if (name.length() == name_index + child->name.length())
       {
         if (!only_globally_unique_children || child->GetChild()->GetFlag(tCoreFlags::cGLOBALLY_UNIQUE_LINK))
         {
           return child->GetChild();
         }
       }
-      if (name.CharAt(name_index + child->name.Length()) == '/')
+      if (name[name_index + child->name.length()] == '/')
       {
-        tFrameworkElement* result = child->GetChild()->GetChildElement(name, name_index + child->name.Length() + 1, only_globally_unique_children, root);
+        tFrameworkElement* result = child->GetChild()->GetChildElement(name, name_index + child->name.length() + 1, only_globally_unique_children, root);
         if (result != NULL)
         {
           return result;
@@ -304,7 +305,7 @@ tFrameworkElement* tFrameworkElement::GetChildElement(const util::tString& name,
 
 const char* tFrameworkElement::GetCName() const
 {
-  return primary.name.Length() == 0 ? "(anonymous)" : primary.name.GetCString();
+  return primary.name.length() == 0 ? "(anonymous)" : primary.name.c_str();
 }
 
 const tFrameworkElement::tLink* tFrameworkElement::GetLink(size_t link_index) const
@@ -390,7 +391,7 @@ const util::tString tFrameworkElement::GetName() const
 {
   if (IsReady() || GetFlag(tCoreFlags::cIS_RUNTIME))
   {
-    return primary.name.Length() == 0 ? "(anonymous)" : primary.name;
+    return primary.name.length() == 0 ? "(anonymous)" : primary.name;
   }
   else
   {
@@ -399,19 +400,19 @@ const util::tString tFrameworkElement::GetName() const
     {
       return "(deleted element)";
     }
-    return primary.name.Length() == 0 ? "(anonymous)" : primary.name;
+    return primary.name.length() == 0 ? "(anonymous)" : primary.name;
   }
 }
 
-void tFrameworkElement::GetNameHelper(util::tStringBuilder& sb, const tLink* l, bool abort_at_link_root)
+void tFrameworkElement::GetNameHelper(util::tString& sb, const tLink* l, bool abort_at_link_root)
 {
   if (l->parent == NULL || (abort_at_link_root && l->GetChild()->GetFlag(tCoreFlags::cALTERNATE_LINK_ROOT)))    // runtime?
   {
     return;
   }
   GetNameHelper(sb, &(l->parent->primary), abort_at_link_root);
-  sb.Append('/');
-  sb.Append(l->name);
+  sb.append("/");
+  sb.append(l->name);
 }
 
 tFrameworkElement* tFrameworkElement::GetParent(int link_index) const
@@ -448,7 +449,7 @@ tFrameworkElement* tFrameworkElement::GetParentWithFlags(uint flags_) const
   return result;
 }
 
-bool tFrameworkElement::GetQualifiedName(util::tStringBuilder& sb, const tLink* start, bool force_full_link) const
+bool tFrameworkElement::GetQualifiedName(util::tString& sb, const tLink* start, bool force_full_link) const
 {
   if (IsReady())
   {
@@ -461,7 +462,7 @@ bool tFrameworkElement::GetQualifiedName(util::tStringBuilder& sb, const tLink* 
   }
 }
 
-bool tFrameworkElement::GetQualifiedNameImpl(util::tStringBuilder& sb, const tLink* start, bool force_full_link) const
+bool tFrameworkElement::GetQualifiedNameImpl(util::tString& sb, const tLink* start, bool force_full_link) const
 {
   size_t length = 0u;
   bool abort_at_link_root = false;
@@ -472,13 +473,16 @@ bool tFrameworkElement::GetQualifiedNameImpl(util::tStringBuilder& sb, const tLi
     {
       break;
     }
-    length += l->name.Length() + 1u;
+    length += l->name.length() + 1u;
   }
-  sb.Delete(0, sb.Length());
-  sb.EnsureCapacity(length);
+  sb.clear();
+  if (sb.capacity() < length)
+  {
+    sb.reserve(length);
+  }
 
   GetNameHelper(sb, start, abort_at_link_root);
-  assert((sb.Length() == length));
+  assert(sb.length() == length);
 
   // remove any characters if buffer is too long
   //      if (len2 < sb.length()) {
@@ -685,7 +689,7 @@ bool tFrameworkElement::NameEquals(const util::tString& other) const
 {
   if (IsReady())
   {
-    return primary.name.Equals(other);
+    return primary.name.compare(other) == 0;
   }
   else
   {
@@ -694,7 +698,7 @@ bool tFrameworkElement::NameEquals(const util::tString& other) const
     {
       return false;
     }
-    return primary.name.Equals(other);
+    return primary.name.compare(other) == 0;
   }
 }
 

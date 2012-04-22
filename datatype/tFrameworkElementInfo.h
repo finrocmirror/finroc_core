@@ -239,7 +239,7 @@ public:
    *
    * (call in runtime-registry synchronized context only)
    */
-  static void SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, tFrameworkElementTreeFilter element_filter, util::tStringBuilder& tmp);
+  static void SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, tFrameworkElementTreeFilter element_filter, std::string& tmp);
 
   virtual const util::tString ToString() const;
 

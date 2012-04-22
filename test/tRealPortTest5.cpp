@@ -50,7 +50,7 @@ std::shared_ptr<tPort<int> > tRealPortTest5::input, tRealPortTest5::output, tRea
 tRuntimeEnvironment* tRealPortTest5::re;
 const int tRealPortTest5::cCYCLES;
 
-void tRealPortTest5::Main(::finroc::util::tArrayWrapper<util::tString>& args)
+void tRealPortTest5::Main()
 {
   // set up
   //RuntimeEnvironment.initialInit(/*new ByteArrayInputStream(new byte[0])*/);
@@ -114,7 +114,7 @@ void tRealPortTest5::TestSimpleEdge()
     result = input->Get();
   }
   int64 time = util::tTime::GetPrecise() - start;
-  FINROC_LOG_PRINT(eLL_USER, util::tLong::ToString(time) + " " + result);
+  FINROC_LOG_PRINT(eLL_USER, time, " ", result);
 }
 
 void tRealPortTest5::TestSimpleEdge2()
@@ -162,7 +162,7 @@ void tRealPortTest5::TestSimpleEdge2()
     input.ReleaseAutoLocks();
   }
   int64 time = util::tTime::GetPrecise() - start;
-  FINROC_LOG_PRINT(eLL_USER, util::tLong::ToString(time) + " " + result);
+  FINROC_LOG_PRINT(eLL_USER, time, " ", result);
 }
 
 void tRealPortTest5::TestSimpleEdgeBB()
@@ -237,7 +237,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
     cbuf.reset();
   }
   int64 time = util::tTime::GetPrecise() - start;
-  FINROC_LOG_PRINT(eLL_USER, util::tLong::ToString(time) + " " + result + " " + size);
+  FINROC_LOG_PRINT(eLL_USER, time, " ", result, " ", size);
   tRuntimeEnvironment::GetInstance()->PrintStructure();
 }
 
@@ -266,10 +266,6 @@ void tRealPortTest5::TestSimpleSet()
 
 int main(int argc__, char **argv__)
 {
-  ::finroc::util::tArrayWrapper< ::finroc::util::tString> sa(argc__ <= 0 ? 0 : (argc__ - 1));
-  for (int i = 1; i < argc__; i++)
-  {
-    sa[i - 1] = ::finroc::util::tString(argv__[i]);
-  }
-  ::finroc::core::tRealPortTest5::Main(sa);
+  ::finroc::core::tRealPortTest5::Main();
+  return 0;
 }

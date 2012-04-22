@@ -74,7 +74,7 @@ public:
     tRuntimeListenerManager listeners;
 
     /*! Temporary buffer - may be used in synchronized context */
-    util::tStringBuilder temp_buffer;
+    std::string temp_buffer;
 
     /*! Alternative roots for links (usually remote runtime environments mapped into this one) */
     util::tSimpleList<tFrameworkElement*> alternative_link_roots;
@@ -171,7 +171,7 @@ public:
    */
   void AddCommandLineArgument(const util::tString& option, const util::tString& value)
   {
-    command_line_args.insert(std::pair<std::string, std::string>(option.GetStdString(), value.GetStdString()));
+    command_line_args.insert(std::pair<std::string, std::string>(option, value));
   }
 
   /*!

@@ -26,7 +26,6 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "core/parameter/tStaticParameterBase.h"
-#include "core/datatype/tCoreString.h"
 #include "core/parameter/tStaticParameterImplStandard.h"
 #include "rrlib/rtti/tDataTypeBase.h"
 
@@ -39,23 +38,23 @@ namespace core
  *
  * String StaticParameter class for convenience
  */
-class tStaticParameterImplString : public tStaticParameterImplStandard<tCoreString>
+class tStaticParameterImplString : public tStaticParameterImplStandard<util::tString>
 {
 public:
 
   tStaticParameterImplString(const util::tString& name, const util::tString& default_value, bool constructor_prototype = false) :
-    tStaticParameterImplStandard<tCoreString>(name, default_value, constructor_prototype)
+    tStaticParameterImplStandard<util::tString>(name, default_value, constructor_prototype)
   {
   }
 
   tStaticParameterImplString(const util::tString& name, bool constructor_prototype = false) :
-    tStaticParameterImplStandard<tCoreString>(name, "", constructor_prototype)
+    tStaticParameterImplStandard<util::tString>(name, "", constructor_prototype)
   {
   }
 
   template <typename T>
   tStaticParameterImplString(const tPortCreationInfo<T>& pci) :
-    tStaticParameterImplStandard<tCoreString>(pci)
+    tStaticParameterImplStandard<util::tString>(pci)
   {
     if (pci.DefaultValueSet())
     {
@@ -69,15 +68,7 @@ public:
    */
   inline std::string Get()
   {
-    return GetValue()->ToString().GetStdString();
-  }
-
-  /*!
-   * \param sb Buffer to store current value in
-   */
-  inline void Get(util::tStringBuilder sb)
-  {
-    GetValue()->Get(sb);
+    return *GetValue();
   }
 
   /*!
@@ -85,7 +76,7 @@ public:
    */
   inline void SetValue(const util::tString& s)
   {
-    GetValue()->Set(s);
+    GetValue()->assign(s);
   }
 
   /*!

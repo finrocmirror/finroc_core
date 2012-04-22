@@ -46,7 +46,7 @@ void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& gro
     {
       start_with = NULL;
     }
-    if (start_with != NULL || (!name.StartsWith(port_prefix)))
+    if (start_with || (!boost::starts_with(name, port_prefix)))
     {
       continue;
     }
@@ -55,7 +55,7 @@ void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& gro
       return;
     }
     count--;
-    name = name.Substring(port_prefix.Length());
+    name = name.substr(port_prefix.length());
 
     // connect-function specific part
     if (op <= 1)

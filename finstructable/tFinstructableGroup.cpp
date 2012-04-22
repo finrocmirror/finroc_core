@@ -38,7 +38,6 @@
 #include "core/plugin/runtime_construction_actions.h"
 #include "core/parameter/tConstructorParameters.h"
 #include "core/tFrameworkElementTreeFilter.h"
-#include "core/datatype/tCoreString.h"
 #include "core/tLinkEdge.h"
 #include "core/parameter/tParameterInfo.h"
 #include "core/parameter/tConfigFile.h"
@@ -92,7 +91,7 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
 
 void tFinstructableGroup::AddDependency(const util::tString& dependency)
 {
-  if (util::tThread::CurrentThreadRaw() == saving_thread && startup_loaded_finroc_libs.find(dependency.GetCString()) == startup_loaded_finroc_libs.end())
+  if (util::tThread::CurrentThreadRaw() == saving_thread && startup_loaded_finroc_libs.find(dependency.c_str()) == startup_loaded_finroc_libs.end())
   {
     dependencies_tmp.insert(dependency);
   }
@@ -103,11 +102,11 @@ void tFinstructableGroup::AddDependency(const rrlib::rtti::tDataTypeBase& dt)
   if (dt.GetUid() >= startup_type_count)
   {
     util::tString tmp(dt.GetBinary());
-    if (tmp.Length() > 0)
+    if (tmp.length() > 0)
     {
-      if (tmp.Contains("/"))
+      if (tmp.find('/') != std::string::npos)
       {
-        tmp = tmp.Substring(tmp.LastIndexOf("/") + 1);
+        tmp = tmp.substr(tmp.rfind('/') + 1);
       }
       AddDependency(tmp);
     }
@@ -117,7 +116,7 @@ void tFinstructableGroup::AddDependency(const rrlib::rtti::tDataTypeBase& dt)
 void tFinstructableGroup::EvaluateStaticParameters()
 {
   util::tLock lock1(this);
-  if (xml_file.HasChanged() && xml_file.Get().Length() > 0)
+  if (xml_file.HasChanged() && xml_file.Get().length() > 0)
   {
     //if (this.childCount() == 0) { // TODO: original intension: changing xml files to mutliple existing ones in finstruct shouldn't load all of them
     if (util::sFiles::FinrocFileExists(xml_file.Get()))
@@ -134,7 +133,7 @@ void tFinstructableGroup::EvaluateStaticParameters()
 
 tAbstractPort* tFinstructableGroup::GetChildPort(const util::tString& link)
 {
-  if (link.StartsWith("/"))
+  if (link[0] == '/')
   {
     return GetRuntime()->GetPort(link);
   }
@@ -148,9 +147,9 @@ tAbstractPort* tFinstructableGroup::GetChildPort(const util::tString& link)
 
 util::tString tFinstructableGroup::GetEdgeLink(const util::tString& target_link)
 {
-  if (target_link.StartsWith(link_tmp))
+  if (boost::starts_with(target_link, link_tmp))
   {
-    return target_link.Substring(link_tmp.Length());
+    return target_link.substr(link_tmp.length());
   }
   return target_link;
 }
@@ -162,7 +161,7 @@ util::tString tFinstructableGroup::GetEdgeLink(tAbstractPort* ap)
   {
     return ap->GetQualifiedLink();
   }
-  return ap->GetQualifiedName().Substring(link_tmp.Length());
+  return ap->GetQualifiedName().substr(link_tmp.length());
 }
 
 void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFrameworkElement* parent)
@@ -186,13 +185,13 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     const rrlib::xml2::tXMLNode* parameters = NULL;
     const rrlib::xml2::tXMLNode* constructor_params = NULL;
     util::tString p_name = child_node->Name();
-    if (p_name.Equals("constructor"))
+    if (boost::equals(p_name, "constructor"))
     {
       constructor_params = &(*child_node);
       ++child_node;
       p_name = child_node->Name();
     }
-    if (p_name.Equals("parameters"))
+    if (boost::equals(p_name, "parameters"))
     {
       parameters = &(*child_node);
       ++child_node;
@@ -218,7 +217,7 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     for (; child_node != node.ChildrenEnd(); ++child_node)
     {
       util::tString name2 = child_node->Name();
-      if (name2.Equals("element"))
+      if (boost::equals(name2, "element"))
       {
         Instantiate(*child_node, created);
       }
@@ -257,7 +256,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
       rrlib::xml2::tXMLDocument doc(util::sFiles::GetFinrocXMLDocument(xml_file_, false));
       rrlib::xml2::tXMLNode& root = doc.RootNode();
       link_tmp = GetQualifiedName() + "/";
-      if (main_name.Length() == 0 && root.HasAttribute("defaultname"))
+      if (main_name.length() == 0 && root.HasAttribute("defaultname"))
       {
         main_name = root.GetStringAttribute("defaultname");
       }
@@ -265,15 +264,16 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
       // load dependencies
       if (root.HasAttribute("dependencies"))
       {
-        std::vector<util::tString> deps = util::tString(root.GetStringAttribute("dependencies")).Split(",");
+        std::vector<util::tString> deps;
+        boost::split(deps, root.GetStringAttribute("dependencies"), boost::is_any_of(","));
         for (size_t i = 0; i < deps.size(); i++)
         {
-          std::string dep = deps[i].Trim().GetCString();
+          std::string dep = boost::trim_copy(deps[i]);
           std::vector<std::string> loadable = sDynamicLoading::GetLoadableFinrocLibraries();
           bool loaded = false;
           for (size_t i = 0; i < loadable.size(); i++)
           {
-            if (loadable[i].compare(dep) == 0)
+            if (boost::equals(loadable[i], dep))
             {
               sDynamicLoading::DLOpen(dep.c_str());
               loaded = true;
@@ -294,16 +294,16 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
       for (rrlib::xml2::tXMLNode::const_iterator node = root.ChildrenBegin(); node != root.ChildrenEnd(); ++node)
       {
         util::tString name = node->Name();
-        if (name.Equals("staticparameter"))
+        if (boost::equals(name, "staticparameter"))
         {
           tStaticParameterList* spl = tStaticParameterList::GetOrCreate(this);
           spl->Add(new tStaticParameterBase(node->GetStringAttribute("name"), rrlib::rtti::tDataTypeBase(), false, true));
         }
-        else if (name.Equals("element"))
+        else if (boost::equals(name, "element"))
         {
           Instantiate(*node, this);
         }
-        else if (name.Equals("edge"))
+        else if (boost::equals(name, "edge"))
         {
           util::tString src = node->GetStringAttribute("src");
           util::tString dest = node->GetStringAttribute("dest");
@@ -326,7 +326,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
             src_port->ConnectToTarget(dest_port, true);
           }
         }
-        else if (name.Equals("parameter"))
+        else if (boost::equals(name, "parameter"))
         {
           util::tString param = node->GetStringAttribute("link");
           tAbstractPort* parameter = GetChildPort(param);
@@ -386,7 +386,7 @@ void tFinstructableGroup::LogException(const std::exception& e)
 
 util::tString tFinstructableGroup::QualifyLink(const util::tString& link)
 {
-  if (link.StartsWith("/"))
+  if (link[0] == '/')
   {
     return link;
   }
@@ -400,9 +400,9 @@ void tFinstructableGroup::SaveXml()
     saving_thread = util::tThread::CurrentThreadRaw();
     dependencies_tmp.clear();
     util::tString save_to = util::sFiles::GetFinrocFileToSaveTo(xml_file.Get());
-    if (save_to.Length() == 0)
+    if (save_to.length() == 0)
     {
-      util::tString save_to_alt = util::sFiles::GetFinrocFileToSaveTo(xml_file.Get().Replace('/', '_'));
+      util::tString save_to_alt = boost::replace_all_copy(util::sFiles::GetFinrocFileToSaveTo(xml_file.Get()), "/", "_");
       FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "There does not seem to be any suitable location for: '", xml_file.Get(), "' . For now, using '", save_to_alt, "'.");
       save_to = save_to_alt;
     }
@@ -413,7 +413,7 @@ void tFinstructableGroup::SaveXml()
       rrlib::xml2::tXMLNode& root = doc.AddRootNode("FinstructableGroup");
 
       // serialize default main name
-      if (main_name.Length() > 0)
+      if (main_name.length() > 0)
       {
         root.SetAttribute("defaultname", main_name);
       }
@@ -504,7 +504,7 @@ void tFinstructableGroup::ScanForCommandLineArgsHelper(std::vector<util::tString
   for (rrlib::xml2::tXMLNode::const_iterator node = parent.ChildrenBegin(); node != parent.ChildrenEnd(); ++node)
   {
     util::tString name(node->Name());
-    if (node->HasAttribute("cmdline") && (name.Equals("staticparameter") || name.Equals("parameter")))
+    if (node->HasAttribute("cmdline") && (boost::equals(name, "staticparameter") || boost::equals(name, "parameter")))
     {
       result.push_back(node->GetStringAttribute("cmdline"));
     }
@@ -527,9 +527,9 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
       n.SetAttribute("name", fe->GetCName());
       tCreateFrameworkElementAction* cma = runtime_construction::GetConstructibleElements()[spl->GetCreateAction()];
       n.SetAttribute("group", cma->GetModuleGroup());
-      if (cma->GetModuleGroup().EndsWith(".so"))
+      if (boost::ends_with(cma->GetModuleGroup(), ".so"))
       {
-        AddDependency(cma->GetModuleGroup().GetStdString());
+        AddDependency(cma->GetModuleGroup());
       }
       n.SetAttribute("type", cma->GetName());
       if (cps != NULL)
@@ -588,7 +588,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
       if (!IsResponsibleForConfigFileConnections(ap))
       {
 
-        if (outermostGroup && info->GetCommandLineOption().Length() > 0)
+        if (outermostGroup && info->GetCommandLineOption().length() > 0)
         {
           rrlib::xml2::tXMLNode& config = root->AddChildNode("parameter");
           config.SetAttribute("link", GetEdgeLink(ap));
@@ -654,7 +654,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
       {
         continue;
       }
-      if (le->GetSourceLink().Length() > 0)
+      if (le->GetSourceLink().length() > 0)
       {
         // save edge
         rrlib::xml2::tXMLNode& edge = root->AddChildNode("edge");

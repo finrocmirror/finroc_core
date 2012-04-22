@@ -247,7 +247,7 @@ public:
           if (cc_push_in->HasChanged())
           {
             cc_push_in->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("ccPushIn received: ") + cc_push_in->Get());
+            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "ccPushIn received: ", cc_push_in->Get());
           }
         }
 
@@ -259,7 +259,7 @@ public:
           if (cc_pull_push_in->HasChanged())
           {
             cc_pull_push_in->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("ccPullPushIn received: ") + cc_pull_push_in->Get());
+            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "ccPullPushIn received: ", cc_pull_push_in->Get());
           }
 
           // do some stuff with push strategy
@@ -273,7 +273,7 @@ public:
           }
           else if (period_idx < 10 && (period_idx % 3) == 0)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("Pulling ccPullPushIn: ") + cc_pull_push_in->Get());
+            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Pulling ccPullPushIn: ", cc_pull_push_in->Get());
           }
         }
 
@@ -284,7 +284,7 @@ public:
             int val = cc_rev_push_in->Get();
             if (val < 0)
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("ccRevPushIn received: ") + val);
+              FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "ccRevPushIn received: ", val);
             }
           }
 
@@ -293,7 +293,7 @@ public:
           if (cc_rev_push_out->HasChanged())
           {
             cc_rev_push_out->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("ccRevPushOut received: ") + cc_rev_push_out->Get());
+            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "ccRevPushOut received: ", cc_rev_push_out->Get());
           }
           if (period_idx == 17)
           {
@@ -338,7 +338,7 @@ public:
           if (std_push_in->HasChanged())
           {
             std_push_in->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("stdPushIn received: ") + std_push_in->GetIntRaw());
+            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "stdPushIn received: ", std_push_in->GetIntRaw());
           }
         }
 
@@ -350,7 +350,7 @@ public:
           if (std_pull_push_in->HasChanged())
           {
             std_pull_push_in->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("stdPullPushIn received: ") + std_pull_push_in->GetIntRaw());
+            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "stdPullPushIn received: ", std_pull_push_in->GetIntRaw());
           }
 
           // do some stuff with push strategy
@@ -364,7 +364,7 @@ public:
           }
           else if (period_idx < 10 && (period_idx % 3) == 0)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("Pulling stdPullPushIn: ") + std_pull_push_in->GetIntRaw());
+            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Pulling stdPullPushIn: ", std_pull_push_in->GetIntRaw());
           }
         }
 
@@ -375,7 +375,7 @@ public:
             int val = std_rev_push_in->GetIntRaw();
             if (val < 0)
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("stdRevPushIn received: ") + val);
+              FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "stdRevPushIn received: ", val);
             }
           }
 
@@ -384,7 +384,7 @@ public:
           if (std_rev_push_out->HasChanged())
           {
             std_rev_push_out->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("stdRevPushOut received: ") + std_rev_push_out->GetIntRaw());
+            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "stdRevPushOut received: ", std_rev_push_out->GetIntRaw());
           }
           if (period_idx == 17)
           {
@@ -456,7 +456,7 @@ public:
             is.Reset(&(bb.Get(0u)));
             if (is.MoreDataAvailable())
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_USER, util::tStringBuilder("Reading Blackboard: ") + is.ReadInt());
+              FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Reading Blackboard: ", is.ReadInt());
             }
             is.Close();
           }

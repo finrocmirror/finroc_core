@@ -70,22 +70,22 @@ void tNumber::Deserialize(rrlib::serialization::tStringInputStream& is)
   // scan for unit
   util::tString s = is.ReadWhile("-.", rrlib::serialization::tStringInputStream::cDIGIT | rrlib::serialization::tStringInputStream::cWHITESPACE | rrlib::serialization::tStringInputStream::cLETTER, true);
   util::tString num = s;
-  for (size_t i = 0u; i < s.Length(); i++)
+  for (size_t i = 0u; i < s.length(); i++)
   {
-    char c = s.CharAt(i);
+    char c = s[i];
     if (isalpha(c))
     {
-      if ((c == 'e' || c == 'E') && (s.Length() > i + 1) && (c == '-' || isdigit(s.CharAt(i + 1))))
+      if ((c == 'e' || c == 'E') && (s.length() > i + 1) && (c == '-' || isdigit(s[i + 1])))
       {
         continue;  // exponent in decimal notation
       }
-      num = s.Substring(0, i).Trim();
-      util::tString unit_string = s.Substring(i).Trim();
+      num = boost::trim_copy(s.substr(0, i));
+      util::tString unit_string = boost::trim_copy(s.substr(i));
       unit = tUnit::GetUnit(unit_string);
       break;
     }
   }
-  if (num.Contains(".") || num.Contains("e") || num.Contains("E"))
+  if (num.find('.') != std::string::npos || num.find('e') != std::string::npos || num.find('E') != std::string::npos)
   {
     try
     {
@@ -181,20 +181,25 @@ void tNumber::SetValue(tConstant* value)
 
 const util::tString tNumber::ToString() const
 {
+  std::ostringstream os;
   switch (num_type)
   {
   case eCONSTANT:
     return constant->ToString();
   case eINT:
-    return util::tStringBuilder(ival) + unit->ToString();
+    os << ival << unit->ToString();
+    break;
   case eFLOAT:
-    return util::tStringBuilder(fval) + unit->ToString();
+    os << fval << unit->ToString();
+    break;
   case eDOUBLE:
-    return util::tStringBuilder(dval) + unit->ToString();
+    os << dval << unit->ToString();
+    break;
 
   default:
     return "Internal Error... shouldn't happen... whatever";
   }
+  return os.str();
 }
 
 bool tNumber::operator<(const tNumber& other) const

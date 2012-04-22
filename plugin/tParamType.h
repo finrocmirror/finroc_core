@@ -101,7 +101,7 @@ struct tParamType<const char*>
   typedef tStaticParameterImplString t;
   static const char* Get(tStaticParameterBase* x)
   {
-    return static_cast<t*>(x)->GetValue()->GetBuffer().GetCString();
+    return static_cast<t*>(x)->GetValue()->c_str();
   }
   static t* Create(const util::tString& name)
   {
@@ -109,19 +109,19 @@ struct tParamType<const char*>
   }
 };
 
-template <>
-struct tParamType<std::string>
-{
-  typedef tStaticParameterImplString t;
-  static std::string Get(tStaticParameterBase* x)
-  {
-    return static_cast<t*>(x)->GetValue()->GetBuffer().GetStdString();
-  }
-  static t* Create(const util::tString& name)
-  {
-    return new t(name, true);
-  }
-};
+//template <>
+//struct tParamType<std::string>
+//{
+//  typedef tStaticParameterImplString t;
+//  static std::string Get(tStaticParameterBase* x)
+//  {
+//    return static_cast<t*>(x)->GetValue();
+//  }
+//  static t* Create(const util::tString& name)
+//  {
+//    return new t(name, true);
+//  }
+//};
 
 template <>
 struct tParamType<util::tString>

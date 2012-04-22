@@ -27,8 +27,6 @@
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/serialization/tMemoryBuffer.h"
 
-#include "core/datatype/tCoreString.h"
-
 #include "core/port/rpc/method/tPortInterface.h"
 #include "core/port/rpc/method/tMethod.h"
 #include "core/port/rpc/method/tVoidMethod.h"
@@ -86,19 +84,19 @@ public:
   static tVoidMethod<tAdminServer, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> cSET_PORT_VALUE;
 
   /*! Get module types */
-  static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer> > cGET_CREATE_MODULE_ACTIONS;
+  static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>> cGET_CREATE_MODULE_ACTIONS;
 
   /*! Create a module */
-  static tVoidMethod<tAdminServer, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > cCREATE_MODULE;
+  static tVoidMethod<tAdminServer, int, tPortDataPtr<std::string>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>> cCREATE_MODULE;
 
   /*! Save finstructable group */
   static tVoidMethod<tAdminServer, int> cSAVE_FINSTRUCTABLE_GROUP;
 
   /*! Get annotation */
-  static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > cGET_ANNOTATION;
+  static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<std::string>> cGET_ANNOTATION;
 
   /*! Set annotation */
-  static tVoidMethod<tAdminServer, int, tPortDataPtr<tCoreString>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer> > cSET_ANNOTATION;
+  static tVoidMethod<tAdminServer, int, tPortDataPtr<std::string>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>> cSET_ANNOTATION;
 
   /*! Delete element */
   static tVoidMethod<tAdminServer, int> cDELETE_ELEMENT;
@@ -113,16 +111,16 @@ public:
   static tMethod<tAdminServer, int, int> cIS_RUNNING;
 
   /*! Get current port value as string */
-  static tMethod<tAdminServer, tPortDataPtr<tCoreString>, int, int, int > cGET_PORT_VALUE_AS_STRING;
+  static tMethod<tAdminServer, tPortDataPtr<std::string>, int, int, int > cGET_PORT_VALUE_AS_STRING;
 
   /*! Get parameter info for specified framework element: ConfigFile, children with config file, info on all parameters with same config file  */
-  static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString> > cGET_PARAMETER_INFO;
+  static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<std::string>> cGET_PARAMETER_INFO;
 
   /*! Get module libraries (.so files) */
   static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>> cGET_MODULE_LIBRARIES;
 
   /*! Load module library (.so file). Returns updated module list (same as GET_CREATE_MODULE_ACTIONS) */
-  static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<tCoreString>> cLOAD_MODULE_LIBRARY;
+  static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<std::string>> cLOAD_MODULE_LIBRARY;
 
   /*! Data Type of method calls to this port */
   static tRPCInterfaceType cDATA_TYPE;
@@ -161,17 +159,17 @@ public:
 
   tPortDataPtr<rrlib::serialization::tMemoryBuffer> HandleCall(const tAbstractMethod& method);
 
-  tPortDataPtr<rrlib::serialization::tMemoryBuffer> HandleCall(const tAbstractMethod& method, int handle, tPortDataPtr<tCoreString>& type);
+  tPortDataPtr<rrlib::serialization::tMemoryBuffer> HandleCall(const tAbstractMethod& method, int handle, tPortDataPtr<std::string>& type);
 
   int HandleCall(const tAbstractMethod& method, int handle);
 
-  tPortDataPtr<tCoreString> HandleCall(const tAbstractMethod& method, int p1, int p2, int p3);
+  tPortDataPtr<std::string> HandleCall(const tAbstractMethod& method, int p1, int p2, int p3);
 
   void HandleVoidCall(const tAbstractMethod& method, int p1, int p2);
 
   void HandleVoidCall(const tAbstractMethod& method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int as_string);
 
-  void HandleVoidCall(const tAbstractMethod& method, int cma_index, tPortDataPtr<tCoreString>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer);
+  void HandleVoidCall(const tAbstractMethod& method, int cma_index, tPortDataPtr<std::string>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer);
 
   void HandleVoidCall(const tAbstractMethod& method, int handle);
 

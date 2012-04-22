@@ -220,7 +220,7 @@ public:
 
   virtual const util::tString ToString() const
   {
-    return util::tStringBuilder("CCPortDataContainer: ") + GetContentString();
+    return std::string("CCPortDataContainer: ") + GetContentString();
   }
 
 };

@@ -139,7 +139,7 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
         rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(dt_name);
         if (dt == NULL)
         {
-          throw util::tRuntimeException(util::tStringBuilder("Type ") + dt_name + " not available", CODE_LOCATION_MACRO);
+          throw util::tRuntimeException(std::string("Type ") + dt_name + " not available", CODE_LOCATION_MACRO);
         }
         bool output = is.ReadBoolean();
         CheckPort(ap, io_vector, flags, name, dt, output, NULL);
@@ -165,7 +165,7 @@ void tPortCreationList::Deserialize(const rrlib::xml2::tXMLNode& node)
     {
       tAbstractPort* ap = i < ports.Size() ? ports.Get(i) : NULL;
       util::tString port_name = port->Name();
-      assert((port_name.Equals("port")));
+      assert(boost::equals(port_name, "port"));
       bool b = false;
       if (show_output_port_selection)
       {
@@ -175,7 +175,7 @@ void tPortCreationList::Deserialize(const rrlib::xml2::tXMLNode& node)
       rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(dt_name);
       if (dt == NULL)
       {
-        throw util::tRuntimeException(util::tStringBuilder("Type ") + dt_name + " not available", CODE_LOCATION_MACRO);
+        throw util::tRuntimeException(std::string("Type ") + dt_name + " not available", CODE_LOCATION_MACRO);
       }
       CheckPort(ap, io_vector, flags, port->GetStringAttribute("name"), dt, b, NULL);
     }

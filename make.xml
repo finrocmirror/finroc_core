@@ -16,7 +16,6 @@
       tRuntimeSettings.cpp
       datatype/tBounds.h
       datatype/tConstant.cpp
-      datatype/tCoreString.cpp
       datatype/tNumber.cpp
       datatype/tUnit.cpp
       port/tAbstractPort.cpp

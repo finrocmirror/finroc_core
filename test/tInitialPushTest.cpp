@@ -33,7 +33,7 @@ namespace finroc
 {
 namespace core
 {
-void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
+void tInitialPushTest::Main()
 {
   // setup and initialize ports
   //ThreadLocalCache.get();
@@ -60,10 +60,10 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   in.ConnectToSource(out);
 
   // print output
-  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumIn (exp 23): ") + n_in.Get());
-  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
+  FINROC_LOG_PRINT(eLL_USER, "NumIn (exp 23): ", n_in.Get());
+  FINROC_LOG_PRINT(eLL_USER, "NumRevOut (exp 23): ", n_rev_out.Get());
   const blackboard::tBlackboardBuffer* bb2 = in.GetAutoLocked();
-  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("StdIn (exp 23): ") + bb2->GetBuffer()->GetInt(0u));
+  FINROC_LOG_PRINT(eLL_USER, "StdIn (exp 23): ", bb2->GetBuffer()->GetInt(0u));
   tThreadLocalCache::GetFast()->ReleaseAllLocks();
 
   // strategy changes...
@@ -71,13 +71,13 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
   n_out.Publish(42);
   //System.out.println("NumIn: " + nIn.getDoubleRaw());
   n_in.SetPushStrategy(true);
-  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumIn (expected 23 - because we have two sources => no push): ") + n_in.Get());
-  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
+  FINROC_LOG_PRINT(eLL_USER, "NumIn (expected 23 - because we have two sources => no push): ", n_in.Get());
+  FINROC_LOG_PRINT(eLL_USER, "NumRevOut (exp 23): ", n_rev_out.Get());
   n_rev_out.SetReversePushStrategy(false);
   n_out.Publish(12);
-  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumRevOut (exp 23): ") + n_rev_out.Get());
+  FINROC_LOG_PRINT(eLL_USER, "NumRevOut (exp 23): ", n_rev_out.Get());
   n_rev_out.SetReversePushStrategy(true);
-  FINROC_LOG_PRINT(eLL_USER, util::tStringBuilder("NumRevOut (exp 12): ") + n_rev_out.Get());
+  FINROC_LOG_PRINT(eLL_USER, "NumRevOut (exp 12): ", n_rev_out.Get());
 
   // now for a complex net
   FINROC_LOG_PRINT(eLL_USER, "\nNow for a complex net...");
@@ -155,10 +155,6 @@ void tInitialPushTest::Main(::finroc::util::tArrayWrapper<util::tString>& args)
 
 int main(int argc__, char **argv__)
 {
-  ::finroc::util::tArrayWrapper< ::finroc::util::tString> sa(argc__ <= 0 ? 0 : (argc__ - 1));
-  for (int i = 1; i < argc__; i++)
-  {
-    sa[i - 1] = ::finroc::util::tString(argv__[i]);
-  }
-  ::finroc::core::tInitialPushTest::Main(sa);
+  ::finroc::core::tInitialPushTest::Main();
+  return 0;
 }

@@ -80,7 +80,7 @@ public:
    * \param ignore_flags These flags are ignored when checking flags
    * \return Is framework element accepted by filter?
    */
-  bool Accept(tFrameworkElement* element, util::tStringBuilder& tmp, int ignore_flags = 0) const;
+  bool Accept(tFrameworkElement* element, std::string& tmp, int ignore_flags = 0) const;
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
@@ -116,7 +116,7 @@ public:
   template <typename T, typename P>
   inline void TraverseElementTree(tFrameworkElement* root, T* callback, const P& custom_param) const
   {
-    util::tStringBuilder sb;
+    std::string sb;
     TraverseElementTree(root, callback, custom_param, sb);
   }
 
@@ -131,7 +131,7 @@ public:
    * \param tmp Temporary StringBuilder buffer
    */
   template <typename T, typename P>
-  inline void TraverseElementTree(tFrameworkElement* root, T* callback, const P& custom_param, util::tStringBuilder& tmp) const
+  inline void TraverseElementTree(tFrameworkElement* root, T* callback, const P& custom_param, std::string& tmp) const
   {
     if (Accept(root, tmp))
     {

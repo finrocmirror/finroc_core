@@ -45,7 +45,7 @@ struct tIsNumeric
 template <typename T>
 struct tIsString
 {
-  enum { value = std::is_same<T, std::string>::value || std::is_same<T, util::tString>::value || std::is_same<T, char*>::value || std::is_same<T, const char*>::value || std::is_same<typename std::remove_extent<T>::type, char>::value || std::is_same<T, util::tStringBuilder>::value };
+  enum { value = std::is_same<T, std::string>::value || std::is_same<T, util::tString>::value || std::is_same<T, char*>::value || std::is_same<T, const char*>::value || std::is_same<typename std::remove_extent<T>::type, char>::value };
 };
 
 }

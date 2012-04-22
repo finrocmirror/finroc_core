@@ -491,116 +491,25 @@ public:
 
 };
 
-template <>
-class tPortUtilBase<std::string, false, false>
-{
-
-public:
-  typedef tPortDataManager tManager;
-  typedef tPortDataManager tManagerTL;
-  typedef tPortBase tPortType;
-  typedef tPortDataPtr<std::string> tDataPtr;
-  typedef tPortDataPtr<const std::string> tConstDataPtr;
-
-  static tDataPtr GetUnusedBuffer(tPortType* port)
-  {
-    tManagerTL* mgr = port->GetUnusedBufferRaw();
-    return tDataPtr(&const_cast<std::string&>(mgr->GetObject()->GetData<tCoreString>()->GetBuffer().GetStdStringRef()), mgr, tPortDataPtrBase::eUNUSED);
-  }
-
-  static tConstDataPtr GetValueWithLock(tPortType* port)
-  {
-    tManager* mgr = port->GetLockedUnsafeRaw();
-    return tConstDataPtr(&mgr->GetObject()->GetData<tCoreString>()->GetBuffer().GetStdStringRef(), mgr);
-  }
-
-  static tConstDataPtr DequeueSingle(tPortType* port)
-  {
-    tManager* mgr = port->DequeueSingleUnsafeRaw();
-    return tConstDataPtr(&mgr->GetObject()->GetData<tCoreString>()->GetBuffer().GetStdStringRef(), mgr);
-  }
-
-  static tConstDataPtr GetPull(tPortType* port, bool intermediate_assign)
-  {
-    tManager* mgr = port->GetPullLockedUnsafe(intermediate_assign, false);
-    return tConstDataPtr(&mgr->GetObject()->GetData<tCoreString>()->GetBuffer().GetStdStringRef(), mgr);
-  }
-
-  static void GetValue(tPortType* port, std::string& result)
-  {
-    tManager* mgr = port->GetLockedUnsafeRaw();
-    result.assign(mgr->GetObject()->GetData<tCoreString>()->GetBuffer().GetStdStringRef().c_str()); // hopefully, this won't destroy our tCoreString buffer (in contras to normal std::string assigment)
-    mgr->ReleaseLock();
-  }
-
-  static bool DequeueSingle(tPortType* port, std::string& result)
-  {
-    tManager* mgr = port->DequeueSingleUnsafeRaw();
-    if (mgr != NULL)
-    {
-      result.assign(mgr->GetObject()->GetData<tCoreString>()->GetBuffer().GetStdStringRef().c_str()); // hopefully, this won't destroy our tCoreString buffer (in contras to normal std::string assigment)
-      mgr->ReleaseLock();
-      return true;
-    }
-    return false;
-  }
-
-  static const std::string* GetAutoLocked(tPortType* port)
-  {
-    return &port->GetAutoLockedRaw()->GetObject()->GetData<tCoreString>()->GetBuffer().GetStdStringRef();
-  }
-
-  static const std::string* DequeueSingleAutoLocked(tPortType* port)
-  {
-    tManager* mgr = port->DequeueSingleAutoLockedRaw();
-    if (mgr == NULL)
-    {
-      return NULL;
-    }
-    rrlib::rtti::tGenericObject* go = mgr->GetObject();
-    return &go->GetData<tCoreString>()->GetBuffer().GetStdStringRef();
-  }
-
-  static void SetDefault(tPortType* port, rrlib::serialization::tInputStream& t)
-  {
-    t >> (*port->GetDefaultBufferRaw()->GetData<tCoreString>());
-  }
-
-  static void Publish(tPortType* port, tConstDataPtr& t)
-  {
-    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
-    t.reset();
-  }
-
-  static void Publish(tPortType* port, tDataPtr& t)
-  {
-    port->Publish(tPortUtilHelper::ResetManager<tManagerTL>(t));
-    t.reset();
-  }
-
-  static void CopyAndPublish(tPortType* port, const std::string& t)
-  {
-    tDataPtr buf = GetUnusedBuffer(port);
-    buf->assign(t.c_str());
-    Publish(port, buf);
-  }
-
-  static const tBounds<std::string> GetBounds(tPortType* port)
-  {
-    assert(false && "Bounds can only be used with CC types");
-    return *((tBounds<std::string>*)NULL); // dummy statement to make compiler happy
-  }
-
-  static void SetBounds(tPortType* port, const tBounds<std::string>& b)
-  {
-    assert(false && "Bounds can only be used with CC types");
-  }
-};
-
 template<typename T>
 class tPortUtil : public tPortUtilBase < T, typeutil::tIsCCType<T>::value, std::is_integral<T>::value || std::is_floating_point<T>::value >
 {
 
+};
+
+template<>
+class tPortUtil<std::string> : public tPortUtilBase < std::string, false, false >
+{
+public:
+  static tDataPtr GetUnusedBuffer(tPortType* port)
+  {
+    tPortDataManager* mgr = port->GetUnusedBufferRaw();
+    if (mgr->GetObject()->GetData<std::string>()->capacity() < tRuntimeSettings::GetDefaultPortStringBufferSize())
+    {
+      FINROC_LOG_PRINTF(rrlib::logging::eLL_WARNING, "A std::string port buffer (from port %s) has lost its capacity. This certainly breaks RT capabilities for smaller strings. Please fix module (sometimes the assignment operator causes stuff like this... use assign with const char* instead).", port->GetQualifiedName().c_str());
+    }
+    return tDataPtr(mgr, tPortDataPtrBase::eUNUSED);
+  }
 };
 
 } // namespace finroc

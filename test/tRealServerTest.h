@@ -42,12 +42,6 @@ public:
 
   tRealServerTest(int stop_cycle);
 
-  inline static void Main(::finroc::util::tArrayWrapper<util::tString>& args)
-  {
-    tRealServerTest rct(args.length == 1 ? util::tInteger::ParseInt(args[0]) : -1);
-    rct.Main();
-  }
-
   void Main();
 
 };

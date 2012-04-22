@@ -411,7 +411,6 @@ extern template class tPort<long long int>;
 extern template class tPort<float>;
 extern template class tPort<double>;
 extern template class tPort<tNumber>;
-extern template class tPort<tCoreString>;
 extern template class tPort<std::string>;
 extern template class tPort<bool>;
 extern template class tPort<rrlib::serialization::tMemoryBuffer>;

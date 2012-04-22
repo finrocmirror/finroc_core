@@ -56,10 +56,11 @@ public:
    * \param default_value default value in string representation
    * \param constructor_prototype Is this a CreateModuleAction prototype (no buffer will be allocated)
    */
-  tStaticParameterImplStandard(const util::tString& name, const util::tString& default_value, bool constructor_prototype = false) :
+  template < bool ENABLE = !std::is_same<util::tString, T>::value >
+  tStaticParameterImplStandard(const util::tString& name, const util::tString& default_value, typename std::enable_if<ENABLE, bool>::type constructor_prototype = false) :
     tStaticParameterBase(name, rrlib::rtti::tDataType<T>(), constructor_prototype)
   {
-    if ((!constructor_prototype) && default_value.Length() > 0)
+    if ((!constructor_prototype) && default_value.length() > 0)
     {
       try
       {
@@ -151,7 +152,8 @@ public:
    *
    * \param new_value New value
    */
-  inline void Set(const T& new_value)
+  template < bool ENABLE = !std::is_same<util::tString, T>::value >
+  inline void Set(const typename std::enable_if<ENABLE, T>::type& new_value)
   {
     SetValue(new_value);
   }

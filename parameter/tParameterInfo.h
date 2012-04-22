@@ -121,7 +121,7 @@ public:
    */
   bool HasNonDefaultFinstructInfo()
   {
-    return (config_entry.Length() > 0 && entry_set_from_finstruct) || command_line_option.Length() > 0 || finstruct_default.Length() > 0;
+    return (config_entry.length() > 0 && entry_set_from_finstruct) || command_line_option.length() > 0 || finstruct_default.length() > 0;
   }
 
   /*!

@@ -69,7 +69,7 @@ void tParameterInfo::Deserialize(rrlib::serialization::tInputStream& is)
   util::tString config_entry_tmp = is.ReadString();
   util::tString command_line_option_tmp = is.ReadString();
   util::tString finstruct_default_tmp = is.ReadString();
-  bool same = config_entry_tmp.Equals(config_entry) && command_line_option_tmp.Equals(command_line_option) && finstruct_default_tmp.Equals(finstruct_default);
+  bool same = boost::equals(config_entry_tmp, config_entry) && boost::equals(command_line_option_tmp, command_line_option) && boost::equals(finstruct_default_tmp, finstruct_default);
   config_entry = config_entry_tmp;
   command_line_option = command_line_option_tmp;
   finstruct_default = finstruct_default_tmp;
@@ -154,10 +154,10 @@ void tParameterInfo::LoadValue(bool ignore_ready)
     if (ann != NULL && (ignore_ready || ann->IsReady()))
     {
       // command line option
-      if (command_line_option.Length() > 0)
+      if (command_line_option.length() > 0)
       {
         util::tString arg = tRuntimeEnvironment::GetInstance()->GetCommandLineArgument(command_line_option);
-        if (arg.Length() > 0)
+        if (arg.length() > 0)
         {
           rrlib::serialization::tStringInputStream sis(arg);
           if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
@@ -201,7 +201,7 @@ void tParameterInfo::LoadValue(bool ignore_ready)
 
       // config file entry
       tConfigFile* cf = tConfigFile::Find(ann);
-      if (cf != NULL && config_entry.Length() > 0)
+      if (cf != NULL && config_entry.length() > 0)
       {
         util::tString full_config_entry = tConfigNode::GetFullConfigEntry(ann, config_entry);
         if (cf->HasEntry(full_config_entry))
@@ -247,7 +247,7 @@ void tParameterInfo::LoadValue(bool ignore_ready)
       }
 
       // finstruct default
-      if (finstruct_default.Length() > 0)
+      if (finstruct_default.length() > 0)
       {
         rrlib::serialization::tStringInputStream sis(finstruct_default);
         if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
@@ -345,18 +345,18 @@ void tParameterInfo::Serialize(rrlib::xml2::tXMLNode& node) const
 void tParameterInfo::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context, bool include_command_line) const
 {
   assert(!(node.HasAttribute("default") || node.HasAttribute("cmdline") || node.HasAttribute("config")));
-  if (config_entry.Length() > 0 && (entry_set_from_finstruct || (!finstruct_context)))
+  if (config_entry.length() > 0 && (entry_set_from_finstruct || (!finstruct_context)))
   {
     node.SetAttribute("config", config_entry);
   }
   if (include_command_line)
   {
-    if (command_line_option.Length() > 0)
+    if (command_line_option.length() > 0)
     {
       node.SetAttribute("cmdline", command_line_option);
     }
   }
-  if (finstruct_default.Length() > 0)
+  if (finstruct_default.length() > 0)
   {
     node.SetAttribute("default", finstruct_default);
   }
@@ -364,7 +364,7 @@ void tParameterInfo::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_conte
 
 void tParameterInfo::SetConfigEntry(const util::tString& config_entry_, bool finstruct_set)
 {
-  if (!this->config_entry.Equals(config_entry_))
+  if (!boost::equals(this->config_entry, config_entry_))
   {
     this->config_entry = config_entry_;
     this->entry_set_from_finstruct = finstruct_set;

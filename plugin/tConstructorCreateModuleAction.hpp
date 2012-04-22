@@ -20,6 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/plugin/tPlugins.h"
+#include <boost/lexical_cast.hpp>
 
 namespace finroc
 {
@@ -44,15 +45,16 @@ tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11,
   group()
 {
   static const util::tString cPARAMETER = "Parameter ";
-  std::vector<util::tString> names_temp = param_names.Split(",");
+  std::vector<util::tString> names_temp;
+  boost::split(names_temp, param_names, boost::is_any_of(","));
   util::tSimpleList<util::tString> names;
   for (size_t i = 0; i < names_temp.size(); i++)
   {
-    names.Add(names_temp[i].Trim());
+    names.Add(boost::trim_copy(names_temp[i]));
   }
   while (names.Size() < 12)
   {
-    names.Add(cPARAMETER + names.Size());
+    names.Add(cPARAMETER + boost::lexical_cast<std::string>(names.Size()));
   }
 
   p1 = SP1::Create(names.Get(0));

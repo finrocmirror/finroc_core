@@ -63,6 +63,14 @@ protected:
 public:
 
   /*!
+   * \return Default size of string buffers received from ports
+   */
+  inline static size_t GetDefaultPortStringBufferSize()
+  {
+    return 512;
+  }
+
+  /*!
    * \return Singleton instance
    */
   static tRuntimeSettings* GetInstance();

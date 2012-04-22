@@ -62,7 +62,6 @@ extern template class tParameter<long long int>;
 extern template class tParameter<float>;
 extern template class tParameter<double>;
 extern template class tParameter<tNumber>;
-extern template class tParameter<tCoreString>;
 extern template class tParameter<std::string>;
 extern template class tParameter<bool>;
 extern template class tParameter<rrlib::serialization::tMemoryBuffer>;

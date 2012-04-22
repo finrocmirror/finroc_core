@@ -22,7 +22,6 @@
 #include "core/tRuntimeEnvironment.h"
 #include "core/port/std/tPortDataManager.h"
 #include "core/datatype/tNumber.h"
-#include "core/datatype/tCoreString.h"
 #include "core/port/std/tPortBase.h"
 #include "core/port/cc/tCCPortBase.h"
 #include <bitset>
@@ -57,7 +56,6 @@ int main(int argc__, char **argv__)
 
   printf(" sizeof(tPortDataManager): %zd\n", sizeof(finroc::core::tPortDataManager));
   printf(" sizeof(tNumber): %zd\n", sizeof(finroc::core::tNumber));
-  printf(" sizeof(tCoreString): %zd\n", sizeof(finroc::core::tCoreString));
   printf(" sizeof(tSafeConcurrentlyIterableList<void*, finroc::util::tNoMutex>): %zd\n", sizeof(finroc::util::tSafeConcurrentlyIterableList<void*, finroc::util::tNoMutex>));
   printf(" sizeof(tSafeConcurrentlyIterableList<void*, finroc::util::tMutexLockOrder>): %zd\n", sizeof(finroc::util::tSafeConcurrentlyIterableList<void*, finroc::util::tMutexLockOrder>));
   printf(" sizeof(tArrayWrapper<void*>): %zd\n", sizeof(finroc::util::tArrayWrapper<void*>));

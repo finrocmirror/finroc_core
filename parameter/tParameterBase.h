@@ -62,7 +62,7 @@ public:
    */
   inline void SetConfigEntry(const util::tString& config_entry)
   {
-    if (config_entry.Length() > 0)
+    if (config_entry.length() > 0)
     {
       tParameterInfo* info = static_cast<tParameterInfo*>(this->wrapped->GetAnnotation(tParameterInfo::cTYPE));
       info->SetConfigEntry(config_entry);
@@ -83,7 +83,6 @@ extern template class tParameterBase<long long int>;
 extern template class tParameterBase<float>;
 extern template class tParameterBase<double>;
 extern template class tParameterBase<tNumber>;
-extern template class tParameterBase<tCoreString>;
 extern template class tParameterBase<std::string>;
 extern template class tParameterBase<bool>;
 extern template class tParameterBase<rrlib::serialization::tMemoryBuffer>;

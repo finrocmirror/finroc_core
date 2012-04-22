@@ -191,7 +191,7 @@ protected:
     if (internal::tIsString<A1>::value)
     {
       result = tPortCreationInfo<T>(arg1, rest...);
-      if (result.name.Length() == 0)
+      if (result.name.length() == 0)
       {
         result.name = this->GetPortName();
       }

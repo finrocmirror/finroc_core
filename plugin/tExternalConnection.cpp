@@ -44,7 +44,7 @@ void tExternalConnection::Connect(const util::tString& address)
 {
   util::tLock lock1(this);
 
-  ConnectImpl(address, (!first_connect) && address.Equals(last_address));
+  ConnectImpl(address, (!first_connect) && boost::equals(address, last_address));
   PostConnect(address);
 }
 
@@ -66,9 +66,9 @@ void tExternalConnection::Disconnect()
 void tExternalConnection::EvaluateStaticParameters()
 {
   util::tString s = auto_connect_to.Get();
-  if (s.Length() > 0)
+  if (s.length() > 0)
   {
-    if (!s.Equals(last_address))
+    if (!boost::equals(s, last_address))
     {
       if (IsConnected())
       {

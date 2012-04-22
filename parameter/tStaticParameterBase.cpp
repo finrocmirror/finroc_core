@@ -228,11 +228,11 @@ void tStaticParameterBase::LoadValue()
   {
     // command line
     tFrameworkElement* fg = parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
-    if (command_line_option.Length() > 0 && (fg == NULL || fg->GetParent() == tRuntimeEnvironment::GetInstance()))
+    if (command_line_option.length() > 0 && (fg == NULL || fg->GetParent() == tRuntimeEnvironment::GetInstance()))
     {
       // outermost group?
       util::tString arg = tRuntimeEnvironment::GetInstance()->GetCommandLineArgument(command_line_option);
-      if (arg.Length() > 0)
+      if (arg.length() > 0)
       {
         try
         {
@@ -247,7 +247,7 @@ void tStaticParameterBase::LoadValue()
     }
 
     // config entry
-    if (config_entry.Length() > 0)
+    if (config_entry.length() > 0)
     {
       if (config_entry_set_by_finstruct)
       {
@@ -327,15 +327,15 @@ void tStaticParameterBase::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct
   }
   val->Serialize(node);
 
-  if (command_line_option.Length() > 0)
+  if (command_line_option.length() > 0)
   {
     node.SetAttribute("cmdline", command_line_option);
   }
-  if (outer_parameter_attachment.Length() > 0)
+  if (outer_parameter_attachment.length() > 0)
   {
     node.SetAttribute("attachouter", outer_parameter_attachment);
   }
-  if (config_entry.Length() > 0 && (config_entry_set_by_finstruct || (!finstruct_context)))
+  if (config_entry.length() > 0 && (config_entry_set_by_finstruct || (!finstruct_context)))
   {
     node.SetAttribute("config", config_entry);
   }
@@ -365,7 +365,7 @@ void tStaticParameterBase::Set(const util::tString& s)
 void tStaticParameterBase::SetConfigEntry(const util::tString& config_entry)
 {
   config_entry_set_by_finstruct = false;
-  if (!config_entry.Equals(this->config_entry))
+  if (!boost::equals(config_entry, this->config_entry))
   {
     this->config_entry = config_entry;
     if (GetParentList() && GetParentList()->GetAnnotated() && GetParentList()->GetAnnotated()->IsReady())
@@ -385,8 +385,8 @@ void tStaticParameterBase::SetOuterParameterAttachment(const util::tString& oute
 
 void tStaticParameterBase::UpdateAndPossiblyLoad(const util::tString& command_line_option_tmp, const util::tString& config_entry_tmp)
 {
-  bool cmdline_changed = !command_line_option.Equals(command_line_option_tmp);
-  bool config_entry_changed = !config_entry.Equals(config_entry_tmp);
+  bool cmdline_changed = !boost::equals(command_line_option, command_line_option_tmp);
+  bool config_entry_changed = !boost::equals(config_entry, config_entry_tmp);
   command_line_option = command_line_option_tmp;
   config_entry = config_entry_tmp;
 
@@ -402,7 +402,7 @@ void tStaticParameterBase::UpdateOuterParameterAttachment()
   {
     return;
   }
-  if (outer_parameter_attachment.Length() == 0)
+  if (outer_parameter_attachment.length() == 0)
   {
     if (use_value_of != this)
     {
@@ -412,7 +412,7 @@ void tStaticParameterBase::UpdateOuterParameterAttachment()
   else
   {
     tStaticParameterBase* sp = GetParameterWithBuffer();
-    if ((!sp->GetName().Equals(outer_parameter_attachment)) || (sp == this))
+    if ((!boost::equals(sp->GetName(), outer_parameter_attachment)) || (sp == this))
     {
 
       // find parameter to attach to
@@ -427,7 +427,7 @@ void tStaticParameterBase::UpdateOuterParameterAttachment()
       for (size_t i = 0; i < spl->Size(); i++)
       {
         sp = spl->Get(i);
-        if (sp->GetName().Equals(outer_parameter_attachment))
+        if (boost::equals(sp->GetName(), outer_parameter_attachment))
         {
           AttachTo(sp);
           return;

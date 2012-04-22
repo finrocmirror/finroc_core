@@ -81,7 +81,7 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
   util::tString file = is.ReadString();
   util::tString content = is.ReadString();
 
-  if (active && file.Length() > 0 && content.Length() == 0 && (!file.Equals(filename)))
+  if (active && file.length() > 0 && content.length() == 0 && (!boost::equals(file, filename)))
   {
     // load file
     if (util::sFiles::FinrocFileExists(file))
@@ -106,16 +106,16 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
     }
     filename = file;
   }
-  else if (active && content.Length() > 0)
+  else if (active && content.length() > 0)
   {
-    if (file.Length() > 0)
+    if (file.length() > 0)
     {
       filename = file;
     }
 
     try
     {
-      wrapped = rrlib::xml2::tXMLDocument(content.GetCString(), content.Length() + 1);
+      wrapped = rrlib::xml2::tXMLDocument(content.c_str(), content.length() + 1);
     }
     catch (const util::tException& e)
     {
@@ -141,22 +141,28 @@ tConfigFile* tConfigFile::Find(const tFrameworkElement* element)
 
 rrlib::xml2::tXMLNode& tConfigFile::GetEntry(const util::tString& entry, bool create)
 {
-  util::tSimpleList<util::tString> nodes;
-  nodes.AddAll(entry.Split(cSEPARATOR));
-  size_t idx = 0u;
+  std::vector<std::string> nodes;
+  boost::split(nodes, entry, boost::is_any_of(cSEPARATOR));
+  size_t idx = (nodes.size() > 0 && nodes[0].length() == 0) ? 1 : 0; // if entry starts with '/', skip first empty string
   rrlib::xml2::tXMLNode::iterator current = &wrapped.RootNode();
   rrlib::xml2::tXMLNode::iterator parent = current;
   bool created = false;
-  while (idx < nodes.Size())
+  while (idx < nodes.size())
   {
+    if (nodes[idx].length() == 0)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Entry '", entry, "' is not clean. Skipping empty string now, but please fix this!");
+      idx++;
+      continue;
+    }
     bool found = false;
     for (rrlib::xml2::tXMLNode::iterator child = current->ChildrenBegin(); child != current->ChildrenEnd(); ++child)
     {
-      if (cXML_BRANCH_NAME.Equals(child->Name()) || cXML_LEAF_NAME.Equals(child->Name()))
+      if (boost::equals(cXML_BRANCH_NAME, child->Name()) || boost::equals(cXML_LEAF_NAME, child->Name()))
       {
         try
         {
-          if (nodes.Get(idx).Equals(child->GetStringAttribute("name")))
+          if (boost::equals(nodes[idx], child->GetStringAttribute("name")))
           {
             idx++;
             parent = current;
@@ -176,20 +182,18 @@ rrlib::xml2::tXMLNode& tConfigFile::GetEntry(const util::tString& entry, bool cr
       if (create)
       {
         parent = current;
-        current = &(current->AddChildNode((idx == nodes.Size() - 1) ? cXML_LEAF_NAME : cXML_BRANCH_NAME));
+        current = &(current->AddChildNode((idx == nodes.size() - 1) ? cXML_LEAF_NAME : cXML_BRANCH_NAME));
         created = true;
-        current->SetAttribute("name", nodes.Get(idx));
+        current->SetAttribute("name", nodes[idx]);
         idx++;
       }
       else
       {
-
-
         throw util::tRuntimeException(util::tString("Node not found: ") + entry, CODE_LOCATION_MACRO);
       }
     }
   }
-  if (!cXML_LEAF_NAME.Equals(current->Name()))
+  if (!boost::equals(cXML_LEAF_NAME, current->Name()))
   {
     throw util::tRuntimeException("Node no leaf", CODE_LOCATION_MACRO);
   }
@@ -199,7 +203,7 @@ rrlib::xml2::tXMLNode& tConfigFile::GetEntry(const util::tString& entry, bool cr
   {
     parent->RemoveChildNode(*current);
     current = &(parent->AddChildNode(cXML_LEAF_NAME));
-    current->SetAttribute("name", nodes.Get(nodes.Size() - 1));
+    current->SetAttribute("name", nodes[nodes.size() - 1]);
   }
 
   return *current;
@@ -226,39 +230,15 @@ util::tString tConfigFile::GetStringEntry(const util::tString& entry)
 
 bool tConfigFile::HasEntry(const util::tString& entry)
 {
-  util::tSimpleList<util::tString> nodes;
-  nodes.AddAll(entry.Split(cSEPARATOR));
-  size_t idx = 0u;
-  rrlib::xml2::tXMLNode::const_iterator current = &wrapped.RootNode();
-  while (idx < nodes.Size())
+  try
   {
-    bool found = false;
-    for (rrlib::xml2::tXMLNode::const_iterator child = current->ChildrenBegin(); child != current->ChildrenEnd(); ++child)
-    {
-      if (cXML_BRANCH_NAME.Equals(child->Name()) || cXML_LEAF_NAME.Equals(child->Name()))
-      {
-        try
-        {
-          if (nodes.Get(idx).Equals(child->GetStringAttribute("name")))
-          {
-            idx++;
-            current = child;
-            found = true;
-            break;
-          }
-        }
-        catch (const rrlib::xml2::tXML2WrapperException& e)
-        {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "tree node without name");
-        }
-      }
-    }
-    if (!found)
-    {
-      return false;
-    }
+    GetEntry(entry, false);
   }
-  return cXML_LEAF_NAME.Equals(current->Name());
+  catch (const util::tRuntimeException& e)
+  {
+    return false;
+  }
+  return true;
 }
 
 void tConfigFile::LoadParameterValues()
@@ -290,9 +270,9 @@ void tConfigFile::SaveFile()
   try
   {
     util::tString save_to = util::sFiles::GetFinrocFileToSaveTo(filename);
-    if (save_to.Length() == 0)
+    if (save_to.length() == 0)
     {
-      util::tString save_to_alt = util::sFiles::GetFinrocFileToSaveTo(filename.Replace('/', '_'));
+      util::tString save_to_alt = util::sFiles::GetFinrocFileToSaveTo(boost::replace_all_copy(filename, "/", "_"));
       FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "There does not seem to be any suitable location for: '", filename, "' . For now, using '", save_to_alt, "'.");
       save_to = save_to_alt;
     }
