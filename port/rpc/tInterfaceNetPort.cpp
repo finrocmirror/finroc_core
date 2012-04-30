@@ -53,7 +53,7 @@ void tInterfaceNetPort::ExecuteNetworkForward(tMethodCall::tPtr& mc, tInterfaceN
   }
   catch (const tMethodCallException& e)
   {
-    mc->SetExceptionStatus(e.GetTypeId());
+    mc->SetExceptionStatus(e.GetType());
   }
   SendSyncCallReturn(mc);
 }
@@ -82,7 +82,7 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall::tPtr& mc)
     {
       if (m->IsVoidMethod())
       {
-        mc->SetExceptionStatus(tMethodCallException::eNO_CONNECTION);
+        mc->SetExceptionStatus(tMethodCallException::tType::NO_CONNECTION);
         SendSyncCallReturn(mc);
       }
     }
@@ -108,7 +108,7 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall::tPtr& mc)
   {
     if (!m->IsVoidMethod())
     {
-      mc->SetExceptionStatus(tMethodCallException::eNO_CONNECTION);
+      mc->SetExceptionStatus(tMethodCallException::tType::NO_CONNECTION);
       SendSyncCallReturn(mc);
     }
   }

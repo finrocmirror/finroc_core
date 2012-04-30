@@ -38,7 +38,10 @@ class tMethodCallException : public util::tException
 {
 public:
 
-  enum tType { eTIMEOUT, eNO_CONNECTION, eUNKNOWN_METHOD, eINVALID_PARAM, ePROGRAMMING_ERROR };
+  enum class tType
+  {
+    NONE, TIMEOUT, NO_CONNECTION, UNKNOWN_METHOD, INVALID_PARAM, PROGRAMMING_ERROR
+  };
 
 private:
 
@@ -46,23 +49,20 @@ private:
 
 public:
 
-  tMethodCallException(int type_, const char* func = NULL, const char* file = NULL, const int line = -1) : tException("", func, file, line), type(static_cast<tType>(type_)) {}
+  tMethodCallException(tType type, const char* func = NULL, const char* file = NULL, const int line = -1) :
+    tException("", func, file, line),
+    type(type)
+  {}
 
   inline tMethodCallException::tType GetType() const
   {
     return type;
   }
 
-  inline int8 GetTypeId() const
-  {
-    return static_cast<int8>(type);
-  }
-
   virtual const char* what() const throw()
   {
-    return (*make_builder::GetEnumStrings<tType>())[type];
+    return make_builder::GetEnumString(type);
   }
-
 };
 
 } // namespace finroc

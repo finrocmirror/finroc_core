@@ -39,6 +39,7 @@ const int tNetPort::cPULL_TIMEOUT;
 
 tNetPort::tNetPort(tPortCreationInfoBase pci, util::tObject* belongs_to_) :
   wrapped(NULL),
+  encoding(rrlib::serialization::tDataEncoding::BINARY),
   belongs_to(belongs_to_),
   remote_handle(0),
   ftype(tFinrocTypeInfo::Get(pci.data_type).GetType()),
@@ -138,13 +139,14 @@ void tNetPort::PropagateStrategyFromTheNet(int16 strategy)
 void tNetPort::ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int64 timestamp, int8 changed_flag)
 {
   assert((GetPort()->IsReady()));
+  rrlib::serialization::tDataEncoding enc = ci.ReadEnum<rrlib::serialization::tDataEncoding>();
   if (IsStdType() || IsTransactionType())
   {
     tStdNetPort* pb = static_cast<tStdNetPort*>(wrapped);
     ci.SetFactory(this);
     do
     {
-      pb->PublishFromNet(static_cast<tPortDataManager*>(rrlib::rtti::ReadObject(ci, wrapped->GetDataType(), NULL)->GetManager()), changed_flag);
+      pb->PublishFromNet(static_cast<tPortDataManager*>(rrlib::rtti::ReadObject(ci, NULL, enc)->GetManager()), changed_flag);
     }
     while (ci.ReadBoolean());
     ci.SetFactory(NULL);
@@ -154,7 +156,7 @@ void tNetPort::ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int
     tCCNetPort* pb = static_cast<tCCNetPort*>(wrapped);
     do
     {
-      pb->PublishFromNet(static_cast<tCCPortDataManagerTL*>(rrlib::rtti::ReadObject(ci, wrapped->GetDataType(), NULL)->GetManager()), changed_flag);
+      pb->PublishFromNet(static_cast<tCCPortDataManagerTL*>(rrlib::rtti::ReadObject(ci, NULL, enc)->GetManager()), changed_flag);
     }
     while (ci.ReadBoolean());
   }
@@ -190,13 +192,14 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
 {
   bool use_q = wrapped->GetFlag(tPortFlags::cUSES_QUEUE);
   bool first = true;
+  co.WriteEnum(encoding);
   if (IsStdType() || IsTransactionType())
   {
     tStdNetPort* pb = static_cast<tStdNetPort*>(wrapped);
     if (!use_q)
     {
       tPortDataManager* pd = pb->GetLockedUnsafeRaw(true);
-      rrlib::rtti::WriteObject(co, pd->GetObject());
+      rrlib::rtti::WriteObject(co, pd->GetObject(), encoding);
       pd->ReleaseLock();
     }
     else
@@ -211,7 +214,7 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
           co.WriteBoolean(true);
         }
         first = false;
-        rrlib::rtti::WriteObject(co, pd->GetManager()->GetObject());
+        rrlib::rtti::WriteObject(co, pd->GetManager()->GetObject(), encoding);
         pd->GetManager()->ReleaseLock();
       }
     }
@@ -222,7 +225,7 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
     if (!use_q)
     {
       tCCPortDataManager* ccitc = pb->GetInInterThreadContainer(true);
-      rrlib::rtti::WriteObject(co, ccitc->GetObject());
+      rrlib::rtti::WriteObject(co, ccitc->GetObject(), encoding);
       ccitc->Recycle2();
     }
     else
@@ -237,7 +240,7 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
           co.WriteBoolean(true);
         }
         first = false;
-        rrlib::rtti::WriteObject(co, pd->GetObject());
+        rrlib::rtti::WriteObject(co, pd->GetObject(), encoding);
         pd->Recycle2();
       }
     }
@@ -344,18 +347,16 @@ void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataManagerTL* read_object, int
   }
 }
 
-bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer)
+bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer, bool intermediateAssign)
 {
   tPullCall::tPtr pc(tThreadLocalRPCData::Get().GetUnusedPullCall());
-  pc->SetRemotePortHandle(outer_class_ptr->remote_handle);
+  pc->SetupPullCall(outer_class_ptr->remote_handle, intermediateAssign, outer_class_ptr->encoding);
   //          pc.setLocalPortHandle(getHandle());
   try
   {
     tSynchMethodCallLogic::PerformSynchCall(pc, *this, cPULL_TIMEOUT);
-    assert(!pc->HasException());
-    tPortDataPtr<rrlib::rtti::tGenericObject> o = pc->GetParamGeneric(0);
-    tCCPortDataManager* c = static_cast<tCCPortDataManager*>(o->GetManager());
-    result_buffer->GetObject()->DeepCopyFrom(c->GetObject(), NULL);
+    assert((!pc->HasException()) && pc->GetPulledBuffer());
+    result_buffer->GetObject()->DeepCopyFrom(pc->GetPulledBuffer(), NULL);
   }
   catch (const tMethodCallException& e)
   {
@@ -440,20 +441,20 @@ void tNetPort::tStdNetPort::PublishFromNet(tPortDataManager* read_object, int8 c
   ::finroc::core::tPortBase::Publish(read_object, !IsOutputPort(), changed_flag);
 }
 
-const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, int8 add_locks)
+const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, int8 add_locks, bool intermediateAssign)
 {
   assert((add_locks > 0));
   tPullCall::tPtr pc = tThreadLocalRPCData::Get().GetUnusedPullCall();
-  pc->SetRemotePortHandle(outer_class_ptr->remote_handle);
+  pc->SetupPullCall(outer_class_ptr->remote_handle, intermediateAssign, outer_class_ptr->encoding);
   //          pc.setLocalPortHandle(getHandle());
   try
   {
     tSynchMethodCallLogic::PerformSynchCall(pc, *this, cPULL_TIMEOUT);
-    assert(!pc->HasException());
-    tPortDataPtr<rrlib::rtti::tGenericObject> o = pc->GetParamGeneric(0);
-    tPortDataManager* pd = static_cast<tPortDataManager*>(o->GetManager());
-    int locks = 0;  // Java: we already have one lock
-    pd->GetCurrentRefCounter()->AddLocks(static_cast<int8>((add_locks - locks)));
+    assert((!pc->HasException()) && pc->GetPulledBuffer());
+    rrlib::rtti::tGenericObject* go = pc->GetPulledBuffer();
+    tPortDataManager* pd = static_cast<tPortDataManager*>(go->GetManager());
+    assert(pd->IsLocked());
+    pd->GetCurrentRefCounter()->AddLocks(static_cast<int8_t>(add_locks));
     return pd;
   }
   catch (const tMethodCallException& e)

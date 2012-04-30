@@ -24,7 +24,7 @@
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/tCoreRegister.h"
 #include "core/port/tPortFlags.h"
-#include "core/port/cc/tCCPullRequestHandler.h"
+#include "core/port/cc/tCCPullRequestHandlerRaw.h"
 
 namespace finroc
 {
@@ -253,7 +253,7 @@ void tCCPortBase::PullValueRawImpl(tThreadLocalCache* tc, bool intermediate_assi
   if ((!first) && pull_request_handler != NULL)    // for network port pulling it's good if pullRequestHandler is not called on first port - and there aren't any scenarios where this would make sense
   {
     tCCPortDataManagerTL* res_buf = tc->GetUnusedBuffer(this->data_type);
-    if (pull_request_handler->PullRequest(this, res_buf))
+    if (pull_request_handler->PullRequest(this, res_buf, intermediate_assign))
     {
       tc->data = res_buf;
       tc->data->SetRefCounter(1);  // one lock for caller
@@ -295,7 +295,7 @@ void tCCPortBase::SetMaxQueueLengthImpl(int length)
   queue->SetMaxLength(length);
 }
 
-void tCCPortBase::SetPullRequestHandler(tCCPullRequestHandler* pull_request_handler_)
+void tCCPortBase::SetPullRequestHandler(tCCPullRequestHandlerRaw* pull_request_handler_)
 {
   if (pull_request_handler_ != NULL)
   {

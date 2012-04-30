@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -79,6 +79,12 @@ private:
   /*! Needed when executed as a task with synch forward over the net - Port from which call originates */
   tInterfaceNetPort* source_net_port;
 
+  /*! Maximum number of parameters */
+  static const size_t cMAX_PARAMS = 4u;
+
+  /*! Storage for parameters that are used in call - for usage in local runtime (fixed size, since this is smaller & less hassle than dynamic array) */
+  tCallParameter params[cMAX_PARAMS];
+
   /*!
    * Sanity check for method and portInterfaceType.
    *
@@ -95,12 +101,26 @@ protected:
 
   void Recycle();
 
+  void SetParametersHelper(int arg_no) {}
+
+  template <typename Arg, typename ... TArgs>
+  void SetParametersHelper(int arg_no, Arg& arg, const TArgs&... args)
+  {
+    SetParameter(arg_no, arg);
+    SetParametersHelper(arg_no + 1, args...);
+  }
+
 public:
 
   typedef std::unique_ptr<tMethodCall, tRecycler> tPtr;
 
   /*! (Typically not instantiated directly - possible though) */
   tMethodCall();
+
+  virtual void CustomDelete(bool b)
+  {
+    tReusable::CustomDelete(b);
+  }
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
@@ -134,6 +154,14 @@ public:
   {
     return net_timeout;
   }
+
+  template <typename T>
+  void GetParam(int index, T& pd)
+  {
+    tParameterUtil<T>::GetParam(&(params[index]), pd);
+  }
+
+  tPortDataPtr<rrlib::rtti::tGenericObject> GetParamGeneric(int index);
 
   /*!
    * \return Data type of interface that method belongs to
@@ -191,7 +219,18 @@ public:
    */
   void PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, int net_timeout_);
 
+  /*!
+   * Recycle all parameters, but keep empty method call
+   */
+  void RecycleParameters();
+
   virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;
+
+  virtual void SetExceptionStatus(tMethodCallException::tType type)
+  {
+    RecycleParameters();
+    tAbstractCall::SetExceptionStatus(type);
+  }
 
   /*!
    * \param m The Method that will be called (may not be changed - to avoid ugly programming errors)
@@ -199,11 +238,23 @@ public:
    */
   void SetMethod(tAbstractMethod* m, const rrlib::rtti::tDataTypeBase& port_interface);
 
-  virtual void CustomDelete(bool b)
+  /*!
+   * Set Parameter with specified in index to specified value
+   */
+  template <typename T>
+  void SetParameter(int index, T& pd)
   {
-    tReusable::CustomDelete(b);
+    tParameterUtil<T>::AddParam(&(params[index]), pd);
   }
 
+  /*!
+   * Set Parameters to specified values
+   */
+  template <typename ... TArgs>
+  void SetParameters(TArgs&... args)
+  {
+    SetParametersHelper(0, args...);
+  }
 };
 
 } // namespace finroc

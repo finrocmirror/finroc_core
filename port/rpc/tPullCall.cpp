@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -36,18 +36,22 @@ namespace core
 tPullCall::tPullCall() :
   tAbstractCall(),
   intermediate_assign(false),
-  cc_pull(false),
   port(NULL),
-  return_to(NULL)
+  return_to(NULL),
+  desired_encoding(rrlib::serialization::tDataEncoding::BINARY),
+  pulled_buffer()
 {
-  Reset();
 }
 
 void tPullCall::Deserialize(rrlib::serialization::tInputStream& is)
 {
-  ::finroc::core::tAbstractCall::Deserialize(is);
+  tAbstractCall::Deserialize(is);
   intermediate_assign = is.ReadBoolean();
-  cc_pull = is.ReadBoolean();
+  is >> desired_encoding;
+  if (IsReturning(false))
+  {
+    pulled_buffer = tCallParameter::Lock(rrlib::rtti::ReadObject(is, this, desired_encoding));
+  }
 }
 
 void tPullCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
@@ -61,16 +65,13 @@ void tPullCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
       FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "pull call received for port that will soon be deleted");
       return;
     }
+    assert(!pulled_buffer);
 
     if (tFinrocTypeInfo::IsCCType(port->GetDataType()))
     {
       tCCPortBase* cp = static_cast<tCCPortBase*>(port);
       tCCPortDataManager* cpd = cp->GetPullInInterthreadContainerRaw(true, true);
-      RecycleParameters();
-
-      tPortDataPtr<rrlib::rtti::tGenericObject> tmp(cpd->GetObject(), cpd);
-      SetParameter(0, tmp);
-
+      pulled_buffer = tPortDataPtr<rrlib::rtti::tGenericObject>(cpd);
       SetStatusReturn();
       return_to->InvokeCall(self2);
     }
@@ -78,11 +79,7 @@ void tPullCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
     {
       tPortBase* p = static_cast<tPortBase*>(port);
       tPortDataManager* pd = p->GetPullLockedUnsafe(true, true);
-      RecycleParameters();
-
-      tPortDataPtr<rrlib::rtti::tGenericObject> tmp(pd->GetObject(), pd);
-      SetParameter(0, tmp);
-
+      pulled_buffer = tPortDataPtr<rrlib::rtti::tGenericObject>(pd);
       SetStatusReturn();
       return_to->InvokeCall(self2);
     }
@@ -94,11 +91,25 @@ void tPullCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
   }
 }
 
+void tPullCall::Recycle()
+{
+  intermediate_assign = false;
+  port = NULL;
+  return_to = NULL;
+  desired_encoding = rrlib::serialization::tDataEncoding::BINARY;
+  pulled_buffer.reset();
+  tAbstractCall::Recycle();
+}
+
 void tPullCall::Serialize(rrlib::serialization::tOutputStream& oos) const
 {
-  finroc::core::tAbstractCall::Serialize(oos);
+  tAbstractCall::Serialize(oos);
   oos.WriteBoolean(intermediate_assign);
-  oos.WriteBoolean(cc_pull);
+  oos << desired_encoding;
+  if (IsReturning(false))
+  {
+    rrlib::rtti::WriteObject(oos, pulled_buffer.get(), desired_encoding);
+  }
 }
 
 const util::tString tPullCall::ToString() const

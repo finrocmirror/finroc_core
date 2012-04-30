@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -20,24 +20,22 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef core__port__std__tPullRequestHandler_h__
-#define core__port__std__tPullRequestHandler_h__
-
-#include "rrlib/finroc_core_utils/definitions.h"
+#ifndef core__port__cc__tCCPullRequestHandlerRaw_h__
+#define core__port__cc__tCCPullRequestHandlerRaw_h__
 
 namespace finroc
 {
 namespace core
 {
-class tPortBase;
-class tPortDataManager;
+class tCCPortBase;
+class tCCPortDataManagerTL;
 
 /*!
  * \author Max Reichardt
  *
  * Can be used to handle pull requests of - typically - output ports
  */
-class tPullRequestHandler : public util::tInterface
+class tCCPullRequestHandlerRaw
 {
 public:
 
@@ -45,14 +43,15 @@ public:
    * Called whenever a pull request is intercepted
    *
    * \param origin (Output) Port pull request comes from
-   * \param add_locks Number of locks to set/add
-   * \return PortData to answer request with (with one additional lock) - or null if pull should be handled by port (now)
+   * \param result_buffer Buffer with result
+   * \param intermediate_assign Assign pulled value to ports in between?
+   * \return Was pull request handled (and result buffer filled) - or should it be handled by port in the standard way (now)?
    */
-  virtual const tPortDataManager* PullRequest(tPortBase* origin, int8 add_locks) = 0;
+  virtual bool PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer, bool intermediate_assign) = 0;
 
 };
 
 } // namespace finroc
 } // namespace core
 
-#endif // core__port__std__tPullRequestHandler_h__
+#endif // core__port__cc__tCCPullRequestHandlerRaw_h__

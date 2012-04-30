@@ -164,14 +164,6 @@ private:
   }
 
   /*!
-   * \return Is this a remote parameter?
-   */
-  inline bool RemoteValue()
-  {
-    return false;
-  }
-
-  /*!
    * Set commandLineOption and configEntry.
    * Check if they changed and possibly load value.
    */
@@ -214,6 +206,13 @@ public:
   void Deserialize(rrlib::serialization::tInputStream& is);
 
   void Deserialize(const rrlib::xml2::tXMLNode& node, bool finstructContext);
+
+  /*!
+   * Deserializes value from stream
+   *
+   * \param is Input stream
+   */
+  void DeserializeValue(rrlib::serialization::tInputStream& is);
 
   /*!
    * \param result Result buffer for all attached parameters (including those from parameters this parameter is possibly (indirectly) attached to)
@@ -287,12 +286,11 @@ public:
   void Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const;
 
   /*!
-   * \return Value serialized as string (reverse operation to set)
+   * Serializes value to output stream
+   *
+   * \param os Output stream
    */
-  inline util::tString SerializeValue()
-  {
-    return sSerializationHelper::TypedStringSerialize(type, ValPointer());
-  }
+  void SerializeValue(rrlib::serialization::tOutputStream& os) const;
 
   /*!
    * \param s serialized as string

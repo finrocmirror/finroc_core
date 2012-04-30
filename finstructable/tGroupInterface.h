@@ -44,8 +44,6 @@ class tGroupInterface : public tPortGroup
 {
 public:
 
-public:
-
   enum tDataClassification { eSENSOR_DATA, eCONTROLLER_DATA, eANY };
 
   enum tPortDirection { eINPUT_ONLY, eOUTPUT_ONLY, eBOTH };

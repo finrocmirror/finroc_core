@@ -44,7 +44,7 @@ namespace finroc
 {
 namespace core
 {
-class tCCPullRequestHandler;
+class tCCPullRequestHandlerRaw;
 class tUnit;
 class tCCQueueFragmentRaw;
 
@@ -116,7 +116,7 @@ protected:
   tPortListenerManager port_listener;
 
   /*! Object that handles pull requests - null if there is none (typical case) */
-  tCCPullRequestHandler* pull_request_handler;
+  tCCPullRequestHandlerRaw* pull_request_handler;
 
   /*! Unit of port (currently only used for numeric ports) */
   tUnit* unit;
@@ -285,27 +285,14 @@ protected:
 
   /*!
    * Pull/read current value from source port
-   * When multiple source ports are available an arbitrary one of them is used.
-   *
-   * \param intermediate_assign Assign pulled value to ports in between?
-   * \return Locked port data (non-const!)
-   */
-  inline tCCPortDataManagerTL* PullValueRaw()
-  {
-    return PullValueRaw(true, false);
-  }
-
-  /*!
-   * Pull/read current value from source port
    * When multiple source ports are available, an arbitrary one of them is used.
    *
    * \param intermediate_assign Assign pulled value to ports in between?
    * \param ignore_pull_request_handler_on_this_port Ignore pull request handler on first port? (for network port pulling it's good if pullRequestHandler is not called on first port)
    * \return Locked port data (current thread is owner; there is one additional lock for caller; non-const(!))
    */
-  tCCPortDataManagerTL* PullValueRaw(bool intermediate_assign, bool ignore_pull_request_handler_on_this_port);
+  tCCPortDataManagerTL* PullValueRaw(bool intermediate_assign = true, bool ignore_pull_request_handler_on_this_port = false);
 
-  template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   /*!
    * Receive data from another port
    *
@@ -314,6 +301,7 @@ protected:
    * \param reverse Value received in reverse direction?
    * \param changed_constant changedConstant to use
    */
+  template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   inline void Receive(tThreadLocalCache* tc, tCCPortBase* origin, bool reverse, int8 changed_constant)
   {
     // Backup tc references (in case it is modified - e.g. in BoundedNumberPort)
@@ -621,7 +609,7 @@ public:
   /*!
    * \param pull_request_handler Object that handles pull requests - null if there is none (typical case)
    */
-  void SetPullRequestHandler(tCCPullRequestHandler* pull_request_handler_);
+  void SetPullRequestHandler(tCCPullRequestHandlerRaw* pull_request_handler_);
 
   /*!
    * Transfers data ownership to port after a thread has been deleted

@@ -25,7 +25,7 @@
 #include "core/port/cc/tCCPortBase.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 #include "core/portdatabase/tPortFactory.h"
-#include "core/port/std/tPullRequestHandler.h"
+#include "core/port/std/tPullRequestHandlerRaw.h"
 
 namespace finroc
 {
@@ -257,7 +257,7 @@ const void tPortBase::PullValueRawImpl(tPublishCache& pc, bool intermediate_assi
   if ((!first) && pull_request_handler != NULL)
   {
     pc.lock_estimate++;  // for local assign
-    const tPortDataManager* mgr = pull_request_handler->PullRequest(this, static_cast<int8>(pc.lock_estimate));
+    const tPortDataManager* mgr = pull_request_handler->PullRequest(this, static_cast<int8>(pc.lock_estimate), intermediate_assign);
     if (mgr != NULL)
     {
       tPortDataReference* pdr = mgr->GetCurReference();
@@ -310,7 +310,7 @@ void tPortBase::SetMaxQueueLengthImpl(int length)
   queue->SetMaxLength(length);
 }
 
-void tPortBase::SetPullRequestHandler(tPullRequestHandler* pull_request_handler_)
+void tPortBase::SetPullRequestHandler(tPullRequestHandlerRaw* pull_request_handler_)
 {
   if (pull_request_handler_ != NULL)
   {

@@ -101,16 +101,10 @@ void tStaticParameterBase::CreateBuffer(rrlib::rtti::tDataTypeBase type_)
 
 void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is)
 {
-  if (RemoteValue())
-  {
-    assert(false && "not supported");
-  }
-  else
-  {
-    is.ReadString();
-    rrlib::rtti::tDataTypeBase dt;
-    is >> dt;
-  }
+  // Skip name and parameter type
+  is.ReadString();
+  rrlib::rtti::tDataTypeBase dt;
+  is >> dt;
 
   util::tString command_line_option_tmp = is.ReadString();
   outer_parameter_attachment = is.ReadString();
@@ -121,16 +115,13 @@ void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is)
   UpdateOuterParameterAttachment();
   UpdateAndPossiblyLoad(command_line_option_tmp, config_entry_tmp);
 
-  if (is.ReadBoolean())
+  try
   {
-    try
-    {
-      Set(is.ReadString());
-    }
-    catch (const util::tException& e)
-    {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
-    }
+    DeserializeValue(is);
+  }
+  catch (const util::tException& e)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
   }
 }
 
@@ -181,6 +172,22 @@ void tStaticParameterBase::Deserialize(const rrlib::xml2::tXMLNode& node, bool f
   }
 
   UpdateAndPossiblyLoad(command_line_option_tmp, config_entry_tmp);
+}
+
+void tStaticParameterBase::DeserializeValue(rrlib::serialization::tInputStream& is)
+{
+  if (is.ReadBoolean())
+  {
+    rrlib::rtti::tDataTypeBase dt;
+    is >> dt;
+    rrlib::rtti::tGenericObject* val = ValPointer();
+    if (val->GetType() != dt)
+    {
+      CreateBuffer(dt);
+      val = ValPointer();
+    }
+    rrlib::serialization::Deserialize(is, *val, rrlib::serialization::tDataEncoding::XML);
+  }
 }
 
 void tStaticParameterBase::GetAllAttachedParameters(util::tSimpleList<tStaticParameterBase*>& result)
@@ -304,13 +311,8 @@ void tStaticParameterBase::Serialize(rrlib::serialization::tOutputStream& os) co
   os.WriteString(config_entry);
   os.WriteBoolean(config_entry_set_by_finstruct);
   os.WriteBoolean(enforce_current_value);
-  rrlib::rtti::tTypedObject* val = ValPointer();
 
-  os.WriteBoolean(val != NULL);
-  if (val != NULL)
-  {
-    os.WriteString(sSerializationHelper::TypedStringSerialize(type, val));
-  }
+  SerializeValue(os);
 }
 
 void tStaticParameterBase::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const
@@ -341,25 +343,31 @@ void tStaticParameterBase::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct
   }
 }
 
+void tStaticParameterBase::SerializeValue(rrlib::serialization::tOutputStream& os) const
+{
+  rrlib::rtti::tGenericObject* val = ValPointer();
+  os.WriteBoolean(val != NULL);
+  if (val != NULL)
+  {
+    os << val->GetType();
+    rrlib::serialization::Serialize(os, *val, rrlib::serialization::tDataEncoding::XML);
+  }
+}
+
+
 void tStaticParameterBase::Set(const util::tString& s)
 {
-  if (RemoteValue())
+  assert(type != NULL);
+  rrlib::rtti::tDataTypeBase dt = sSerializationHelper::GetTypedStringDataType(type, s);
+  rrlib::rtti::tTypedObject* val = ValPointer();
+  if (val->GetType() != dt)
   {
+    CreateBuffer(dt);
+    val = ValPointer();
   }
-  else
-  {
-    assert((type != NULL));
-    rrlib::rtti::tDataTypeBase dt = sSerializationHelper::GetTypedStringDataType(type, s);
-    rrlib::rtti::tTypedObject* val = ValPointer();
-    if (val->GetType() != dt)
-    {
-      CreateBuffer(dt);
-      val = ValPointer();
-    }
 
-    rrlib::serialization::tStringInputStream sis(s);
-    val->Deserialize(sis);
-  }
+  rrlib::serialization::tStringInputStream sis(s);
+  val->Deserialize(sis);
 }
 
 void tStaticParameterBase::SetConfigEntry(const util::tString& config_entry)

@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -28,101 +28,54 @@ namespace finroc
 {
 namespace core
 {
-const int8 tAbstractCall::cNONE, tAbstractCall::cSYNCH_CALL, tAbstractCall::cASYNCH_CALL, tAbstractCall::cSYNCH_RETURN, tAbstractCall::cASYNCH_RETURN, tAbstractCall::cCONNECTION_EXCEPTION;
-
-const util::tString const_array_tAbstractCall_0[6] = {"NONE", "SYNCH_CALL", "ASYNCH_CALL", "SYNCH_RETURN", "ASYNCH_RETURN"
-    , "CONNECTION_EXCEPTION"
-                                                     };
-::finroc::util::tArrayWrapper<util::tString> tAbstractCall::cSTATUS_STRINGS(const_array_tAbstractCall_0, 6);
-const size_t tAbstractCall::cMAX_PARAMS;
 
 tAbstractCall::tAbstractCall() :
-  syncher_iD(-1),
-  thread_uid(0),
-  method_call_index(0),
-  local_port_handle(0),
-  remote_port_handle(0),
-  status(cNONE)
+  syncher_id(-1),
+  thread_uid(-1),
+  status(tStatus::NONE),
+  exception_type(tMethodCallException::tType::NONE),
+  method_call_index(-1),
+  local_port_handle(-1),
+  remote_port_handle(-1)
 {
-  //callerStack = new CallStack(maxCallDepth);
 }
 
-void tAbstractCall::DeserializeImpl(rrlib::serialization::tInputStream& is, bool skip_parameters)
+void tAbstractCall::DeserializeImpl(rrlib::serialization::tInputStream& is)
 {
-  status = is.ReadByte();
-  syncher_iD = is.ReadByte();
+  is >> status >> exception_type;
+  syncher_id = is.ReadByte();
   thread_uid = is.ReadInt();
   method_call_index = is.ReadShort();
-
-  // deserialize parameters
-  if (skip_parameters)
-  {
-    return;
-  }
-  for (size_t i = 0u; i < cMAX_PARAMS; i++)
-  {
-    params[i].Deserialize(is);
-  }
-}
-
-tPortDataPtr<rrlib::rtti::tGenericObject> tAbstractCall::GetParamGeneric(int index)
-{
-  tCallParameter& p = params[index];
-  if (p.type == tCallParameter::cNULLPARAM || p.value == NULL)
-  {
-    return tPortDataPtr<rrlib::rtti::tGenericObject>();
-  }
-  else
-  {
-    return std::move(p.value);
-  }
 }
 
 void tAbstractCall::Recycle()
 {
-  RecycleParameters();
   method_call_index = -1;
   remote_port_handle = -1;
-  status = cNONE;
-  syncher_iD = -1;
+  status = tStatus::NONE;
+  exception_type = tMethodCallException::tType::NONE;
+  syncher_id = -1;
   thread_uid = -1;
-  ::finroc::util::tReusable::Recycle();
-}
-
-void tAbstractCall::RecycleParameters()
-{
-  for (size_t i = 0u; i < cMAX_PARAMS; i++)
-  {
-    params[i].Recycle();
-  }
+  tReusable::Recycle();
 }
 
 void tAbstractCall::Serialize(rrlib::serialization::tOutputStream& oos) const
 {
-  oos.WriteByte(status);
-  oos.WriteByte(syncher_iD);
+  oos << status << exception_type;
+  oos.WriteByte(syncher_id);
   oos.WriteInt(thread_uid);
   oos.WriteShort(method_call_index);
-
-  // Serialize parameters
-  for (size_t i = 0u; i < cMAX_PARAMS; i++)
-  {
-    params[i].Serialize(oos);
-  }
 }
 
-void tAbstractCall::SetExceptionStatus(int8 type_id)
+void tAbstractCall::SetExceptionStatus(tMethodCallException::tType type)
 {
-  RecycleParameters();
-  SetStatus(cCONNECTION_EXCEPTION);
-  params[0].type = tCallParameter::cNUMBER;
-  params[0].value.reset();
-  params[0].number.SetValue(type_id);
+  SetStatus(tStatus::EXCEPTION);
+  exception_type = type;
 }
 
 void tAbstractCall::SetupAsynchCall()
 {
-  status = cASYNCH_CALL;
+  status = tStatus::ASYNCH_CALL;
   thread_uid = -1;
   SetSyncherID(-1);
   //callerStack.setSize(0);
@@ -130,7 +83,7 @@ void tAbstractCall::SetupAsynchCall()
 
 void tAbstractCall::SetupSynchCall(tMethodCallSyncher& mcs)
 {
-  status = cSYNCH_CALL;
+  status = tStatus::SYNCH_CALL;
   thread_uid = mcs.GetThreadUid();
   SetSyncherID(mcs.GetIndex());
   SetMethodCallIndex(mcs.GetAndUseNextCallIndex());

@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -41,24 +41,31 @@ class tMethodCallSyncher;
  * \author Max Reichardt
  *
  * This is the base abstract class for (possibly synchronous) calls
- * (such as Pull-Calls and method calls)
+ * (such as pull calls and method calls)
  */
 class tAbstractCall : public tSerializableReusableTask
 {
-  friend class tMethodCallSyncher;
-  friend class tSynchMethodCallLogic;
+public:
+  /*! Enum for status of method call */
+  enum class tStatus
+  {
+    NONE, SYNCH_CALL, ASYNCH_CALL, SYNCH_RETURN, ASYNCH_RETURN, EXCEPTION
+  };
+
 private:
 
+  friend class tMethodCallSyncher;
+  friend class tSynchMethodCallLogic;
+
   /*! Method Syncher index of calling method - in case this is a synchronous method call - otherwise -1 - valid only on calling system */
-  int8 syncher_iD;
+  int8 syncher_id;
 
   /*! Unique Thread ID of calling method */
   int thread_uid;
 
-  static ::finroc::util::tArrayWrapper<util::tString> cSTATUS_STRINGS;
-
-  //  /** Caller stack - contains port handle to which return value will be forwarded - only relevant for network connections */
-  //  private final CallStack callerStack;
+  /*! Status of this method call */
+  tStatus status;
+  tMethodCallException::tType exception_type;
 
   /*! Index of method call - used to filter out obsolete returns */
   int16 method_call_index;
@@ -68,21 +75,6 @@ private:
 
   /*! Destination port handle - only used while call is enqueued in network queue */
   int remote_port_handle;
-
-  /*! Maximum number of parameters */
-  static const size_t cMAX_PARAMS = 4u;
-
-  /*! Storage for parameters that are used in call - for usage in local runtime (fixed size, since this is smaller & less hassle than dynamic array) */
-  tCallParameter params[cMAX_PARAMS];
-
-protected:
-
-  int8 status;
-
-public:
-
-  /*! Status of this method call */
-  static const int8 cNONE = 0, cSYNCH_CALL = 1, cASYNCH_CALL = 2, cSYNCH_RETURN = 3, cASYNCH_RETURN = 4, cCONNECTION_EXCEPTION = 5;
 
 protected:
 
@@ -101,7 +93,7 @@ protected:
    */
   inline int GetSyncherID() const
   {
-    return syncher_iD;
+    return syncher_id;
   }
 
   void Recycle();
@@ -111,22 +103,13 @@ protected:
     this->method_call_index = method_call_index_;
   }
 
-  void SetParametersHelper(int arg_no) {}
-
-  template <typename Arg, typename ... TArgs>
-  void SetParametersHelper(int arg_no, Arg& arg, const TArgs&... args)
-  {
-    SetParameter(arg_no, arg);
-    SetParametersHelper(arg_no + 1, args...);
-  }
-
   /*!
    * \param syncher_iD Method Syncher index of calling method
    */
-  inline void SetSyncherID(int syncher_iD_)
+  inline void SetSyncherID(int syncher_id)
   {
-    assert((syncher_iD_ <= 127));
-    this->syncher_iD = static_cast<int8>(syncher_iD_);
+    assert(syncher_id <= 127);
+    this->syncher_id = static_cast<int8>(syncher_id);
   }
 
 public:
@@ -140,10 +123,18 @@ public:
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is)
   {
-    DeserializeImpl(is, false);
+    DeserializeImpl(is);
   }
 
-  void DeserializeImpl(rrlib::serialization::tInputStream& is, bool skip_parameters);
+  void DeserializeImpl(rrlib::serialization::tInputStream& is);
+
+  /*!
+   * \return Type of exception (only makes sense, if HasException() is true)
+   */
+  inline tMethodCallException::tType GetExceptionType()
+  {
+    return exception_type;
+  }
 
   /*!
    * \return Local port handle - only used while call is enqueued in network queue
@@ -153,14 +144,6 @@ public:
     return local_port_handle;
   }
 
-  template <typename T>
-  void GetParam(int index, T& pd)
-  {
-    tParameterUtil<T>::GetParam(&(params[index]), pd);
-  }
-
-  tPortDataPtr<rrlib::rtti::tGenericObject> GetParamGeneric(int index);
-
   /*!
    * \return Destination port handle - only used while call is enqueued in network queue
    */
@@ -169,14 +152,14 @@ public:
     return remote_port_handle;
   }
 
-  inline int8 GetStatus() const
+  inline tStatus GetStatus() const
   {
     return status;
   }
 
-  inline const util::tString& GetStatusString() const
+  inline const util::tString GetStatusString() const
   {
-    return cSTATUS_STRINGS[status];
+    return make_builder::GetEnumString(status);
   }
 
   inline int GetThreadUid() const
@@ -189,7 +172,7 @@ public:
    */
   inline bool HasException() const
   {
-    return status == cCONNECTION_EXCEPTION;
+    return status == tStatus::EXCEPTION;
   }
 
   /*!
@@ -197,27 +180,17 @@ public:
    */
   inline bool IsReturning(bool include_exception) const
   {
-    return status == cASYNCH_RETURN || status == cSYNCH_RETURN || (include_exception && status == cCONNECTION_EXCEPTION);
+    return status == tStatus::ASYNCH_RETURN || status == tStatus::SYNCH_RETURN || (include_exception && status == tStatus::EXCEPTION);
   }
-
-  /*!
-   * Recycle all parameters, but keep empty method call
-   */
-  void RecycleParameters();
 
   virtual void Serialize(rrlib::serialization::tOutputStream& oos) const;
-
-  inline void SetExceptionStatus(tMethodCallException::tType type)
-  {
-    SetExceptionStatus((int8)type);
-  }
 
   /*!
    * Clear parameters and set method call status to exception
    *
-   * \param type_id Type of exception
+   * \param type Type of exception
    */
-  void SetExceptionStatus(int8 type_id);
+  virtual void SetExceptionStatus(tMethodCallException::tType type);
 
   /*!
    * \param local_port_handle Local port handle - only used while call is enqueued in network queue
@@ -228,24 +201,6 @@ public:
   }
 
   /*!
-   * Set Parameter with specified in index to specified value
-   */
-  template <typename T>
-  void SetParameter(int index, T& pd)
-  {
-    tParameterUtil<T>::AddParam(&(params[index]), pd);
-  }
-
-  /*!
-   * Set Parameters to specified values
-   */
-  template <typename ... TArgs>
-  void SetParameters(TArgs&... args)
-  {
-    SetParametersHelper(0, args...);
-  }
-
-  /*!
    * \param remote_port_handle Destination port handle - only used while call is enqueued in network queue
    */
   inline void SetRemotePortHandle(int remote_port_handle_)
@@ -253,9 +208,9 @@ public:
     this->remote_port_handle = remote_port_handle_;
   }
 
-  inline void SetStatus(int8 status_)
+  inline void SetStatus(tStatus status)
   {
-    this->status = status_;
+    this->status = status;
   }
 
   /*!
@@ -265,8 +220,8 @@ public:
    */
   inline void SetStatusReturn()
   {
-    assert((status == cSYNCH_CALL || status == cASYNCH_CALL));
-    status = (status == cSYNCH_CALL) ? cSYNCH_RETURN : cASYNCH_RETURN;
+    assert((status == tStatus::SYNCH_CALL || status == tStatus::ASYNCH_CALL));
+    status = (status == tStatus::SYNCH_CALL) ? tStatus::SYNCH_RETURN : tStatus::ASYNCH_RETURN;
   }
 
   /*!

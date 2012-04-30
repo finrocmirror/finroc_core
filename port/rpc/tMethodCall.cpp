@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -29,6 +29,8 @@ namespace finroc
 {
 namespace core
 {
+const size_t tMethodCall::cMAX_PARAMS;
+
 tMethodCall::tMethodCall() :
   tAbstractCall(),
   method(NULL),
@@ -48,7 +50,17 @@ void tMethodCall::DeserializeCall(rrlib::serialization::tInputStream& is, const 
   int8 b = is.ReadByte();
   method = (dt == NULL) ? NULL : tFinrocTypeInfo::Get(dt).GetPortInterface()->GetMethod(b);
   net_timeout = is.ReadInt();
-  ::finroc::core::tAbstractCall::DeserializeImpl(is, skip_parameters);
+  tAbstractCall::DeserializeImpl(is);
+
+  // deserialize parameters
+  if (skip_parameters)
+  {
+    return;
+  }
+  for (size_t i = 0u; i < cMAX_PARAMS; i++)
+  {
+    params[i].Deserialize(is);
+  }
 }
 
 void tMethodCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
@@ -74,6 +86,19 @@ void tMethodCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
   else    // sync network call in another thread
   {
     method->ExecuteAsyncNonVoidCallOverTheNet(self2, *net_port, *ret_handler, net_timeout);
+  }
+}
+
+tPortDataPtr<rrlib::rtti::tGenericObject> tMethodCall::GetParamGeneric(int index)
+{
+  tCallParameter& p = params[index];
+  if (p.type == tCallParameter::cNULLPARAM || p.value == NULL)
+  {
+    return tPortDataPtr<rrlib::rtti::tGenericObject>();
+  }
+  else
+  {
+    return std::move(p.value);
   }
 }
 
@@ -130,15 +155,30 @@ void tMethodCall::Recycle()
   net_port = NULL;
   net_timeout = -1;
   source_net_port = NULL;
-  ::finroc::core::tAbstractCall::Recycle();
+  RecycleParameters();
+  tAbstractCall::Recycle();
+}
+
+void tMethodCall::RecycleParameters()
+{
+  for (size_t i = 0u; i < cMAX_PARAMS; i++)
+  {
+    params[i].Recycle();
+  }
 }
 
 void tMethodCall::Serialize(rrlib::serialization::tOutputStream& oos) const
 {
   oos.WriteByte(method == NULL ? -1 : method->GetMethodId());
-  assert(((GetStatus() != cSYNCH_CALL || net_timeout > 0)) && "Network timeout needs to be >0 with a synch call");
+  assert(((GetStatus() != tStatus::SYNCH_CALL || net_timeout > 0)) && "Network timeout needs to be >0 with a synch call");
   oos.WriteInt(net_timeout);
-  ::finroc::core::tAbstractCall::Serialize(oos);
+  tAbstractCall::Serialize(oos);
+
+  // Serialize parameters
+  for (size_t i = 0u; i < cMAX_PARAMS; i++)
+  {
+    params[i].Serialize(oos);
+  }
 }
 
 void tMethodCall::SetMethod(tAbstractMethod* m, const rrlib::rtti::tDataTypeBase& port_interface)

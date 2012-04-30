@@ -78,7 +78,7 @@ void tVoidMethod<HANDLER, TArgs...>::Call(tInterfaceClientPort port, bool force_
     HANDLER* handler = static_cast<HANDLER*>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (!handler)
     {
-      throw tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO);
+      throw tMethodCallException(tMethodCallException::tType::NO_CONNECTION, CODE_LOCATION_MACRO);
     }
     if (force_same_thread || (!HandleInExtraThread()))
     {
@@ -94,7 +94,7 @@ void tVoidMethod<HANDLER, TArgs...>::Call(tInterfaceClientPort port, bool force_
   }
   else
   {
-    throw tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO);
+    throw tMethodCallException(tMethodCallException::tType::NO_CONNECTION, CODE_LOCATION_MACRO);
   }
 }
 

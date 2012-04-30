@@ -48,6 +48,8 @@ class tFrameworkElement;
 template<typename T>
 class tPort : public tPortWrapperBase
 {
+  static_assert(rrlib::serialization::tIsBinarySerializable<T>::value, "Type T needs to be binary serializable for use in ports.");
+
 protected:
 
   /*!
@@ -125,6 +127,15 @@ public:
       pci.GetDefault(t);
       SetDefault(t);
     }
+  }
+
+  /*!
+   * Wraps raw port
+   */
+  tPort(tPortBaseType& wrap)
+  {
+    assert(wrap.GetDataType().GetRttiName() == typeid(typename tPortTypeMap<T>::tPortDataType).name());
+    wrapped = &wrap;
   }
 
   void AddPortListener(tPortListener<tPortDataPtr<const T> >* listener)

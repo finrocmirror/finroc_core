@@ -99,13 +99,11 @@ public:
 
     if (!call)
     {
-      throw tMethodCallException(tMethodCallException::eTIMEOUT, CODE_LOCATION_MACRO);
+      throw tMethodCallException(tMethodCallException::tType::TIMEOUT, CODE_LOCATION_MACRO);
     }
     else if (call->HasException())
     {
-      int8 type = 0;
-      call->GetParam(0, type);
-      throw tMethodCallException(type, CODE_LOCATION_MACRO);
+      throw tMethodCallException(call->GetExceptionType(), CODE_LOCATION_MACRO);
     }
   }
 };

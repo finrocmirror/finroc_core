@@ -81,13 +81,13 @@ R tMethod<HANDLER, R, TArgs...>::Call(tInterfaceClientPort port, int net_timeout
     HANDLER* handler = static_cast<HANDLER*>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (!handler)
     {
-      throw tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO);
+      throw tMethodCallException(tMethodCallException::tType::NO_CONNECTION, CODE_LOCATION_MACRO);
     }
     return handler->HandleCall(*this, args...);
   }
   else
   {
-    throw tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO);
+    throw tMethodCallException(tMethodCallException::tType::NO_CONNECTION, CODE_LOCATION_MACRO);
   }
 }
 
@@ -107,7 +107,7 @@ void tMethod<HANDLER, R, TArgs...>::CallAsync(tInterfaceClientPort port, tAsyncR
     HANDLER* mhandler = static_cast<HANDLER*>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (!mhandler)
     {
-      handler->HandleMethodCallException(this, tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO));
+      handler->HandleMethodCallException(this, tMethodCallException(tMethodCallException::tType::NO_CONNECTION, CODE_LOCATION_MACRO));
     }
     if (force_same_thread || (!HandleInExtraThread()))
     {
@@ -131,7 +131,7 @@ void tMethod<HANDLER, R, TArgs...>::CallAsync(tInterfaceClientPort port, tAsyncR
   }
   else
   {
-    handler->HandleMethodCallException(this, tMethodCallException(tMethodCallException::eNO_CONNECTION, CODE_LOCATION_MACRO));
+    handler->HandleMethodCallException(this, tMethodCallException(tMethodCallException::tType::NO_CONNECTION, CODE_LOCATION_MACRO));
   }
 }
 
@@ -192,7 +192,7 @@ void tMethod<HANDLER, R, TArgs...>::ExecuteFromMethodCallObject(tMethodCall::tPt
     }
     else
     {
-      call->SetExceptionStatus(e.GetTypeId());
+      call->SetExceptionStatus(e.GetType());
     }
   }
 }

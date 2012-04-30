@@ -47,7 +47,7 @@ void tCallParameter::Deserialize(rrlib::serialization::tInputStream& is)
   {
     assert((value == NULL));
     //value = (GenericObject)is.readObjectInInterThreadContainer(null);
-    rrlib::rtti::tGenericObject* go = rrlib::rtti::ReadObject(is, NULL, this);
+    rrlib::rtti::tGenericObject* go = rrlib::rtti::ReadObject(is, this);
     if (!go)
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Received object that could not be read. Throwing exception.");

@@ -45,7 +45,7 @@ namespace finroc
 {
 namespace core
 {
-class tPullRequestHandler;
+class tPullRequestHandlerRaw;
 class tPortQueueFragmentRaw;
 
 /*!
@@ -109,7 +109,7 @@ protected:
   //public @Ptr PortBase std11CaseReceiver; // should not need to be volatile
 
   /*! Object that handles pull requests - null if there is none (typical case) */
-  tPullRequestHandler* pull_request_handler;
+  tPullRequestHandlerRaw* pull_request_handler;
 
   /*! Listen to port value changes - may be null */
   tPortListenerManager port_listener;
@@ -127,7 +127,6 @@ private:
   /*! makes adjustment to flags passed through constructor */
   static tPortCreationInfoBase& ProcessPci(tPortCreationInfoBase& pci);
 
-  template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cINFORM_LISTENERS>
   /*!
    * (only for use by port classes)
    *
@@ -140,6 +139,7 @@ private:
    * \param changed_constant changedConstant to use
    * \param inform_listeners Inform this port's listeners on change? (usually only when value comes from browser)
    */
+  template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cINFORM_LISTENERS>
   inline void PublishImpl(const tPortDataManager* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
   {
     assert((data->GetType() != NULL) && "Port data type not initialized");
@@ -330,30 +330,18 @@ protected:
    * When multiple source ports are available an arbitrary one of them is used.
    *
    * \param intermediate_assign Assign pulled value to ports in between?
-   * \return Locked port data
-   */
-  inline tPortDataManager* PullValueRaw()
-  {
-    return PullValueRaw(true, false);
-  }
-
-  /*!
-   * Pull/read current value from source port
-   * When multiple source ports are available an arbitrary one of them is used.
-   *
-   * \param intermediate_assign Assign pulled value to ports in between?
    * \param ignore_pull_request_handler_on_this_port Ignore pull request handler on first port? (for network port pulling it's good if pullRequestHandler is not called on first port)
    * \return Locked port data
    */
-  tPortDataManager* PullValueRaw(bool intermediate_assign, bool ignore_pull_request_handler_on_this_port);
+  tPortDataManager* PullValueRaw(bool intermediate_assign = true, bool ignore_pull_request_handler_on_this_port = false);
 
-  template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   /*!
    * \param pc Publish cache readily set up
    * \param origin Port that value was received from
    * \param reverse Value received in reverse direction?
    * \param changed_constant changedConstant to use
    */
+  template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   inline void Receive(tPublishCache& pc, tPortBase* origin, bool reverse, int8 changed_constant)
   {
     Assign(pc);
@@ -573,7 +561,7 @@ public:
   /*!
    * \param pull_request_handler Object that handles pull requests - null if there is none (typical case)
    */
-  void SetPullRequestHandler(tPullRequestHandler* pull_request_handler_);
+  void SetPullRequestHandler(tPullRequestHandlerRaw* pull_request_handler_);
 
   /*!
    * Does port (still) have this value?

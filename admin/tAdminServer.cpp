@@ -55,7 +55,7 @@ tPortInterface tAdminServer::cMETHODS("Admin Interface", true);
 tVoidMethod<tAdminServer, int, int> tAdminServer::cCONNECT(tAdminServer::cMETHODS, "Connect", "source port handle", "destination port handle", false);
 tVoidMethod<tAdminServer, int, int> tAdminServer::cDISCONNECT(tAdminServer::cMETHODS, "Disconnect", "source port handle", "destination port handle", false);
 tVoidMethod<tAdminServer, int, int> tAdminServer::cDISCONNECT_ALL(tAdminServer::cMETHODS, "DisconnectAll", "source port handle", "dummy", false);
-tVoidMethod<tAdminServer, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> tAdminServer::cSET_PORT_VALUE(tAdminServer::cMETHODS, "SetPortValue", "port handle", "data", "as string?", false);
+tVoidMethod<tAdminServer, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> tAdminServer::cSET_PORT_VALUE(tAdminServer::cMETHODS, "SetPortValue", "port handle", "data", "dummy", false);
 tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>> tAdminServer::cGET_CREATE_MODULE_ACTIONS(tAdminServer::cMETHODS, "GetCreateModuleActions", false);
 tVoidMethod<tAdminServer, int, tPortDataPtr<std::string>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>> tAdminServer::cCREATE_MODULE(tAdminServer::cMETHODS, "CreateModule", "create action index", "module name", "parent handle", "module creation parameters", false);
 tVoidMethod<tAdminServer, int> tAdminServer::cSAVE_FINSTRUCTABLE_GROUP(tAdminServer::cMETHODS, "Save Finstructable Group", "finstructable handle", false);
@@ -65,7 +65,6 @@ tVoidMethod<tAdminServer, int> tAdminServer::cDELETE_ELEMENT(tAdminServer::cMETH
 tVoidMethod<tAdminServer, int> tAdminServer::cSTART_EXECUTION(tAdminServer::cMETHODS, "Start execution", "Framework element handle", false);
 tVoidMethod<tAdminServer, int> tAdminServer::cPAUSE_EXECUTION(tAdminServer::cMETHODS, "Pause execution", "Framework element handle", false);
 tMethod<tAdminServer, int, int> tAdminServer::cIS_RUNNING(tAdminServer::cMETHODS, "Is Framework element running", "handle", false);
-tMethod<tAdminServer, tPortDataPtr<std::string>, int, int, int> tAdminServer::cGET_PORT_VALUE_AS_STRING(tAdminServer::cMETHODS, "Get port value as string", "handle", "dummy", "dummy", false);
 tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<std::string>> tAdminServer::cGET_PARAMETER_INFO(tAdminServer::cMETHODS, "GetParameterInfo", "handle", "dummy", false);
 tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>> tAdminServer::cGET_MODULE_LIBRARIES(tAdminServer::cMETHODS, "GetModuleLibraries", false);
 tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<std::string>> tAdminServer::cLOAD_MODULE_LIBRARY(tAdminServer::cMETHODS, "LoadModuleLibrary", "dummy", "library name", false);
@@ -249,35 +248,6 @@ int tAdminServer::HandleCall(const tAbstractMethod& method, int handle)
   }
 }
 
-tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method, int p1, int p2, int p3)
-{
-  assert(method == cGET_PORT_VALUE_AS_STRING);
-  ::finroc::core::tAbstractPort* ap = GetRuntime()->GetPort(p1);
-  if (ap != NULL && ap->IsReady())
-  {
-    if (tFinrocTypeInfo::IsCCType(ap->GetDataType()))
-    {
-      tPortDataPtr<std::string> cs = this->GetBufferForReturn<std::string>();
-      tCCPortBase* p = static_cast<tCCPortBase*>(ap);
-      const rrlib::rtti::tGenericObject* go = p->GetAutoLockedRaw();
-      *cs = rrlib::serialization::Serialize(*go).c_str();
-      tPortBase::ReleaseAutoLocks();
-      return cs;
-    }
-    else if (tFinrocTypeInfo::IsStdType(ap->GetDataType()))
-    {
-      tPortDataPtr<std::string> cs = this->GetBufferForReturn<std::string>();
-      tPortBase* p = static_cast<tPortBase*>(ap);
-      tPortDataManager* go = p->GetAutoLockedRaw();
-      *cs = rrlib::serialization::Serialize(*go->GetObject()).c_str();
-      tPortBase::ReleaseAutoLocks();
-      return cs;
-    }
-  }
-
-  return tPortDataPtr<std::string>();
-}
-
 void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
 {
   tRuntimeEnvironment* re = tRuntimeEnvironment::GetInstance();
@@ -346,68 +316,32 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
   }
 }
 
-void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int as_string)
+void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int unused)
 {
   assert(method == cSET_PORT_VALUE);
   ::finroc::core::tAbstractPort* port = tRuntimeEnvironment::GetInstance()->GetPort(port_handle);
   if (port != NULL && port->IsReady())
   {
+    util::tLock lock3(port);
+    if (port->IsReady())
     {
-      util::tLock lock3(port);
-      if (port->IsReady())
+      rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::eNames);
+      rrlib::serialization::tDataEncoding enc;
+      rrlib::rtti::tDataTypeBase dt;
+      ci >> enc >> dt;
+      if (tFinrocTypeInfo::IsCCType(port->GetDataType()) && tFinrocTypeInfo::IsCCType(dt))
       {
-        rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::eNames);
-        rrlib::rtti::tDataTypeBase dt;
-        ci >> dt;
-        if (tFinrocTypeInfo::IsCCType(port->GetDataType()) && tFinrocTypeInfo::IsCCType(dt))
-        {
-          tCCPortBase* p = static_cast<tCCPortBase*>(port);
-          tCCPortDataManagerTL* c = tThreadLocalCache::Get()->GetUnusedBuffer(dt);
-          if (as_string == 0)
-          {
-            c->GetObject()->Deserialize(ci);
-          }
-          else
-          {
-            util::tString s = ci.ReadString();
-            rrlib::serialization::tStringInputStream sis(s);
-            try
-            {
-              c->GetObject()->Deserialize(sis);
-            }
-            catch (const util::tException& e)
-            {
-              c->RecycleUnused();
-              FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot deserialize from string ", s, e);
-            }
-          }
-          p->BrowserPublishRaw(c);
-        }
-        else if (tFinrocTypeInfo::IsStdType(port->GetDataType()) && tFinrocTypeInfo::IsStdType(dt))
-        {
-          tPortBase* p = static_cast<tPortBase*>(port);
-          tPortDataManager* port_data = p->GetDataType() != dt ? p->GetUnusedBufferRaw(dt) : p->GetUnusedBufferRaw();
-          if (as_string == 0)
-          {
-            port_data->GetObject()->Deserialize(ci);
-          }
-          else
-          {
-            util::tString s = ci.ReadString();
-            rrlib::serialization::tStringInputStream sis(s);
-            try
-            {
-              port_data->GetObject()->Deserialize(sis);
-            }
-            catch (const util::tException& e)
-            {
-              port_data->RecycleUnused();
-              FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot deserialize from string ", s, e);
-            }
-          }
-          p->BrowserPublish(port_data);
-          port_data = NULL;
-        }
+        tCCPortBase* p = static_cast<tCCPortBase*>(port);
+        tCCPortDataManagerTL* c = tThreadLocalCache::Get()->GetUnusedBuffer(dt);
+        c->GetObject()->Deserialize(ci, enc);
+        p->BrowserPublishRaw(c);
+      }
+      else if (tFinrocTypeInfo::IsStdType(port->GetDataType()) && tFinrocTypeInfo::IsStdType(dt))
+      {
+        tPortBase* p = static_cast<tPortBase*>(port);
+        tPortDataManager* port_data = p->GetDataType() != dt ? p->GetUnusedBufferRaw(dt) : p->GetUnusedBufferRaw();
+        port_data->GetObject()->Deserialize(ci, enc);
+        p->BrowserPublish(port_data);
       }
     }
   }
@@ -476,14 +410,13 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int cma_index, 
             for (size_t i = 0u; i < params->Size(); i++)
             {
               tStaticParameterBase* param = params->Get(i);
-              util::tString s = ci.ReadString();
               try
               {
-                param->Set(s);
+                param->DeserializeValue(ci);
               }
               catch (const util::tException& e)
               {
-                FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error parsing '", s, "' for parameter ", param->GetName());
+                FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error parsing value for parameter ", param->GetName());
                 FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
               }
             }

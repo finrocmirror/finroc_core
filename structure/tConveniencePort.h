@@ -100,10 +100,6 @@ protected:
 
 /*!
  * Base class for ports that are typically used inside modules by application developer.
- */
-
-/**
- *
  *
  * Note for application developers:
  * Constructor takes variadic argument list... just any properties you want to assign to port (see tPort class).
@@ -151,7 +147,7 @@ public:
    */
   bool HasChanged()
   {
-    return HasChanged(this);
+    return HasChangedImpl(this);
   }
 
   /*!
@@ -161,7 +157,7 @@ public:
    */
   void ResetChanged()
   {
-    ResetChanged(this);
+    ResetChangedImpl(this);
   }
 
 protected:
@@ -229,23 +225,23 @@ protected:
 private:
 
   /*! Helper methods for different kinds of base classes */
-  static bool HasChanged(tPort<T>* p)
+  bool HasChangedImpl(tPortWrapperBase* p)
   {
     return p->GetWrapped()->GetCustomChangedFlag() != 0;
   }
-  static bool HasChanged(tStaticParameter<T>* p)
+  bool HasChangedImpl(...) // tStaticParameter<T>* p
   {
-    return p->HasChanged();
+    return PORT::HasChanged();
   }
 
-  void ResetChanged(tPort<T>* p)
+  void ResetChangedImpl(tPortWrapperBase* p)
   {
     p->ResetChanged();
     p->GetWrapped()->SetCustomChangedFlag(0);
   }
-  void ResetChanged(tStaticParameter<T>* p)
+  void ResetChangedImpl(...) // tStaticParameter<T>* p
   {
-    p->ResetChanged();
+    PORT::ResetChanged();
   }
 };
 

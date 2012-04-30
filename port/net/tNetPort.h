@@ -35,21 +35,14 @@
 #include "core/tCoreFlags.h"
 #include "core/tFinrocAnnotation.h"
 #include "core/port/cc/tCCPortBase.h"
-#include "core/port/cc/tCCPullRequestHandler.h"
+#include "core/port/cc/tCCPullRequestHandlerRaw.h"
 #include "core/port/rpc/tCallable.h"
 #include "core/port/tPortFlags.h"
 #include "core/port/std/tPortBase.h"
-#include "core/port/std/tPullRequestHandler.h"
+#include "core/port/std/tPullRequestHandlerRaw.h"
 #include "core/port/rpc/tMethodCall.h"
 #include "core/port/rpc/tInterfaceNetPort.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -70,6 +63,9 @@ class tNetPort : public tPortListener<>, public tCallable<tPullCall>, public tFi
 
   /*! Wrapped port */
   tAbstractPort* wrapped;
+
+  /*! Data type to use when writing data to the network */
+  rrlib::serialization::tDataEncoding encoding;
 
 protected:
 
@@ -199,6 +195,14 @@ public:
   }
 
   /*!
+   * \return Data type to use when writing data to the network
+   */
+  inline rrlib::serialization::tDataEncoding GetEncoding()
+  {
+    return encoding;
+  }
+
+  /*!
    * \return Last time the value was updated (used to make sure that minimum update interval is kept)
    */
   inline int64 GetLastUpdate()
@@ -276,10 +280,19 @@ public:
    *
    * \param ci Stream
    * \param timestamp Time stamp
+   * \param changed_flag Type of change
    */
   void ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int64 timestamp, int8 changed_flag);
 
   virtual void SendCallReturn(tAbstractCall::tPtr& mc) = 0;
+
+  /*!
+   * \param enc Data type to use when writing data to the network
+   */
+  void SetEncoding(rrlib::serialization::tDataEncoding enc)
+  {
+    this->encoding = enc;
+  }
 
   /*!
    * \param last_update Last time the value was updated (used to make sure that minimum update interval is kept)
@@ -312,7 +325,7 @@ public:
   /*!
    * Wrapped cc port
    */
-  class tCCNetPort : public tCCPortBase, public tCCPullRequestHandler, public tCallable<tPullCall>
+  class tCCNetPort : public tCCPortBase, public tCCPullRequestHandlerRaw, public tCallable<tPullCall>
   {
   private:
 
@@ -374,7 +387,7 @@ public:
 
     void PublishFromNet(tCCPortDataManagerTL* read_object, int8 changed_flag);
 
-    virtual bool PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer);
+    virtual bool PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer, bool intermediateAssign);
 
     inline void UpdateFlags(uint flags)
     {
@@ -388,7 +401,7 @@ public:
   /*!
    * Wrapped standard port
    */
-  class tStdNetPort : public tPortBase, public tPullRequestHandler, public tCallable<tPullCall>
+  class tStdNetPort : public tPortBase, public tPullRequestHandlerRaw, public tCallable<tPullCall>
   {
   private:
 
@@ -454,7 +467,7 @@ public:
 
     void PublishFromNet(tPortDataManager* read_object, int8 changed_flag);
 
-    virtual const tPortDataManager* PullRequest(tPortBase* origin, int8 add_locks);
+    virtual const tPortDataManager* PullRequest(tPortBase* origin, int8 add_locks, bool intermediateAssign);
 
     inline void UpdateFlags(uint flags)
     {

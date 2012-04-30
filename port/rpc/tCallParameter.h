@@ -67,12 +67,6 @@ public:
   /*! Type of parameter (see constants at beginning of class) */
   int8 type;
 
-private:
-
-  tPortDataPtr<rrlib::rtti::tGenericObject> Lock(rrlib::rtti::tGenericObject* tmp);
-
-public:
-
   tCallParameter();
 
   inline void Clear()
@@ -87,6 +81,8 @@ public:
   }
 
   void Deserialize(rrlib::serialization::tInputStream& is);
+
+  static tPortDataPtr<rrlib::rtti::tGenericObject> Lock(rrlib::rtti::tGenericObject* tmp);
 
   void Recycle();
 

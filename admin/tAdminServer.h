@@ -110,9 +110,6 @@ public:
   /*! Is framework element with specified handle currently executing? */
   static tMethod<tAdminServer, int, int> cIS_RUNNING;
 
-  /*! Get current port value as string */
-  static tMethod<tAdminServer, tPortDataPtr<std::string>, int, int, int > cGET_PORT_VALUE_AS_STRING;
-
   /*! Get parameter info for specified framework element: ConfigFile, children with config file, info on all parameters with same config file  */
   static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<std::string>> cGET_PARAMETER_INFO;
 

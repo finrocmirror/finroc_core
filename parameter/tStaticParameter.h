@@ -52,7 +52,7 @@ namespace core
 template <typename T>
 class tStaticParameter
 {
-
+  static_assert(rrlib::serialization::tIsXMLSerializable<T>::value, "T has to be serializable to XML.");
   typedef typename tPortTypeMap<T>::tStaticParameterImpl tImpl;
 
   /*! Static Parameter Implementation */

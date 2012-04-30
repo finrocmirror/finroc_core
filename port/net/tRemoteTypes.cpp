@@ -75,6 +75,17 @@ void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
       e.name = name;
     }
 
+    // read additional data we do not need in C++ (remote type traits and enum constant names)
+    int8_t traits = ci.ReadByte(); // type traits
+    if (traits & rrlib::rtti::trait_flags::cIS_ENUM)
+    {
+      short n = ci.ReadShort();
+      for (short i = 0; i < n; i++)
+      {
+        ci.SkipString();
+      }
+    }
+
     types.Add(e, true);
     if (local != NULL)
     {
@@ -142,6 +153,20 @@ void tRemoteTypes::SerializeLocalDataTypes(rrlib::serialization::tOutputStream& 
     co.WriteShort(tFinrocTypeInfo::Get(i).GetUpdateTime());
     co.WriteByte(tFinrocTypeInfo::Get(i).GetType());
     co.WriteString(dt.GetName());
+    const int cTRAITS = rrlib::rtti::trait_flags::cIS_ENUM | rrlib::rtti::trait_flags::cIS_BINARY_SERIALIZABLE | rrlib::rtti::trait_flags::cIS_STRING_SERIALIZABLE | rrlib::rtti::trait_flags::cIS_XML_SERIALIZABLE;
+    static_assert(cTRAITS <= 255, "Does not fit into byte");
+    co.WriteByte(dt.GetTypeTraits() & cTRAITS); // type traits
+    if ((dt.GetTypeTraits() & rrlib::rtti::trait_flags::cIS_ENUM) != 0)
+    {
+      const std::vector<const char*>* enum_constants = dt.GetEnumConstants();
+      assert(enum_constants && enum_constants->size() <= 0xFFFF && "Something is wrong with the enum");
+      co.WriteShort(enum_constants->size());
+      for (size_t j = 0; j < enum_constants->size(); j++)
+      {
+        co.WriteString((*enum_constants)[j]);
+      }
+    }
+
   }
   co.WriteShort(-1);  // terminator
   local_types_sent = type_count;
