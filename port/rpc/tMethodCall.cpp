@@ -188,6 +188,13 @@ void tMethodCall::SetMethod(tAbstractMethod* m, const rrlib::rtti::tDataTypeBase
   assert((TypeCheck()));
 }
 
+const util::tString tMethodCall::ToString() const
+{
+  std::ostringstream os;
+  os << "MethodCall '" << (method && method->GetPortInterface() ? (method->GetPortInterface()->name + "::" + method->GetName()).c_str() : "Unknown") << "' (" << GetStatusString() << ", callid: " << ::finroc::core::tAbstractCall::GetMethodCallIndex() << ", threaduid: " << ::finroc::core::tAbstractCall::GetThreadUid() << ")";
+  return os.str();
+}
+
 bool tMethodCall::TypeCheck()
 {
   return method != NULL && port_interface_type != NULL && tFinrocTypeInfo::Get(port_interface_type).GetPortInterface() != NULL && tFinrocTypeInfo::Get(port_interface_type).GetPortInterface()->ContainsMethod(method);

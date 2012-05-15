@@ -255,6 +255,8 @@ public:
   {
     SetParametersHelper(0, args...);
   }
+
+  virtual const util::tString ToString() const;
 };
 
 } // namespace finroc

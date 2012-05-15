@@ -27,6 +27,7 @@
 #include "rrlib/finroc_core_utils/thread/tLoopThread.h"
 #include "rrlib/finroc_core_utils/thread/tTask.h"
 #include "rrlib/finroc_core_utils/container/tReusable.h"
+#include "rrlib/watchdog/tWatchDogTask.h"
 
 #include "core/portdatabase/tSerializableReusable.h"
 
@@ -39,7 +40,7 @@ namespace core
  *
  * (Helper) thread for remote procedure calls
  */
-class tRPCThread : public finroc::util::tLoopThread, public util::tReusable
+class tRPCThread : public finroc::util::tLoopThread, public util::tReusable, public rrlib::watchdog::tWatchDogTask
 {
 private:
 
@@ -48,6 +49,9 @@ private:
 
   /*! Next reusable task */
   tSerializableReusableTask::tPtr next_reusable_task;
+
+  /*! String representation of task that is currently executed */
+  std::string current_task_string;
 
 public:
 
@@ -60,6 +64,8 @@ public:
    */
   void ExecuteTask(util::tTask& t);
   void ExecuteTask(tSerializableReusableTask::tPtr& t);
+
+  virtual void HandleWatchdogAlert();
 
   virtual void MainLoopCallback();
 

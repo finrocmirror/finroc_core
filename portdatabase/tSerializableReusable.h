@@ -91,6 +91,11 @@ public:
    * \param self Unique pointer to self - for clean, safe recycling
    */
   virtual void ExecuteTask(tPtr& self) = 0;
+
+  /*!
+   * \return String representation of task
+   */
+  virtual const util::tString ToString() const = 0;
 };
 
 } // namespace finroc

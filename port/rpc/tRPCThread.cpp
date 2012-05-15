@@ -29,6 +29,11 @@ namespace core
 {
 tRPCThread::tRPCThread() :
   tLoopThread(0),
+#ifdef NDEBUG  // only activate monitoring in debug mode
+  tWatchDogTask(false),
+#else
+  tWatchDogTask(true),
+#endif
   next_task(NULL),
   next_reusable_task()
 {
@@ -50,6 +55,13 @@ void tRPCThread::ExecuteTask(tSerializableReusableTask::tPtr& t)
   monitor.NotifyAll(lock1);
 }
 
+void tRPCThread::HandleWatchdogAlert()
+{
+  util::tLock lock2(this);
+  RRLIB_LOG_PRINT(rrlib::logging::eLL_WARNING, "Watchdoggy detected that execution of the following task got stuck: ", current_task_string);
+  tWatchDogTask::Deactivate();
+}
+
 void tRPCThread::MainLoopCallback()
 {
   {
@@ -66,6 +78,10 @@ void tRPCThread::MainLoopCallback()
   }
   while (next_task || next_reusable_task)
   {
+    assert(GetDeadLine() == cTASK_DEACTIVED);
+#ifndef NDEBUG
+    SetDeadLine(util::tTime::GetPrecise() + 3000); // TODO: deadline should depend on type of call
+#endif
     if (next_task)
     {
       util::tTask* tmp = next_task;
@@ -75,8 +91,15 @@ void tRPCThread::MainLoopCallback()
     else
     {
       tSerializableReusableTask::tPtr tmp(std::move(next_reusable_task));
+#ifndef NDEBUG
+      {
+        util::tLock lock2(this);
+        current_task_string = tmp->ToString();
+      }
+#endif
       tmp->ExecuteTask(tmp);
     }
+    tWatchDogTask::Deactivate();
   }
 }
 
