@@ -26,6 +26,8 @@ namespace finroc
 {
 namespace core
 {
+namespace internal
+{
 
 /*!
  * \author Max Reichardt
@@ -40,6 +42,9 @@ class tRPCPlugin : public tPlugin
   }
 };
 
+static tRPCPlugin rpc_plugin;
+
+}
 } // namespace finroc
 } // namespace core
 

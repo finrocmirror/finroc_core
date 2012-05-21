@@ -53,6 +53,9 @@ private:
   /*! String representation of task that is currently executed */
   std::string current_task_string;
 
+  /*! Mutex String representation of task that is currently executed */
+  util::tMutex current_task_string_mutex;
+
 public:
 
   tRPCThread();

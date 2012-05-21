@@ -37,6 +37,11 @@ tRPCThread::tRPCThread() :
   next_task(NULL),
   next_reusable_task()
 {
+  static int count = 0;
+  std::ostringstream oss;
+  oss << "RPC Thread " << count;
+  SetName(oss.str());
+  count++;
 }
 
 void tRPCThread::ExecuteTask(util::tTask& t)
@@ -57,8 +62,8 @@ void tRPCThread::ExecuteTask(tSerializableReusableTask::tPtr& t)
 
 void tRPCThread::HandleWatchdogAlert()
 {
-  util::tLock lock2(this);
-  RRLIB_LOG_PRINT(rrlib::logging::eLL_WARNING, "Watchdoggy detected that execution of the following task got stuck: ", current_task_string);
+  util::tLock lock2(current_task_string_mutex);
+  FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Watchdoggy detected that execution of the following task got stuck: ", current_task_string);
   tWatchDogTask::Deactivate();
 }
 
@@ -93,7 +98,7 @@ void tRPCThread::MainLoopCallback()
       tSerializableReusableTask::tPtr tmp(std::move(next_reusable_task));
 #ifndef NDEBUG
       {
-        util::tLock lock2(this);
+        util::tLock lock2(current_task_string_mutex);
         current_task_string = tmp->ToString();
       }
 #endif
