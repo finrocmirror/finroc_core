@@ -74,6 +74,11 @@ private:
 
 public:
 
+  explicit operator bool ()
+  {
+    return (bool) this->Value <int>();
+  }
+
   /*! Zero Constant */
   static tNumber cZERO;
 
