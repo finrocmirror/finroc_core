@@ -43,7 +43,7 @@ namespace rrlib
 {
 namespace xml2
 {
-class tXMLNode;
+class tNode;
 } // namespace rrlib
 } // namespace xml2
 
@@ -205,7 +205,7 @@ public:
 
   void Deserialize(rrlib::serialization::tInputStream& is);
 
-  void Deserialize(const rrlib::xml2::tXMLNode& node, bool finstructContext);
+  void Deserialize(const rrlib::xml::tNode& node, bool finstructContext);
 
   /*!
    * Deserializes value from stream
@@ -283,7 +283,7 @@ public:
 
   void Serialize(rrlib::serialization::tOutputStream& os) const;
 
-  void Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const;
+  void Serialize(rrlib::xml::tNode& node, bool finstruct_context) const;
 
   /*!
    * Serializes value to output stream

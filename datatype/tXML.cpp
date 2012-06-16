@@ -21,7 +21,7 @@
  */
 #include "core/datatype/tXML.h"
 
-#include "rrlib/xml2_wrapper/tXMLDocument.h"
+#include "rrlib/xml/tDocument.h"
 
 namespace finroc
 {
@@ -34,21 +34,21 @@ tXML::tXML() :
 {
 }
 
-void tXML::Deserialize(const rrlib::xml2::tXMLNode& node)
+void tXML::Deserialize(const rrlib::xml::tNode& node)
 {
   Set(node.FirstChild().GetXMLDump(true));
 }
 
-void tXML::Serialize(rrlib::xml2::tXMLNode& node) const
+void tXML::Serialize(rrlib::xml::tNode& node) const
 {
   if (buffer.length() > 0)
   {
-    rrlib::xml2::tXMLDocument doc(static_cast<const void*>(buffer.c_str()), buffer.length() + 1);
+    rrlib::xml::tDocument doc(static_cast<const void*>(buffer.c_str()), buffer.length() + 1);
     node.AddChildNode(doc.RootNode(), true);
   }
 }
 
-void tXML::Set(const rrlib::xml2::tXMLNode& n)
+void tXML::Set(const rrlib::xml::tNode& n)
 {
   Set(n.GetXMLDump(true));
 }

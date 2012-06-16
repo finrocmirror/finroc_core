@@ -23,7 +23,7 @@
 #include "core/parameter/tStaticParameterBase.h"
 #include "rrlib/rtti/rtti.h"
 #include "core/tFrameworkElement.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "rrlib/xml/tNode.h"
 #include "core/parameter/tConstructorParameters.h"
 
 namespace finroc
@@ -89,12 +89,12 @@ void tStaticParameterList::Deserialize(rrlib::serialization::tInputStream& is)
   }
 }
 
-void tStaticParameterList::Deserialize(const rrlib::xml2::tXMLNode& node)
+void tStaticParameterList::Deserialize(const rrlib::xml::tNode& node)
 {
   Deserialize(node, false);
 }
 
-void tStaticParameterList::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context)
+void tStaticParameterList::Deserialize(const rrlib::xml::tNode& node, bool finstruct_context)
 {
   size_t number_of_children = std::distance(node.ChildrenBegin(), node.ChildrenEnd());
   if (number_of_children != Size())
@@ -102,7 +102,7 @@ void tStaticParameterList::Deserialize(const rrlib::xml2::tXMLNode& node, bool f
     FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Parameter list size and number of xml parameters differ. Trying anyway");
   }
   int count = std::min(number_of_children, Size());
-  rrlib::xml2::tXMLNode::const_iterator child = node.ChildrenBegin();
+  rrlib::xml::tNode::const_iterator child = node.ChildrenBegin();
   for (int i = 0; i < count; i++)
   {
     tStaticParameterBase* param = Get(i);
@@ -211,16 +211,16 @@ void tStaticParameterList::Serialize(rrlib::serialization::tOutputStream& os) co
   }
 }
 
-void tStaticParameterList::Serialize(rrlib::xml2::tXMLNode& node) const
+void tStaticParameterList::Serialize(rrlib::xml::tNode& node) const
 {
   Serialize(node, false);
 }
 
-void tStaticParameterList::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const
+void tStaticParameterList::Serialize(rrlib::xml::tNode& node, bool finstruct_context) const
 {
   for (size_t i = 0u; i < Size(); i++)
   {
-    rrlib::xml2::tXMLNode& child = node.AddChildNode("parameter");
+    rrlib::xml::tNode& child = node.AddChildNode("parameter");
     tStaticParameterBase* param = Get(i);
     child.SetAttribute("name", param->GetName());
     param->Serialize(child, finstruct_context);

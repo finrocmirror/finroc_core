@@ -34,7 +34,7 @@ namespace rrlib
 {
 namespace xml2
 {
-class tXMLNode;
+class tNode;
 } // namespace rrlib
 } // namespace xml2
 
@@ -92,7 +92,7 @@ private:
    * \param node xml node that contains data for instantiation
    * \param parent Parent element
    */
-  void Instantiate(const rrlib::xml2::tXMLNode& node, tFrameworkElement* parent);
+  void Instantiate(const rrlib::xml::tNode& node, tFrameworkElement* parent);
 
   /*!
    * Loads and instantiates contents of xml file
@@ -122,7 +122,7 @@ private:
    * \param node XML node to serialize to
    * \param current Framework element
    */
-  void SerializeChildren(rrlib::xml2::tXMLNode& node, tFrameworkElement* current);
+  void SerializeChildren(rrlib::xml::tNode& node, tFrameworkElement* current);
 
   /*!
    * Recursive helper function for ScanForCommandLineArgs
@@ -130,7 +130,7 @@ private:
    * \param result Result list
    * \param parent Node to scan childs of
    */
-  static void ScanForCommandLineArgsHelper(std::vector<util::tString>& result, const rrlib::xml2::tXMLNode& parent);
+  static void ScanForCommandLineArgsHelper(std::vector<util::tString>& result, const rrlib::xml::tNode& parent);
 
 protected:
 
@@ -223,7 +223,7 @@ public:
    */
   static void StaticInit();
 
-  void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode* root);
+  void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml::tNode* root);
 
 };
 

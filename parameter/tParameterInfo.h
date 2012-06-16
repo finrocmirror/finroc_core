@@ -86,9 +86,9 @@ public:
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
-  virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
+  virtual void Deserialize(const rrlib::xml::tNode& node);
 
-  void Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context, bool include_commmand_line);
+  void Deserialize(const rrlib::xml::tNode& node, bool finstruct_context, bool include_commmand_line);
 
   /*!
    * \return Command line option to set this parameter
@@ -164,9 +164,9 @@ public:
 
   virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 
-  virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
+  virtual void Serialize(rrlib::xml::tNode& node) const;
 
-  void Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context, bool include_command_line) const;
+  void Serialize(rrlib::xml::tNode& node, bool finstruct_context, bool include_command_line) const;
 
   /*!
    * \param commandLineOption Command line option to set this parameter

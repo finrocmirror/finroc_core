@@ -25,7 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/rtti/rtti.h"
-#include "rrlib/xml2_wrapper/tXMLDocument.h"
+#include "rrlib/xml/tDocument.h"
 
 #include "core/tFinrocAnnotation.h"
 
@@ -45,7 +45,7 @@ class tConfigFile : public tFinrocAnnotation
 private:
 
   /*! (Wrapped) XML document */
-  rrlib::xml2::tXMLDocument wrapped;
+  rrlib::xml::tDocument wrapped;
 
   /*! File name of configuration file */
   util::tString filename;
@@ -99,7 +99,7 @@ public:
    * \param create (Re)create entry node?
    * \return XMLNode representing entry
    */
-  rrlib::xml2::tXMLNode& GetEntry(const util::tString& entry, bool create = false);
+  rrlib::xml::tNode& GetEntry(const util::tString& entry, bool create = false);
 
   /*!
    * \return Filename of current config file

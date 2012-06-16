@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "rrlib/finroc_core_utils/sFiles.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
-#include "rrlib/xml2_wrapper/tXML2WrapperException.h"
+#include "rrlib/xml/tNode.h"
+#include "rrlib/xml/tException.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/serialization/serialization.h"
 
@@ -55,13 +55,13 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
     catch (const std::exception& e)
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
-      wrapped = rrlib::xml2::tXMLDocument();
+      wrapped = rrlib::xml::tDocument();
       wrapped.AddRootNode(cXML_BRANCH_NAME);
     }
   }
   else
   {
-    wrapped = rrlib::xml2::tXMLDocument();
+    wrapped = rrlib::xml::tDocument();
     wrapped.AddRootNode(cXML_BRANCH_NAME);
   }
 }
@@ -93,12 +93,12 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
       catch (const std::exception & e)
       {
         FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
-        wrapped = rrlib::xml2::tXMLDocument();
+        wrapped = rrlib::xml::tDocument();
         try
         {
           wrapped.AddRootNode(cXML_BRANCH_NAME);
         }
-        catch (const rrlib::xml2::tXML2WrapperException& e1)
+        catch (const rrlib::xml::tException& e1)
         {
           FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
         }
@@ -115,7 +115,7 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
 
     try
     {
-      wrapped = rrlib::xml2::tXMLDocument(content.c_str(), content.length() + 1);
+      wrapped = rrlib::xml::tDocument(content.c_str(), content.length() + 1);
     }
     catch (const util::tException& e)
     {
@@ -139,13 +139,13 @@ tConfigFile* tConfigFile::Find(const tFrameworkElement* element)
   return NULL;
 }
 
-rrlib::xml2::tXMLNode& tConfigFile::GetEntry(const util::tString& entry, bool create)
+rrlib::xml::tNode& tConfigFile::GetEntry(const util::tString& entry, bool create)
 {
   std::vector<std::string> nodes;
   boost::split(nodes, entry, boost::is_any_of(cSEPARATOR));
   size_t idx = (nodes.size() > 0 && nodes[0].length() == 0) ? 1 : 0; // if entry starts with '/', skip first empty string
-  rrlib::xml2::tXMLNode::iterator current = &wrapped.RootNode();
-  rrlib::xml2::tXMLNode::iterator parent = current;
+  rrlib::xml::tNode::iterator current = &wrapped.RootNode();
+  rrlib::xml::tNode::iterator parent = current;
   bool created = false;
   while (idx < nodes.size())
   {
@@ -156,7 +156,7 @@ rrlib::xml2::tXMLNode& tConfigFile::GetEntry(const util::tString& entry, bool cr
       continue;
     }
     bool found = false;
-    for (rrlib::xml2::tXMLNode::iterator child = current->ChildrenBegin(); child != current->ChildrenEnd(); ++child)
+    for (rrlib::xml::tNode::iterator child = current->ChildrenBegin(); child != current->ChildrenEnd(); ++child)
     {
       if (boost::equals(cXML_BRANCH_NAME, child->Name()) || boost::equals(cXML_LEAF_NAME, child->Name()))
       {
@@ -171,7 +171,7 @@ rrlib::xml2::tXMLNode& tConfigFile::GetEntry(const util::tString& entry, bool cr
             break;
           }
         }
-        catch (const rrlib::xml2::tXML2WrapperException& e)
+        catch (const rrlib::xml::tException& e)
         {
           FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "tree node without name");
         }
@@ -217,7 +217,7 @@ util::tString tConfigFile::GetStringEntry(const util::tString& entry)
     {
       return GetEntry(entry, false).GetTextContent();
     }
-    catch (const rrlib::xml2::tXML2WrapperException& e)
+    catch (const rrlib::xml::tException& e)
     {
       return "";
     }
@@ -295,7 +295,7 @@ void tConfigFile::Serialize(rrlib::serialization::tOutputStream& os) const
   {
     os.WriteString(wrapped.RootNode().GetXMLDump());
   }
-  catch (const rrlib::xml2::tXML2WrapperException& e)
+  catch (const rrlib::xml::tException& e)
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
   }

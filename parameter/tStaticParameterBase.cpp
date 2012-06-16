@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "rrlib/rtti/rtti.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "rrlib/xml/tNode.h"
 
 #include "core/parameter/tStaticParameterBase.h"
 #include "core/parameter/tStaticParameterList.h"
@@ -125,7 +125,7 @@ void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is)
   }
 }
 
-void tStaticParameterBase::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstructContext)
+void tStaticParameterBase::Deserialize(const rrlib::xml::tNode& node, bool finstructContext)
 {
   rrlib::rtti::tDataTypeBase dt = type;
   if (node.HasAttribute("type"))
@@ -269,7 +269,7 @@ void tStaticParameterBase::LoadValue()
       {
         if (cf->HasEntry(full_config_entry))
         {
-          rrlib::xml2::tXMLNode& node = cf->GetEntry(full_config_entry, false);
+          rrlib::xml::tNode& node = cf->GetEntry(full_config_entry, false);
           try
           {
             value->Deserialize(node);
@@ -315,7 +315,7 @@ void tStaticParameterBase::Serialize(rrlib::serialization::tOutputStream& os) co
   SerializeValue(os);
 }
 
-void tStaticParameterBase::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const
+void tStaticParameterBase::Serialize(rrlib::xml::tNode& node, bool finstruct_context) const
 {
   assert(!(node.HasAttribute("type") || node.HasAttribute("cmdline") || node.HasAttribute("config") || node.HasAttribute("attachouter")));
   rrlib::rtti::tTypedObject* val = ValPointer();

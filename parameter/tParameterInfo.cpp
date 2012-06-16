@@ -21,7 +21,7 @@
  */
 #include "rrlib/rtti/rtti.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "rrlib/xml/tNode.h"
 #include "rrlib/serialization/serialization.h"
 
 #include "core/parameter/tParameterInfo.h"
@@ -87,12 +87,12 @@ void tParameterInfo::Deserialize(rrlib::serialization::tInputStream& is)
   }
 }
 
-void tParameterInfo::Deserialize(const rrlib::xml2::tXMLNode& node)
+void tParameterInfo::Deserialize(const rrlib::xml::tNode& node)
 {
   Deserialize(node, false, true);
 }
 
-void tParameterInfo::Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context, bool include_commmand_line)
+void tParameterInfo::Deserialize(const rrlib::xml::tNode& node, bool finstruct_context, bool include_commmand_line)
 {
   if (node.HasAttribute("config"))
   {
@@ -206,7 +206,7 @@ void tParameterInfo::LoadValue(bool ignore_ready)
         util::tString full_config_entry = tConfigNode::GetFullConfigEntry(ann, config_entry);
         if (cf->HasEntry(full_config_entry))
         {
-          rrlib::xml2::tXMLNode& node = cf->GetEntry(full_config_entry, false);
+          rrlib::xml::tNode& node = cf->GetEntry(full_config_entry, false);
           if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
           {
             tCCPortBase* port = static_cast<tCCPortBase*>(ann);
@@ -306,7 +306,7 @@ void tParameterInfo::SaveValue()
     tCCPortBase* port = static_cast<tCCPortBase*>(ann);
     if (has_entry || (!port->ContainsDefaultValue()))
     {
-      rrlib::xml2::tXMLNode& node = cf->GetEntry(config_entry, true);
+      rrlib::xml::tNode& node = cf->GetEntry(config_entry, true);
       tCCPortDataManager* c = port->GetInInterThreadContainer();
       c->GetObject()->Serialize(node);
       c->Recycle2();
@@ -317,7 +317,7 @@ void tParameterInfo::SaveValue()
     tPortBase* port = static_cast<tPortBase*>(ann);
     if (has_entry || (!port->ContainsDefaultValue()))
     {
-      rrlib::xml2::tXMLNode& node = cf->GetEntry(config_entry, true);
+      rrlib::xml::tNode& node = cf->GetEntry(config_entry, true);
       tPortDataManager* pd = port->GetLockedUnsafeRaw();
       pd->GetObject()->Serialize(node);
       pd->ReleaseLock();
@@ -337,12 +337,12 @@ void tParameterInfo::Serialize(rrlib::serialization::tOutputStream& os) const
   os.WriteString(finstruct_default);
 }
 
-void tParameterInfo::Serialize(rrlib::xml2::tXMLNode& node) const
+void tParameterInfo::Serialize(rrlib::xml::tNode& node) const
 {
   Serialize(node, false, true);
 }
 
-void tParameterInfo::Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context, bool include_command_line) const
+void tParameterInfo::Serialize(rrlib::xml::tNode& node, bool finstruct_context, bool include_command_line) const
 {
   assert(!(node.HasAttribute("default") || node.HasAttribute("cmdline") || node.HasAttribute("config")));
   if (config_entry.length() > 0 && (entry_set_from_finstruct || (!finstruct_context)))

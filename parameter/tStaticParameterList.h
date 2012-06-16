@@ -122,10 +122,10 @@ public:
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
-  virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
+  virtual void Deserialize(const rrlib::xml::tNode& node);
 
   // currently only used in FinstructableGroup
-  void Deserialize(const rrlib::xml2::tXMLNode& node, bool finstruct_context);
+  void Deserialize(const rrlib::xml::tNode& node, bool finstruct_context);
 
   /*!
    * Trigger evaluation of static parameters in this framework element and all of its children.
@@ -172,10 +172,10 @@ public:
 
   virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 
-  virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
+  virtual void Serialize(rrlib::xml::tNode& node) const;
 
   // currently only used in FinstructableGroup
-  void Serialize(rrlib::xml2::tXMLNode& node, bool finstruct_context) const;
+  void Serialize(rrlib::xml::tNode& node, bool finstruct_context) const;
 
   /*!
    * \param create_action CreateModuleAction that was used to create framework element

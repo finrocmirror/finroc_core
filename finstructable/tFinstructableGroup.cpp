@@ -20,10 +20,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "rrlib/xml/tNode.h"
 #include "rrlib/finroc_core_utils/sFiles.h"
-#include "rrlib/xml2_wrapper/tXML2WrapperException.h"
-#include "rrlib/xml2_wrapper/tXMLDocument.h"
+#include "rrlib/xml/tException.h"
+#include "rrlib/xml/tDocument.h"
 #include <set>
 
 #include "core/finstructable/tFinstructableGroup.h"
@@ -164,7 +164,7 @@ util::tString tFinstructableGroup::GetEdgeLink(tAbstractPort* ap)
   return ap->GetQualifiedName().substr(link_tmp.length());
 }
 
-void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFrameworkElement* parent)
+void tFinstructableGroup::Instantiate(const rrlib::xml::tNode& node, tFrameworkElement* parent)
 {
   try
   {
@@ -181,9 +181,9 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     }
 
     // read parameters
-    rrlib::xml2::tXMLNode::const_iterator child_node = node.ChildrenBegin();
-    const rrlib::xml2::tXMLNode* parameters = NULL;
-    const rrlib::xml2::tXMLNode* constructor_params = NULL;
+    rrlib::xml::tNode::const_iterator child_node = node.ChildrenBegin();
+    const rrlib::xml::tNode* parameters = NULL;
+    const rrlib::xml::tNode* constructor_params = NULL;
     util::tString p_name = child_node->Name();
     if (boost::equals(p_name, "constructor"))
     {
@@ -228,7 +228,7 @@ void tFinstructableGroup::Instantiate(const rrlib::xml2::tXMLNode& node, tFramew
     }
 
   }
-  catch (const rrlib::xml2::tXML2WrapperException& e)
+  catch (const rrlib::xml::tException& e)
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to instantiate element. Skipping...");
     LogException(e);
@@ -253,8 +253,8 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
     try
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Loading XML: ", xml_file_);
-      rrlib::xml2::tXMLDocument doc(util::sFiles::GetFinrocXMLDocument(xml_file_, false));
-      rrlib::xml2::tXMLNode& root = doc.RootNode();
+      rrlib::xml::tDocument doc(util::sFiles::GetFinrocXMLDocument(xml_file_, false));
+      rrlib::xml::tNode& root = doc.RootNode();
       link_tmp = GetQualifiedName() + "/";
       if (main_name.length() == 0 && root.HasAttribute("defaultname"))
       {
@@ -291,7 +291,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
         }
       }
 
-      for (rrlib::xml2::tXMLNode::const_iterator node = root.ChildrenBegin(); node != root.ChildrenEnd(); ++node)
+      for (rrlib::xml::tNode::const_iterator node = root.ChildrenBegin(); node != root.ChildrenEnd(); ++node)
       {
         util::tString name = node->Name();
         if (boost::equals(name, "staticparameter"))
@@ -407,10 +407,10 @@ void tFinstructableGroup::SaveXml()
       save_to = save_to_alt;
     }
     FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Saving XML: ", save_to);
-    rrlib::xml2::tXMLDocument doc;
+    rrlib::xml::tDocument doc;
     try
     {
-      rrlib::xml2::tXMLNode& root = doc.AddRootNode("FinstructableGroup");
+      rrlib::xml::tNode& root = doc.AddRootNode("FinstructableGroup");
 
       // serialize default main name
       if (main_name.length() > 0)
@@ -427,7 +427,7 @@ void tFinstructableGroup::SaveXml()
           tStaticParameterBase* sp = spl->Get(i);
           if (sp->IsStaticParameterProxy())
           {
-            rrlib::xml2::tXMLNode& proxy = root.AddChildNode("staticparameter");
+            rrlib::xml::tNode& proxy = root.AddChildNode("staticparameter");
             proxy.SetAttribute("name", sp->GetName());
           }
         }
@@ -466,7 +466,7 @@ void tFinstructableGroup::SaveXml()
       FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Saving successful.");
 
     }
-    catch (const rrlib::xml2::tXML2WrapperException& e)
+    catch (const rrlib::xml::tException& e)
     {
       const char* msg = e.what();
       FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Saving failed: ", msg);
@@ -481,11 +481,11 @@ std::vector<util::tString> tFinstructableGroup::ScanForCommandLineArgs(const uti
   std::vector<util::tString> result;
   try
   {
-    rrlib::xml2::tXMLDocument doc(util::sFiles::GetFinrocXMLDocument(finroc_file, false));
+    rrlib::xml::tDocument doc(util::sFiles::GetFinrocXMLDocument(finroc_file, false));
     try
     {
       FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG, "Scanning for command line options in ", finroc_file);
-      rrlib::xml2::tXMLNode& root = doc.RootNode();
+      rrlib::xml::tNode& root = doc.RootNode();
       ScanForCommandLineArgsHelper(result, root);
       FINROC_LOG_PRINTF_STATIC(rrlib::logging::eLL_DEBUG, "Scanning successful. Found %d additional options.", result.size());
     }
@@ -499,9 +499,9 @@ std::vector<util::tString> tFinstructableGroup::ScanForCommandLineArgs(const uti
   return result;
 }
 
-void tFinstructableGroup::ScanForCommandLineArgsHelper(std::vector<util::tString>& result, const rrlib::xml2::tXMLNode& parent)
+void tFinstructableGroup::ScanForCommandLineArgsHelper(std::vector<util::tString>& result, const rrlib::xml::tNode& parent)
 {
-  for (rrlib::xml2::tXMLNode::const_iterator node = parent.ChildrenBegin(); node != parent.ChildrenEnd(); ++node)
+  for (rrlib::xml::tNode::const_iterator node = parent.ChildrenBegin(); node != parent.ChildrenEnd(); ++node)
   {
     util::tString name(node->Name());
     if (node->HasAttribute("cmdline") && (boost::equals(name, "staticparameter") || boost::equals(name, "parameter")))
@@ -512,7 +512,7 @@ void tFinstructableGroup::ScanForCommandLineArgsHelper(std::vector<util::tString
   }
 }
 
-void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFrameworkElement* current)
+void tFinstructableGroup::SerializeChildren(rrlib::xml::tNode& node, tFrameworkElement* current)
 {
   tFrameworkElement::tChildIterator ci(current);
   ::finroc::core::tFrameworkElement* fe = NULL;
@@ -523,7 +523,7 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
     if (fe->IsReady() && fe->GetFlag(tCoreFlags::cFINSTRUCTED))
     {
       // serialize framework element
-      rrlib::xml2::tXMLNode& n = node.AddChildNode("element");
+      rrlib::xml::tNode& n = node.AddChildNode("element");
       n.SetAttribute("name", fe->GetCName());
       tCreateFrameworkElementAction* cma = runtime_construction::GetConstructibleElements()[spl->GetCreateAction()];
       n.SetAttribute("group", cma->GetModuleGroup());
@@ -534,12 +534,12 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml2::tXMLNode& node, tFramew
       n.SetAttribute("type", cma->GetName());
       if (cps != NULL)
       {
-        rrlib::xml2::tXMLNode& pn = n.AddChildNode("constructor");
+        rrlib::xml::tNode& pn = n.AddChildNode("constructor");
         cps->Serialize(pn, true);
       }
       if (spl != NULL)
       {
-        rrlib::xml2::tXMLNode& pn = n.AddChildNode("parameters");
+        rrlib::xml::tNode& pn = n.AddChildNode("parameters");
         spl->Serialize(pn, true);
       }
 
@@ -571,7 +571,7 @@ void tFinstructableGroup::StaticInit()
   startup_loaded_finroc_libs = sDynamicLoading::GetLoadedFinrocLibraries();
 }
 
-void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2::tXMLNode* root)
+void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml::tNode* root)
 {
   assert((fe->IsPort()));
   tAbstractPort* ap = static_cast<tAbstractPort*>(fe);
@@ -590,7 +590,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
 
         if (outermostGroup && info->GetCommandLineOption().length() > 0)
         {
-          rrlib::xml2::tXMLNode& config = root->AddChildNode("parameter");
+          rrlib::xml::tNode& config = root->AddChildNode("parameter");
           config.SetAttribute("link", GetEdgeLink(ap));
           config.SetAttribute("cmdline", info->GetCommandLineOption());
         }
@@ -598,7 +598,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
         return;
       }
 
-      rrlib::xml2::tXMLNode& config = root->AddChildNode("parameter");
+      rrlib::xml::tNode& config = root->AddChildNode("parameter");
       config.SetAttribute("link", GetEdgeLink(ap));
       info->Serialize(config, true, outermostGroup);
     }
@@ -639,7 +639,7 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
     }
 
     // save edge
-    rrlib::xml2::tXMLNode& edge = root->AddChildNode("edge");
+    rrlib::xml::tNode& edge = root->AddChildNode("edge");
     edge.SetAttribute("src", GetEdgeLink(ap));
     edge.SetAttribute("dest", GetEdgeLink(ap2));
   }
@@ -657,14 +657,14 @@ void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml2:
       if (le->GetSourceLink().length() > 0)
       {
         // save edge
-        rrlib::xml2::tXMLNode& edge = root->AddChildNode("edge");
+        rrlib::xml::tNode& edge = root->AddChildNode("edge");
         edge.SetAttribute("src", GetEdgeLink(le->GetSourceLink()));
         edge.SetAttribute("dest", GetEdgeLink(ap));
       }
       else
       {
         // save edge
-        rrlib::xml2::tXMLNode& edge = root->AddChildNode("edge");
+        rrlib::xml::tNode& edge = root->AddChildNode("edge");
         edge.SetAttribute("src", GetEdgeLink(ap));
         edge.SetAttribute("dest", GetEdgeLink(le->GetTargetLink()));
       }

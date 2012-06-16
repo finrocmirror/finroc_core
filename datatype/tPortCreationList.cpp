@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "rrlib/rtti/rtti.h"
-#include "rrlib/xml2_wrapper/tXMLNode.h"
+#include "rrlib/xml/tNode.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "rrlib/serialization/serialization.h"
 
@@ -152,7 +152,7 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
   }
 }
 
-void tPortCreationList::Deserialize(const rrlib::xml2::tXMLNode& node)
+void tPortCreationList::Deserialize(const rrlib::xml::tNode& node)
 {
   assert(((io_vector != NULL)) && "Only available on local systems");
   {
@@ -161,7 +161,7 @@ void tPortCreationList::Deserialize(const rrlib::xml2::tXMLNode& node)
     util::tSimpleList<tAbstractPort*> ports;
     GetPorts(io_vector, ports);
     size_t i = 0u;
-    for (rrlib::xml2::tXMLNode::const_iterator port = node.ChildrenBegin(); port != node.ChildrenEnd(); ++port, ++i)
+    for (rrlib::xml::tNode::const_iterator port = node.ChildrenBegin(); port != node.ChildrenEnd(); ++port, ++i)
     {
       tAbstractPort* ap = i < ports.Size() ? ports.Get(i) : NULL;
       util::tString port_name = port->Name();
@@ -239,7 +239,7 @@ void tPortCreationList::Serialize(rrlib::serialization::tOutputStream& os) const
   }
 }
 
-void tPortCreationList::Serialize(rrlib::xml2::tXMLNode& node) const
+void tPortCreationList::Serialize(rrlib::xml::tNode& node) const
 {
   assert(((io_vector != NULL)) && "Only available on local systems");
   {
@@ -251,7 +251,7 @@ void tPortCreationList::Serialize(rrlib::xml2::tXMLNode& node) const
     for (int i = 0; i < size; i++)
     {
       tAbstractPort* p = ports.Get(i);
-      rrlib::xml2::tXMLNode& child = node.AddChildNode("port");
+      rrlib::xml::tNode& child = node.AddChildNode("port");
       child.SetAttribute("name", p->GetCName());
       child.SetAttribute("type", p->GetDataType().GetName());
       tFinstructableGroup::AddDependency(p->GetDataType());

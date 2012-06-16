@@ -60,7 +60,7 @@ public:
     is >> buffer;
   }
 
-  virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
+  virtual void Deserialize(const rrlib::xml::tNode& node);
 
   /*!
    * \return XML content as text
@@ -80,7 +80,7 @@ public:
     os << buffer;
   }
 
-  virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
+  virtual void Serialize(rrlib::xml::tNode& node) const;
 
   /*!
    * \param s String to set buffer to
@@ -93,7 +93,7 @@ public:
   /*!
    * \param n Node to set buffer to
    */
-  void Set(const rrlib::xml2::tXMLNode& n);
+  void Set(const rrlib::xml::tNode& n);
 
   /*!
    * (same as Get())

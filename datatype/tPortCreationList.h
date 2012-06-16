@@ -161,7 +161,7 @@ public:
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
-  virtual void Deserialize(const rrlib::xml2::tXMLNode& node);
+  virtual void Deserialize(const rrlib::xml::tNode& node);
 
   /*!
    * \return (Local) change listener
@@ -190,7 +190,7 @@ public:
 
   virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 
-  virtual void Serialize(rrlib::xml2::tXMLNode& node) const;
+  virtual void Serialize(rrlib::xml::tNode& node) const;
 
   /*!
    * \param listener (Local) change listener
