@@ -516,7 +516,7 @@ void tFinstructableGroup::SaveXml()
         tAbstractPort& ap = static_cast<tAbstractPort&>(fe);
 
         // second pass?
-        bool outermostGroup = GetParent() == tRuntimeEnvironment::GetInstance();
+        bool outermostGroup = this->GetParent() == tRuntimeEnvironment::GetInstance();
         tParameterInfo* info = ap.GetAnnotation<tParameterInfo>();
 
         if (info != NULL && info->HasNonDefaultFinstructInfo())

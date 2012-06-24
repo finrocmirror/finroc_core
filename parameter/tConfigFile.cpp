@@ -263,7 +263,7 @@ void tConfigFile::LoadParameterValues(tFrameworkElement& fe)
         }
         catch (const util::tException& e)
         {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+          FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_ERROR, e);
         }
       }
     }
@@ -291,7 +291,7 @@ void tConfigFile::SaveFile()
           }
           catch (const util::tException& e)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+            FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_ERROR, e);
           }
         }
       }

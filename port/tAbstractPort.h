@@ -119,7 +119,11 @@ protected:
 public:
 
   /*! Timeout for pull operations */
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
   static constexpr rrlib::time::tDuration cPULL_TIMEOUT = std::chrono::seconds(1);
+#else
+  static rrlib::time::tDuration cPULL_TIMEOUT;
+#endif
 
   /*! constants for port change status */
   static const int8 cNO_CHANGE = 0, cCHANGED = 1, cCHANGED_INITIAL = 2;

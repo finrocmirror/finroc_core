@@ -52,7 +52,11 @@ tAbstractMethod::tAbstractMethod(tPortInterface& port_interface, const util::tSt
   port_interface.AddMethod(this);
 }
 
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
 constexpr rrlib::time::tDuration tAbstractNonVoidMethod::cDEFAULT_NET_TIMEOUT;
+#else
+rrlib::time::tDuration tAbstractNonVoidMethod::cDEFAULT_NET_TIMEOUT = std::chrono::seconds(2);
+#endif
 
 tAbstractNonVoidMethod::tAbstractNonVoidMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread, rrlib::time::tDuration default_net_timeout) :
   tAbstractMethod(port_interface, name, p1_name, p2_name, p3_name, p4_name, handle_in_extra_thread),

@@ -66,7 +66,11 @@ tAbstractPort::~tAbstractPort()
   delete link_edges;
 }
 
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
 constexpr rrlib::time::tDuration tAbstractPort::cPULL_TIMEOUT;
+#else
+rrlib::time::tDuration tAbstractPort::cPULL_TIMEOUT = std::chrono::seconds(1);
+#endif
 const int8 tAbstractPort::cNO_CHANGE, tAbstractPort::cCHANGED, tAbstractPort::cCHANGED_INITIAL;
 const uint tAbstractPort::cBULK_N_EXPRESS;
 
