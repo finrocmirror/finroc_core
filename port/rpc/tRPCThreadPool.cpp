@@ -50,8 +50,8 @@ tRPCThread& tRPCThreadPool::GetUnusedThread()
     r = new tRPCThread();
     util::sThreadUtil::SetAutoDelete(*r);
     r->Start();
-#if (__GNUC__ <= 4 && __GNUC_MINOR__ <= 5)
-    util::tThread::Sleep(250);
+#if (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ <= 5))
+    util::tThread::Sleep(std::chrono::milliseconds(250), false);
 #endif
   }
   return *r;
