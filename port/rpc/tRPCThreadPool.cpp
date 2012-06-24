@@ -41,7 +41,7 @@ tRPCThreadPool::tRPCThreadPool() :
 
 tRPCThread& tRPCThreadPool::GetUnusedThread()
 {
-  util::tLock lock1(this);
+  util::tLock lock1(obj_mutex);
   tRPCThread* r = NULL;
   r = unused_threads.Dequeue();
 

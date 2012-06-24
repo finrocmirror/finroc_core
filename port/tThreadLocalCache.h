@@ -24,7 +24,6 @@
 #define core__port__tThreadLocalCache_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-#include "rrlib/finroc_core_utils/tGarbageCollector.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPool.h"
 #include "rrlib/finroc_core_utils/container/tBoundedQElementContainer.h"
 #include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"

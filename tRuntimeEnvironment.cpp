@@ -19,8 +19,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tTime.h"
-#include "rrlib/finroc_core_utils/tGarbageCollector.h"
+#include "rrlib/finroc_core_utils/tGarbageDeleter.h"
 #include "rrlib/finroc_core_utils/stream/tChunkedBuffer.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "rrlib/util/patterns/singleton.h"
@@ -33,7 +32,6 @@
 #include "core/datatype/tUnit.h"
 #include "core/datatype/tNumber.h"
 #include "core/plugin/tPlugins.h"
-#include "core/tFrameworkElementTreeFilter.h"
 
 namespace finroc
 {
@@ -56,13 +54,13 @@ tRuntimeEnvironment::tRegistry::tRegistry() :
   listeners(),
   temp_buffer(),
   alternative_link_roots(),
-  obj_mutex(tLockOrderLevels::cRUNTIME_REGISTER)
+  mutex(tLockOrderLevels::cRUNTIME_REGISTER)
 {}
 
 tRuntimeEnvironment::tRuntimeEnvironment() :
   tFrameworkElement(NULL, "Runtime", tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cIS_RUNTIME, tLockOrderLevels::cRUNTIME_ROOT),
   registry(),
-  creation_time(util::tTime::GetPrecise()),
+  creation_time(rrlib::time::Now()),
   command_line_args(),
   unrelated(NULL)
 {
@@ -93,7 +91,7 @@ void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge* edge
 {
   FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Adding link edge connecting to ", link);
   {
-    util::tLock lock2(registry);
+    util::tLock lock2(registry.mutex);
     if (registry.link_edges.find(link) == registry.link_edges.end())
     {
       // add first edge
@@ -110,17 +108,17 @@ void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge* edge
 
     // directly notify link edge?
     tAbstractPort* p = GetPort(link);
-    if (p != NULL)
+    if (p)
     {
-      edge->LinkAdded(this, link, p);
+      edge->LinkAdded(*this, link, *p);
     }
   }
 }
 
-void tRuntimeEnvironment::AddListener(tRuntimeListener* listener)
+void tRuntimeEnvironment::AddListener(tRuntimeListener& listener)
 {
-  util::tLock lock2(registry);
-  registry.listeners.Add(listener);
+  util::tLock lock2(registry.mutex);
+  registry.listeners.AddListener(listener);
 }
 
 util::tString tRuntimeEnvironment::GetCommandLineArgument(const util::tString& name)
@@ -167,7 +165,7 @@ tAbstractPort* tRuntimeEnvironment::GetPort(int port_handle)
 
 tAbstractPort* tRuntimeEnvironment::GetPort(const util::tString& link_name)
 {
-  util::tLock lock2(registry);
+  util::tLock lock2(registry.mutex);
 
   ::finroc::core::tFrameworkElement* fe = GetChildElement(link_name, false);
   if (fe == NULL)
@@ -197,8 +195,7 @@ void tRuntimeEnvironment::InitialInit()
   // Finish initializing static members of classes
   tUnit::StaticInit();  // can safely be done first
   tConstant::StaticInit();  // needs to be done after unit
-  util::tTime::GetInstance();  // (possibly) init timing thread
-  util::tGarbageCollector::CreateAndStartInstance();
+  util::tGarbageDeleter::CreateAndStartInstance();
 
   instance_raw_ptr = &tRuntimeEnvironmentInstance::Instance(); // should be done before any ports/elements are added
 
@@ -219,7 +216,7 @@ void tRuntimeEnvironment::InitialInit()
 
 void tRuntimeEnvironment::MarkElementDeleted(tFrameworkElement* fe)
 {
-  util::tLock lock2(registry);
+  util::tLock lock2(registry.mutex);
   if (fe->IsPort())
   {
     registry.ports->MarkDeleted(fe->GetHandle());
@@ -230,21 +227,24 @@ void tRuntimeEnvironment::MarkElementDeleted(tFrameworkElement* fe)
   }
 }
 
-void tRuntimeEnvironment::PreElementInit(tFrameworkElement* element)
+void tRuntimeEnvironment::PreElementInit(tFrameworkElement& element)
 {
-  util::tLock lock2(registry);
-  registry.listeners.Notify(element, NULL, tRuntimeListener::cPRE_INIT);
+  util::tLock lock2(registry.mutex);
+  registry.listeners.Notify([&](tRuntimeListener & l)
+  {
+    l.RuntimeChange(tRuntimeListener::cPRE_INIT, element);
+  });
 }
 
-int tRuntimeEnvironment::RegisterElement(tFrameworkElement* fe)
+int tRuntimeEnvironment::RegisterElement(tFrameworkElement* fe, bool port)
 {
-  util::tLock lock2(registry);
-  return fe->IsPort() ? registry.ports->Add(static_cast<tAbstractPort*>(fe)) : registry.elements.Add(fe);
+  util::tLock lock2(registry.mutex);
+  return port ? registry.ports->Add(static_cast<tAbstractPort*>(fe)) : registry.elements.Add(fe);
 }
 
 void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* edge)
 {
-  util::tLock lock2(registry);
+  util::tLock lock2(registry.mutex);
   tLinkEdge* current = registry.link_edges[link];
   if (current == edge)
   {
@@ -277,7 +277,7 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* e
 
 void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tAbstractPort* partner_port)
 {
-  util::tLock lock2(registry);
+  util::tLock lock2(registry.mutex);
   for (tLinkEdge* current = registry.link_edges[link]; current != NULL; current = current->GetNext())
   {
     if (current->GetPortHandle() == partner_port->GetHandle())
@@ -288,35 +288,35 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tAbstractPor
   }
 }
 
-void tRuntimeEnvironment::RemoveListener(tRuntimeListener* listener)
+void tRuntimeEnvironment::RemoveListener(tRuntimeListener& listener)
 {
-  util::tLock lock2(registry);
-  registry.listeners.Remove(listener);
+  util::tLock lock2(registry.mutex);
+  registry.listeners.RemoveListener(listener);
 }
 
-void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement* element, tAbstractPort* edge_target)
+void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement& element, tAbstractPort* edge_target)
 {
-  util::tLock lock2(registry);
+  util::tLock lock2(registry.mutex);
   if (!ShuttingDown())
   {
-    if (element->GetFlag(tCoreFlags::cALTERNATE_LINK_ROOT))
+    if (element.GetFlag(tCoreFlags::cALTERNATE_LINK_ROOT))
     {
       if (change_type == tRuntimeListener::cADD)
       {
-        registry.alternative_link_roots.Add(element);
+        registry.alternative_link_roots.Add(&element);
       }
       else if (change_type == tRuntimeListener::cREMOVE)
       {
-        registry.alternative_link_roots.RemoveElem(element);
+        registry.alternative_link_roots.RemoveElem(&element);
       }
     }
 
-    if (change_type == tRuntimeListener::cADD && element->IsPort())    // check links
+    if (change_type == tRuntimeListener::cADD && element.IsPort())    // check links
     {
-      tAbstractPort* ap = static_cast<tAbstractPort*>(element);
-      for (size_t i = 0u; i < ap->GetLinkCount(); i++)
+      tAbstractPort& ap = static_cast<tAbstractPort&>(element);
+      for (size_t i = 0u; i < ap.GetLinkCount(); i++)
       {
-        ap->GetQualifiedLink(registry.temp_buffer, i);
+        ap.GetQualifiedLink(registry.temp_buffer, i);
         util::tString s = registry.temp_buffer;
         FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_2, "Checking link ", s, " with respect to link edges");
 
@@ -325,15 +325,28 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement* ele
           tLinkEdge* le = registry.link_edges[s];
           while (le != NULL)
           {
-            le->LinkAdded(this, s, ap);
+            le->LinkAdded(*this, s, ap);
             le = le->GetNext();
           }
         }
       }
-
     }
 
-    registry.listeners.Notify(element, edge_target, change_type);
+    if (edge_target)
+    {
+      assert(element.IsPort());
+      registry.listeners.Notify([&](tRuntimeListener & l)
+      {
+        l.RuntimeEdgeChange(change_type, static_cast<tAbstractPort&>(element), *edge_target);
+      });
+    }
+    else
+    {
+      registry.listeners.Notify([&](tRuntimeListener & l)
+      {
+        l.RuntimeChange(change_type, element);
+      });
+    }
   }
 }
 
@@ -348,7 +361,7 @@ void tRuntimeEnvironment::Shutdown()
 
 void tRuntimeEnvironment::UnregisterElement(tFrameworkElement* fe)
 {
-  util::tLock lock2(registry);
+  util::tLock lock2(registry.mutex);
   if (fe->IsPort())
   {
     registry.ports->Remove(fe->GetHandle());

@@ -138,12 +138,12 @@ public:
     wrapped = &wrap;
   }
 
-  void AddPortListener(tPortListener<tPortDataPtr<const T> >* listener)
+  void AddPortListener(tPortListener<tPortDataPtr<const T>>& listener)
   {
     static_cast<tPortBaseType*>(wrapped)->AddPortListenerRaw(listener);
   }
 
-  void AddPortListener(tPortListener<>* listener)
+  void AddPortListener(tPortListener<>& listener)
   {
     static_cast<tPortBaseType*>(wrapped)->AddPortListenerRaw(listener);
   }
@@ -151,7 +151,7 @@ public:
   /*!
    * \param listener Listener to add
    */
-  inline void AddPortListener(tPortListener<T>* listener)
+  inline void AddPortListener(tPortListener<T>& listener)
   {
     static_cast<tPortBaseType*>(wrapped)->AddPortListenerRaw(listener);
   }
@@ -363,7 +363,7 @@ public:
     tPortUtil<T>::Publish(static_cast<tPortBaseType*>(wrapped), data);
   }
 
-  void RemovePortListener(tPortListener<tPortDataPtr<const T> >* listener)
+  void RemovePortListener(tPortListener<tPortDataPtr<const T>>& listener)
   {
     static_cast<tPortBaseType*>(wrapped)->RemovePortListenerRaw(listener);
   }
@@ -371,7 +371,7 @@ public:
   /*!
    * \param listener Listener to add
    */
-  inline void RemovePortListener(tPortListener<T>* listener)
+  inline void RemovePortListener(tPortListener<T>& listener)
   {
     static_cast<tPortBaseType*>(wrapped)->RemovePortListenerRaw(listener);
   }

@@ -27,7 +27,7 @@ namespace core
 {
 tPortDataManager* tMultiTypePortDataBufferPool::PossiblyCreatePool(rrlib::rtti::tDataTypeBase data_type)
 {
-  util::tLock lock1(this);
+  util::tLock lock1(*this);
 
   // search for correct pool
   for (size_t i = 0u, n = pools.Size(); i < n; i++)

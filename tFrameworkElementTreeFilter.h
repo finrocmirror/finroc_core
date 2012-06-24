@@ -52,27 +52,19 @@ private:
   uint flag_result;
 
   /*! Qualified names of framework elements need to start with one of these in order to be published */
-  std::shared_ptr<util::tSimpleList<util::tString> > paths;
+  std::vector<util::tString> paths;
 
   /*! Constant for empty string - to allow this-constructor in c++ */
   static const util::tString& GetEmptyString();
 
 public:
 
-  tFrameworkElementTreeFilter();
-
-  /*!
-   * \param relevant_flags Framework element's flags that are relevant
-   * \param flag_result Result that needs to be achieved when ANDing element's flags with relevant flags (see ChildIterator)
-   */
-  tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_);
-
   /*!
    * \param relevant_flags Framework element's flags that are relevant
    * \param flag_result Result that needs to be achieved when ANDing element's flags with relevant flags (see ChildIterator)
    * \param paths Qualified names of framework elements need to start with one of these (comma-separated list of strings)
    */
-  tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_, const util::tString& paths_);
+  tFrameworkElementTreeFilter(uint relevant_flags = tCoreFlags::cSTATUS_FLAGS, uint flag_result = tCoreFlags::cREADY | tCoreFlags::cPUBLISHED, const util::tString& paths = "");
 
   /*!
    * \param element Framework element
@@ -80,7 +72,7 @@ public:
    * \param ignore_flags These flags are ignored when checking flags
    * \return Is framework element accepted by filter?
    */
-  bool Accept(tFrameworkElement* element, std::string& tmp, int ignore_flags = 0) const;
+  bool Accept(tFrameworkElement& element, std::string& tmp, int ignore_flags = 0) const;
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
@@ -105,45 +97,41 @@ public:
 
   /*!
    * Traverse (part of) element tree.
-   * Only follows primary links (no links - this way, we don't have duplicates)
+   * Only follows primary links (no other links - this way, we don't have duplicates)
    * (creates temporary StringBuilder => might not be suitable for real-time)
    *
-   * \param <T> Type of callback class
    * \param root Root element of tree
-   * \param callback Callback class instance (needs to have method 'TreeFilterCallback(tFrameworkElement* fe, P customParam)')
-   * \param custom_param Custom parameter
+   * \param f Lambda function to call for each element
    */
-  template <typename T, typename P>
-  inline void TraverseElementTree(tFrameworkElement* root, T* callback, const P& custom_param) const
+  template <typename tLambdaFunction>
+  inline void TraverseElementTree(tFrameworkElement& root, tLambdaFunction f) const
   {
     std::string sb;
-    TraverseElementTree(root, callback, custom_param, sb);
+    TraverseElementTree(root, sb, f);
   }
 
   /*!
    * Traverse (part of) element tree.
    * Only follows primary links (no links - this way, we don't have duplicates)
    *
-   * \param <T> Type of callback class
    * \param root Root element of tree
-   * \param callback Callback class instance (needs to have method 'TreeFilterCallback(tFrameworkElement* fe, P customParam)')
-   * \param custom_param Custom parameter
+   * \param f Lambda function to call for each element
    * \param tmp Temporary StringBuilder buffer
    */
-  template <typename T, typename P>
-  inline void TraverseElementTree(tFrameworkElement* root, T* callback, const P& custom_param, std::string& tmp) const
+  template <typename tLambdaFunction>
+  inline void TraverseElementTree(tFrameworkElement& root, std::string& tmp, tLambdaFunction f) const
   {
     if (Accept(root, tmp))
     {
-      callback->TreeFilterCallback(root, custom_param);
+      f(root);
     }
-    const util::tArrayWrapper<tFrameworkElement::tLink*>* children = root->GetChildren();
+    const util::tArrayWrapper<tFrameworkElement::tLink*>* children = root.GetChildren();
     for (int i = 0, n = children->Size(); i < n; i++)
     {
       tFrameworkElement::tLink* link = children->Get(i);
       if (link != NULL && link->GetChild() != NULL && link->IsPrimaryLink())
       {
-        TraverseElementTree(link->GetChild(), callback, custom_param, tmp);
+        TraverseElementTree(*link->GetChild(), tmp, f);
       }
     }
   }

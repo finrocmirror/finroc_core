@@ -30,9 +30,9 @@ namespace core
 namespace detail
 {
 
-tUnit* GetUnit(tAbstractPort* cc_port)
+tUnit* GetUnit(tAbstractPort& cc_port)
 {
-  return static_cast<tCCPortBase*>(cc_port)->GetUnit();
+  return static_cast<tCCPortBase&>(cc_port).GetUnit();
 }
 
 } // namespace

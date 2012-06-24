@@ -59,7 +59,7 @@ void tPullCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
   tPullCall::tPtr& self2 = reinterpret_cast<tPullCall::tPtr&>(self);
   assert(port);
   {
-    util::tLock lock2(port);
+    util::tLock lock2(*port);
     if (!port->IsReady())
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "pull call received for port that will soon be deleted");

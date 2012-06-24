@@ -113,24 +113,24 @@ tLinkEdge::~tLinkEdge()
   }
 }
 
-void tLinkEdge::LinkAdded(tRuntimeEnvironment* re, const util::tString& link, tAbstractPort* port)
+void tLinkEdge::LinkAdded(tRuntimeEnvironment& re, const util::tString& link, tAbstractPort& port)
 {
   {
     util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
     if (link.compare(source_link) == 0)
     {
-      tAbstractPort* target = target_link.length() > 0 ? re->GetPort(target_link) : re->GetPort(port_handle);
+      tAbstractPort* target = target_link.length() > 0 ? re.GetPort(target_link) : re.GetPort(port_handle);
       if (target != NULL)
       {
-        port->ConnectToTarget(target, finstructed);
+        port.ConnectToTarget(target, finstructed);
       }
     }
     else
     {
-      tAbstractPort* source = source_link.length() > 0 ? re->GetPort(source_link) : re->GetPort(port_handle);
+      tAbstractPort* source = source_link.length() > 0 ? re.GetPort(source_link) : re.GetPort(port_handle);
       if (source != NULL)
       {
-        port->ConnectToSource(source, finstructed);
+        port.ConnectToSource(source, finstructed);
       }
     }
   }

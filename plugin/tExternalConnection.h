@@ -55,7 +55,7 @@ private:
   bool connected;
 
   /*! Connection Listeners */
-  tConnectionListenerManager listener;
+  util::tListenerManager<tConnectionListener, util::tMutexLockOrder> listener;
 
   /*! Is this the first connect ? */
   bool first_connect;
@@ -98,9 +98,9 @@ public:
    */
   tExternalConnection(const util::tString& name, const util::tString& default_address);
 
-  inline void AddConnectionListener(tConnectionListener* l)
+  inline void AddConnectionListener(tConnectionListener& l)
   {
-    listener.Add(l);
+    listener.AddListener(l);
   }
 
   /*!
@@ -120,7 +120,10 @@ public:
   inline void FireConnectionEvent(int e)
   {
     connected = (e == tConnectionListener::cCONNECTED);
-    listener.Notify(this, NULL, e);
+    listener.Notify([&](tConnectionListener & l)
+    {
+      l.ConnectionEvent(*this, e);
+    });
   }
 
   /*!
@@ -165,13 +168,13 @@ public:
    */
   inline void Reconnect()
   {
-    util::tLock lock2(this);
+    util::tLock lock2(*this);
     Connect(last_address);
   }
 
-  inline void RemoveConnectionListener(tConnectionListener* l)
+  inline void RemoveConnectionListener(tConnectionListener& l)
   {
-    listener.Remove(l);
+    listener.RemoveListener(l);
   }
 
   /*!

@@ -75,7 +75,7 @@ private:
   std::string tmp;
 
   /*! Port to publish time spent in last call to MainLoopCallback() */
-  tPort<long> last_cycle_execution_time;
+  tPort<rrlib::time::tDuration> last_cycle_execution_time;
 
 private:
 
@@ -89,7 +89,7 @@ private:
 
 public:
 
-  tThreadContainerThread(tFrameworkElement* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed, tPort<long> last_cycle_execution_time);
+  tThreadContainerThread(tFrameworkElement* thread_container, rrlib::time::tDuration default_cycle_time, bool warn_on_cycle_time_exceed, tPort<rrlib::time::tDuration> last_cycle_execution_time);
 
   /*!
    * \param fe Framework element
@@ -104,14 +104,11 @@ public:
 
   virtual void Run();
 
-  virtual void RuntimeChange(int8 change_type, tFrameworkElement* element);
+  virtual void RuntimeChange(int8 change_type, tFrameworkElement& element);
 
-  virtual void RuntimeEdgeChange(int8 change_type, tAbstractPort* source, tAbstractPort* target);
+  virtual void RuntimeEdgeChange(int8 change_type, tAbstractPort& source, tAbstractPort& target);
 
   virtual void StopThread();
-
-  void TreeFilterCallback(tFrameworkElement* fe, bool unused);
-
 };
 
 } // namespace finroc

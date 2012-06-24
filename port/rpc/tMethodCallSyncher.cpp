@@ -32,10 +32,11 @@ const size_t tMethodCallSyncher::cMAX_THREADS;
 ::finroc::util::tArrayWrapper<tMethodCallSyncher> tMethodCallSyncher::slots(tMethodCallSyncher::cMAX_THREADS);
 
 tMethodCallSyncher::tMethodCallSyncher() :
+  util::tMutexLockOrder(tLockOrderLevels::cINNER_MOST - 300),
   index(0),
   thread(NULL),
   thread_uid(0),
-  obj_mutex(tLockOrderLevels::cINNER_MOST - 300),
+  monitor(*this),
   method_return(),
   current_method_call_index(0)
 {}
@@ -78,7 +79,7 @@ void tMethodCallSyncher::Reset()
 
 void tMethodCallSyncher::ReturnValue(tAbstractCall::tPtr& mc)
 {
-  util::tLock lock1(this);
+  util::tLock lock1(*this);
 
   if (GetThreadUid() != mc->GetThreadUid())
   {

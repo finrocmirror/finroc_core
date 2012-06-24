@@ -63,18 +63,18 @@ public:
    * \param fe Element
    * \return StartAndPausable
    */
-  inline static tExecutionControl* Find(tFrameworkElement* fe)
+  inline static tExecutionControl* Find(tFrameworkElement& fe)
   {
     return static_cast<tExecutionControl*>(FindParentWithAnnotation(fe, cTYPE));
   }
 
   /*!
-   * Returns all execution controls below and including specified element
+   * Returns all execution controls below including specified element
    *
    * \param result Result buffer for list of execution controls (controls are added to list)
    * \param elementHandle Framework element that is root of subtree to search for execution controls
    */
-  static void FindAll(util::tSimpleList<tExecutionControl*>& result, tFrameworkElement* fe);
+  static void FindAll(std::vector<tExecutionControl*>& result, tFrameworkElement& fe);
 
   /*!
    * \return Is currently executing?
@@ -97,7 +97,7 @@ public:
    *
    * \param fe Framework element that is root of subtree to search for execution controls
    */
-  static void PauseAll(tFrameworkElement* fe);
+  static void PauseAll(tFrameworkElement& fe);
 
   /*!
    * Start/Resume execution
@@ -112,7 +112,7 @@ public:
    *
    * \param fe Framework element that is root of subtree to search for execution controls
    */
-  static void StartAll(tFrameworkElement* fe);
+  static void StartAll(tFrameworkElement& fe);
 
 };
 

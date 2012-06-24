@@ -83,7 +83,7 @@ public:
     tPortCreationInfo<T> pci(args...);
     impl = new tImpl(pci);
     assert(pci.parent != NULL);
-    tStaticParameterList::GetOrCreate(pci.parent)->Add(impl);
+    tStaticParameterList::GetOrCreate(*pci.parent)->Add(impl);
   }
 
   /*!

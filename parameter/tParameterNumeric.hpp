@@ -40,12 +40,6 @@ void tParameterNumeric<T>::Set(T v)
   cache->current_value = v;
 }
 
-template<typename T>
-tParameterNumeric<T>::tNumberCache::tNumberCache() :
-  current_value(0)
-{
-}
-
 } // namespace finroc
 } // namespace core
 

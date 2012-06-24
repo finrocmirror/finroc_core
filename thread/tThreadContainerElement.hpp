@@ -36,10 +36,10 @@ template <typename ... ARGS>
 tThreadContainerElement<BASE>::tThreadContainerElement(const ARGS&... args) :
   BASE(args...),
   rt_thread("Realtime Thread", this, false),
-  cycle_time("Cycle Time", this, 40, tBounds<int>(1, 60000, true)),
+  cycle_time("Cycle Time", this, std::chrono::milliseconds(40), tBounds<rrlib::time::tDuration>(rrlib::time::tDuration::zero(), std::chrono::seconds(60), true)),
   warn_on_cycle_time_exceed("Warn on cycle time exceed", this, true),
   thread(),
-  last_cycle_execution_time("Last Cycle execution time", this, tPortFlags::cOUTPUT_PORT, tUnit::ms)
+  last_cycle_execution_time("Last Cycle execution time", this, tPortFlags::cOUTPUT_PORT)
 {
   this->AddAnnotation(new tExecutionControl(*this));
 }
@@ -47,7 +47,7 @@ tThreadContainerElement<BASE>::tThreadContainerElement(const ARGS&... args) :
 template <typename BASE>
 tThreadContainerElement<BASE>::~tThreadContainerElement()
 {
-  if (thread.get() != NULL)
+  if (thread.get())
   {
     StopThread();
     JoinThread();
@@ -57,27 +57,16 @@ tThreadContainerElement<BASE>::~tThreadContainerElement()
 template <typename BASE>
 bool tThreadContainerElement<BASE>::IsExecuting()
 {
-  std::shared_ptr<tThreadContainerThread> t = thread;
-  if (t.get() != NULL)
-  {
-    return t->IsRunning();
-  }
-  return false;
+  return thread.get();
 }
 
 template <typename BASE>
 void tThreadContainerElement<BASE>::JoinThread()
 {
+  util::tLock l(*this);
   if (thread.get() != NULL)
   {
-    try
-    {
-      thread->Join();
-    }
-    catch (const util::tInterruptedException& e)
-    {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Interrupted ?!!");
-    }
+    thread->Join();
     thread.reset();
   }
 }
@@ -85,19 +74,26 @@ void tThreadContainerElement<BASE>::JoinThread()
 template <typename BASE>
 void tThreadContainerElement<BASE>::StartExecution()
 {
-  assert((thread.get() == NULL));
+  util::tLock l(*this);
+  if (thread)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Thread is already executing.");
+    return;
+  }
   thread = util::sThreadUtil::GetThreadSharedPtr(new tThreadContainerThread(this, cycle_time.Get(), warn_on_cycle_time_exceed.Get(), last_cycle_execution_time));
   if (rt_thread.Get())
   {
     util::sThreadUtil::MakeThreadRealtime(thread);
   }
+  l.Unlock();
   thread->Start();
 }
 
 template <typename BASE>
 void tThreadContainerElement<BASE>::StopThread()
 {
-  if (thread.get() != NULL)
+  util::tLock l(*this);
+  if (thread)
   {
     thread->StopThread();
   }

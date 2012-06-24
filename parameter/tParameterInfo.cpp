@@ -126,7 +126,7 @@ void tParameterInfo::Deserialize(const rrlib::xml::tNode& node, bool finstruct_c
 
 bool tParameterInfo::IsFinstructableGroupResponsibleForConfigFileConnections(const tFrameworkElement& finstructable_group, const tFrameworkElement& ap)
 {
-  tConfigFile* cf = tConfigFile::Find(&ap);
+  tConfigFile* cf = tConfigFile::Find(ap);
   if (cf == NULL)
   {
     return finstructable_group.GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP) == NULL;
@@ -200,10 +200,10 @@ void tParameterInfo::LoadValue(bool ignore_ready)
       }
 
       // config file entry
-      tConfigFile* cf = tConfigFile::Find(ann);
+      tConfigFile* cf = tConfigFile::Find(*ann);
       if (cf != NULL && config_entry.length() > 0)
       {
-        util::tString full_config_entry = tConfigNode::GetFullConfigEntry(ann, config_entry);
+        util::tString full_config_entry = tConfigNode::GetFullConfigEntry(*ann, config_entry);
         if (cf->HasEntry(full_config_entry))
         {
           rrlib::xml::tNode& node = cf->GetEntry(full_config_entry, false);
@@ -299,7 +299,7 @@ void tParameterInfo::SaveValue()
   {
     return;
   }
-  tConfigFile* cf = tConfigFile::Find(ann);
+  tConfigFile* cf = tConfigFile::Find(*ann);
   bool has_entry = cf->HasEntry(config_entry);
   if (tFinrocTypeInfo::IsCCType(ann->GetDataType()))
   {

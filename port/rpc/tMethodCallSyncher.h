@@ -42,7 +42,7 @@ class tThreadLocalCache;
  * Thread local class for forwarding method return values
  * back to calling thread.
  */
-class tMethodCallSyncher : public util::tLogUser
+class tMethodCallSyncher : public util::tLogUser, public util::tMutexLockOrder
 {
 private:
 
@@ -67,10 +67,7 @@ public:
   static util::tMutex static_class_mutex;
 
   // for monitor functionality
-  mutable util::tMonitor monitor;
-
-  /*! Network writer threads need to be notified afterwards */
-  util::tMutexLockOrder obj_mutex;
+  mutable util::tConditionVariable monitor;
 
   //  /** Optimization for method calls handled directly by the same thread - may only be accessed and written by one thread */
   //  boolean beforeQuickReturnCheck = false;
@@ -142,7 +139,7 @@ public:
    */
   inline void Release()
   {
-    util::tLock lock2(this);
+    util::tLock lock2(*this);
     Reset();
   }
 

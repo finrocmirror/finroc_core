@@ -52,7 +52,6 @@ void tEdgeAggregator::EdgeAdded(tAbstractPort* source, tAbstractPort* target)
 
 void tEdgeAggregator::EdgeAdded(tEdgeAggregator* dest)
 {
-  util::tLock lock1(this);
   tAggregatedEdge* ae = FindAggregatedEdge(dest);
   if (ae != NULL)
   {
@@ -79,7 +78,6 @@ void tEdgeAggregator::EdgeRemoved(tAbstractPort* source, tAbstractPort* target)
 
 void tEdgeAggregator::EdgeRemoved(tEdgeAggregator* dest)
 {
-  util::tLock lock1(this);
   tAggregatedEdge* ae = FindAggregatedEdge(dest);
   if (ae != NULL)
   {

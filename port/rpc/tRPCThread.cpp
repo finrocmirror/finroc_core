@@ -28,7 +28,7 @@ namespace finroc
 namespace core
 {
 tRPCThread::tRPCThread() :
-  tLoopThread(0),
+  tLoopThread(rrlib::time::tDuration()),
 #ifdef NDEBUG  // only activate monitoring in debug mode
   tWatchDogTask(false),
 #else
@@ -46,7 +46,7 @@ tRPCThread::tRPCThread() :
 
 void tRPCThread::ExecuteTask(util::tTask& t)
 {
-  util::tLock lock1(this);
+  util::tLock lock1(*this);
   assert((next_task == NULL));
   next_task = &t;
   monitor.NotifyAll(lock1);
@@ -54,7 +54,7 @@ void tRPCThread::ExecuteTask(util::tTask& t)
 
 void tRPCThread::ExecuteTask(tSerializableReusableTask::tPtr& t)
 {
-  util::tLock lock1(this);
+  util::tLock lock1(*this);
   assert(!next_reusable_task);
   next_reusable_task = std::move(t);
   monitor.NotifyAll(lock1);
@@ -70,7 +70,7 @@ void tRPCThread::HandleWatchdogAlert()
 void tRPCThread::MainLoopCallback()
 {
   {
-    util::tLock lock2(this);
+    util::tLock lock2(*this);
     if (next_task == NULL && next_reusable_task.get() == NULL)
     {
       tRPCThreadPool::GetInstance().EnqueueThread(this);
@@ -83,9 +83,9 @@ void tRPCThread::MainLoopCallback()
   }
   while (next_task || next_reusable_task)
   {
-    assert(GetDeadLine() == cTASK_DEACTIVED);
+    assert(GetDeadLine() == rrlib::time::cNO_TIME);
 #ifndef NDEBUG
-    SetDeadLine(util::tTime::GetPrecise() + 3000); // TODO: deadline should depend on type of call
+    SetDeadLine(rrlib::time::Now() + std::chrono::seconds(3)); // TODO: deadline should depend on type of call
 #endif
     if (next_task)
     {
@@ -116,7 +116,7 @@ void tRPCThread::Run()
 
 void tRPCThread::StopThread()
 {
-  util::tLock lock2(this);
+  util::tLock lock2(*this);
   monitor.Notify(lock2);
 }
 

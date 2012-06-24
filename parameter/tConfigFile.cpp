@@ -124,17 +124,17 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
   }
 }
 
-tConfigFile* tConfigFile::Find(const tFrameworkElement* element)
+tConfigFile* tConfigFile::Find(const tFrameworkElement& element)
 {
-  ::finroc::core::tFinrocAnnotation* ann = element->GetAnnotation(cTYPE);
-  if (ann != NULL && (static_cast<tConfigFile*>(ann))->active == true)
+  tFinrocAnnotation* ann = element.GetAnnotation(cTYPE);
+  if (ann && (static_cast<tConfigFile*>(ann))->active == true)
   {
     return static_cast<tConfigFile*>(ann);
   }
-  tFrameworkElement* parent = element->GetParent();
-  if (parent != NULL)
+  tFrameworkElement* parent = element.GetParent();
+  if (parent)
   {
-    return Find(parent);
+    return Find(*parent);
   }
   return NULL;
 }
@@ -243,28 +243,59 @@ bool tConfigFile::HasEntry(const util::tString& entry)
 
 void tConfigFile::LoadParameterValues()
 {
-  LoadParameterValues(static_cast<tFrameworkElement*>(GetAnnotated()));
+  LoadParameterValues(static_cast<tFrameworkElement&>(*GetAnnotated()));
 }
 
-void tConfigFile::LoadParameterValues(tFrameworkElement* fe)
+void tConfigFile::LoadParameterValues(tFrameworkElement& fe)
 {
-  assert((fe != NULL));
+  util::tLock lock2(fe.GetRegistryLock());  // nothing should change while we're doing this
+  tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
+  fet.TraverseElementTree(fe, temp_buffer, [&](tFrameworkElement & fe)
   {
-    util::tLock lock2(fe->GetRegistryLock());  // nothing should change while we're doing this
-    tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
-    fet.TraverseElementTree(fe, this, true, temp_buffer);
-  }
+    if (Find(fe) == this)    // Does element belong to this configuration file?
+    {
+      tParameterInfo* pi = static_cast<tParameterInfo*>(fe.GetAnnotation(tParameterInfo::cTYPE));
+      if (pi)
+      {
+        try
+        {
+          pi->LoadValue();
+        }
+        catch (const util::tException& e)
+        {
+          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+        }
+      }
+    }
+  });
 }
 
 void tConfigFile::SaveFile()
 {
   // first: update tree
   tFrameworkElement* ann = static_cast<tFrameworkElement*>(GetAnnotated());
-  assert((ann != NULL));
+  assert(ann);
   {
     util::tLock lock2(ann->GetRegistryLock()); // nothing should change while we're doing this
     tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
-    fet.TraverseElementTree(ann, this, false, temp_buffer);
+    fet.TraverseElementTree(*ann, temp_buffer, [&](tFrameworkElement & fe)
+    {
+      if (Find(fe) == this)    // Does element belong to this configuration file?
+      {
+        tParameterInfo* pi = static_cast<tParameterInfo*>(fe.GetAnnotation(tParameterInfo::cTYPE));
+        if (pi)
+        {
+          try
+          {
+            pi->SaveValue();
+          }
+          catch (const util::tException& e)
+          {
+            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+          }
+        }
+      }
+    });
   }
 
   try
@@ -302,39 +333,6 @@ void tConfigFile::Serialize(rrlib::serialization::tOutputStream& os) const
   catch (const util::tException& e)
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
-  }
-}
-
-void tConfigFile::TreeFilterCallback(tFrameworkElement* fe, bool loading_parameters)
-{
-  if (Find(fe) == this)    // Does element belong to this configuration file?
-  {
-    tParameterInfo* pi = static_cast<tParameterInfo*>(fe->GetAnnotation(tParameterInfo::cTYPE));
-    if (pi != NULL)
-    {
-      if (loading_parameters == true)
-      {
-        try
-        {
-          pi->LoadValue();
-        }
-        catch (const util::tException& e)
-        {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
-        }
-      }
-      else
-      {
-        try
-        {
-          pi->SaveValue();
-        }
-        catch (const util::tException& e)
-        {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
-        }
-      }
-    }
   }
 }
 

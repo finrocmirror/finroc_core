@@ -75,7 +75,7 @@ public:
    * \param timeout Timeout for call
    */
   template <typename T>
-  inline static void PerformSynchCall(std::unique_ptr<T, tSerializableReusable::tRecycler>& call, tCallable<T>& call_me, int64 timeout)
+  inline static void PerformSynchCall(std::unique_ptr<T, tSerializableReusable::tRecycler>& call, tCallable<T>& call_me, const rrlib::time::tDuration& timeout)
   {
     tMethodCallSyncher& mcs = tThreadLocalRPCData::Get().GetMethodSyncher();
 
@@ -84,14 +84,7 @@ public:
     mcs.current_method_call_index = call->GetMethodCallIndex();
     assert(mcs.method_return.get() == NULL);
     call_me.InvokeCall(call);
-    try
-    {
-      mcs.monitor.Wait(lock2, timeout);
-    }
-    catch (const util::tInterruptedException& e)
-    {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Synch method call interrupted... this shouldn't happen... usually");
-    }
+    mcs.monitor.Wait(lock2, timeout, false);
 
     // reset stuff for next call
     mcs.GetAndUseNextCallIndex();  // Invalidate results of any incoming outdated returns

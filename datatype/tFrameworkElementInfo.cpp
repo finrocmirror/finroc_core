@@ -142,19 +142,19 @@ void tFrameworkElementInfo::Reset()
   connections.Clear();
 }
 
-void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, tFrameworkElementTreeFilter element_filter, std::string& tmp)
+void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement& fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, const tFrameworkElementTreeFilter& element_filter, std::string& tmp)
 {
   tp.WriteByte(op_code_);  // write opcode (see base class)
 
   // write common info
-  tp.WriteInt(fe->GetHandle());
-  tp.WriteInt(fe->GetAllFlags());
+  tp.WriteInt(fe.GetHandle());
+  tp.WriteInt(fe.GetAllFlags());
   if (op_code_ == tRuntimeListener::cREMOVE)
   {
     return;
   }
-  assert((!fe->IsDeleted()));
-  int cnt = fe->GetLinkCount();
+  assert(!fe.IsDeleted());
+  int cnt = fe.GetLinkCount();
   tp.WriteBoolean(element_filter.IsPortOnlyFilter());
 
   // write links (only when creating element)
@@ -164,7 +164,7 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
     {
       for (int i = 0; i < cnt; i++)
       {
-        bool unique = fe->GetQualifiedLink(tmp, i);
+        bool unique = fe.GetQualifiedLink(tmp, i);
         tp.WriteByte(1 | (unique ? tCoreFlags::cGLOBALLY_UNIQUE_LINK : 0));
         tp.WriteString(tmp.substr(1));
       }
@@ -174,8 +174,8 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
       for (int i = 0; i < cnt; i++)
       {
         // we only serialize parents that target is interested in
-        tFrameworkElement* parent = fe->GetParent(i);
-        if (element_filter.Accept(parent, tmp))
+        tFrameworkElement* parent = fe.GetParent(i);
+        if (element_filter.Accept(*parent, tmp))
         {
           // serialize 1 for another link - ORed with CoreFlags for parent LINK_ROOT and GLOBALLY_UNIQUE
           tp.WriteByte(1 | (parent->GetAllFlags() & cPARENT_FLAGS_TO_STORE));
@@ -183,7 +183,7 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
           {
             tp.WriteByte((parent->GetAllFlags() & tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS) >> 8);
           }
-          fe->WriteName(tp, i);
+          fe.WriteName(tp, i);
           tp.WriteInt(parent->GetHandle());
         }
       }
@@ -192,17 +192,17 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement* fe, int
   }
 
   // possibly write port info
-  if (fe->IsPort())
+  if (fe.IsPort())
   {
-    tAbstractPort* port = static_cast<tAbstractPort*>(fe);
+    tAbstractPort& port = static_cast<tAbstractPort&>(fe);
 
-    tp << port->GetDataType();
-    tp.WriteShort(port->GetStrategy());
-    tp.WriteShort(port->GetMinNetUpdateInterval());
+    tp << port.GetDataType();
+    tp.WriteShort(port.GetStrategy());
+    tp.WriteShort(port.GetMinNetUpdateInterval());
 
     if (element_filter.IsAcceptAllFilter())
     {
-      port->SerializeOutgoingConnections(tp);
+      port.SerializeOutgoingConnections(tp);
     }
     else if (!element_filter.IsPortOnlyFilter())
     {

@@ -25,56 +25,34 @@ namespace finroc
 {
 namespace core
 {
-tFrameworkElementTreeFilter::tFrameworkElementTreeFilter() :
-  relevant_flags(tCoreFlags::cSTATUS_FLAGS),
-  flag_result(tCoreFlags::cREADY | tCoreFlags::cPUBLISHED),
-  paths(new util::tSimpleList<util::tString>())
-{
-}
 
-tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_) :
-  relevant_flags(relevant_flags_),
-  flag_result(flag_result_),
-  paths(new util::tSimpleList<util::tString>())
+tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags, uint flag_result, const util::tString& paths) :
+  relevant_flags(relevant_flags),
+  flag_result(flag_result),
+  paths()
 {
-}
-
-tFrameworkElementTreeFilter::tFrameworkElementTreeFilter(uint relevant_flags_, uint flag_result_, const util::tString& paths_) :
-  relevant_flags(relevant_flags_),
-  flag_result(flag_result_),
-  paths(new util::tSimpleList<util::tString>())
-{
-  if (paths_.length() > 0)
+  if (paths.length() > 0)
   {
-    std::vector<util::tString> tmp;
-    boost::split(tmp, paths_, boost::is_any_of(","));
-    this->paths->AddAll(tmp);
+    boost::split(this->paths, paths, boost::is_any_of(","));
   }
 }
 
-bool tFrameworkElementTreeFilter::Accept(tFrameworkElement* element, std::string& tmp, int ignore_flags) const
+bool tFrameworkElementTreeFilter::Accept(tFrameworkElement& element, std::string& tmp, int ignore_flags) const
 {
-  if (element == NULL)
-  {
-    return false;
-  }
   int not_ignore = ~ignore_flags;
-  if ((element->GetAllFlags() & relevant_flags & not_ignore) == (flag_result & not_ignore))
+  if ((element.GetAllFlags() & relevant_flags & not_ignore) == (flag_result & not_ignore))
   {
-    if (paths->Size() == 0)
+    if (paths.size() == 0)
     {
       return true;
     }
-    bool found = (paths->Size() == 0);
-    for (size_t i = 0u, n = paths->Size(); i < n && (!found); i++)
+    element.GetQualifiedName(tmp);
+    for (auto it = paths.begin(); it < paths.end(); it++)
     {
-      element->GetQualifiedName(tmp);
-
-      if (boost::starts_with(tmp, paths->Get(i)))
+      if (boost::starts_with(tmp, *it))
       {
         return true;
       }
-
     }
   }
   return false;
@@ -84,11 +62,11 @@ void tFrameworkElementTreeFilter::Deserialize(rrlib::serialization::tInputStream
 {
   relevant_flags = is.ReadInt();
   flag_result = is.ReadInt();
-  paths->Clear();
+  paths.clear();
   int8 count = is.ReadByte();
   for (int i = 0; i < count; i++)
   {
-    paths->Add(is.ReadString());
+    paths.push_back(is.ReadString());
   }
 }
 
@@ -102,10 +80,10 @@ void tFrameworkElementTreeFilter::Serialize(rrlib::serialization::tOutputStream&
 {
   os.WriteInt(relevant_flags);
   os.WriteInt(flag_result);
-  os.WriteByte(paths->Size());
-  for (size_t i = 0u; i < paths->Size(); i++)
+  os.WriteByte(paths.size());
+  for (auto it = paths.begin(); it < paths.end(); it++)
   {
-    os.WriteString(paths->Get(i));
+    os.WriteString(*it);
   }
 }
 

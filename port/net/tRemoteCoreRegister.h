@@ -39,15 +39,12 @@ namespace core
  * Allow threads to iterate concurrently, while another one makes modifications.
  */
 template < typename T = finroc::util::tObject* >
-class tRemoteCoreRegister : public util::tUncopyableObject
+class tRemoteCoreRegister : public util::tUncopyableObject, util::tMutex
 {
 public:
   class tIterator; // inner class forward declaration
 
 public:
-
-  // for synchronization on an object of this class
-  mutable util::tMutex obj_mutex;
 
   /*!
    * First and second level block sizes
@@ -88,7 +85,6 @@ private:
 public:
 
   tRemoteCoreRegister() :
-    obj_mutex(),
     elements(cLEVEL_ONE_BLOCK_SIZE)
   {}
 

@@ -52,11 +52,11 @@ tAbstractMethod::tAbstractMethod(tPortInterface& port_interface, const util::tSt
   port_interface.AddMethod(this);
 }
 
-const int tAbstractNonVoidMethod::cDEFAULT_NET_TIMEOUT;
+constexpr rrlib::time::tDuration tAbstractNonVoidMethod::cDEFAULT_NET_TIMEOUT;
 
-tAbstractNonVoidMethod::tAbstractNonVoidMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread, int default_net_timeout_) :
+tAbstractNonVoidMethod::tAbstractNonVoidMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread, rrlib::time::tDuration default_net_timeout) :
   tAbstractMethod(port_interface, name, p1_name, p2_name, p3_name, p4_name, handle_in_extra_thread),
-  default_net_timeout(default_net_timeout_)
+  default_net_timeout(default_net_timeout)
 {
 }
 

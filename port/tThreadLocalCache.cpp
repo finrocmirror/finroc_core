@@ -62,7 +62,7 @@ static inline unsigned int GetLongevity(util::tSimpleListWithMutex<tThreadLocalC
 }
 
 __thread tThreadLocalCache* tThreadLocalCache::info = NULL;
-util::tMutexLockOrder* tThreadLocalCache::infos_mutex = &tThreadLocalCacheInfos::Instance().obj_mutex;
+util::tMutexLockOrder* tThreadLocalCache::infos_mutex = &tThreadLocalCacheInfos::Instance();
 util::tAtomicInt tThreadLocalCache::thread_uid_counter(1);
 
 tThreadLocalCache::tThreadLocalCache() :

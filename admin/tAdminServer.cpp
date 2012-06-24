@@ -96,16 +96,19 @@ void tAdminServer::Connect(tAbstractPort* src, tAbstractPort* dest)
   }
 }
 
-void tAdminServer::GetExecutionControls(util::tSimpleList<tExecutionControl*>& result, int element_handle)
+void tAdminServer::GetExecutionControls(std::vector<tExecutionControl*>& result, int element_handle)
 {
-  ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(element_handle);
-  tExecutionControl::FindAll(result, fe);
-  if (result.Size() == 0)
+  core::tFrameworkElement* fe = GetRuntime()->GetElement(element_handle);
+  if (fe)
   {
-    tExecutionControl* ec = tExecutionControl::Find(fe);
-    if (ec != NULL)
+    tExecutionControl::FindAll(result, *fe);
+    if (result.size() == 0)
     {
-      result.Add(ec);
+      tExecutionControl* ec = tExecutionControl::Find(*fe);
+      if (ec != NULL)
+      {
+        result.push_back(ec);
+      }
     }
   }
 }
@@ -188,7 +191,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
   {
     assert((method == cGET_PARAMETER_INFO));
 
-    ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
+    core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
     if (fe == NULL || (!fe->IsReady()))
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not get parameter info for framework element ", handle);
@@ -196,7 +199,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
       return tPortDataPtr<rrlib::serialization::tMemoryBuffer>();
     }
 
-    tConfigFile* cf = tConfigFile::Find(fe);
+    tConfigFile* cf = tConfigFile::Find(*fe);
     tPortDataPtr<rrlib::serialization::tMemoryBuffer> buf = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
     rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::eNames);
     if (cf == NULL)
@@ -206,11 +209,30 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
     else
     {
       co.WriteBoolean(true);
-      tCallbackParameters params(cf, &(co));
-      co.WriteInt((static_cast< ::finroc::core::tFrameworkElement*>(cf->GetAnnotated()))->GetHandle());
+      co.WriteInt((static_cast<core::tFrameworkElement*>(cf->GetAnnotated()))->GetHandle());
       cf->Serialize(co);
       tFrameworkElementTreeFilter filter;
-      filter.TraverseElementTree(fe, this, params);
+      filter.TraverseElementTree(*fe, [&](tFrameworkElement & fe)
+      {
+        tConfigFile* fe_config = static_cast<tConfigFile*>(fe.GetAnnotation(tConfigFile::cTYPE));
+        if (fe_config)
+        {
+          co.WriteByte(1);
+          co.WriteInt(fe.GetHandle());
+          co.WriteString(fe_config->GetFilename());
+          co.WriteBoolean(fe_config->IsActive());
+        }
+        else
+        {
+          tParameterInfo* pi = static_cast<tParameterInfo*>(fe.GetAnnotation(tParameterInfo::cTYPE));
+          if (pi && cf == tConfigFile::Find(fe))
+          {
+            co.WriteByte(2);
+            co.WriteInt(fe.GetHandle());
+            co.WriteString(pi->GetConfigEntry());
+          }
+        }
+      });
     }
     co.Close();
     return buf;
@@ -220,15 +242,15 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
 int tAdminServer::HandleCall(const tAbstractMethod& method, int handle)
 {
   assert(method == cIS_RUNNING);
-  util::tSimpleList<tExecutionControl*> ecs;
+  std::vector<tExecutionControl*> ecs;
   GetExecutionControls(ecs, handle);
 
   bool stopped = false;
   bool running = false;
-  for (size_t i = 0u; i < ecs.Size(); i++)
+  for (auto it = ecs.begin(); it < ecs.end(); it++)
   {
-    stopped |= (!ecs.Get(i)->IsRunning());
-    running |= ecs.Get(i)->IsRunning();
+    stopped |= (!(*it)->IsRunning());
+    running |= (*it)->IsRunning();
   }
   if (running && stopped)
   {
@@ -322,7 +344,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int port_handle
   ::finroc::core::tAbstractPort* port = tRuntimeEnvironment::GetInstance()->GetPort(port_handle);
   if (port != NULL && port->IsReady())
   {
-    util::tLock lock3(port);
+    util::tLock lock3(GetRegistryLock()); // TODO: obtaining registry lock is quite heavy-weight - however, set calls should not occur often
     if (port->IsReady())
     {
       rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::eNames);
@@ -423,7 +445,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int cma_index, 
             ci.Close();
           }
           ::finroc::core::tFrameworkElement* created = cma->CreateModule(parent, *name, params);
-          tFinstructableGroup::SetFinstructed(created, cma, params);
+          tFinstructableGroup::SetFinstructed(*created, cma, params);
           created->Init();
           params = NULL;
 
@@ -468,29 +490,29 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int handle)
 
   if (method == cSTART_EXECUTION || method == cPAUSE_EXECUTION)
   {
-    util::tSimpleList<tExecutionControl*> ecs;
+    std::vector<tExecutionControl*> ecs;
     GetExecutionControls(ecs, handle);
-    if (ecs.Size() == 0)
+    if (ecs.size() == 0)
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Start/Pause command has not effect");
     }
     if (method == cSTART_EXECUTION)
     {
-      for (size_t i = 0u; i < ecs.Size(); i++)
+      for (auto it = ecs.begin(); it < ecs.end(); it++)
       {
-        if (!ecs.Get(i)->IsRunning())
+        if (!(*it)->IsRunning())
         {
-          ecs.Get(i)->Start();
+          (*it)->Start();
         }
       }
     }
     else if (method == cPAUSE_EXECUTION)
     {
-      for (size_t i = 0u; i < ecs.Size(); i++)
+      for (auto it = ecs.begin(); it < ecs.end(); it++)
       {
-        if (ecs.Get(i)->IsRunning())
+        if ((*it)->IsRunning())
         {
-          ecs.Get(i)->Pause();
+          (*it)->Pause();
         }
       }
     }
@@ -514,28 +536,6 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int handle)
   else
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not save finstructable group, because it does not appear to be available.");
-  }
-}
-
-void tAdminServer::TreeFilterCallback(tFrameworkElement* fe, const tCallbackParameters& custom_param)
-{
-  tConfigFile* cf = static_cast<tConfigFile*>(fe->GetAnnotation(tConfigFile::cTYPE));
-  if (cf != NULL)
-  {
-    custom_param.co->WriteByte(1);
-    custom_param.co->WriteInt(fe->GetHandle());
-    custom_param.co->WriteString(cf->GetFilename());
-    custom_param.co->WriteBoolean(cf->IsActive());
-  }
-  else
-  {
-    tParameterInfo* pi = static_cast<tParameterInfo*>(fe->GetAnnotation(tParameterInfo::cTYPE));
-    if (pi != NULL && custom_param.cf == tConfigFile::Find(fe))
-    {
-      custom_param.co->WriteByte(2);
-      custom_param.co->WriteInt(fe->GetHandle());
-      custom_param.co->WriteString(pi->GetConfigEntry());
-    }
   }
 }
 

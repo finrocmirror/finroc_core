@@ -53,7 +53,7 @@ class tThreadContainerElement : public BASE, public tStartAndPausable
   tStaticParameter<bool> rt_thread;
 
   /*! Thread cycle time */
-  tStaticParameter<int> cycle_time;
+  tStaticParameter<rrlib::time::tDuration> cycle_time;
 
   /*! Warn on cycle time exceed */
   tStaticParameter<bool> warn_on_cycle_time_exceed;
@@ -62,7 +62,7 @@ class tThreadContainerElement : public BASE, public tStartAndPausable
   std::shared_ptr<tThreadContainerThread> thread;
 
   /*! Port to publish time spent in last call to MainLoopCallback() */
-  core::tPort<long> last_cycle_execution_time;
+  core::tPort<rrlib::time::tDuration> last_cycle_execution_time;
 
   /*!
    * Stop thread in thread container (does not block - call join thread to block until thread has terminated)
@@ -82,7 +82,7 @@ public:
   /*!
    * \return Cycle time in milliseconds
    */
-  inline int GetCycleTime()
+  inline rrlib::time::tDuration GetCycleTime()
   {
     return cycle_time.Get();
   }
@@ -101,11 +101,19 @@ public:
   }
 
   /*!
-   * \param period Cycle time in milliseconds
+   * \param period Cycle time
    */
-  inline void SetCycleTime(int period)
+  inline void SetCycleTime(const rrlib::time::tDuration& period)
   {
     cycle_time.Set(period);
+  }
+
+  /*!
+   * \param period Cycle time in milliseconds
+   */
+  inline void SetCycleTime(int64_t period)
+  {
+    SetCycleTime(std::chrono::milliseconds(period));
   }
 
   virtual void StartExecution();

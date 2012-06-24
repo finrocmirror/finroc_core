@@ -40,53 +40,44 @@ tExecutionControl::tExecutionControl() :
   throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
 }
 
-namespace internal
+void tExecutionControl::FindAll(std::vector<tExecutionControl*>& result, tFrameworkElement& fe)
 {
-struct tFindCallback
-{
-  void TreeFilterCallback(tFrameworkElement* fe, util::tSimpleList<tExecutionControl*>* const customParam)
-  {
-    tExecutionControl* ec = fe->GetAnnotation<tExecutionControl>();
-    if (ec != NULL)
-    {
-      customParam->Add(ec);
-    }
-  }
-};
-}
-
-void tExecutionControl::FindAll(util::tSimpleList<tExecutionControl*>& result, tFrameworkElement* fe)
-{
-  if (fe != NULL && (fe->IsReady()))
+  if (fe.IsReady())
   {
     tFrameworkElementTreeFilter filter;
-    internal::tFindCallback cb;
-    filter.TraverseElementTree(fe, &cb, &result);
+    filter.TraverseElementTree(fe, [&](tFrameworkElement&)
+    {
+      tExecutionControl* ec = fe.GetAnnotation<tExecutionControl>();
+      if (ec)
+      {
+        result.push_back(ec);
+      }
+    });
   }
 }
 
-void tExecutionControl::PauseAll(tFrameworkElement* fe)
+void tExecutionControl::PauseAll(tFrameworkElement& fe)
 {
-  util::tSimpleList<tExecutionControl*> ecs;
+  std::vector<tExecutionControl*> ecs;
   FindAll(ecs, fe);
-  for (size_t i = 0; i < ecs.Size(); i++)
+  for (auto it = ecs.begin(); it < ecs.end(); it++)
   {
-    if (ecs.Get(i)->IsRunning())
+    if ((*it)->IsRunning())
     {
-      ecs.Get(i)->Pause();
+      (*it)->Pause();
     }
   }
 }
 
-void tExecutionControl::StartAll(tFrameworkElement* fe)
+void tExecutionControl::StartAll(tFrameworkElement& fe)
 {
-  util::tSimpleList<tExecutionControl*> ecs;
+  std::vector<tExecutionControl*> ecs;
   FindAll(ecs, fe);
-  for (size_t i = 0; i < ecs.Size(); i++)
+  for (auto it = ecs.begin(); it < ecs.end(); it++)
   {
-    if (!ecs.Get(i)->IsRunning())
+    if (!(*it)->IsRunning())
     {
-      ecs.Get(i)->Start();
+      (*it)->Start();
     }
   }
 }

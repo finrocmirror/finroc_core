@@ -55,7 +55,7 @@ void tStaticParameterList::Add(tStaticParameterBase* param)
 
 void tStaticParameterList::AnnotatedObjectInitialized()
 {
-  DoStaticParameterEvaluation(GetAnnotated());
+  DoStaticParameterEvaluation(*GetAnnotated());
 }
 
 void tStaticParameterList::Clear()
@@ -85,7 +85,7 @@ void tStaticParameterList::Deserialize(rrlib::serialization::tInputStream& is)
       tStaticParameterBase* param = parameters.Get(i);
       param->Deserialize(is);
     }
-    DoStaticParameterEvaluation(ann);
+    DoStaticParameterEvaluation(*ann);
   }
 }
 
@@ -111,16 +111,16 @@ void tStaticParameterList::Deserialize(const rrlib::xml::tNode& node, bool finst
   }
 }
 
-void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement* fe)
+void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement& fe)
 {
-  util::tLock lock2(fe->GetRegistryLock());
+  util::tLock lock2(fe.GetRegistryLock());
 
   // all parameters attached to any of the module's parameters
   util::tSimpleList<tStaticParameterBase*> attached_parameters;
   util::tSimpleList<tStaticParameterBase*> attached_parameters_tmp;
 
-  tStaticParameterList* spl = fe->GetAnnotation<tStaticParameterList>();
-  if (spl != NULL)
+  tStaticParameterList* spl = fe.GetAnnotation<tStaticParameterList>();
+  if (spl)
   {
 
     // Reevaluate parameters and check whether they have changed
@@ -135,7 +135,7 @@ void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement* fe)
 
     if (changed)
     {
-      fe->EvaluateStaticParameters();
+      fe.EvaluateStaticParameters();
 
       // Reset change flags for all parameters
       for (size_t i = 0; i < spl->Size(); i++)
@@ -144,21 +144,21 @@ void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement* fe)
       }
 
       // initialize any new child elements
-      if (fe->IsReady())
+      if (fe.IsReady())
       {
-        fe->Init();
+        fe.Init();
       }
     }
   }
 
   // evaluate children's static parameters
-  const util::tArrayWrapper<tFrameworkElement::tLink*>* iterable = fe->GetChildren();
+  const util::tArrayWrapper<tFrameworkElement::tLink*>* iterable = fe.GetChildren();
   for (int i = 0, n = iterable->Size(); i < n; i++)
   {
     tFrameworkElement::tLink* child = iterable->Get(i);
     if (child != NULL && child->IsPrimaryLink() && (!child->GetChild()->IsDeleted()))
     {
-      DoStaticParameterEvaluation(child->GetChild());
+      DoStaticParameterEvaluation(*child->GetChild());
     }
   }
 
@@ -167,7 +167,7 @@ void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement* fe)
   {
     if (attached_parameters.Get(i)->HasChanged())
     {
-      DoStaticParameterEvaluation(attached_parameters.Get(i)->GetParentList()->GetAnnotated());
+      DoStaticParameterEvaluation(*attached_parameters.Get(i)->GetParentList()->GetAnnotated());
     }
   }
 }
@@ -177,13 +177,13 @@ tFrameworkElement* tStaticParameterList::GetAnnotated()
   return static_cast<tFrameworkElement*>(tFinrocAnnotation::GetAnnotated());
 }
 
-tStaticParameterList* tStaticParameterList::GetOrCreate(tFrameworkElement* fe)
+tStaticParameterList* tStaticParameterList::GetOrCreate(tFrameworkElement& fe)
 {
-  tStaticParameterList* result = static_cast<tStaticParameterList*>(fe->GetAnnotation(cTYPE));
+  tStaticParameterList* result = static_cast<tStaticParameterList*>(fe.GetAnnotation(cTYPE));
   if (result == NULL)
   {
     result = new tStaticParameterList();
-    fe->AddAnnotation(result);
+    fe.AddAnnotation(result);
   }
   return result;
 }

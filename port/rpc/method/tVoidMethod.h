@@ -89,7 +89,7 @@ public:
     Call(port, false, args...);
   }
 
-  virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port, tAbstractAsyncReturnHandler& ret_handler, int net_timeout)
+  virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port, tAbstractAsyncReturnHandler& ret_handler, const rrlib::time::tDuration& net_timeout)
   {
     throw util::tRuntimeException("Only supported by non-void methods", CODE_LOCATION_MACRO);
   }

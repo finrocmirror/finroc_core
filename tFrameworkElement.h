@@ -62,8 +62,19 @@ class tAbstractPort;
  *
  * To prevent deleting of framework element while using it over a longer period of time,
  * lock it - or the complete runtime environment.
+ *
+ * A framework element can be locked with
+ *   util::tLock lock(<framework_element>)
+ *
+ * That's why it inherits from tMutexLockOrder.
+ * This also defines the lock order in which framework elements can be locked.
+ * Generally the framework element tree is locked from root to leaves.
+ * So children's lock level needs to be larger than their parent's.
+ *
+ * tMutexLockOrder's secondary component is the element's unique handle in local runtime environment.
+ * ("normal" elements have negative handle, while ports have positive ones)
  */
-class tFrameworkElement : public tAnnotatable
+class tFrameworkElement : public tAnnotatable, public util::tMutexLockOrder
 {
 public:
 
@@ -144,7 +155,7 @@ public:
 
 private:
 
-  friend class util::tGarbageCollector;
+  friend class util::tGarbageDeleter;
   friend class tChildIterator;
   friend class tRuntimeEnvironment;
   friend class tFinstructableGroup;
@@ -152,11 +163,6 @@ private:
 
   /*! Primary link to framework element - the place at which it actually is in FrameworkElement tree - contains name etc. */
   tLink primary;
-
-  /*!
-   * Extra Mutex for changing flags
-   */
-  mutable util::tMutex flag_mutex;
 
 protected:
 
@@ -168,23 +174,11 @@ protected:
   /*! Constant Flags - see CoreFlags */
   const uint const_flags;
 
-  /*! Variable Flags - see CoreFlags */
+  /*! Variable Flags - see CoreFlags; Functions modifying this must acquire simple_mutex */
   uint flags;
 
   /*! children - may contain null entries (for efficient thread-safe unsynchronized iteration) */
   util::tSafeConcurrentlyIterableList<tLink*, util::tNoMutex> children;
-
-public:
-
-  /*!
-   * Defines lock order in which framework elements can be locked.
-   * Generally the framework element tree is locked from root to leaves.
-   * So children's lock level needs to be larger than their parent's.
-   *
-   * The secondary component is the element's unique handle in local runtime environment.
-   * ("normal" elements have negative handle, while ports have positive ones)
-   */
-  mutable util::tMutexLockOrder obj_mutex;
 
 private:
 
@@ -298,7 +292,7 @@ private:
    *
    * \return Returns runtime registry if this is the case - otherwise this-pointer.
    */
-  util::tMutexLockOrder& RuntimeLockHelper() const;
+  const util::tMutexLockOrder& RuntimeLockHelper() const;
 
 protected:
 
@@ -420,7 +414,7 @@ public:
    * \param flags Any special flags for framework element
    * \param lock_order Custom value for lock order (needs to be larger than parent's) - negative indicates unused.
    */
-  tFrameworkElement(tFrameworkElement* parent = NULL, const util::tString& name = "", uint flags = tCoreFlags::cALLOWS_CHILDREN, int lock_order = -1);
+  explicit tFrameworkElement(tFrameworkElement* parent = NULL, const util::tString& name = "", uint flags = tCoreFlags::cALLOWS_CHILDREN, int lock_order = -1);
 
   /*!
    * Add Child to framework element
@@ -518,7 +512,7 @@ public:
    */
   inline int GetHandle() const
   {
-    return obj_mutex.GetSecondary();
+    return GetSecondary();
   }
 
   /*!
@@ -539,7 +533,7 @@ public:
    */
   inline int GetLockOrder() const
   {
-    return obj_mutex.GetPrimary();
+    return GetPrimary();
   }
 
   inline const tFrameworkElement& GetLogDescription() const
@@ -674,7 +668,7 @@ public:
    * \return Registry of the one and only RuntimeEnvironment - Structure changing operations need to be synchronized on this object!
    * (Only lock runtime for minimal periods of time!)
    */
-  util::tMutexLockOrder& GetRegistryLock() const;
+  const util::tMutexLockOrder& GetRegistryLock() const;
 
   /*!
    * (for convenience)
@@ -763,9 +757,9 @@ public:
    * \param fe Specified other framework element
    * \return Answer
    */
-  inline bool LockAfter(const tFrameworkElement* fe) const
+  inline bool LockAfter(const tFrameworkElement& fe) const
   {
-    return obj_mutex.ValidAfter(fe->obj_mutex);
+    return ValidAfter(fe);
   }
 
   /*!

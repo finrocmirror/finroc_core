@@ -141,7 +141,7 @@ public:
    * \param link Link that has been added
    * \param port port linked to
    */
-  void LinkAdded(tRuntimeEnvironment* re, const util::tString& link, tAbstractPort* port);
+  void LinkAdded(tRuntimeEnvironment& re, const util::tString& link, tAbstractPort& port);
 
   /*!
    * (should only be called by RuntimeEnvironment)

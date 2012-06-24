@@ -53,11 +53,7 @@ protected:
 
 public:
 
-  tCoreLoopThreadBase(int64 default_cycle_time, bool warn_on_cycle_time_exceed, bool pause_on_startup);
-
-  tCoreLoopThreadBase(int64 default_cycle_time, bool warn_on_cycle_time_exceed);
-
-  tCoreLoopThreadBase(int64 default_cycle_time);
+  tCoreLoopThreadBase(rrlib::time::tDuration default_cycle_time, bool use_application_time = true, bool warn_on_cycle_time_exceed = false, bool pause_on_startup = false);
 
   virtual void Run()
   {

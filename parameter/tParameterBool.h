@@ -50,13 +50,13 @@ class tParameterBool : public tParameterBase<bool>
   public:
 
     /*! Cached current value (we will much more often read than it will be changed) */
-    volatile bool current_value;
+    std::atomic<bool> current_value;
 
     tBoolCache() :
       current_value(false)
     {}
 
-    virtual void PortChanged(tAbstractPort* origin, const bool& value)
+    virtual void PortChanged(tAbstractPort& origin, const bool& value)
     {
       current_value = value;
     }
@@ -73,14 +73,14 @@ public:
     tParameterBase<bool>(args...),
     cache(new tBoolCache())
   {
-    this->AddPortListener(cache.get());
-    cache->current_value = Get();
+    this->AddPortListener(*cache);
+    cache->current_value = tPort<bool>::Get();
   }
 
   /*!
    * \return Current parameter value
    */
-  inline bool GetValue() const
+  inline bool Get() const
   {
     return cache->current_value;
   }

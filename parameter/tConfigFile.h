@@ -88,7 +88,7 @@ public:
    * \param element Element
    * \return ConfigFile - or null if none could be found
    */
-  static tConfigFile* Find(const tFrameworkElement* element);
+  static tConfigFile* Find(const tFrameworkElement& element);
 
   // TODO: reduce code duplication in hasEntry() and getEntry()
 
@@ -144,7 +144,7 @@ public:
    *
    * \param fe Framework element
    */
-  void LoadParameterValues(tFrameworkElement* fe);
+  void LoadParameterValues(tFrameworkElement& fe);
 
   /*!
    * Saves configuration file back to HDD
@@ -152,9 +152,6 @@ public:
   void SaveFile();
 
   virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
-
-  void TreeFilterCallback(tFrameworkElement* fe, bool loading_parameters);
-
 };
 
 } // namespace finroc

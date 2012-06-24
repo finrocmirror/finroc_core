@@ -99,7 +99,7 @@ public:
    * \param ret_handler Return handler
    * \param net_timeout Timeout for call
    */
-  virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port, tAbstractAsyncReturnHandler& ret_handler, int net_timeout) = 0;
+  virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port, tAbstractAsyncReturnHandler& ret_handler, const rrlib::time::tDuration& net_timeout) = 0;
 
   /*!
    * If we have a method call object (either from network or from another thread):
@@ -161,21 +161,21 @@ class tAbstractNonVoidMethod : public tAbstractMethod
 private:
 
   /*! Default timeout for calls over the net */
-  int default_net_timeout;
+  rrlib::time::tDuration default_net_timeout;
 
 protected:
 
   /*! Default network timeout */
-  static const int cDEFAULT_NET_TIMEOUT = 2000;
+  static constexpr rrlib::time::tDuration cDEFAULT_NET_TIMEOUT = std::chrono::seconds(2);
 
 public:
 
-  tAbstractNonVoidMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread, int default_net_timeout_);
+  tAbstractNonVoidMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread, rrlib::time::tDuration default_net_timeout);
 
   /*!
    * \return Default timeout for calls over the net
    */
-  inline int GetDefaultNetTimeout()
+  inline rrlib::time::tDuration GetDefaultNetTimeout()
   {
     return default_net_timeout;
   }

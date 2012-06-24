@@ -119,7 +119,7 @@ protected:
 public:
 
   /*! Timeout for pull operations */
-  static const int cPULL_TIMEOUT = 1000;
+  static constexpr rrlib::time::tDuration cPULL_TIMEOUT = std::chrono::seconds(1);
 
   /*! constants for port change status */
   static const int8 cNO_CHANGE = 0, cCHANGED = 1, cCHANGED_INITIAL = 2;

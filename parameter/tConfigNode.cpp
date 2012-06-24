@@ -35,7 +35,7 @@ tConfigNode::tConfigNode(const util::tString& node) :
 {
 }
 
-util::tString tConfigNode::GetConfigNode(tFrameworkElement* fe)
+util::tString tConfigNode::GetConfigNode(tFrameworkElement& fe)
 {
   tConfigFile* cf = tConfigFile::Find(fe);
   if (cf == NULL)
@@ -44,11 +44,12 @@ util::tString tConfigNode::GetConfigNode(tFrameworkElement* fe)
   }
 
   util::tString result = "";
+  tFrameworkElement* fe_ptr = &fe;
   while (true)
   {
 
-    tConfigNode* cn = fe->GetAnnotation<tConfigNode>();
-    if (cn != NULL)
+    tConfigNode* cn = fe_ptr->GetAnnotation<tConfigNode>();
+    if (cn)
     {
       result = cn->node + (boost::ends_with(cn->node, "/") ? "" : "/") + result;
       if (cn->node[0] == '/')
@@ -57,16 +58,16 @@ util::tString tConfigNode::GetConfigNode(tFrameworkElement* fe)
       }
     }
 
-    if (fe == cf->GetAnnotated())
+    if (fe_ptr == cf->GetAnnotated())
     {
       return result;
     }
 
-    fe = fe->GetParent();
+    fe_ptr = fe_ptr->GetParent();
   }
 }
 
-util::tString tConfigNode::GetFullConfigEntry(tFrameworkElement* parent, const util::tString& config_entry)
+util::tString tConfigNode::GetFullConfigEntry(tFrameworkElement& parent, const util::tString& config_entry)
 {
   if (config_entry[0] == '/')
   {
@@ -76,10 +77,10 @@ util::tString tConfigNode::GetFullConfigEntry(tFrameworkElement* parent, const u
   return node + (boost::ends_with(node, "/") ? "" : "/") + config_entry;
 }
 
-void tConfigNode::SetConfigNode(tFrameworkElement* fe, const util::tString& node)
+void tConfigNode::SetConfigNode(tFrameworkElement& fe, const util::tString& node)
 {
-  util::tLock lock2(fe->GetRegistryLock());
-  tConfigNode* cn = fe->GetAnnotation<tConfigNode>();
+  util::tLock lock2(fe.GetRegistryLock());
+  tConfigNode* cn = fe.GetAnnotation<tConfigNode>();
   if (cn != NULL)
   {
     if (boost::equals(cn->node, node))
@@ -91,14 +92,14 @@ void tConfigNode::SetConfigNode(tFrameworkElement* fe, const util::tString& node
   else
   {
     cn = new tConfigNode(node);
-    fe->AddAnnotation(cn);
+    fe.AddAnnotation(cn);
   }
 
   // reevaluate static parameters
   tStaticParameterList::DoStaticParameterEvaluation(fe);
 
   // reload parameters
-  if (fe->IsReady())
+  if (fe.IsReady())
   {
     tConfigFile* cf = tConfigFile::Find(fe);
     if (cf != NULL)

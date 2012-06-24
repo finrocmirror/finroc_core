@@ -43,19 +43,12 @@ class tPortDataManager;
  * Special version that supports buffers of multiple types.
  * This list is not real-time capable if new types are used.
  */
-class tMultiTypePortDataBufferPool : public util::tUncopyableObject
+class tMultiTypePortDataBufferPool : util::tMutexLockOrder
 {
 private:
 
   /*! list contains pools for different data types... new pools are added when needed */
   util::tSimpleList<tPortDataBufferPool*> pools;
-
-public:
-
-  /*! Mutex lock order - needs to be locked before AllocationRegister */
-  util::tMutexLockOrder obj_mutex;
-
-private:
 
   /*!
    * \param data_type DataType of buffer to create
@@ -66,8 +59,8 @@ private:
 public:
 
   tMultiTypePortDataBufferPool() :
-    pools(2u),
-    obj_mutex(tLockOrderLevels::cINNER_MOST - 20)
+    util::tMutexLockOrder(tLockOrderLevels::cINNER_MOST - 20),
+    pools(2u)
   {}
 
   /*!

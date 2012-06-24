@@ -38,17 +38,17 @@ void tFinrocAnnotation::Append(tFinrocAnnotation* ann)
   }
 }
 
-tFinrocAnnotation* tFinrocAnnotation::FindParentWithAnnotation(tFrameworkElement* fe, const rrlib::rtti::tDataTypeBase& type)
+tFinrocAnnotation* tFinrocAnnotation::FindParentWithAnnotation(tFrameworkElement& fe, const rrlib::rtti::tDataTypeBase& type)
 {
-  tFinrocAnnotation* ann = fe->GetAnnotation(type);
-  if (ann != NULL)
+  tFinrocAnnotation* ann = fe.GetAnnotation(type);
+  if (ann)
   {
     return ann;
   }
-  tFrameworkElement* parent = fe->GetParent();
-  if (parent != NULL)
+  tFrameworkElement* parent = fe.GetParent();
+  if (parent)
   {
-    return FindParentWithAnnotation(parent, type);
+    return FindParentWithAnnotation(*parent, type);
   }
   return NULL;
 }

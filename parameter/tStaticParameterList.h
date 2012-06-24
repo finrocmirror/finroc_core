@@ -133,7 +133,7 @@ public:
    *
    * \param fe Framework element of interest
    */
-  static void DoStaticParameterEvaluation(tFrameworkElement* fe);
+  static void DoStaticParameterEvaluation(tFrameworkElement& fe);
 
   /*!
    * \param i Index
@@ -160,7 +160,7 @@ public:
    * \param fe Framework element
    * \return StaticParameterList
    */
-  static tStaticParameterList* GetOrCreate(tFrameworkElement* fe);
+  static tStaticParameterList* GetOrCreate(tFrameworkElement& fe);
 
   /*!
    * If this is constructor parameter prototype: create instance that can be filled with values

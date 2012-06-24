@@ -54,7 +54,7 @@ tNetworkSettings::tNetworkSettings() :
   update_time_listener(),
   default_minimum_network_update_time("Global Default", this, 40, tBounds<int16_t>(1, 2000))
 {
-  default_minimum_network_update_time.AddPortListener(this);
+  default_minimum_network_update_time.AddPortListener(*this);
 
   for (int16_t i = 0; i < rrlib::rtti::tDataTypeBase::GetTypeCount(); i++)
   {
@@ -62,7 +62,7 @@ tNetworkSettings::tNetworkSettings() :
     if (dt != NULL && (tFinrocTypeInfo::IsCCType(dt) || tFinrocTypeInfo::IsStdType(dt)))
     {
       tParameter<int16_t> p(dt.GetName(), this, -1, tBounds<int16_t>(-1, 10000));
-      p.AddPortListener(this);
+      p.AddPortListener(*this);
     }
   }
 }
@@ -73,16 +73,22 @@ tNetworkSettings& tNetworkSettings::GetInstance()
   return *settings;
 }
 
-void tNetworkSettings::PortChanged(tAbstractPort* origin, const int16_t& value)
+void tNetworkSettings::PortChanged(tAbstractPort& origin, const int16_t& value)
 {
-  if (origin == default_minimum_network_update_time)
+  if (&origin == default_minimum_network_update_time)
   {
-    update_time_listener.Notify(NULL, NULL, static_cast<int16>(value));
+    update_time_listener.Notify([&](tUpdateTimeChangeListener & l)
+    {
+      l.UpdateTimeChanged(NULL, value);
+    });
   }
   else
   {
-    rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(origin->GetName());
-    update_time_listener.Notify(&(dt), NULL, value);
+    rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(origin.GetName());
+    update_time_listener.Notify([&](tUpdateTimeChangeListener & l)
+    {
+      l.UpdateTimeChanged(dt, value);
+    });
   }
 }
 

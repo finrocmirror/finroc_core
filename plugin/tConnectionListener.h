@@ -52,23 +52,7 @@ public:
    * \param source Connection that event came from
    * \param e Event that occured (see constants above)
    */
-  virtual void ConnectionEvent(tExternalConnection* source, int e) = 0;
-
-};
-
-/*!
- * Manager for connection listeners
- */
-class tConnectionListenerManager : public util::tListenerManager<tExternalConnection, util::tObject, tConnectionListener, tConnectionListenerManager>
-{
-public:
-
-  tConnectionListenerManager() {}
-
-  inline void SingleNotify(tConnectionListener* listener, tExternalConnection* origin, const util::tObject* parameter, int call_id)
-  {
-    listener->ConnectionEvent(origin, call_id);
-  }
+  virtual void ConnectionEvent(tExternalConnection& source, int e) = 0;
 
 };
 

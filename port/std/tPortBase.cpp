@@ -112,7 +112,7 @@ tPortDataManager* tPortBase::CreateDefaultValue(const rrlib::rtti::tDataTypeBase
 
 tPortBase::~tPortBase()
 {
-  util::tLock lock1(this);
+  util::tLock lock1(*this);
   default_value->GetCurrentRefCounter()->ReleaseLock();  // thread safe, since called deferred - when no one else should access this port anymore
   value.Get()->GetRefCounter()->ReleaseLock();  // thread safe, since nobody should publish to port anymore
 

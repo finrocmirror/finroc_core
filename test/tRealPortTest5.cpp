@@ -35,6 +35,7 @@
 #include "plugins/blackboard/tBlackboardWriteAccess.h"
 #include "plugins/blackboard/tBBLockException.h"
 #include "core/port/rpc/tMethodCallException.h"
+#include "rrlib/finroc_core_utils/crash_handler.h"
 
 using namespace rrlib::logging;
 
@@ -53,6 +54,7 @@ const int tRealPortTest5::cCYCLES;
 void tRealPortTest5::Main()
 {
   // set up
+  util::InstallCrashHandler();
   //RuntimeEnvironment.initialInit(/*new ByteArrayInputStream(new byte[0])*/);
   re = tRuntimeEnvironment::GetInstance();
   output = std::shared_ptr<tPort<int> >(new tPort<int>("test1", tPortFlags::cOUTPUT_PORT));
@@ -96,15 +98,9 @@ void tRealPortTest5::TestSimpleEdge()
 
   std::cout << input->Get() << std::endl;
 
-  try
-  {
-    util::tThread::Sleep(1000);
-  }
-  catch (const util::tInterruptedException& e)
-  {
-  }
+  util::tThread::Sleep(std::chrono::seconds(1), true);
 
-  int64 start = util::tTime::GetPrecise();
+  rrlib::time::tTimestamp start = rrlib::time::Now();
   int result = 0;
   for (int i = 0; i < cCYCLES; i++)
   {
@@ -113,8 +109,8 @@ void tRealPortTest5::TestSimpleEdge()
 
     result = input->Get();
   }
-  int64 time = util::tTime::GetPrecise() - start;
-  FINROC_LOG_PRINT(eLL_USER, time, " ", result);
+  rrlib::time::tDuration time = rrlib::time::Now() - start;
+  FINROC_LOG_PRINT(eLL_USER, rrlib::time::ToString(time), " ", result);
 }
 
 void tRealPortTest5::TestSimpleEdge2()
@@ -138,15 +134,9 @@ void tRealPortTest5::TestSimpleEdge2()
   FINROC_LOG_PRINT(eLL_USER, ci.ReadInt());
   input.ReleaseAutoLocks();
 
-  try
-  {
-    util::tThread::Sleep(1000);
-  }
-  catch (const util::tInterruptedException& e)
-  {
-  }
+  util::tThread::Sleep(std::chrono::seconds(1), true);
 
-  int64 start = util::tTime::GetPrecise();
+  rrlib::time::tTimestamp start = rrlib::time::Now();
   int result = 0;
   for (int i = 0; i < cCYCLES; i++)
   {
@@ -161,8 +151,8 @@ void tRealPortTest5::TestSimpleEdge2()
     result = ci.ReadInt();
     input.ReleaseAutoLocks();
   }
-  int64 time = util::tTime::GetPrecise() - start;
-  FINROC_LOG_PRINT(eLL_USER, time, " ", result);
+  rrlib::time::tDuration time = rrlib::time::Now() - start;
+  FINROC_LOG_PRINT(eLL_USER, rrlib::time::ToString(time), " ", result);
 }
 
 void tRealPortTest5::TestSimpleEdgeBB()
@@ -176,7 +166,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
 
   try
   {
-    blackboard::tBlackboardWriteAccess<rrlib::serialization::tMemoryBuffer> bbw(client, 4000000);
+    blackboard::tBlackboardWriteAccess<rrlib::serialization::tMemoryBuffer> bbw(client, std::chrono::hours(1));
     bbw.Resize(8u);
 
     rrlib::serialization::tOutputStream co(&(bbw[0]));
@@ -209,12 +199,12 @@ void tRealPortTest5::TestSimpleEdgeBB()
 
   cbuf.reset();
 
-  int64 start = util::tTime::GetPrecise();
+  rrlib::time::tTimestamp start = rrlib::time::Now();
   int result = 0;
   int64 size = 0;
   for (int i = 0; i < cCYCLES; i++)
   {
-    std::vector<tMemoryBuffer>* buf3 = client.WriteLock(300000000);
+    std::vector<tMemoryBuffer>* buf3 = client.WriteLock(std::chrono::hours(1));
 
     co.Reset(&buf3->at(0));
 
@@ -236,29 +226,23 @@ void tRealPortTest5::TestSimpleEdgeBB()
 
     cbuf.reset();
   }
-  int64 time = util::tTime::GetPrecise() - start;
-  FINROC_LOG_PRINT(eLL_USER, time, " ", result, " ", size);
+  rrlib::time::tDuration time = rrlib::time::Now() - start;
+  FINROC_LOG_PRINT(eLL_USER, rrlib::time::ToString(time), " ", result, " ", size);
   tRuntimeEnvironment::GetInstance()->PrintStructure();
 }
 
 void tRealPortTest5::TestSimpleSet()
 {
-  try
-  {
-    util::tThread::Sleep(1000);
-  }
-  catch (const util::tInterruptedException& e)
-  {
-  }
+  util::tThread::Sleep(std::chrono::seconds(1), true);
 
-  int64 start = util::tTime::GetPrecise();
+  rrlib::time::tTimestamp start = rrlib::time::Now();
   for (int i = 1; i < cCYCLES + 1; i++)
   {
     output->Publish(i);
   }
-  int64 time = util::tTime::GetPrecise() - start;
+  rrlib::time::tDuration time = rrlib::time::Now() - start;
 
-  std::cout << time << " " << output->Get() << std::endl;
+  std::cout << rrlib::time::ToString(time) << " " << output->Get() << std::endl;
 }
 
 } // namespace finroc

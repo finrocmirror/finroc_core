@@ -46,6 +46,7 @@ extern "C"
 #include "rrlib/logging/configuration.h"
 #include "rrlib/finroc_core_utils/log/log_definitions.h"
 #include "rrlib/finroc_core_utils/sFiles.h"
+#include "rrlib/finroc_core_utils/crash_handler.h"
 
 #include "plugins/tcp/tTCPServer.h"
 #include "plugins/tcp/tTCPPeer.h"
@@ -86,20 +87,46 @@ char ** finroc_argv_copy; // copy of argv for 'finroc' part. TODO: remove when r
 // Implementation
 //----------------------------------------------------------------------
 
-bool run_main_loop = false;
-bool pause_at_startup = false;
-int network_port = 4444;
+static bool run_main_loop = false;
+static bool pause_at_startup = false;
+static int network_port = 4444;
 bool links_are_unique = true;
-finroc::util::tString connect_to;
+static finroc::util::tString connect_to;
+#ifdef NDEBUG
+static bool enable_crash_handler = false;
+#else
+static bool enable_crash_handler = true;
+#endif
+
+// We do not use stuff from rrlib_thread, because we have the rare case that in signal handler
+// waiting thread does something else, which is problematic with respect to enforcing lock order
+static std::mutex main_thread_wait_mutex;
+static std::condition_variable main_thread_wait_variable;
 
 //----------------------------------------------------------------------
 // HandleSignalSIGINT
 //----------------------------------------------------------------------
 void HandleSignalSIGINT(int signal)
 {
+  static int call_count = 0; // How many time has function been called?
   assert(signal == SIGINT);
-  FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "\nCaught SIGINT. Exiting...");
-  run_main_loop = false;
+  call_count++;
+  if (call_count == 1)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "\nCaught SIGINT. Exiting...");
+    run_main_loop = false;
+    std::unique_lock<std::mutex> l(main_thread_wait_mutex);
+    main_thread_wait_variable.notify_all();
+  }
+  else if (call_count < 5)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "\nCaught SIGINT again. Unfortunately, the program still hasn't terminated. Program will be aborted at fifth SIGINT.");
+  }
+  else
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "\nCaught SIGINT for the fifth time. Aborting program.");
+    abort();
+  }
 }
 
 //----------------------------------------------------------------------
@@ -255,6 +282,32 @@ bool MaxElementsHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_ma
 }
 
 //----------------------------------------------------------------------
+// CrashHandler
+//----------------------------------------------------------------------
+bool CrashHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
+{
+  rrlib::getopt::tOption crash_config(name_to_option_map.at("crash-handler"));
+  if (crash_config->IsActive())
+  {
+    std::string s(boost::any_cast<const char*>(crash_config->GetValue()));
+    if (s.compare("on") == 0)
+    {
+      enable_crash_handler = true;
+    }
+    else if (s.compare("off") == 0)
+    {
+      enable_crash_handler = false;
+    }
+    else
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Option --crash-handler needs be either 'on' or 'off' (not '", s, "'). Using default.");
+    }
+  }
+
+  return true;
+}
+
+//----------------------------------------------------------------------
 // main
 //----------------------------------------------------------------------
 int main(int argc, char **argv)
@@ -281,12 +334,21 @@ int main(int argc, char **argv)
   rrlib::getopt::AddValue("connect", 0, "TCP address of finroc application to connect to (default: localhost:<port>)", &ConnectHandler);
   rrlib::getopt::AddValue("max-ports", 0, "Maximum number of ports (default: 65535). Has significant impact on memory footprint.", &MaxPortsHandler);
   rrlib::getopt::AddValue("max-elements", 0, "Maximum number of framework elements excluding ports (default: 65535).", &MaxElementsHandler);
+  rrlib::getopt::AddValue("crash-handler", 0, "Enable/disable crash handler (default: 'on' in debug mode - 'off' in release mode).", &CrashHandler);
   rrlib::getopt::AddFlag("pause", 0, "Pause program at startup", &PauseHandler);
   rrlib::getopt::AddFlag("port-links-are-not-unique", 0, "Port links in this part are not unique in P2P network (=> host name is prepended in GUI, for instance).", &UniqueHandler);
 
   StartUp();
 
   std::vector<char *> remaining_args = rrlib::getopt::ProcessCommandLine(argc, argv);
+
+  if (enable_crash_handler)
+  {
+    if (!finroc::util::InstallCrashHandler())
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error installing crash handler. Crashes will simply terminate the program.");
+    }
+  }
 
   finroc::core::tRuntimeEnvironment *runtime_environment = finroc::core::tRuntimeEnvironment::GetInstance();
 
@@ -339,26 +401,27 @@ int main(int argc, char **argv)
     }
     if (pause_at_startup)
     {
-      finroc::core::tExecutionControl::PauseAll(fe); // Shouldn't be necessary, but who knows what people might implement
+      finroc::core::tExecutionControl::PauseAll(*fe); // Shouldn't be necessary, but who knows what people might implement
     }
     else
     {
-      finroc::core::tExecutionControl::StartAll(fe);
+      finroc::core::tExecutionControl::StartAll(*fe);
     }
   }
 
   run_main_loop = true;
-  while (run_main_loop)
   {
-    try
+    std::unique_lock<std::mutex> l(main_thread_wait_mutex);
+    while (run_main_loop)
     {
-      finroc::util::tThread::Sleep(10000);
-    }
-    catch (const finroc::util::tInterruptedException& e)
-    {
+      main_thread_wait_variable.wait_for(l, std::chrono::seconds(10));
     }
   }
   FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Left main loop");
+
+  // In many cases this is not necessary.
+  // However, doing this before static deinitialization can avoid issues with external libraries and thread container threads still running.
+  finroc::core::tRuntimeEnvironment::Shutdown();
 
   return EXIT_SUCCESS;
 }

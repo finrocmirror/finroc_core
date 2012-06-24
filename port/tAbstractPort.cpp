@@ -66,7 +66,7 @@ tAbstractPort::~tAbstractPort()
   delete link_edges;
 }
 
-const int tAbstractPort::cPULL_TIMEOUT;
+constexpr rrlib::time::tDuration tAbstractPort::cPULL_TIMEOUT;
 const int8 tAbstractPort::cNO_CHANGE, tAbstractPort::cCHANGED, tAbstractPort::cCHANGED_INITIAL;
 const uint tAbstractPort::cBULK_N_EXPRESS;
 
@@ -490,7 +490,7 @@ bool tAbstractPort::MayConnectTo(tAbstractPort* target)
 
 void tAbstractPort::PrepareDelete()
 {
-  util::tLock lock1(this);
+  util::tLock lock1(*this);
 
   // disconnect all edges
   DisconnectAll();

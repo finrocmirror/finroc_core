@@ -263,8 +263,8 @@ void tStaticParameterBase::LoadValue()
           return;
         }
       }
-      tConfigFile* cf = tConfigFile::Find(parent);
-      util::tString full_config_entry = tConfigNode::GetFullConfigEntry(parent, config_entry);
+      tConfigFile* cf = tConfigFile::Find(*parent);
+      util::tString full_config_entry = tConfigNode::GetFullConfigEntry(*parent, config_entry);
       if (cf != NULL)
       {
         if (cf->HasEntry(full_config_entry))
@@ -431,7 +431,7 @@ void tStaticParameterBase::UpdateOuterParameterAttachment()
         return;
       }
 
-      tStaticParameterList* spl = tStaticParameterList::GetOrCreate(fg);
+      tStaticParameterList* spl = tStaticParameterList::GetOrCreate(*fg);
       for (size_t i = 0; i < spl->Size(); i++)
       {
         sp = spl->Get(i);

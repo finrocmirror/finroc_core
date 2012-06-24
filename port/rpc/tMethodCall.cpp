@@ -38,7 +38,7 @@ tMethodCall::tMethodCall() :
   handler(NULL),
   ret_handler(NULL),
   net_port(NULL),
-  net_timeout(0),
+  net_timeout(rrlib::time::tDuration::zero()),
   source_net_port(NULL)
 {
 }
@@ -49,7 +49,7 @@ void tMethodCall::DeserializeCall(rrlib::serialization::tInputStream& is, const 
   port_interface_type = dt;
   int8 b = is.ReadByte();
   method = (dt == NULL) ? NULL : tFinrocTypeInfo::Get(dt).GetPortInterface()->GetMethod(b);
-  net_timeout = is.ReadInt();
+  is >> net_timeout;
   tAbstractCall::DeserializeImpl(is);
 
   // deserialize parameters
@@ -127,7 +127,7 @@ void tMethodCall::PrepareForwardSyncRemoteExecution(tInterfaceNetPort* source, t
   this->net_port = dest;
 }
 
-void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, tAbstractAsyncReturnHandler* ret_handler_, tInterfaceNetPort* net_port_, int net_timeout_)
+void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, tAbstractAsyncReturnHandler* ret_handler_, tInterfaceNetPort* net_port_, const rrlib::time::tDuration& net_timeout_)
 {
   assert((this->method == NULL && this->handler == NULL && method_ != NULL));
   this->method = method_;
@@ -138,7 +138,7 @@ void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrl
   this->net_timeout = net_timeout_;
 }
 
-void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, int net_timeout_)
+void tMethodCall::PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, const rrlib::time::tDuration& net_timeout_)
 {
   assert((this->method == NULL && this->handler == NULL && method_ != NULL));
   this->method = method_;
@@ -153,7 +153,7 @@ void tMethodCall::Recycle()
   handler = NULL;
   ret_handler = NULL;
   net_port = NULL;
-  net_timeout = -1;
+  net_timeout = rrlib::time::tDuration::zero();
   source_net_port = NULL;
   RecycleParameters();
   tAbstractCall::Recycle();
@@ -170,8 +170,8 @@ void tMethodCall::RecycleParameters()
 void tMethodCall::Serialize(rrlib::serialization::tOutputStream& oos) const
 {
   oos.WriteByte(method == NULL ? -1 : method->GetMethodId());
-  assert(((GetStatus() != tStatus::SYNCH_CALL || net_timeout > 0)) && "Network timeout needs to be >0 with a synch call");
-  oos.WriteInt(net_timeout);
+  assert(((GetStatus() != tStatus::SYNCH_CALL || net_timeout > rrlib::time::tDuration::zero())) && "Network timeout needs to be >0 with a synch call");
+  oos << net_timeout;
   tAbstractCall::Serialize(oos);
 
   // Serialize parameters

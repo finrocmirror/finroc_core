@@ -26,20 +26,8 @@ namespace finroc
 {
 namespace core
 {
-tCoreLoopThreadBase::tCoreLoopThreadBase(int64 default_cycle_time, bool warn_on_cycle_time_exceed, bool pause_on_startup) :
-  util::tLoopThread(default_cycle_time, warn_on_cycle_time_exceed, pause_on_startup),
-  tc(NULL)
-{
-}
-
-tCoreLoopThreadBase::tCoreLoopThreadBase(int64 default_cycle_time, bool warn_on_cycle_time_exceed) :
-  util::tLoopThread(default_cycle_time, warn_on_cycle_time_exceed),
-  tc(NULL)
-{
-}
-
-tCoreLoopThreadBase::tCoreLoopThreadBase(int64 default_cycle_time) :
-  util::tLoopThread(default_cycle_time),
+tCoreLoopThreadBase::tCoreLoopThreadBase(rrlib::time::tDuration default_cycle_time, bool use_application_time, bool warn_on_cycle_time_exceed, bool pause_on_startup) :
+  util::tLoopThread(default_cycle_time, use_application_time, warn_on_cycle_time_exceed, pause_on_startup),
   tc(NULL)
 {
 }

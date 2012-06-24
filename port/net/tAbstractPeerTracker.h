@@ -40,21 +40,10 @@ namespace core
  * This is the abstract base class for "peer trackers".
  * Peer trackers look for other systems on the network that can be connected to.
  */
-class tAbstractPeerTracker : public util::tLogUser
+class tAbstractPeerTracker : public util::tLogUser, public util::tMutexLockOrder
 {
 public:
   class tListener; // inner class forward declaration
-public:
-
-  class tTrackerListenerManager : public util::tListenerManager<util::tIPSocketAddress, util::tString, tAbstractPeerTracker::tListener, tAbstractPeerTracker::tTrackerListenerManager>
-  {
-  public:
-
-    tTrackerListenerManager() {}
-
-    void SingleNotify(tAbstractPeerTracker::tListener* listener, util::tIPSocketAddress* origin, const util::tString* parameter, int call_id);
-
-  };
 
 private:
 
@@ -70,14 +59,7 @@ private:
 protected:
 
   /*! Tracker listeners */
-  tTrackerListenerManager listeners;
-
-public:
-
-  /*! Mutex for tracker */
-  mutable util::tMutexLockOrder obj_mutex;
-
-protected:
+  util::tListenerManager<tListener, util::tMutexLockOrder> listeners;
 
   /*!
    * Called by subclass when TCP node has been discovered
@@ -85,9 +67,12 @@ protected:
    * \param isa Node's network address
    * \param name Node's name
    */
-  inline void NotifyDiscovered(util::tIPSocketAddress* isa, const util::tString& name)
+  inline void NotifyDiscovered(const util::tIPSocketAddress& isa, const util::tString& name)
   {
-    listeners.Notify(isa, &(name), cDISCOVERED);
+    listeners.Notify([&](tListener & l)
+    {
+      l.NodeDiscovered(isa, name);
+    });
   }
 
   /*!
@@ -96,9 +81,12 @@ protected:
    * \param isa Node's network address
    * \param name Node's name
    */
-  inline void NotifyRemoved(util::tIPSocketAddress* isa, const util::tString& name)
+  inline void NotifyRemoved(const util::tIPSocketAddress& isa, const util::tString& name)
   {
-    listeners.Notify(NULL, &(name), cREMOVED);
+    listeners.Notify([&](tListener & l)
+    {
+      l.NodeRemoved(isa, name);
+    });
   }
 
   /*!
@@ -132,7 +120,7 @@ public:
   /*!
    * \param listener Listener to add
    */
-  void AddListener(tListener* listener);
+  void AddListener(tListener& listener);
 
   /*!
    * Delete tracker
@@ -151,7 +139,7 @@ public:
   /*!
    * \param listener Listener to remove
    */
-  void RemoveListener(tListener* listener);
+  void RemoveListener(tListener& listener);
 
   /*!
    * Unregister/unpublish server

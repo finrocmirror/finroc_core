@@ -65,7 +65,7 @@ T tRemoteCoreRegister<T>::Get(int handle)
 template<typename T>
 void tRemoteCoreRegister<T>::Put(int handle, const T& elem)
 {
-  util::tLock lock1(this);
+  util::tLock lock1(*this);
   int lv1_block = (handle & cLEVEL_ONE_MASK) >> cLEVEL_ONE_SHIFT;
   int lv2_block = handle & cLEVEL_TWO_MASK;
   util::tArrayWrapper<T>* cur_lvl2_block = GetLvl2Element(lv1_block);
@@ -82,7 +82,7 @@ void tRemoteCoreRegister<T>::Put(int handle, const T& elem)
 template<typename T>
 void tRemoteCoreRegister<T>::Remove(int handle)
 {
-  util::tLock lock1(this);
+  util::tLock lock1(*this);
   int lv1_block = (handle & cLEVEL_ONE_MASK) >> cLEVEL_ONE_SHIFT;
   int lv2_block = handle & cLEVEL_TWO_MASK;
   util::tArrayWrapper<T>* cur_lvl2_block = GetLvl2Element(lv1_block);

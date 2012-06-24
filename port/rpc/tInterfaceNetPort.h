@@ -93,7 +93,7 @@ public:
    * \param timeout Network timeout for call (should be larger than any timeout in call due to network delays)
    * \return Method Call object containing results (may be a different one than mc - transfers responsibility for it to caller)
    */
-  virtual tMethodCall::tPtr SynchCallOverTheNet(tMethodCall::tPtr& mc, int timeout) = 0;
+  virtual tMethodCall::tPtr SynchCallOverTheNet(tMethodCall::tPtr& mc, const rrlib::time::tDuration& timeout) = 0;
 
 };
 

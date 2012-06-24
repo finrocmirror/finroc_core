@@ -62,19 +62,19 @@ public:
    * \param default_net_timeout Default timeout for calls over the net (should be higher than any timeout for call to avoid that returning calls get lost)
    */
   template <int ARGCOUNT = cARG_COUNT>
-  tMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread, typename std::enable_if<ARGCOUNT == 4, int>::type default_net_timeout = cDEFAULT_NET_TIMEOUT) :
+  tMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, const util::tString& p4_name, bool handle_in_extra_thread, typename std::enable_if<ARGCOUNT == 4, rrlib::time::tDuration>::type default_net_timeout = cDEFAULT_NET_TIMEOUT) :
     tAbstractNonVoidMethod(port_interface, name, p1_name, p2_name, p3_name, p4_name, handle_in_extra_thread, default_net_timeout) {}
   template <int ARGCOUNT = cARG_COUNT>
-  tMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, bool handle_in_extra_thread, typename std::enable_if<ARGCOUNT == 3, int>::type default_net_timeout = cDEFAULT_NET_TIMEOUT) :
+  tMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, const util::tString& p3_name, bool handle_in_extra_thread, typename std::enable_if<ARGCOUNT == 3, rrlib::time::tDuration>::type default_net_timeout = cDEFAULT_NET_TIMEOUT) :
     tAbstractNonVoidMethod(port_interface, name, p1_name, p2_name, p3_name, cNO_PARAM, handle_in_extra_thread, default_net_timeout) {}
   template <int ARGCOUNT = cARG_COUNT>
-  tMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, bool handle_in_extra_thread, typename std::enable_if<ARGCOUNT == 2, int>::type default_net_timeout = cDEFAULT_NET_TIMEOUT) :
+  tMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, const util::tString& p2_name, bool handle_in_extra_thread, typename std::enable_if<ARGCOUNT == 2, rrlib::time::tDuration>::type default_net_timeout = cDEFAULT_NET_TIMEOUT) :
     tAbstractNonVoidMethod(port_interface, name, p1_name, p2_name, cNO_PARAM, cNO_PARAM, handle_in_extra_thread, default_net_timeout) {}
   template <int ARGCOUNT = cARG_COUNT>
-  tMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, bool handle_in_extra_thread, typename std::enable_if<ARGCOUNT == 1, int>::type default_net_timeout = cDEFAULT_NET_TIMEOUT) :
+  tMethod(tPortInterface& port_interface, const util::tString& name, const util::tString& p1_name, bool handle_in_extra_thread, typename std::enable_if<ARGCOUNT == 1, rrlib::time::tDuration>::type default_net_timeout = cDEFAULT_NET_TIMEOUT) :
     tAbstractNonVoidMethod(port_interface, name, p1_name, cNO_PARAM, cNO_PARAM, cNO_PARAM, handle_in_extra_thread, default_net_timeout) {}
   template <int ARGCOUNT = cARG_COUNT>
-  tMethod(tPortInterface& port_interface, const util::tString& name, bool handle_in_extra_thread, typename std::enable_if<ARGCOUNT == 0, int>::type default_net_timeout = cDEFAULT_NET_TIMEOUT) :
+  tMethod(tPortInterface& port_interface, const util::tString& name, bool handle_in_extra_thread, typename std::enable_if<ARGCOUNT == 0, rrlib::time::tDuration>::type default_net_timeout = cDEFAULT_NET_TIMEOUT) :
     tAbstractNonVoidMethod(port_interface, name, cNO_PARAM, cNO_PARAM, cNO_PARAM, cNO_PARAM, handle_in_extra_thread, default_net_timeout) {}
 
   /*!
@@ -86,7 +86,7 @@ public:
    * \param args Arguments for method call
    * \return return value of method
    */
-  R Call(tInterfaceClientPort port, int net_timeout, TArgs... args); // Note: originally, net_timeout was at the end with default. However, gcc 4.5 does not like this.
+  R Call(tInterfaceClientPort port, const rrlib::time::tDuration& net_timeout, TArgs... args); // Note: originally, net_timeout was at the end with default. However, gcc 4.5 does not like this.
   inline R Call(tInterfaceClientPort port, TArgs... args)
   {
     return Call(port, -1, args...);
@@ -103,13 +103,13 @@ public:
    * \param force_same_thread Force that method call is performed by this thread on local machine (even if method call default is something else)
    * \param args Arguments for method call
    */
-  void CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, int net_timeout, bool force_same_thread, TArgs... args);
+  void CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, const rrlib::time::tDuration& net_timeout, bool force_same_thread, TArgs... args);
   inline void CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, TArgs... args)
   {
     CallAsync(port, handler, -1, false, args...);
   }
 
-  virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port, tAbstractAsyncReturnHandler& ret_handler, int net_timeout);
+  virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port, tAbstractAsyncReturnHandler& ret_handler, const rrlib::time::tDuration& net_timeout);
 
   virtual void ExecuteFromMethodCallObject(tMethodCall::tPtr& call, tAbstractMethodCallHandler& handler, tAbstractAsyncReturnHandler* ret_handler);
 

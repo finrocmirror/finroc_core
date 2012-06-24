@@ -93,7 +93,7 @@ class tModuleBase : public finroc::core::tFrameworkElement
     volatile bool parameters_changed;
 
     /*! Implementation of tPortListenerRaw */
-    virtual void PortChanged(tAbstractPort* origin, const void* const& value);
+    virtual void PortChanged(tAbstractPort& origin, const void* const& value);
 
     tParameterChangeDetector() : parameters_changed(true) {}
   };
@@ -172,7 +172,7 @@ public:
       : tConveniencePort < T, tModuleBase, finroc::core::tParameter<T>>(GetContainer, args...)
     {
       assert(this->GetWrapped()->GetParent()->NameEquals("Parameters"));
-      this->AddPortListener(&static_cast<tModuleBase*>(this->GetWrapped()->GetParent()->GetParent())->parameters_changed);
+      this->AddPortListener(static_cast<tModuleBase*>(this->GetWrapped()->GetParent()->GetParent())->parameters_changed);
     }
 
   private:
@@ -220,7 +220,7 @@ public:
    */
   void SetConfigNode(const util::tString& node)
   {
-    core::tConfigNode::SetConfigNode(this, node);
+    core::tConfigNode::SetConfigNode(*this, node);
   }
 
   /*!
@@ -228,7 +228,7 @@ public:
    */
   tConfigFile* GetConfigFile() const
   {
-    return tConfigFile::Find(this);
+    return tConfigFile::Find(*this);
   }
 };
 

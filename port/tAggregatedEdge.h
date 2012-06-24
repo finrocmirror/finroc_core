@@ -24,8 +24,8 @@
 #define core__port__tAggregatedEdge_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/time/time.h"
 
-#include "rrlib/finroc_core_utils/tTime.h"
 #include "core/tAnnotatable.h"
 
 namespace finroc
@@ -53,7 +53,7 @@ public:
   tEdgeAggregator* source, * destination;
 
   /*! Usage statistics: Time when edge was created */
-  int64 creation_time;
+  rrlib::time::tTimestamp creation_time;
 
   /*! Usage statistics: Number of published elements */
   util::tAtomicInt64 publish_count;
@@ -69,7 +69,7 @@ public:
     edge_count(0),
     source(src),
     destination(dest),
-    creation_time(util::tTime::GetPrecise()),
+    creation_time(rrlib::time::Now()),
     publish_count(0),
     publish_size(0)
   {
@@ -80,7 +80,8 @@ public:
    */
   inline int GetDataRate()
   {
-    return static_cast<int>(((publish_size.Get() * 1000) / std::max(static_cast<int64>(1), util::tTime::GetCoarse() - creation_time)));
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(rrlib::time::Now(false) - creation_time);
+    return ms.count() == 0 ? 0 : static_cast<int>((publish_size.Get() * 1000) / ms.count());
   }
 
   /*!
@@ -88,7 +89,8 @@ public:
    */
   inline float GetPublishRate()
   {
-    return ((static_cast<float>(publish_count.Get())) * 1000.0f) / (static_cast<float>(std::max(static_cast<int64>(1), util::tTime::GetCoarse() - creation_time)));
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(rrlib::time::Now(false) - creation_time);
+    return ms.count() == 0 ? 0.f : (static_cast<float>(publish_count.Get()) * 1000.0f) / (static_cast<float>(ms.count()));
   }
 
 };

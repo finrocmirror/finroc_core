@@ -59,7 +59,7 @@ public:
    *
    * \param fe Framework element
    */
-  static util::tString GetConfigNode(tFrameworkElement* fe);
+  static util::tString GetConfigNode(tFrameworkElement& fe);
 
   /*!
    * Get full config entry for specified parent - taking any common config file node
@@ -69,7 +69,7 @@ public:
    * \param config_entry Config entry (possibly relative to parent config file node - if not starting with '/')
    * \return Config entry to use
    */
-  static util::tString GetFullConfigEntry(tFrameworkElement* parent, const util::tString& config_entry);
+  static util::tString GetFullConfigEntry(tFrameworkElement& parent, const util::tString& config_entry);
 
   /*!
    * Set config file node for the specified framework element.
@@ -77,7 +77,7 @@ public:
    * \param fe Framework element
    * \param node Common parent config file node for all child parameter config entries (starting with '/' => absolute link - otherwise relative).
    */
-  static void SetConfigNode(tFrameworkElement* fe, const util::tString& node);
+  static void SetConfigNode(tFrameworkElement& fe, const util::tString& node);
 
 };
 

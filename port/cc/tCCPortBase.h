@@ -113,7 +113,7 @@ protected:
   tCCPortQueue* queue;
 
   /*! Listens to port value changes - may be null */
-  tPortListenerManager port_listener;
+  util::tListenerManager<tPortListenerRaw, util::tNoMutex> port_listener;
 
   /*! Object that handles pull requests - null if there is none (typical case) */
   tCCPullRequestHandlerRaw* pull_request_handler;
@@ -131,7 +131,10 @@ private:
 
   inline void NotifyListeners(tThreadLocalCache* tc)
   {
-    port_listener.Notify(this, tc->data);
+    port_listener.Notify([&](tPortListenerRaw & l)
+    {
+      l.PortChangedRaw(*this, *tc->data);
+    });
   }
 
   /*!
@@ -357,9 +360,10 @@ public:
   /*!
    * \param listener Listener to add
    */
-  inline void AddPortListenerRaw(tPortListenerRaw* listener)
+  inline void AddPortListenerRaw(tPortListenerRaw& listener)
   {
-    port_listener.Add(listener);
+    util::tLock l(simple_mutex);
+    port_listener.AddListener(listener);
   }
 
   /*!
@@ -601,9 +605,10 @@ public:
   /*!
    * \param listener Listener to add
    */
-  inline void RemovePortListenerRaw(tPortListenerRaw* listener)
+  inline void RemovePortListenerRaw(tPortListenerRaw& listener)
   {
-    port_listener.Remove(listener);
+    util::tLock l(simple_mutex);
+    port_listener.RemoveListener(listener);
   }
 
   /*!

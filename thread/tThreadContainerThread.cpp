@@ -34,9 +34,9 @@ namespace finroc
 {
 namespace core
 {
-tThreadContainerThread::tThreadContainerThread(tFrameworkElement* thread_container_, int64 default_cycle_time, bool warn_on_cycle_time_exceed, tPort<long> last_cycle_execution_time) :
-  tCoreLoopThreadBase(default_cycle_time, warn_on_cycle_time_exceed),
-  thread_container(thread_container_),
+tThreadContainerThread::tThreadContainerThread(tFrameworkElement* thread_container, rrlib::time::tDuration default_cycle_time, bool warn_on_cycle_time_exceed, tPort<rrlib::time::tDuration> last_cycle_execution_time) :
+  tCoreLoopThreadBase(default_cycle_time, true, warn_on_cycle_time_exceed),
+  thread_container(thread_container),
   reschedule(true),
   schedule(),
   tasks(),
@@ -47,7 +47,7 @@ tThreadContainerThread::tThreadContainerThread(tFrameworkElement* thread_contain
   tmp(),
   last_cycle_execution_time(last_cycle_execution_time)
 {
-  this->SetName(std::string("ThreadContainer ") + thread_container_->GetCName());
+  this->SetName(std::string("ThreadContainer ") + thread_container->GetCName());
 }
 
 void tThreadContainerThread::MainLoopCallback()
@@ -63,7 +63,29 @@ void tThreadContainerThread::MainLoopCallback()
       non_sensor_tasks.Clear();
       schedule.Clear();
 
-      filter.TraverseElementTree(this->thread_container, this, false, tmp);
+      filter.TraverseElementTree(*this->thread_container, tmp, [&](tFrameworkElement & fe)
+      {
+        if (tExecutionControl::Find(fe)->GetAnnotated() != thread_container)    // don't handle elements in nested thread containers
+        {
+          return;
+        }
+        tFinrocAnnotation* ann = fe.GetAnnotation(tPeriodicFrameworkElementTask::cTYPE);
+        if (ann)
+        {
+          tPeriodicFrameworkElementTask* task = static_cast<tPeriodicFrameworkElementTask*>(ann);
+          task->previous_tasks.Clear();
+          task->next_tasks.Clear();
+          if (task->IsSenseTask())
+          {
+            tasks.Add(task);
+          }
+          else
+          {
+            non_sensor_tasks.Add(task);
+          }
+        }
+      });
+
       tasks.AddAll(non_sensor_tasks);
 
       // create task graph
@@ -151,21 +173,21 @@ void tThreadContainerThread::MainLoopCallback()
 
 void tThreadContainerThread::Run()
 {
-  this->thread_container->GetRuntime()->AddListener(this);
+  this->thread_container->GetRuntime()->AddListener(*this);
   ::finroc::core::tCoreLoopThreadBase::Run();
 }
 
-void tThreadContainerThread::RuntimeChange(int8 change_type, tFrameworkElement* element)
+void tThreadContainerThread::RuntimeChange(int8 change_type, tFrameworkElement& element)
 {
-  if (element->IsChildOf(this->thread_container, true))
+  if (element.IsChildOf(this->thread_container, true))
   {
     reschedule = true;
   }
 }
 
-void tThreadContainerThread::RuntimeEdgeChange(int8 change_type, tAbstractPort* source, tAbstractPort* target)
+void tThreadContainerThread::RuntimeEdgeChange(int8 change_type, tAbstractPort& source, tAbstractPort& target)
 {
-  if (source->IsChildOf(this->thread_container) && target->IsChildOf(this->thread_container))
+  if (source.IsChildOf(this->thread_container) && target.IsChildOf(this->thread_container))
   {
     reschedule = true;
   }
@@ -173,11 +195,9 @@ void tThreadContainerThread::RuntimeEdgeChange(int8 change_type, tAbstractPort* 
 
 void tThreadContainerThread::StopThread()
 {
-  {
-    util::tLock lock2(this->thread_container->GetRegistryLock());
-    this->thread_container->GetRuntime()->RemoveListener(this);
-    ::finroc::util::tLoopThread::StopThread();
-  }
+  util::tLock lock2(this->thread_container->GetRegistryLock());
+  this->thread_container->GetRuntime()->RemoveListener(*this);
+  tLoopThread::StopThread();
 }
 
 void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, tEdgeAggregator* outgoing)
@@ -190,16 +210,16 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
   for (size_t i = 0u; i < out_edges->Size(); i++)
   {
     tAggregatedEdge* temp = out_edges->Get(i);
-    if (temp == NULL)
+    if (!temp)
     {
       FINROC_LOG_PRINT_TO(thread_containers, rrlib::logging::eLL_WARNING, "Out Edge ", i , " is NULL ... skipping.\n");
       continue;
     }
-    assert(temp != NULL);
+    assert(temp);
 
     tEdgeAggregator* dest = temp->destination;
 
-    assert(dest != NULL);
+    assert(dest);
     if (!trace.Contains(dest))
     {
       // ok, have we reached another task?
@@ -208,7 +228,7 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
       {
         ann = dest->GetParent()->GetAnnotation(tPeriodicFrameworkElementTask::cTYPE);
       }
-      if (ann != NULL)
+      if (ann)
       {
         tPeriodicFrameworkElementTask* task2 = static_cast<tPeriodicFrameworkElementTask*>(ann);
         if (!task->next_tasks.Contains(task2))
@@ -252,29 +272,6 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
   // remove from trace stack
   assert((trace.Get(trace.Size() - 1) == outgoing));
   trace.Remove(trace.Size() - 1);
-}
-
-void tThreadContainerThread::TreeFilterCallback(tFrameworkElement* fe, bool unused)
-{
-  if (tExecutionControl::Find(fe)->GetAnnotated() != thread_container)    // don't handle elements in nested thread containers
-  {
-    return;
-  }
-  tFinrocAnnotation* ann = fe->GetAnnotation(tPeriodicFrameworkElementTask::cTYPE);
-  if (ann != NULL)
-  {
-    tPeriodicFrameworkElementTask* task = static_cast<tPeriodicFrameworkElementTask*>(ann);
-    task->previous_tasks.Clear();
-    task->next_tasks.Clear();
-    if (task->IsSenseTask())
-    {
-      tasks.Add(task);
-    }
-    else
-    {
-      non_sensor_tasks.Add(task);
-    }
-  }
 }
 
 } // namespace finroc

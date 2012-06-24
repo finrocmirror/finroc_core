@@ -61,13 +61,13 @@ void tRealPortQueueTest::Main()
   tRuntimeEnvironment::GetInstance()->PrintStructure();
 
   FINROC_LOG_PRINT_STATIC(eLL_USER, "test writing a lot to port...");
-  int64 start = util::tTime::GetPrecise();
+  rrlib::time::tTimestamp start = rrlib::time::Now();
   for (int i = 0; i < cCYCLES; i++)
   {
     output->Publish(i);
   }
-  int64 time = util::tTime::GetPrecise() - start;
-  FINROC_LOG_PRINT_STATIC(eLL_USER, time);
+  rrlib::time::tDuration time = rrlib::time::Now() - start;
+  FINROC_LOG_PRINT_STATIC(eLL_USER, rrlib::time::ToString(time));
 
   FINROC_LOG_PRINT_STATIC(eLL_USER, "Reading contents of queue (single dq)...");
   int cn = 0;
@@ -152,7 +152,7 @@ void tRealPortQueueTest::Main()
   int last_neg_unlimited_f = 0;
 
   int e = cCYCLES - 1;
-  start = util::tTime::GetPrecise();
+  start = rrlib::time::Now();
   cPUBLISH_LIMIT = cCYCLES;
   int cc = 0;
   while (true)
@@ -223,8 +223,8 @@ void tRealPortQueueTest::Main()
       break;
     }
   }
-  time = util::tTime::GetPrecise() - start;
-  FINROC_LOG_PRINT_STATIC(eLL_USER, time);
+  time = rrlib::time::Now() - start;
+  FINROC_LOG_PRINT_STATIC(eLL_USER, rrlib::time::ToString(time));
   finished.Set(1);
 }
 

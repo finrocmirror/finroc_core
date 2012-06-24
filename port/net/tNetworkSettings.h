@@ -44,7 +44,7 @@ class tNetworkSettings : public tFrameworkElement, public tPortListener<int16_t>
 private:
 
   /*! List with listeners for update times */
-  tUpdateTimeChangeListener::tManager update_time_listener;
+  util::tListenerManager<tUpdateTimeChangeListener, util::tMutexLockOrder> update_time_listener;
 
 public:
 
@@ -56,14 +56,14 @@ public:
   /*!
    * \param listener Listener to add
    */
-  inline void AddUpdateTimeChangeListener(tUpdateTimeChangeListener* listener)
+  inline void AddUpdateTimeChangeListener(tUpdateTimeChangeListener& listener)
   {
-    update_time_listener.Add(listener);
+    update_time_listener.AddListener(listener);
   }
 
   static tNetworkSettings& GetInstance();
 
-  virtual void PortChanged(tAbstractPort* origin, const int16_t& value);
+  virtual void PortChanged(tAbstractPort& origin, const int16_t& value);
 
   /*!
    * Notify update time change listener of change
@@ -73,15 +73,18 @@ public:
    */
   inline void NotifyUpdateTimeChangeListener(rrlib::rtti::tDataTypeBase dt, int16 time)
   {
-    update_time_listener.Notify(&(dt), NULL, time);
+    update_time_listener.Notify([ = ](tUpdateTimeChangeListener & l)
+    {
+      l.UpdateTimeChanged(dt, time);
+    });
   }
 
   /*!
    * \param listener Listener to remove
    */
-  inline void RemoveUpdateTimeChangeListener(tUpdateTimeChangeListener* listener)
+  inline void RemoveUpdateTimeChangeListener(tUpdateTimeChangeListener& listener)
   {
-    update_time_listener.Remove(listener);
+    update_time_listener.RemoveListener(listener);
   }
 };
 

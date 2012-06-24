@@ -74,7 +74,7 @@ private:
   tInterfaceNetPort* net_port;
 
   /*! Needed when executed as a task with synch call over the net - Network timeout in ms */
-  int net_timeout;
+  rrlib::time::tDuration net_timeout;
 
   /*! Needed when executed as a task with synch forward over the net - Port from which call originates */
   tInterfaceNetPort* source_net_port;
@@ -150,7 +150,7 @@ public:
   /*!
    * \return Needed when executed as a task with synch call over the net - Network timeout in ms
    */
-  inline int GetNetTimeout()
+  inline rrlib::time::tDuration GetNetTimeout()
   {
     return net_timeout;
   }
@@ -208,7 +208,7 @@ public:
    * \param net_port Port over which call is sent
    * \param net_timeout Network timeout in ms for call
    */
-  void PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, tAbstractAsyncReturnHandler* ret_handler_, tInterfaceNetPort* net_port_, int net_timeout_);
+  void PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, tAbstractAsyncReturnHandler* ret_handler_, tInterfaceNetPort* net_port_, const rrlib::time::tDuration& net_timeout_);
 
   /*!
    * Prepare method call object for blocking remote execution in same thread (as a task)
@@ -217,7 +217,7 @@ public:
    * \param port_interface Data type of interface that method belongs to
    * \param net_timeout Network timeout in ms for call
    */
-  void PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, int net_timeout_);
+  void PrepareSyncRemoteExecution(tAbstractMethod* method_, const rrlib::rtti::tDataTypeBase& port_interface, const rrlib::time::tDuration& net_timeout_);
 
   /*!
    * Recycle all parameters, but keep empty method call

@@ -40,9 +40,6 @@ namespace core
 class tUpdateTimeChangeListener : public util::tInterface
 {
 public:
-  class tManager; // inner class forward declaration
-
-public:
 
   /*!
    * Called whenever default update time globally or for specific type changes
@@ -51,21 +48,6 @@ public:
    * \param new_update_time new update time
    */
   virtual void UpdateTimeChanged(rrlib::rtti::tDataTypeBase dt, int16 new_update_time) = 0;
-
-public:
-
-  class tManager : public util::tListenerManager<rrlib::rtti::tDataTypeBase, util::tObject, tUpdateTimeChangeListener, tUpdateTimeChangeListener::tManager>
-  {
-  public:
-
-    tManager() {}
-
-    inline void SingleNotify(tUpdateTimeChangeListener* listener, rrlib::rtti::tDataTypeBase* origin, const util::tObject* parameter, int call_id)
-    {
-      listener->UpdateTimeChanged(*origin, static_cast<int16>(call_id));
-    }
-
-  };
 
 };
 

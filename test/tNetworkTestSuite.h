@@ -432,7 +432,7 @@ public:
         // write to remote blackboard
         try
         {
-          blackboard::tBlackboardWriteAccess<rrlib::serialization::tMemoryBuffer> bb(*bb_client, 2000);
+          blackboard::tBlackboardWriteAccess<rrlib::serialization::tMemoryBuffer> bb(*bb_client, std::chrono::seconds(2));
           if (bb.Size() == 0)
           {
             bb.Resize(1u);
@@ -450,7 +450,7 @@ public:
         // read local blackboard
         try
         {
-          blackboard::tBlackboardReadAccess<rrlib::serialization::tMemoryBuffer> bb(*local_bb_client, 2000);
+          blackboard::tBlackboardReadAccess<rrlib::serialization::tMemoryBuffer> bb(*local_bb_client, std::chrono::seconds(2));
           if (bb.Size() > 0)
           {
             is.Reset(&(bb.Get(0u)));
@@ -470,7 +470,7 @@ public:
 
       try
       {
-        util::tThread::Sleep(cPUBLISH_FREQ);
+        util::tThread::Sleep(std::chrono::milliseconds(cPUBLISH_FREQ), true);
       }
       catch (const util::tException& e)
       {
@@ -490,6 +490,8 @@ public:
   }
 
 };
+
+const int16 tNetworkTestSuite::cPUBLISH_FREQ; // not clean - but only included from one .cpp file
 
 } // namespace finroc
 } // namespace core

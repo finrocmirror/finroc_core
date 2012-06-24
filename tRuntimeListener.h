@@ -55,11 +55,10 @@ public:
    *
    * \param change_type Type of change (see Constants)
    * \param element FrameworkElement that changed
-   * \param edge_target Target of edge, in case of EDGE_CHANGE
    *
    * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
    */
-  virtual void RuntimeChange(int8 change_type, tFrameworkElement* element) = 0;
+  virtual void RuntimeChange(int8 change_type, tFrameworkElement& element) = 0;
 
   /*!
    * Called whenever an edge was added/removed
@@ -70,35 +69,7 @@ public:
    *
    * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
    */
-  virtual void RuntimeEdgeChange(int8 change_type, tAbstractPort* source, tAbstractPort* target) = 0;
-
-};
-
-/*!
- * Manager for port listeners
- */
-class tRuntimeListenerManager : public util::tListenerManager<tFrameworkElement, util::tObject, tRuntimeListener, tRuntimeListenerManager>
-{
-public:
-
-  tRuntimeListenerManager() {}
-
-  inline void SingleNotify(tRuntimeListener* listener, tFrameworkElement* origin, const util::tObject* parameter, int call_id)
-  {
-    if (parameter != NULL)
-    {
-      int8 change_type = static_cast<int8>(call_id);
-      tAbstractPort* src = static_cast<tAbstractPort*>(origin);
-      const tAbstractPort* dest = static_cast<const tAbstractPort*>(parameter);
-
-      listener->RuntimeEdgeChange(change_type, src, const_cast<tAbstractPort*>(dest));
-    }
-    else
-    {
-      listener->RuntimeChange(static_cast<int8>(call_id), origin);
-    }
-  }
-
+  virtual void RuntimeEdgeChange(int8 change_type, tAbstractPort& source, tAbstractPort& target) = 0;
 };
 
 } // namespace finroc

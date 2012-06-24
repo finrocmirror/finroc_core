@@ -49,23 +49,7 @@ public:
    * \param origin Port that value comes from
    * \param value Manager of port's new value
    */
-  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value) = 0;
-
-};
-
-/*!
- * Manager for port listeners
- */
-class tPortListenerManager : public util::tListenerManager<tAbstractPort, rrlib::rtti::tGenericObjectManager, tPortListenerRaw, tPortListenerManager>
-{
-public:
-
-  tPortListenerManager() {}
-
-  inline void SingleNotify(tPortListenerRaw* listener, tAbstractPort* origin, const rrlib::rtti::tGenericObjectManager* parameter, int cCallId)
-  {
-    listener->PortChangedRaw(origin, parameter);
-  }
+  virtual void PortChangedRaw(tAbstractPort& origin, const tGenericObjectManager& value) = 0;
 
 };
 

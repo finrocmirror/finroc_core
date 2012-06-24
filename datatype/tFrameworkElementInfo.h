@@ -106,10 +106,6 @@ private:
   /*! Stores outgoing connection destination ports - if this is a port */
   util::tSimpleList<tConnectionInfo> connections;
 
-  /*! Register Data type */
-  //@ConstPtr
-  //public final static DataType TYPE = DataTypeRegister.getInstance().getDataType(FrameworkElementInfo.class);
-
   /*! mask for non-ports and non-edge-aggregators */
   static const uint cPARENT_FLAGS_TO_STORE = tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cEDGE_AGGREGATOR;
 
@@ -239,7 +235,7 @@ public:
    *
    * (call in runtime-registry synchronized context only)
    */
-  static void SerializeFrameworkElement(tFrameworkElement* fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, tFrameworkElementTreeFilter element_filter, std::string& tmp);
+  static void SerializeFrameworkElement(tFrameworkElement& fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, const tFrameworkElementTreeFilter& element_filter, std::string& tmp);
 
   virtual const util::tString ToString() const;
 

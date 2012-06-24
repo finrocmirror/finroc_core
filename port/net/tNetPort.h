@@ -84,7 +84,7 @@ public:
   static const int cPULL_TIMEOUT = 1000;
 
   /*! Last time the value was updated (used to make sure that minimum update interval is kept) */
-  int64 last_update;
+  rrlib::time::tTimestamp last_update;
 
 private:
 
@@ -205,7 +205,7 @@ public:
   /*!
    * \return Last time the value was updated (used to make sure that minimum update interval is kept)
    */
-  inline int64 GetLastUpdate()
+  inline rrlib::time::tTimestamp GetLastUpdate()
   {
     return last_update;
   }
@@ -263,7 +263,7 @@ public:
     GetPort()->ManagedDelete();
   }
 
-  virtual void PortChanged(tAbstractPort* origin, const void* const& value)
+  virtual void PortChanged(tAbstractPort& origin, const void* const& value)
   {
     PortChanged();
   }
@@ -282,7 +282,7 @@ public:
    * \param timestamp Time stamp
    * \param changed_flag Type of change
    */
-  void ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int64 timestamp, int8 changed_flag);
+  void ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, rrlib::time::tTimestamp timestamp, int8 changed_flag);
 
   virtual void SendCallReturn(tAbstractCall::tPtr& mc) = 0;
 
@@ -297,17 +297,17 @@ public:
   /*!
    * \param last_update Last time the value was updated (used to make sure that minimum update interval is kept)
    */
-  inline void SetLastUpdate(int64 last_update_)
+  inline void SetLastUpdate(const rrlib::time::tTimestamp& last_update)
   {
-    this->last_update = last_update_;
+    this->last_update = last_update;
   }
 
   /*!
    * \param remote_handle Handle of Remote port
    */
-  inline void SetRemoteHandle(int remote_handle_)
+  inline void SetRemoteHandle(int remote_handle)
   {
-    this->remote_handle = remote_handle_;
+    this->remote_handle = remote_handle;
   }
 
   void UpdateFlags(uint flags);
@@ -318,7 +318,7 @@ public:
    * \param co Stream
    * \param start_time Time stamp
    */
-  void WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64 start_time);
+  void WriteDataToNetwork(rrlib::serialization::tOutputStream& co, const rrlib::time::tTimestamp& start_time);
 
 public:
 
@@ -330,55 +330,55 @@ public:
   private:
 
     // Outer class NetPort
-    tNetPort* const outer_class_ptr;
+    tNetPort& outer_class;
 
   protected:
 
     virtual void ConnectionRemoved(tAbstractPort* partner)
     {
-      outer_class_ptr->ConnectionRemoved();
+      outer_class.ConnectionRemoved();
     }
 
     virtual void InitialPushTo(tAbstractPort* target, bool reverse);
 
     virtual void NewConnection(tAbstractPort* partner)
     {
-      outer_class_ptr->NewConnection();
+      outer_class.NewConnection();
     }
 
     virtual void PostChildInit()
     {
       ::finroc::core::tFrameworkElement::PostChildInit();
-      outer_class_ptr->PostChildInit();
+      outer_class.PostChildInit();
     }
 
     virtual void PreChildInit()
     {
       ::finroc::core::tFrameworkElement::PreChildInit();
-      outer_class_ptr->PreChildInit();
+      outer_class.PreChildInit();
     }
 
     virtual void PrepareDelete();
 
   public:
 
-    tCCNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci);
+    tCCNetPort(tNetPort& outer_class_ptr_, tPortCreationInfoBase pci);
 
     virtual tNetPort* AsNetPort()
     {
-      return outer_class_ptr;
+      return &outer_class;
     }
 
     virtual void InvokeCall(tPullCall::tPtr& call)
     {
       tAbstractCall::tPtr tmp(std::move(call));
-      outer_class_ptr->SendCall(tmp);
+      outer_class.SendCall(tmp);
     }
 
     virtual void NotifyDisconnect()
     {
       ::finroc::core::tCCPortBase::NotifyDisconnect();
-      outer_class_ptr->NotifyDisconnect();
+      outer_class.NotifyDisconnect();
     }
 
     virtual bool PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort* new_connection_partner);
@@ -406,55 +406,55 @@ public:
   private:
 
     // Outer class NetPort
-    tNetPort* const outer_class_ptr;
+    tNetPort& outer_class;
 
   protected:
 
     virtual void ConnectionRemoved(tAbstractPort* partner)
     {
-      outer_class_ptr->ConnectionRemoved();
+      outer_class.ConnectionRemoved();
     }
 
     virtual void InitialPushTo(tAbstractPort* target, bool reverse);
 
     virtual void NewConnection(tAbstractPort* partner)
     {
-      outer_class_ptr->NewConnection();
+      outer_class.NewConnection();
     }
 
     virtual void PostChildInit()
     {
       ::finroc::core::tFrameworkElement::PostChildInit();
-      outer_class_ptr->PostChildInit();
+      outer_class.PostChildInit();
     }
 
     virtual void PreChildInit()
     {
       ::finroc::core::tFrameworkElement::PreChildInit();
-      outer_class_ptr->PreChildInit();
+      outer_class.PreChildInit();
     }
 
     virtual void PrepareDelete();
 
   public:
 
-    tStdNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci);
+    tStdNetPort(tNetPort& outer_class, tPortCreationInfoBase pci);
 
     virtual tNetPort* AsNetPort()
     {
-      return outer_class_ptr;
+      return &outer_class;
     }
 
     virtual void InvokeCall(tPullCall::tPtr& call)
     {
       tAbstractCall::tPtr tmp(std::move(call));
-      outer_class_ptr->SendCall(tmp);
+      outer_class.SendCall(tmp);
     }
 
     virtual void NotifyDisconnect()
     {
       ::finroc::core::tPortBase::NotifyDisconnect();
-      outer_class_ptr->NotifyDisconnect();
+      outer_class.NotifyDisconnect();
     }
 
     virtual bool PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort* new_connection_partner);
@@ -486,74 +486,74 @@ public:
   private:
 
     // Outer class NetPort
-    tNetPort* const outer_class_ptr;
+    tNetPort& outer_class;
 
   protected:
 
     virtual void ConnectionRemoved(tAbstractPort* partner)
     {
-      outer_class_ptr->ConnectionRemoved();
+      outer_class.ConnectionRemoved();
     }
 
     virtual void NewConnection(tAbstractPort* partner)
     {
-      outer_class_ptr->NewConnection();
+      outer_class.NewConnection();
     }
 
     virtual void PostChildInit()
     {
       ::finroc::core::tFrameworkElement::PostChildInit();
-      outer_class_ptr->PostChildInit();
+      outer_class.PostChildInit();
     }
 
     virtual void PreChildInit()
     {
       ::finroc::core::tFrameworkElement::PreChildInit();
-      outer_class_ptr->PreChildInit();
+      outer_class.PreChildInit();
     }
 
     virtual void PrepareDelete()
     {
-      util::tLock lock3(this);
+      util::tLock lock3(*this);
       ::finroc::core::tAbstractPort::PrepareDelete();
-      outer_class_ptr->PrepareDelete();
+      outer_class.PrepareDelete();
     }
 
   public:
 
-    tInterfaceNetPortImpl(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci);
+    tInterfaceNetPortImpl(tNetPort& outer_class_ptr_, tPortCreationInfoBase pci);
 
     virtual tNetPort* AsNetPort()
     {
-      return outer_class_ptr;
+      return &outer_class;;
     }
 
     virtual void InvokeCall(tMethodCall::tPtr& call)
     {
       tAbstractCall::tPtr tmp(std::move(call));
-      outer_class_ptr->SendCall(tmp);
+      outer_class.SendCall(tmp);
     }
 
     virtual void NotifyDisconnect()
     {
       ::finroc::core::tInterfacePort::NotifyDisconnect();
-      outer_class_ptr->NotifyDisconnect();
+      outer_class.NotifyDisconnect();
     }
 
     virtual void SendAsyncCall(tMethodCall::tPtr& mc)
     {
       mc->SetupAsynchCall();
       tAbstractCall::tPtr tmp(std::move(mc));
-      outer_class_ptr->SendCall(tmp);
+      outer_class.SendCall(tmp);
     }
 
     virtual void SendSyncCallReturn(tMethodCall::tPtr& mc)
     {
       tAbstractCall::tPtr tmp(std::move(mc));
-      outer_class_ptr->SendCall(tmp);
+      outer_class.SendCall(tmp);
     }
 
-    virtual tMethodCall::tPtr SynchCallOverTheNet(tMethodCall::tPtr& mc, int timeout);
+    virtual tMethodCall::tPtr SynchCallOverTheNet(tMethodCall::tPtr& mc, const rrlib::time::tDuration& timeout);
 
     inline void UpdateFlags(uint flags)
     {

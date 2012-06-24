@@ -44,7 +44,7 @@ namespace detail
 /**
  * \return Unit of cc port
  */
-tUnit* GetUnit(tAbstractPort* cc_port);
+tUnit* GetUnit(tAbstractPort& cc_port);
 }
 
 /*!
@@ -64,11 +64,11 @@ public:
    * \param origin Port that value comes from
    * \param value Port's new value (locked for duration of method call)
    */
-  virtual void PortChanged(tAbstractPort* origin, const T& value) = 0;
+  virtual void PortChanged(tAbstractPort& origin, const T& value) = 0;
 
-  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
+  virtual void PortChangedRaw(tAbstractPort& origin, const tGenericObjectManager& value)
   {
-    PortChanged(origin, *value->GetObject()->GetData<T>());
+    PortChanged(origin, *value.GetObject()->GetData<T>());
   }
 };
 
@@ -78,14 +78,14 @@ class tPortListenerAdapter<tPortDataPtr<const T>, false, false> : public tPortLi
 {
 public:
 
-  virtual void PortChanged(tAbstractPort* origin, const tPortDataPtr<const T>& value) = 0;
+  virtual void PortChanged(tAbstractPort& origin, const tPortDataPtr<const T>& value) = 0;
 
-  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
+  virtual void PortChangedRaw(tAbstractPort& origin, const tGenericObjectManager& value)
   {
-    assert(typeid(*value).name() == typeid(tPortDataManager).name());
-    tPortDataManager* mgr = const_cast<tPortDataManager*>(static_cast<const tPortDataManager*>(value));
-    mgr->AddLock();
-    PortChanged(origin, tPortDataPtr<const T>(mgr));
+    assert(typeid(value).name() == typeid(tPortDataManager).name());
+    tPortDataManager& mgr = const_cast<tPortDataManager&>(static_cast<const tPortDataManager&>(value));
+    mgr.AddLock();
+    PortChanged(origin, tPortDataPtr<const T>(&mgr));
   }
 };
 
@@ -95,12 +95,12 @@ class tPortListenerAdapter<tPortDataPtr<const T>, true, false> : public tPortLis
 {
 public:
 
-  virtual void PortChanged(tAbstractPort* origin, const tPortDataPtr<const T>& value) = 0;
+  virtual void PortChanged(tAbstractPort& origin, const tPortDataPtr<const T>& value) = 0;
 
-  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
+  virtual void PortChangedRaw(tAbstractPort& origin, const tGenericObjectManager& value)
   {
-    tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(value->GetObject()->GetType());
-    c->GetObject()->DeepCopyFrom(value->GetObject());
+    tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(value.GetObject()->GetType());
+    c->GetObject()->DeepCopyFrom(value.GetObject());
     PortChanged(origin, tPortDataPtr<const T>(c));
   }
 };
@@ -111,11 +111,11 @@ class tPortListenerAdapter<T, CC, true> : public tPortListenerRaw
 {
 public:
 
-  virtual void PortChanged(tAbstractPort* origin, const T& value) = 0;
+  virtual void PortChanged(tAbstractPort& origin, const T& value) = 0;
 
-  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
+  virtual void PortChangedRaw(tAbstractPort& origin, const tGenericObjectManager& value)
   {
-    const tNumber* num = value->GetObject()->GetData<tNumber>();
+    const tNumber* num = value.GetObject()->GetData<tNumber>();
     tUnit* port_unit = detail::GetUnit(origin);
     if (port_unit != num->GetUnit() && port_unit != &tUnit::cNO_UNIT && num->GetUnit() != &tUnit::cNO_UNIT)
     {
@@ -134,11 +134,11 @@ class tPortListenerAdapter<tPortDataPtr<const T>, CC, true> : public tPortListen
 {
 public:
 
-  virtual void PortChanged(tAbstractPort* origin, const std::shared_ptr<const T>& value) = 0;
+  virtual void PortChanged(tAbstractPort& origin, const std::shared_ptr<const T>& value) = 0;
 
-  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
+  virtual void PortChangedRaw(tAbstractPort& origin, const tGenericObjectManager& value)
   {
-    const tNumber* num = value->GetObject()->GetData<tNumber>();
+    const tNumber* num = value.GetObject()->GetData<tNumber>();
     tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
     tNumber* new_num = c->GetObject()->GetData<tNumber>();
     tUnit* port_unit = detail::GetUnit(origin);
@@ -160,11 +160,11 @@ class tPortListenerAdapter<const void*, CC, NUM> : public tPortListenerRaw
 {
 public:
 
-  virtual void PortChanged(tAbstractPort* origin, const void* const& value) = 0;
+  virtual void PortChanged(tAbstractPort& origin, const void* const& value) = 0;
 
-  virtual void PortChangedRaw(tAbstractPort* origin, const tGenericObjectManager* value)
+  virtual void PortChangedRaw(tAbstractPort& origin, const tGenericObjectManager& value)
   {
-    PortChanged(origin, value->GetObject()->GetRawDataPtr());
+    PortChanged(origin, value.GetObject()->GetRawDataPtr());
   }
 };
 

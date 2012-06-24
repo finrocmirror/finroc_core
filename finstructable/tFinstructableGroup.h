@@ -144,7 +144,7 @@ protected:
    * \param ap Port
    * \return Relative link to this port (or absolute link if it is globally unique)
    */
-  util::tString GetEdgeLink(tAbstractPort* ap);
+  util::tString GetEdgeLink(tAbstractPort& ap);
 
 public:
 
@@ -184,7 +184,7 @@ public:
    * \param ap Framework element to check this for (usually parameter port)
    * \return Answer.
    */
-  bool IsResponsibleForConfigFileConnections(tFrameworkElement* ap) const;
+  bool IsResponsibleForConfigFileConnections(tFrameworkElement& ap) const;
 
   /*!
    * Save contents of group back to Xml file
@@ -208,7 +208,7 @@ public:
    * \param create_action Action with which framework element was created
    * \param params Parameters that module was created with (may be null)
    */
-  static void SetFinstructed(tFrameworkElement* fe, tCreateFrameworkElementAction* create_action, tConstructorParameters* params);
+  static void SetFinstructed(tFrameworkElement& fe, tCreateFrameworkElementAction* create_action, tConstructorParameters* params);
 
   /*!
    * \param main_name Default name when group is main part
@@ -222,8 +222,6 @@ public:
    * Perform some static initialization w.r.t. to state at program startup
    */
   static void StaticInit();
-
-  void TreeFilterCallback(tFrameworkElement* fe, rrlib::xml::tNode* root);
 
 };
 

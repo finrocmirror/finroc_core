@@ -45,20 +45,17 @@ class tParameterNumeric : public tParameterBase<T>
   /*!
    * Caches numeric value of parameter port (optimization)
    */
-  class tNumberCache : public tPortListener<T>
+  struct tNumberCache : public tPortListener<T>
   {
-  public:
-
     /*! Cached current value (we will much more often read than it will be changed) */
-    volatile T current_value;
+    volatile T current_value;  // TODO: According to Mr. Williams' book, we should use atomic var instead of volatile. However, std::atomic does not support float or float/double yet (at least in gcc 4.6).
 
-    tNumberCache();
+    tNumberCache() : current_value(0) {}
 
-    virtual void PortChanged(tAbstractPort* origin, const T& value)
+    virtual void PortChanged(tAbstractPort& origin, const T& value)
     {
       current_value = value;
     }
-
   };
 
 public:
@@ -71,14 +68,14 @@ public:
     tParameterBase<T>(args...),
     cache(new tNumberCache())
   {
-    cache->current_value = this->Get();
-    this->AddPortListener(cache.get());
+    cache->current_value = tPort<T>::Get();
+    this->AddPortListener(*cache);
   }
 
   /*!
    * \return Current parameter value
    */
-  inline T GetValue() const
+  inline T Get() const
   {
     return cache->current_value;
   }

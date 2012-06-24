@@ -115,7 +115,6 @@ void tFinstructableGroup::AddDependency(const rrlib::rtti::tDataTypeBase& dt)
 
 void tFinstructableGroup::EvaluateStaticParameters()
 {
-  util::tLock lock1(this);
   if (xml_file.HasChanged() && xml_file.Get().length() > 0)
   {
     //if (this.childCount() == 0) { // TODO: original intension: changing xml files to mutliple existing ones in finstruct shouldn't load all of them
@@ -154,14 +153,14 @@ util::tString tFinstructableGroup::GetEdgeLink(const util::tString& target_link)
   return target_link;
 }
 
-util::tString tFinstructableGroup::GetEdgeLink(tAbstractPort* ap)
+util::tString tFinstructableGroup::GetEdgeLink(tAbstractPort& ap)
 {
-  ::finroc::core::tFrameworkElement* alt_root = ap->GetParentWithFlags(tCoreFlags::cALTERNATE_LINK_ROOT);
+  ::finroc::core::tFrameworkElement* alt_root = ap.GetParentWithFlags(tCoreFlags::cALTERNATE_LINK_ROOT);
   if (alt_root != NULL && alt_root->IsChildOf(this))
   {
-    return ap->GetQualifiedLink();
+    return ap.GetQualifiedLink();
   }
-  return ap->GetQualifiedName().substr(link_tmp.length());
+  return ap.GetQualifiedName().substr(link_tmp.length());
 }
 
 void tFinstructableGroup::Instantiate(const rrlib::xml::tNode& node, tFrameworkElement* parent)
@@ -206,8 +205,8 @@ void tFinstructableGroup::Instantiate(const rrlib::xml::tNode& node, tFrameworkE
       spl->Deserialize(*constructor_params, true);
     }
     created = action->CreateModule(parent, name, spl);
-    SetFinstructed(created, action, spl);
-    if (parameters != NULL)
+    SetFinstructed(*created, action, spl);
+    if (parameters)
     {
       (static_cast<tStaticParameterList*>(created->GetAnnotation(tStaticParameterList::cTYPE)))->Deserialize(*parameters);
     }
@@ -240,14 +239,13 @@ void tFinstructableGroup::Instantiate(const rrlib::xml::tNode& node, tFrameworkE
   }
 }
 
-bool tFinstructableGroup::IsResponsibleForConfigFileConnections(tFrameworkElement* ap) const
+bool tFinstructableGroup::IsResponsibleForConfigFileConnections(tFrameworkElement& ap) const
 {
-  return tParameterInfo::IsFinstructableGroupResponsibleForConfigFileConnections(*this, *ap);
+  return tParameterInfo::IsFinstructableGroupResponsibleForConfigFileConnections(*this, ap);
 }
 
 void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
 {
-  util::tLock lock1(this);
   {
     util::tLock lock2(GetRegistryLock());
     try
@@ -296,7 +294,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
         util::tString name = node->Name();
         if (boost::equals(name, "staticparameter"))
         {
-          tStaticParameterList* spl = tStaticParameterList::GetOrCreate(this);
+          tStaticParameterList* spl = tStaticParameterList::GetOrCreate(*this);
           spl->Add(new tStaticParameterBase(node->GetStringAttribute("name"), rrlib::rtti::tDataTypeBase(), false, true));
         }
         else if (boost::equals(name, "element"))
@@ -344,7 +342,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
             }
             else
             {
-              if (outermost_group && node->HasAttribute("cmdline") && (!IsResponsibleForConfigFileConnections(parameter)))
+              if (outermost_group && node->HasAttribute("cmdline") && (!IsResponsibleForConfigFileConnections(*parameter)))
               {
                 pi->SetCommandLineOption(node->GetStringAttribute("cmdline"));
               }
@@ -439,11 +437,108 @@ void tFinstructableGroup::SaveXml()
       // serialize edges
       link_tmp = GetQualifiedName() + "/";
       tFrameworkElementTreeFilter filter(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
+      filter.TraverseElementTree(*this, [&](tFrameworkElement & fe)
+      {
+        assert(fe.IsPort());
+        tAbstractPort& ap = static_cast<tAbstractPort&>(fe);
 
-      save_parameter_config_entries = false;
-      filter.TraverseElementTree(this, this, &root);
-      save_parameter_config_entries = true;
-      filter.TraverseElementTree(this, this, &root);
+        // first pass
+        ap.GetConnectionPartners(connect_tmp, true, false, true);  // only outgoing edges => we don't get any edges double
+
+        for (size_t i = 0u; i < connect_tmp.Size(); i++)
+        {
+          tAbstractPort* ap2 = connect_tmp.Get(i);
+
+          // save edge?
+          // check1: different finstructed elements as parent?
+          if (ap.GetParentWithFlags(tCoreFlags::cFINSTRUCTED) == ap2->GetParentWithFlags(tCoreFlags::cFINSTRUCTED))
+          {
+            // TODO: check why continue causes problems here
+            // continue;
+          }
+
+          // check2: their deepest common finstructable_group parent is this
+          core::tFrameworkElement* common_parent = ap.GetParent();
+          while (!ap2->IsChildOf(common_parent))
+          {
+            common_parent = common_parent->GetParent();
+          }
+          ::finroc::core::tFrameworkElement* common_finstructable_parent = common_parent->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP) ? common_parent : common_parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
+          if (common_finstructable_parent != this)
+          {
+            continue;
+          }
+
+          // check3: only save non-volatile connections in this step (finstruct creates link edges for volatile ports)
+          if (ap.IsVolatile() || ap2->IsVolatile())
+          {
+            continue;
+          }
+
+          // save edge
+          rrlib::xml::tNode& edge = root.AddChildNode("edge");
+          edge.SetAttribute("src", GetEdgeLink(ap));
+          edge.SetAttribute("dest", GetEdgeLink(*ap2));
+        }
+
+        // serialize link edges
+        if (ap.GetLinkEdges() != NULL)
+        {
+          for (size_t i = 0u; i < ap.GetLinkEdges()->Size(); i++)
+          {
+            tLinkEdge* le = ap.GetLinkEdges()->Get(i);
+            if (!le->IsFinstructed())
+            {
+              continue;
+            }
+            if (le->GetSourceLink().length() > 0)
+            {
+              // save edge
+              rrlib::xml::tNode& edge = root.AddChildNode("edge");
+              edge.SetAttribute("src", GetEdgeLink(le->GetSourceLink()));
+              edge.SetAttribute("dest", GetEdgeLink(ap));
+            }
+            else
+            {
+              // save edge
+              rrlib::xml::tNode& edge = root.AddChildNode("edge");
+              edge.SetAttribute("src", GetEdgeLink(ap));
+              edge.SetAttribute("dest", GetEdgeLink(le->GetTargetLink()));
+            }
+          }
+        }
+      });
+
+      // Save parameter config entries
+      filter.TraverseElementTree(*this, [&](tFrameworkElement & fe)
+      {
+        assert(fe.IsPort());
+        tAbstractPort& ap = static_cast<tAbstractPort&>(fe);
+
+        // second pass?
+        bool outermostGroup = GetParent() == tRuntimeEnvironment::GetInstance();
+        tParameterInfo* info = ap.GetAnnotation<tParameterInfo>();
+
+        if (info != NULL && info->HasNonDefaultFinstructInfo())
+        {
+          if (!IsResponsibleForConfigFileConnections(ap))
+          {
+
+            if (outermostGroup && info->GetCommandLineOption().length() > 0)
+            {
+              rrlib::xml::tNode& config = root.AddChildNode("parameter");
+              config.SetAttribute("link", GetEdgeLink(ap));
+              config.SetAttribute("cmdline", info->GetCommandLineOption());
+            }
+
+            return;
+          }
+
+          rrlib::xml::tNode& config = root.AddChildNode("parameter");
+          config.SetAttribute("link", GetEdgeLink(ap));
+          info->Serialize(config, true, outermostGroup);
+        }
+      });
 
       // add dependencies
       if (dependencies_tmp.size() > 0)
@@ -552,16 +647,16 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml::tNode& node, tFrameworkE
   }
 }
 
-void tFinstructableGroup::SetFinstructed(tFrameworkElement* fe, tCreateFrameworkElementAction* create_action, tConstructorParameters* params)
+void tFinstructableGroup::SetFinstructed(tFrameworkElement& fe, tCreateFrameworkElementAction* create_action, tConstructorParameters* params)
 {
-  assert((!fe->GetFlag(tCoreFlags::cFINSTRUCTED)));
+  assert(!fe.GetFlag(tCoreFlags::cFINSTRUCTED));
   tStaticParameterList* list = tStaticParameterList::GetOrCreate(fe);
   const std::vector<core::tCreateFrameworkElementAction*>& v = runtime_construction::GetConstructibleElements();
   list->SetCreateAction(static_cast<int>(std::find(v.begin(), v.end(), create_action) - v.begin()));
-  fe->SetFlag(tCoreFlags::cFINSTRUCTED);
+  fe.SetFlag(tCoreFlags::cFINSTRUCTED);
   if (params != NULL)
   {
-    fe->AddAnnotation(params);
+    fe.AddAnnotation(params);
   }
 }
 
@@ -569,107 +664,6 @@ void tFinstructableGroup::StaticInit()
 {
   startup_type_count = rrlib::rtti::tDataTypeBase::GetTypeCount();
   startup_loaded_finroc_libs = sDynamicLoading::GetLoadedFinrocLibraries();
-}
-
-void tFinstructableGroup::TreeFilterCallback(tFrameworkElement* fe, rrlib::xml::tNode* root)
-{
-  assert((fe->IsPort()));
-  tAbstractPort* ap = static_cast<tAbstractPort*>(fe);
-
-  // second pass?
-  if (save_parameter_config_entries)
-  {
-
-    bool outermostGroup = GetParent() == tRuntimeEnvironment::GetInstance();
-    tParameterInfo* info = ap->GetAnnotation<tParameterInfo>();
-
-    if (info != NULL && info->HasNonDefaultFinstructInfo())
-    {
-      if (!IsResponsibleForConfigFileConnections(ap))
-      {
-
-        if (outermostGroup && info->GetCommandLineOption().length() > 0)
-        {
-          rrlib::xml::tNode& config = root->AddChildNode("parameter");
-          config.SetAttribute("link", GetEdgeLink(ap));
-          config.SetAttribute("cmdline", info->GetCommandLineOption());
-        }
-
-        return;
-      }
-
-      rrlib::xml::tNode& config = root->AddChildNode("parameter");
-      config.SetAttribute("link", GetEdgeLink(ap));
-      info->Serialize(config, true, outermostGroup);
-    }
-    return;
-  }
-
-  // first pass
-  ap->GetConnectionPartners(connect_tmp, true, false, true);  // only outgoing edges => we don't get any edges double
-
-  for (size_t i = 0u; i < connect_tmp.Size(); i++)
-  {
-    tAbstractPort* ap2 = connect_tmp.Get(i);
-
-    // save edge?
-    // check1: different finstructed elements as parent?
-    if (ap->GetParentWithFlags(tCoreFlags::cFINSTRUCTED) == ap2->GetParentWithFlags(tCoreFlags::cFINSTRUCTED))
-    {
-      // TODO: check why continue causes problems here
-      // continue;
-    }
-
-    // check2: their deepest common finstructable_group parent is this
-    ::finroc::core::tFrameworkElement* common_parent = ap->GetParent();
-    while (!ap2->IsChildOf(common_parent))
-    {
-      common_parent = common_parent->GetParent();
-    }
-    ::finroc::core::tFrameworkElement* common_finstructable_parent = common_parent->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP) ? common_parent : common_parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
-    if (common_finstructable_parent != this)
-    {
-      continue;
-    }
-
-    // check3: only save non-volatile connections in this step (finstruct creates link edges for volatile ports)
-    if (ap->IsVolatile() || ap2->IsVolatile())
-    {
-      continue;
-    }
-
-    // save edge
-    rrlib::xml::tNode& edge = root->AddChildNode("edge");
-    edge.SetAttribute("src", GetEdgeLink(ap));
-    edge.SetAttribute("dest", GetEdgeLink(ap2));
-  }
-
-  // serialize link edges
-  if (ap->GetLinkEdges() != NULL)
-  {
-    for (size_t i = 0u; i < ap->GetLinkEdges()->Size(); i++)
-    {
-      tLinkEdge* le = ap->GetLinkEdges()->Get(i);
-      if (!le->IsFinstructed())
-      {
-        continue;
-      }
-      if (le->GetSourceLink().length() > 0)
-      {
-        // save edge
-        rrlib::xml::tNode& edge = root->AddChildNode("edge");
-        edge.SetAttribute("src", GetEdgeLink(le->GetSourceLink()));
-        edge.SetAttribute("dest", GetEdgeLink(ap));
-      }
-      else
-      {
-        // save edge
-        rrlib::xml::tNode& edge = root->AddChildNode("edge");
-        edge.SetAttribute("src", GetEdgeLink(ap));
-        edge.SetAttribute("dest", GetEdgeLink(le->GetTargetLink()));
-      }
-    }
-  }
 }
 
 } // namespace finroc

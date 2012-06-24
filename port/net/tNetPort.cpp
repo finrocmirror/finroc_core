@@ -37,13 +37,13 @@ namespace core
 {
 const int tNetPort::cPULL_TIMEOUT;
 
-tNetPort::tNetPort(tPortCreationInfoBase pci, util::tObject* belongs_to_) :
+tNetPort::tNetPort(tPortCreationInfoBase pci, util::tObject* belongs_to) :
   wrapped(NULL),
   encoding(rrlib::serialization::tDataEncoding::BINARY),
-  belongs_to(belongs_to_),
+  belongs_to(belongs_to),
   remote_handle(0),
   ftype(tFinrocTypeInfo::Get(pci.data_type).GetType()),
-  last_update(util::tLong::cMIN_VALUE)
+  last_update(rrlib::time::cNO_TIME)
 {
   // keep most these flags
   uint f = pci.flags & (tPortFlags::cACCEPTS_DATA | tPortFlags::cEMITS_DATA | tPortFlags::cMAY_ACCEPT_REVERSE_DATA | tPortFlags::cIS_OUTPUT_PORT | tPortFlags::cIS_BULK_PORT | tPortFlags::cIS_EXPRESS_PORT | tPortFlags::cNON_STANDARD_ASSIGN | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cFINSTRUCTED);
@@ -65,7 +65,7 @@ tNetPort::tNetPort(tPortCreationInfoBase pci, util::tObject* belongs_to_) :
   }
   pci.flags = f;
 
-  wrapped = (IsMethodType() ? static_cast<tAbstractPort*>(new tInterfaceNetPortImpl(this, pci)) : (IsCCType() ? static_cast<tAbstractPort*>(new tCCNetPort(this, pci)) : static_cast<tAbstractPort*>(new tStdNetPort(this, pci))));
+  wrapped = (IsMethodType() ? static_cast<tAbstractPort*>(new tInterfaceNetPortImpl(*this, pci)) : (IsCCType() ? static_cast<tAbstractPort*>(new tCCNetPort(*this, pci)) : static_cast<tAbstractPort*>(new tStdNetPort(*this, pci))));
   tTypedObject::type = rrlib::rtti::tDataType<tNetPort>();
   wrapped->AddAnnotation(this);
 }
@@ -136,7 +136,7 @@ void tNetPort::PropagateStrategyFromTheNet(int16 strategy)
   }
 }
 
-void tNetPort::ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, int64 timestamp, int8 changed_flag)
+void tNetPort::ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, rrlib::time::tTimestamp timestamp, int8 changed_flag)
 {
   assert((GetPort()->IsReady()));
   rrlib::serialization::tDataEncoding enc = ci.ReadEnum<rrlib::serialization::tDataEncoding>();
@@ -188,7 +188,7 @@ void tNetPort::UpdateFlags(uint flags)
   }
 }
 
-void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64 start_time)
+void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, const rrlib::time::tTimestamp& start_time)
 {
   bool use_q = wrapped->GetFlag(tPortFlags::cUSES_QUEUE);
   bool first = true;
@@ -252,12 +252,12 @@ void tNetPort::WriteDataToNetwork(rrlib::serialization::tOutputStream& co, int64
   co.WriteBoolean(false);
 }
 
-tNetPort::tCCNetPort::tCCNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci) :
+tNetPort::tCCNetPort::tCCNetPort(tNetPort& outer_class, tPortCreationInfoBase pci) :
   tCCPortBase(pci),
-  outer_class_ptr(outer_class_ptr_)
+  outer_class(outer_class)
 {
-  ::finroc::core::tCCPortBase::AddPortListenerRaw(outer_class_ptr);
-  ::finroc::core::tCCPortBase::SetPullRequestHandler(this);
+  tCCPortBase::AddPortListenerRaw(outer_class);
+  tCCPortBase::SetPullRequestHandler(this);
 }
 
 void tNetPort::tCCNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
@@ -285,10 +285,10 @@ void tNetPort::tCCNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
 
 void tNetPort::tCCNetPort::PrepareDelete()
 {
-  util::tLock lock1(this);
-  ::finroc::core::tCCPortBase::RemovePortListenerRaw(outer_class_ptr);
-  ::finroc::core::tAbstractPort::PrepareDelete();
-  outer_class_ptr->PrepareDelete();
+  util::tLock lock1(*this);
+  tCCPortBase::RemovePortListenerRaw(outer_class);
+  tAbstractPort::PrepareDelete();
+  outer_class.PrepareDelete();
 }
 
 bool tNetPort::tCCNetPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort* new_connection_partner)
@@ -297,14 +297,14 @@ bool tNetPort::tCCNetPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstra
   {
     if (::finroc::core::tAbstractPort::PropagateStrategy(NULL, NULL))    // we don't want to push ourselves directly - unless there's no change
     {
-      outer_class_ptr->PropagateStrategyOverTheNet();
+      outer_class.PropagateStrategyOverTheNet();
       return true;
     }
     else
     {
       if (push_wanter != NULL)
       {
-        ::finroc::core::tCCPortBase::InitialPushTo(push_wanter, false);
+        tCCPortBase::InitialPushTo(push_wanter, false);
       }
     }
     return false;
@@ -339,7 +339,7 @@ void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataManagerTL* read_object, int
   else
   {
     // reverse push: reset changed flag - since this change comes from the net and needs not to be propagated
-    outer_class_ptr->GetPort()->ResetChanged();
+    this->ResetChanged();
     // not entirely thread-safe: if changed flag is set now - value from the net will be published back - usually not a problem
     // dual-way ports are somewhat ugly anyway
 
@@ -350,7 +350,7 @@ void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataManagerTL* read_object, int
 bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer, bool intermediateAssign)
 {
   tPullCall::tPtr pc(tThreadLocalRPCData::Get().GetUnusedPullCall());
-  pc->SetupPullCall(outer_class_ptr->remote_handle, intermediateAssign, outer_class_ptr->encoding);
+  pc->SetupPullCall(outer_class.remote_handle, intermediateAssign, outer_class.encoding);
   //          pc.setLocalPortHandle(getHandle());
   try
   {
@@ -366,12 +366,12 @@ bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
   return true;
 }
 
-tNetPort::tStdNetPort::tStdNetPort(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci) :
+tNetPort::tStdNetPort::tStdNetPort(tNetPort& outer_class, tPortCreationInfoBase pci) :
   tPortBase(pci),
-  outer_class_ptr(outer_class_ptr_)
+  outer_class(outer_class)
 {
-  ::finroc::core::tPortBase::AddPortListenerRaw(outer_class_ptr);
-  ::finroc::core::tPortBase::SetPullRequestHandler(this);
+  tPortBase::AddPortListenerRaw(outer_class);
+  tPortBase::SetPullRequestHandler(this);
 }
 
 void tNetPort::tStdNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
@@ -399,10 +399,10 @@ void tNetPort::tStdNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
 
 void tNetPort::tStdNetPort::PrepareDelete()
 {
-  util::tLock lock1(this);
-  ::finroc::core::tPortBase::RemovePortListenerRaw(outer_class_ptr);
-  ::finroc::core::tAbstractPort::PrepareDelete();
-  outer_class_ptr->PrepareDelete();
+  util::tLock lock1(*this);
+  tPortBase::RemovePortListenerRaw(outer_class);
+  tAbstractPort::PrepareDelete();
+  outer_class.PrepareDelete();
 }
 
 bool tNetPort::tStdNetPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort* new_connection_partner)
@@ -411,14 +411,14 @@ bool tNetPort::tStdNetPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstr
   {
     if (::finroc::core::tAbstractPort::PropagateStrategy(NULL, NULL))    // we don't want to push ourselves directly - unless there's no change
     {
-      outer_class_ptr->PropagateStrategyOverTheNet();
+      outer_class.PropagateStrategyOverTheNet();
       return true;
     }
     else
     {
       if (push_wanter != NULL)
       {
-        ::finroc::core::tPortBase::InitialPushTo(push_wanter, false);
+        tPortBase::InitialPushTo(push_wanter, false);
       }
     }
     return false;
@@ -434,7 +434,7 @@ void tNetPort::tStdNetPort::PublishFromNet(tPortDataManager* read_object, int8 c
   if (!IsOutputPort())
   {
     // reverse push: reset changed flag - since this change comes from the net and needs not to be propagated
-    outer_class_ptr->GetPort()->ResetChanged();
+    this->ResetChanged();
     // not entirely thread-safe: if changed flag is set now - value from the net will be published back - usually not a problem
     // dual-way ports are somewhat ugly anyway
   }
@@ -445,7 +445,7 @@ const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, in
 {
   assert((add_locks > 0));
   tPullCall::tPtr pc = tThreadLocalRPCData::Get().GetUnusedPullCall();
-  pc->SetupPullCall(outer_class_ptr->remote_handle, intermediateAssign, outer_class_ptr->encoding);
+  pc->SetupPullCall(outer_class.remote_handle, intermediateAssign, outer_class.encoding);
   //          pc.setLocalPortHandle(getHandle());
   try
   {
@@ -468,14 +468,14 @@ const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, in
   }
 }
 
-tNetPort::tInterfaceNetPortImpl::tInterfaceNetPortImpl(tNetPort* const outer_class_ptr_, tPortCreationInfoBase pci) :
+tNetPort::tInterfaceNetPortImpl::tInterfaceNetPortImpl(tNetPort& outer_class, tPortCreationInfoBase pci) :
   tInterfaceNetPort(pci),
-  outer_class_ptr(outer_class_ptr_)
+  outer_class(outer_class)
 {
   //setCallHandler(this);
 }
 
-tMethodCall::tPtr tNetPort::tInterfaceNetPortImpl::SynchCallOverTheNet(tMethodCall::tPtr& mc, int timeout)
+tMethodCall::tPtr tNetPort::tInterfaceNetPortImpl::SynchCallOverTheNet(tMethodCall::tPtr& mc, const rrlib::time::tDuration& timeout)
 {
   assert((mc->GetMethod() != NULL));
   tSynchMethodCallLogic::PerformSynchCall(mc, *this, timeout);

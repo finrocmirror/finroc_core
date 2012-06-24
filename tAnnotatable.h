@@ -49,12 +49,10 @@ private:
    */
   tFinrocAnnotation* first_annotation;
 
-public:
+protected:
 
   // for synchronization on an object of this class
-  mutable util::tMutex obj_mutex;
-
-protected:
+  util::tMutex simple_mutex;
 
   /*!
    * Notify annotations that object is to be deleted
@@ -69,8 +67,7 @@ protected:
 public:
 
   tAnnotatable() :
-    first_annotation(NULL),
-    obj_mutex()
+    first_annotation(NULL)
   {}
 
   /*!

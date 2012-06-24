@@ -20,7 +20,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "rrlib/finroc_core_utils/tGarbageCollector.h"
+#include "rrlib/finroc_core_utils/tGarbageDeleter.h"
 #include "rrlib/serialization/tOutputStream.h"
 #include <boost/lexical_cast.hpp>
 
@@ -34,13 +34,12 @@ namespace finroc
 namespace core
 {
 tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tString& name, uint flags, int lock_order) :
+  tMutexLockOrder(GetLockOrder(flags, parent_, lock_order), (flags & tCoreFlags::cIS_RUNTIME) ? util::tInteger::cMIN_VALUE : tRuntimeEnvironment::GetInstance()->RegisterElement(this, (flags & tCoreFlags::cIS_PORT))),
   primary(this),
-  flag_mutex(),
   creater_thread_uid(util::sThreadUtil::GetCurrentThreadId()),
   const_flags(flags & tCoreFlags::cCONSTANT_FLAGS),
   flags(flags & tCoreFlags::cNON_CONSTANT_FLAGS),
-  children(GetFlag(tCoreFlags::cALLOWS_CHILDREN) ? 4 : 0),
-  obj_mutex(GetLockOrder(flags, parent_, lock_order), GetFlag(tCoreFlags::cIS_RUNTIME) ? util::tInteger::cMIN_VALUE : tRuntimeEnvironment::GetInstance()->RegisterElement(this))
+  children(GetFlag(tCoreFlags::cALLOWS_CHILDREN) ? 4 : 0)
 {
   assert(((flags & tCoreFlags::cSTATUS_FLAGS) == 0));
 
@@ -48,7 +47,7 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tSt
 
   if (!GetFlag(tCoreFlags::cIS_RUNTIME))
   {
-    tFrameworkElement* parent = (parent_ != NULL) ? parent_ : tRuntimeEnvironment::GetInstance()->unrelated;
+    tFrameworkElement* parent = (parent_) ? parent_ : tRuntimeEnvironment::GetInstance()->unrelated;
     if (lock_order < 0)
     {
       lock_order = parent->GetLockOrder() + 1;
@@ -83,12 +82,12 @@ void tFrameworkElement::AddChild(tLink* child)
   }
   if (child->parent != NULL)
   {
-    assert(((child->GetChild()->LockAfter(child->parent))) && "lockOrder level of child needs to be higher than of former parent");
+    assert(child->GetChild()->LockAfter(*child->parent) && "lockOrder level of child needs to be higher than of former parent");
   }
-  assert(((child->GetChild()->LockAfter(this))) && "lockOrder level of child needs to be higher than of parent");
+  assert(child->GetChild()->LockAfter(*this) && "lockOrder level of child needs to be higher than of parent");
   // avoid cycles
   assert(child->GetChild() != this);
-  assert((!this->IsChildOf(child->GetChild())));
+  assert(!this->IsChildOf(child->GetChild()));
 
   // detach from former parent
   if (child->parent != NULL)
@@ -491,9 +490,9 @@ bool tFrameworkElement::GetQualifiedNameImpl(util::tString& sb, const tLink* sta
   return abort_at_link_root;
 }
 
-util::tMutexLockOrder& tFrameworkElement::GetRegistryLock() const
+const util::tMutexLockOrder& tFrameworkElement::GetRegistryLock() const
 {
-  return tRuntimeEnvironment::GetInstance()->GetRegistryHelper()->obj_mutex;
+  return tRuntimeEnvironment::GetInstance()->GetRegistryHelper()->mutex;
 }
 
 tRuntimeEnvironment* tFrameworkElement::GetRuntime() const
@@ -536,7 +535,7 @@ void tFrameworkElement::InitImpl()
   if (init_this)
   {
     PreChildInit();
-    tRuntimeEnvironment::GetInstance()->PreElementInit(this);
+    tRuntimeEnvironment::GetInstance()->PreElementInit(*this);
   }
 
   if (init_this || IsReady())
@@ -557,7 +556,7 @@ void tFrameworkElement::InitImpl()
     PostChildInit();
     //System.out.println("Setting Ready " + toString() + " Thread: " + ThreadUtil.getCurrentThreadId());
     {
-      util::tLock lock3(flag_mutex);
+      util::tLock lock3(simple_mutex);
       flags |= tCoreFlags::cREADY;
     }
 
@@ -596,8 +595,8 @@ bool tFrameworkElement::IsChildOf(tFrameworkElement* re, bool ignore_delete_flag
 
 void tFrameworkElement::Link(tFrameworkElement* parent, const util::tString& link_name)
 {
-  assert(((IsCreator())) && "may only be called by creator thread");
-  assert((LockAfter(parent)));
+  assert(IsCreator() && "may only be called by creator thread");
+  assert(LockAfter(*parent));
 
   // lock runtime (required to perform structural changes)
   util::tLock lock2(GetRegistryLock());
@@ -621,7 +620,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
   {
     util::tLock lock2(RuntimeLockHelper());
     {
-      util::tLock lock3(this);
+      util::tLock lock3(*this);
 
       if (IsDeleted())    // can happen if two threads delete concurrently - no problem, since this is - if at all - called when GarbageCollector-safety period has just started
       {
@@ -642,7 +641,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
         assert(((primary.GetParent() != NULL) | GetFlag(tCoreFlags::cIS_RUNTIME)));
 
         {
-          util::tLock lock5(flag_mutex);
+          util::tLock lock5(simple_mutex);
           flags = (flags | tCoreFlags::cDELETED) & ~tCoreFlags::cREADY;
         }
 
@@ -682,7 +681,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
   }
 
   // add garbage collector task
-  util::tGarbageCollector::DeleteDeferred(this);
+  util::tGarbageDeleter::DeleteDeferred(this);
 }
 
 bool tFrameworkElement::NameEquals(const util::tString& other) const
@@ -744,7 +743,7 @@ void tFrameworkElement::PublishUpdatedEdgeInfo(int8 change_type, tAbstractPort* 
 {
   if (GetFlag(tCoreFlags::cPUBLISHED))
   {
-    tRuntimeEnvironment::GetInstance()->RuntimeChange(change_type, this, target);
+    tRuntimeEnvironment::GetInstance()->RuntimeChange(change_type, *this, target);
   }
 }
 
@@ -752,25 +751,25 @@ void tFrameworkElement::PublishUpdatedInfo(int8 change_type)
 {
   if (change_type == tRuntimeListener::cADD || GetFlag(tCoreFlags::cPUBLISHED))
   {
-    tRuntimeEnvironment::GetInstance()->RuntimeChange(change_type, this, NULL);
+    tRuntimeEnvironment::GetInstance()->RuntimeChange(change_type, *this, NULL);
   }
 }
 
 void tFrameworkElement::RemoveFlag(int flag)
 {
-  util::tLock lock2(flag_mutex);
+  util::tLock lock2(simple_mutex);
   assert((flag & tCoreFlags::cNON_CONSTANT_FLAGS) != 0);
   flags &= ~flag;
 }
 
-util::tMutexLockOrder& tFrameworkElement::RuntimeLockHelper() const
+const util::tMutexLockOrder& tFrameworkElement::RuntimeLockHelper() const
 {
-  if (obj_mutex.ValidAfter(GetRuntime()->GetRegistryHelper()->obj_mutex))
+  if (ValidAfter(GetRuntime()->GetRegistryHelper()->mutex))
   {
     return GetRegistryLock();
   }
 
-  return this->obj_mutex;
+  return *this;
 }
 
 void tFrameworkElement::SetFlag(int flag, bool value)
@@ -787,7 +786,7 @@ void tFrameworkElement::SetFlag(int flag, bool value)
 
 void tFrameworkElement::SetFlag(int flag)
 {
-  util::tLock lock2(flag_mutex);
+  util::tLock lock2(simple_mutex);
   assert((flag & tCoreFlags::cCONSTANT_FLAGS) == 0);
   flags |= flag;
 }

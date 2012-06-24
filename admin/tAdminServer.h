@@ -49,24 +49,6 @@ class tConfigFile;
  */
 class tAdminServer : public tInterfaceServerPort, public tAbstractMethodCallHandler
 {
-  /*! Struct for callback parameters for GET_PARAMETER_INFO method */
-  struct tCallbackParameters
-  {
-  public:
-
-    rrlib::serialization::tOutputStream* co;
-
-    tConfigFile* cf;
-
-    tCallbackParameters(tConfigFile* cf2, rrlib::serialization::tOutputStream* co2) :
-      co(co2),
-      cf(cf2)
-    {
-    }
-
-  };
-
-public:
 
   /*! Admin interface */
   static tPortInterface cMETHODS;
@@ -131,7 +113,6 @@ public:
   /*! Return values for IS_RUNNING */
   static const int cNOTHING = -1, cSTOPPED = 0, cSTARTED = 1, cBOTH = 2;
 
-private:
 
   /*!
    * Connects two ports taking volatility into account
@@ -148,7 +129,7 @@ private:
    * \param result Result buffer for list of execution controls
    * \param element_handle Handle of element
    */
-  void GetExecutionControls(util::tSimpleList<tExecutionControl*>& result, int element_handle);
+  void GetExecutionControls(std::vector<tExecutionControl*>& result, int element_handle);
 
 public:
 
@@ -169,8 +150,6 @@ public:
   void HandleVoidCall(const tAbstractMethod& method, int cma_index, tPortDataPtr<std::string>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer);
 
   void HandleVoidCall(const tAbstractMethod& method, int handle);
-
-  void TreeFilterCallback(tFrameworkElement* fe, const tCallbackParameters& custom_param);
 
 };
 

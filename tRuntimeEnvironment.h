@@ -49,16 +49,17 @@ class tAbstractPort;
 class tRuntimeEnvironment : public tFrameworkElement
 {
 public:
-  /*implements Runtime*/
 
   /*!
    * Contains diverse registers/lookup tables of runtime.
    * They are moved to extra class in order to be separately lockable
    * (necessary for systematic dead-lock avoidance)
    */
-  class tRegistry : public util::tObject
+  class tRegistry : public boost::noncopyable
   {
     friend class tRuntimeEnvironment;
+    friend class tFrameworkElement;
+
   private:
 
     /*! Global register of all ports. Allows accessing ports with simple handle. */
@@ -71,7 +72,7 @@ public:
     std::map<std::string, tLinkEdge*> link_edges;
 
     /*! List with runtime listeners */
-    tRuntimeListenerManager listeners;
+    util::tListenerManager<tRuntimeListener, tMutexLockOrder> listeners;
 
     /*! Temporary buffer - may be used in synchronized context */
     std::string temp_buffer;
@@ -79,13 +80,10 @@ public:
     /*! Alternative roots for links (usually remote runtime environments mapped into this one) */
     util::tSimpleList<tFrameworkElement*> alternative_link_roots;
 
-  public:
-
     /*! Mutex */
-    mutable util::tMutexLockOrder obj_mutex;
+    util::tMutexLockOrder mutex;
 
     tRegistry();
-
   };
 
   friend class tFrameworkElement;
@@ -100,7 +98,7 @@ private:
   static tRuntimeEnvironment* instance_raw_ptr;
 
   /*! Timestamp when runtime environment was created */
-  int64 creation_time;
+  rrlib::time::tTimestamp creation_time;
 
   /*! Is RuntimeEnvironment currently active (and needs to be deleted?) */
   static bool active;
@@ -138,9 +136,10 @@ private:
    * This is done automatically and should not be called by a user.
    *
    * \param framework_element Element to register
+   * \param port Is framework element a port?
    * \return Handle of Framework element
    */
-  int RegisterElement(tFrameworkElement* fe);
+  int RegisterElement(tFrameworkElement* fe, bool port);
 
   /*!
    * (usually only called by LinkEdge)
@@ -179,12 +178,12 @@ public:
    *
    * \param listener Listener to add
    */
-  void AddListener(tRuntimeListener* listener);
+  void AddListener(tRuntimeListener& listener);
 
   /*!
    * \return Timestamp when runtime environment was created
    */
-  inline int64 GetCreationTime()
+  inline rrlib::time::tTimestamp GetCreationTime()
   {
     return creation_time;
   }
@@ -254,7 +253,7 @@ public:
    *
    * \param element Framework element that will be initialized soon
    */
-  void PreElementInit(tFrameworkElement* element);
+  void PreElementInit(tFrameworkElement& element);
 
   /*!
    * Remove linked edges from specified link to specified partner port
@@ -269,7 +268,7 @@ public:
    *
    * \param listener Listener to remove
    */
-  void RemoveListener(tRuntimeListener* listener);
+  void RemoveListener(tRuntimeListener& listener);
 
   /*!
    * Called whenever a framework element was added/removed or changed
@@ -281,7 +280,7 @@ public:
    * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
    * (should only be called by FrameworkElement class)
    */
-  void RuntimeChange(int8 change_type, tFrameworkElement* element, tAbstractPort* edge_target);
+  void RuntimeChange(int8 change_type, tFrameworkElement& element, tAbstractPort* edge_target = NULL);
 
   /*!
    * Using only the basic constructs from this framework - things should shutdown

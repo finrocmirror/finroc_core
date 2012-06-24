@@ -82,7 +82,7 @@ protected:
    * \param type Data Type
    * \return Annotation of first parent that has one - or null
    */
-  static tFinrocAnnotation* FindParentWithAnnotation(tFrameworkElement* fe, const rrlib::rtti::tDataTypeBase& type);
+  static tFinrocAnnotation* FindParentWithAnnotation(tFrameworkElement& fe, const rrlib::rtti::tDataTypeBase& type);
 
 public:
 

@@ -89,7 +89,7 @@ bool tCCPortBase::ContainsDefaultValue()
 
 tCCPortBase::~tCCPortBase()
 {
-  util::tLock lock1(this);
+  util::tLock lock1(*this);
   tThreadLocalCache::Get();  // Initialize ThreadLocalCache - if this has not already happened for GarbageCollector
   tThreadLocalCache::DeleteInfoForPort(port_index);
   default_value->Recycle2();

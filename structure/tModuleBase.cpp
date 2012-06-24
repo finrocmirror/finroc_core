@@ -87,7 +87,7 @@ void tModuleBase::CheckParameters()
   }
 }
 
-void tModuleBase::tParameterChangeDetector::PortChanged(tAbstractPort* origin, const void* const& value)
+void tModuleBase::tParameterChangeDetector::PortChanged(tAbstractPort& origin, const void* const& value)
 {
   parameters_changed = true;
 }

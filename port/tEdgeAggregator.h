@@ -94,7 +94,7 @@ public:
   tEdgeAggregator(tFrameworkElement* parent_ = NULL, const util::tString& name_ = "", uint flags_ = 0);
 
   /*!
-   * (Should be called by abstract port only)
+   * (Should be called by abstract port only - with runtime registry locked)
    * Notify parent aggregators that edge has been added
    *
    * \param source Source port
@@ -103,7 +103,7 @@ public:
   static void EdgeAdded(tAbstractPort* source, tAbstractPort* target);
 
   /*!
-   * (Should be called by abstract port only)
+   * (Should be called by abstract port only - with runtime registry locked)
    * Notify parent aggregators that edge has been removed
    *
    * \param source Source port
