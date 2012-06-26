@@ -112,8 +112,6 @@ class tStructureElementRegister
    */
   static std::vector<tModulePorts>& GetModuleTypeRegister();
 
-  //RRLIB_LOG_CREATE_DEFAULT_DOMAIN("structure_element_register")
-
 public:
 
   /*!
@@ -143,7 +141,7 @@ public:
   /*!
    * \return Parent module/group of port class at address ptr
    */
-  static tFrameworkElement* FindParent(void* ptr);
+  static tFrameworkElement* FindParent(void* ptr, bool abort_if_not_found = true);
 
   /*!
    * Retrieves auto-generated port name

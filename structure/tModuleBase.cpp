@@ -70,6 +70,11 @@ tModuleBase::tModuleBase(tFrameworkElement *parent, const util::tString &name)
     count_for_type(NULL)
 {
   tStructureElementRegister::AddModule(this);
+  if (!tStructureElementRegister::FindParent(this, false))
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Module ", GetQualifiedName(), " was not created using new().");
+    abort();
+  }
 }
 
 tModuleBase::~tModuleBase()

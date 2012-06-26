@@ -85,6 +85,11 @@ tGroup::tGroup(tFrameworkElement *parent, const util::tString &name, const util:
     count_for_type(NULL)
 {
   tStructureElementRegister::AddModule(this);
+  if (!tStructureElementRegister::FindParent(this, false))
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Group ", GetQualifiedName(), " was not created using new().");
+    abort();
+  }
 }
 
 tGroup::~tGroup()

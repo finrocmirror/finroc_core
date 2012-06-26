@@ -141,7 +141,7 @@ void tStructureElementRegister::RemoveModule(tFrameworkElement* module)
   }
 }
 
-tFrameworkElement* tStructureElementRegister::FindParent(void* ptr)
+tFrameworkElement* tStructureElementRegister::FindParent(void* ptr, bool abort_if_not_found)
 {
   util::tLock(GetMutex());
   std::vector<tInstantiatedModule>& reg = tStructureElementRegister::GetRegister();
@@ -153,7 +153,11 @@ tFrameworkElement* tStructureElementRegister::FindParent(void* ptr)
       return reg[i].module;
     }
   }
-  assert(false && "Could not find parent for port (or parameter). Please provide port name as first and parent as second constructor paremeter for all ports that are not plain module/group class members (e.g. pushed in a std::vector).");
+  if (abort_if_not_found)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not find parent for port (or parameter). Please provide port name as first and parent as second constructor paremeter for all ports that are not plain module/group class members (e.g. pushed in a std::vector).");
+    abort();
+  }
   return NULL;
 }
 
