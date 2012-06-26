@@ -153,7 +153,7 @@ tFrameworkElement* tStructureElementRegister::FindParent(void* ptr)
       return reg[i].module;
     }
   }
-  assert(false && "Could not find parent for Port/Parameter. Please use constructor that takes parent as parameter for dynamically created ports.");
+  assert(false && "Could not find parent for port (or parameter). Please provide port name as first and parent as second constructor paremeter for all ports that are not plain module/group class members (e.g. pushed in a std::vector).");
   return NULL;
 }
 
