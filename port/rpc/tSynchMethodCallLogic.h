@@ -88,7 +88,7 @@ public:
 
     // reset stuff for next call
     mcs.GetAndUseNextCallIndex();  // Invalidate results of any incoming outdated returns
-    call = std::move(reinterpret_cast<std::unique_ptr<T, tSerializableReusable::tRecycler>&>(mcs.method_return));
+    call.reset(static_cast<T*>(mcs.method_return.release()));  // more or less equivalent to std::move()
 
     if (!call)
     {
