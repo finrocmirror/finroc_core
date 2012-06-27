@@ -330,6 +330,26 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement& ele
           }
         }
       }
+      for (size_t i = 0; ap.GetLinkEdges() && i < ap.GetLinkEdges()->Size(); i++)
+      {
+        tLinkEdge& e = *ap.GetLinkEdges()->Get(i);
+        if (e.GetSourceLink().length() > 0)
+        {
+          tAbstractPort* source = GetPort(e.GetSourceLink());
+          if (source)
+          {
+            e.LinkAdded(*this, e.GetSourceLink(), *source);
+          }
+        }
+        if (e.GetTargetLink().length() > 0)
+        {
+          tAbstractPort* target = GetPort(e.GetTargetLink());
+          if (target)
+          {
+            e.LinkAdded(*this, e.GetTargetLink(), *target);
+          }
+        }
+      }
     }
 
     if (edge_target)
