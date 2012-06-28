@@ -23,18 +23,19 @@
 #include "core/tRuntimeEnvironment.h"
 #include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "core/port/tThreadLocalCache.h"
-#include "rrlib/finroc_core_utils/tTime.h"
+#include "rrlib/time/time.h"
 
 using namespace finroc::core;
 using namespace finroc;
 using namespace rrlib::logging;
 
-const int tBasicRealtimeTest::cINTERVAL;
+rrlib::time::tDuration tBasicRealtimeTest::cINTERVAL = std::chrono::microseconds(500);
 
 tBasicRealtimeTest::tBasicRealtimeTest(const util::tString& name) :
+  tLoopThread(cINTERVAL),
   port(name + "-port", tPortFlags::cOUTPUT_PORT),
-  max_latency(),
-  total_latency(),
+  max_latency(rrlib::time::tDuration(0)),
+  total_latency(rrlib::time::tDuration(0)),
   cycles()
 {
   port.Init();
@@ -47,20 +48,19 @@ void tBasicRealtimeTest::Run()
   port.Publish(40);
   port.Publish(42);
 
-  int64 next = util::tTime::NanoTime() + util::tTime::cNSEC_PER_SEC;
-  while (true)
+  tLoopThread::Run();
+}
+
+void tBasicRealtimeTest::MainLoopCallback()
+{
+  rrlib::time::tDuration diff = rrlib::time::Now() - tLoopThread::GetCurrentCycleStartTime();
+  if (max_latency.Load() < diff)
   {
-    util::tTime::SleepUntilNano(next);
-    int64 diff = util::tTime::NanoTime() - next;
-    if (max_latency.Get() < diff)
-    {
-      max_latency.Set(diff);
-    }
-    total_latency.Set(total_latency.Get() + diff);
-    int c = cycles.IncrementAndGet();
-    port.Publish(c);
-    next += cINTERVAL;
+    max_latency.Store(diff);
   }
+  total_latency.Store(total_latency.Load() + diff);
+  int c = cycles.IncrementAndGet();
+  port.Publish(c);
 }
 
 int main(int argc__, char **argv__)
@@ -76,13 +76,6 @@ int main(int argc__, char **argv__)
   while (true)
   {
     FINROC_LOG_PRINT(eLL_USER, rt->ToString() + "   " + t->ToString());
-    try
-    {
-      ::finroc::util::tThread::Sleep(1000);
-    }
-    catch (const util::tInterruptedException& e)
-    {
-      break;
-    }
+    util::tThread::Sleep(std::chrono::seconds(1), false);
   }
 }

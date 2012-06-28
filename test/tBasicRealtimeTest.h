@@ -39,28 +39,30 @@ namespace core
  * Apart from using the finroc_core_utils API it doesn't have that
  * much to do with finroc (yet).
  */
-class tBasicRealtimeTest : public util::tThread
+class tBasicRealtimeTest : public util::tLoopThread
 {
 public:
 
   tPort<int> port;
 
-  util::tAtomicInt64 max_latency;
+  rrlib::time::tAtomicDuration max_latency;
 
-  util::tAtomicInt64 total_latency;
+  rrlib::time::tAtomicDuration total_latency;
 
   util::tAtomicInt cycles;
 
-  static const int cINTERVAL = 500000;
+  static rrlib::time::tDuration cINTERVAL;
 
   tBasicRealtimeTest(const util::tString& name);
+
+  virtual void MainLoopCallback();
 
   virtual void Run();
 
   virtual const util::tString ToString() const
   {
     std::ostringstream os;
-    os << GetName() << " - Cycles: " << cycles.Get() << "; Max Latency: " << (max_latency.Get() / 1000) << " us; Average Latency: " << (total_latency.Get() / (1000 * std::max(1, cycles.Get()))) << " us";
+    os << GetName() << " - Cycles: " << cycles.Get() << "; Max Latency: " << rrlib::time::ToString(max_latency.Load()) << "; Average Latency: " << rrlib::time::ToString(std::chrono::nanoseconds(total_latency.Load()) / std::max(1, cycles.Get()));
     return os.str();
   }
 
