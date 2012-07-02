@@ -45,9 +45,9 @@ void tExecutionControl::FindAll(std::vector<tExecutionControl*>& result, tFramew
   if (fe.IsReady())
   {
     tFrameworkElementTreeFilter filter;
-    filter.TraverseElementTree(fe, [&](tFrameworkElement&)
+    filter.TraverseElementTree(fe, [&](tFrameworkElement & element)
     {
-      tExecutionControl* ec = fe.GetAnnotation<tExecutionControl>();
+      tExecutionControl* ec = element.GetAnnotation<tExecutionControl>();
       if (ec)
       {
         result.push_back(ec);
