@@ -102,7 +102,7 @@ void tAbstractPort::CommitUpdateTimeChange()
 
 void tAbstractPort::ConnectToSource(const util::tString& src_link, bool finstructed)
 {
-  util::tLock lock2(GetRegistryLock());
+  tLock lock2(GetRegistryLock());
   if (IsDeleted())
   {
     return;
@@ -137,7 +137,7 @@ void tAbstractPort::ConnectToSource(tFrameworkElement* src_port_parent, const ut
 
 void tAbstractPort::ConnectToTarget(tAbstractPort* target, bool finstructed)
 {
-  util::tLock lock2(GetRegistryLock());
+  tLock lock2(GetRegistryLock());
   if (IsDeleted())
   {
     return;
@@ -157,7 +157,7 @@ void tAbstractPort::ConnectToTarget(tAbstractPort* target, bool finstructed)
 
 void tAbstractPort::ConnectToTarget(const util::tString& dest_link, bool finstructed)
 {
-  util::tLock lock2(GetRegistryLock());
+  tLock lock2(GetRegistryLock());
   if (IsDeleted())
   {
     return;
@@ -204,7 +204,7 @@ void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
 
 void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
 {
-  util::tLock lock2(GetRegistryLock());
+  tLock lock2(GetRegistryLock());
 
   // remove link edges
   if (link_edges != NULL)
@@ -255,7 +255,7 @@ void tAbstractPort::DisconnectFrom(tAbstractPort* target)
 {
   bool found = false;
   {
-    util::tLock lock2(GetRegistryLock());
+    tLock lock2(GetRegistryLock());
     util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
     for (int i = 0, n = it->Size(); i < n; i++)
     {
@@ -285,7 +285,7 @@ void tAbstractPort::DisconnectFrom(tAbstractPort* target)
 
 void tAbstractPort::DisconnectFrom(const util::tString& link)
 {
-  util::tLock lock2(GetRegistryLock());
+  tLock lock2(GetRegistryLock());
   for (size_t i = 0u; i < link_edges->Size(); i++)
   {
     tLinkEdge* le = link_edges->Get(i);
@@ -494,7 +494,7 @@ bool tAbstractPort::MayConnectTo(tAbstractPort* target)
 
 void tAbstractPort::PrepareDelete()
 {
-  util::tLock lock1(*this);
+  tLock lock1(*this);
 
   // disconnect all edges
   DisconnectAll();
@@ -532,7 +532,7 @@ uint tAbstractPort::ProcessFlags(const tPortCreationInfoBase& pci)
 
 bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort* new_connection_partner)
 {
-  util::tLock lock2(GetRegistryLock());
+  tLock lock2(GetRegistryLock());
 
   // step1: determine max queue length (strategy) for this port
   int16 max = static_cast<int16>(std::min(GetStrategyRequirement(), util::tShort::cMAX_VALUE));
@@ -713,7 +713,7 @@ void tAbstractPort::SetMaxQueueLength(int queue_length)
     return;
   }
   {
-    util::tLock lock2(GetRegistryLock());
+    tLock lock2(GetRegistryLock());
     if (queue_length <= 1)
     {
       RemoveFlag(tPortFlags::cUSES_QUEUE);
@@ -730,7 +730,7 @@ void tAbstractPort::SetMaxQueueLength(int queue_length)
 
 void tAbstractPort::SetMinNetUpdateInterval(int interval2)
 {
-  util::tLock lock2(GetRegistryLock());
+  tLock lock2(GetRegistryLock());
   int16 interval = static_cast<int16>(std::min(interval2, static_cast<int>(util::tShort::cMAX_VALUE)));
   if (min_net_update_time != interval)
   {
@@ -741,7 +741,7 @@ void tAbstractPort::SetMinNetUpdateInterval(int interval2)
 
 void tAbstractPort::SetPushStrategy(bool push)
 {
-  util::tLock lock2(GetRegistryLock());
+  tLock lock2(GetRegistryLock());
   if (push == GetFlag(tPortFlags::cPUSH_STRATEGY))
   {
     return;
@@ -758,7 +758,7 @@ void tAbstractPort::SetReversePushStrategy(bool push)
   }
 
   {
-    util::tLock lock2(GetRegistryLock());
+    tLock lock2(GetRegistryLock());
     SetFlag(tPortFlags::cPUSH_STRATEGY_REVERSE, push);
     if (push && IsReady())    // strategy change
     {

@@ -285,7 +285,7 @@ void tNetPort::tCCNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
 
 void tNetPort::tCCNetPort::PrepareDelete()
 {
-  util::tLock lock1(*this);
+  tLock lock1(*this);
   tCCPortBase::RemovePortListenerRaw(outer_class);
   tAbstractPort::PrepareDelete();
   outer_class.PrepareDelete();
@@ -347,7 +347,7 @@ void tNetPort::tCCNetPort::PublishFromNet(tCCPortDataManagerTL* read_object, int
   }
 }
 
-bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer, bool intermediateAssign)
+bool tNetPort::tCCNetPort::PullRequest(tCCPortBase& origin, tCCPortDataManagerTL& result_buffer, bool intermediateAssign)
 {
   tPullCall::tPtr pc(tThreadLocalRPCData::Get().GetUnusedPullCall());
   pc->SetupPullCall(outer_class.remote_handle, intermediateAssign, outer_class.encoding);
@@ -356,12 +356,12 @@ bool tNetPort::tCCNetPort::PullRequest(tCCPortBase* origin, tCCPortDataManagerTL
   {
     tSynchMethodCallLogic::PerformSynchCall(pc, *this, cPULL_TIMEOUT);
     assert((!pc->HasException()) && pc->GetPulledBuffer());
-    result_buffer->GetObject()->DeepCopyFrom(pc->GetPulledBuffer(), NULL);
+    result_buffer.GetObject()->DeepCopyFrom(pc->GetPulledBuffer(), NULL);
   }
   catch (const tMethodCallException& e)
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, "Pulling value via network connection failed: ", e.what());
-    GetRaw(result_buffer->GetObject(), true);
+    GetRaw(result_buffer, true);
   }
   return true;
 }
@@ -399,7 +399,7 @@ void tNetPort::tStdNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
 
 void tNetPort::tStdNetPort::PrepareDelete()
 {
-  util::tLock lock1(*this);
+  tLock lock1(*this);
   tPortBase::RemovePortListenerRaw(outer_class);
   tAbstractPort::PrepareDelete();
   outer_class.PrepareDelete();
@@ -441,7 +441,7 @@ void tNetPort::tStdNetPort::PublishFromNet(tPortDataManager* read_object, int8 c
   ::finroc::core::tPortBase::Publish(read_object, !IsOutputPort(), changed_flag);
 }
 
-const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase* origin, int8 add_locks, bool intermediateAssign)
+const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase& origin, int8 add_locks, bool intermediateAssign)
 {
   assert((add_locks > 0));
   tPullCall::tPtr pc = tThreadLocalRPCData::Get().GetUnusedPullCall();

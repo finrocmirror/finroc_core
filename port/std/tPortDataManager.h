@@ -23,11 +23,10 @@
 #ifndef core__port__std__tPortDataManager_h__
 #define core__port__std__tPortDataManager_h__
 
-#include "rrlib/finroc_core_utils/definitions.h"
-
 #include "rrlib/rtti/rtti.h"
-#include "core/portdatabase/tReusableGenericObjectManager.h"
+#include "rrlib/finroc_core_utils/container/tReusable.h"
 
+#include "core/portdatabase/tAbstractPortDataManager.h"
 #include "core/port/tCombinedPointer.h"
 
 namespace finroc
@@ -49,7 +48,7 @@ class tPortDataReference;
  * shall be used in a port.
  * This way, it does not need to copied.
  */
-class __attribute__((aligned(8))) tPortDataManager : public tReusableGenericObjectManager
+class __attribute__((aligned(8))) tPortDataManager : public tAbstractPortDataManager<util::tReusable>
 {
 public:
 
@@ -333,16 +332,6 @@ public:
   inline const tPortDataManager* GetNextInBufferPool() const
   {
     return static_cast<tPortDataManager*>(this->next_in_buffer_pool);
-  }
-
-  /*!
-   * TODO
-   *
-   * \return Manager time stamp
-   */
-  inline int64 GetTimestamp()
-  {
-    return 0;
   }
 
   /*!

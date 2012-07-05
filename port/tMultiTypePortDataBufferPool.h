@@ -43,7 +43,7 @@ class tPortDataManager;
  * Special version that supports buffers of multiple types.
  * This list is not real-time capable if new types are used.
  */
-class tMultiTypePortDataBufferPool : util::tMutexLockOrder
+class tMultiTypePortDataBufferPool : rrlib::thread::tOrderedMutex
 {
 private:
 
@@ -54,20 +54,19 @@ private:
    * \param data_type DataType of buffer to create
    * \return Returns unused buffer of possibly newly created pool
    */
-  tPortDataManager* PossiblyCreatePool(rrlib::rtti::tDataTypeBase data_type);
+  tPortDataManager* PossiblyCreatePool(const rrlib::rtti::tDataTypeBase& data_type);
 
 public:
 
-  tMultiTypePortDataBufferPool() :
-    util::tMutexLockOrder(tLockOrderLevels::cINNER_MOST - 20),
-    pools(2u)
-  {}
+  tMultiTypePortDataBufferPool();
+
+  ~tMultiTypePortDataBufferPool();
 
   /*!
    * \param data_type DataType of returned buffer.
    * \return Returns unused buffer. If there are no buffers that can be reused, a new buffer is allocated.
    */
-  inline tPortDataManager* GetUnusedBuffer(rrlib::rtti::tDataTypeBase data_type)
+  inline tPortDataManager* GetUnusedBuffer(const rrlib::rtti::tDataTypeBase& data_type)
   {
     // search for correct pool
     for (size_t i = 0u, n = pools.Size(); i < n; i++)
@@ -88,16 +87,6 @@ public:
    * \param indent Current indentation
    */
   void PrintStructure(int indent, std::stringstream& output);
-
-  virtual ~tMultiTypePortDataBufferPool()
-  {
-    // now there shouldn't be the hazard that a new pool is/will be created
-    for (size_t i = 0, n = pools.Size(); i < n; i++)
-    {
-      pools.Get(i)->ControlledDelete();
-    }
-    pools.Clear();
-  }
 
 };
 

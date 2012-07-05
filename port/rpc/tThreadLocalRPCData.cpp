@@ -34,7 +34,7 @@ tThreadLocalRPCData::tThreadLocalRPCData() :
   method_calls(new util::tReusablesPool<tMethodCall>()),
   pull_calls(new util::tReusablesPool<tPullCall>())
 {
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating tThreadLocalRPCData for thread ", util::tThread::CurrentThread()->GetName());
+  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating tThreadLocalRPCData for thread ", rrlib::thread::tThread::CurrentThreadRaw()->GetName());
   tThreadLocalCache::GetFast()->AddAnnotation(this);
 }
 

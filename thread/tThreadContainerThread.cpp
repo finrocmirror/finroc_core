@@ -19,8 +19,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/thread/tLoopThread.h"
-#include "rrlib/finroc_core_utils/thread/tTask.h"
 
 #include "core/thread/tThreadContainerThread.h"
 #include "core/thread/tPeriodicFrameworkElementTask.h"
@@ -56,7 +54,7 @@ void tThreadContainerThread::MainLoopCallback()
   {
     reschedule = false;
     {
-      util::tLock lock3(this->thread_container->GetRegistryLock());
+      tLock lock3(this->thread_container->GetRegistryLock());
 
       // find tasks
       tasks.Clear();
@@ -195,7 +193,7 @@ void tThreadContainerThread::RuntimeEdgeChange(int8 change_type, tAbstractPort& 
 
 void tThreadContainerThread::StopThread()
 {
-  util::tLock lock2(this->thread_container->GetRegistryLock());
+  tLock lock2(this->thread_container->GetRegistryLock());
   this->thread_container->GetRuntime()->RemoveListener(*this);
   tLoopThread::StopThread();
 }

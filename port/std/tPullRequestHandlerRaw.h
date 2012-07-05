@@ -45,7 +45,7 @@ public:
    * \param intermediate_assign Assign pulled value to ports in between?
    * \return PortData to answer request with (with one additional lock) - or null if pull should be handled by port (now)
    */
-  virtual const tPortDataManager* PullRequest(tPortBase* origin, int8 add_locks, bool intermediate_assign) = 0;
+  virtual const tPortDataManager* PullRequest(tPortBase& origin, int8 add_locks, bool intermediate_assign) = 0;
 
 };
 

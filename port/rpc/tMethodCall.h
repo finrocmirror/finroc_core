@@ -27,7 +27,6 @@
 
 #include "rrlib/serialization/serialization.h"
 #include "core/port/rpc/tAbstractCall.h"
-#include "rrlib/finroc_core_utils/thread/tTask.h"
 
 namespace finroc
 {

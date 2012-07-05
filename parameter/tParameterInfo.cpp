@@ -150,8 +150,8 @@ void tParameterInfo::LoadValue(bool ignore_ready)
 {
   tAbstractPort* ann = static_cast<tAbstractPort*>(GetAnnotated());
   {
-    util::tLock lock2(ann->GetRegistryLock());
-    if (ann != NULL && (ignore_ready || ann->IsReady()))
+    rrlib::thread::tLock lock2(ann->GetRegistryLock());
+    if (ann && (ignore_ready || ann->IsReady()))
     {
       // command line option
       if (command_line_option.length() > 0)

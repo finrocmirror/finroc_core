@@ -23,21 +23,12 @@
 #ifndef core__port__rpc__tCallParameter_h__
 #define core__port__rpc__tCallParameter_h__
 
-#include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/rtti/rtti.h"
+#include "core/datatype/tNumber.h"
 
 #include "core/port/cc/tCCPortDataManager.h"
-#include "core/datatype/tNumber.h"
-#include "rrlib/rtti/rtti.h"
-
 #include "core/port/tPortDataPtr.h"
 
-namespace rrlib
-{
-namespace serialization
-{
-class tInputStream;
-} // namespace rrlib
-} // namespace serialization
 
 namespace finroc
 {
@@ -45,11 +36,8 @@ namespace core
 {
 /*!
  * Storage for a parameter
- *
- * CC Objects: If call is executed in the same runtime environment, object is stored inside
- * otherwise it is directly serialized
  */
-class tCallParameter : public util::tObject
+class tCallParameter
 {
   friend class tAbstractCall;
 

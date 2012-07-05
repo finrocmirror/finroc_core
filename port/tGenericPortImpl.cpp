@@ -44,9 +44,9 @@ public:
     port(pci)
   {}
 
-  virtual void Get(rrlib::rtti::tGenericObject& result)
+  virtual void Get(rrlib::rtti::tGenericObject& result, rrlib::time::tTimestamp& timestamp)
   {
-    port.Get(*result.GetData<T>());
+    port.Get(*result.GetData<T>(), timestamp);
   }
 
   virtual tAbstractPort* GetWrapped()
@@ -54,9 +54,9 @@ public:
     return port.GetWrapped();
   }
 
-  virtual void Publish(const rrlib::rtti::tGenericObject& data)
+  virtual void Publish(const rrlib::rtti::tGenericObject& data, const rrlib::time::tTimestamp& timestamp)
   {
-    port.Publish(*data.GetData<T>());
+    port.Publish(*data.GetData<T>(), timestamp);
   }
 
   virtual void SetBounds(const rrlib::rtti::tGenericObject& min, const rrlib::rtti::tGenericObject& max)
@@ -100,9 +100,9 @@ public:
     }
   }
 
-  virtual void Get(rrlib::rtti::tGenericObject& result)
+  virtual void Get(rrlib::rtti::tGenericObject& result, rrlib::time::tTimestamp& timestamp)
   {
-    port->GetRaw(&result);
+    port->GetRaw(result, timestamp);
   }
 
   virtual tAbstractPort* GetWrapped()
@@ -110,11 +110,12 @@ public:
     return port;
   }
 
-  virtual void Publish(const rrlib::rtti::tGenericObject& data)
+  virtual void Publish(const rrlib::rtti::tGenericObject& data, const rrlib::time::tTimestamp& timestamp)
   {
     assert(data.GetType() == port->GetDataType());
     tCCPortDataManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(data.GetType());
     mgr->GetObject()->DeepCopyFrom(&data);
+    mgr->SetTimestamp(timestamp);
     port->Publish(mgr);
   }
 
@@ -139,11 +140,12 @@ public:
     }
   }
 
-  virtual void Get(rrlib::rtti::tGenericObject& result)
+  virtual void Get(rrlib::rtti::tGenericObject& result, rrlib::time::tTimestamp& timestamp)
   {
     tPortDataManager* mgr = port->GetLockedUnsafeRaw();
     rrlib::rtti::tGenericObject* buf = mgr->GetObject();
     result.DeepCopyFrom(buf);
+    timestamp = mgr->GetTimestamp();
     mgr->ReleaseLock();
   }
 
@@ -152,11 +154,12 @@ public:
     return port;
   }
 
-  virtual void Publish(const rrlib::rtti::tGenericObject& data)
+  virtual void Publish(const rrlib::rtti::tGenericObject& data, const rrlib::time::tTimestamp& timestamp)
   {
     assert(data.GetType() == port->GetDataType());
     tPortDataManager* mgr = port->GetUnusedBufferRaw();
     mgr->GetObject()->DeepCopyFrom(&data);
+    mgr->SetTimestamp(timestamp);
     port->Publish(mgr);
   }
 

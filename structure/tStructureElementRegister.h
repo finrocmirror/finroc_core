@@ -100,7 +100,7 @@ class tStructureElementRegister
   /*!
    * Get Mutex for StructureElementRegister access
    */
-  static util::tMutex& GetMutex();
+  static rrlib::thread::tMutex& GetMutex();
 
   /*!
    * \return Register containing all instantiated elements

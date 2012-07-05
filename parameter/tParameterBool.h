@@ -45,7 +45,7 @@ class tParameterBool : public tParameterBase<bool>
   /*!
    * Caches bool value of parameter port (optimization)
    */
-  class tBoolCache : public util::tUncopyableObject, public tPortListener<bool>
+  class tBoolCache : public tPortListener<bool>
   {
   public:
 
@@ -56,7 +56,7 @@ class tParameterBool : public tParameterBase<bool>
       current_value(false)
     {}
 
-    virtual void PortChanged(tAbstractPort& origin, const bool& value)
+    virtual void PortChanged(tAbstractPort& origin, const bool& value, const rrlib::time::tTimestamp& timestamp)
     {
       current_value = value;
     }

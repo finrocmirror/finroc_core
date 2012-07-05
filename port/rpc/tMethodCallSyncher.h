@@ -25,7 +25,6 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "rrlib/finroc_core_utils/thread/tThread.h"
 
 #include "core/tLockOrderLevels.h"
 #include "core/port/rpc/tAbstractCall.h"
@@ -42,7 +41,7 @@ class tThreadLocalCache;
  * Thread local class for forwarding method return values
  * back to calling thread.
  */
-class tMethodCallSyncher : public util::tLogUser, public util::tMutexLockOrder
+class tMethodCallSyncher : public util::tLogUser, public rrlib::thread::tOrderedMutex
 {
 private:
 
@@ -56,7 +55,7 @@ private:
   size_t index;
 
   /*! Thread currently associated with this Syncher object - null if none */
-  util::tThread* thread;
+  rrlib::thread::tThread* thread;
 
   /*! Uid of associated thread; 0 if none */
   int thread_uid;
@@ -64,10 +63,10 @@ private:
 public:
 
   // for static synchronization in this class' methods
-  static util::tMutex static_class_mutex;
+  static rrlib::thread::tMutex static_class_mutex;
 
   // for monitor functionality
-  mutable util::tConditionVariable monitor;
+  mutable rrlib::thread::tConditionVariable monitor;
 
   //  /** Optimization for method calls handled directly by the same thread - may only be accessed and written by one thread */
   //  boolean beforeQuickReturnCheck = false;
@@ -139,7 +138,7 @@ public:
    */
   inline void Release()
   {
-    util::tLock lock2(*this);
+    rrlib::thread::tLock lock2(*this);
     Reset();
   }
 

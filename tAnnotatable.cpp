@@ -28,7 +28,7 @@ namespace core
 {
 void tAnnotatable::AddAnnotation(tFinrocAnnotation* ann)
 {
-  util::tLock lock1(simple_mutex);
+  rrlib::thread::tLock lock1(simple_mutex);
   if (ann->GetType() == NULL)
   {
     ann->InitDataType();

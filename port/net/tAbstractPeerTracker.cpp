@@ -31,31 +31,31 @@ const int8 tAbstractPeerTracker::cDISCOVERED, tAbstractPeerTracker::cREMOVED;
 std::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*>> tAbstractPeerTracker::instances(new util::tSimpleListWithMutex<tAbstractPeerTracker*>(tLockOrderLevels::cINNER_MOST - 1));
 
 tAbstractPeerTracker::tAbstractPeerTracker(int lock_order) :
-  util::tMutexLockOrder(lock_order),
+  tRecursiveMutex("Abstract Peer Tracker", lock_order),
   instances_lock(instances),
   listeners()
 {
-  util::tLock lock2(*instances);
+  rrlib::thread::tLock lock2(*instances);
   instances->Add(this);
 }
 
 void tAbstractPeerTracker::AddListener(tListener& listener)
 {
   // make sure: listener list can only be modified, while there aren't any other connection events being processed
-  util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
-  util::tLock lock3(*this);
+  rrlib::thread::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+  rrlib::thread::tLock lock3(*this);
   listeners.AddListener(listener);
 }
 
 tAbstractPeerTracker::~tAbstractPeerTracker()
 {
-  util::tLock lock2(*instances_lock);
+  rrlib::thread::tLock lock2(*instances_lock);
   instances_lock->RemoveElem(this);
 }
 
 void tAbstractPeerTracker::RegisterServer(const util::tString& network_name, const util::tString& name, int port)
 {
-  util::tLock lock2(*instances);
+  rrlib::thread::tLock lock2(*instances);
   for (size_t i = 0u; i < instances->Size(); i++)
   {
     instances->Get(i)->RegisterServerImpl(network_name, name, port);
@@ -65,14 +65,14 @@ void tAbstractPeerTracker::RegisterServer(const util::tString& network_name, con
 void tAbstractPeerTracker::RemoveListener(tListener& listener)
 {
   // make sure: listener list can only be modified, while there aren't any other connection events being processed
-  util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
-  util::tLock lock3(*this);
+  rrlib::thread::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+  rrlib::thread::tLock lock3(*this);
   listeners.RemoveListener(listener);
 }
 
 void tAbstractPeerTracker::UnregisterServer(const util::tString& network_name, const util::tString& name)
 {
-  util::tLock lock2(*instances);
+  rrlib::thread::tLock lock2(*instances);
   for (size_t i = 0u; i < instances->Size(); i++)
   {
     instances->Get(i)->UnregisterServerImpl(network_name, name);

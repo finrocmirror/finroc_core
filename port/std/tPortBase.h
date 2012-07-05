@@ -112,7 +112,7 @@ protected:
   tPullRequestHandlerRaw* pull_request_handler;
 
   /*! Listen to port value changes - may be null */
-  util::tListenerManager<tPortListenerRaw, util::tNoMutex> port_listener;
+  util::tListenerManager<tPortListenerRaw, rrlib::thread::tNoMutex> port_listener;
 
 private:
 
@@ -123,7 +123,7 @@ private:
   {
     port_listener.Notify([&](tPortListenerRaw & l)
     {
-      l.PortChangedRaw(*this, *pc->cur_ref->GetManager());
+      l.PortChangedRaw(*this, *pc->cur_ref->GetManager(), pc->cur_ref->GetManager()->GetTimestamp());
     });
   }
 
@@ -394,7 +394,7 @@ public:
    */
   inline void AddPortListenerRaw(tPortListenerRaw& listener)
   {
-    util::tLock l(simple_mutex);
+    tLock l(simple_mutex);
     port_listener.AddListener(listener);
   }
 
@@ -526,7 +526,7 @@ public:
     return buffer_pool == NULL ? multi_buffer_pool->GetUnusedBuffer(cur_data_type) : buffer_pool->GetUnusedBuffer();
   }
 
-  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::rtti::tDataTypeBase dt)
+  virtual tPortDataManager* GetUnusedBufferRaw(const rrlib::rtti::tDataTypeBase& dt)
   {
     assert((multi_buffer_pool != NULL));
     return multi_buffer_pool->GetUnusedBuffer(dt);
@@ -559,7 +559,7 @@ public:
    */
   inline void RemovePortListenerRaw(tPortListenerRaw& listener)
   {
-    util::tLock l(simple_mutex);
+    tLock l(simple_mutex);
     port_listener.RemoveListener(listener);
   }
 

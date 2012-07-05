@@ -30,7 +30,7 @@ const size_t tCCPortDataManagerTL::cREF_INDEX_MASK;
 
 tCCPortDataManagerTL::tCCPortDataManagerTL() :
   reuse_counter(0),
-  owner_thread(util::sThreadUtil::GetCurrentThreadId()),
+  owner_thread(rrlib::thread::tThread::CurrentThreadId()),
   ref_counter(0)
 {
 }
@@ -38,7 +38,7 @@ tCCPortDataManagerTL::tCCPortDataManagerTL() :
 void tCCPortDataManagerTL::NonOwnerLockRelease(tCCPortDataBufferPool* owner)
 {
   util::tRawWonderQueueTL* owner2 = this->owner;
-  if (owner_thread == util::sThreadUtil::GetCurrentThreadId())
+  if (owner_thread == rrlib::thread::tThread::CurrentThreadId())
   {
     ReleaseLock();
   }

@@ -64,11 +64,11 @@ protected:
    * List class for edges
    */
   template < typename T = tAbstractPort* >
-  class tEdgeList : public util::tSafeConcurrentlyIterableList<T, util::tNoMutex, tRuntimeSettings::cEDGE_LIST_SIZE_INCREASE_FACTOR>
+  class tEdgeList : public util::tSafeConcurrentlyIterableList<T, rrlib::thread::tNoMutex, tRuntimeSettings::cEDGE_LIST_SIZE_INCREASE_FACTOR>
   {
   public:
     tEdgeList() :
-      util::tSafeConcurrentlyIterableList<T, util::tNoMutex, tRuntimeSettings::cEDGE_LIST_SIZE_INCREASE_FACTOR>(tRuntimeSettings::cEDGE_LIST_DEFAULT_SIZE)
+      util::tSafeConcurrentlyIterableList<T, rrlib::thread::tNoMutex, tRuntimeSettings::cEDGE_LIST_SIZE_INCREASE_FACTOR>(tRuntimeSettings::cEDGE_LIST_DEFAULT_SIZE)
     {}
 
   };

@@ -19,7 +19,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "rrlib/util/patterns/singleton.h"
 #include "core/port/rpc/tRPCThreadPool.h"
 
@@ -35,23 +34,23 @@ static inline unsigned int GetLongevity(tRPCThreadPool*)
 
 tRPCThreadPool::tRPCThreadPool() :
   unused_threads(),
-  obj_mutex(tLockOrderLevels::cINNER_MOST - 100)
+  obj_mutex("RPC Thread Pool", tLockOrderLevels::cINNER_MOST - 100)
 {
 }
 
 tRPCThread& tRPCThreadPool::GetUnusedThread()
 {
-  util::tLock lock1(obj_mutex);
+  rrlib::thread::tLock lock1(obj_mutex);
   tRPCThread* r = NULL;
   r = unused_threads.Dequeue();
 
   if (!r)
   {
     r = new tRPCThread();
-    util::sThreadUtil::SetAutoDelete(*r);
+    r->SetAutoDelete();
     r->Start();
-#if (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ <= 5))
-    util::tThread::Sleep(std::chrono::milliseconds(250), false);
+#if (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ <= 5)) // TODO: Is this still required?
+    util::tThread::Sleep(std::chrono::milliseconds(70), false);
 #endif
   }
   return *r;

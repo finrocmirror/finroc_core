@@ -97,7 +97,7 @@ void tRealClientTest::Main()
     client->Connect();
     //PeerList fpl = AutoDeleter.addStatic(new PeerList());
     //fpl.addPeer(new IPSocketAddress(IPAddress.getByName("localhost"), 4444));
-    util::tThread::Sleep(std::chrono::seconds(2), true);
+    rrlib::thread::tThread::Sleep(std::chrono::seconds(2), true);
   }
   catch (const util::tException& e1)
   {

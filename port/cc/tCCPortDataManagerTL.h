@@ -23,12 +23,9 @@
 #ifndef core__port__cc__tCCPortDataManagerTL_h__
 #define core__port__cc__tCCPortDataManagerTL_h__
 
-#include "rrlib/finroc_core_utils/definitions.h"
-
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "rrlib/finroc_core_utils/container/tReusableTL.h"
-#include "core/portdatabase/tReusableGenericObjectManagerTL.h"
 
+#include "core/portdatabase/tAbstractPortDataManager.h"
 #include "core/port/tCombinedPointer.h"
 
 namespace finroc
@@ -45,7 +42,7 @@ class tCCPortDataBufferPool;
  * Contains diverse management information such as reuse
  * queue pointers - possibly time stamp.
  */
-class __attribute__((aligned(8))) tCCPortDataManagerTL : public tReusableGenericObjectManagerTL
+class __attribute__((aligned(8))) tCCPortDataManagerTL : public tAbstractPortDataManager<util::tReusableTL>
 {
   friend class tCCPortBase;
 private:
@@ -88,7 +85,7 @@ public:
    */
   inline void AddLocks(int count)
   {
-    assert((owner_thread == util::sThreadUtil::GetCurrentThreadId()) && "may only be called by owner thread");
+    assert(owner_thread == rrlib::thread::tThread::CurrentThreadId() && "may only be called by owner thread");
     ref_counter += count;
   }
 
@@ -107,6 +104,11 @@ public:
   inline bool ContentEquals(const void* other) const
   {
     return memcmp(GetObject()->GetRawDataPtr(), other, GetObject()->GetType().GetSize()) == 0;
+  }
+
+  virtual void GenericLockRelease()
+  {
+    throw std::logic_error("Should not be called");
   }
 
   inline void HandlePointerRelease()
@@ -154,7 +156,7 @@ public:
    */
   inline bool IsOwnerThread()
   {
-    return util::sThreadUtil::GetCurrentThreadId() == owner_thread;
+    return rrlib::thread::tThread::CurrentThreadId() == owner_thread;
   }
 
   /*!
@@ -197,13 +199,13 @@ public:
    */
   inline void ReleaseLocks(int count)
   {
-    assert((ref_counter >= count) && "More locks released than acquired");
-    assert((owner_thread == util::sThreadUtil::GetCurrentThreadId()) && "may only be called by owner thread");
+    assert(ref_counter >= count && "More locks released than acquired");
+    assert(owner_thread == rrlib::thread::tThread::CurrentThreadId() && "may only be called by owner thread");
     ref_counter -= count;
     if (ref_counter == 0)
     {
       reuse_counter++;
-      Recycle();
+      RecyclePortDataBuffer();
     }
   }
 

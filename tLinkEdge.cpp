@@ -101,7 +101,7 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& tar
 tLinkEdge::~tLinkEdge()
 {
   {
-    util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+    rrlib::thread::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
     if (source_link.length() > 0)
     {
       tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(source_link, this);
@@ -116,7 +116,7 @@ tLinkEdge::~tLinkEdge()
 void tLinkEdge::LinkAdded(tRuntimeEnvironment& re, const util::tString& link, tAbstractPort& port)
 {
   {
-    util::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+    rrlib::thread::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
     if (link.compare(source_link) == 0)
     {
       tAbstractPort* target = target_link.length() > 0 ? re.GetPort(target_link) : re.GetPort(port_handle);

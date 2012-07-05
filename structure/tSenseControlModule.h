@@ -41,6 +41,7 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include "rrlib/thread/tTask.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -73,7 +74,7 @@ namespace structure
  */
 class tSenseControlModule : public tModuleBase
 {
-  class ControlTask : public finroc::util::tTask
+  class ControlTask : public rrlib::thread::tTask
   {
     tSenseControlModule *const module;
   public:
@@ -81,7 +82,7 @@ class tSenseControlModule : public tModuleBase
     virtual void ExecuteTask();
   };
 
-  class SenseTask : public finroc::util::tTask
+  class SenseTask : public rrlib::thread::tTask
   {
     tSenseControlModule *const module;
   public:

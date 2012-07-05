@@ -45,7 +45,7 @@ static inline unsigned int GetLongevity(tRuntimeEnvironment*)
 
 tRuntimeEnvironment* tRuntimeEnvironment::instance_raw_ptr = NULL;
 bool tRuntimeEnvironment::active = false;
-util::tMutexLockOrder tRuntimeEnvironment::static_class_mutex(tLockOrderLevels::cFIRST);
+rrlib::thread::tOrderedMutex tRuntimeEnvironment::static_class_mutex("Runtime", tLockOrderLevels::cFIRST);
 
 tRuntimeEnvironment::tRegistry::tRegistry() :
   ports(new tCoreRegister<tAbstractPort*>(true)),
@@ -54,7 +54,7 @@ tRuntimeEnvironment::tRegistry::tRegistry() :
   listeners(),
   temp_buffer(),
   alternative_link_roots(),
-  mutex(tLockOrderLevels::cRUNTIME_REGISTER)
+  mutex("Runtime Registry", tLockOrderLevels::cRUNTIME_REGISTER)
 {}
 
 tRuntimeEnvironment::tRuntimeEnvironment() :
@@ -70,7 +70,7 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
 tRuntimeEnvironment::~tRuntimeEnvironment()
 {
   active = false;
-  util::tThread::StopThreads();
+  rrlib::thread::tThread::StopThreads();
 
   // delete all children - (runtime settings last)
   tFrameworkElement::tChildIterator ci(this);
@@ -91,7 +91,7 @@ void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge* edge
 {
   FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Adding link edge connecting to ", link);
   {
-    util::tLock lock2(registry.mutex);
+    tLock lock2(registry.mutex);
     if (registry.link_edges.find(link) == registry.link_edges.end())
     {
       // add first edge
@@ -117,7 +117,7 @@ void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge* edge
 
 void tRuntimeEnvironment::AddListener(tRuntimeListener& listener)
 {
-  util::tLock lock2(registry.mutex);
+  tLock lock2(registry.mutex);
   registry.listeners.AddListener(listener);
 }
 
@@ -165,7 +165,7 @@ tAbstractPort* tRuntimeEnvironment::GetPort(int port_handle)
 
 tAbstractPort* tRuntimeEnvironment::GetPort(const util::tString& link_name)
 {
-  util::tLock lock2(registry.mutex);
+  tLock lock2(registry.mutex);
 
   ::finroc::core::tFrameworkElement* fe = GetChildElement(link_name, false);
   if (fe == NULL)
@@ -188,7 +188,7 @@ tAbstractPort* tRuntimeEnvironment::GetPort(const util::tString& link_name)
 
 void tRuntimeEnvironment::InitialInit()
 {
-  util::tLock lock1(static_class_mutex);
+  tLock lock1(static_class_mutex);
   assert((!ShuttingDown()));
   rrlib::rtti::tDataType<std::string>("String"); // Make sure std::string data type has name "String" - as in Java
 
@@ -216,7 +216,7 @@ void tRuntimeEnvironment::InitialInit()
 
 void tRuntimeEnvironment::MarkElementDeleted(tFrameworkElement* fe)
 {
-  util::tLock lock2(registry.mutex);
+  tLock lock2(registry.mutex);
   if (fe->IsPort())
   {
     registry.ports->MarkDeleted(fe->GetHandle());
@@ -229,7 +229,7 @@ void tRuntimeEnvironment::MarkElementDeleted(tFrameworkElement* fe)
 
 void tRuntimeEnvironment::PreElementInit(tFrameworkElement& element)
 {
-  util::tLock lock2(registry.mutex);
+  tLock lock2(registry.mutex);
   registry.listeners.Notify([&](tRuntimeListener & l)
   {
     l.RuntimeChange(tRuntimeListener::cPRE_INIT, element);
@@ -238,13 +238,13 @@ void tRuntimeEnvironment::PreElementInit(tFrameworkElement& element)
 
 int tRuntimeEnvironment::RegisterElement(tFrameworkElement* fe, bool port)
 {
-  util::tLock lock2(registry.mutex);
+  tLock lock2(registry.mutex);
   return port ? registry.ports->Add(static_cast<tAbstractPort*>(fe)) : registry.elements.Add(fe);
 }
 
 void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* edge)
 {
-  util::tLock lock2(registry.mutex);
+  tLock lock2(registry.mutex);
   tLinkEdge* current = registry.link_edges[link];
   if (current == edge)
   {
@@ -277,7 +277,7 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge* e
 
 void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tAbstractPort* partner_port)
 {
-  util::tLock lock2(registry.mutex);
+  tLock lock2(registry.mutex);
   for (tLinkEdge* current = registry.link_edges[link]; current != NULL; current = current->GetNext())
   {
     if (current->GetPortHandle() == partner_port->GetHandle())
@@ -290,13 +290,13 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tAbstractPor
 
 void tRuntimeEnvironment::RemoveListener(tRuntimeListener& listener)
 {
-  util::tLock lock2(registry.mutex);
+  tLock lock2(registry.mutex);
   registry.listeners.RemoveListener(listener);
 }
 
 void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement& element, tAbstractPort* edge_target)
 {
-  util::tLock lock2(registry.mutex);
+  tLock lock2(registry.mutex);
   if (!ShuttingDown())
   {
     if (element.GetFlag(tCoreFlags::cALTERNATE_LINK_ROOT))
@@ -372,7 +372,7 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement& ele
 
 void tRuntimeEnvironment::Shutdown()
 {
-  util::tThread::StopThreads();
+  rrlib::thread::tThread::StopThreads();
   if (active)
   {
     //instance.reset();
@@ -381,7 +381,7 @@ void tRuntimeEnvironment::Shutdown()
 
 void tRuntimeEnvironment::UnregisterElement(tFrameworkElement* fe)
 {
-  util::tLock lock2(registry.mutex);
+  tLock lock2(registry.mutex);
   if (fe->IsPort())
   {
     registry.ports->Remove(fe->GetHandle());

@@ -92,7 +92,7 @@ void tModuleBase::CheckParameters()
   }
 }
 
-void tModuleBase::tParameterChangeDetector::PortChanged(tAbstractPort& origin, const void* const& value)
+void tModuleBase::tParameterChangeDetector::PortChanged(tAbstractPort& origin, const void* const& value, const rrlib::time::tTimestamp&)
 {
   parameters_changed = true;
 }

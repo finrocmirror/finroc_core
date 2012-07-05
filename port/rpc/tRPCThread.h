@@ -24,8 +24,8 @@
 #define core__port__rpc__tRPCThread_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-#include "rrlib/finroc_core_utils/thread/tLoopThread.h"
-#include "rrlib/finroc_core_utils/thread/tTask.h"
+#include "rrlib/thread/tLoopThread.h"
+#include "rrlib/thread/tTask.h"
 #include "rrlib/finroc_core_utils/container/tReusable.h"
 #include "rrlib/watchdog/tWatchDogTask.h"
 
@@ -40,12 +40,12 @@ namespace core
  *
  * (Helper) thread for remote procedure calls
  */
-class tRPCThread : public finroc::util::tLoopThread, public util::tReusable, public rrlib::watchdog::tWatchDogTask
+class tRPCThread : public rrlib::thread::tLoopThread, public util::tReusable, public rrlib::watchdog::tWatchDogTask
 {
 private:
 
   /*! Task to execute next */
-  util::tTask* volatile next_task;
+  rrlib::thread::tTask* volatile next_task;
 
   /*! Next reusable task */
   tSerializableReusableTask::tPtr next_reusable_task;
@@ -54,7 +54,7 @@ private:
   std::string current_task_string;
 
   /*! Mutex String representation of task that is currently executed */
-  util::tMutex current_task_string_mutex;
+  rrlib::thread::tMutex current_task_string_mutex;
 
 public:
 
@@ -65,7 +65,7 @@ public:
    *
    * \param t Task to execute
    */
-  void ExecuteTask(util::tTask& t);
+  void ExecuteTask(rrlib::thread::tTask& t);
   void ExecuteTask(tSerializableReusableTask::tPtr& t);
 
   virtual void HandleWatchdogAlert();

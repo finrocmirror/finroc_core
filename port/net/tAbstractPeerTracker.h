@@ -40,7 +40,7 @@ namespace core
  * This is the abstract base class for "peer trackers".
  * Peer trackers look for other systems on the network that can be connected to.
  */
-class tAbstractPeerTracker : public util::tLogUser, public util::tMutexLockOrder
+class tAbstractPeerTracker : public util::tLogUser, public rrlib::thread::tRecursiveMutex
 {
 public:
   class tListener; // inner class forward declaration
@@ -59,7 +59,7 @@ private:
 protected:
 
   /*! Tracker listeners */
-  util::tListenerManager<tListener, util::tMutexLockOrder> listeners;
+  util::tListenerManager<tListener, rrlib::thread::tOrderedMutex> listeners;
 
   /*!
    * Called by subclass when TCP node has been discovered

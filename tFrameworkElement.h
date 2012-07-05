@@ -25,7 +25,6 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 
 #include "core/tCoreFlags.h"
 #include "core/tAnnotatable.h"
@@ -74,7 +73,7 @@ class tAbstractPort;
  * tMutexLockOrder's secondary component is the element's unique handle in local runtime environment.
  * ("normal" elements have negative handle, while ports have positive ones)
  */
-class tFrameworkElement : public tAnnotatable, public util::tMutexLockOrder
+class tFrameworkElement : public tAnnotatable, public rrlib::thread::tRecursiveMutex
 {
 public:
 
@@ -159,7 +158,6 @@ private:
   friend class tChildIterator;
   friend class tRuntimeEnvironment;
   friend class tFinstructableGroup;
-  friend class tLock;
 
   /*! Primary link to framework element - the place at which it actually is in FrameworkElement tree - contains name etc. */
   tLink primary;
@@ -178,7 +176,7 @@ protected:
   uint flags;
 
   /*! children - may contain null entries (for efficient thread-safe unsynchronized iteration) */
-  util::tSafeConcurrentlyIterableList<tLink*, util::tNoMutex> children;
+  util::tSafeConcurrentlyIterableList<tLink*, rrlib::thread::tNoMutex> children;
 
 private:
 
@@ -276,7 +274,7 @@ private:
    */
   inline bool IsCreator() const
   {
-    return util::sThreadUtil::GetCurrentThreadId() == creater_thread_uid;
+    return rrlib::thread::tThread::CurrentThreadId() == creater_thread_uid;
   }
 
   /*!
@@ -292,7 +290,7 @@ private:
    *
    * \return Returns runtime registry if this is the case - otherwise this-pointer.
    */
-  const util::tMutexLockOrder& RuntimeLockHelper() const;
+  const rrlib::thread::tRecursiveMutex& RuntimeLockHelper() const;
 
 protected:
 
@@ -668,7 +666,7 @@ public:
    * \return Registry of the one and only RuntimeEnvironment - Structure changing operations need to be synchronized on this object!
    * (Only lock runtime for minimal periods of time!)
    */
-  const util::tMutexLockOrder& GetRegistryLock() const;
+  const rrlib::thread::tRecursiveMutex& GetRegistryLock() const;
 
   /*!
    * (for convenience)

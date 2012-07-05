@@ -113,7 +113,7 @@ void tStaticParameterList::Deserialize(const rrlib::xml::tNode& node, bool finst
 
 void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement& fe)
 {
-  util::tLock lock2(fe.GetRegistryLock());
+  rrlib::thread::tLock lock2(fe.GetRegistryLock());
 
   // all parameters attached to any of the module's parameters
   util::tSimpleList<tStaticParameterBase*> attached_parameters;

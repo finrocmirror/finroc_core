@@ -75,26 +75,33 @@ public:
   /*!
    * Gets Port's current value
    *
-   * (Note that numbers and "cheap copy" types also have a method: T GetValue();  (defined in tPortParent<T>))
+   * (Using this get()-variant is more efficient when using CC types, but can be extremely costly with large data types)
    *
    * \param result Buffer to (deep) copy port's current value to
-   * (Using this get()-variant is more efficient when using CC types, but can be extremely costly with large data types)
+   * \param timestamp Buffer to copy timestamp attached to data to (optional)
    */
   inline const void Get(rrlib::rtti::tGenericObject& result)
   {
-    impl->Get(result);
+    rrlib::time::tTimestamp timestamp;
+    Get(result, timestamp);
+  }
+  inline const void Get(rrlib::rtti::tGenericObject& result, rrlib::time::tTimestamp& timestamp)
+  {
+    impl->Get(result, timestamp);
   }
 
   /*!
    * Publish Data Buffer. This data will be forwarded to any connected ports.
    * Should only be called on output ports.
    *
+   * (This publish() method is efficient when using CC types, but can be extremely costly with large data types)
+   *
    * \param data Data to publish. It will be deep-copied.
-   * This publish()-variant is efficient when using CC types, but can be extremely costly with large data types)
+   * \param timestamp Timestamp to attach to data.
    */
-  inline void Publish(const rrlib::rtti::tGenericObject& data)
+  inline void Publish(const rrlib::rtti::tGenericObject& data, const rrlib::time::tTimestamp& timestamp = rrlib::time::cNO_TIME)
   {
-    impl->Publish(data);
+    impl->Publish(data, timestamp);
   }
 
   /*!

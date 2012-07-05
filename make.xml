@@ -46,8 +46,7 @@
       port/std/*.cpp
       port/std/*.h
       portdatabase/sSerializationHelper.cpp
-      portdatabase/tReusableGenericObjectManager.h
-      portdatabase/tReusableGenericObjectManagerTL.h
+      portdatabase/tAbstractPortDataManager.h
     </sources>
   </finrocplugin>
 

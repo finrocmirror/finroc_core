@@ -56,12 +56,12 @@ int main(int argc__, char **argv__)
 
   printf(" sizeof(tPortDataManager): %zd\n", sizeof(finroc::core::tPortDataManager));
   printf(" sizeof(tNumber): %zd\n", sizeof(finroc::core::tNumber));
-  printf(" sizeof(tSafeConcurrentlyIterableList<void*, finroc::util::tNoMutex>): %zd\n", sizeof(finroc::util::tSafeConcurrentlyIterableList<void*, finroc::util::tNoMutex>));
-  printf(" sizeof(tSafeConcurrentlyIterableList<void*, finroc::util::tMutexLockOrder>): %zd\n", sizeof(finroc::util::tSafeConcurrentlyIterableList<void*, finroc::util::tMutexLockOrder>));
+  printf(" sizeof(tSafeConcurrentlyIterableList<void*, rrlib::thread::tNoMutex>): %zd\n", sizeof(finroc::util::tSafeConcurrentlyIterableList<void*, rrlib::thread::tNoMutex>));
+  printf(" sizeof(tSafeConcurrentlyIterableList<void*, rrlib::thread::tOrderedMutex>): %zd\n", sizeof(finroc::util::tSafeConcurrentlyIterableList<void*, rrlib::thread::tOrderedMutex>));
   printf(" sizeof(tArrayWrapper<void*>): %zd\n", sizeof(finroc::util::tArrayWrapper<void*>));
   printf(" sizeof(bitset<1>): %zd\n", sizeof(std::bitset<1>));
-  printf(" sizeof(tMutex): %zd\n", sizeof(finroc::util::tMutex));
-  printf(" sizeof(tMutexLockOrder): %zd\n", sizeof(finroc::util::tMutexLockOrder));
+  printf(" sizeof(tMutex): %zd\n", sizeof(rrlib::thread::tMutex));
+  printf(" sizeof(tOrderedMutex): %zd\n", sizeof(rrlib::thread::tOrderedMutex));
   printf(" sizeof(tFrameworkElement): %zd\n", sizeof(finroc::core::tFrameworkElement));
   printf(" sizeof(tAbstractPort): %zd\n", sizeof(finroc::core::tAbstractPort));
   printf(" sizeof(tPortBase): %zd\n", sizeof(finroc::core::tPortBase));

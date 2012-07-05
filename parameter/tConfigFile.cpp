@@ -248,7 +248,7 @@ void tConfigFile::LoadParameterValues()
 
 void tConfigFile::LoadParameterValues(tFrameworkElement& fe)
 {
-  util::tLock lock2(fe.GetRegistryLock());  // nothing should change while we're doing this
+  rrlib::thread::tLock lock2(fe.GetRegistryLock());  // nothing should change while we're doing this
   tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
   fet.TraverseElementTree(fe, temp_buffer, [&](tFrameworkElement & fe)
   {
@@ -276,7 +276,7 @@ void tConfigFile::SaveFile()
   tFrameworkElement* ann = static_cast<tFrameworkElement*>(GetAnnotated());
   assert(ann);
   {
-    util::tLock lock2(ann->GetRegistryLock()); // nothing should change while we're doing this
+    rrlib::thread::tLock lock2(ann->GetRegistryLock()); // nothing should change while we're doing this
     tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
     fet.TraverseElementTree(*ann, temp_buffer, [&](tFrameworkElement & fe)
     {

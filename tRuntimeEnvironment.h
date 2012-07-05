@@ -72,7 +72,7 @@ public:
     std::map<std::string, tLinkEdge*> link_edges;
 
     /*! List with runtime listeners */
-    util::tListenerManager<tRuntimeListener, tMutexLockOrder> listeners;
+    util::tListenerManager<tRuntimeListener, rrlib::thread::tOrderedMutex> listeners;
 
     /*! Temporary buffer - may be used in synchronized context */
     std::string temp_buffer;
@@ -81,7 +81,7 @@ public:
     util::tSimpleList<tFrameworkElement*> alternative_link_roots;
 
     /*! Mutex */
-    util::tMutexLockOrder mutex;
+    rrlib::thread::tRecursiveMutex mutex;
 
     tRegistry();
   };
@@ -104,7 +104,7 @@ private:
   static bool active;
 
   /*! Mutex for static methods */
-  static util::tMutexLockOrder static_class_mutex;
+  static rrlib::thread::tOrderedMutex static_class_mutex;
 
   /*! Command line arguments (used by parameters, for instance). Needs to be manually filled (usually in main()). */
   std::map<std::string, std::string> command_line_args;
@@ -298,7 +298,7 @@ public:
    */
   inline static bool ShuttingDown()
   {
-    return util::tThread::StoppingThreads();
+    return rrlib::thread::tThread::StoppingThreads();
   }
 
 };

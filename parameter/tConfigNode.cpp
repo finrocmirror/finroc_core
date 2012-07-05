@@ -79,7 +79,7 @@ util::tString tConfigNode::GetFullConfigEntry(tFrameworkElement& parent, const u
 
 void tConfigNode::SetConfigNode(tFrameworkElement& fe, const util::tString& node)
 {
-  util::tLock lock2(fe.GetRegistryLock());
+  rrlib::thread::tLock lock2(fe.GetRegistryLock());
   tConfigNode* cn = fe.GetAnnotation<tConfigNode>();
   if (cn != NULL)
   {

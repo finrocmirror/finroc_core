@@ -62,6 +62,25 @@ tCCPortBase::tCCPortBase(tPortCreationInfoBase pci) :
   tc->last_written_to_port[port_index] = c;
 }
 
+tCCPortBase::~tCCPortBase()
+{
+  tLock lock1(*this);
+  tThreadLocalCache::Get();  // Initialize ThreadLocalCache - if this has not already happened for GarbageCollector
+  tThreadLocalCache::DeleteInfoForPort(port_index);
+  default_value->Recycle2();
+  if (owned_data != NULL)
+  {
+    tLock lock3(*tThreadLocalCache::infos_mutex);
+    owned_data->PostThreadReleaseLock();
+  }
+  // do not release lock on current value - this is done in one of the statements above
+
+  if (queue != NULL)
+  {
+    delete queue;
+  }
+}
+
 void tCCPortBase::ApplyDefaultValue()
 {
   //publish(ThreadLocalCache.get(), defaultValue.getContainer());
@@ -73,7 +92,7 @@ void tCCPortBase::ApplyDefaultValue()
 
 void tCCPortBase::BrowserPublishRaw(tCCPortDataManagerTL* buffer)
 {
-  assert((buffer->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId()));
+  assert(buffer->GetOwnerThread() == rrlib::thread::tThread::CurrentThreadId());
   tThreadLocalCache* tc = tThreadLocalCache::Get();
 
   PublishImpl<false, cCHANGED, true>(tc, buffer);
@@ -87,28 +106,20 @@ bool tCCPortBase::ContainsDefaultValue()
   return result;
 }
 
-tCCPortBase::~tCCPortBase()
-{
-  util::tLock lock1(*this);
-  tThreadLocalCache::Get();  // Initialize ThreadLocalCache - if this has not already happened for GarbageCollector
-  tThreadLocalCache::DeleteInfoForPort(port_index);
-  default_value->Recycle2();
-  if (owned_data != NULL)
-  {
-    util::tLock lock3(*tThreadLocalCache::infos_mutex);
-    owned_data->PostThreadReleaseLock();
-  }
-  // do not release lock on current value - this is done in one of the statements above
-
-  if (queue != NULL)
-  {
-    delete queue;
-  }
-}
-
 void tCCPortBase::DequeueAllRaw(tCCQueueFragmentRaw& fragment)
 {
   queue->DequeueAll(fragment);
+}
+
+rrlib::rtti::tGenericObject* tCCPortBase::DequeueSingleAutoLockedRaw()
+{
+  tCCPortDataManager* result = DequeueSingleUnsafeRaw();
+  if (result == NULL)
+  {
+    return NULL;
+  }
+  tThreadLocalCache::Get()->AddAutoLock(result);
+  return result->GetObject();
 }
 
 tCCPortDataManager* tCCPortBase::DequeueSingleUnsafeRaw()
@@ -125,17 +136,30 @@ void tCCPortBase::ForwardData(tAbstractPort* other)
   c->ReleaseLock();
 }
 
-tCCPortDataManager* tCCPortBase::GetInInterThreadContainer()
+const rrlib::rtti::tGenericObject* tCCPortBase::GetAutoLockedRaw()
 {
-  tCCPortDataManager* ccitc = tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(GetDataType());
-  GetRaw(ccitc);
-  return ccitc;
+  tThreadLocalCache* tc = tThreadLocalCache::Get();
+
+  if (PushStrategy())
+  {
+    tCCPortDataManagerTL* mgr = GetLockedUnsafeInContainer();
+    tc->AddAutoLock(mgr);
+    return mgr->GetObject();
+  }
+  else
+  {
+    tCCPortDataManager* mgr = GetInInterThreadContainer();
+    tc->AddAutoLock(mgr);
+    return mgr->GetObject();
+  }
 }
 
 tCCPortDataManager* tCCPortBase::GetInInterThreadContainer(bool dont_pull)
 {
   tCCPortDataManager* ccitc = tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(GetDataType());
-  GetRaw(ccitc->GetObject(), dont_pull);
+  rrlib::time::tTimestamp timestamp;
+  GetRaw(*ccitc->GetObject(), timestamp, dont_pull);
+  ccitc->SetTimestamp(timestamp);
   return ccitc;
 }
 
@@ -143,7 +167,7 @@ tCCPortDataManagerTL* tCCPortBase::GetLockedUnsafeInContainer()
 {
   tCCPortDataRef* val = value;
   tCCPortDataManagerTL* val_c = val->GetContainer();
-  if (val_c->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId())    // if same thread: simply add read lock
+  if (val_c->GetOwnerThread() == rrlib::thread::tThread::CurrentThreadId())    // if same thread: simply add read lock
   {
     val_c->AddLock();
     return val_c;
@@ -156,6 +180,7 @@ tCCPortDataManagerTL* tCCPortBase::GetLockedUnsafeInContainer()
   for (; ;)
   {
     ccitc->GetObject()->DeepCopyFrom(val_c->GetObject(), NULL);
+    ccitc->SetTimestamp(val_c->GetTimestamp());
     if (val == value)    // still valid??
     {
       return ccitc;
@@ -170,18 +195,20 @@ tCCPortDataManager* tCCPortBase::GetPullInInterthreadContainerRaw(bool intermedi
   tCCPortDataManagerTL* tmp = PullValueRaw(intermediate_assign, ignore_pull_request_handler_on_this_port);
   tCCPortDataManager* ret = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(this->data_type);
   ret->GetObject()->DeepCopyFrom(tmp->GetObject(), NULL);
+  ret->SetTimestamp(tmp->GetTimestamp());
   tmp->ReleaseLock();
   return ret;
 }
 
-void tCCPortBase::GetRaw(rrlib::rtti::tGenericObject* buffer, bool dont_pull)
+void tCCPortBase::GetRaw(rrlib::rtti::tGenericObject& buffer, rrlib::time::tTimestamp& timestamp, bool dont_pull)
 {
   if (PushStrategy() || dont_pull)
   {
     for (; ;)
     {
       tCCPortDataRef* val = value;
-      buffer->DeepCopyFrom(val->GetData(), NULL);
+      buffer.DeepCopyFrom(val->GetData(), NULL);
+      timestamp = val->GetContainer()->GetTimestamp();
       if (val == value)    // still valid??
       {
         return;
@@ -191,7 +218,8 @@ void tCCPortBase::GetRaw(rrlib::rtti::tGenericObject* buffer, bool dont_pull)
   else
   {
     tCCPortDataManagerTL* dc = PullValueRaw();
-    buffer->DeepCopyFrom(dc->GetObject(), NULL);
+    buffer.DeepCopyFrom(dc->GetObject(), NULL);
+    timestamp = dc->GetTimestamp();
     dc->ReleaseLock();
   }
 }
@@ -224,6 +252,7 @@ void tCCPortBase::NonStandardAssign(tThreadLocalCache* tc)
     // enqueue
     tCCPortDataManager* itc = tc->GetUnusedInterThreadBuffer(tc->data->GetObject()->GetType());
     itc->GetObject()->DeepCopyFrom(tc->data->GetObject(), NULL);
+    itc->SetTimestamp(tc->data->GetTimestamp());
     queue->EnqueueWrapped(itc);
   }
 }
@@ -253,7 +282,7 @@ void tCCPortBase::PullValueRawImpl(tThreadLocalCache* tc, bool intermediate_assi
   if ((!first) && pull_request_handler != NULL)    // for network port pulling it's good if pullRequestHandler is not called on first port - and there aren't any scenarios where this would make sense
   {
     tCCPortDataManagerTL* res_buf = tc->GetUnusedBuffer(this->data_type);
-    if (pull_request_handler->PullRequest(this, res_buf, intermediate_assign))
+    if (pull_request_handler->PullRequest(*this, *res_buf, intermediate_assign))
     {
       tc->data = res_buf;
       tc->data->SetRefCounter(1);  // one lock for caller

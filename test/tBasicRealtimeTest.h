@@ -39,7 +39,7 @@ namespace core
  * Apart from using the finroc_core_utils API it doesn't have that
  * much to do with finroc (yet).
  */
-class tBasicRealtimeTest : public util::tLoopThread
+class tBasicRealtimeTest : public rrlib::thread::tLoopThread
 {
 public:
 

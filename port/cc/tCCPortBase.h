@@ -25,7 +25,6 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "rrlib/rtti/rtti.h"
 
 #include "core/tFrameworkElement.h"
@@ -63,7 +62,6 @@ class tCCPortBase : public tAbstractPort
   friend class tPort;
 
 protected:
-  /*implements Callable<PullCall>*/
 
   /*! Edges emerging from this port */
   tAbstractPort::tEdgeList<tCCPortBase*> edges_src;
@@ -113,7 +111,7 @@ protected:
   tCCPortQueue* queue;
 
   /*! Listens to port value changes - may be null */
-  util::tListenerManager<tPortListenerRaw, util::tNoMutex> port_listener;
+  util::tListenerManager<tPortListenerRaw, rrlib::thread::tNoMutex> port_listener;
 
   /*! Object that handles pull requests - null if there is none (typical case) */
   tCCPullRequestHandlerRaw* pull_request_handler;
@@ -133,7 +131,7 @@ private:
   {
     port_listener.Notify([&](tPortListenerRaw & l)
     {
-      l.PortChangedRaw(*this, *tc->data);
+      l.PortChangedRaw(*this, *tc->data, tc->data->GetTimestamp());
     });
   }
 
@@ -357,12 +355,14 @@ public:
    */
   tCCPortBase(tPortCreationInfoBase pci);
 
+  virtual ~tCCPortBase();
+
   /*!
    * \param listener Listener to add
    */
   inline void AddPortListenerRaw(tPortListenerRaw& listener)
   {
-    util::tLock l(simple_mutex);
+    tLock l(simple_mutex);
     port_listener.AddListener(listener);
   }
 
@@ -409,8 +409,6 @@ public:
    */
   bool ContainsDefaultValue();
 
-  virtual ~tCCPortBase();
-
   /*!
    * Dequeue all elements currently in queue
    *
@@ -428,16 +426,7 @@ public:
    *
    * \return Dequeued first/oldest element in queue
    */
-  inline rrlib::rtti::tGenericObject* DequeueSingleAutoLockedRaw()
-  {
-    tCCPortDataManager* result = DequeueSingleUnsafeRaw();
-    if (result == NULL)
-    {
-      return NULL;
-    }
-    tThreadLocalCache::Get()->AddAutoLock(result);
-    return result->GetObject();
-  }
+  rrlib::rtti::tGenericObject* DequeueSingleAutoLockedRaw();
 
   /*!
    * Dequeue first/oldest element in queue.
@@ -456,24 +445,7 @@ public:
   /*!
    * \return Current data with auto-lock (can only be unlocked with ThreadLocalCache auto-unlock)
    */
-  inline const rrlib::rtti::tGenericObject* GetAutoLockedRaw()
-  {
-    tThreadLocalCache* tc = tThreadLocalCache::Get();
-
-    if (PushStrategy())
-    {
-      tCCPortDataManagerTL* mgr = GetLockedUnsafeInContainer();
-      tc->AddAutoLock(mgr);
-      return mgr->GetObject();
-
-    }
-    else
-    {
-      tCCPortDataManager* mgr = GetInInterThreadContainer();
-      tc->AddAutoLock(mgr);
-      return mgr->GetObject();
-    }
-  }
+  const rrlib::rtti::tGenericObject* GetAutoLockedRaw();
 
   /*!
    * \return Returns data type cc index directly (faster than acquiring using FinrocTypeInfo and DataTypeBase)
@@ -494,15 +466,10 @@ public:
   }
 
   /*!
-   * \return Current data in CC Interthread-container. Needs to be recycled manually.
-   */
-  tCCPortDataManager* GetInInterThreadContainer();
-
-  /*!
    * \param dont_pull Do not attempt to pull data - even if port is on push strategy
    * \return Current data in CC Interthread-container. Needs to be recycled manually.
    */
-  tCCPortDataManager* GetInInterThreadContainer(bool dont_pull);
+  tCCPortDataManager* GetInInterThreadContainer(bool dont_pull = false);
 
   /*!
    * Pulls port data (regardless of strategy) and returns it in interhread container
@@ -517,30 +484,25 @@ public:
   /*!
    * Copy current value to buffer (Most efficient get()-version)
    *
-   * \param buffer Buffer to copy current data
-   */
-  inline void GetRaw(rrlib::rtti::tGenericObjectManager* buffer)
-  {
-    GetRaw(buffer->GetObject());
-  }
-
-  /*!
-   * Copy current value to buffer (Most efficient get()-version)
-   *
    * \param buffer Buffer to copy current data to
-   */
-  inline void GetRaw(rrlib::rtti::tGenericObject* buffer)
-  {
-    GetRaw(buffer, false);
-  }
-
-  /*!
-   * Copy current value to buffer (Most efficient get()-version)
-   *
-   * \param buffer Buffer to copy current data to
+   * \param timestamp Buffer to copy attached time stamp to
    * \param dont_pull Do not attempt to pull data - even if port is on push strategy
    */
-  void GetRaw(rrlib::rtti::tGenericObject* buffer, bool dont_pull);
+  void GetRaw(rrlib::rtti::tGenericObject& buffer, rrlib::time::tTimestamp& timestamp, bool dont_pull = false);
+
+  /*!
+   * Copy current value to buffer (Most efficient get()-version)
+   *
+   * \param buffer Buffer to copy current data
+   * \param dont_pull Do not attempt to pull data - even if port is on push strategy
+   */
+  template <typename R>
+  inline void GetRaw(tAbstractPortDataManager<R>& buffer, bool dont_pull = false)
+  {
+    rrlib::time::tTimestamp timestamp;
+    GetRaw(*buffer.GetObject(), timestamp, dont_pull);
+    buffer.SetTimestamp(timestamp);
+  }
 
   /*!
    * Copy current value to buffer (Most efficient get()-version)
@@ -566,6 +528,37 @@ public:
     {
       tCCPortDataManagerTL* dc = PullValueRaw();
       rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*dc->GetObject()->GetData<T>(), buffer, NULL);
+      dc->ReleaseLock();
+    }
+  }
+
+  /*!
+   * Copy current value to buffer (Most efficient get()-version)
+   *
+   * \param buffer Buffer to copy current data to
+   * \param timestamp Buffer to copy current timestamp to
+   */
+  template <typename T>
+  inline void GetRawT(T& buffer, rrlib::time::tTimestamp& timestamp)
+  {
+    if (PushStrategy())
+    {
+      for (; ;)
+      {
+        tCCPortDataRef* val = value;
+        rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*val->GetData()->GetData<T>(), buffer, NULL);
+        timestamp = val->GetContainer()->GetTimestamp();
+        if (val == value)    // still valid??
+        {
+          return;
+        }
+      }
+    }
+    else
+    {
+      tCCPortDataManagerTL* dc = PullValueRaw();
+      rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*dc->GetObject()->GetData<T>(), buffer, NULL);
+      timestamp = dc->GetTimestamp();
       dc->ReleaseLock();
     }
   }
@@ -598,7 +591,7 @@ public:
    */
   inline void Publish(tCCPortDataManagerTL* buffer)
   {
-    assert((buffer->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId()));
+    assert(buffer->GetOwnerThread() == rrlib::thread::tThread::CurrentThreadId());
     Publish(tThreadLocalCache::GetFast(), buffer);
   }
 
@@ -607,7 +600,7 @@ public:
    */
   inline void RemovePortListenerRaw(tPortListenerRaw& listener)
   {
-    util::tLock l(simple_mutex);
+    tLock l(simple_mutex);
     port_listener.RemoveListener(listener);
   }
 

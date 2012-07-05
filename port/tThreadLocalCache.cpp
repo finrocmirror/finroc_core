@@ -20,7 +20,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "rrlib/rtti/rtti.h"
 #include "rrlib/util/patterns/singleton.h"
 
@@ -62,7 +61,7 @@ static inline unsigned int GetLongevity(util::tSimpleListWithMutex<tThreadLocalC
 }
 
 __thread tThreadLocalCache* tThreadLocalCache::info = NULL;
-util::tMutexLockOrder* tThreadLocalCache::infos_mutex = &tThreadLocalCacheInfos::Instance();
+rrlib::thread::tRecursiveMutex* tThreadLocalCache::infos_mutex = &tThreadLocalCacheInfos::Instance();
 util::tAtomicInt tThreadLocalCache::thread_uid_counter(1);
 
 tThreadLocalCache::tThreadLocalCache() :
@@ -77,16 +76,16 @@ tThreadLocalCache::tThreadLocalCache() :
   pq_fragments(new util::tReusablesPool<tPortQueueElement>()),
   ccpq_fragments(new util::tReusablesPool<tCCPortQueueElement>()),
   input_packet_processor(),
-  thread_id(util::sThreadUtil::GetCurrentThreadId()),
+  thread_id(rrlib::thread::tThread::CurrentThreadId()),
   port_register(tRuntimeEnvironment::GetInstance()->GetPorts())
 {
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating ThreadLocalCache for thread ", util::tThread::CurrentThread()->GetName());
+  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating ThreadLocalCache for thread ", rrlib::thread::tThread::CurrentThread()->GetName());
 }
 
 tThreadLocalCache::~tThreadLocalCache()
 {
   util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
-  util::tLock l(infos);
+  rrlib::thread::tLock l(infos);
   tThreadLocalCache* tmp = this; // to cleanly remove const modifier
   infos.RemoveElem(tmp);
 
@@ -116,7 +115,7 @@ void tThreadLocalCache::AddAutoLock(rrlib::rtti::tGenericObject* obj)
 void tThreadLocalCache::AddAutoLock(tCCPortDataManagerTL* obj)
 {
   assert((obj != NULL));
-  assert((obj->GetOwnerThread() == util::sThreadUtil::GetCurrentThreadId()));
+  assert((obj->GetOwnerThread() == rrlib::thread::tThread::CurrentThreadId()));
   cc_auto_locks.Add(obj);
 }
 
@@ -130,13 +129,13 @@ tCCPortDataBufferPool* tThreadLocalCache::CreateCCPool(const rrlib::rtti::tDataT
 tThreadLocalCache* tThreadLocalCache::CreateThreadLocalCacheForThisThread()
 {
   util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
-  util::tLock lock4(infos);
+  rrlib::thread::tLock lock4(infos);
   tThreadLocalCache* tli = new tThreadLocalCache();
   infos.Add(tli);
   info = tli;
   if (infos.Size() > 1)
   {
-    util::tThread::CurrentThreadRaw()->LockObject(std::shared_ptr<tThreadLocalCache>(tli)); // for auto-deleting after thread finishes
+    rrlib::thread::tThread::CurrentThreadRaw()->LockObject(std::shared_ptr<tThreadLocalCache>(tli)); // for auto-deleting after thread finishes
   }
   return tli;
 }
@@ -146,7 +145,7 @@ void tThreadLocalCache::DeleteInfoForPort(int port_index)
   assert((port_index >= 0 && port_index <= tCoreRegister<tAbstractPort*>::GetMaximumNumberOfElements()));
   {
     util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
-    util::tLock lock2(infos);
+    rrlib::thread::tLock lock2(infos);
     for (int i = 0, n = infos.Size(); i < n; i++)
     {
       tThreadLocalCache* tli = infos.Get(i);
@@ -165,7 +164,7 @@ void tThreadLocalCache::DeleteInfoForPort(int port_index)
 
 void tThreadLocalCache::FinalDelete()
 {
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Deleting ThreadLocalCache for thread ", util::tThread::CurrentThreadRaw()->GetName());
+  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Deleting ThreadLocalCache for thread ", rrlib::thread::tThread::CurrentThreadRaw()->GetName());
 
   /*! Delete local port data buffer pools */
   for (size_t i = 0u; i < cc_type_pools.length; i++)
@@ -182,7 +181,7 @@ void tThreadLocalCache::FinalDelete()
   /*! Transfer ownership of remaining port data to ports */
   {
     util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
-    util::tLock lock2(infos);  // big lock - to make sure no ports are deleted at the same time which would result in a mess (note that CCPortBase desctructor has synchronized operation on infos)
+    rrlib::thread::tLock lock2(infos);  // big lock - to make sure no ports are deleted at the same time which would result in a mess (note that CCPortBase desctructor has synchronized operation on infos)
     for (size_t i = 0u; i < last_written_to_port.length; i++)
     {
       if (last_written_to_port[i] != NULL)

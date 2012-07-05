@@ -36,7 +36,7 @@ namespace core
  *
  * Test for ports with bounded queues
  */
-class tRealPortQueueTest : public util::tThread
+class tRealPortQueueTest : public rrlib::thread::tThread
 {
 public:
 

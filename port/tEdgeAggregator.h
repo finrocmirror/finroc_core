@@ -50,7 +50,7 @@ class tEdgeAggregator : public tFrameworkElement
 private:
 
   /*! List of emerging aggregated edges */
-  util::tSafeConcurrentlyIterableList<tAggregatedEdge*, util::tNoMutex, 5, true> emerging_edges;
+  util::tSafeConcurrentlyIterableList<tAggregatedEdge*, rrlib::thread::tNoMutex, 5, true> emerging_edges;
 
 public:
 

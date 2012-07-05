@@ -344,7 +344,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int port_handle
   ::finroc::core::tAbstractPort* port = tRuntimeEnvironment::GetInstance()->GetPort(port_handle);
   if (port != NULL && port->IsReady())
   {
-    util::tLock lock3(GetRegistryLock()); // TODO: obtaining registry lock is quite heavy-weight - however, set calls should not occur often
+    tLock lock3(GetRegistryLock()); // TODO: obtaining registry lock is quite heavy-weight - however, set calls should not occur often
     if (port->IsReady())
     {
       rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::eNames);
@@ -414,7 +414,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int cma_index, 
     try
     {
       {
-        util::tLock lock4(GetRegistryLock());
+        tLock lock4(GetRegistryLock());
         tCreateFrameworkElementAction* cma = runtime_construction::GetConstructibleElements()[cma_index];
         ::finroc::core::tFrameworkElement* parent = tRuntimeEnvironment::GetInstance()->GetElement(parent_handle);
         if (parent == NULL || (!parent->IsReady()))

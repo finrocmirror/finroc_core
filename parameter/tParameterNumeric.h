@@ -52,7 +52,7 @@ class tParameterNumeric : public tParameterBase<T>
 
     tNumberCache() : current_value(0) {}
 
-    virtual void PortChanged(tAbstractPort& origin, const T& value)
+    virtual void PortChanged(tAbstractPort& origin, const T& value, const rrlib::time::tTimestamp& timestamp)
     {
       current_value = value;
     }

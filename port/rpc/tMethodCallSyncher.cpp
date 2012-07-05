@@ -27,12 +27,12 @@ namespace finroc
 {
 namespace core
 {
-util::tMutex tMethodCallSyncher::static_class_mutex;
+rrlib::thread::tMutex tMethodCallSyncher::static_class_mutex;
 const size_t tMethodCallSyncher::cMAX_THREADS;
 ::finroc::util::tArrayWrapper<tMethodCallSyncher> tMethodCallSyncher::slots(tMethodCallSyncher::cMAX_THREADS);
 
 tMethodCallSyncher::tMethodCallSyncher() :
-  util::tMutexLockOrder(tLockOrderLevels::cINNER_MOST - 300),
+  tOrderedMutex("Method Call Syncher", tLockOrderLevels::cINNER_MOST - 300),
   index(0),
   thread(NULL),
   thread_uid(0),
@@ -53,14 +53,14 @@ int16 tMethodCallSyncher::GetAndUseNextCallIndex()
 
 tMethodCallSyncher* tMethodCallSyncher::GetFreeInstance(tThreadLocalCache* tc)
 {
-  util::tLock lock1(static_class_mutex);
+  rrlib::thread::tLock lock1(static_class_mutex);
   for (size_t i = 0u; i < slots.length; i++)
   {
     if (slots[i].thread_uid == 0)
     {
       tMethodCallSyncher* mcs = &(slots[i]);
       mcs->Reset();
-      mcs->thread = util::tThread::CurrentThread().get();
+      mcs->thread = rrlib::thread::tThread::CurrentThreadRaw();
       mcs->thread_uid = tc->GetThreadUid();
       return mcs;
     }
@@ -79,7 +79,7 @@ void tMethodCallSyncher::Reset()
 
 void tMethodCallSyncher::ReturnValue(tAbstractCall::tPtr& mc)
 {
-  util::tLock lock1(*this);
+  rrlib::thread::tLock lock1(*this);
 
   if (GetThreadUid() != mc->GetThreadUid())
   {

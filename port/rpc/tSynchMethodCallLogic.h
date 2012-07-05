@@ -79,7 +79,7 @@ public:
   {
     tMethodCallSyncher& mcs = tThreadLocalRPCData::Get().GetMethodSyncher();
 
-    util::tLock lock2(mcs);
+    rrlib::thread::tLock lock2(mcs);
     call->SetupSynchCall(mcs);
     mcs.current_method_call_index = call->GetMethodCallIndex();
     assert(mcs.method_return.get() == NULL);

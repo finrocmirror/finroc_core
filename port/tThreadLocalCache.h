@@ -78,7 +78,7 @@ private:
   static __thread tThreadLocalCache* info;
 
   /*! Pointer to aboves list mutex */
-  static util::tMutexLockOrder* infos_mutex;
+  static rrlib::thread::tRecursiveMutex* infos_mutex;
 
   /*! Uid of thread - unique and constant for runtime of program */
   const int thread_uid;

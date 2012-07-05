@@ -68,7 +68,7 @@ private:
   int elem_count;
 
   // for synchronization on an object of this class
-  mutable util::tMutex obj_mutex;
+  mutable rrlib::thread::tMutex obj_mutex;
 
   /*! Maximum number of elements */
   static int cMAX_ELEMENTS;

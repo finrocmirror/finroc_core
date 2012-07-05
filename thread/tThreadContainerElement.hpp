@@ -24,7 +24,6 @@
 #include "core/tAnnotatable.h"
 #include "core/thread/tExecutionControl.h"
 #include "core/tFrameworkElement.h"
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 
 namespace finroc
 {
@@ -63,7 +62,7 @@ bool tThreadContainerElement<BASE>::IsExecuting()
 template <typename BASE>
 void tThreadContainerElement<BASE>::JoinThread()
 {
-  util::tLock l(*this);
+  rrlib::thread::tLock l(*this);
   if (thread.get() != NULL)
   {
     thread->Join();
@@ -74,16 +73,18 @@ void tThreadContainerElement<BASE>::JoinThread()
 template <typename BASE>
 void tThreadContainerElement<BASE>::StartExecution()
 {
-  util::tLock l(*this);
+  rrlib::thread::tLock l(*this);
   if (thread)
   {
     FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Thread is already executing.");
     return;
   }
-  thread = util::sThreadUtil::GetThreadSharedPtr(new tThreadContainerThread(this, cycle_time.Get(), warn_on_cycle_time_exceed.Get(), last_cycle_execution_time));
+  tThreadContainerThread* thread_tmp = new tThreadContainerThread(this, cycle_time.Get(), warn_on_cycle_time_exceed.Get(), last_cycle_execution_time);
+  thread_tmp->SetAutoDelete();
+  thread = std::static_pointer_cast<tThreadContainerThread>(thread_tmp->GetSharedPtr());
   if (rt_thread.Get())
   {
-    util::sThreadUtil::MakeThreadRealtime(thread);
+    thread_tmp->SetRealtime();
   }
   l.Unlock();
   thread->Start();
@@ -92,7 +93,7 @@ void tThreadContainerElement<BASE>::StartExecution()
 template <typename BASE>
 void tThreadContainerElement<BASE>::StopThread()
 {
-  util::tLock l(*this);
+  rrlib::thread::tLock l(*this);
   if (thread)
   {
     thread->StopThread();

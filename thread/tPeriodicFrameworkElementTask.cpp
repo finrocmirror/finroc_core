@@ -27,7 +27,7 @@ namespace core
 {
 rrlib::rtti::tDataTypeBase tPeriodicFrameworkElementTask::cTYPE = rrlib::rtti::tDataType<tPeriodicFrameworkElementTask>();
 
-tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, util::tTask* task_) :
+tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, rrlib::thread::tTask* task_) :
   task(task_),
   incoming(incoming_ports),
   outgoing(outgoing_ports),

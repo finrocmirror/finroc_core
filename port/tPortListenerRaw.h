@@ -48,8 +48,9 @@ public:
    *
    * \param origin Port that value comes from
    * \param value Manager of port's new value
+   * \param timestamp Timestamp attached to value
    */
-  virtual void PortChangedRaw(tAbstractPort& origin, const tGenericObjectManager& value) = 0;
+  virtual void PortChangedRaw(tAbstractPort& origin, tGenericObjectManager& value, const rrlib::time::tTimestamp& timestamp) = 0;
 
 };
 

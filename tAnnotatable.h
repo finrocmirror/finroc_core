@@ -52,7 +52,7 @@ private:
 protected:
 
   // for synchronization on an object of this class
-  util::tMutex simple_mutex;
+  rrlib::thread::tMutex simple_mutex;
 
   /*!
    * Notify annotations that object is to be deleted

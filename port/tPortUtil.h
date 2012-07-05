@@ -98,12 +98,21 @@ public:
     mgr->ReleaseLock();
   }
 
-  static bool DequeueSingle(tPortType* port, T& result)
+  static void GetValue(tPortType* port, T& result, rrlib::time::tTimestamp& timestamp)
+  {
+    tManager* mgr = port->GetLockedUnsafeRaw();
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
+    timestamp = mgr->GetTimestamp();
+    mgr->ReleaseLock();
+  }
+
+  static bool DequeueSingle(tPortType* port, T& result, rrlib::time::tTimestamp& timestamp)
   {
     tManager* mgr = port->DequeueSingleUnsafeRaw();
     if (mgr != NULL)
     {
       rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
+      timestamp = mgr->GetTimestamp();
       mgr->ReleaseLock();
       return true;
     }
@@ -144,10 +153,11 @@ public:
     t.reset();
   }
 
-  static void CopyAndPublish(tPortType* port, const T& t)
+  static void CopyAndPublish(tPortType* port, const T& t, const rrlib::time::tTimestamp& timestamp = rrlib::time::cNO_TIME)
   {
     tDataPtr buf = GetUnusedBuffer(port);
     rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *buf);
+    buf.SetTimestamp(timestamp);
     Publish(port, buf);
   }
 
@@ -185,21 +195,25 @@ public:
 
     // copy value and possibly convert number to correct type (a little inefficient, but should be used scarcely anyway)
     T val;
-    GetValue(port, val);
+    rrlib::time::tTimestamp timestamp;
+    GetValue(port, val, timestamp);
     tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
     tNumber* new_num = c->GetObject()->GetData<tNumber>();
     new_num->SetValue(val, port->GetUnit());
+    c->SetTimestamp(timestamp);
     return tConstDataPtr(new_num->GetValuePtr<T>(), c);
   }
 
   static tConstDataPtr DequeueSingle(tPortType* port)
   {
     T val;
-    if (DequeueSingle(port, val))
+    rrlib::time::tTimestamp timestamp;
+    if (DequeueSingle(port, val, timestamp))
     {
       tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
       tNumber* new_num = c->GetObject()->GetData<tNumber>();
       new_num->SetValue(val, port->GetUnit());
+      c->SetTimestamp(timestamp);
       return tConstDataPtr(new_num->GetValuePtr<T>(), c);
     }
     else
@@ -233,7 +247,22 @@ public:
     }
   }
 
-  static bool DequeueSingle(tPortType* port, T& result)
+  // second, almost identical version of method with timestamp (numeric ports are critical for runtime overhead)
+  static void GetValue(tPortType* port, T& result, rrlib::time::tTimestamp& timestamp)
+  {
+    tNumber num;
+    port->GetRawT(num, timestamp);
+    if (port->GetUnit() != num.GetUnit() && port->GetUnit() != &tUnit::cNO_UNIT && num.GetUnit() != &tUnit::cNO_UNIT)
+    {
+      result = static_cast<T>(num.GetUnit()->ConvertTo(num.Value<double>(), port->GetUnit()));
+    }
+    else
+    {
+      result = num.Value<T>();
+    }
+  }
+
+  static bool DequeueSingle(tPortType* port, T& result, rrlib::time::tTimestamp& timestamp)
   {
     tManager* mgr = port->DequeueSingleUnsafeRaw();
     if (mgr != NULL)
@@ -247,6 +276,7 @@ public:
       {
         result = num->Value<T>();
       }
+      timestamp = mgr->GetTimestamp();
       mgr->Recycle2();
       return true;
     }
@@ -267,7 +297,8 @@ public:
   static const T* DequeueSingleAutoLocked(tPortType* port)
   {
     T val;
-    if (DequeueSingle(port, val))
+    rrlib::time::tTimestamp unused;
+    if (DequeueSingle(port, val, unused))
     {
       tCCPortDataManager* c = tThreadLocalCache::GetFast()->GetUnusedInterThreadBuffer(tNumber::cTYPE);
       tNumber* new_num = c->GetObject()->GetData<tNumber>();
@@ -305,7 +336,7 @@ public:
     else
     {
       assert(tPortUtilHelper::HasManagerType<tManager>(t));
-      CopyAndPublish(port, *t);
+      CopyAndPublish(port, *t, t.GetTimestamp());
     }
   }
 
@@ -319,15 +350,16 @@ public:
     else
     {
       assert(tPortUtilHelper::HasManagerType<tManager>(t));
-      CopyAndPublish(port, *t);
+      CopyAndPublish(port, *t, t.GetTimestamp());
     }
   }
 
-  static void CopyAndPublish(tPortType* port, const T& t)
+  static void CopyAndPublish(tPortType* port, const T& t, const rrlib::time::tTimestamp& timestamp)
   {
     tThreadLocalCache* tc = tThreadLocalCache::GetFast();
     tManagerTL* mgr = tc->GetUnusedBuffer(port->GetDataTypeCCIndex());
     mgr->GetObject()->GetData<tNumber>()->SetValue(t, port->GetUnit());
+    mgr->SetTimestamp(timestamp);
     port->Publish(tc, mgr);
   }
 
@@ -386,12 +418,18 @@ public:
     port->GetRawT(result);
   }
 
-  static bool DequeueSingle(tPortType* port, T& result)
+  static void GetValue(tPortType* port, T& result, rrlib::time::tTimestamp& timestamp)
+  {
+    port->GetRawT(result, timestamp);
+  }
+
+  static bool DequeueSingle(tPortType* port, T& result, rrlib::time::tTimestamp& timestamp)
   {
     tManager* mgr = port->DequeueSingleUnsafeRaw();
     if (mgr != NULL)
     {
       rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(*(mgr->GetObject()->GetData<T>()), result);
+      timestamp = mgr->GetTimestamp();
       mgr->Recycle2();
       return true;
     }
@@ -434,7 +472,7 @@ public:
     else
     {
       assert(tPortUtilHelper::HasManagerType<tManager>(t));
-      CopyAndPublish(port, *t);
+      CopyAndPublish(port, *t, t.GetTimestamp());
     }
   }
 
@@ -448,14 +486,15 @@ public:
     else
     {
       assert(tPortUtilHelper::HasManagerType<tManager>(t));
-      CopyAndPublish(port, *t);
+      CopyAndPublish(port, *t, t.GetTimestamp());
     }
   }
 
-  static void CopyAndPublish(tPortType* port, const T& t)
+  static void CopyAndPublish(tPortType* port, const T& t, const rrlib::time::tTimestamp& timestamp)
   {
     tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
     rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *(mgr->GetObject()->GetData<T>()), NULL);
+    mgr->SetTimestamp(timestamp);
     port->Publish(mgr);
   }
 

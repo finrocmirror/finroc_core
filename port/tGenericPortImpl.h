@@ -56,7 +56,7 @@ class tGenericPortImpl
    * \param result Buffer to (deep) copy port's current value to
    * (Using this get()-variant is more efficient when using CC types, but can be extremely costly with large data types)
    */
-  virtual void Get(rrlib::rtti::tGenericObject& result) = 0;
+  virtual void Get(rrlib::rtti::tGenericObject& result, rrlib::time::tTimestamp& timestamp) = 0;
 
   /*!
    * \return Wrapped port.
@@ -70,7 +70,7 @@ class tGenericPortImpl
    * \param data Data to publish. It will be deep-copied.
    * This publish()-variant is efficient when using CC types, but can be extremely costly with large data types)
    */
-  virtual void Publish(const rrlib::rtti::tGenericObject& data) = 0;
+  virtual void Publish(const rrlib::rtti::tGenericObject& data, const rrlib::time::tTimestamp& timestamp) = 0;
 
   /*!
    * Set new bounds

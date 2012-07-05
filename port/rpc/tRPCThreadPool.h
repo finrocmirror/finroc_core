@@ -31,14 +31,6 @@
 
 namespace finroc
 {
-namespace util
-{
-class tTask;
-} // namespace finroc
-} // namespace util
-
-namespace finroc
-{
 namespace core
 {
 /*!
@@ -59,7 +51,7 @@ class tRPCThreadPool : public boost::noncopyable
 public:
 
   /*! Lock order: locked before thread list in C++ */
-  util::tMutexLockOrder obj_mutex;
+  rrlib::thread::tOrderedMutex obj_mutex;
 
   tRPCThreadPool();
 
@@ -79,7 +71,7 @@ public:
    *
    * \param task Task
    */
-  void ExecuteTask(util::tTask& task)
+  void ExecuteTask(rrlib::thread::tTask& task)
   {
     GetUnusedThread().ExecuteTask(task);
   }

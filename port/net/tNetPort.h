@@ -263,7 +263,7 @@ public:
     GetPort()->ManagedDelete();
   }
 
-  virtual void PortChanged(tAbstractPort& origin, const void* const& value)
+  virtual void PortChanged(tAbstractPort&, const void* const&, const rrlib::time::tTimestamp&)
   {
     PortChanged();
   }
@@ -387,7 +387,7 @@ public:
 
     void PublishFromNet(tCCPortDataManagerTL* read_object, int8 changed_flag);
 
-    virtual bool PullRequest(tCCPortBase* origin, tCCPortDataManagerTL* result_buffer, bool intermediateAssign);
+    virtual bool PullRequest(tCCPortBase& origin, tCCPortDataManagerTL& result_buffer, bool intermediateAssign);
 
     inline void UpdateFlags(uint flags)
     {
@@ -467,7 +467,7 @@ public:
 
     void PublishFromNet(tPortDataManager* read_object, int8 changed_flag);
 
-    virtual const tPortDataManager* PullRequest(tPortBase* origin, int8 add_locks, bool intermediateAssign);
+    virtual const tPortDataManager* PullRequest(tPortBase& origin, int8 add_locks, bool intermediateAssign);
 
     inline void UpdateFlags(uint flags)
     {
@@ -514,8 +514,8 @@ public:
 
     virtual void PrepareDelete()
     {
-      util::tLock lock3(*this);
-      ::finroc::core::tAbstractPort::PrepareDelete();
+      tLock lock3(*this);
+      tAbstractPort::PrepareDelete();
       outer_class.PrepareDelete();
     }
 

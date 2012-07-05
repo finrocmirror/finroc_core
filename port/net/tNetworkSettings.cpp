@@ -73,7 +73,7 @@ tNetworkSettings& tNetworkSettings::GetInstance()
   return *settings;
 }
 
-void tNetworkSettings::PortChanged(tAbstractPort& origin, const int16_t& value)
+void tNetworkSettings::PortChanged(tAbstractPort& origin, const int16_t& value, const rrlib::time::tTimestamp& timestamp)
 {
   if (&origin == default_minimum_network_update_time)
   {

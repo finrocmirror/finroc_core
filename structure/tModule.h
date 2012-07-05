@@ -41,6 +41,7 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include "rrlib/thread/tTask.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -73,7 +74,7 @@ namespace structure
  */
 class tModule : public tModuleBase
 {
-  class UpdateTask : public finroc::util::tTask
+  class UpdateTask : public rrlib::thread::tTask
   {
     tModule *const module;
   public:

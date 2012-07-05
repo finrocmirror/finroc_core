@@ -23,9 +23,9 @@
 #ifndef core__port__cc__tCCPortDataManager_h__
 #define core__port__cc__tCCPortDataManager_h__
 
-#include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/finroc_core_utils/container/tReusable.h"
 
-#include "core/portdatabase/tReusableGenericObjectManager.h"
+#include "core/portdatabase/tAbstractPortDataManager.h"
 
 namespace finroc
 {
@@ -39,7 +39,7 @@ namespace core
  * Manager is also very simple - no lock counting.
  * It is mainly used for queueing CCPortData.
  */
-class tCCPortDataManager : public tReusableGenericObjectManager
+class tCCPortDataManager : public tAbstractPortDataManager<util::tReusable>
 {
 public:
 
@@ -88,8 +88,7 @@ public:
    */
   inline void Recycle2()
   {
-    //System.out.println("Recycling interthread buffer " + this.hashCode());
-    ::finroc::util::tReusable::Recycle();
+    RecyclePortDataBuffer();
   }
 
   virtual const util::tString ToString() const

@@ -48,7 +48,7 @@ tPortCreationList::tPortCreationList() :
 void tPortCreationList::Add(const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output)
 {
   {
-    util::tLock lock2(*io_vector);
+    rrlib::thread::tLock lock2(*io_vector);
     CheckPort(NULL, io_vector, flags, name, dt, output, NULL);
   }
 }
@@ -56,7 +56,7 @@ void tPortCreationList::Add(const util::tString& name, rrlib::rtti::tDataTypeBas
 void tPortCreationList::ApplyChanges(tFrameworkElement* io_vector_, uint flags_)
 {
   {
-    util::tLock lock2(*io_vector_);
+    rrlib::thread::tLock lock2(*io_vector_);
     util::tSimpleList<tAbstractPort*> ports1;
     GetPorts(this->io_vector, ports1);
     util::tSimpleList<tAbstractPort*> ports2;
@@ -126,7 +126,7 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
   else
   {
     {
-      util::tLock lock3(io_vector->GetRegistryLock());
+      rrlib::thread::tLock lock3(io_vector->GetRegistryLock());
       show_output_port_selection = is.ReadBoolean();
       size_t size = is.ReadInt();
       util::tSimpleList<tAbstractPort*> ports;
@@ -156,7 +156,7 @@ void tPortCreationList::Deserialize(const rrlib::xml::tNode& node)
 {
   assert(((io_vector != NULL)) && "Only available on local systems");
   {
-    util::tLock lock2(io_vector->GetRegistryLock());
+    rrlib::thread::tLock lock2(io_vector->GetRegistryLock());
     show_output_port_selection = node.GetBoolAttribute("showOutputSelection");
     util::tSimpleList<tAbstractPort*> ports;
     GetPorts(io_vector, ports);
@@ -223,7 +223,7 @@ void tPortCreationList::Serialize(rrlib::serialization::tOutputStream& os) const
   else
   {
     {
-      util::tLock lock3(io_vector->GetRegistryLock());
+      rrlib::thread::tLock lock3(io_vector->GetRegistryLock());
       util::tSimpleList<tAbstractPort*> ports;
       GetPorts(io_vector, ports);
       int size = ports.Size();
@@ -243,7 +243,7 @@ void tPortCreationList::Serialize(rrlib::xml::tNode& node) const
 {
   assert(((io_vector != NULL)) && "Only available on local systems");
   {
-    util::tLock lock2(io_vector->GetRegistryLock());
+    rrlib::thread::tLock lock2(io_vector->GetRegistryLock());
     node.SetAttribute("showOutputSelection", show_output_port_selection);
     util::tSimpleList<tAbstractPort*> ports;
     GetPorts(io_vector, ports);

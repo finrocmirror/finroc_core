@@ -24,19 +24,13 @@
 #define core__thread__tPeriodicFrameworkElementTask_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-
+#include "rrlib/thread/tTask.h"
 #include "rrlib/rtti/tDataTypeBase.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
+
 #include "core/port/tEdgeAggregator.h"
 #include "core/tFinrocAnnotation.h"
 
-namespace finroc
-{
-namespace util
-{
-class tTask;
-} // namespace finroc
-} // namespace util
 
 namespace finroc
 {
@@ -57,7 +51,7 @@ public:
   static rrlib::rtti::tDataTypeBase cTYPE;
 
   /*! Task to execute */
-  util::tTask* task;
+  rrlib::thread::tTask* task;
 
   /*! Element containing incoming ports (relevant for execution order) */
   tEdgeAggregator* incoming;
@@ -76,7 +70,7 @@ public:
    * \param outgoing_ports Element containing outgoing ports (relevant for execution order)
    * \param task Task to execute
    */
-  tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, util::tTask* task_);
+  tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, rrlib::thread::tTask* task_);
 
   /*!
    * Dummy constructor. Generic instantiation is not supported.

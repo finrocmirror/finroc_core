@@ -21,7 +21,6 @@
  */
 #include "core/test/tBasicRealtimeTest.h"
 #include "core/tRuntimeEnvironment.h"
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 #include "core/port/tThreadLocalCache.h"
 #include "rrlib/time/time.h"
 
@@ -67,15 +66,17 @@ int main(int argc__, char **argv__)
 {
   tRuntimeEnvironment::GetInstance();
 
-  std::shared_ptr<tBasicRealtimeTest> rt = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("RT-Thread"));
-  std::shared_ptr<tBasicRealtimeTest> t = util::sThreadUtil::GetThreadSharedPtr(new tBasicRealtimeTest("non-RT-Thread"));
-  util::sThreadUtil::MakeThreadRealtime(rt);
+  tBasicRealtimeTest* rt = new tBasicRealtimeTest("RT-Thread");
+  rt->SetAutoDelete();
+  tBasicRealtimeTest* t = new tBasicRealtimeTest("non-RT-Thread");
+  t->SetAutoDelete();
+  rt->SetRealtime();
   rt->Start();
   t->Start();
 
   while (true)
   {
     FINROC_LOG_PRINT(eLL_USER, rt->ToString() + "   " + t->ToString());
-    util::tThread::Sleep(std::chrono::seconds(1), false);
+    rrlib::thread::tThread::Sleep(std::chrono::seconds(1), false);
   }
 }

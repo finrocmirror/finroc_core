@@ -25,9 +25,24 @@ namespace finroc
 {
 namespace core
 {
-tPortDataManager* tMultiTypePortDataBufferPool::PossiblyCreatePool(rrlib::rtti::tDataTypeBase data_type)
+tMultiTypePortDataBufferPool::tMultiTypePortDataBufferPool() :
+  tOrderedMutex("tMultiTypePortDataBufferPool", tLockOrderLevels::cINNER_MOST - 20),
+  pools(2u)
+{}
+
+tMultiTypePortDataBufferPool::~tMultiTypePortDataBufferPool()
 {
-  util::tLock lock1(*this);
+  // now there shouldn't be the hazard that a new pool is/will be created
+  for (size_t i = 0, n = pools.Size(); i < n; i++)
+  {
+    pools.Get(i)->ControlledDelete();
+  }
+  pools.Clear();
+}
+
+tPortDataManager* tMultiTypePortDataBufferPool::PossiblyCreatePool(const rrlib::rtti::tDataTypeBase& data_type)
+{
+  rrlib::thread::tLock lock1(*this);
 
   // search for correct pool
   for (size_t i = 0u, n = pools.Size(); i < n; i++)

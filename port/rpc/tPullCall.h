@@ -24,7 +24,6 @@
 #define core__port__rpc__tPullCall_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-#include "rrlib/finroc_core_utils/thread/tTask.h"
 
 #include "core/port/tAbstractPort.h"
 #include "core/port/rpc/tAbstractCall.h"

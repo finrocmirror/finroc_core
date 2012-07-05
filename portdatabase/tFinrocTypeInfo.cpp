@@ -91,8 +91,8 @@ void tFinrocTypeInfo::Init(tFinrocTypeInfo::tType type_)
 void tFinrocTypeInfo::InitMoreTypes()
 {
   static util::tAtomicInt last_cc_index(0);
-  static util::tMutex mutex;
-  util::tLock lock(mutex); // we need exclusive access on index variables
+  static rrlib::thread::tMutex mutex;
+  rrlib::thread::tLock lock(mutex); // we need exclusive access on index variables
   for (; initialized_types < rrlib::rtti::tDataTypeBase::GetTypeCount(); initialized_types++)
   {
     tFinrocTypeInfo& finfo = InfoArray()[initialized_types];

@@ -55,7 +55,7 @@ private:
   bool connected;
 
   /*! Connection Listeners */
-  util::tListenerManager<tConnectionListener, util::tMutexLockOrder> listener;
+  util::tListenerManager<tConnectionListener, rrlib::thread::tOrderedMutex> listener;
 
   /*! Is this the first connect ? */
   bool first_connect;
@@ -168,7 +168,7 @@ public:
    */
   inline void Reconnect()
   {
-    util::tLock lock2(*this);
+    tLock lock2(*this);
     Connect(last_address);
   }
 

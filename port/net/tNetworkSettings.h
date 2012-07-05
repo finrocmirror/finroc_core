@@ -44,7 +44,7 @@ class tNetworkSettings : public tFrameworkElement, public tPortListener<int16_t>
 private:
 
   /*! List with listeners for update times */
-  util::tListenerManager<tUpdateTimeChangeListener, util::tMutexLockOrder> update_time_listener;
+  util::tListenerManager<tUpdateTimeChangeListener, rrlib::thread::tOrderedMutex> update_time_listener;
 
 public:
 
@@ -63,7 +63,7 @@ public:
 
   static tNetworkSettings& GetInstance();
 
-  virtual void PortChanged(tAbstractPort& origin, const int16_t& value);
+  virtual void PortChanged(tAbstractPort& origin, const int16_t& value, const rrlib::time::tTimestamp& timestamp);
 
   /*!
    * Notify update time change listener of change

@@ -42,7 +42,7 @@ tExternalConnection::tExternalConnection(const util::tString& name, const util::
 
 void tExternalConnection::Connect(const util::tString& address)
 {
-  util::tLock lock1(*this);
+  tLock lock1(*this);
 
   ConnectImpl(address, (!first_connect) && boost::equals(address, last_address));
   PostConnect(address);
@@ -50,7 +50,7 @@ void tExternalConnection::Connect(const util::tString& address)
 
 void tExternalConnection::Disconnect()
 {
-  util::tLock lock1(*this);
+  tLock lock1(*this);
   try
   {
     DisconnectImpl();
@@ -106,7 +106,7 @@ void tExternalConnection::PostConnect(const util::tString& address)
 
 void tExternalConnection::PrepareDelete()
 {
-  util::tLock lock1(*this);
+  tLock lock1(*this);
   try
   {
     Disconnect();

@@ -39,7 +39,6 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
-#include "rrlib/finroc_core_utils/thread/tTask.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -93,7 +92,7 @@ class tModuleBase : public finroc::core::tFrameworkElement
     volatile bool parameters_changed;
 
     /*! Implementation of tPortListenerRaw */
-    virtual void PortChanged(tAbstractPort& origin, const void* const& value);
+    virtual void PortChanged(tAbstractPort& origin, const void* const& value, const rrlib::time::tTimestamp&);
 
     tParameterChangeDetector() : parameters_changed(true) {}
   };

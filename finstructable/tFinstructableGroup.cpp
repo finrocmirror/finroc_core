@@ -49,7 +49,7 @@ namespace core
 tStandardCreateModuleAction<tFinstructableGroup> tFinstructableGroup::cCREATE_ACTION("Finstructable Group");
 
 /*! Thread currently saving finstructable group */
-static util::tThread* saving_thread = NULL;
+static rrlib::thread::tThread* saving_thread = NULL;
 
 /*! Temporary variable for saving: .so files that should be loaded prior to instantiating this group */
 static std::set<std::string> dependencies_tmp;
@@ -91,7 +91,7 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
 
 void tFinstructableGroup::AddDependency(const util::tString& dependency)
 {
-  if (util::tThread::CurrentThreadRaw() == saving_thread && startup_loaded_finroc_libs.find(dependency.c_str()) == startup_loaded_finroc_libs.end())
+  if (rrlib::thread::tThread::CurrentThreadRaw() == saving_thread && startup_loaded_finroc_libs.find(dependency.c_str()) == startup_loaded_finroc_libs.end())
   {
     dependencies_tmp.insert(dependency);
   }
@@ -247,7 +247,7 @@ bool tFinstructableGroup::IsResponsibleForConfigFileConnections(tFrameworkElemen
 void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
 {
   {
-    util::tLock lock2(GetRegistryLock());
+    tLock lock2(GetRegistryLock());
     try
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Loading XML: ", xml_file_);
@@ -394,8 +394,8 @@ util::tString tFinstructableGroup::QualifyLink(const util::tString& link)
 void tFinstructableGroup::SaveXml()
 {
   {
-    util::tLock lock2(GetRegistryLock());
-    saving_thread = util::tThread::CurrentThreadRaw();
+    tLock lock2(GetRegistryLock());
+    saving_thread = rrlib::thread::tThread::CurrentThreadRaw();
     dependencies_tmp.clear();
     util::tString save_to = util::sFiles::GetFinrocFileToSaveTo(xml_file.Get());
     if (save_to.length() == 0)

@@ -74,7 +74,7 @@ void tPeer2PeerTest::Main(int argc, char **argv)
   {
     try
     {
-      util::tThread::Sleep(std::chrono::seconds(10), true);
+      rrlib::thread::tThread::Sleep(std::chrono::seconds(10), true);
     }
     catch (const util::tException& e)
     {

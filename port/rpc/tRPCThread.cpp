@@ -44,25 +44,25 @@ tRPCThread::tRPCThread() :
   count++;
 }
 
-void tRPCThread::ExecuteTask(util::tTask& t)
+void tRPCThread::ExecuteTask(rrlib::thread::tTask& t)
 {
-  util::tLock lock1(*this);
+  rrlib::thread::tLock lock1(*this);
   assert((next_task == NULL));
   next_task = &t;
-  monitor.NotifyAll(lock1);
+  GetMonitor().NotifyAll(lock1);
 }
 
 void tRPCThread::ExecuteTask(tSerializableReusableTask::tPtr& t)
 {
-  util::tLock lock1(*this);
+  rrlib::thread::tLock lock1(*this);
   assert(!next_reusable_task);
   next_reusable_task = std::move(t);
-  monitor.NotifyAll(lock1);
+  GetMonitor().NotifyAll(lock1);
 }
 
 void tRPCThread::HandleWatchdogAlert()
 {
-  util::tLock lock2(current_task_string_mutex);
+  rrlib::thread::tLock lock2(current_task_string_mutex);
   FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Watchdoggy detected that execution of the following task got stuck: ", current_task_string);
   tWatchDogTask::Deactivate();
 }
@@ -70,14 +70,14 @@ void tRPCThread::HandleWatchdogAlert()
 void tRPCThread::MainLoopCallback()
 {
   {
-    util::tLock lock2(*this);
+    rrlib::thread::tLock lock2(*this);
     if (next_task == NULL && next_reusable_task.get() == NULL)
     {
       tRPCThreadPool::GetInstance().EnqueueThread(this);
 
       if (!IsStopSignalSet())
       {
-        monitor.Wait(lock2);
+        GetMonitor().Wait(lock2);
       }
     }
   }
@@ -89,7 +89,7 @@ void tRPCThread::MainLoopCallback()
 #endif
     if (next_task)
     {
-      util::tTask* tmp = next_task;
+      rrlib::thread::tTask* tmp = next_task;
       next_task = NULL;
       tmp->ExecuteTask();
     }
@@ -98,7 +98,7 @@ void tRPCThread::MainLoopCallback()
       tSerializableReusableTask::tPtr tmp(std::move(next_reusable_task));
 #ifndef NDEBUG
       {
-        util::tLock lock2(current_task_string_mutex);
+        rrlib::thread::tLock lock2(current_task_string_mutex);
         current_task_string = tmp->ToString();
       }
 #endif
@@ -111,13 +111,13 @@ void tRPCThread::MainLoopCallback()
 void tRPCThread::Run()
 {
   tThreadLocalCache::Get();
-  finroc::util::tLoopThread::Run();
+  tLoopThread::Run();
 }
 
 void tRPCThread::StopThread()
 {
-  util::tLock lock2(*this);
-  monitor.Notify(lock2);
+  rrlib::thread::tLock lock2(*this);
+  GetMonitor().Notify(lock2);
 }
 
 } // namespace finroc

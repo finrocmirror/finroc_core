@@ -78,7 +78,7 @@ private:
    *
    * \return Lock
    */
-  util::tMutexLockOrder& GetThreadLocalCacheInfosLock();
+  rrlib::thread::tRecursiveMutex& GetThreadLocalCacheInfosLock();
 
 protected:
 

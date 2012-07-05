@@ -138,6 +138,9 @@ public:
     wrapped = &wrap;
   }
 
+  /*!
+   * \param listener Listener to add
+   */
   void AddPortListener(tPortListener<tPortDataPtr<const T>>& listener)
   {
     static_cast<tPortBaseType*>(wrapped)->AddPortListenerRaw(listener);
@@ -147,10 +150,6 @@ public:
   {
     static_cast<tPortBaseType*>(wrapped)->AddPortListenerRaw(listener);
   }
-
-  /*!
-   * \param listener Listener to add
-   */
   inline void AddPortListener(tPortListener<T>& listener)
   {
     static_cast<tPortBaseType*>(wrapped)->AddPortListenerRaw(listener);
@@ -172,9 +171,8 @@ public:
    * Use dequeueAll if a continuous set of values is required.
    *
    * (Use only with ports that have a input queue)
-   * (in Java lock will need to be released manually, in C++ tPortDataPtr takes care of this)
    *
-   * \return Dequeued first/oldest element in queue
+   * \return Dequeued first/oldest element in queue (NULL if no element is left in queue)
    */
   inline tPortDataPtr<const T> Dequeue()
   {
@@ -189,12 +187,18 @@ public:
    * (Use only with ports that have a input queue)
    *
    * \param result Buffer to (deep) copy dequeued value to
+   * \param timestamp Buffer to store time stamp of data in (optional)
    * (Using this dequeueSingle()-variant is more efficient when using CC types, but can be extremely costly with large data types)
    * \return true if element was dequeued - false if queue was empty
    */
   inline bool Dequeue(T& result)
   {
-    return tPortUtil<T>::DequeueSingle(static_cast<tPortBaseType*>(wrapped), result);
+    rrlib::time::tTimestamp unused;
+    return Dequeue(result, unused);
+  }
+  inline bool Dequeue(T& result, rrlib::time::tTimestamp& timestamp)
+  {
+    return tPortUtil<T>::DequeueSingle(static_cast<tPortBaseType*>(wrapped), result, timestamp);
   }
 
   /*!
@@ -216,6 +220,7 @@ public:
    * Gets Port's current value (in most "natural" way)
    *
    * \param v unused dummy parameter for std::enable_if technique
+   * \param timestamp Buffer to store time stamp of data in (optional)
    * \return Port's current value by value in case of CC types. Port's current value with read lock in case of standard types.
    */
   template < bool CC = typeutil::tIsCCType<T>::value >
@@ -230,6 +235,13 @@ public:
     tPortUtil<T>::GetValue(static_cast<tPortBaseType*>(wrapped), t);
     return t;
   }
+  template < bool CC = typeutil::tIsCCType<T>::value >
+  inline T Get(typename std::enable_if<CC, rrlib::time::tTimestamp&>::type& timestamp)
+  {
+    T t;
+    Get(t, timestamp);
+    return t;
+  }
 
   /*!
    * Gets Port's current value
@@ -237,11 +249,16 @@ public:
    * (Note that numbers and "cheap copy" types also have a method: T GetValue();  (defined in tPortParent<T>))
    *
    * \param result Buffer to (deep) copy port's current value to
+   * \param timestamp Buffer to store time stamp of data in (optional)
    * (Using this get()-variant is more efficient when using CC types, but can be extremely costly with large data types)
    */
-  inline const void Get(T& result)
+  inline void Get(T& result)
   {
-    return tPortUtil<T>::GetValue(static_cast<tPortBaseType*>(wrapped), result);
+    tPortUtil<T>::GetValue(static_cast<tPortBaseType*>(wrapped), result);
+  }
+  inline void Get(T& result, rrlib::time::tTimestamp& timestamp)
+  {
+    tPortUtil<T>::GetValue(static_cast<tPortBaseType*>(wrapped), result, timestamp);
   }
 
   /*!
@@ -338,39 +355,46 @@ public:
     tPortUtil<T>::Publish(static_cast<tPortBaseType*>(wrapped), data);
   }
 
-  // Publish Data Buffer. This data will be forwarded to any connected ports.
-  // Should only be called on output ports.
-  //
-  // \param data Data to publish. It will be deep-copied.
-  // This publish()-variant is efficient when using CC types, but can be extremely costly with large data types)
-  inline void Publish(const T& data)
+  /*!
+   * Publish Data Buffer. This data will be forwarded to any connected ports.
+   * Should only be called on output ports.
+   *
+   * (This pass-by-value Publish()-variant is efficient when using CC types, but can be extremely costly with large data types)
+   *
+   * \param data Data to publish. It will be deep-copied.
+   * \param teimstamp Timestamp for attached data (optional)
+   */
+  inline void Publish(const T& data, const rrlib::time::tTimestamp& timestamp = rrlib::time::cNO_TIME)
   {
-    tPortUtil<T>::CopyAndPublish(static_cast<tPortBaseType*>(wrapped), data);
+    tPortUtil<T>::CopyAndPublish(static_cast<tPortBaseType*>(wrapped), data, timestamp);
   }
 
+  /*!
+   * Publish Data Buffer. This data will be forwarded to any connected ports.
+   * Should only be called on output ports.
+   *
+   * \param data Data to publish. It will be deep-copied.
+   */
   inline void Publish(tPortDataPtr<T> && data)
   {
     tPortUtil<T>::Publish(static_cast<tPortBaseType*>(wrapped), data);
   }
-
   inline void Publish(tPortDataPtr<T>& data)
   {
     tPortUtil<T>::Publish(static_cast<tPortBaseType*>(wrapped), data);
   }
-
   inline void Publish(tPortDataPtr<const T>& data)
   {
     tPortUtil<T>::Publish(static_cast<tPortBaseType*>(wrapped), data);
   }
 
+  /*!
+   * \param listener Listener to remove
+   */
   void RemovePortListener(tPortListener<tPortDataPtr<const T>>& listener)
   {
     static_cast<tPortBaseType*>(wrapped)->RemovePortListenerRaw(listener);
   }
-
-  /*!
-   * \param listener Listener to add
-   */
   inline void RemovePortListener(tPortListener<T>& listener)
   {
     static_cast<tPortBaseType*>(wrapped)->RemovePortListenerRaw(listener);

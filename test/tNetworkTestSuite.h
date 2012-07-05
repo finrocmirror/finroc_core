@@ -470,7 +470,7 @@ public:
 
       try
       {
-        util::tThread::Sleep(std::chrono::milliseconds(cPUBLISH_FREQ), true);
+        rrlib::thread::tThread::Sleep(std::chrono::milliseconds(cPUBLISH_FREQ), true);
       }
       catch (const util::tException& e)
       {

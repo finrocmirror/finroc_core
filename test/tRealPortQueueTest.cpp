@@ -26,7 +26,6 @@
 #include "core/port/tPortFlags.h"
 #include "core/tFrameworkElement.h"
 #include "core/datatype/tNumber.h"
-#include "rrlib/finroc_core_utils/thread/sThreadUtil.h"
 
 using namespace rrlib::logging;
 
@@ -138,11 +137,13 @@ void tRealPortQueueTest::Main()
   tThreadLocalCache::GetFast()->ReleaseAllLocks();
 
   // start writer threads
-  std::shared_ptr<tRealPortQueueTest> thread1 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(true));
-  std::shared_ptr<tRealPortQueueTest> thread2 = util::sThreadUtil::GetThreadSharedPtr(new tRealPortQueueTest(false));
-  FINROC_LOG_PRINTF_STATIC(eLL_USER, "Created threads %p and %p\n", thread1.get(), thread2.get());
+  tRealPortQueueTest* thread1 = new tRealPortQueueTest(true);
   thread1->Start();
+  tRealPortQueueTest* thread2 = new tRealPortQueueTest(false);
   thread2->Start();
+  FINROC_LOG_PRINTF_STATIC(eLL_USER, "Created threads %p and %p\n", thread1, thread2);
+  thread1->SetAutoDelete();
+  thread2->SetAutoDelete();
 
   int last_pos_limited = 0;
   int last_neg_limited = 0;

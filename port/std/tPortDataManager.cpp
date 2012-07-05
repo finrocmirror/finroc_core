@@ -55,7 +55,7 @@ void tPortDataManager::DangerousDirectRecycle()
     GetObject()->Clear();
   }
   reuse_counter++;
-  ::finroc::util::tReusable::Recycle();
+  RecyclePortDataBuffer();
 }
 
 const util::tString tPortDataManager::ToString() const

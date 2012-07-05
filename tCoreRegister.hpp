@@ -60,7 +60,7 @@ tCoreRegister<T>::tCoreRegister(bool positive_indices) :
 template<typename T>
 int tCoreRegister<T>::Add(const T& elem)
 {
-  util::tLock lock1(obj_mutex);
+  rrlib::thread::tLock lock1(obj_mutex);
 
   if (elem_count >= cMAX_ELEMENTS)
   {
@@ -118,7 +118,7 @@ void tCoreRegister<T>::IncrementCurElementIndex()
 template<typename T>
 void tCoreRegister<T>::MarkDeleted(int handle)
 {
-  util::tLock lock1(obj_mutex);
+  rrlib::thread::tLock lock1(obj_mutex);
   int index = handle & cELEM_INDEX_MASK;
   int uid = (handle & cELEM_UID_MASK) >> cUID_SHIFT;
   assert((elements.Get(index) != NULL));
@@ -129,7 +129,7 @@ void tCoreRegister<T>::MarkDeleted(int handle)
 template<typename T>
 void tCoreRegister<T>::Remove(int handle)
 {
-  util::tLock lock1(obj_mutex);
+  rrlib::thread::tLock lock1(obj_mutex);
   int index = handle & cELEM_INDEX_MASK;
   int uid = (handle & cELEM_UID_MASK) >> cUID_SHIFT;
   int clean_cur_uid = element_uid.Get(index) & cMAX_UID;

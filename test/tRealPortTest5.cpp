@@ -98,7 +98,7 @@ void tRealPortTest5::TestSimpleEdge()
 
   std::cout << input->Get() << std::endl;
 
-  util::tThread::Sleep(std::chrono::seconds(1), true);
+  rrlib::thread::tThread::Sleep(std::chrono::seconds(1), true);
 
   rrlib::time::tTimestamp start = rrlib::time::Now();
   int result = 0;
@@ -134,7 +134,7 @@ void tRealPortTest5::TestSimpleEdge2()
   FINROC_LOG_PRINT(eLL_USER, ci.ReadInt());
   input.ReleaseAutoLocks();
 
-  util::tThread::Sleep(std::chrono::seconds(1), true);
+  rrlib::thread::tThread::Sleep(std::chrono::seconds(1), true);
 
   rrlib::time::tTimestamp start = rrlib::time::Now();
   int result = 0;
@@ -233,7 +233,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
 
 void tRealPortTest5::TestSimpleSet()
 {
-  util::tThread::Sleep(std::chrono::seconds(1), true);
+  rrlib::thread::tThread::Sleep(std::chrono::seconds(1), true);
 
   rrlib::time::tTimestamp start = rrlib::time::Now();
   for (int i = 1; i < cCYCLES + 1; i++)

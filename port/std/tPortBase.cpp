@@ -112,7 +112,7 @@ tPortDataManager* tPortBase::CreateDefaultValue(const rrlib::rtti::tDataTypeBase
 
 tPortBase::~tPortBase()
 {
-  util::tLock lock1(*this);
+  tLock lock1(*this);
   default_value->GetCurrentRefCounter()->ReleaseLock();  // thread safe, since called deferred - when no one else should access this port anymore
   value.Get()->GetRefCounter()->ReleaseLock();  // thread safe, since nobody should publish to port anymore
 
@@ -257,7 +257,7 @@ const void tPortBase::PullValueRawImpl(tPublishCache& pc, bool intermediate_assi
   if ((!first) && pull_request_handler != NULL)
   {
     pc.lock_estimate++;  // for local assign
-    const tPortDataManager* mgr = pull_request_handler->PullRequest(this, static_cast<int8>(pc.lock_estimate), intermediate_assign);
+    const tPortDataManager* mgr = pull_request_handler->PullRequest(*this, static_cast<int8>(pc.lock_estimate), intermediate_assign);
     if (mgr != NULL)
     {
       tPortDataReference* pdr = mgr->GetCurReference();

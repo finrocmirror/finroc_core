@@ -48,8 +48,14 @@ public:
    *
    * \param origin Port that value comes from
    * \param value Port's new value (locked for duration of method call)
+   * \param timestamp Timestamp attached to new value
    */
-  virtual void PortChanged(tAbstractPort& origin, const T& value) = 0;
+  // if T is tPortDataPtr<U> type
+  //virtual void PortChanged(tAbstractPort& origin, const T& value) = 0;
+
+  // if T is not tPortDataPtr<U> type
+  //virtual void PortChanged(tAbstractPort& origin, const T& value, const rrlib::time::tTimestamp& timestamp) = 0;
+
 
 };
 

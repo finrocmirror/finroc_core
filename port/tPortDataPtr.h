@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2011 Max Reichardt,
+ * Copyright (C) 2011-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -194,6 +194,33 @@ public:
     }
   }
 
+  T* Get() const
+  {
+    return data;
+  }
+
+  T* get() const
+  {
+    return Get();
+  }
+
+  /*!
+   * \return Pointer to manager of data
+   */
+  tManager* GetManager() const
+  {
+    assert(mode == eNORMAL);
+    return manager;
+  }
+
+  /*!
+   * \return Timestamp attached to data
+   */
+  rrlib::time::tTimestamp GetTimestamp() const
+  {
+    return manager->GetTimestamp();
+  }
+
   void reset()
   {
     Reset();
@@ -217,6 +244,14 @@ public:
     }
   }
 
+  /*!
+   * \param timestamp Timestamp to attach to data
+   */
+  void SetTimestamp(const rrlib::time::tTimestamp& timestamp)
+  {
+    manager->SetTimestamp(timestamp);
+  }
+
   T& operator*() const
   {
     assert(data != NULL);
@@ -226,16 +261,6 @@ public:
   T* operator->() const
   {
     assert(data != NULL);
-    return Get();
-  }
-
-  T* Get() const
-  {
-    return data;
-  }
-
-  T* get() const
-  {
     return Get();
   }
 
@@ -253,22 +278,13 @@ public:
   {
     return *reinterpret_cast<tPortDataPtr<const T>*>(this);
   }
-
-  /*!
-   * \return Pointer to manager of data
-   */
-  tManager* GetManager() const
-  {
-    assert(mode == eNORMAL);
-    return manager;
-  }
 };
 
 template <>
 class tPortDataPtr<rrlib::rtti::tGenericObject> : public tPortDataPtrBase
 {
 public:
-  typedef tReusableGenericObjectManager tManager;
+  typedef tAbstractPortDataManager<util::tReusable> tManager;
 
 private:
   typedef rrlib::rtti::tGenericObject T;
@@ -353,6 +369,33 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
     }
   }
 
+  T* Get() const
+  {
+    return data;
+  }
+
+  T* get() const
+  {
+    return Get();
+  }
+
+  /*!
+   * \return Pointer to manager of data
+   */
+  tManager* GetManager() const
+  {
+    assert(mode == eNORMAL);
+    return manager;
+  }
+
+  /*!
+   * \return Timestamp attached to data
+   */
+  rrlib::time::tTimestamp GetTimestamp() const
+  {
+    return manager->GetTimestamp();
+  }
+
   void reset()
   {
     Reset();
@@ -369,6 +412,14 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
     }
   }
 
+  /*!
+   * \param timestamp Timestamp to attach to data
+   */
+  void SetTimestamp(const rrlib::time::tTimestamp& timestamp)
+  {
+    manager->SetTimestamp(timestamp);
+  }
+
   T& operator*() const
   {
     assert(data != NULL);
@@ -381,28 +432,9 @@ public: // TODO ... public because we cannot declare tPortDataPtr<U> as friend
     return Get();
   }
 
-  T* Get() const
-  {
-    return data;
-  }
-
-  T* get() const
-  {
-    return Get();
-  }
-
   operator const void*() const
   {
     return data;
-  }
-
-  /*!
-   * \return Pointer to manager of data
-   */
-  tManager* GetManager() const
-  {
-    assert(mode == eNORMAL);
-    return manager;
   }
 
   /*!

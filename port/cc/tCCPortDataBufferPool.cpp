@@ -94,7 +94,7 @@ tCCPortDataBufferPool::~tCCPortDataBufferPool()
   tCCPortQueueElement* pqe = returned_buffers.Dequeue();
   tCCPortDataManagerTL* pc = NULL;
   {
-    util::tLock lock2(GetThreadLocalCacheInfosLock());  // for postThreadReleaseLock()
+    rrlib::thread::tLock lock2(GetThreadLocalCacheInfosLock());  // for postThreadReleaseLock()
     while (pqe != NULL)
     {
       //pc = static_cast<CCPortDataContainer<>*>(pqe->getElement());
@@ -107,7 +107,7 @@ tCCPortDataBufferPool::~tCCPortDataBufferPool()
   ;
 }
 
-util::tMutexLockOrder& tCCPortDataBufferPool::GetThreadLocalCacheInfosLock()
+rrlib::thread::tRecursiveMutex& tCCPortDataBufferPool::GetThreadLocalCacheInfosLock()
 {
   return *tThreadLocalCache::infos_mutex;
 }

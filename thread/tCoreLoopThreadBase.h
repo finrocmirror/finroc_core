@@ -23,9 +23,7 @@
 #ifndef core__thread__tCoreLoopThreadBase_h__
 #define core__thread__tCoreLoopThreadBase_h__
 
-#include "rrlib/finroc_core_utils/definitions.h"
-
-#include "rrlib/finroc_core_utils/thread/tLoopThread.h"
+#include "rrlib/thread/tLoopThread.h"
 
 namespace finroc
 {
@@ -38,7 +36,7 @@ class tThreadLocalCache;
  *
  * Base class for worker threads managed by the runtime environment
  */
-class tCoreLoopThreadBase : public util::tLoopThread
+class tCoreLoopThreadBase : public rrlib::thread::tLoopThread
 {
 protected:
 
@@ -58,7 +56,7 @@ public:
   virtual void Run()
   {
     InitThreadLocalCache();
-    ::finroc::util::tLoopThread::Run();
+    tLoopThread::Run();
   }
 
 };
