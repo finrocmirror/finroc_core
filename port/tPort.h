@@ -217,26 +217,22 @@ public:
   }
 
   /*!
-   * Gets Port's current value (in most "natural" way)
+   * Gets Port's current value.
+   * (Only available for CC types)
    *
    * \param v unused dummy parameter for std::enable_if technique
    * \param timestamp Buffer to store time stamp of data in (optional)
-   * \return Port's current value by value in case of CC types. Port's current value with read lock in case of standard types.
+   * \return Port's current value by value.
    */
   template < bool CC = typeutil::tIsCCType<T>::value >
-  inline tPortDataPtr<const T> Get(typename std::enable_if < !CC, void >::type* v = NULL)
-  {
-    return GetPointer();
-  }
-  template < bool CC = typeutil::tIsCCType<T>::value >
-  inline T Get(typename std::enable_if<CC, void>::type* v = NULL)
+  inline T Get(typename std::enable_if<CC, void>::type* v = NULL) const
   {
     T t;
     tPortUtil<T>::GetValue(static_cast<tPortBaseType*>(wrapped), t);
     return t;
   }
   template < bool CC = typeutil::tIsCCType<T>::value >
-  inline T Get(typename std::enable_if<CC, rrlib::time::tTimestamp&>::type& timestamp)
+  inline T Get(typename std::enable_if<CC, rrlib::time::tTimestamp&>::type& timestamp) const
   {
     T t;
     Get(t, timestamp);
@@ -252,11 +248,11 @@ public:
    * \param timestamp Buffer to store time stamp of data in (optional)
    * (Using this get()-variant is more efficient when using CC types, but can be extremely costly with large data types)
    */
-  inline void Get(T& result)
+  inline void Get(T& result) const
   {
     tPortUtil<T>::GetValue(static_cast<tPortBaseType*>(wrapped), result);
   }
-  inline void Get(T& result, rrlib::time::tTimestamp& timestamp)
+  inline void Get(T& result, rrlib::time::tTimestamp& timestamp) const
   {
     tPortUtil<T>::GetValue(static_cast<tPortBaseType*>(wrapped), result, timestamp);
   }
@@ -266,7 +262,7 @@ public:
    *
    * \return current auto-locked Port data (unlock with getThreadLocalCache.releaseAllLocks())
    */
-  inline const T* GetAutoLocked()
+  inline const T* GetAutoLocked() const
   {
     return tPortUtil<T>::GetAutoLocked(static_cast<tPortBaseType*>(wrapped));
   }
@@ -297,7 +293,7 @@ public:
    * (in Java lock will need to be released manually, in C++ tPortDataPtr takes care of this)
    * (Using get with parameter T& is more efficient when using CC types - shouldn't matter usually)
    */
-  inline tPortDataPtr<const T> GetPointer()
+  inline tPortDataPtr<const T> GetPointer() const
   {
     return tPortUtil<T>::GetValueWithLock(static_cast<tPortBaseType*>(wrapped));
   }
@@ -338,7 +334,7 @@ public:
   /*!
    * \return Does port have "cheap copy" (CC) type?
    */
-  inline bool HasCCType()
+  inline bool HasCCType() const
   {
     return typeutil::tIsCCType<T>::value; // compile-time constant
   }
