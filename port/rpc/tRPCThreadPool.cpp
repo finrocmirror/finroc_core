@@ -50,7 +50,7 @@ tRPCThread& tRPCThreadPool::GetUnusedThread()
     r->SetAutoDelete();
     r->Start();
 #if (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ <= 5)) // TODO: Is this still required?
-    util::tThread::Sleep(std::chrono::milliseconds(70), false);
+    rrlib::thread::tThread::Sleep(std::chrono::milliseconds(70), false);
 #endif
   }
   return *r;
