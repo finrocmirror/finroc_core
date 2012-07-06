@@ -28,7 +28,7 @@ namespace finroc
 namespace core
 {
 tRPCThread::tRPCThread() :
-  tLoopThread(rrlib::time::tDuration()),
+  tLoopThread(rrlib::time::tDuration(0)),
 #ifdef NDEBUG  // only activate monitoring in debug mode
   tWatchDogTask(false),
 #else
