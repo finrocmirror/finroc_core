@@ -108,7 +108,7 @@ tInterfacePort* tInterfacePort::GetServer()
   }
 }
 
-tPortDataManager* tInterfacePort::GetUnusedBufferRaw(rrlib::rtti::tDataTypeBase dt)
+tPortDataManager* tInterfacePort::GetUnusedBufferRaw(const rrlib::rtti::tDataTypeBase& dt)
 {
   assert((!tFinrocTypeInfo::IsCCType(dt)));
   assert((buf_pool != NULL));

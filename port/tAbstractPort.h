@@ -517,7 +517,7 @@ public:
    *
    * This method is only supported by a subset of ports that have a MultiTypePortDataBufferPool
    */
-  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::rtti::tDataTypeBase dt)
+  virtual tPortDataManager* GetUnusedBufferRaw(const rrlib::rtti::tDataTypeBase& dt)
   {
     throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
   }

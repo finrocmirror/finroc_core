@@ -163,7 +163,7 @@ public:
    * \param dt Data type of object to get buffer of
    * \return Unused buffer of type
    */
-  virtual tPortDataManager* GetUnusedBufferRaw(rrlib::rtti::tDataTypeBase dt);
+  virtual tPortDataManager* GetUnusedBufferRaw(const rrlib::rtti::tDataTypeBase& dt);
 
   /*!
    * (for cc types only)
