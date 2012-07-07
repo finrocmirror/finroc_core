@@ -34,6 +34,11 @@ namespace core
 {
 tThreadContainerThread::tThreadContainerThread(tFrameworkElement& thread_container, rrlib::time::tDuration default_cycle_time, bool warn_on_cycle_time_exceed, tPort<rrlib::time::tDuration> last_cycle_execution_time) :
   tCoreLoopThreadBase(default_cycle_time, true, warn_on_cycle_time_exceed),
+#ifdef NDEBUG  // only activate monitoring in debug mode
+  tWatchDogTask(false),
+#else
+  tWatchDogTask(true),
+#endif
   thread_container(thread_container),
   reschedule(true),
   schedule(),
@@ -43,9 +48,25 @@ tThreadContainerThread::tThreadContainerThread(tFrameworkElement& thread_contain
   trace_back(),
   filter(),
   tmp(),
-  last_cycle_execution_time(last_cycle_execution_time)
+  last_cycle_execution_time(last_cycle_execution_time),
+  current_task(NULL)
 {
   this->SetName(std::string("ThreadContainer ") + thread_container.GetCName());
+}
+
+void tThreadContainerThread::HandleWatchdogAlert()
+{
+  tPeriodicFrameworkElementTask* task = current_task;
+  if (!task)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Got stuck without executing any task!? This should not happen.");
+  }
+  else
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Got stuck executing task associated with '", task->incoming->GetQualifiedName(), "'. Please check your code for infinite loops etc.!");
+  }
+  tWatchDogTask::Deactivate();
+
 }
 
 void tThreadContainerThread::MainLoopCallback()
@@ -163,16 +184,26 @@ void tThreadContainerThread::MainLoopCallback()
 
   // execute tasks
   last_cycle_execution_time.Publish(GetLastCycleTime());
+
+#ifndef NDEBUG
+  SetDeadLine(rrlib::time::Now() + GetCycleTime() * 4 + std::chrono::seconds(1));
+#endif
+
   for (size_t i = 0u; i < schedule.Size(); i++)
   {
-    schedule.Get(i)->task->ExecuteTask();
+    current_task = schedule.Get(i);
+    current_task->task->ExecuteTask();
   }
+
+#ifndef NDEBUG
+  tWatchDogTask::Deactivate();
+#endif
 }
 
 void tThreadContainerThread::Run()
 {
   this->thread_container.GetRuntime().AddListener(*this);
-  ::finroc::core::tCoreLoopThreadBase::Run();
+  core::tCoreLoopThreadBase::Run();
 }
 
 void tThreadContainerThread::RuntimeChange(int8 change_type, tFrameworkElement& element)

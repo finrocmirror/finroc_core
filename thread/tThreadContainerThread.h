@@ -24,6 +24,7 @@
 #define core__thread__tThreadContainerThread_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/watchdog/tWatchDogTask.h"
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tFrameworkElementTreeFilter.h"
@@ -43,7 +44,7 @@ class tPeriodicFrameworkElementTask;
 class tAbstractPort;
 
 /*! ThreadContainer thread class */
-class tThreadContainerThread : public tCoreLoopThreadBase, public tRuntimeListener
+class tThreadContainerThread : public tCoreLoopThreadBase, public tRuntimeListener, public rrlib::watchdog::tWatchDogTask
 {
 private:
 
@@ -51,7 +52,7 @@ private:
   tFrameworkElement& thread_container;
 
   /*! true, when thread needs to make a new schedule before next run */
-  volatile bool reschedule;
+  std::atomic<bool> reschedule;
 
   /*! simple schedule: Tasks will be executed in specified order */
   util::tSimpleList<tPeriodicFrameworkElementTask*> schedule;
@@ -77,6 +78,12 @@ private:
   /*! Port to publish time spent in last call to MainLoopCallback() */
   tPort<rrlib::time::tDuration> last_cycle_execution_time;
 
+  /*!
+   * Thread sets this to the task it is currently executing (for error message, should it get stuck)
+   * NULL if not executing any task
+   */
+  tPeriodicFrameworkElementTask* current_task;
+
 private:
 
   /*!
@@ -90,6 +97,8 @@ private:
 public:
 
   tThreadContainerThread(tFrameworkElement& thread_container, rrlib::time::tDuration default_cycle_time, bool warn_on_cycle_time_exceed, tPort<rrlib::time::tDuration> last_cycle_execution_time);
+
+  virtual void HandleWatchdogAlert();
 
   /*!
    * \param fe Framework element
