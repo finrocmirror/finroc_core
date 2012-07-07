@@ -136,7 +136,7 @@ private:
    * \param elem Framework Element
    * \param result List containing result
    */
-  static void GetPorts(const tFrameworkElement* elem, util::tSimpleList<tAbstractPort*>& result);
+  static void GetPorts(const tFrameworkElement& elem, util::tSimpleList<tAbstractPort*>& result);
 
 public:
 

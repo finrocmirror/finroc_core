@@ -129,9 +129,9 @@ public:
     for (int i = 0, n = children->Size(); i < n; i++)
     {
       tFrameworkElement::tLink* link = children->Get(i);
-      if (link != NULL && link->GetChild() != NULL && link->IsPrimaryLink())
+      if (link && link->IsPrimaryLink())
       {
-        TraverseElementTree(*link->GetChild(), tmp, f);
+        TraverseElementTree(link->GetChild(), tmp, f);
       }
     }
   }

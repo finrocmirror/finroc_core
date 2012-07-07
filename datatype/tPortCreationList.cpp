@@ -58,9 +58,9 @@ void tPortCreationList::ApplyChanges(tFrameworkElement* io_vector_, uint flags_)
   {
     rrlib::thread::tLock lock2(*io_vector_);
     util::tSimpleList<tAbstractPort*> ports1;
-    GetPorts(this->io_vector, ports1);
+    GetPorts(*this->io_vector, ports1);
     util::tSimpleList<tAbstractPort*> ports2;
-    GetPorts(io_vector_, ports2);
+    GetPorts(*io_vector_, ports2);
 
     for (size_t i = 0u; i < ports1.Size(); i++)
     {
@@ -130,7 +130,7 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
       show_output_port_selection = is.ReadBoolean();
       size_t size = is.ReadInt();
       util::tSimpleList<tAbstractPort*> ports;
-      GetPorts(io_vector, ports);
+      GetPorts(*io_vector, ports);
       for (size_t i = 0u; i < size; i++)
       {
         tAbstractPort* ap = i < ports.Size() ? ports.Get(i) : NULL;
@@ -154,12 +154,12 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
 
 void tPortCreationList::Deserialize(const rrlib::xml::tNode& node)
 {
-  assert(((io_vector != NULL)) && "Only available on local systems");
+  assert(io_vector && "Only available on local systems");
   {
     rrlib::thread::tLock lock2(io_vector->GetRegistryLock());
     show_output_port_selection = node.GetBoolAttribute("showOutputSelection");
     util::tSimpleList<tAbstractPort*> ports;
-    GetPorts(io_vector, ports);
+    GetPorts(*io_vector, ports);
     size_t i = 0u;
     for (rrlib::xml::tNode::const_iterator port = node.ChildrenBegin(); port != node.ChildrenEnd(); ++port, ++i)
     {
@@ -186,7 +186,7 @@ void tPortCreationList::Deserialize(const rrlib::xml::tNode& node)
   }
 }
 
-void tPortCreationList::GetPorts(const tFrameworkElement* elem, util::tSimpleList<tAbstractPort*>& result)
+void tPortCreationList::GetPorts(const tFrameworkElement& elem, util::tSimpleList<tAbstractPort*>& result)
 {
   result.Clear();
   tFrameworkElement::tChildIterator ci(elem);
@@ -225,7 +225,7 @@ void tPortCreationList::Serialize(rrlib::serialization::tOutputStream& os) const
     {
       rrlib::thread::tLock lock3(io_vector->GetRegistryLock());
       util::tSimpleList<tAbstractPort*> ports;
-      GetPorts(io_vector, ports);
+      GetPorts(*io_vector, ports);
       int size = ports.Size();
       os.WriteInt(size);
       for (int i = 0; i < size; i++)
@@ -241,12 +241,12 @@ void tPortCreationList::Serialize(rrlib::serialization::tOutputStream& os) const
 
 void tPortCreationList::Serialize(rrlib::xml::tNode& node) const
 {
-  assert(((io_vector != NULL)) && "Only available on local systems");
+  assert(io_vector && "Only available on local systems");
   {
     rrlib::thread::tLock lock2(io_vector->GetRegistryLock());
     node.SetAttribute("showOutputSelection", show_output_port_selection);
     util::tSimpleList<tAbstractPort*> ports;
-    GetPorts(io_vector, ports);
+    GetPorts(*io_vector, ports);
     int size = ports.Size();
     for (int i = 0; i < size; i++)
     {

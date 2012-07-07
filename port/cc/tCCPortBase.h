@@ -179,7 +179,7 @@ private:
       bool push = (dest != NULL) && dest->WantsPush<cREVERSE, cCHANGE_CONSTANT>(cREVERSE, cCHANGE_CONSTANT);
       if (push)
       {
-        dest->Receive<cREVERSE, cCHANGE_CONSTANT>(tc, this, cREVERSE, cCHANGE_CONSTANT);
+        dest->Receive<cREVERSE, cCHANGE_CONSTANT>(tc, *this, cREVERSE, cCHANGE_CONSTANT);
       }
     }
   }
@@ -200,7 +200,7 @@ private:
    *
    * \param tc Initialized ThreadLocalCache
    */
-  inline void UpdateStatistics(tThreadLocalCache* tc, tCCPortBase* source, tCCPortBase* target)
+  inline void UpdateStatistics(tThreadLocalCache* tc, tCCPortBase& source, tCCPortBase& target)
   {
     if (tRuntimeSettings::cCOLLECT_EDGE_STATISTICS)    // const, so method can be optimized away completely
     {
@@ -239,7 +239,7 @@ protected:
     return tc->GetUnusedBuffer(cc_type_index);
   }
 
-  virtual void InitialPushTo(tAbstractPort* target, bool reverse);
+  virtual void InitialPushTo(tAbstractPort& target, bool reverse);
 
   /*!
    * Custom special assignment to port.
@@ -303,7 +303,7 @@ protected:
    * \param changed_constant changedConstant to use
    */
   template <bool cREVERSE, int8 cCHANGE_CONSTANT>
-  inline void Receive(tThreadLocalCache* tc, tCCPortBase* origin, bool reverse, int8 changed_constant)
+  inline void Receive(tThreadLocalCache* tc, tCCPortBase& origin, bool reverse, int8 changed_constant)
   {
     // Backup tc references (in case it is modified - e.g. in BoundedNumberPort)
     tCCPortDataManagerTL* old_data = tc->data;
@@ -312,7 +312,7 @@ protected:
     Assign(tc);
     SetChanged(cCHANGE_CONSTANT);
     NotifyListeners(tc);
-    UpdateStatistics(tc, origin, this);
+    UpdateStatistics(tc, origin, *this);
 
     if (!cREVERSE)
     {
@@ -324,7 +324,7 @@ protected:
         bool push = (dest != NULL) && dest->WantsPush<false, cCHANGE_CONSTANT>(false, cCHANGE_CONSTANT);
         if (push)
         {
-          dest->Receive<false, cCHANGE_CONSTANT>(tc, this, false, cCHANGE_CONSTANT);
+          dest->Receive<false, cCHANGE_CONSTANT>(tc, *this, false, cCHANGE_CONSTANT);
         }
       }
 
@@ -334,9 +334,9 @@ protected:
       {
         tCCPortBase* dest = dests->Get(i);
         bool push = (dest != NULL) && dest->WantsPush<true, cCHANGE_CONSTANT>(true, cCHANGE_CONSTANT);
-        if (push && dest != origin)
+        if (push && dest != &origin)
         {
-          dest->Receive<true, cCHANGE_CONSTANT>(tc, this, true, cCHANGE_CONSTANT);
+          dest->Receive<true, cCHANGE_CONSTANT>(tc, *this, true, cCHANGE_CONSTANT);
         }
       }
     }
@@ -440,7 +440,7 @@ public:
    */
   tCCPortDataManager* DequeueSingleUnsafeRaw();
 
-  virtual void ForwardData(tAbstractPort* other);
+  virtual void ForwardData(tAbstractPort& other);
 
   /*!
    * \return Current data with auto-lock (can only be unlocked with ThreadLocalCache auto-unlock)

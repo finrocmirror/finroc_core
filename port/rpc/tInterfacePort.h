@@ -114,12 +114,12 @@ protected:
     return 0;
   }
 
-  virtual void InitialPushTo(tAbstractPort* target, bool reverse)
+  virtual void InitialPushTo(tAbstractPort& target, bool reverse)
   {
     // do nothing in interface port
   }
 
-  virtual void RawConnectToTarget(tAbstractPort* target, bool finstructed);
+  virtual void RawConnectToTarget(tAbstractPort& target, bool finstructed);
 
   virtual void SetMaxQueueLengthImpl(int length)
   {
@@ -138,7 +138,7 @@ public:
 
   virtual ~tInterfacePort();
 
-  virtual void ForwardData(tAbstractPort* other)
+  virtual void ForwardData(tAbstractPort& other)
   {
     // do nothing in interface port
   }

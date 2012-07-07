@@ -63,7 +63,7 @@ void tRealPortTest5::Main()
   p1 = std::shared_ptr<tPort<int> >(new tPort<int>("p1", tPortFlags::cINPUT_PORT));
   p2 = std::shared_ptr<tPort<int> >(new tPort<int>("p2", tPortFlags::cINPUT_PORT));
   p3 = std::shared_ptr<tPort<int> >(new tPort<int>("p3", tPortFlags::cINPUT_PORT));
-  p3->GetWrapped()->Link(tRuntimeEnvironment::GetInstance(), "portlink");
+  p3->GetWrapped()->Link(*tRuntimeEnvironment::GetInstance(), "portlink");
   tFrameworkElement::InitAll();
   //output.std11CaseReceiver = input;
 

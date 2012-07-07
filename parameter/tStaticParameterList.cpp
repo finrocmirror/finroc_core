@@ -156,9 +156,9 @@ void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement& fe)
   for (int i = 0, n = iterable->Size(); i < n; i++)
   {
     tFrameworkElement::tLink* child = iterable->Get(i);
-    if (child != NULL && child->IsPrimaryLink() && (!child->GetChild()->IsDeleted()))
+    if (child != NULL && child->IsPrimaryLink() && (!child->GetChild().IsDeleted()))
     {
-      DoStaticParameterEvaluation(*child->GetChild());
+      DoStaticParameterEvaluation(child->GetChild());
     }
   }
 

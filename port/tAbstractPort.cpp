@@ -121,34 +121,34 @@ void tAbstractPort::ConnectToSource(const util::tString& src_link, bool finstruc
   link_edges->Add(new tLinkEdge(MakeAbsoluteLink(src_link), GetHandle(), finstructed));
 }
 
-void tAbstractPort::ConnectToSource(tFrameworkElement* src_port_parent, const util::tString& src_port_name, bool warn_if_not_available)
+void tAbstractPort::ConnectToSource(tFrameworkElement& src_port_parent, const util::tString& src_port_name, bool warn_if_not_available)
 {
-  tFrameworkElement* p = src_port_parent->GetChildElement(src_port_name, false);
-  if (p != NULL && p->IsPort())
+  tFrameworkElement* p = src_port_parent.GetChildElement(src_port_name, false);
+  if (p && p->IsPort())
   {
-    ConnectToSource(static_cast<tAbstractPort*>(p));
+    ConnectToSource(*static_cast<tAbstractPort*>(p));
   }
   else if (warn_if_not_available)
   {
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_WARNING, "Cannot find port '", src_port_name, "' in ", src_port_parent->GetQualifiedName(), ".");
+    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_WARNING, "Cannot find port '", src_port_name, "' in ", src_port_parent.GetQualifiedName(), ".");
   }
 }
 
 
-void tAbstractPort::ConnectToTarget(tAbstractPort* target, bool finstructed)
+void tAbstractPort::ConnectToTarget(tAbstractPort& target, bool finstructed)
 {
   tLock lock2(GetRegistryLock());
   if (IsDeleted())
   {
     return;
   }
-  if (MayConnectTo(target) && (!IsConnectedTo(target)))
+  if (MayConnectTo(target, true) && (!IsConnectedTo(target)))
   {
     RawConnectToTarget(target, finstructed);
-    target->PropagateStrategy(NULL, this);
+    target.PropagateStrategy(NULL, this);
     NewConnection(target);
-    target->NewConnection(this);
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "creating Edge from ", GetQualifiedName(), " to ", target->GetQualifiedName());
+    target.NewConnection(*this);
+    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "creating Edge from ", GetQualifiedName(), " to ", target.GetQualifiedName());
 
     // check whether we need an initial reverse push
     ConsiderInitialReversePush(target);
@@ -176,28 +176,28 @@ void tAbstractPort::ConnectToTarget(const util::tString& dest_link, bool finstru
   link_edges->Add(new tLinkEdge(GetHandle(), MakeAbsoluteLink(dest_link), finstructed));
 }
 
-void tAbstractPort::ConnectToTarget(tFrameworkElement* dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available)
+void tAbstractPort::ConnectToTarget(tFrameworkElement& dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available)
 {
-  tFrameworkElement* p = dest_port_parent->GetChildElement(dest_port_name, false);
-  if (p != NULL && p->IsPort())
+  tFrameworkElement* p = dest_port_parent.GetChildElement(dest_port_name, false);
+  if (p && p->IsPort())
   {
-    ConnectToTarget(static_cast<tAbstractPort*>(p));
+    ConnectToTarget(*static_cast<tAbstractPort*>(p));
   }
   else if (warn_if_not_available)
   {
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_WARNING, "Cannot find port '", dest_port_name, "' in ", dest_port_parent->GetQualifiedName(), ".");
+    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_WARNING, "Cannot find port '", dest_port_name, "' in ", dest_port_parent.GetQualifiedName(), ".");
   }
 }
 
 
-void tAbstractPort::ConsiderInitialReversePush(tAbstractPort* target)
+void tAbstractPort::ConsiderInitialReversePush(tAbstractPort& target)
 {
-  if (IsReady() && target->IsReady())
+  if (IsReady() && target.IsReady())
   {
     if (ReversePushStrategy() && edges_src->CountElements() == 1)
     {
-      FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial reverse push from ", target->GetQualifiedName(), " to ", GetQualifiedName());
-      target->InitialPushTo(this, true);
+      FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial reverse push from ", target.GetQualifiedName(), " to ", GetQualifiedName());
+      target.InitialPushTo(*this, true);
     }
   }
 }
@@ -228,11 +228,10 @@ void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
     for (int i = 0, n = it->Size(); i < n; i++)
     {
       tAbstractPort* target = it->Get(i);
-      if (target == NULL)
+      if (target)
       {
-        continue;
+        RemoveInternal(*this, *target);
       }
-      RemoveInternal(this, target);
     }
   }
 
@@ -242,16 +241,15 @@ void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
     for (int i = 0, n = it->Size(); i < n; i++)
     {
       tAbstractPort* target = it->Get(i);
-      if (target == NULL)
+      if (target)
       {
-        continue;
+        RemoveInternal(*target, *this);
       }
-      RemoveInternal(target, this);
     }
   }
 }
 
-void tAbstractPort::DisconnectFrom(tAbstractPort* target)
+void tAbstractPort::DisconnectFrom(tAbstractPort& target)
 {
   bool found = false;
   {
@@ -259,9 +257,9 @@ void tAbstractPort::DisconnectFrom(tAbstractPort* target)
     util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
     for (int i = 0, n = it->Size(); i < n; i++)
     {
-      if (it->Get(i) == target)
+      if (it->Get(i) == &target)
       {
-        RemoveInternal(this, target);
+        RemoveInternal(*this, target);
         found = true;
       }
     }
@@ -269,9 +267,9 @@ void tAbstractPort::DisconnectFrom(tAbstractPort* target)
     it = edges_dest->GetIterable();
     for (int i = 0, n = it->Size(); i < n; i++)
     {
-      if (it->Get(i) == target)
+      if (it->Get(i) == &target)
       {
-        RemoveInternal(target, this);
+        RemoveInternal(target, *this);
         found = true;
       }
     }
@@ -295,10 +293,10 @@ void tAbstractPort::DisconnectFrom(const util::tString& link)
     }
   }
 
-  tAbstractPort* ap = GetRuntime()->GetPort(link);
+  tAbstractPort* ap = GetRuntime().GetPort(link);
   if (ap != NULL)
   {
-    DisconnectFrom(this);
+    DisconnectFrom(*this);
   }
 }
 
@@ -408,12 +406,12 @@ int16 tAbstractPort::GetStrategyRequirement() const
   }
 }
 
-bool tAbstractPort::IsConnectedTo(tAbstractPort* target)
+bool tAbstractPort::IsConnectedTo(tAbstractPort& target)
 {
   util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
   for (int i = 0, n = it->Size(); i < n; i++)
   {
-    if (it->Get(i) == target)
+    if (it->Get(i) == &target)
     {
       return true;
     }
@@ -422,7 +420,7 @@ bool tAbstractPort::IsConnectedTo(tAbstractPort* target)
   it = edges_dest->GetIterable();
   for (int i = 0, n = it->Size(); i < n; i++)
   {
-    if (it->Get(i) == target)
+    if (it->Get(i) == &target)
     {
       return true;
     }
@@ -478,15 +476,25 @@ util::tString tAbstractPort::MakeAbsoluteLink(const util::tString& rel_link)
   return relative_to->GetQualifiedLink() + "/" + rel_link2;
 }
 
-bool tAbstractPort::MayConnectTo(tAbstractPort* target)
+bool tAbstractPort::MayConnectTo(tAbstractPort& target, bool warn_if_impossible)
 {
-  if (!(GetFlag(tPortFlags::cEMITS_DATA) && target->GetFlag(tPortFlags::cACCEPTS_DATA)))
+  rrlib::logging::tLogLevel loglvl = warn_if_impossible ? rrlib::logging::eLL_WARNING : rrlib::logging::eLL_DEBUG_VERBOSE_1;
+  if (!GetFlag(tPortFlags::cEMITS_DATA))
   {
+    FINROC_LOG_PRINT_TO(edges, loglvl, "Cannot connect to target port '", target.GetQualifiedName(), "', because this (source) port does not emit data.");
     return false;
   }
 
-  if (!data_type.IsConvertibleTo(target->data_type))
+  if (!target.GetFlag(tPortFlags::cACCEPTS_DATA))
   {
+    FINROC_LOG_PRINT_TO(edges, loglvl, "Cannot connect to target port '", target.GetQualifiedName(), "', because it does not accept data.");
+    return false;
+  }
+
+  if (!data_type.IsConvertibleTo(target.data_type))
+  {
+    FINROC_LOG_PRINT_TO(edges, loglvl, "Cannot connect to target port '", target.GetQualifiedName(), "', because data types are incompatible ('",
+                        GetDataType().GetName(), "' and '", target.GetDataType().GetName(), "').");
     return false;
   }
   return true;
@@ -573,7 +581,7 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
       if (IsReady() && push_wanter->IsReady() && (!GetFlag(tPortFlags::cNO_INITIAL_PUSHING)) && (!push_wanter->GetFlag(tPortFlags::cNO_INITIAL_PUSHING)))
       {
         FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial push from ", GetQualifiedName(), " to ", push_wanter->GetQualifiedName());
-        InitialPushTo(push_wanter, false);
+        InitialPushTo(*push_wanter, false);
       }
       push_wanter = NULL;
     }
@@ -610,12 +618,12 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
   return change;
 }
 
-void tAbstractPort::RawConnectToTarget(tAbstractPort* target, bool finstructed)
+void tAbstractPort::RawConnectToTarget(tAbstractPort& target, bool finstructed)
 {
-  tEdgeAggregator::EdgeAdded(this, target);
+  tEdgeAggregator::EdgeAdded(*this, target);
 
-  size_t idx = edges_src->Add(target, false);
-  target->edges_dest->Add(this, false);
+  size_t idx = edges_src->Add(&target, false);
+  target.edges_dest->Add(this, false);
   if (finstructed)
   {
     SetEdgeFinstructed(idx, true);
@@ -624,28 +632,28 @@ void tAbstractPort::RawConnectToTarget(tAbstractPort* target, bool finstructed)
   PublishUpdatedEdgeInfo(tRuntimeListener::cADD, target);
 }
 
-void tAbstractPort::RemoveInternal(tAbstractPort* src, tAbstractPort* dest)
+void tAbstractPort::RemoveInternal(tAbstractPort& src, tAbstractPort& dest)
 {
   tEdgeAggregator::EdgeRemoved(src, dest);
 
-  dest->edges_dest->Remove(src);
-  src->edges_src->Remove(dest);
+  dest.edges_dest->Remove(&src);
+  src.edges_src->Remove(&dest);
 
-  src->ConnectionRemoved(dest);
-  dest->ConnectionRemoved(src);
+  src.ConnectionRemoved(dest);
+  dest.ConnectionRemoved(src);
 
-  if (!src->IsConnected())
+  if (!src.IsConnected())
   {
-    src->strategy = -1;
+    src.strategy = -1;
   }
-  if (!dest->IsConnected())
+  if (!dest.IsConnected())
   {
-    dest->strategy = -1;
+    dest.strategy = -1;
   }
 
-  src->PublishUpdatedEdgeInfo(tRuntimeListener::cADD, dest);
-  dest->PropagateStrategy(NULL, NULL);
-  src->PropagateStrategy(NULL, NULL);
+  src.PublishUpdatedEdgeInfo(tRuntimeListener::cADD, dest);
+  dest.PropagateStrategy(NULL, NULL);
+  src.PropagateStrategy(NULL, NULL);
 }
 
 void tAbstractPort::SerializeOutgoingConnections(rrlib::serialization::tOutputStream& co)
@@ -769,7 +777,7 @@ void tAbstractPort::SetReversePushStrategy(bool push)
         if (ap != NULL && ap->IsReady())
         {
           FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial reverse push from ", ap->GetQualifiedName(), " to ", GetQualifiedName());
-          ap->InitialPushTo(this, true);
+          ap->InitialPushTo(*this, true);
           break;
         }
       }
@@ -778,7 +786,7 @@ void tAbstractPort::SetReversePushStrategy(bool push)
   }
 }
 
-void tAbstractPort::UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, rrlib::rtti::tGenericObject* data)
+void tAbstractPort::UpdateEdgeStatistics(tAbstractPort& source, tAbstractPort& target, rrlib::rtti::tGenericObject* data)
 {
   tEdgeAggregator::UpdateEdgeStatistics(source, target, tFinrocTypeInfo::EstimateDataSize(data));
 }

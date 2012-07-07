@@ -37,11 +37,11 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, int target_handle, bool 
   // this(sourceLink_,"",targetHandle);
   if (source_link.length() > 0)
   {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, this);
+    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, *this);
   }
   if (target_link.length() > 0)
   {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, this);
+    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, *this);
   }
 }
 
@@ -55,11 +55,11 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& tar
   // this(sourceLink_,targetLink_,-1);
   if (source_link.length() > 0)
   {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, this);
+    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, *this);
   }
   if (target_link.length() > 0)
   {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, this);
+    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, *this);
   }
 }
 
@@ -73,11 +73,11 @@ tLinkEdge::tLinkEdge(int source_handle, const util::tString& target_link_, bool 
   // this("",targetLink_,sourceHandle);
   if (source_link.length() > 0)
   {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, this);
+    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, *this);
   }
   if (target_link.length() > 0)
   {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, this);
+    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, *this);
   }
 }
 
@@ -90,11 +90,11 @@ tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& tar
 {
   if (source_link.length() > 0)
   {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, this);
+    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, *this);
   }
   if (target_link.length() > 0)
   {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, this);
+    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, *this);
   }
 }
 
@@ -104,11 +104,11 @@ tLinkEdge::~tLinkEdge()
     rrlib::thread::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
     if (source_link.length() > 0)
     {
-      tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(source_link, this);
+      tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(source_link, *this);
     }
     if (target_link.length() > 0)
     {
-      tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(target_link, this);
+      tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(target_link, *this);
     }
   }
 }
@@ -120,17 +120,17 @@ void tLinkEdge::LinkAdded(tRuntimeEnvironment& re, const util::tString& link, tA
     if (link.compare(source_link) == 0)
     {
       tAbstractPort* target = target_link.length() > 0 ? re.GetPort(target_link) : re.GetPort(port_handle);
-      if (target != NULL)
+      if (target)
       {
-        port.ConnectToTarget(target, finstructed);
+        port.ConnectToTarget(*target, finstructed);
       }
     }
     else
     {
       tAbstractPort* source = source_link.length() > 0 ? re.GetPort(source_link) : re.GetPort(port_handle);
-      if (source != NULL)
+      if (source)
       {
-        port.ConnectToSource(source, finstructed);
+        port.ConnectToSource(*source, finstructed);
       }
     }
   }

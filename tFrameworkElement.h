@@ -91,7 +91,7 @@ public:
   private:
 
     // Outer class FrameworkElement
-    tFrameworkElement* const outer_class_ptr;
+    tFrameworkElement& outer_class;
 
     /*! Name of Framework Element - in link context */
     util::tString name;
@@ -104,8 +104,8 @@ public:
 
   public:
 
-    tLink(tFrameworkElement* const outer_class_ptr_) :
-      outer_class_ptr(outer_class_ptr_),
+    tLink(tFrameworkElement& outer_class) :
+      outer_class(outer_class),
       name(),
       parent(NULL),
       next(NULL)
@@ -118,9 +118,9 @@ public:
     /*!
      * \return Element that this link points to
      */
-    inline tFrameworkElement* GetChild() const
+    inline tFrameworkElement& GetChild() const
     {
-      return outer_class_ptr;
+      return outer_class;
     }
 
     /*!
@@ -144,7 +144,7 @@ public:
      */
     inline bool IsPrimaryLink() const
     {
-      return this == &(GetChild()->primary);
+      return this == &(GetChild().primary);
     }
 
   };
@@ -190,7 +190,7 @@ private:
    *
    * \param cLink link to child to use
    */
-  void AddChild(tLink* child);
+  void AddChild(tLink& child);
 
   /*!
    * \return Have all parents (including link parents) been initialized?
@@ -238,7 +238,7 @@ private:
    * \param l Link to continue with
    * \param abort_at_link_root Abort when an alternative link root is reached?
    */
-  static void GetNameHelper(util::tString& sb, const tLink* l, bool abort_at_link_root);
+  static void GetNameHelper(util::tString& sb, const tLink& l, bool abort_at_link_root);
 
   /*!
    * Very efficient implementation of above.
@@ -249,7 +249,7 @@ private:
    * \param force_full_link Return full link from root (even if object has shorter globally unique link?)
    * \return Is this a globally unique link?
    */
-  bool GetQualifiedName(util::tString& sb, const tLink* start, bool force_full_link) const;
+  bool GetQualifiedName(util::tString& sb, const tLink& start, bool force_full_link) const;
 
   /*!
    * Very efficient implementation of above.
@@ -260,7 +260,7 @@ private:
    * \param force_full_link Return full link from root (even if object has shorter globally unique link?)
    * \return Is this a globally unique link?
    */
-  bool GetQualifiedNameImpl(util::tString& sb, const tLink* start, bool force_full_link) const;
+  bool GetQualifiedNameImpl(util::tString& sb, const tLink& start, bool force_full_link) const;
 
   /*!
    * Initializes element and all child elements that were created by this thread
@@ -305,7 +305,7 @@ protected:
    * \param cLink root
    * \return Framework element - or null if non-existent
    */
-  tFrameworkElement* GetChildElement(const util::tString& name, int name_index, bool only_globally_unique_children, tFrameworkElement* root);
+  tFrameworkElement* GetChildElement(const util::tString& name, int name_index, bool only_globally_unique_children, tFrameworkElement& root);
 
   /*!
    * Create link to this framework element
@@ -313,7 +313,7 @@ protected:
    * \param parent Parent framework element
    * \param link_name name of link
    */
-  virtual void Link(tFrameworkElement* parent, const util::tString& link_name);
+  virtual void Link(tFrameworkElement& parent, const util::tString& link_name);
 
   /*!
    * Initializes this runtime element.
@@ -373,7 +373,7 @@ protected:
    *
    * (should only be called by AbstractPort class)
    */
-  void PublishUpdatedEdgeInfo(int8 change_type, tAbstractPort* target);
+  void PublishUpdatedEdgeInfo(int8 change_type, tAbstractPort& target);
 
   /*!
    * Publish updated port information
@@ -420,9 +420,9 @@ public:
    *
    * \param fe Framework element to add (must not have been initialized already - structure is fixes in this case)
    */
-  inline void AddChild(tFrameworkElement* fe)
+  inline void AddChild(tFrameworkElement& fe)
   {
-    AddChild(&(fe->primary));
+    AddChild(fe.primary);
   }
 
   /*!
@@ -586,7 +586,7 @@ public:
    */
   inline bool GetQualifiedLink(util::tString& sb) const
   {
-    return GetQualifiedLink(sb, &(primary));
+    return GetQualifiedLink(sb, primary);
   }
 
   /*!
@@ -599,7 +599,9 @@ public:
    */
   inline bool GetQualifiedLink(util::tString& sb, size_t link_index) const
   {
-    return GetQualifiedLink(sb, GetLink(link_index));
+    const tLink* link = GetLink(link_index);
+    assert(link);
+    return GetQualifiedLink(sb, *link);
   }
 
   /*!
@@ -610,7 +612,7 @@ public:
    * \param start Link to start with
    * \return Is this link globally unique?
    */
-  inline bool GetQualifiedLink(util::tString& sb, const tLink* start) const
+  inline bool GetQualifiedLink(util::tString& sb, const tLink& start) const
   {
     return GetQualifiedName(sb, start, false);
   }
@@ -634,7 +636,7 @@ public:
    */
   inline void GetQualifiedName(util::tString& sb) const
   {
-    GetQualifiedName(sb, &(primary));
+    GetQualifiedName(sb, primary);
   }
 
   /*!
@@ -646,7 +648,9 @@ public:
    */
   inline void GetQualifiedName(util::tString& sb, size_t link_index) const
   {
-    GetQualifiedName(sb, GetLink(link_index));
+    const tLink* link = GetLink(link_index);
+    assert(link);
+    GetQualifiedName(sb, *link);
   }
 
   /*!
@@ -656,7 +660,7 @@ public:
    * \param sb Buffer that will store result
    * \param start Link to start with
    */
-  inline void GetQualifiedName(util::tString& sb, const tLink* start) const
+  inline void GetQualifiedName(util::tString& sb, const tLink& start) const
   {
     GetQualifiedName(sb, start, true);
   }
@@ -672,7 +676,7 @@ public:
    * (for convenience)
    * \return The one and only RuntimeEnvironment
    */
-  tRuntimeEnvironment* GetRuntime() const;
+  tRuntimeEnvironment& GetRuntime() const;
 
   /*!
    * Initialize this framework element and all framework elements in sub tree that were created by this thread
@@ -694,7 +698,7 @@ public:
    * \param re Possible parent of this Runtime element
    * \return Answer
    */
-  inline bool IsChildOf(tFrameworkElement* re) const
+  inline bool IsChildOf(const tFrameworkElement& re) const
   {
     return IsChildOf(re, false);
   }
@@ -707,7 +711,7 @@ public:
    * \param ignore_delete_flag Perform check even if delete flag is already set on object (deprecated in C++ - except of directly calling on runtime change)
    * \return Answer
    */
-  bool IsChildOf(tFrameworkElement* re, bool ignore_delete_flag) const;
+  bool IsChildOf(const tFrameworkElement& re, bool ignore_delete_flag) const;
 
   /*!
    * \return true before element is officially declared as being initialized
@@ -839,7 +843,7 @@ public:
    *
    * Used to iterate over a framework element's children.
    */
-  class tChildIterator : public util::tObject
+  class tChildIterator
   {
   private:
 
@@ -862,28 +866,13 @@ public:
 
   public:
 
-    tChildIterator(const tFrameworkElement* parent);
-
-    /*!
-     * \param parent Framework element over whose child to iterate
-     * \param flags Flags that children must have in order to be considered
-     */
-    tChildIterator(const tFrameworkElement* parent, uint flags_);
-
-    /*!
-     * \param parent Framework element over whose child to iterate
-     * \param flags Relevant flags
-     * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
-     */
-    tChildIterator(const tFrameworkElement* parent, uint flags_, uint result_);
-
     /*!
      * \param parent Framework element over whose child to iterate
      * \param flags Relevant flags
      * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
      * \param include_non_ready Include children that are not fully initialized yet?
      */
-    tChildIterator(const tFrameworkElement* parent, uint flags_, uint result_, bool include_non_ready);
+    tChildIterator(const tFrameworkElement& parent, uint flags = 0, uint result = 0, bool include_non_ready = false);
 
     /*!
      * \return Next child - or null if there are no more children left
@@ -900,43 +889,7 @@ public:
      */
     inline void Reset()
     {
-      Reset(cur_parent);
-    }
-
-    /*!
-     * Use Iterator for different framework element
-     * (or same and reset)
-     *
-     * \param parent Framework element over whose child to iterate
-     */
-    inline void Reset(const tFrameworkElement* parent)
-    {
-      Reset(parent, 0, 0);
-    }
-
-    /*!
-     * Use Iterator for different framework element
-     * (or same and reset)
-     *
-     * \param parent Framework element over whose child to iterate
-     * \param flags Flags that children must have in order to be considered
-     */
-    inline void Reset(const tFrameworkElement* parent, uint flags_)
-    {
-      Reset(parent, flags_, flags_);
-    }
-
-    /*!
-     * Use Iterator for different framework element
-     * (or same and reset)
-     *
-     * \param parent Framework element over whose child to iterate
-     * \param flags Relevant flags
-     * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
-     */
-    inline void Reset(const tFrameworkElement* parent, uint flags_, uint result_)
-    {
-      Reset(parent, flags_, result_, false);
+      Reset(*cur_parent);
     }
 
     /*!
@@ -948,7 +901,7 @@ public:
      * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
      * \param include_non_ready Include children that are not fully initialized yet?
      */
-    void Reset(const tFrameworkElement* parent, uint flags_, uint result_, bool include_non_ready);
+    void Reset(const tFrameworkElement& parent, uint flags = 0, uint result = 0, bool include_non_ready = false);
 
   };
 

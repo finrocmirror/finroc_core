@@ -39,18 +39,18 @@ tEdgeAggregator::tEdgeAggregator(tFrameworkElement* parent_, const util::tString
 {
 }
 
-void tEdgeAggregator::EdgeAdded(tAbstractPort* source, tAbstractPort* target)
+void tEdgeAggregator::EdgeAdded(tAbstractPort& source, tAbstractPort& target)
 {
   tEdgeAggregator* src = GetAggregator(source);
   tEdgeAggregator* dest = GetAggregator(target);
-  if (src != NULL && dest != NULL && (!tFinrocTypeInfo::IsMethodType(source->GetDataType())))
+  if (src && dest && (!tFinrocTypeInfo::IsMethodType(source.GetDataType())))
   {
     //System.out.println("edgeAdded: " + src.getQualifiedName() + "->" + dest.getQualifiedName() + " (because of " + source.getQualifiedName() + "->" + target.getQualifiedName() + ")");
-    src->EdgeAdded(dest);
+    src->EdgeAdded(*dest);
   }
 }
 
-void tEdgeAggregator::EdgeAdded(tEdgeAggregator* dest)
+void tEdgeAggregator::EdgeAdded(tEdgeAggregator& dest)
 {
   tAggregatedEdge* ae = FindAggregatedEdge(dest);
   if (ae != NULL)
@@ -60,23 +60,23 @@ void tEdgeAggregator::EdgeAdded(tEdgeAggregator* dest)
   }
 
   // not found
-  ae = new tAggregatedEdge(this, dest);
+  ae = new tAggregatedEdge(*this, dest);
   ae->edge_count = 1u;
   emerging_edges.Add(ae, false);
 }
 
-void tEdgeAggregator::EdgeRemoved(tAbstractPort* source, tAbstractPort* target)
+void tEdgeAggregator::EdgeRemoved(tAbstractPort& source, tAbstractPort& target)
 {
   tEdgeAggregator* src = GetAggregator(source);
   tEdgeAggregator* dest = GetAggregator(target);
-  if (src != NULL && dest != NULL && (!tFinrocTypeInfo::IsMethodType(source->GetDataType())))
+  if (src && dest && (!tFinrocTypeInfo::IsMethodType(source.GetDataType())))
   {
     //System.out.println("edgeRemoved: " + src.getQualifiedName() + "->" + dest.getQualifiedName() + " (because of " + source.getQualifiedName() + "->" + target.getQualifiedName() + ")");
-    src->EdgeRemoved(dest);
+    src->EdgeRemoved(*dest);
   }
 }
 
-void tEdgeAggregator::EdgeRemoved(tEdgeAggregator* dest)
+void tEdgeAggregator::EdgeRemoved(tEdgeAggregator& dest)
 {
   tAggregatedEdge* ae = FindAggregatedEdge(dest);
   if (ae != NULL)
@@ -93,13 +93,13 @@ void tEdgeAggregator::EdgeRemoved(tEdgeAggregator* dest)
   throw util::tRuntimeException("Edge not found - this is inconsistent => programming error", CODE_LOCATION_MACRO);
 }
 
-tAggregatedEdge* tEdgeAggregator::FindAggregatedEdge(tEdgeAggregator* dest)
+tAggregatedEdge* tEdgeAggregator::FindAggregatedEdge(tEdgeAggregator& dest)
 {
   util::tArrayWrapper<tAggregatedEdge*>* iterable = emerging_edges.GetIterable();
   for (int i = 0, n = iterable->Size(); i < n; i++)
   {
     tAggregatedEdge* ae = iterable->Get(i);
-    if (ae != NULL && ae->destination == dest)
+    if (ae && &ae->destination == &dest)
     {
       return ae;
     }
@@ -107,10 +107,10 @@ tAggregatedEdge* tEdgeAggregator::FindAggregatedEdge(tEdgeAggregator* dest)
   return NULL;
 }
 
-tEdgeAggregator* tEdgeAggregator::GetAggregator(tAbstractPort* source)
+tEdgeAggregator* tEdgeAggregator::GetAggregator(tAbstractPort& source)
 {
-  ::finroc::core::tFrameworkElement* current = source->GetParent();
-  while (current != NULL)
+  tFrameworkElement* current = source.GetParent();
+  while (current)
   {
     if (current->GetFlag(tCoreFlags::cEDGE_AGGREGATOR) && (!current->GetFlag(tCoreFlags::cNETWORK_ELEMENT)))
     {
@@ -121,12 +121,13 @@ tEdgeAggregator* tEdgeAggregator::GetAggregator(tAbstractPort* source)
   return NULL;
 }
 
-void tEdgeAggregator::UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, size_t estimated_data_size)
+void tEdgeAggregator::UpdateEdgeStatistics(tAbstractPort& source, tAbstractPort& target, size_t estimated_data_size)
 {
   tEdgeAggregator* src = GetAggregator(source);
   tEdgeAggregator* dest = GetAggregator(target);
-  tAggregatedEdge* ar = src->FindAggregatedEdge(dest);
-  assert((ar != NULL));
+  assert(src && dest);
+  tAggregatedEdge* ar = src->FindAggregatedEdge(*dest);
+  assert(ar);
   ar->publish_count.AddAndGet(1);
   ar->publish_size.AddAndGet(estimated_data_size);
 }

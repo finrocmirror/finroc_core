@@ -74,7 +74,7 @@ rrlib::rtti::tGenericObject* tNetPort::CreateGenericObject(const rrlib::rtti::tD
 {
   if (tFinrocTypeInfo::IsStdType(dt))
   {
-    return GetPort()->GetUnusedBufferRaw(dt)->GetObject();
+    return GetPort().GetUnusedBufferRaw(dt)->GetObject();
   }
   else if (tFinrocTypeInfo::IsCCType(dt))
   {
@@ -118,16 +118,16 @@ tNetPort* tNetPort::FindNetPort(tAbstractPort& port, util::tObject* belongs_to)
 
 void tNetPort::PropagateStrategyFromTheNet(int16 strategy)
 {
-  if (!GetPort()->IsOutputPort())    // only input ports are relevant for strategy changes
+  if (!GetPort().IsOutputPort())    // only input ports are relevant for strategy changes
   {
-    tAbstractPort* ap = GetPort();
-    if (typeid(*ap) == typeid(tStdNetPort))
+    tAbstractPort& ap = GetPort();
+    if (typeid(ap) == typeid(tStdNetPort))
     {
-      (static_cast<tStdNetPort*>(ap))->PropagateStrategy(strategy);
+      (static_cast<tStdNetPort&>(ap)).PropagateStrategy(strategy);
     }
-    else if (typeid(*ap) == typeid(tCCNetPort))
+    else if (typeid(ap) == typeid(tCCNetPort))
     {
-      (static_cast<tCCNetPort*>(ap))->PropagateStrategy(strategy);
+      (static_cast<tCCNetPort&>(ap)).PropagateStrategy(strategy);
     }
     else
     {
@@ -138,7 +138,7 @@ void tNetPort::PropagateStrategyFromTheNet(int16 strategy)
 
 void tNetPort::ReceiveDataFromStream(rrlib::serialization::tInputStream& ci, rrlib::time::tTimestamp timestamp, int8 changed_flag)
 {
-  assert((GetPort()->IsReady()));
+  assert(GetPort().IsReady());
   rrlib::serialization::tDataEncoding enc = ci.ReadEnum<rrlib::serialization::tDataEncoding>();
   if (IsStdType() || IsTransactionType())
   {
@@ -170,7 +170,7 @@ void tNetPort::UpdateFlags(uint flags)
 {
   // process flags... keep DELETE and READY flags
   uint keep_flags = tCoreFlags::cSTATUS_FLAGS;
-  uint cur_flags = GetPort()->GetAllFlags() & keep_flags;
+  uint cur_flags = GetPort().GetAllFlags() & keep_flags;
   flags &= ~(keep_flags);
   flags |= cur_flags;
 
@@ -260,7 +260,7 @@ tNetPort::tCCNetPort::tCCNetPort(tNetPort& outer_class, tPortCreationInfoBase pc
   tCCPortBase::SetPullRequestHandler(this);
 }
 
-void tNetPort::tCCNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
+void tNetPort::tCCNetPort::InitialPushTo(tAbstractPort& target, bool reverse)
 {
   if (reverse)
   {
@@ -268,10 +268,10 @@ void tNetPort::tCCNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
     util::tArrayWrapper< ::finroc::core::tCCPortBase*>* it = this->edges_dest.GetIterable();
     for (int i = 0, n = it->Size(); i < n; i++)
     {
-      ::finroc::core::tAbstractPort* port = it->Get(i);
-      if (port != NULL && port != target && port->IsReady() && port->GetFlag(tPortFlags::cPUSH_STRATEGY_REVERSE))
+      core::tAbstractPort* port = it->Get(i);
+      if (port && port != &target && port->IsReady() && port->GetFlag(tPortFlags::cPUSH_STRATEGY_REVERSE))
       {
-        ::finroc::core::tCCPortBase::InitialPushTo(target, reverse);
+        core::tCCPortBase::InitialPushTo(target, reverse);
         return;
       }
     }
@@ -295,16 +295,16 @@ bool tNetPort::tCCNetPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstra
 {
   if (IsOutputPort() && IsInitialized())
   {
-    if (::finroc::core::tAbstractPort::PropagateStrategy(NULL, NULL))    // we don't want to push ourselves directly - unless there's no change
+    if (core::tAbstractPort::PropagateStrategy(NULL, NULL))    // we don't want to push ourselves directly - unless there's no change
     {
       outer_class.PropagateStrategyOverTheNet();
       return true;
     }
     else
     {
-      if (push_wanter != NULL)
+      if (push_wanter)
       {
-        tCCPortBase::InitialPushTo(push_wanter, false);
+        tCCPortBase::InitialPushTo(*push_wanter, false);
       }
     }
     return false;
@@ -374,7 +374,7 @@ tNetPort::tStdNetPort::tStdNetPort(tNetPort& outer_class, tPortCreationInfoBase 
   tPortBase::SetPullRequestHandler(this);
 }
 
-void tNetPort::tStdNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
+void tNetPort::tStdNetPort::InitialPushTo(tAbstractPort& target, bool reverse)
 {
   if (reverse)
   {
@@ -382,10 +382,10 @@ void tNetPort::tStdNetPort::InitialPushTo(tAbstractPort* target, bool reverse)
     util::tArrayWrapper< ::finroc::core::tPortBase*>* it = this->edges_dest.GetIterable();
     for (int i = 0, n = it->Size(); i < n; i++)
     {
-      ::finroc::core::tAbstractPort* port = it->Get(i);
-      if (port != NULL && port != target && port->IsReady() && port->GetFlag(tPortFlags::cPUSH_STRATEGY_REVERSE))
+      core::tAbstractPort* port = it->Get(i);
+      if (port && port != &target && port->IsReady() && port->GetFlag(tPortFlags::cPUSH_STRATEGY_REVERSE))
       {
-        ::finroc::core::tPortBase::InitialPushTo(target, reverse);
+        core::tPortBase::InitialPushTo(target, reverse);
         return;
       }
     }
@@ -416,16 +416,16 @@ bool tNetPort::tStdNetPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstr
     }
     else
     {
-      if (push_wanter != NULL)
+      if (push_wanter)
       {
-        tPortBase::InitialPushTo(push_wanter, false);
+        tPortBase::InitialPushTo(*push_wanter, false);
       }
     }
     return false;
   }
   else
   {
-    return ::finroc::core::tAbstractPort::PropagateStrategy(push_wanter, new_connection_partner);
+    return core::tAbstractPort::PropagateStrategy(push_wanter, new_connection_partner);
   }
 }
 

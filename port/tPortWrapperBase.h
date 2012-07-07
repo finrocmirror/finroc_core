@@ -75,7 +75,7 @@ public:
    *
    * \param source Source port
    */
-  inline void ConnectToSource(tAbstractPort* source)
+  inline void ConnectToSource(tAbstractPort& source)
   {
     wrapped->ConnectToSource(source);
   }
@@ -87,7 +87,7 @@ public:
    */
   inline void ConnectToSource(const tPortWrapperBase& source)
   {
-    wrapped->ConnectToSource(source.wrapped);
+    wrapped->ConnectToSource(*source.wrapped);
   }
 
   /*!
@@ -108,7 +108,7 @@ public:
    * \param src_port_name Name of source port
    * \param warn_if_not_available Print warning message if connection cannot be established
    */
-  void ConnectToSource(tFrameworkElement* src_port_parent, const util::tString& src_port_name, bool warn_if_not_available = true)
+  void ConnectToSource(tFrameworkElement& src_port_parent, const util::tString& src_port_name, bool warn_if_not_available = true)
   {
     wrapped->ConnectToSource(src_port_parent, src_port_name, warn_if_not_available);
   }
@@ -118,7 +118,7 @@ public:
    *
    * \param target Target port
    */
-  inline void ConnectToTarget(tAbstractPort* target)
+  inline void ConnectToTarget(tAbstractPort& target)
   {
     wrapped->ConnectToTarget(target);
   }
@@ -130,7 +130,7 @@ public:
    */
   inline void ConnectToTarget(const tPortWrapperBase& target)
   {
-    wrapped->ConnectToTarget(target.wrapped);
+    wrapped->ConnectToTarget(*target.wrapped);
   }
 
   /*!
@@ -151,7 +151,7 @@ public:
    * \param dest_port_name Name of destination port
    * \param warn_if_not_available Print warning message if connection cannot be established
    */
-  void ConnectToTarget(tFrameworkElement* dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available = true)
+  void ConnectToTarget(tFrameworkElement& dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available = true)
   {
     wrapped->ConnectToTarget(dest_port_parent, dest_port_name, warn_if_not_available);
   }

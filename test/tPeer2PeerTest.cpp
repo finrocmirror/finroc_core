@@ -44,7 +44,7 @@ void tPeer2PeerTest::Main(int argc, char **argv)
   // Create two ports
   tFrameworkElement* link_test = new tFrameworkElement(NULL, "linkTest");
   tPort<int> output("testOut", tPortFlags::cSHARED_OUTPUT_PORT);
-  output.GetWrapped()->Link(link_test, "linkTestPort");
+  output.GetWrapped()->Link(*link_test, "linkTestPort");
   tPort<int> output2("testOutGlobal", tPortFlags::cSHARED_OUTPUT_PORT | tCoreFlags::cGLOBALLY_UNIQUE_LINK);
   tPort<int> input("testIn", tPortFlags::cINPUT_PORT);
   input.ConnectToSource("/TCP/localhost:4444/Unrelated/testOut");

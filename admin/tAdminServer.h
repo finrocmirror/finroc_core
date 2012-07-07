@@ -120,7 +120,7 @@ class tAdminServer : public tInterfaceServerPort, public tAbstractMethodCallHand
    * \param src Source port
    * \param dest Destination port
    */
-  void Connect(tAbstractPort* src, tAbstractPort* dest);
+  void Connect(tAbstractPort& src, tAbstractPort& dest);
 
   /*!
    * Returns all relevant execution controls for start/stop command on specified element

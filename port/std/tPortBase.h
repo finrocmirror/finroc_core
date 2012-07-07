@@ -183,7 +183,7 @@ private:
       bool push = (dest != NULL) && dest->WantsPush<cREVERSE, cCHANGE_CONSTANT>(cREVERSE, cCHANGE_CONSTANT);
       if (push)
       {
-        dest->Receive<cREVERSE, cCHANGE_CONSTANT>(pc, this, cREVERSE, cCHANGE_CONSTANT);
+        dest->Receive<cREVERSE, cCHANGE_CONSTANT>(pc, *this, cREVERSE, cCHANGE_CONSTANT);
       }
     }
 
@@ -207,7 +207,7 @@ private:
    *
    * \param tc Initialized ThreadLocalCache
    */
-  inline void UpdateStatistics(tPublishCache& pc, tPortBase* source, tPortBase* target)
+  inline void UpdateStatistics(tPublishCache& pc, tPortBase& source, tPortBase& target)
   {
     if (tRuntimeSettings::cCOLLECT_EDGE_STATISTICS)    // const, so method can be optimized away completely
     {
@@ -256,7 +256,7 @@ protected:
   }
 
   // quite similar to publish
-  virtual void InitialPushTo(tAbstractPort* target, bool reverse);
+  virtual void InitialPushTo(tAbstractPort& target, bool reverse);
 
   inline tPortDataManager* LockCurrentValueForRead() const
   {
@@ -345,12 +345,12 @@ protected:
    * \param changed_constant changedConstant to use
    */
   template <bool cREVERSE, int8 cCHANGE_CONSTANT>
-  inline void Receive(tPublishCache& pc, tPortBase* origin, bool reverse, int8 changed_constant)
+  inline void Receive(tPublishCache& pc, tPortBase& origin, bool reverse, int8 changed_constant)
   {
     Assign(pc);
     SetChanged(cCHANGE_CONSTANT);
     NotifyListeners(&(pc));
-    UpdateStatistics(pc, origin, this);
+    UpdateStatistics(pc, origin, *this);
 
     if (!cREVERSE)
     {
@@ -362,7 +362,7 @@ protected:
         bool push = (dest != NULL) && dest->WantsPush<false, cCHANGE_CONSTANT>(false, cCHANGE_CONSTANT);
         if (push)
         {
-          dest->Receive<false, cCHANGE_CONSTANT>(pc, this, false, cCHANGE_CONSTANT);
+          dest->Receive<false, cCHANGE_CONSTANT>(pc, *this, false, cCHANGE_CONSTANT);
         }
       }
 
@@ -372,9 +372,9 @@ protected:
       {
         tPortBase* dest = dests->Get(i);
         bool push = (dest != NULL) && dest->WantsPush<true, cCHANGE_CONSTANT>(false, cCHANGE_CONSTANT);
-        if (push && dest != origin)
+        if (push && dest != &origin)
         {
-          dest->Receive<true, cCHANGE_CONSTANT>(pc, this, true, cCHANGE_CONSTANT);
+          dest->Receive<true, cCHANGE_CONSTANT>(pc, *this, true, cCHANGE_CONSTANT);
         }
       }
     }
@@ -455,7 +455,7 @@ public:
    */
   tPortDataManager* DequeueSingleUnsafeRaw();
 
-  virtual void ForwardData(tAbstractPort* other);
+  virtual void ForwardData(tAbstractPort& other);
 
   /*!
    * \return current auto-locked Port data (unlock with getThreadLocalCache.releaseAllLocks())

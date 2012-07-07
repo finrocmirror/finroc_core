@@ -49,9 +49,9 @@ class tInterfaceClientPort : public tPortWrapperBase
 
   protected:
 
-    virtual void ConnectionRemoved(tAbstractPort* partner);
+    virtual void ConnectionRemoved(tAbstractPort& partner);
 
-    virtual void NewConnection(tAbstractPort* partner);
+    virtual void NewConnection(tAbstractPort& partner);
 
   public:
 
@@ -68,7 +68,7 @@ protected:
    *
    * \param partner Port at other end of connection
    */
-  virtual void ConnectionRemoved(tAbstractPort* partner)
+  virtual void ConnectionRemoved(tAbstractPort& partner)
   {
   }
 
@@ -79,7 +79,7 @@ protected:
    *
    * \param partner Port at other end of connection
    */
-  virtual void NewConnection(tAbstractPort* partner)
+  virtual void NewConnection(tAbstractPort& partner)
   {
   }
 

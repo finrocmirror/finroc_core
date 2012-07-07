@@ -134,7 +134,7 @@ tAbstractPort* tFinstructableGroup::GetChildPort(const util::tString& link)
 {
   if (link[0] == '/')
   {
-    return GetRuntime()->GetPort(link);
+    return GetRuntime().GetPort(link);
   }
   ::finroc::core::tFrameworkElement* fe = GetChildElement(link, false);
   if (fe != NULL && fe->IsPort())
@@ -155,8 +155,8 @@ util::tString tFinstructableGroup::GetEdgeLink(const util::tString& target_link)
 
 util::tString tFinstructableGroup::GetEdgeLink(tAbstractPort& ap)
 {
-  ::finroc::core::tFrameworkElement* alt_root = ap.GetParentWithFlags(tCoreFlags::cALTERNATE_LINK_ROOT);
-  if (alt_root != NULL && alt_root->IsChildOf(this))
+  tFrameworkElement* alt_root = ap.GetParentWithFlags(tCoreFlags::cALTERNATE_LINK_ROOT);
+  if (alt_root && alt_root->IsChildOf(*this))
   {
     return ap.GetQualifiedLink();
   }
@@ -321,7 +321,7 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
           }
           else
           {
-            src_port->ConnectToTarget(dest_port, true);
+            src_port->ConnectToTarget(*dest_port, true);
           }
         }
         else if (boost::equals(name, "parameter"))
@@ -432,7 +432,7 @@ void tFinstructableGroup::SaveXml()
       }
 
       // serialize framework elements
-      SerializeChildren(root, this);
+      SerializeChildren(root, *this);
 
       // serialize edges
       link_tmp = GetQualifiedName() + "/";
@@ -459,11 +459,11 @@ void tFinstructableGroup::SaveXml()
 
           // check2: their deepest common finstructable_group parent is this
           core::tFrameworkElement* common_parent = ap.GetParent();
-          while (!ap2->IsChildOf(common_parent))
+          while (!ap2->IsChildOf(*common_parent))
           {
             common_parent = common_parent->GetParent();
           }
-          ::finroc::core::tFrameworkElement* common_finstructable_parent = common_parent->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP) ? common_parent : common_parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
+          tFrameworkElement* common_finstructable_parent = common_parent->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP) ? common_parent : common_parent->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
           if (common_finstructable_parent != this)
           {
             continue;
@@ -607,10 +607,10 @@ void tFinstructableGroup::ScanForCommandLineArgsHelper(std::vector<util::tString
   }
 }
 
-void tFinstructableGroup::SerializeChildren(rrlib::xml::tNode& node, tFrameworkElement* current)
+void tFinstructableGroup::SerializeChildren(rrlib::xml::tNode& node, tFrameworkElement& current)
 {
   tFrameworkElement::tChildIterator ci(current);
-  ::finroc::core::tFrameworkElement* fe = NULL;
+  tFrameworkElement* fe = NULL;
   while ((fe = ci.Next()) != NULL)
   {
     tStaticParameterList* spl = static_cast<tStaticParameterList*>(fe->GetAnnotation(tStaticParameterList::cTYPE));
@@ -641,7 +641,7 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml::tNode& node, tFrameworkE
       // serialize its children
       if (!fe->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP))
       {
-        SerializeChildren(n, fe);
+        SerializeChildren(n, *fe);
       }
     }
   }

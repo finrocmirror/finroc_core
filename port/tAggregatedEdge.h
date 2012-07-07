@@ -50,7 +50,7 @@ public:
   size_t edge_count;
 
   /*! Pointer to source and destination element */
-  tEdgeAggregator* source, * destination;
+  tEdgeAggregator& source, & destination;
 
   /*! Usage statistics: Time when edge was created */
   rrlib::time::tTimestamp creation_time;
@@ -65,7 +65,7 @@ public:
    * \param src Source aggregator
    * \param dest Destination aggregator
    */
-  tAggregatedEdge(tEdgeAggregator* src, tEdgeAggregator* dest) :
+  tAggregatedEdge(tEdgeAggregator& src, tEdgeAggregator& dest) :
     edge_count(0),
     source(src),
     destination(dest),

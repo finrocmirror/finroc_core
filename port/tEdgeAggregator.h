@@ -73,20 +73,20 @@ private:
    *
    * \param dest Destination aggregating element
    */
-  void EdgeAdded(tEdgeAggregator* dest);
+  void EdgeAdded(tEdgeAggregator& dest);
 
   /*!
    * Called when edge has been added that is relevant for this element
    *
    * \param dest Destination aggregating element
    */
-  void EdgeRemoved(tEdgeAggregator* dest);
+  void EdgeRemoved(tEdgeAggregator& dest);
 
   /*!
    * \param source Port
    * \return EdgeAggregator parent - or null if there's none
    */
-  static tEdgeAggregator* GetAggregator(tAbstractPort* source);
+  static tEdgeAggregator* GetAggregator(tAbstractPort& source);
 
 public:
 
@@ -100,7 +100,7 @@ public:
    * \param source Source port
    * \param target Target port
    */
-  static void EdgeAdded(tAbstractPort* source, tAbstractPort* target);
+  static void EdgeAdded(tAbstractPort& source, tAbstractPort& target);
 
   /*!
    * (Should be called by abstract port only - with runtime registry locked)
@@ -109,13 +109,13 @@ public:
    * \param source Source port
    * \param target Target port
    */
-  static void EdgeRemoved(tAbstractPort* source, tAbstractPort* target);
+  static void EdgeRemoved(tAbstractPort& source, tAbstractPort& target);
 
   /*!
    * \param dest Destination aggregating element
    * \return Edge that connects these elements - or null if such an edge does not yet exists
    */
-  tAggregatedEdge* FindAggregatedEdge(tEdgeAggregator* dest);
+  tAggregatedEdge* FindAggregatedEdge(tEdgeAggregator& dest);
 
   /*!
    * \return Array with emerging edges. Can be iterated over concurrently.
@@ -134,7 +134,7 @@ public:
    * \param target Destination port
    * \param estimated_data_size Data Size of data
    */
-  static void UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, size_t estimated_data_size);
+  static void UpdateEdgeStatistics(tAbstractPort& source, tAbstractPort& target, size_t estimated_data_size);
 
 };
 

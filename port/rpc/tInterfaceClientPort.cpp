@@ -36,12 +36,12 @@ tInterfaceClientPort::tPortImpl::tPortImpl(tInterfaceClientPort* const outer_cla
 {
 }
 
-void tInterfaceClientPort::tPortImpl::ConnectionRemoved(tAbstractPort* partner)
+void tInterfaceClientPort::tPortImpl::ConnectionRemoved(tAbstractPort& partner)
 {
   outer_class_ptr->ConnectionRemoved(partner);
 }
 
-void tInterfaceClientPort::tPortImpl::NewConnection(tAbstractPort* partner)
+void tInterfaceClientPort::tPortImpl::NewConnection(tAbstractPort& partner)
 {
   outer_class_ptr->NewConnection(partner);
 }

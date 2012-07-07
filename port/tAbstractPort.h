@@ -136,7 +136,7 @@ private:
    *
    * \param target Potential Target port
    */
-  void ConsiderInitialReversePush(tAbstractPort* target);
+  void ConsiderInitialReversePush(tAbstractPort& target);
 
   /*!
    * Forward current strategy to source ports (helper for above - and possibly variations of above)
@@ -162,7 +162,7 @@ private:
    */
   static uint ProcessFlags(const tPortCreationInfoBase& pci);
 
-  static void RemoveInternal(tAbstractPort* src, tAbstractPort* dest);
+  static void RemoveInternal(tAbstractPort& src, tAbstractPort& dest);
 
 protected:
 
@@ -185,7 +185,7 @@ protected:
    *
    * \param partner Port at other end of connection
    */
-  virtual void ConnectionRemoved(tAbstractPort* partner)
+  virtual void ConnectionRemoved(tAbstractPort& partner)
   {
   }
 
@@ -207,7 +207,7 @@ protected:
    * \param target Port to push data to
    * \param reverse Is this a reverse push?
    */
-  virtual void InitialPushTo(tAbstractPort* target, bool reverse) = 0;
+  virtual void InitialPushTo(tAbstractPort& target, bool reverse) = 0;
 
   /*!
    * Called whenever a new connection to this port was established
@@ -216,7 +216,7 @@ protected:
    *
    * \param partner Port at other end of connection
    */
-  virtual void NewConnection(tAbstractPort* partner)
+  virtual void NewConnection(tAbstractPort& partner)
   {
   }
 
@@ -247,7 +247,7 @@ protected:
    * \param target Target to connect to
    * \param finstructed Was edge created using finstruct? (Should never be called with true by application developer)
    */
-  virtual void RawConnectToTarget(tAbstractPort* target, bool finstructed);
+  virtual void RawConnectToTarget(tAbstractPort& target, bool finstructed);
 
   /*!
    * Sets special change flag for initial push data
@@ -273,9 +273,8 @@ protected:
    * \param target Target port
    * \param data Data that was sent
    */
-  void UpdateEdgeStatistics(tAbstractPort* source, tAbstractPort* target, rrlib::rtti::tGenericObject* data);
+  void UpdateEdgeStatistics(tAbstractPort& source, tAbstractPort& target, rrlib::rtti::tGenericObject* data);
 
-  template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   /*!
    * Does this port "want" to receive a value via push strategy?
    *
@@ -286,6 +285,7 @@ protected:
    * Typically it does, unless it has multiple sources or no push strategy itself.
    * (Standard implementation for this)
    */
+  template <bool cREVERSE, int8 cCHANGE_CONSTANT>
   inline bool WantsPush(bool reverse, int8 change_constant) const
   {
     // I think and hope that the compiler is intelligent enough to optimize branches away...
@@ -336,9 +336,9 @@ public:
    *
    * \param source Source port
    */
-  inline void ConnectToSource(tAbstractPort* source, bool finstructed = false)
+  inline void ConnectToSource(tAbstractPort& source, bool finstructed = false)
   {
-    source->ConnectToTarget(this, finstructed);
+    source.ConnectToTarget(*this, finstructed);
   }
 
   /*!
@@ -357,7 +357,7 @@ public:
    * \param src_port_name Name of source port
    * \param warn_if_not_available Print warning message if connection cannot be established
    */
-  void ConnectToSource(tFrameworkElement* src_port_parent, const util::tString& src_port_name, bool warn_if_not_available = true);
+  void ConnectToSource(tFrameworkElement& src_port_parent, const util::tString& src_port_name, bool warn_if_not_available = true);
 
   /*!
    * Connect port to specified target port
@@ -365,7 +365,7 @@ public:
    * \param target Target port
    * \param finstructed Was edge created using finstruct? (Should never be called with true by application developer)
    */
-  void ConnectToTarget(tAbstractPort* target, bool finstructed = false);
+  void ConnectToTarget(tAbstractPort& target, bool finstructed = false);
 
   /*!
    * Connect port to specified target port
@@ -383,7 +383,7 @@ public:
    * \param dest_port_name Name of destination port
    * \param warn_if_not_available Print warning message if connection cannot be established
    */
-  void ConnectToTarget(tFrameworkElement* dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available = true);
+  void ConnectToTarget(tFrameworkElement& dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available = true);
 
   /*!
    * disconnects all edges
@@ -401,7 +401,7 @@ public:
    */
   void DisconnectAll(bool incoming, bool outgoing);
 
-  void DisconnectFrom(tAbstractPort* target);
+  void DisconnectFrom(tAbstractPort& target);
 
   /*!
    * Disconnect from port with specified link (removes link edges
@@ -416,7 +416,7 @@ public:
    *
    * \param destination other port
    */
-  virtual void ForwardData(tAbstractPort* other) = 0;
+  virtual void ForwardData(tAbstractPort& other) = 0;
 
   /*!
    * \return Changed "flag" (has two different values for ordinary and initial data)
@@ -568,7 +568,7 @@ public:
   /*!
    * \return Is port connected to specified other port?
    */
-  bool IsConnectedTo(tAbstractPort* target);
+  bool IsConnectedTo(tAbstractPort& target);
 
   /*!
    * \return Is port connected to output ports that request reverse pushes?
@@ -607,9 +607,9 @@ public:
    * \param parent Parent framework element
    * \param link_name name of link
    */
-  virtual void Link(tFrameworkElement* parent, const util::tString& link_name)
+  virtual void Link(tFrameworkElement& parent, const util::tString& link_name)
   {
-    ::finroc::core::tFrameworkElement::Link(parent, link_name);
+    tFrameworkElement::Link(parent, link_name);
   }
 
   template <typename T>
@@ -624,9 +624,10 @@ public:
    * (may be overridden by subclass - should usually call superclass method, too)
    *
    * \param target Target port?
+   * \param warn_if_impossible Print warning to console if connecting is not possible?
    * \return Answer
    */
-  bool MayConnectTo(tAbstractPort* target);
+  bool MayConnectTo(tAbstractPort& target, bool warn_if_impossible = false);
 
   /*!
    * Notify port of (network) disconnect

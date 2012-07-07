@@ -137,17 +137,17 @@ tPortCreationInfoBase tInterfacePort::ProcessPci(tPortCreationInfoBase pci, tInt
   return pci;
 }
 
-void tInterfacePort::RawConnectToTarget(tAbstractPort* target, bool finstructed)
+void tInterfacePort::RawConnectToTarget(tAbstractPort& target, bool finstructed)
 {
-  tInterfacePort* target2 = static_cast<tInterfacePort*>(target);
+  tInterfacePort& target2 = static_cast<tInterfacePort&>(target);
 
   // disconnect old port(s) - should always be max. one - however, defensive implementation
-  while (target2->edges_dest.Size() > 0)    // disconnect old port
+  while (target2.edges_dest.Size() > 0)    // disconnect old port
   {
-    target2->edges_dest.GetIterable()->Get(0)->DisconnectFrom(target2);
+    target2.edges_dest.GetIterable()->Get(0)->DisconnectFrom(target2);
   }
 
-  ::finroc::core::tAbstractPort::RawConnectToTarget(target, finstructed);
+  core::tAbstractPort::RawConnectToTarget(target, finstructed);
 }
 
 } // namespace finroc

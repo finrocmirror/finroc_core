@@ -128,11 +128,11 @@ tCCPortDataManager* tCCPortBase::DequeueSingleUnsafeRaw()
   return queue->Dequeue();
 }
 
-void tCCPortBase::ForwardData(tAbstractPort* other)
+void tCCPortBase::ForwardData(tAbstractPort& other)
 {
-  assert((tFinrocTypeInfo::IsCCType(other->GetDataType())));
+  assert((tFinrocTypeInfo::IsCCType(other.GetDataType())));
   tCCPortDataManagerTL* c = GetLockedUnsafeInContainer();
-  (static_cast<tCCPortBase*>(other))->Publish(c);
+  (static_cast<tCCPortBase&>(other)).Publish(c);
   c->ReleaseLock();
 }
 
@@ -224,20 +224,20 @@ void tCCPortBase::GetRaw(rrlib::rtti::tGenericObject& buffer, rrlib::time::tTime
   }
 }
 
-void tCCPortBase::InitialPushTo(tAbstractPort* target, bool reverse)
+void tCCPortBase::InitialPushTo(tAbstractPort& target, bool reverse)
 {
   tThreadLocalCache* tc = tThreadLocalCache::GetFast();
   tc->data = GetLockedUnsafeInContainer();
   tc->ref = tc->data->GetCurrentRef();
-  tCCPortBase* t = static_cast<tCCPortBase*>(target);
+  tCCPortBase& t = static_cast<tCCPortBase&>(target);
 
   if (reverse)
   {
-    t->Receive<true, cCHANGED_INITIAL>(tc, this, true, cCHANGED_INITIAL);
+    t.Receive<true, cCHANGED_INITIAL>(tc, *this, true, cCHANGED_INITIAL);
   }
   else
   {
-    t->Receive<false, cCHANGED_INITIAL>(tc, this, false, cCHANGED_INITIAL);
+    t.Receive<false, cCHANGED_INITIAL>(tc, *this, false, cCHANGED_INITIAL);
   }
 
   tc->data->ReleaseLock();

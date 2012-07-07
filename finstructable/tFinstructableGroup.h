@@ -122,7 +122,7 @@ private:
    * \param node XML node to serialize to
    * \param current Framework element
    */
-  void SerializeChildren(rrlib::xml::tNode& node, tFrameworkElement* current);
+  void SerializeChildren(rrlib::xml::tNode& node, tFrameworkElement& current);
 
   /*!
    * Recursive helper function for ScanForCommandLineArgs

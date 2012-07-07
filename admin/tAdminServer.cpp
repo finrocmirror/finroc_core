@@ -80,25 +80,25 @@ tAdminServer::tAdminServer() :
   SetCallHandler(this);
 }
 
-void tAdminServer::Connect(tAbstractPort* src, tAbstractPort* dest)
+void tAdminServer::Connect(tAbstractPort& src, tAbstractPort& dest)
 {
-  if (src->IsVolatile() && (!dest->IsVolatile()))
+  if (src.IsVolatile() && (!dest.IsVolatile()))
   {
-    dest->ConnectToSource(src->GetQualifiedLink(), true);
+    dest.ConnectToSource(src.GetQualifiedLink(), true);
   }
-  else if (dest->IsVolatile() && (!src->IsVolatile()))
+  else if (dest.IsVolatile() && (!src.IsVolatile()))
   {
-    src->ConnectToTarget(dest->GetQualifiedLink(), true);
+    src.ConnectToTarget(dest.GetQualifiedLink(), true);
   }
   else
   {
-    src->ConnectToTarget(dest, true);
+    src.ConnectToTarget(dest, true);
   }
 }
 
 void tAdminServer::GetExecutionControls(std::vector<tExecutionControl*>& result, int element_handle)
 {
-  core::tFrameworkElement* fe = GetRuntime()->GetElement(element_handle);
+  core::tFrameworkElement* fe = GetRuntime().GetElement(element_handle);
   if (fe)
   {
     tExecutionControl::FindAll(result, *fe);
@@ -155,7 +155,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
 {
   if (method == cGET_ANNOTATION)
   {
-    ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
+    ::finroc::core::tFrameworkElement* fe = GetRuntime().GetElement(handle);
     tFinrocAnnotation* result = NULL;
     rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(*type);
     if (fe != NULL && fe->IsReady() && dt != NULL)
@@ -191,7 +191,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
   {
     assert((method == cGET_PARAMETER_INFO));
 
-    core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
+    core::tFrameworkElement* fe = GetRuntime().GetElement(handle);
     if (fe == NULL || (!fe->IsReady()))
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not get parameter info for framework element ", handle);
@@ -299,15 +299,15 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot really persistently connect two network ports: ", src->GetQualifiedLink(), ", ", dest->GetQualifiedLink());
     }
-    if (src->MayConnectTo(dest))
+    if (src->MayConnectTo(*dest))
     {
-      Connect(src, dest);
+      Connect(*src, *dest);
     }
-    else if (dest->MayConnectTo(src))
+    else if (dest->MayConnectTo(*src))
     {
-      Connect(dest, src);
+      Connect(*dest, *src);
     }
-    if (!src->IsConnectedTo(dest))
+    if (!src->IsConnectedTo(*dest))
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not connect ports ", src->GetQualifiedName(), " ", dest->GetQualifiedName());
     }
@@ -326,8 +326,8 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
     {
       src->DisconnectFrom(dest->GetQualifiedLink());
     }
-    src->DisconnectFrom(dest);
-    if (src->IsConnectedTo(dest))
+    src->DisconnectFrom(*dest);
+    if (src->IsConnectedTo(*dest))
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not disconnect ports ", src->GetQualifiedName(), " ", dest->GetQualifiedName());
     }
@@ -475,7 +475,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int handle)
 {
   if (method == cDELETE_ELEMENT)
   {
-    ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
+    ::finroc::core::tFrameworkElement* fe = GetRuntime().GetElement(handle);
     if (fe != NULL && (!fe->IsDeleted()))
     {
       FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Deleting element ", fe->GetQualifiedLink());
@@ -520,7 +520,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int handle)
   }
 
   assert(method == cSAVE_FINSTRUCTABLE_GROUP);
-  ::finroc::core::tFrameworkElement* fe = GetRuntime()->GetElement(handle);
+  ::finroc::core::tFrameworkElement* fe = GetRuntime().GetElement(handle);
   if (fe != NULL && fe->IsReady() && fe->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP))
   {
     try

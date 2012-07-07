@@ -154,20 +154,19 @@ tPortDataManager* tPortBase::DequeueSingleUnsafeRaw()
   return pd != NULL ? pd->GetManager() : NULL;
 }
 
-void tPortBase::ForwardData(tAbstractPort* other)
+void tPortBase::ForwardData(tAbstractPort& other)
 {
-  assert((tFinrocTypeInfo::IsStdType(other->GetDataType())));
-  (static_cast<tPortBase*>(other))->Publish(GetAutoLockedRaw());
+  assert(tFinrocTypeInfo::IsStdType(other.GetDataType()));
+  (static_cast<tPortBase&>(other)).Publish(GetAutoLockedRaw());
   ReleaseAutoLocks();
 }
 
-void tPortBase::InitialPushTo(tAbstractPort* target, bool reverse)
+void tPortBase::InitialPushTo(tAbstractPort& target, bool reverse)
 {
   tPortDataManager* pd = GetLockedUnsafeRaw();
 
   assert((pd->GetType() != NULL) && "Port data type not initialized");
   assert(IsInitialized());
-  assert(target != NULL);
 
   tPublishCache pc;
 
@@ -178,15 +177,15 @@ void tPortBase::InitialPushTo(tAbstractPort* target, bool reverse)
   //pc.curRefCounter.setOrAddLocks((byte)pc.lockEstimate); - we already have this one lock
   assert((pc.cur_ref->IsLocked()));
 
-  tPortBase* t = static_cast<tPortBase*>(target);
+  tPortBase& t = static_cast<tPortBase&>(target);
 
   if (reverse)
   {
-    t->Receive<true, cCHANGED_INITIAL>(pc, this, true, cCHANGED_INITIAL);
+    t.Receive<true, cCHANGED_INITIAL>(pc, *this, true, cCHANGED_INITIAL);
   }
   else
   {
-    t->Receive<false, cCHANGED_INITIAL>(pc, this, false, cCHANGED_INITIAL);
+    t.Receive<false, cCHANGED_INITIAL>(pc, *this, false, cCHANGED_INITIAL);
   }
 
   // release any locks that were acquired too much

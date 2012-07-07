@@ -213,9 +213,9 @@ public:
   /*!
    * \return Wrapped port
    */
-  inline tAbstractPort* GetPort()
+  inline tAbstractPort& GetPort()
   {
-    return wrapped;
+    return *wrapped;
   }
 
   /*!
@@ -260,7 +260,7 @@ public:
   /*! Delete port */
   inline void ManagedDelete()
   {
-    GetPort()->ManagedDelete();
+    GetPort().ManagedDelete();
   }
 
   virtual void PortChanged(tAbstractPort&, const void* const&, const rrlib::time::tTimestamp&)
@@ -334,14 +334,14 @@ public:
 
   protected:
 
-    virtual void ConnectionRemoved(tAbstractPort* partner)
+    virtual void ConnectionRemoved(tAbstractPort& partner)
     {
       outer_class.ConnectionRemoved();
     }
 
-    virtual void InitialPushTo(tAbstractPort* target, bool reverse);
+    virtual void InitialPushTo(tAbstractPort& target, bool reverse);
 
-    virtual void NewConnection(tAbstractPort* partner)
+    virtual void NewConnection(tAbstractPort& partner)
     {
       outer_class.NewConnection();
     }
@@ -410,14 +410,14 @@ public:
 
   protected:
 
-    virtual void ConnectionRemoved(tAbstractPort* partner)
+    virtual void ConnectionRemoved(tAbstractPort& partner)
     {
       outer_class.ConnectionRemoved();
     }
 
-    virtual void InitialPushTo(tAbstractPort* target, bool reverse);
+    virtual void InitialPushTo(tAbstractPort& target, bool reverse);
 
-    virtual void NewConnection(tAbstractPort* partner)
+    virtual void NewConnection(tAbstractPort& partner)
     {
       outer_class.NewConnection();
     }
@@ -490,12 +490,12 @@ public:
 
   protected:
 
-    virtual void ConnectionRemoved(tAbstractPort* partner)
+    virtual void ConnectionRemoved(tAbstractPort& partner)
     {
       outer_class.ConnectionRemoved();
     }
 
-    virtual void NewConnection(tAbstractPort* partner)
+    virtual void NewConnection(tAbstractPort& partner)
     {
       outer_class.NewConnection();
     }

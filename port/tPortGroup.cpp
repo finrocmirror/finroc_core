@@ -37,7 +37,7 @@ tPortGroup::tPortGroup(tFrameworkElement* parent, const util::tString& name, uin
 void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& group_link, bool create_missing_ports, tAbstractPort* start_with, int count, const util::tString& port_prefix, const util::tString& other_port_prefix)
 {
   int org_count = count;
-  tChildIterator ci(this);
+  tChildIterator ci(*this);
   tAbstractPort* p = NULL;
   while ((p = ci.NextPort()) != NULL)
   {
@@ -61,15 +61,15 @@ void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& gro
     if (op <= 1)
     {
       tFrameworkElement* child = group->GetChild(other_port_prefix + name);
-      if (child != NULL && child->IsPort())
+      if (child && child->IsPort())
       {
         if (op == 0)
         {
-          p->ConnectToSource(static_cast<tAbstractPort*>(child));
+          p->ConnectToSource(*static_cast<tAbstractPort*>(child));
         }
         else
         {
-          p->ConnectToTarget(static_cast<tAbstractPort*>(child));
+          p->ConnectToTarget(*static_cast<tAbstractPort*>(child));
         }
       }
       else if (create_missing_ports)
@@ -77,11 +77,11 @@ void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& gro
         child = group->CreatePort(other_port_prefix + name, p->GetDataType(), 0);
         if (op == 0)
         {
-          p->ConnectToSource(static_cast<tAbstractPort*>(child));
+          p->ConnectToSource(*static_cast<tAbstractPort*>(child));
         }
         else
         {
-          p->ConnectToTarget(static_cast<tAbstractPort*>(child));
+          p->ConnectToTarget(*static_cast<tAbstractPort*>(child));
         }
       }
     }
@@ -126,7 +126,7 @@ tAbstractPort* tPortGroup::CreatePort(const util::tString& name, rrlib::rtti::tD
 
 void tPortGroup::DisconnectAll(bool incoming, bool outgoing, tAbstractPort* start_with, int count)
 {
-  tChildIterator ci(this);
+  tChildIterator ci(*this);
   tAbstractPort* p = NULL;
   while ((p = ci.NextPort()) != NULL)
   {

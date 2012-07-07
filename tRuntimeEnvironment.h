@@ -110,7 +110,7 @@ private:
   std::map<std::string, std::string> command_line_args;
 
   /*! Framework element that contains all framework elements that have no parent specified */
-  ::finroc::core::tFrameworkElement* unrelated;
+  tFrameworkElement* unrelated;
 
   tRuntimeEnvironment();
 
@@ -129,7 +129,7 @@ private:
    * \param link link that edge is interested in
    * \param edge Edge to add
    */
-  void AddLinkEdge(const util::tString& link, tLinkEdge* edge);
+  void AddLinkEdge(const util::tString& link, tLinkEdge& edge);
 
   /*!
    * Register framework element at RuntimeEnvironment.
@@ -139,7 +139,7 @@ private:
    * \param port Is framework element a port?
    * \return Handle of Framework element
    */
-  int RegisterElement(tFrameworkElement* fe, bool port);
+  int RegisterElement(tFrameworkElement& fe, bool port);
 
   /*!
    * (usually only called by LinkEdge)
@@ -148,7 +148,7 @@ private:
    * \param link link that edge is interested in
    * \param edge Edge to add
    */
-  void RemoveLinkEdge(const util::tString& link, tLinkEdge* edge);
+  void RemoveLinkEdge(const util::tString& link, tLinkEdge& edge);
 
   /*!
    * Unregister framework element at RuntimeEnvironment.
@@ -156,7 +156,7 @@ private:
    *
    * \param framework_element Element to remove
    */
-  void UnregisterElement(tFrameworkElement* fe);
+  void UnregisterElement(tFrameworkElement& fe);
 
 public:
 
@@ -227,7 +227,7 @@ public:
    * (Should only be called by ThreadLocalCache class - needed for clean cleanup - port register needs to exists longer than runtime environment)
    * \return Port register
    */
-  inline std::shared_ptr<const tCoreRegister<tAbstractPort*> > GetPorts()
+  inline std::shared_ptr<const tCoreRegister<tAbstractPort*>> GetPorts()
   {
     return registry.ports;
   }
@@ -235,9 +235,9 @@ public:
   /*!
    * \return Lock order of registry
    */
-  inline const tRegistry* GetRegistryHelper()
+  inline const tRegistry& GetRegistryHelper()
   {
-    return &(registry);
+    return registry;
   }
 
   /*!
@@ -246,7 +246,7 @@ public:
    *
    * \param framework_element Element to mark deleted
    */
-  void MarkElementDeleted(tFrameworkElement* fe);
+  void MarkElementDeleted(tFrameworkElement& fe);
 
   /*!
    * Called before a framework element is initialized - can be used to create links etc. to this element etc.
@@ -254,14 +254,6 @@ public:
    * \param element Framework element that will be initialized soon
    */
   void PreElementInit(tFrameworkElement& element);
-
-  /*!
-   * Remove linked edges from specified link to specified partner port
-   *
-   * \param link Link
-   * \param partner_port connected port
-   */
-  void RemoveLinkEdge(const util::tString& link, tAbstractPort* partner_port);
 
   /*!
    * Remove runtime listener

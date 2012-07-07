@@ -48,7 +48,7 @@ class tThreadContainerThread : public tCoreLoopThreadBase, public tRuntimeListen
 private:
 
   /*! Thread container that thread belongs to */
-  tFrameworkElement* thread_container;
+  tFrameworkElement& thread_container;
 
   /*! true, when thread needs to make a new schedule before next run */
   volatile bool reschedule;
@@ -89,7 +89,7 @@ private:
 
 public:
 
-  tThreadContainerThread(tFrameworkElement* thread_container, rrlib::time::tDuration default_cycle_time, bool warn_on_cycle_time_exceed, tPort<rrlib::time::tDuration> last_cycle_execution_time);
+  tThreadContainerThread(tFrameworkElement& thread_container, rrlib::time::tDuration default_cycle_time, bool warn_on_cycle_time_exceed, tPort<rrlib::time::tDuration> last_cycle_execution_time);
 
   /*!
    * \param fe Framework element
