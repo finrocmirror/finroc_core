@@ -287,7 +287,8 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask& task, 
             TraceOutgoing(task, *ea);
           }
         }
-        tFrameworkElement::tChildIterator ci(*parent, tCoreFlags::cREADY | tCoreFlags::cEDGE_AGGREGATOR | tEdgeAggregator::cIS_INTERFACE);
+        const uint cFLAGS_TO_CHECK = tCoreFlags::cREADY | tCoreFlags::cEDGE_AGGREGATOR | tEdgeAggregator::cIS_INTERFACE;
+        tFrameworkElement::tChildIterator ci(*parent, cFLAGS_TO_CHECK, cFLAGS_TO_CHECK);
         tFrameworkElement* other_if = NULL;
         while ((other_if = ci.Next()) != NULL)
         {

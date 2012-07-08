@@ -73,7 +73,7 @@ tRuntimeEnvironment::~tRuntimeEnvironment()
   rrlib::thread::tThread::StopThreads();
 
   // delete all children - (runtime settings last)
-  tFrameworkElement::tChildIterator ci(*this);
+  tFrameworkElement::tChildIterator ci(*this, false);
   tFrameworkElement* next = NULL;
   while ((next = ci.Next()) != NULL)
   {

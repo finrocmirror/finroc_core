@@ -812,15 +812,26 @@ void tFrameworkElement::WriteName(rrlib::serialization::tOutputStream& os, int i
   }
 }
 
-tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement& parent, uint flags, uint result, bool include_non_ready) :
+tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement& parent, uint flags, uint result, bool only_ready_elements) :
   next_elem(NULL),
   last(NULL),
   flags(0),
   result(0),
   cur_parent(NULL)
 {
-  Reset(parent, flags, result, include_non_ready);
+  Reset(parent, flags, result, only_ready_elements);
 }
+
+tFrameworkElement::tChildIterator::tChildIterator(const tFrameworkElement& parent, bool only_ready_elements) :
+  next_elem(NULL),
+  last(NULL),
+  flags(0),
+  result(0),
+  cur_parent(NULL)
+{
+  Reset(parent, only_ready_elements);
+}
+
 
 tFrameworkElement* tFrameworkElement::tChildIterator::Next()
 {
@@ -854,11 +865,11 @@ tAbstractPort* tFrameworkElement::tChildIterator::NextPort()
   }
 }
 
-void tFrameworkElement::tChildIterator::Reset(const tFrameworkElement& parent, uint flags, uint result, bool include_non_ready)
+void tFrameworkElement::tChildIterator::Reset(const tFrameworkElement& parent, uint flags, uint result, bool only_ready_elements)
 {
   this->flags = flags | tCoreFlags::cDELETED;
   this->result = result;
-  if (!include_non_ready)
+  if (only_ready_elements)
   {
     this->flags |= tCoreFlags::cREADY;
     this->result |= tCoreFlags::cREADY;

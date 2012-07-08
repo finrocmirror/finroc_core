@@ -37,7 +37,7 @@ tPortGroup::tPortGroup(tFrameworkElement* parent, const util::tString& name, uin
 void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& group_link, bool create_missing_ports, tAbstractPort* start_with, int count, const util::tString& port_prefix, const util::tString& other_port_prefix)
 {
   int org_count = count;
-  tChildIterator ci(*this);
+  tChildIterator ci(*this, false);
   tAbstractPort* p = NULL;
   while ((p = ci.NextPort()) != NULL)
   {
@@ -126,7 +126,7 @@ tAbstractPort* tPortGroup::CreatePort(const util::tString& name, rrlib::rtti::tD
 
 void tPortGroup::DisconnectAll(bool incoming, bool outgoing, tAbstractPort* start_with, int count)
 {
-  tChildIterator ci(*this);
+  tChildIterator ci(*this, false);
   tAbstractPort* p = NULL;
   while ((p = ci.NextPort()) != NULL)
   {

@@ -868,11 +868,17 @@ public:
 
     /*!
      * \param parent Framework element over whose child to iterate
+     * \param only_ready_elements Include only children that are fully initialized?
+     */
+    tChildIterator(const tFrameworkElement& parent, bool only_ready_elements = true);
+
+    /*!
+     * \param parent Framework element over whose child to iterate
      * \param flags Relevant flags
      * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
-     * \param include_non_ready Include children that are not fully initialized yet?
+     * \param only_ready_elements Include only children that are fully initialized?
      */
-    tChildIterator(const tFrameworkElement& parent, uint flags = 0, uint result = 0, bool include_non_ready = false);
+    tChildIterator(const tFrameworkElement& parent, uint flags, uint result, bool only_ready_elements = true);
 
     /*!
      * \return Next child - or null if there are no more children left
@@ -899,10 +905,23 @@ public:
      * \param parent Framework element over whose child to iterate
      * \param flags Relevant flags
      * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
-     * \param include_non_ready Include children that are not fully initialized yet?
+     * \param only_ready_elements Include only children that are fully initialized?
      */
-    void Reset(const tFrameworkElement& parent, uint flags = 0, uint result = 0, bool include_non_ready = false);
+    inline void Reset(const tFrameworkElement& parent, bool only_ready_elements = true)
+    {
+      Reset(parent, 0, 0, only_ready_elements);
+    }
 
+    /*!
+     * Use Iterator for different framework element
+     * (or same and reset)
+     *
+     * \param parent Framework element over whose child to iterate
+     * \param flags Relevant flags
+     * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
+     * \param only_ready_elements Include only children that are fully initialized?
+     */
+    void Reset(const tFrameworkElement& parent, uint flags, uint result, bool only_ready_elements = true);
   };
 
 };
