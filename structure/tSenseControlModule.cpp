@@ -77,8 +77,8 @@ tSenseControlModule::tSenseControlModule(tFrameworkElement *parent, const util::
     sense_task(this),
     sensor_input_changed(true)
 {
-  controller_input->AddAnnotation(new tPeriodicFrameworkElementTask(this->controller_input, this->controller_output, &this->control_task));
-  sensor_input->AddAnnotation(new tPeriodicFrameworkElementTask(this->sensor_input, this->sensor_output, &this->sense_task));
+  controller_input->AddAnnotation(new tPeriodicFrameworkElementTask(*this->controller_input, *this->controller_output, this->control_task));
+  sensor_input->AddAnnotation(new tPeriodicFrameworkElementTask(*this->sensor_input, *this->sensor_output, this->sense_task));
 }
 
 //----------------------------------------------------------------------

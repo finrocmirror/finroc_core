@@ -92,7 +92,7 @@ private:
    * \param task Task we're tracing from
    * \param outgoing edge aggregator with outgoing connections to follow
    */
-  void TraceOutgoing(tPeriodicFrameworkElementTask* task, tEdgeAggregator* outgoing);
+  void TraceOutgoing(tPeriodicFrameworkElementTask& task, tEdgeAggregator& outgoing);
 
 public:
 
@@ -104,9 +104,9 @@ public:
    * \param fe Framework element
    * \return Is framework element an interface?
    */
-  inline bool IsInterface(tFrameworkElement* fe)
+  inline bool IsInterface(tFrameworkElement& fe)
   {
-    return fe->GetFlag(tCoreFlags::cEDGE_AGGREGATOR | tEdgeAggregator::cIS_INTERFACE);
+    return fe.GetFlag(tCoreFlags::cEDGE_AGGREGATOR | tEdgeAggregator::cIS_INTERFACE);
   }
 
   virtual void MainLoopCallback();

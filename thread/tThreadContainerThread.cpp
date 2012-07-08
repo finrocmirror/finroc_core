@@ -63,7 +63,7 @@ void tThreadContainerThread::HandleWatchdogAlert()
   }
   else
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Got stuck executing task associated with '", task->incoming->GetQualifiedName(), "'. Please check your code for infinite loops etc.!");
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Got stuck executing task associated with '", task->incoming[0]->GetQualifiedName(), "'. Please check your code for infinite loops etc.!");
   }
   tWatchDogTask::Deactivate();
 
@@ -113,7 +113,10 @@ void tThreadContainerThread::MainLoopCallback()
         tPeriodicFrameworkElementTask* task = tasks.Get(i);
 
         // trace outgoing connections
-        TraceOutgoing(task, task->outgoing);
+        for (auto it = task->outgoing.begin(); it < task->outgoing.end(); it++)
+        {
+          TraceOutgoing(*task, **it);
+        }
       }
 
       // now create schedule
@@ -165,7 +168,7 @@ void tThreadContainerThread::MainLoopCallback()
           }
           if (end)
           {
-            FINROC_LOG_PRINT_TO(thread_containers, rrlib::logging::eLL_WARNING, "Choosing ", current->incoming->GetQualifiedName(), " as next element");
+            FINROC_LOG_PRINT_TO(thread_containers, rrlib::logging::eLL_WARNING, "Choosing ", current->incoming[0]->GetQualifiedName(), " as next element");
             schedule.Add(current);
             tasks.RemoveElem(current);
 
@@ -192,7 +195,7 @@ void tThreadContainerThread::MainLoopCallback()
   for (size_t i = 0u; i < schedule.Size(); i++)
   {
     current_task = schedule.Get(i);
-    current_task->task->ExecuteTask();
+    current_task->task.ExecuteTask();
   }
 
 #ifndef NDEBUG
@@ -229,12 +232,12 @@ void tThreadContainerThread::StopThread()
   tLoopThread::StopThread();
 }
 
-void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, tEdgeAggregator* outgoing)
+void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask& task, tEdgeAggregator& outgoing)
 {
   // add to trace stack
-  trace.Add(outgoing);
+  trace.Add(&outgoing);
 
-  util::tArrayWrapper<tAggregatedEdge*>* out_edges = outgoing->GetEmergingEdges();
+  util::tArrayWrapper<tAggregatedEdge*>* out_edges = outgoing.GetEmergingEdges();
   assert(out_edges != NULL);
   for (size_t i = 0u; i < out_edges->Size(); i++)
   {
@@ -253,17 +256,17 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
     {
       // ok, have we reached another task?
       tFinrocAnnotation* ann = dest->GetAnnotation(tPeriodicFrameworkElementTask::cTYPE);
-      if (ann == NULL && IsInterface(dest))
+      if (ann == NULL && IsInterface(*dest))
       {
         ann = dest->GetParent()->GetAnnotation(tPeriodicFrameworkElementTask::cTYPE);
       }
       if (ann)
       {
         tPeriodicFrameworkElementTask* task2 = static_cast<tPeriodicFrameworkElementTask*>(ann);
-        if (!task->next_tasks.Contains(task2))
+        if (!task.next_tasks.Contains(task2))
         {
-          task->next_tasks.Add(task2);
-          task2->previous_tasks.Add(task);
+          task.next_tasks.Add(task2);
+          task2->previous_tasks.Add(&task);
         }
         continue;
       }
@@ -271,9 +274,9 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
       // continue from this edge aggregator
       if (dest->GetEmergingEdges()->Size() > 0)
       {
-        TraceOutgoing(task, dest);
+        TraceOutgoing(task, *dest);
       }
-      else if (IsInterface(dest))
+      else if (IsInterface(*dest)) // TODO: check whether this breaks sense-control-groups
       {
         tFrameworkElement* parent = dest->GetParent();
         if (parent->GetFlag(tCoreFlags::cEDGE_AGGREGATOR))
@@ -281,7 +284,7 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
           tEdgeAggregator* ea = static_cast<tEdgeAggregator*>(parent);
           if (!trace.Contains(ea))
           {
-            TraceOutgoing(task, ea);
+            TraceOutgoing(task, *ea);
           }
         }
         tFrameworkElement::tChildIterator ci(*parent, tCoreFlags::cREADY | tCoreFlags::cEDGE_AGGREGATOR | tEdgeAggregator::cIS_INTERFACE);
@@ -291,7 +294,7 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
           tEdgeAggregator* ea = static_cast<tEdgeAggregator*>(other_if);
           if (!trace.Contains(ea))
           {
-            TraceOutgoing(task, ea);
+            TraceOutgoing(task, *ea);
           }
         }
       }
@@ -299,7 +302,7 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask* task, 
   }
 
   // remove from trace stack
-  assert((trace.Get(trace.Size() - 1) == outgoing));
+  assert(trace.Get(trace.Size() - 1) == &outgoing);
   trace.Remove(trace.Size() - 1);
 }
 

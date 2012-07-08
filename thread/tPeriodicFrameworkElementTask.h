@@ -51,13 +51,13 @@ public:
   static rrlib::rtti::tDataTypeBase cTYPE;
 
   /*! Task to execute */
-  rrlib::thread::tTask* task;
+  rrlib::thread::tTask& task;
 
   /*! Element containing incoming ports (relevant for execution order) */
-  tEdgeAggregator* incoming;
+  std::vector<tEdgeAggregator*> incoming;
 
   /*! Element containing outgoing ports (relevant for execution order) */
-  tEdgeAggregator* outgoing;
+  std::vector<tEdgeAggregator*> outgoing;
 
   /*! Tasks to execute before this one (updated during scheduling) */
   util::tSimpleList<tPeriodicFrameworkElementTask*> previous_tasks;
@@ -70,7 +70,14 @@ public:
    * \param outgoing_ports Element containing outgoing ports (relevant for execution order)
    * \param task Task to execute
    */
-  tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, rrlib::thread::tTask* task_);
+  tPeriodicFrameworkElementTask(tEdgeAggregator& incoming_ports, tEdgeAggregator& outgoing_ports, rrlib::thread::tTask& task);
+
+  /*!
+   * \param incoming_ports Elements containing incoming ports (relevant for execution order)
+   * \param outgoing_ports Elements containing outgoing ports (relevant for execution order)
+   * \param task Task to execute
+   */
+  tPeriodicFrameworkElementTask(const std::vector<tEdgeAggregator*>& incoming_ports, const std::vector<tEdgeAggregator*>& outgoing_ports, rrlib::thread::tTask& task);
 
   /*!
    * Dummy constructor. Generic instantiation is not supported.
@@ -80,10 +87,7 @@ public:
   /*!
    * \return Is this a sensor task?
    */
-  inline bool IsSenseTask()
-  {
-    return outgoing->GetFlag(tEdgeAggregator::cSENSOR_DATA) || incoming->GetFlag(tEdgeAggregator::cSENSOR_DATA);
-  }
+  bool IsSenseTask();
 
 };
 

@@ -72,7 +72,7 @@ tModule::tModule(tFrameworkElement *parent, const util::tString &name)
     update_task(this),
     input_changed(true)
 {
-  this->AddAnnotation(new tPeriodicFrameworkElementTask(this->input, this->output, &this->update_task));
+  this->AddAnnotation(new tPeriodicFrameworkElementTask(*this->input, *this->output, this->update_task));
 }
 
 //----------------------------------------------------------------------

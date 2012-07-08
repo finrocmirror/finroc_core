@@ -27,8 +27,19 @@ namespace core
 {
 rrlib::rtti::tDataTypeBase tPeriodicFrameworkElementTask::cTYPE = rrlib::rtti::tDataType<tPeriodicFrameworkElementTask>();
 
-tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(tEdgeAggregator* incoming_ports, tEdgeAggregator* outgoing_ports, rrlib::thread::tTask* task_) :
-  task(task_),
+tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(tEdgeAggregator& incoming_ports, tEdgeAggregator& outgoing_ports, rrlib::thread::tTask& task) :
+  task(task),
+  incoming(),
+  outgoing(),
+  previous_tasks(),
+  next_tasks()
+{
+  incoming.push_back(&incoming_ports);
+  outgoing.push_back(&outgoing_ports);
+}
+
+tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(const std::vector<tEdgeAggregator*>& incoming_ports, const std::vector<tEdgeAggregator*>& outgoing_ports, rrlib::thread::tTask& task):
+  task(task),
   incoming(incoming_ports),
   outgoing(outgoing_ports),
   previous_tasks(),
@@ -37,13 +48,32 @@ tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask(tEdgeAggregator* in
 }
 
 tPeriodicFrameworkElementTask::tPeriodicFrameworkElementTask() :
-  task(NULL),
-  incoming(NULL),
-  outgoing(NULL),
+  task(*((rrlib::thread::tTask*)NULL)),
+  incoming(),
+  outgoing(),
   previous_tasks(),
   next_tasks()
 {
   throw util::tRuntimeException("Unsupported", CODE_LOCATION_MACRO);
+}
+
+bool tPeriodicFrameworkElementTask::IsSenseTask()
+{
+  for (auto it = outgoing.begin(); it < outgoing.end(); it++)
+  {
+    if ((*it)->GetFlag(tEdgeAggregator::cSENSOR_DATA))
+    {
+      return true;
+    }
+  }
+  for (auto it = incoming.begin(); it < incoming.end(); it++)
+  {
+    if ((*it)->GetFlag(tEdgeAggregator::cSENSOR_DATA))
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace finroc
