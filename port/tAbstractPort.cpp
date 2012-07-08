@@ -77,6 +77,7 @@ const uint tAbstractPort::cBULK_N_EXPRESS;
 tAbstractPort::tAbstractPort(tPortCreationInfoBase pci) :
   tFrameworkElement(pci.parent, pci.name, ProcessFlags(pci), pci.lock_order < 0 ? tLockOrderLevels::cPORT : pci.lock_order),
   changed(0),
+  custom_changed_flag(0),
   edges_src(NULL),
   edges_dest(NULL),
   link_edges(NULL),
