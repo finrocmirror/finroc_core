@@ -297,6 +297,15 @@ protected:
   virtual ~tFrameworkElement();
 
   /*!
+   * Checks if specified link can be added to parent.
+   * Aborts program if this is not the case.
+   *
+   * (Check: Framework elements may only have multiple children with the same name
+   *  if explicitly allowed in runtime settings.)
+   */
+  void CheckForNameClash(const tLink& link);
+
+  /*!
    * Helper for above
    *
    * \param name (relative) Qualified name

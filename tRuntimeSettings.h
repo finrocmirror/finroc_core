@@ -48,6 +48,13 @@ private:
   /*! Singleton Instance */
   static tRuntimeSettings* inst;
 
+  /*!
+   * Is creation of framework elements with the same qualified names allowed?
+   * (by default it is not, because this causes undefined behaviour with port connections by-string
+   *  when ports have the same names (e.g. in fingui and in finstructable groups)
+   */
+  static bool duplicate_qualified_names_allowed;
+
 public:
 
   static const int cEDGE_LIST_DEFAULT_SIZE = 0;
@@ -61,6 +68,24 @@ protected:
   tRuntimeSettings();
 
 public:
+
+  /*!
+   * Allow creation of framework elements with the same qualified names.
+   * Activating this is somewhat dangerous. Only do this if you really have to!
+   * If ports have the same qualified names, connecting to them by-string causes undefined behaviour.
+   */
+  static void AllowDuplicateQualifiedNames()
+  {
+    duplicate_qualified_names_allowed = true;
+  }
+
+  /*!
+   * \return Is creation of framework elements with the same qualified names allowed?
+   */
+  static bool DuplicateQualifiedNamesAllowed()
+  {
+    return duplicate_qualified_names_allowed;
+  }
 
   /*!
    * \return Default size of string buffers received from ports

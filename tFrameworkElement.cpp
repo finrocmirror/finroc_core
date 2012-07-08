@@ -55,11 +55,6 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tSt
     parent->AddChild(primary);
   }
 
-  //      if (parent != null) {
-  //          assert !parent.isInitialized() : "shouldn't add half-constructed objects to initialized/operating parent - could cause concurrency problems in init process";
-  //          parent.addChild(primary);
-  //      }
-
   FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Constructing FrameworkElement");
 }
 
@@ -104,15 +99,13 @@ void tFrameworkElement::AddChild(tLink& child)
     util::tArrayWrapper<tLink*>* ch = children.GetIterable();
     for (int i = 0, n = ch->Size(); i < n; i++)
     {
+      assert(i >= 0);
       tLink* re = ch->Get(i);
       if (re && boost::equals(re->GetName(), child_desc))
       {
-        // name clash
-        /*if (postfixIndex == 1) {
-            System.out.println("Warning: name conflict in " + getUid() + " - " + child.GetName());
-        }*/
         re->GetChild().SetName(child_desc + "[" + boost::lexical_cast<std::string>(postfix_index) + "]");
         postfix_index++;
+        i = -1; // start all over again with new name
         continue;
       }
     }
@@ -202,6 +195,26 @@ tFrameworkElement::~tFrameworkElement()
     tLink* tmp = l;
     l = l->next;
     delete tmp;
+  }
+}
+
+void tFrameworkElement::CheckForNameClash(const tLink& link)
+{
+  if (!tRuntimeSettings::DuplicateQualifiedNamesAllowed() && link.parent)
+  {
+    util::tArrayWrapper<tLink*>* iterable = link.parent->children.GetIterable();
+    for (int i = 0, n = iterable->Size(); i < n; i++)
+    {
+      tLink* child = iterable->Get(i);
+      if (child && child->GetChild().IsReady() && child->GetName().compare(primary.GetName()) == 0)
+      {
+        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Framework elements with the same qualified names are not allowed ('", child->GetChild().GetQualifiedName(),
+                         "'), since this causes undefined behavior with port connections by qualified names (e.g. in fingui or in finstructable groups). Apart from manually choosing another name, there are two ways to solve this:\n",
+                         "  1) Set the tCoreFlags::cAUTO_RENAME flag constructing this framework element.\n",
+                         "  2) Explicitly allow duplicate names by calling tRuntimeSettings::AllowDuplicateQualifiedNames() and be careful.");
+        abort();
+      }
+    }
   }
 }
 
@@ -525,34 +538,35 @@ void tFrameworkElement::InitAll()
 
 void tFrameworkElement::InitImpl()
 {
-  //System.out.println("init: " + toString() + " " + parent.toString());
-  assert(((!IsDeleted())) && "Deleted element cannot be reinitialized");
-
+  assert((!IsDeleted()) && "Deleted element cannot be reinitialized");
   bool init_this = !IsReady() && IsCreator();
 
+  // Call pre-child-init callbacks and check for name clash
   if (init_this)
   {
     PreChildInit();
     tRuntimeEnvironment::GetInstance()->PreElementInit(*this);
+    CheckForNameClash(primary);
   }
 
+  // Initialize children and check for name clashes
   if (init_this || IsReady())
   {
     util::tArrayWrapper<tLink*>* iterable = children.GetIterable();
     for (int i = 0, n = iterable->Size(); i < n; i++)
     {
       tLink* child = iterable->Get(i);
-      if (child != NULL && child->IsPrimaryLink() && (!child->GetChild().IsDeleted()))
+      if (child && child->IsPrimaryLink() && (!child->GetChild().IsDeleted()))
       {
         child->GetChild().InitImpl();
       }
     }
   }
 
+  // Call post-child-init callbacks and set READY flag
   if (init_this)
   {
     PostChildInit();
-    //System.out.println("Setting Ready " + toString() + " Thread: " + ThreadUtil.getCurrentThreadId());
     {
       tLock lock3(simple_mutex);
       flags |= tCoreFlags::cREADY;
@@ -560,7 +574,6 @@ void tFrameworkElement::InitImpl()
 
     NotifyAnnotationsInitialized();
   }
-
 }
 
 bool tFrameworkElement::IsChildOf(const tFrameworkElement& re, bool ignore_delete_flag) const
@@ -609,6 +622,7 @@ void tFrameworkElement::Link(tFrameworkElement& parent, const util::tString& lin
   tLink* lprev = GetLinkInternal(GetLinkCount() - 1u);
   assert(lprev->next == NULL);
   lprev->next = l;
+  CheckForNameClash(*l);
   parent.AddChild(*l);
   //RuntimeEnvironment.getInstance().link(this, linkName);
 }

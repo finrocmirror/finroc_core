@@ -28,6 +28,7 @@ namespace finroc
 namespace core
 {
 tRuntimeSettings* tRuntimeSettings::inst = NULL;
+bool tRuntimeSettings::duplicate_qualified_names_allowed = false;
 const int tRuntimeSettings::cEDGE_LIST_DEFAULT_SIZE;
 const int tRuntimeSettings::cEDGE_LIST_SIZE_INCREASE_FACTOR;
 const bool tRuntimeSettings::cCOLLECT_EDGE_STATISTICS;
