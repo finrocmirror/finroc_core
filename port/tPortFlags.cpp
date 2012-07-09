@@ -52,6 +52,9 @@ const uint tPortFlags::cPROXY;
 const uint tPortFlags::cOUTPUT_PROXY;
 const uint tPortFlags::cINPUT_PROXY;
 
+static_assert((tPortFlags::cFIRST_CUSTOM_PORT_FLAG & tPortFlags::cCONSTANT_FLAGS) != 0, "Invalid flag configuration");
+static_assert((tPortFlags::cPUSH_STRATEGY_REVERSE & tPortFlags::cNON_CONSTANT_FLAGS) != 0, "Invalid flag configuration");
+
 } // namespace finroc
 } // namespace core
 

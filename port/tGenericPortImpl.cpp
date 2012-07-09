@@ -96,7 +96,11 @@ public:
       // publish for value caching in Parameter classes
       tCCPortDataManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
       mgr->GetObject()->DeepCopyFrom(port->GetDefaultBufferRaw());
-      port->BrowserPublishRaw(mgr);
+      util::tString error = port->BrowserPublishRaw(mgr);
+      if (error.size() > 0)
+      {
+        FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not set default value: ", error);
+      }
     }
   }
 

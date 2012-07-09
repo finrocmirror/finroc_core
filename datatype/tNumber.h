@@ -349,6 +349,12 @@ inline rrlib::serialization::tStringInputStream& operator>>(rrlib::serialization
   return stream;
 }
 
+inline std::ostream& operator<<(std::ostream& stream, const tNumber& n)
+{
+  stream << n.ToString();
+  return stream;
+}
+
 } // namespace finroc
 } // namespace core
 

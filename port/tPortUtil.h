@@ -323,7 +323,11 @@ public:
     // publish for value caching in Parameter classes
     tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(tNumber::cTYPE);
     mgr->GetObject()->DeepCopyFrom(go);
-    port->BrowserPublishRaw(mgr);
+    util::tString error = port->BrowserPublishRaw(mgr);
+    if (error.size() > 0)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not set default value: ", error);
+    }
   }
 
   static void Publish(tPortType* port, tConstDataPtr& t)
@@ -459,7 +463,11 @@ public:
     // publish for value caching in Parameter classes
     tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
     mgr->GetObject()->DeepCopyFrom(go);
-    port->BrowserPublishRaw(mgr);
+    util::tString error = port->BrowserPublishRaw(mgr);
+    if (error.size() > 0)
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not set default value: ", error);
+    }
   }
 
   static void Publish(tPortType* port, tConstDataPtr& t)

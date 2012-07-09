@@ -140,15 +140,15 @@ private:
    *
    * \param tc ThreadLocalCache
    * \param data Data to publish
-   * \param reverse Value received in reverse direction?
-   * \param changed_constant changedConstant to use
-   * \param inform_listeners Inform this port's listeners on change? (usually only when value comes from browser)
+   * \param cREVERSE Value received in reverse direction?
+   * \param cCHANGE_CONSTANT changedConstant to use
+   * \param cBROWSER_PUBLISH Inform this port's listeners on change and also publish in reverse direction? (only set from BrowserPublish())
    */
-  template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cINFORM_LISTENERS>
-  inline void PublishImpl(tThreadLocalCache* tc, tCCPortDataManagerTL* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
+  template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cBROWSER_PUBLISH>
+  inline void PublishImpl(tThreadLocalCache* tc, tCCPortDataManagerTL* data)
   {
     assert((data->GetObject()->GetType() != NULL) && "Port data type not initialized");
-    if (!(IsInitialized() || cINFORM_LISTENERS))
+    if (!(IsInitialized() || cBROWSER_PUBLISH))
     {
       PrintNotReadyMessage("Ignoring publishing request.");
 
@@ -166,7 +166,7 @@ private:
     Assign(tc);
 
     // inform listeners?
-    if (cINFORM_LISTENERS)
+    if (cBROWSER_PUBLISH)
     {
       SetChanged(cCHANGE_CONSTANT);
       NotifyListeners(tc);
@@ -180,6 +180,23 @@ private:
       if (push)
       {
         dest->Receive<cREVERSE, cCHANGE_CONSTANT>(tc, *this, cREVERSE, cCHANGE_CONSTANT);
+      }
+    }
+
+    if (cBROWSER_PUBLISH)
+    {
+      assert(!cREVERSE);
+
+      // reverse
+      dests = edges_dest.GetIterable();
+      for (int i = 0, n = dests->Size(); i < n; i++)
+      {
+        tCCPortBase* dest = dests->Get(i);
+        bool push = (dest != NULL) && dest->WantsPush<true, cCHANGE_CONSTANT>(true, cCHANGE_CONSTANT);
+        if (push)
+        {
+          dest->Receive<true, cCHANGE_CONSTANT>(tc, *this, true, cCHANGE_CONSTANT);
+        }
       }
     }
   }
@@ -402,7 +419,7 @@ public:
    *
    * \param buffer Buffer with data (must be owned by current thread)
    */
-  void BrowserPublishRaw(tCCPortDataManagerTL* buffer);
+  virtual std::string BrowserPublishRaw(tCCPortDataManagerTL* buffer);
 
   /*!
    * \return Does port contain default value?

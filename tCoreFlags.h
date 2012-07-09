@@ -42,9 +42,8 @@ namespace core
  *
  * Using flags instead of variables saves a lot of memory.
  */
-class tCoreFlags : public util::tUncopyableObject
+struct tCoreFlags
 {
-public:
 
   /*! Mask for constant flags (first 22 bit) */
   static const uint cCONSTANT_FLAGS = 0x3FFFFF;
@@ -52,7 +51,7 @@ public:
   /*! Mask for changeable flags (second 9 bit)*/
   static const uint cNON_CONSTANT_FLAGS = 0x7FC00000;
 
-  // Constant flags (both ports and non-ports - first 9 bits)
+  // Constant flags (both ports and non-ports - first 8 bits)
 
   /*! Is this framework element a port? */
   static const uint cIS_PORT = 1 << 0;
@@ -81,7 +80,7 @@ public:
   /*! First flag whose meaning differs between ports and non-ports */
   static const uint cFIRST_PORT_FLAG = 1 << 8;
 
-  // Non-port constant flags (second 8 bit)
+  // Non-port constant flags
 
   /*! Automatically rename children with duplicate names? */
   static const uint cAUTO_RENAME = cFIRST_PORT_FLAG << 0;
@@ -112,8 +111,6 @@ public:
 
   /*! All status flags */
   static const uint cSTATUS_FLAGS = cREADY | cPUBLISHED | cDELETED;
-
-  tCoreFlags() {}
 };
 
 } // namespace finroc

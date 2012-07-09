@@ -41,7 +41,7 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tSt
   flags(flags & tCoreFlags::cNON_CONSTANT_FLAGS),
   children(GetFlag(tCoreFlags::cALLOWS_CHILDREN) ? 4 : 0)
 {
-  assert(((flags & tCoreFlags::cSTATUS_FLAGS) == 0));
+  assert((flags & tCoreFlags::cSTATUS_FLAGS) == 0);
 
   primary.name = name;
 
@@ -91,23 +91,17 @@ void tFrameworkElement::AddChild(tLink& child)
     child.parent->children.Remove(&child);
   }
 
-  // Check if child with same name already exists and possibly rename (?)
-  if (GetFlag(tCoreFlags::cAUTO_RENAME) && (!GetFlag(tCoreFlags::cIS_PORT)))
+  // Check if child with same name already exists and possibly rename?
+  if (GetFlag(tCoreFlags::cAUTO_RENAME) && (!GetFlag(tCoreFlags::cIS_PORT)) && GetChild(child.GetName()))
   {
-    util::tString child_desc = child.GetName();
-    int postfix_index = 1;
-    util::tArrayWrapper<tLink*>* ch = children.GetIterable();
-    for (int i = 0, n = ch->Size(); i < n; i++)
+    // Ok, rename
+    char pointer_buffer[100];
+    sprintf(pointer_buffer, " (%p)", &child.GetChild());
+    child.GetChild().SetName(child.GetChild().GetName() + pointer_buffer);
+    while (GetChild(child.GetName()))
     {
-      assert(i >= 0);
-      tLink* re = ch->Get(i);
-      if (re && boost::equals(re->GetName(), child_desc))
-      {
-        re->GetChild().SetName(child_desc + "[" + boost::lexical_cast<std::string>(postfix_index) + "]");
-        postfix_index++;
-        i = -1; // start all over again with new name
-        continue;
-      }
+      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, "Spooky framework elements name duplicates: " + child.GetName());
+      child.GetChild().SetName(child.GetChild().GetName() + pointer_buffer);
     }
   }
 
@@ -200,7 +194,7 @@ tFrameworkElement::~tFrameworkElement()
 
 void tFrameworkElement::CheckForNameClash(const tLink& link)
 {
-  if (!tRuntimeSettings::DuplicateQualifiedNamesAllowed() && link.parent)
+  if (!tRuntimeSettings::DuplicateQualifiedNamesAllowed() && link.parent && (!link.GetChild().GetFlag(tCoreFlags::cNETWORK_ELEMENT))) // we cannot influence naming of elements in other runtime environments
   {
     util::tArrayWrapper<tLink*>* iterable = link.parent->children.GetIterable();
     for (int i = 0, n = iterable->Size(); i < n; i++)
@@ -210,7 +204,7 @@ void tFrameworkElement::CheckForNameClash(const tLink& link)
       {
         FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Framework elements with the same qualified names are not allowed ('", child->GetChild().GetQualifiedName(),
                          "'), since this causes undefined behavior with port connections by qualified names (e.g. in fingui or in finstructable groups). Apart from manually choosing another name, there are two ways to solve this:\n",
-                         "  1) Set the tCoreFlags::cAUTO_RENAME flag constructing this framework element.\n",
+                         "  1) Set the tCoreFlags::cAUTO_RENAME flag constructing parent framework element.\n",
                          "  2) Explicitly allow duplicate names by calling tRuntimeSettings::AllowDuplicateQualifiedNames() and be careful.");
         abort();
       }
@@ -808,8 +802,8 @@ void tFrameworkElement::SetName(const util::tString& name)
   assert((!GetFlag(tCoreFlags::cIS_RUNTIME)));
 
   tLock lock2(GetRegistryLock());  // synchronize, C++ strings may not be thread safe...
-  assert((IsConstructing()));
-  assert((IsCreator()));
+  assert(IsConstructing());
+  assert(IsCreator());
   primary.name = name;
 }
 

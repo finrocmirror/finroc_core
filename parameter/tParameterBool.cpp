@@ -33,7 +33,8 @@ void tParameterBool::Set(bool b)
 {
   tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(rrlib::rtti::tDataType<bool>());
   (*(cb->GetObject()->GetData<bool>())) = b;
-  (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
+  std::string error = (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
+  assert(error.size() == 0);
   cache->current_value = b;
 }
 

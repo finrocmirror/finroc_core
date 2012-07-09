@@ -90,12 +90,17 @@ void tCCPortBase::ApplyDefaultValue()
   Publish(tc, c);
 }
 
-void tCCPortBase::BrowserPublishRaw(tCCPortDataManagerTL* buffer)
+std::string tCCPortBase::BrowserPublishRaw(tCCPortDataManagerTL* buffer)
 {
   assert(buffer->GetOwnerThread() == rrlib::thread::tThread::CurrentThreadId());
+  if (buffer->GetObject()->GetType() != GetDataType())
+  {
+    return "Buffer has wrong type";
+  }
   tThreadLocalCache* tc = tThreadLocalCache::Get();
 
   PublishImpl<false, cCHANGED, true>(tc, buffer);
+  return "";
 }
 
 bool tCCPortBase::ContainsDefaultValue()

@@ -36,10 +36,8 @@ namespace core
  *
  * Contains Flags for Ports.
  */
-class tPortFlags : public tCoreFlags
+struct tPortFlags : public tCoreFlags
 {
-public:
-
   // Constant flags
 
   /*! Does Port have a queue for storing incoming data? */
@@ -127,8 +125,6 @@ public:
 
   /*! Simple Proxy Port */
   static const uint cINPUT_PROXY = cPROXY | cPUSH_STRATEGY;
-
-  tPortFlags() {}
 };
 
 } // namespace finroc

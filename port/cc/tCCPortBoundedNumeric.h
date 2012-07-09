@@ -66,12 +66,40 @@ private:
     return pci;
   }
 
+  /*!
+   * Convert incoming value to correct unit
+   *
+   * \param num Incoming value
+   * \return Value in correct unit
+   */
+  template < bool ENABLE = std::is_same<T, tNumber>::value>
+  inline T ToCorrectUnit(const typename std::enable_if < !ENABLE, tNumber >::type& num2)
+  {
+    const tNumber& num = num2;
+    T val = num.Value<T>();
+    if (num.GetUnit() != &tUnit::cNO_UNIT && GetUnit() != &tUnit::cNO_UNIT && num.GetUnit() != GetUnit())
+    {
+      val = num.GetUnit()->ConvertTo(val, GetUnit());
+    }
+    return val;
+  }
+  template < bool ENABLE = std::is_same<T, tNumber>::value>
+  inline T ToCorrectUnit(const typename std::enable_if<ENABLE, tNumber>::type& num2)
+  {
+    const tNumber& num = num2;
+    if (num.GetUnit() != &tUnit::cNO_UNIT && GetUnit() != &tUnit::cNO_UNIT && num.GetUnit() != GetUnit())
+    {
+      return tNumber(num.GetUnit()->ConvertTo(num.Value<double>(), GetUnit()), GetUnit());
+    }
+    return num;
+  }
+
 protected:
 
   virtual void NonStandardAssign(tThreadLocalCache* tc)
   {
     const tNumber* cn = tc->data->GetObject()->GetData<tNumber>();
-    T val = cn->Value<T>();
+    T val = ToCorrectUnit(*cn);
     if (!bounds.InBounds(val))
     {
       if (tc->ref->GetContainer()->GetRefCounter() == 0)    // still unused
@@ -115,6 +143,23 @@ public:
   {
   }
 
+  virtual std::string BrowserPublishRaw(tCCPortDataManagerTL* buffer)
+  {
+    if (buffer->GetObject()->GetType() != GetDataType())
+    {
+      return "Buffer has wrong type";
+    }
+    T val = ToCorrectUnit(*buffer->GetObject()->GetData<tNumber>());
+    if (!bounds.InBounds(val))
+    {
+      std::ostringstream oss;
+      oss << "Value " << val << " is out of bounds [" << bounds.GetMin() << "; " << bounds.GetMax() << "]";
+      return oss.str();
+    }
+    buffer->GetObject()->GetData<tNumber>()->SetValue(val, GetUnit());
+    return tCCPortBase::BrowserPublishRaw(buffer);
+  }
+
   /*!
    * \return the bounds of this port
    */
@@ -145,7 +190,7 @@ public:
     bounds.Set(bounds2);
     tCCPortDataManager* mgr = ::finroc::core::tCCPortBase::GetInInterThreadContainer();
     const tNumber* cn = mgr->GetObject()->GetData<tNumber>();
-    T val = cn->Value<T>();
+    T val = ToCorrectUnit(*cn);
     if (!bounds.InBounds(val))
     {
       if (bounds.Discard())

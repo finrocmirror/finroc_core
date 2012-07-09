@@ -63,13 +63,13 @@ class tAdminServer : public tInterfaceServerPort, public tAbstractMethodCallHand
   static tVoidMethod<tAdminServer, int, int> cDISCONNECT_ALL;
 
   /*! Set a port's value */
-  static tVoidMethod<tAdminServer, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> cSET_PORT_VALUE;
+  static tMethod<tAdminServer, tPortDataPtr<std::string>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> cSET_PORT_VALUE;
 
   /*! Get module types */
   static tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>> cGET_CREATE_MODULE_ACTIONS;
 
   /*! Create a module */
-  static tVoidMethod<tAdminServer, int, tPortDataPtr<std::string>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>> cCREATE_MODULE;
+  static tMethod<tAdminServer, tPortDataPtr<std::string>, int, tPortDataPtr<std::string>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>> cCREATE_MODULE;
 
   /*! Save finstructable group */
   static tVoidMethod<tAdminServer, int> cSAVE_FINSTRUCTABLE_GROUP;
@@ -141,11 +141,11 @@ public:
 
   int HandleCall(const tAbstractMethod& method, int handle);
 
-  tPortDataPtr<std::string> HandleCall(const tAbstractMethod& method, int p1, int p2, int p3);
+  tPortDataPtr<std::string> HandleCall(const tAbstractMethod& method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int as_string);
+
+  tPortDataPtr<std::string> HandleCall(const tAbstractMethod& method, int cma_index, tPortDataPtr<std::string>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer);
 
   void HandleVoidCall(const tAbstractMethod& method, int p1, int p2);
-
-  void HandleVoidCall(const tAbstractMethod& method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int as_string);
 
   void HandleVoidCall(const tAbstractMethod& method, int cma_index, tPortDataPtr<std::string>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer);
 

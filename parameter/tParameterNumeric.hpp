@@ -36,7 +36,11 @@ void tParameterNumeric<T>::Set(T v)
 {
   tCCPortDataManagerTL* cb = tThreadLocalCache::Get()->GetUnusedBuffer(tNumber::cTYPE);
   cb->GetObject()->GetData<tNumber>()->SetValue(v, (static_cast<tCCPortBase*>(this->wrapped))->GetUnit());
-  (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
+  std::string error = (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
+  if (error.size() > 0)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not set value: ", error);
+  }
   cache->current_value = v;
 }
 

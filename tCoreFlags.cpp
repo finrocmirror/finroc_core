@@ -46,6 +46,9 @@ const uint tCoreFlags::cFINSTRUCTABLE_GROUP;
 const uint tCoreFlags::cFIRST_CUSTOM_NON_CONST_FLAG;
 const uint tCoreFlags::cSTATUS_FLAGS;
 
+static_assert((tCoreFlags::cSTATUS_FLAGS & tCoreFlags::cNON_CONSTANT_FLAGS) == tCoreFlags::cSTATUS_FLAGS, "Invalid flag configuration");
+static_assert((tCoreFlags::cALLOWS_CHILDREN & tCoreFlags::cCONSTANT_FLAGS) != 0, "Invalid flag configuration");
+
 } // namespace finroc
 } // namespace core
 

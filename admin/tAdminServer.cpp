@@ -21,6 +21,7 @@
  */
 #include "rrlib/rtti/rtti.h"
 #include "rrlib/serialization/serialization.h"
+#include <boost/lexical_cast.hpp>
 
 #include "core/admin/tAdminServer.h"
 #include "core/tCoreFlags.h"
@@ -55,9 +56,9 @@ tPortInterface tAdminServer::cMETHODS("Admin Interface", true);
 tVoidMethod<tAdminServer, int, int> tAdminServer::cCONNECT(tAdminServer::cMETHODS, "Connect", "source port handle", "destination port handle", false);
 tVoidMethod<tAdminServer, int, int> tAdminServer::cDISCONNECT(tAdminServer::cMETHODS, "Disconnect", "source port handle", "destination port handle", false);
 tVoidMethod<tAdminServer, int, int> tAdminServer::cDISCONNECT_ALL(tAdminServer::cMETHODS, "DisconnectAll", "source port handle", "dummy", false);
-tVoidMethod<tAdminServer, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> tAdminServer::cSET_PORT_VALUE(tAdminServer::cMETHODS, "SetPortValue", "port handle", "data", "dummy", false);
+tMethod<tAdminServer, tPortDataPtr<std::string>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>, int> tAdminServer::cSET_PORT_VALUE(tAdminServer::cMETHODS, "SetPortValue", "port handle", "data", "dummy", false);
 tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>> tAdminServer::cGET_CREATE_MODULE_ACTIONS(tAdminServer::cMETHODS, "GetCreateModuleActions", false);
-tVoidMethod<tAdminServer, int, tPortDataPtr<std::string>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>> tAdminServer::cCREATE_MODULE(tAdminServer::cMETHODS, "CreateModule", "create action index", "module name", "parent handle", "module creation parameters", false);
+tMethod<tAdminServer, tPortDataPtr<std::string>, int, tPortDataPtr<std::string>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>> tAdminServer::cCREATE_MODULE(tAdminServer::cMETHODS, "CreateModule", "create action index", "module name", "parent handle", "module creation parameters", false);
 tVoidMethod<tAdminServer, int> tAdminServer::cSAVE_FINSTRUCTABLE_GROUP(tAdminServer::cMETHODS, "Save Finstructable Group", "finstructable handle", false);
 tMethod<tAdminServer, tPortDataPtr<rrlib::serialization::tMemoryBuffer>, int, tPortDataPtr<std::string>> tAdminServer::cGET_ANNOTATION(tAdminServer::cMETHODS, "Get Annotation", "handle", "annotation type", false);
 tVoidMethod<tAdminServer, int, tPortDataPtr<std::string>, int, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>> tAdminServer::cSET_ANNOTATION(tAdminServer::cMETHODS, "Set Annotation", "handle", "dummy", "dummy", "annotation", false);
@@ -270,6 +271,121 @@ int tAdminServer::HandleCall(const tAbstractMethod& method, int handle)
   }
 }
 
+tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int unused)
+{
+  assert(method == cSET_PORT_VALUE);
+  tPortDataPtr<std::string> result = this->GetBufferForReturn<std::string>();
+  result->clear();
+
+  core::tAbstractPort* port = tRuntimeEnvironment::GetInstance()->GetPort(port_handle);
+  if (port != NULL && port->IsReady())
+  {
+    tLock lock3(GetRegistryLock()); // TODO: obtaining registry lock is quite heavy-weight - however, set calls should not occur often
+    if (port->IsReady())
+    {
+      try
+      {
+        rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::eNames);
+        rrlib::serialization::tDataEncoding enc;
+        rrlib::rtti::tDataTypeBase dt;
+        ci >> enc >> dt;
+        if (tFinrocTypeInfo::IsCCType(port->GetDataType()) && tFinrocTypeInfo::IsCCType(dt))
+        {
+          tCCPortBase* p = static_cast<tCCPortBase*>(port);
+          tCCPortDataManagerTL* c = tThreadLocalCache::Get()->GetUnusedBuffer(dt);
+          c->GetObject()->Deserialize(ci, enc);
+          (*result) = p->BrowserPublishRaw(c);
+          if (result->length() > 0)
+          {
+            FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Setting value of port '", port->GetQualifiedName(), "' failed: ", *result);
+          }
+        }
+        else if (tFinrocTypeInfo::IsStdType(port->GetDataType()) && tFinrocTypeInfo::IsStdType(dt))
+        {
+          tPortBase* p = static_cast<tPortBase*>(port);
+          tPortDataManager* port_data = p->GetDataType() != dt ? p->GetUnusedBufferRaw(dt) : p->GetUnusedBufferRaw();
+          port_data->GetObject()->Deserialize(ci, enc);
+          p->BrowserPublish(port_data);
+        }
+      }
+      catch (const std::exception& e)
+      {
+        FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Setting value of port '", port->GetQualifiedName(), "' failed: ", e);
+        (*result) = e.what();
+      }
+      return result;
+    }
+  }
+  (*result) += "Port with handle " + boost::lexical_cast<std::string>(port_handle) + " is not available.";
+  FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Setting value of port failed: ", *result);
+  return result;
+}
+
+tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method, int cma_index, tPortDataPtr<std::string>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer)
+{
+  tConstructorParameters* params = NULL;
+  assert(method == cCREATE_MODULE);
+  tPortDataPtr<std::string> result = this->GetBufferForReturn<std::string>();
+  result->clear();
+
+  try
+  {
+    tLock lock4(GetRegistryLock());
+    tCreateFrameworkElementAction* cma = runtime_construction::GetConstructibleElements()[cma_index];
+    core::tFrameworkElement* parent = tRuntimeEnvironment::GetInstance()->GetElement(parent_handle);
+    if (parent == NULL || (!parent->IsReady()))
+    {
+      (*result) = "Parent not available. Cancelling remote module creation.";
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, *result);
+    }
+    else if ((!tRuntimeSettings::DuplicateQualifiedNamesAllowed()) && parent->GetChild(*name))
+    {
+      (*result) = std::string("Element with name '") + *name + "' already exists. Creating another module with this name is not allowed.";
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, *result);
+    }
+    else
+    {
+      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Creating Module ", parent->GetQualifiedLink(), "/", *name);
+
+      if (cma->GetParameterTypes() != NULL && cma->GetParameterTypes()->Size() > 0)
+      {
+        params = cma->GetParameterTypes()->Instantiate();
+        rrlib::serialization::tInputStream ci(params_buffer.get());
+        for (size_t i = 0u; i < params->Size(); i++)
+        {
+          tStaticParameterBase* param = params->Get(i);
+          try
+          {
+            param->DeserializeValue(ci);
+          }
+          catch (const std::exception& e)
+          {
+            (*result) = std::string("Error parsing value for parameter ") + param->GetName();
+            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, *result);
+            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+          }
+        }
+        ci.Close();
+      }
+      core::tFrameworkElement* created = cma->CreateModule(parent, *name, params);
+      tFinstructableGroup::SetFinstructed(*created, cma, params);
+      created->Init();
+      params = NULL;
+
+      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Creating Module succeeded");
+    }
+  }
+  catch (const std::exception& e)
+  {
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+    (*result) = e.what();
+  }
+
+  // if something's gone wrong, delete parameter list
+  delete params;
+  return result;
+}
+
 void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
 {
   tRuntimeEnvironment* re = tRuntimeEnvironment::GetInstance();
@@ -338,137 +454,42 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
   }
 }
 
-void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int port_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& buf, int unused)
-{
-  assert(method == cSET_PORT_VALUE);
-  ::finroc::core::tAbstractPort* port = tRuntimeEnvironment::GetInstance()->GetPort(port_handle);
-  if (port != NULL && port->IsReady())
-  {
-    tLock lock3(GetRegistryLock()); // TODO: obtaining registry lock is quite heavy-weight - however, set calls should not occur often
-    if (port->IsReady())
-    {
-      rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::eNames);
-      rrlib::serialization::tDataEncoding enc;
-      rrlib::rtti::tDataTypeBase dt;
-      ci >> enc >> dt;
-      if (tFinrocTypeInfo::IsCCType(port->GetDataType()) && tFinrocTypeInfo::IsCCType(dt))
-      {
-        tCCPortBase* p = static_cast<tCCPortBase*>(port);
-        tCCPortDataManagerTL* c = tThreadLocalCache::Get()->GetUnusedBuffer(dt);
-        c->GetObject()->Deserialize(ci, enc);
-        p->BrowserPublishRaw(c);
-      }
-      else if (tFinrocTypeInfo::IsStdType(port->GetDataType()) && tFinrocTypeInfo::IsStdType(dt))
-      {
-        tPortBase* p = static_cast<tPortBase*>(port);
-        tPortDataManager* port_data = p->GetDataType() != dt ? p->GetUnusedBufferRaw(dt) : p->GetUnusedBufferRaw();
-        port_data->GetObject()->Deserialize(ci, enc);
-        p->BrowserPublish(port_data);
-      }
-    }
-  }
-}
-
 void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int cma_index, tPortDataPtr<std::string>& name, int parent_handle, tPortDataPtr<const rrlib::serialization::tMemoryBuffer>& params_buffer)
 {
-  tConstructorParameters* params = NULL;
-  if (method == cSET_ANNOTATION)
+  assert(method == cSET_ANNOTATION);
+  assert(!name);
+  ::finroc::core::tFrameworkElement* elem = tRuntimeEnvironment::GetInstance()->GetElement(cma_index);
+  if (elem == NULL || (!elem->IsReady()))
   {
-    assert(!name);
-    ::finroc::core::tFrameworkElement* elem = tRuntimeEnvironment::GetInstance()->GetElement(cma_index);
-    if (elem == NULL || (!elem->IsReady()))
+    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Parent not available. Cancelling setting of annotation.");
+  }
+  else
+  {
+    rrlib::serialization::tInputStream ci(params_buffer.get(), rrlib::serialization::eNames);
+    rrlib::rtti::tDataTypeBase dt;
+    ci >> dt;
+    if (dt == NULL)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Parent not available. Cancelling setting of annotation.");
+      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Data type not available. Cancelling setting of annotation.");
     }
     else
     {
-      rrlib::serialization::tInputStream ci(params_buffer.get(), rrlib::serialization::eNames);
-      rrlib::rtti::tDataTypeBase dt;
-      ci >> dt;
-      if (dt == NULL)
+      tFinrocAnnotation* ann = elem->GetAnnotation(dt);
+      if (ann == NULL)
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Data type not available. Cancelling setting of annotation.");
+        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Creating new annotations not supported yet. Cancelling setting of annotation.");
+      }
+      else if (ann->GetType() != dt)
+      {
+        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Existing annotation has wrong type?!. Cancelling setting of annotation.");
       }
       else
       {
-        tFinrocAnnotation* ann = elem->GetAnnotation(dt);
-        if (ann == NULL)
-        {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Creating new annotations not supported yet. Cancelling setting of annotation.");
-        }
-        else if (ann->GetType() != dt)
-        {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Existing annotation has wrong type?!. Cancelling setting of annotation.");
-        }
-        else
-        {
-          ann->Deserialize(ci);
-        }
-      }
-      ci.Close();
-    }
-
-  }
-  else if (method == cCREATE_MODULE)
-  {
-    try
-    {
-      {
-        tLock lock4(GetRegistryLock());
-        tCreateFrameworkElementAction* cma = runtime_construction::GetConstructibleElements()[cma_index];
-        ::finroc::core::tFrameworkElement* parent = tRuntimeEnvironment::GetInstance()->GetElement(parent_handle);
-        if (parent == NULL || (!parent->IsReady()))
-        {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Parent not available. Cancelling remote module creation.");
-        }
-        else
-        {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Creating Module ", parent->GetQualifiedLink(), "/", *name);
-
-          if (cma->GetParameterTypes() != NULL && cma->GetParameterTypes()->Size() > 0)
-          {
-            params = cma->GetParameterTypes()->Instantiate();
-            rrlib::serialization::tInputStream ci(params_buffer.get());
-            for (size_t i = 0u; i < params->Size(); i++)
-            {
-              tStaticParameterBase* param = params->Get(i);
-              try
-              {
-                param->DeserializeValue(ci);
-              }
-              catch (const util::tException& e)
-              {
-                FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error parsing value for parameter ", param->GetName());
-                FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
-              }
-            }
-            ci.Close();
-          }
-          ::finroc::core::tFrameworkElement* created = cma->CreateModule(parent, *name, params);
-          tFinstructableGroup::SetFinstructed(*created, cma, params);
-          created->Init();
-          params = NULL;
-
-          FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Creating Module succeeded");
-        }
+        ann->Deserialize(ci);
       }
     }
-    catch (const util::tException& e)
-    {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
-    }
+    ci.Close();
   }
-
-  // if something's gone wrong, delete parameter list
-  if (params != NULL)
-  {
-    delete params;
-  }
-
-  // release locks
-
-  // release locks
-
 }
 
 void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int handle)

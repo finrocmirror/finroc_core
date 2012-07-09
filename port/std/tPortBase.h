@@ -138,15 +138,15 @@ private:
    * Should only be called on output ports
    *
    * \param cnc Data buffer acquired from a port using getUnusedBuffer
-   * \param reverse Publish in reverse direction? (typical is forward)
-   * \param changed_constant changedConstant to use
-   * \param inform_listeners Inform this port's listeners on change? (usually only when value comes from browser)
+   * \param cREVERSE Publish in reverse direction? (typical is forward)
+   * \param cCHANGE_CONSTANT changedConstant to use
+   * \param cBROWSER_PUBLISH Inform this port's listeners on change and also publish in reverse direction? (only set from BrowserPublish())
    */
-  template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cINFORM_LISTENERS>
-  inline void PublishImpl(const tPortDataManager* data, bool reverse = false, int8 changed_constant = cCHANGED, bool inform_listeners = false)
+  template <bool cREVERSE, int8 cCHANGE_CONSTANT, bool cBROWSER_PUBLISH>
+  inline void PublishImpl(const tPortDataManager* data)
   {
     assert((data->GetType() != NULL) && "Port data type not initialized");
-    if (!(IsInitialized() || cINFORM_LISTENERS))
+    if (!(IsInitialized() || cBROWSER_PUBLISH))
     {
       PrintNotReadyMessage("Ignoring publishing request.");
 
@@ -170,7 +170,7 @@ private:
     Assign(pc);
 
     // inform listeners?
-    if (cINFORM_LISTENERS)
+    if (cBROWSER_PUBLISH)
     {
       SetChanged(cCHANGE_CONSTANT);
       NotifyListeners(&(pc));
@@ -184,6 +184,23 @@ private:
       if (push)
       {
         dest->Receive<cREVERSE, cCHANGE_CONSTANT>(pc, *this, cREVERSE, cCHANGE_CONSTANT);
+      }
+    }
+
+    if (cBROWSER_PUBLISH)
+    {
+      assert(!cREVERSE);
+
+      // reverse
+      dests = edges_dest.GetIterable();
+      for (int i = 0, n = dests->Size(); i < n; i++)
+      {
+        tPortBase* dest = dests->Get(i);
+        bool push = (dest != NULL) && dest->WantsPush<true, cCHANGE_CONSTANT>(false, cCHANGE_CONSTANT);
+        if (push)
+        {
+          dest->Receive<true, cCHANGE_CONSTANT>(pc, *this, true, cCHANGE_CONSTANT);
+        }
       }
     }
 

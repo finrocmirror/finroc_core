@@ -167,7 +167,11 @@ void tParameterInfo::LoadValue(bool ignore_ready)
             try
             {
               c->GetObject()->Deserialize(sis);
-              port->BrowserPublishRaw(c);
+              util::tString error = port->BrowserPublishRaw(c);
+              if (error.size() > 0)
+              {
+                FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to load parameter '", ann->GetQualifiedName(), "' from command line argument '", arg, "': ", error);
+              }
               return;
             }
             catch (const util::tException& e)
@@ -214,7 +218,11 @@ void tParameterInfo::LoadValue(bool ignore_ready)
             try
             {
               c->GetObject()->Deserialize(node);
-              port->BrowserPublishRaw(c);
+              util::tString error = port->BrowserPublishRaw(c);
+              if (error.size() > 0)
+              {
+                FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", full_config_entry, "': ", error);
+              }
               return;
             }
             catch (const util::tException& e)
@@ -257,7 +265,11 @@ void tParameterInfo::LoadValue(bool ignore_ready)
           try
           {
             c->GetObject()->Deserialize(sis);
-            port->BrowserPublishRaw(c);
+            util::tString error = port->BrowserPublishRaw(c);
+            if (error.size() > 0)
+            {
+              FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to load parameter '", ann->GetQualifiedName(), "' from finstruct default '", finstruct_default, "': ", error);
+            }
             return;
           }
           catch (const util::tException& e)

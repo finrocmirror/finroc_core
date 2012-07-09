@@ -100,6 +100,25 @@ protected:
     //super.assign(tc); done anyway
   }
 
+  /*!
+   * Generates error message for BrowserPublishRaw
+   *
+   * \param current_vale Value to generate out of bounds error message for
+   * \return Error message that value is out of bounds
+   */
+  template < bool ENABLE = rrlib::serialization::tIsStringSerializable<T>::value>
+  std::string GenerateErrorMessage(const typename std::enable_if<ENABLE, T>::type& current_value)
+  {
+    rrlib::serialization::tStringOutputStream sos;
+    sos << "Value " << current_value << " is out of bounds [" << bounds.GetMin() << "; " << bounds.GetMax() << "]";
+    return sos.ToString();
+  }
+  template < bool ENABLE = rrlib::serialization::tIsStringSerializable<T>::value>
+  std::string GenerateErrorMessage(const typename std::enable_if < !ENABLE, T >::type& current_value)
+  {
+    return "Value is out of bounds";
+  }
+
 public:
 
   /*!
@@ -109,6 +128,20 @@ public:
     tCCPortBase(ProcessPciBNP(pci)),
     bounds(pci.GetBounds())
   {
+  }
+
+  virtual std::string BrowserPublishRaw(tCCPortDataManagerTL* buffer)
+  {
+    if (buffer->GetObject()->GetType() != GetDataType())
+    {
+      return "Buffer has wrong type";
+    }
+    T val = *buffer->GetObject()->GetData<T>();
+    if (!bounds.InBounds(val))
+    {
+      return GenerateErrorMessage(val);
+    }
+    return tCCPortBase::BrowserPublishRaw(buffer);
   }
 
   /*!
