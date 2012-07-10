@@ -22,7 +22,7 @@
 #include <fstream>
 #include <dlfcn.h>
 #include <boost/filesystem.hpp>
-#include "rrlib/util/patterns/singleton.h"
+#include "rrlib/design_patterns/singleton.h"
 
 #include "core/plugin/sDynamicLoading.h"
 #include "core/tRuntimeEnvironment.h"
@@ -79,7 +79,7 @@ static inline unsigned int GetLongevity(internal::tDLCloser*)
 
 }
 
-typedef rrlib::util::tSingletonHolder<internal::tDLCloser, rrlib::util::singleton::Longevity> tDLCloserInstance;
+typedef rrlib::design_patterns::tSingletonHolder<internal::tDLCloser, rrlib::design_patterns::singleton::Longevity> tDLCloserInstance;
 
 bool sDynamicLoading::DLOpen(const char* open)
 {

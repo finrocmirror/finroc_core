@@ -21,7 +21,7 @@
  */
 
 #include "rrlib/rtti/rtti.h"
-#include "rrlib/util/patterns/singleton.h"
+#include "rrlib/design_patterns/singleton.h"
 
 #include "core/port/tThreadLocalCache.h"
 #include "core/tRuntimeEnvironment.h"
@@ -54,7 +54,7 @@ struct ThreadLocalCacheInfosCreator
 
 }
 
-typedef rrlib::util::tSingletonHolder<util::tSimpleListWithMutex<tThreadLocalCache*>, rrlib::util::singleton::Longevity, internal::ThreadLocalCacheInfosCreator> tThreadLocalCacheInfos;
+typedef rrlib::design_patterns::tSingletonHolder<util::tSimpleListWithMutex<tThreadLocalCache*>, rrlib::design_patterns::singleton::Longevity, internal::ThreadLocalCacheInfosCreator> tThreadLocalCacheInfos;
 static inline unsigned int GetLongevity(util::tSimpleListWithMutex<tThreadLocalCache*>*)
 {
   return 0xEFFFFFFE; // delete after thread cleanup

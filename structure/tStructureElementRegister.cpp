@@ -32,7 +32,7 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include "core/tRuntimeEnvironment.h"
-#include "rrlib/util/patterns/singleton.h"
+#include "rrlib/design_patterns/singleton.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -84,7 +84,7 @@ static inline unsigned int GetLongevity(internal::tStructureElementStorage*)
 }
 }
 
-typedef rrlib::util::tSingletonHolder<internal::tStructureElementStorage, rrlib::util::singleton::Longevity> tStructureElementStorageInstance;
+typedef rrlib::design_patterns::tSingletonHolder<internal::tStructureElementStorage, rrlib::design_patterns::singleton::Longevity> tStructureElementStorageInstance;
 
 rrlib::thread::tMutex& tStructureElementRegister::GetMutex()
 {

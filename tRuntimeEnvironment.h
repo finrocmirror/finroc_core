@@ -26,7 +26,7 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
-#include "rrlib/util/patterns/singleton/policies/creation/CreateUsingNew.h"
+#include "rrlib/design_patterns/singleton/policies/creation/CreateUsingNew.h"
 
 #include "core/tCoreRegister.h"
 #include "core/tFrameworkElement.h"
@@ -88,7 +88,7 @@ public:
 
   friend class tFrameworkElement;
   friend class tLinkEdge;
-  friend class rrlib::util::singleton::CreateUsingNew<tRuntimeEnvironment>;
+  friend class rrlib::design_patterns::singleton::CreateUsingNew<tRuntimeEnvironment>;
 private:
 
   /*! Single final instance of above */

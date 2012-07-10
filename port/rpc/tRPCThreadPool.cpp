@@ -19,14 +19,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/util/patterns/singleton.h"
+#include "rrlib/design_patterns/singleton.h"
 #include "core/port/rpc/tRPCThreadPool.h"
 
 namespace finroc
 {
 namespace core
 {
-typedef rrlib::util::tSingletonHolder<tRPCThreadPool, rrlib::util::singleton::Longevity> tRPCThreadPoolInstance;
+typedef rrlib::design_patterns::tSingletonHolder<tRPCThreadPool, rrlib::design_patterns::singleton::Longevity> tRPCThreadPoolInstance;
 static inline unsigned int GetLongevity(tRPCThreadPool*)
 {
   return 10; // delete after runtime environment

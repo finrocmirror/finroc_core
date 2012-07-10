@@ -22,7 +22,7 @@
 #include "rrlib/finroc_core_utils/tGarbageDeleter.h"
 #include "rrlib/finroc_core_utils/stream/tChunkedBuffer.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "rrlib/util/patterns/singleton.h"
+#include "rrlib/design_patterns/singleton.h"
 
 #include "core/tRuntimeEnvironment.h"
 #include "core/tCoreFlags.h"
@@ -37,7 +37,7 @@ namespace finroc
 {
 namespace core
 {
-typedef rrlib::util::tSingletonHolder<tRuntimeEnvironment, rrlib::util::singleton::Longevity> tRuntimeEnvironmentInstance;
+typedef rrlib::design_patterns::tSingletonHolder<tRuntimeEnvironment, rrlib::design_patterns::singleton::Longevity> tRuntimeEnvironmentInstance;
 static inline unsigned int GetLongevity(tRuntimeEnvironment*)
 {
   return 1; // delete before (almost) any other singleton
