@@ -234,14 +234,14 @@ tFrameworkElement* tFrameworkElement::GetChild(const util::tString& name) const
   for (int i = 0, n = iterable->Size(); i < n; i++)
   {
     tLink* child = iterable->Get(i);
-    if (child->GetChild().IsReady())
+    if (child && child->GetChild().IsReady())
     {
       if (boost::equals(child->GetName(), name))
       {
         return &child->GetChild();
       }
     }
-    else
+    else if (child)
     {
       tLock lock4(GetRegistryLock());
       if (IsDeleted())
