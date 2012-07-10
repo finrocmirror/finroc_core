@@ -147,6 +147,24 @@ void tPortGroup::DisconnectAll(bool incoming, bool outgoing, tAbstractPort* star
   }
 }
 
+tAbstractPort& tPortGroup::operator[](size_t index)
+{
+  tChildIterator ci(*this, false);
+  if (index)
+  {
+    for (size_t i = 0; i < index - 1; i++)
+    {
+      ci.NextPort();
+    }
+  }
+  tAbstractPort* result = ci.NextPort();
+  if (!result)
+  {
+    throw util::tException("Index out of bounds", CODE_LOCATION_MACRO);
+  }
+  return *result;
+}
+
 } // namespace finroc
 } // namespace core
 

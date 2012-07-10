@@ -33,7 +33,7 @@ tGroup::tGroup(tFrameworkElement* parent, const util::tString& name, uint flags)
   tPortGroup(parent, name, flags, 0),
   ports("Ports", this)
 {
-  ports.GetValue()->InitialSetup(this, 0, true);
+  ports.GetValue()->InitialSetup(*this, 0, true);
 }
 
 } // namespace finroc

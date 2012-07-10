@@ -190,7 +190,7 @@ public:
     }
     else
     {
-      assert((manager_tl == NULL) && "Buffers acquired via getUnuserBuffer() have to be published via port!");
+      assert((manager_tl == NULL) && "Buffers acquired via getUnusedBuffer() have to be published via port!");
     }
   }
 
@@ -240,7 +240,7 @@ public:
     }
     else
     {
-      assert((manager_tl == NULL) && "Buffers acquired via getUnuserBuffer() have to be published via port!");
+      assert((manager_tl == NULL) && "Buffers acquired via getUnusedBuffer() have to be published via port!");
     }
   }
 

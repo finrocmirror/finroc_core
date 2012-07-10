@@ -183,6 +183,12 @@ public:
   {
     return default_port_flags;
   }
+
+  /*!
+   * \param index of port in this group (throws util::tException if index is out of bounds; use ChildCount() to check for size)
+   * \return nth Port in this port group
+   */
+  tAbstractPort& operator[](size_t index);
 };
 
 } // namespace finroc

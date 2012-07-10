@@ -23,16 +23,15 @@
 #ifndef core__datatype__tPortCreationList_h__
 #define core__datatype__tPortCreationList_h__
 
-#include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/rtti/tDataTypeBase.h"
+#include "rrlib/serialization/serialization.h"
+#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 
 #include "core/tCoreFlags.h"
 #include "core/port/tPortFlags.h"
-#include "rrlib/rtti/tDataTypeBase.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tFrameworkElement.h"
 #include "core/datatype/tDataTypeReference.h"
-
-#include "rrlib/serialization/serialization.h"
+#include "core/port/tPortTypeMap.h"
 
 namespace finroc
 {
@@ -128,7 +127,7 @@ private:
    * \param output output port
    * \param prototype Port prototype (only interesting for listener)
    */
-  void CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, uint flags_, const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output, tAbstractPort* prototype);
+  void CheckPort(tAbstractPort* ap, tFrameworkElement& io_vector, uint flags, const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output, tAbstractPort* prototype);
 
   /*!
    * Returns all child ports of specified framework element
@@ -152,12 +151,25 @@ public:
   void Add(const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output);
 
   /*!
+   * Add entry to list
+   *
+   * \param T Data type
+   * \param name Port name
+   * \param output Output port? (possibly irrelevant)
+   */
+  template <typename T>
+  void Add(const util::tString& name, bool output = false)
+  {
+    Add(name, rrlib::rtti::tDataType<typename tPortTypeMap<T>::tPortDataType>(), output);
+  }
+
+  /*!
    * Applies changes to another IO vector
    *
    * \param io_vector Other io vector
    * \param flags Flags to use for port creation
    */
-  void ApplyChanges(tFrameworkElement* io_vector_, uint flags_);
+  void ApplyChanges(tFrameworkElement& io_vector, uint flags);
 
   virtual void Deserialize(rrlib::serialization::tInputStream& is);
 
@@ -186,7 +198,7 @@ public:
    * \param port_creation_flags Flags for port creation
    * \param show_output_port_selection Should output port selection be visible in finstruct?
    */
-  void InitialSetup(tFrameworkElement* managed_io_vector, uint port_creation_flags, bool show_output_port_selection_);
+  void InitialSetup(tFrameworkElement& managed_io_vector, uint port_creation_flags, bool show_output_port_selection);
 
   virtual void Serialize(rrlib::serialization::tOutputStream& os) const;
 

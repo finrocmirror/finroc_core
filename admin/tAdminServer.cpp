@@ -425,7 +425,9 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
     }
     if (!src->IsConnectedTo(*dest))
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not connect ports ", src->GetQualifiedName(), " ", dest->GetQualifiedName());
+      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not connect ports '", src->GetQualifiedName(), "' and '", dest->GetQualifiedName(), "' for the following reasons:");
+      src->MayConnectTo(*dest, true);
+      dest->MayConnectTo(*src, true);
     }
     else
     {

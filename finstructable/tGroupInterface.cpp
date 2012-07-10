@@ -36,14 +36,14 @@ tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString&
   tPortGroup(parent, name, ::finroc::core::tEdgeAggregator::cIS_INTERFACE, 0),
   ports("Ports", this)
 {
-  ports.GetValue()->InitialSetup(this, 0, true);
+  ports.GetValue()->InitialSetup(*this, 0, true);
 }
 
 tGroupInterface::tGroupInterface(tFrameworkElement* parent, const util::tString& name, tGroupInterface::tDataClassification data_class, tGroupInterface::tPortDirection port_dir, bool shared, bool unique_link) :
   tPortGroup(parent, name, ComputeFlags(data_class, shared, unique_link), ComputePortFlags(port_dir, shared, unique_link)),
   ports("Ports", this)
 {
-  ports.GetValue()->InitialSetup(this, ComputePortFlags(port_dir, shared, unique_link), port_dir == eBOTH);
+  ports.GetValue()->InitialSetup(*this, ComputePortFlags(port_dir, shared, unique_link), port_dir == eBOTH);
 }
 
 uint tGroupInterface::ComputeFlags(tGroupInterface::tDataClassification data_class, bool shared, bool unique_link)

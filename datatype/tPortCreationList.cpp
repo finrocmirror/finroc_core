@@ -49,18 +49,18 @@ void tPortCreationList::Add(const util::tString& name, rrlib::rtti::tDataTypeBas
 {
   {
     rrlib::thread::tLock lock2(*io_vector);
-    CheckPort(NULL, io_vector, flags, name, dt, output, NULL);
+    CheckPort(NULL, *io_vector, flags, name, dt, output, NULL);
   }
 }
 
-void tPortCreationList::ApplyChanges(tFrameworkElement* io_vector_, uint flags_)
+void tPortCreationList::ApplyChanges(tFrameworkElement& io_vector_, uint flags_)
 {
   {
-    rrlib::thread::tLock lock2(*io_vector_);
+    rrlib::thread::tLock lock2(io_vector_);
     util::tSimpleList<tAbstractPort*> ports1;
     GetPorts(*this->io_vector, ports1);
     util::tSimpleList<tAbstractPort*> ports2;
-    GetPorts(*io_vector_, ports2);
+    GetPorts(io_vector_, ports2);
 
     for (size_t i = 0u; i < ports1.Size(); i++)
     {
@@ -75,7 +75,7 @@ void tPortCreationList::ApplyChanges(tFrameworkElement* io_vector_, uint flags_)
   }
 }
 
-void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vector_, uint flags_, const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output, tAbstractPort* prototype)
+void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement& io_vector_, uint flags_, const util::tString& name, rrlib::rtti::tDataTypeBase dt, bool output, tAbstractPort* prototype)
 {
   if (ap != NULL && ap->NameEquals(name) && ap->GetDataType() == dt && (ap->GetAllFlags() & cRELEVANT_FLAGS) == (flags_ & cRELEVANT_FLAGS))
   {
@@ -97,8 +97,8 @@ void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement* io_vecto
   }
   flags_ |= tmp;
 
-  FINROC_LOG_PRINT_TO(port_creation_list, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", io_vector_->GetQualifiedLink());
-  ap = &tFinrocTypeInfo::GetPortFactory(dt).CreatePort(name, *io_vector_, dt, flags_);
+  FINROC_LOG_PRINT_TO(port_creation_list, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", io_vector_.GetQualifiedLink());
+  ap = &tFinrocTypeInfo::GetPortFactory(dt).CreatePort(name, io_vector_, dt, flags_);
   if (ap != NULL)
   {
     ap->Init();
@@ -142,7 +142,7 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
           throw util::tRuntimeException(std::string("Type ") + dt_name + " not available", CODE_LOCATION_MACRO);
         }
         bool output = is.ReadBoolean();
-        CheckPort(ap, io_vector, flags, name, dt, output, NULL);
+        CheckPort(ap, *io_vector, flags, name, dt, output, NULL);
       }
       for (size_t i = size; i < ports.Size(); i++)
       {
@@ -177,7 +177,7 @@ void tPortCreationList::Deserialize(const rrlib::xml::tNode& node)
       {
         throw util::tRuntimeException(std::string("Type ") + dt_name + " not available", CODE_LOCATION_MACRO);
       }
-      CheckPort(ap, io_vector, flags, port->GetStringAttribute("name"), dt, b, NULL);
+      CheckPort(ap, *io_vector, flags, port->GetStringAttribute("name"), dt, b, NULL);
     }
     for (; i < ports.Size(); i++)
     {
@@ -197,12 +197,12 @@ void tPortCreationList::GetPorts(const tFrameworkElement& elem, util::tSimpleLis
   }
 }
 
-void tPortCreationList::InitialSetup(tFrameworkElement* managed_io_vector, uint port_creation_flags, bool show_output_port_selection_)
+void tPortCreationList::InitialSetup(tFrameworkElement& managed_io_vector, uint port_creation_flags, bool show_output_port_selection)
 {
-  assert(((io_vector == NULL || io_vector == managed_io_vector) && list.IsEmpty()));
-  io_vector = managed_io_vector;
+  assert((io_vector == NULL || io_vector == &managed_io_vector) && list.IsEmpty());
+  io_vector = &managed_io_vector;
   flags = port_creation_flags;
-  this->show_output_port_selection = show_output_port_selection_;
+  this->show_output_port_selection = show_output_port_selection;
 }
 
 void tPortCreationList::Serialize(rrlib::serialization::tOutputStream& os) const
