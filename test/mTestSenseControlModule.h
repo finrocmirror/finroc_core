@@ -67,15 +67,15 @@ class mTestSenseControlModule : public finroc::core::structure::tSenseControlMod
 {
   static finroc::core::tStandardCreateModuleAction<mTestSenseControlModule> cCREATE_ACTION;
 
-  int counter;
-
 //----------------------------------------------------------------------
-// Protected methods
+// Public ports
 //----------------------------------------------------------------------
+public:
 
-  virtual void Control();
-
-  virtual void Sense();
+  tControllerInput<int> ci_signal_1;
+  tControllerOutput<int> co_signal_2;
+  tSensorInput<int> si_signal_3;
+  tSensorOutput<int> so_signal_4;
 
 //----------------------------------------------------------------------
 // Public methods
@@ -84,10 +84,15 @@ public:
 
   mTestSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name = "TestModule");
 
-  tControllerInput<int> ci_signal_1;
-  tControllerOutput<int> co_signal_2;
-  tSensorInput<int> si_signal_3;
-  tSensorOutput<int> so_signal_4;
+//----------------------------------------------------------------------
+// Private fields and methods
+//----------------------------------------------------------------------
+
+  int counter;
+
+  virtual void Sense();
+
+  virtual void Control();
 
 };
 

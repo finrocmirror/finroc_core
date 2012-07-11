@@ -83,51 +83,9 @@ class tModuleBase : public finroc::core::tFrameworkElement
   template <typename T>
   friend class tConveniencePortBase;
 
-  /*! Introduced this helper class to remove ambiguities when derived classes add listeners to ports */
-  class tParameterChangeDetector : public finroc::core::tPortListener<>
-  {
-    friend class tModuleBase;
-
-    /*! Changed flag that is set whenever a parameter change is detected */
-    volatile bool parameters_changed;
-
-    /*! Implementation of tPortListenerRaw */
-    virtual void PortChanged(tAbstractPort& origin, const void* const& value, const rrlib::time::tTimestamp&);
-
-    tParameterChangeDetector() : parameters_changed(true) {}
-  };
-
-  /*! Element aggregating parameters */
-  finroc::core::tFrameworkElement* parameters;
-
-  /*! Changed flag that is set whenever a parameter change is detected */
-  tParameterChangeDetector parameters_changed;
-
-  /*! Number of ports already created that have auto-generated names */
-  int auto_name_port_count;
-
-  /*! Counter should be reset for every module class in type hierarchy. This helper variable is used to detect this. */
-  const char* count_for_type;
-
-protected:
-
-  /*! Called whenever parameters have changed */
-  virtual void ParametersChanged() {}
-
-  /*!
-   * (Automatically called)
-   * Checks and resets all changed flags of ports in specified port group
-   * and set custom API changed flags accordingly.
-   *
-   * This way, all changed flags can be reset automatically without the risk
-   * of missing a change
-   * (which could happen when resetting after Update()/Sense()/Control() call).
-   *
-   * \param port_group Port group to process
-   * \return Has any port changed since last call?
-   */
-  bool ProcessChangedFlags(tFrameworkElement& port_group);
-
+//----------------------------------------------------------------------
+// Public methods and typedefs
+//----------------------------------------------------------------------
 public:
 
   tModuleBase(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name);
@@ -154,13 +112,6 @@ public:
   {
     tThreadLocalCache::GetFast()->ReleaseAllLocks();
   }
-
-  /*!
-   * (Should only be called by abstract module classes such as tModule and tSenseControlModule)
-   *
-   * Calls ParametersChanged() if a parameter change was detected and resets change flag
-   */
-  void CheckParameters();
 
   template < typename T = double >
   class tParameter : public tConveniencePort < T, tModuleBase, finroc::core::tParameter<T> >
@@ -189,8 +140,7 @@ public:
     template<typename ... ARGS>
     explicit tStaticParameter(const ARGS&... args)
       : tConveniencePort < T, tModuleBase, finroc::core::tStaticParameter<T> >(GetContainer, args...)
-    {
-    }
+    {}
 
   private:
     static tFrameworkElement* GetContainer(tModuleBase* module)
@@ -229,11 +179,67 @@ public:
   {
     return tConfigFile::Find(*this);
   }
-};
+
+protected:
+
+  /*!
+   * (Automatically called)
+   * Checks and resets all changed flags of ports in specified port group
+   * and set custom API changed flags accordingly.
+   *
+   * This way, all changed flags can be reset automatically without the risk
+   * of missing a change
+   * (which could happen when resetting after Update()/Sense()/Control() call).
+   *
+   * \param port_group Port group to process
+   * \return Has any port changed since last call?
+   */
+  bool ProcessChangedFlags(tFrameworkElement& port_group);
+
+  /*!
+   * (Should only be called by abstract module classes such as tModule and tSenseControlModule)
+   *
+   * Calls ParametersChanged() if a parameter change was detected and resets change flag
+   */
+  void CheckParameters();
 
 //----------------------------------------------------------------------
-// End of namespace declaration
+// Private fields and methods
 //----------------------------------------------------------------------
+private:
+
+  /*! Introduced this helper class to remove ambiguities when derived classes add listeners to ports */
+  class tParameterChangeDetector : public finroc::core::tPortListener<>
+  {
+    friend class tModuleBase;
+
+    /*! Changed flag that is set whenever a parameter change is detected */
+    volatile bool parameters_changed;
+
+    /*! Implementation of tPortListenerRaw */
+    virtual void PortChanged(tAbstractPort& origin, const void* const& value, const rrlib::time::tTimestamp&);
+
+    tParameterChangeDetector() : parameters_changed(true) {}
+  };
+
+  /*! Element aggregating parameters */
+  finroc::core::tFrameworkElement* parameters;
+
+  /*! Changed flag that is set whenever a parameter change is detected */
+  tParameterChangeDetector parameters_changed;
+
+  /*! Number of ports already created that have auto-generated names */
+  int auto_name_port_count;
+
+  /*! Counter should be reset for every module class in type hierarchy. This helper variable is used to detect this. */
+  const char* count_for_type;
+
+  /*! Called whenever parameters have changed */
+  virtual void EvaluateParameters()
+  {}
+
+};
+
 }
 }
 }

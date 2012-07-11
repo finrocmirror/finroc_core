@@ -74,43 +74,14 @@ namespace structure
  */
 class tModule : public tModuleBase
 {
-  class UpdateTask : public rrlib::thread::tTask
-  {
-    tModule *const module;
-  public:
-    UpdateTask(tModule *module);
-    virtual void ExecuteTask();
-  };
 
   finroc::core::tPortGroup *input;
   finroc::core::tPortGroup *output;
-  UpdateTask update_task;
-
-  /*! Has any input port changed since last cycle? */
-  bool input_changed;
 
 //----------------------------------------------------------------------
-// Protected methods
-//----------------------------------------------------------------------
-protected:
-
-  virtual void Update();
-
-//----------------------------------------------------------------------
-// Public methods
+// Public methods and typedefs
 //----------------------------------------------------------------------
 public:
-
-  /*!
-   * May be called in Update() method to check
-   * whether any input port has changed, since last call to Update().
-   *
-   * (Changed flags are reset automatically)
-   */
-  bool InputChanged()
-  {
-    return input_changed;
-  }
 
   /**
    * Port classes to use in module.
@@ -188,6 +159,42 @@ public:
   {
     return *output;
   }
+
+//----------------------------------------------------------------------
+// Protected methods
+//----------------------------------------------------------------------
+
+  /*!
+   * May be called in Update() method to check
+   * whether any input port has changed, since last call to Update().
+   *
+   * (Changed flags are reset automatically)
+   */
+  bool InputChanged()
+  {
+    return input_changed;
+  }
+
+//----------------------------------------------------------------------
+// Private fields and methods
+//----------------------------------------------------------------------
+private:
+
+  class UpdateTask : public rrlib::thread::tTask
+  {
+    tModule *const module;
+  public:
+    UpdateTask(tModule *module);
+    virtual void ExecuteTask();
+  };
+
+  UpdateTask update_task;
+
+  /*! Has any input port changed since last cycle? */
+  bool input_changed;
+
+  virtual void Update() = 0;
+
 };
 
 //----------------------------------------------------------------------

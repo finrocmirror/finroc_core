@@ -86,9 +86,9 @@ void tModuleBase::CheckParameters()
 {
   if (parameters_changed.parameters_changed)
   {
-    ProcessChangedFlags(*parameters);
+    this->ProcessChangedFlags(*parameters);
     parameters_changed.parameters_changed = false;
-    ParametersChanged();
+    this->EvaluateParameters();
   }
 }
 

@@ -74,71 +74,17 @@ namespace structure
  */
 class tSenseControlModule : public tModuleBase
 {
-  class ControlTask : public rrlib::thread::tTask
-  {
-    tSenseControlModule *const module;
-  public:
-    ControlTask(tSenseControlModule *module);
-    virtual void ExecuteTask();
-  };
-
-  class SenseTask : public rrlib::thread::tTask
-  {
-    tSenseControlModule *const module;
-  public:
-    SenseTask(tSenseControlModule *module);
-    virtual void ExecuteTask();
-  };
 
   finroc::core::tPortGroup *controller_input;
   finroc::core::tPortGroup *controller_output;
-  ControlTask control_task;
-
-  /*! Has any controller input port changed since last cycle? */
-  bool controller_input_changed;
 
   finroc::core::tPortGroup *sensor_input;
   finroc::core::tPortGroup *sensor_output;
-  SenseTask sense_task;
-
-  /*! Has any sensor input port changed since last cycle? */
-  bool sensor_input_changed;
 
 //----------------------------------------------------------------------
-// Protected methods
-//----------------------------------------------------------------------
-protected:
-
-  virtual void Control();
-
-  virtual void Sense();
-
-//----------------------------------------------------------------------
-// Public methods
+// Public methods and typedefs
 //----------------------------------------------------------------------
 public:
-
-  /*!
-   * May be called in Sense() method to check
-   * whether any sensor input port has changed, since last call to Sense().
-   *
-   * (Changed flags are reset automatically)
-   */
-  bool SensorInputChanged()
-  {
-    return sensor_input_changed;
-  }
-
-  /*!
-   * May be called in Control() method to check
-   * whether any controller input port has changed, since last call to Control().
-   *
-   * (Changed flags are reset automatically)
-   */
-  bool ControllerInputChanged()
-  {
-    return controller_input_changed;
-  }
 
   /**
    * Port classes to use in module.
@@ -269,6 +215,68 @@ public:
   {
     return *sensor_output;
   }
+
+//----------------------------------------------------------------------
+// Protected methods
+//----------------------------------------------------------------------
+protected:
+
+  /*!
+   * May be called in Sense() method to check
+   * whether any sensor input port has changed, since last call to Sense().
+   *
+   * (Changed flags are reset automatically)
+   */
+  bool SensorInputChanged()
+  {
+    return sensor_input_changed;
+  }
+
+  /*!
+   * May be called in Control() method to check
+   * whether any controller input port has changed, since last call to Control().
+   *
+   * (Changed flags are reset automatically)
+   */
+  bool ControllerInputChanged()
+  {
+    return controller_input_changed;
+  }
+
+//----------------------------------------------------------------------
+// Private fields and methods
+//----------------------------------------------------------------------
+private:
+
+  class ControlTask : public rrlib::thread::tTask
+  {
+    tSenseControlModule *const module;
+  public:
+    ControlTask(tSenseControlModule *module);
+    virtual void ExecuteTask();
+  };
+
+  class SenseTask : public rrlib::thread::tTask
+  {
+    tSenseControlModule *const module;
+  public:
+    SenseTask(tSenseControlModule *module);
+    virtual void ExecuteTask();
+  };
+
+  ControlTask control_task;
+  SenseTask sense_task;
+
+  /*! Has any controller input port changed since last cycle? */
+  bool controller_input_changed;
+
+  /*! Has any sensor input port changed since last cycle? */
+  bool sensor_input_changed;
+
+  virtual void Sense() = 0;
+
+  virtual void Control() = 0;
+
 };
 
 //----------------------------------------------------------------------

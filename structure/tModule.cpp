@@ -76,12 +76,6 @@ tModule::tModule(tFrameworkElement *parent, const util::tString &name)
 }
 
 //----------------------------------------------------------------------
-// tModule Update
-//----------------------------------------------------------------------
-void tModule::Update()
-{}
-
-//----------------------------------------------------------------------
 // tModule::UpdateTask constructors
 //----------------------------------------------------------------------
 tModule::UpdateTask::UpdateTask(tModule *module)

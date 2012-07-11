@@ -67,13 +67,13 @@ class mTestModule : public finroc::core::structure::tModule
 {
   static finroc::core::tStandardCreateModuleAction<mTestModule> cCREATE_ACTION;
 
-  int counter;
-
 //----------------------------------------------------------------------
-// Protected methods
+// Public ports
 //----------------------------------------------------------------------
+public:
 
-  virtual void Update();
+  tInput<> signal_1;
+  tOutput<> signal_2;
 
 //----------------------------------------------------------------------
 // Public methods
@@ -82,8 +82,15 @@ public:
 
   mTestModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name = "TestModule");
 
-  tInput<> signal_1;
-  tOutput<> signal_2;
+
+//----------------------------------------------------------------------
+// Private fields and methods
+//----------------------------------------------------------------------
+private:
+
+  int counter;
+
+  virtual void Update();
 
 };
 

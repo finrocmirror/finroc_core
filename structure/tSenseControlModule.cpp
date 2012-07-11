@@ -82,18 +82,6 @@ tSenseControlModule::tSenseControlModule(tFrameworkElement *parent, const util::
 }
 
 //----------------------------------------------------------------------
-// tSenseControlModule Control
-//----------------------------------------------------------------------
-void tSenseControlModule::Control()
-{}
-
-//----------------------------------------------------------------------
-// tSenseControlModule Sense
-//----------------------------------------------------------------------
-void tSenseControlModule::Sense()
-{}
-
-//----------------------------------------------------------------------
 // tSenseControlModule::ControlTask constructors
 //----------------------------------------------------------------------
 tSenseControlModule::ControlTask::ControlTask(tSenseControlModule *module)
