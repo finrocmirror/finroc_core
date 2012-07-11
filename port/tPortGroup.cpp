@@ -152,7 +152,7 @@ tAbstractPort& tPortGroup::operator[](size_t index)
   tChildIterator ci(*this, false);
   if (index)
   {
-    for (size_t i = 0; i < index - 1; i++)
+    for (size_t i = 0; i < index; i++)
     {
       ci.NextPort();
     }
