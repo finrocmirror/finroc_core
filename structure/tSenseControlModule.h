@@ -75,11 +75,11 @@ namespace structure
 class tSenseControlModule : public tModuleBase
 {
 
-  finroc::core::tPortGroup *controller_input;
-  finroc::core::tPortGroup *controller_output;
-
   finroc::core::tPortGroup *sensor_input;
   finroc::core::tPortGroup *sensor_output;
+
+  finroc::core::tPortGroup *controller_input;
+  finroc::core::tPortGroup *controller_output;
 
 //----------------------------------------------------------------------
 // Public methods and typedefs
@@ -185,22 +185,6 @@ public:
   tSenseControlModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name, bool share_so_and_ci_ports = false);
 
   /*!
-   * \return Parent port group of all controller inputs
-   */
-  inline finroc::core::tPortGroup& GetControllerInputs()
-  {
-    return *controller_input;
-  }
-
-  /*!
-   * \return Parent port group of all controller outputs
-   */
-  inline finroc::core::tPortGroup& GetControllerOutputs()
-  {
-    return *controller_output;
-  }
-
-  /*!
    * \return Parent port group of all sensor inputs
    */
   inline finroc::core::tPortGroup& GetSensorInputs()
@@ -214,6 +198,22 @@ public:
   inline finroc::core::tPortGroup& GetSensorOutputs()
   {
     return *sensor_output;
+  }
+
+  /*!
+   * \return Parent port group of all controller inputs
+   */
+  inline finroc::core::tPortGroup& GetControllerInputs()
+  {
+    return *controller_input;
+  }
+
+  /*!
+   * \return Parent port group of all controller outputs
+   */
+  inline finroc::core::tPortGroup& GetControllerOutputs()
+  {
+    return *controller_output;
   }
 
 //----------------------------------------------------------------------
@@ -264,14 +264,15 @@ private:
     virtual void ExecuteTask();
   };
 
-  ControlTask control_task;
   SenseTask sense_task;
 
-  /*! Has any controller input port changed since last cycle? */
-  bool controller_input_changed;
+  ControlTask control_task;
 
   /*! Has any sensor input port changed since last cycle? */
   bool sensor_input_changed;
+
+  /*! Has any controller input port changed since last cycle? */
+  bool controller_input_changed;
 
   virtual void Sense() = 0;
 
