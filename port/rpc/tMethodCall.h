@@ -103,7 +103,7 @@ protected:
   void SetParametersHelper(int arg_no) {}
 
   template <typename Arg, typename ... TArgs>
-  void SetParametersHelper(int arg_no, Arg& arg, const TArgs&... args)
+  void SetParametersHelper(int arg_no, Arg& arg, TArgs&... args)
   {
     SetParameter(arg_no, arg);
     SetParametersHelper(arg_no + 1, args...);
