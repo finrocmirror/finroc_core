@@ -199,7 +199,7 @@ protected:
   /*!
    * (Should only be called by abstract module classes such as tModule and tSenseControlModule)
    *
-   * Calls ParametersChanged() if a parameter change was detected and resets change flag
+   * Calls EvaluateParameters() if a parameter change was detected and resets change flag
    */
   void CheckParameters();
 
