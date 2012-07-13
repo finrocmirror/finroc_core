@@ -33,7 +33,14 @@ void tSynchMethodCallLogic::HandleMethodReturn(tAbstractCall::tPtr& call)
 {
   // return value
   tMethodCallSyncher* mcs = tMethodCallSyncher::Get(call->GetSyncherID());
-  mcs->ReturnValue(call);
+  if (mcs)
+  {
+    mcs->ReturnValue(call);
+  }
+  else
+  {
+    FINROC_LOG_PRINTF(rrlib::logging::eLL_WARNING, "Received method return value with invalid synchronization id %d: '%s'. Ignoring.", call->GetSyncherID(), call->ToString().c_str());
+  }
 }
 
 } // namespace finroc

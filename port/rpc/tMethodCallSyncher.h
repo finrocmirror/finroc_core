@@ -49,7 +49,7 @@ private:
   static const size_t cMAX_THREADS = 127u;
 
   /*! PreAllocated array of (initially empty) MethodCallSyncher classes */
-  static ::finroc::util::tArrayWrapper<tMethodCallSyncher> slots;
+  static std::array<tMethodCallSyncher, cMAX_THREADS> slots;
 
   /*! Index in array */
   size_t index;
@@ -95,9 +95,13 @@ public:
    * \param syncher_iD Index of syncher objects
    * \return Syncher object
    */
-  inline static tMethodCallSyncher* Get(int syncher_iD)
+  inline static tMethodCallSyncher* Get(int syncher_id)
   {
-    return &(slots[syncher_iD]);
+    if (syncher_id < 0 || syncher_id >= static_cast<int>(slots.size()))
+    {
+      return NULL;
+    }
+    return &(slots[syncher_id]);
   }
 
   /*!

@@ -29,7 +29,7 @@ namespace core
 {
 rrlib::thread::tMutex tMethodCallSyncher::static_class_mutex;
 const size_t tMethodCallSyncher::cMAX_THREADS;
-::finroc::util::tArrayWrapper<tMethodCallSyncher> tMethodCallSyncher::slots(tMethodCallSyncher::cMAX_THREADS);
+std::array<tMethodCallSyncher, tMethodCallSyncher::cMAX_THREADS> tMethodCallSyncher::slots;
 
 tMethodCallSyncher::tMethodCallSyncher() :
   tOrderedMutex("Method Call Syncher", tLockOrderLevels::cINNER_MOST - 300),

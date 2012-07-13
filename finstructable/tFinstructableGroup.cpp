@@ -124,11 +124,10 @@ void tFinstructableGroup::EvaluateStaticParameters()
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot find XML file ", xml_file.Get(), ". Creating empty group. You may edit and save this group using finstruct.");
+      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Cannot find XML file ", xml_file.Get(), ". Creating empty group. You may edit and save this group using finstruct.");
     }
   }
 }
-
 
 tAbstractPort* tFinstructableGroup::GetChildPort(const util::tString& link)
 {

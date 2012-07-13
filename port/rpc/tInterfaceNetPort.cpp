@@ -80,7 +80,7 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall::tPtr& mc)
     tAbstractMethodCallHandler* mhandler = static_cast<tAbstractMethodCallHandler*>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (mhandler == NULL)
     {
-      if (m->IsVoidMethod())
+      if (!m->IsVoidMethod())
       {
         mc->SetExceptionStatus(tMethodCallException::tType::NO_CONNECTION);
         SendSyncCallReturn(mc);
