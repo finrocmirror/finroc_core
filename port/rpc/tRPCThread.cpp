@@ -35,6 +35,7 @@ tRPCThread::tRPCThread() :
   tWatchDogTask(true),
 #endif
   next_task(NULL),
+  used(true),
   next_reusable_task()
 {
   static int count = 0;
@@ -73,7 +74,10 @@ void tRPCThread::MainLoopCallback()
     rrlib::thread::tLock lock2(*this);
     if (next_task == NULL && next_reusable_task.get() == NULL)
     {
-      tRPCThreadPool::GetInstance().EnqueueThread(this);
+      if (!used)
+      {
+        tRPCThreadPool::GetInstance().EnqueueThread(this);
+      }
 
       if (!IsStopSignalSet())
       {
@@ -105,6 +109,7 @@ void tRPCThread::MainLoopCallback()
       tmp->ExecuteTask(tmp);
     }
     tWatchDogTask::Deactivate();
+    used = false;
   }
 }
 

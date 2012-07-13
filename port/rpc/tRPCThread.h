@@ -47,6 +47,9 @@ private:
   /*! Task to execute next */
   rrlib::thread::tTask* volatile next_task;
 
+  /*! Indicates whether thread is currently in use and therefore should not be enqueued in unused thread pool */
+  bool used;
+
   /*! Next reusable task */
   tSerializableReusableTask::tPtr next_reusable_task;
 
