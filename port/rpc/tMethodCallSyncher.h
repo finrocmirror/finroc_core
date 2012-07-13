@@ -25,6 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
+#include <array>
 
 #include "core/tLockOrderLevels.h"
 #include "core/port/rpc/tAbstractCall.h"

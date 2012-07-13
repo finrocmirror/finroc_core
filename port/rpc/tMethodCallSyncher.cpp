@@ -54,7 +54,7 @@ int16 tMethodCallSyncher::GetAndUseNextCallIndex()
 tMethodCallSyncher* tMethodCallSyncher::GetFreeInstance(tThreadLocalCache* tc)
 {
   rrlib::thread::tLock lock1(static_class_mutex);
-  for (size_t i = 0u; i < slots.length; i++)
+  for (size_t i = 0u; i < slots.size(); i++)
   {
     if (slots[i].thread_uid == 0)
     {
@@ -99,7 +99,7 @@ void tMethodCallSyncher::ReturnValue(tAbstractCall::tPtr& mc)
 
 void tMethodCallSyncher::StaticInit()
 {
-  for (size_t i = 0u; i < slots.length; i++)
+  for (size_t i = 0u; i < slots.size(); i++)
   {
     slots[i].index = i;
   }
