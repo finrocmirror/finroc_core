@@ -3,4 +3,4 @@ rrlib_finroc_core_utils
 rrlib_getopt
 rrlib_logging
 rrlib_serialization
-rrlib_xml2_wrapper
+rrlib_xml
