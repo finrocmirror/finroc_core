@@ -84,7 +84,6 @@ private:
    */
   tPeriodicFrameworkElementTask* current_task;
 
-private:
 
   /*!
    * Trace outgoing connection
@@ -97,6 +96,15 @@ private:
 public:
 
   tThreadContainerThread(tFrameworkElement& thread_container, rrlib::time::tDuration default_cycle_time, bool warn_on_cycle_time_exceed, tPort<rrlib::time::tDuration> last_cycle_execution_time);
+
+  /*!
+   * \return Returns pointer to current thread if it is a tThreadContainerThread - NULL otherwise
+   */
+  static tThreadContainerThread* CurrentThread()
+  {
+    rrlib::thread::tThread* thread = rrlib::thread::tThread::CurrentThreadRaw();
+    return (typeid(*thread) == typeid(tThreadContainerThread)) ? static_cast<tThreadContainerThread*>(thread) : NULL;
+  }
 
   virtual void HandleWatchdogAlert();
 
