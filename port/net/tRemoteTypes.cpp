@@ -158,12 +158,11 @@ void tRemoteTypes::SerializeLocalDataTypes(rrlib::serialization::tOutputStream& 
     co.WriteByte(dt.GetTypeTraits() & cTRAITS); // type traits
     if ((dt.GetTypeTraits() & rrlib::rtti::trait_flags::cIS_ENUM) != 0)
     {
-      const std::vector<const char*>* enum_constants = dt.GetEnumConstants();
-      assert(enum_constants && enum_constants->size() <= 0xFFFF && "Something is wrong with the enum");
-      co.WriteShort(enum_constants->size());
-      for (size_t j = 0; j < enum_constants->size(); j++)
+      const make_builder::tEnumStrings &enum_strings = *dt.GetEnumStrings();
+      co.WriteShort(enum_strings.size);
+      for (size_t j = 0; j < enum_strings.size; j++)
       {
-        co.WriteString((*enum_constants)[j]);
+        co.WriteString(enum_strings.strings[j]);
       }
     }
 
