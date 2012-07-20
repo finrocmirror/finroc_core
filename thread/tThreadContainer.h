@@ -92,7 +92,7 @@ public:
     }
     catch (const util::tException& e)
     {
-      FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_ERROR, e);
+      FINROC_LOG_PRINT_TO(framework_elements, ERROR, e);
     }
   }
 };

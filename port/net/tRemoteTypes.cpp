@@ -97,7 +97,7 @@ void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
     }
     next = ci.ReadShort();
   }
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, ls.str());
+  FINROC_LOG_PRINT(DEBUG_VERBOSE_1, ls.str());
 }
 
 int16 tRemoteTypes::GetTime(const rrlib::rtti::tDataTypeBase& data_type)
@@ -123,7 +123,7 @@ rrlib::rtti::tDataTypeBase tRemoteTypes::ReadType(rrlib::serialization::tInputSt
   int types_size = types.Size();  // to avoid warning
   if (uid < 0 || uid >= types_size)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Corrupt type information from received from connection partner: ", uid);
+    FINROC_LOG_PRINT(ERROR, "Corrupt type information from received from connection partner: ", uid);
     throw util::tRuntimeException("Corrupt type information from received from connection partner", CODE_LOCATION_MACRO);
   }
 

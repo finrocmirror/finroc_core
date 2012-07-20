@@ -121,7 +121,7 @@ void tStaticParameterBase::Deserialize(rrlib::serialization::tInputStream& is)
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+    FINROC_LOG_PRINT(ERROR, e);
   }
 }
 
@@ -248,7 +248,7 @@ void tStaticParameterBase::LoadValue()
         }
         catch (std::exception& e)
         {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", GetName(), "' from command line argument '", arg, "': ", e);
+          FINROC_LOG_PRINT(ERROR, "Failed to load parameter '", GetName(), "' from command line argument '", arg, "': ", e);
         }
       }
     }
@@ -276,7 +276,7 @@ void tStaticParameterBase::LoadValue()
           }
           catch (std::exception& e)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", GetName(), "' from config entry '", full_config_entry, "': ", e);
+            FINROC_LOG_PRINT(ERROR, "Failed to load parameter '", GetName(), "' from config entry '", full_config_entry, "': ", e);
           }
         }
       }
@@ -295,7 +295,7 @@ void tStaticParameterBase::ResetChanged()
   }
   assert(last_value);
 
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_2, "Resetting change for buffers of type ", sp->value->GetType().GetName());
+  FINROC_LOG_PRINT(DEBUG_VERBOSE_2, "Resetting change for buffers of type ", sp->value->GetType().GetName());
   //rrlib::serialization::sSerialization::DeepCopy(*sp->value, *last_value);
   last_value->DeepCopyFrom(sp->value.get());
   assert(!HasChanged());
@@ -427,7 +427,7 @@ void tStaticParameterBase::UpdateOuterParameterAttachment()
       tFrameworkElement* fg = parent_list->GetAnnotated()->GetParentWithFlags(tCoreFlags::cFINSTRUCTABLE_GROUP);
       if (fg == NULL)
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "No parent finstructable group. Ignoring...");
+        FINROC_LOG_PRINT(ERROR, "No parent finstructable group. Ignoring...");
         return;
       }
 
@@ -447,11 +447,11 @@ void tStaticParameterBase::UpdateOuterParameterAttachment()
         sp = new tStaticParameterBase(outer_parameter_attachment, type, false, true);
         AttachTo(sp);
         spl->Add(sp);
-        FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Creating proxy parameter '", outer_parameter_attachment, "' in '", fg->GetQualifiedName() + "'.");
+        FINROC_LOG_PRINT(DEBUG, "Creating proxy parameter '", outer_parameter_attachment, "' in '", fg->GetQualifiedName() + "'.");
       }
       else
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "No parameter named '", outer_parameter_attachment, "' found in parent group.");
+        FINROC_LOG_PRINT(ERROR, "No parameter named '", outer_parameter_attachment, "' found in parent group.");
       }
     }
   }

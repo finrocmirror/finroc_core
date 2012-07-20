@@ -59,7 +59,7 @@ void tParameterInfo::AnnotatedObjectInitialized()
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+    FINROC_LOG_PRINT(ERROR, e);
   }
 }
 
@@ -82,7 +82,7 @@ void tParameterInfo::Deserialize(rrlib::serialization::tInputStream& is)
     }
     catch (std::exception& e)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+      FINROC_LOG_PRINT(ERROR, e);
     }
   }
 }
@@ -170,13 +170,13 @@ void tParameterInfo::LoadValue(bool ignore_ready)
               util::tString error = port->BrowserPublishRaw(c);
               if (error.size() > 0)
               {
-                FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to load parameter '", ann->GetQualifiedName(), "' from command line argument '", arg, "': ", error);
+                FINROC_LOG_PRINT(WARNING, "Failed to load parameter '", ann->GetQualifiedName(), "' from command line argument '", arg, "': ", error);
               }
               return;
             }
             catch (const util::tException& e)
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from command line argument '", arg, "': ", e);
+              FINROC_LOG_PRINT(ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from command line argument '", arg, "': ", e);
               c->RecycleUnused();
             }
           }
@@ -192,7 +192,7 @@ void tParameterInfo::LoadValue(bool ignore_ready)
             }
             catch (const util::tException& e)
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from command line argument '", arg, "': ", e);
+              FINROC_LOG_PRINT(ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from command line argument '", arg, "': ", e);
               pd->RecycleUnused();
             }
           }
@@ -221,13 +221,13 @@ void tParameterInfo::LoadValue(bool ignore_ready)
               util::tString error = port->BrowserPublishRaw(c);
               if (error.size() > 0)
               {
-                FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", full_config_entry, "': ", error);
+                FINROC_LOG_PRINT(WARNING, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", full_config_entry, "': ", error);
               }
               return;
             }
             catch (const util::tException& e)
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", full_config_entry, "': ", e);
+              FINROC_LOG_PRINT(ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", full_config_entry, "': ", e);
               c->RecycleUnused();
             }
           }
@@ -243,7 +243,7 @@ void tParameterInfo::LoadValue(bool ignore_ready)
             }
             catch (const util::tException& e)
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", full_config_entry, "': ", e);
+              FINROC_LOG_PRINT(ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from config entry '", full_config_entry, "': ", e);
               pd->RecycleUnused();
             }
           }
@@ -268,13 +268,13 @@ void tParameterInfo::LoadValue(bool ignore_ready)
             util::tString error = port->BrowserPublishRaw(c);
             if (error.size() > 0)
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Failed to load parameter '", ann->GetQualifiedName(), "' from finstruct default '", finstruct_default, "': ", error);
+              FINROC_LOG_PRINT(WARNING, "Failed to load parameter '", ann->GetQualifiedName(), "' from finstruct default '", finstruct_default, "': ", error);
             }
             return;
           }
           catch (const util::tException& e)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from finstruct default '", finstruct_default, "': ", e);
+            FINROC_LOG_PRINT(ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from finstruct default '", finstruct_default, "': ", e);
             c->RecycleUnused();
           }
         }
@@ -290,7 +290,7 @@ void tParameterInfo::LoadValue(bool ignore_ready)
           }
           catch (const util::tException& e)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from finstruct default '", finstruct_default, "': ", e);
+            FINROC_LOG_PRINT(ERROR, "Failed to load parameter '", ann->GetQualifiedName(), "' from finstruct default '", finstruct_default, "': ", e);
             pd->RecycleUnused();
           }
         }
@@ -386,7 +386,7 @@ void tParameterInfo::SetConfigEntry(const util::tString& config_entry_, bool fin
     }
     catch (const std::exception& e)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+      FINROC_LOG_PRINT(ERROR, e);
     }
   }
 }

@@ -59,41 +59,41 @@ void tRealPortQueueTest::Main()
   tFrameworkElement::InitAll();
   tRuntimeEnvironment::GetInstance()->PrintStructure();
 
-  FINROC_LOG_PRINT_STATIC(eLL_USER, "test writing a lot to port...");
+  FINROC_LOG_PRINT_STATIC(USER, "test writing a lot to port...");
   rrlib::time::tTimestamp start = rrlib::time::Now();
   for (int i = 0; i < cCYCLES; i++)
   {
     output->Publish(i);
   }
   rrlib::time::tDuration time = rrlib::time::Now() - start;
-  FINROC_LOG_PRINT_STATIC(eLL_USER, rrlib::time::ToString(time));
+  FINROC_LOG_PRINT_STATIC(USER, rrlib::time::ToString(time));
 
-  FINROC_LOG_PRINT_STATIC(eLL_USER, "Reading contents of queue (single dq)...");
+  FINROC_LOG_PRINT_STATIC(USER, "Reading contents of queue (single dq)...");
   int cn = 0;
   while ((input.Dequeue(cn)))
   {
     PrintNum(cn);
   }
 
-  FINROC_LOG_PRINT_STATIC(eLL_USER, "Writing two entries to queue...");
+  FINROC_LOG_PRINT_STATIC(USER, "Writing two entries to queue...");
   for (int i = 0; i < 2; i++)
   {
     output->Publish(i);
   }
 
-  FINROC_LOG_PRINT_STATIC(eLL_USER, "Reading contents of queue (single dq)...");
+  FINROC_LOG_PRINT_STATIC(USER, "Reading contents of queue (single dq)...");
   while ((input.Dequeue(cn)))
   {
     PrintNum(cn);
   }
 
-  FINROC_LOG_PRINT_STATIC(eLL_USER, "Writing 20 entries to queue...");
+  FINROC_LOG_PRINT_STATIC(USER, "Writing 20 entries to queue...");
   for (int i = 0; i < 20; i++)
   {
     output->Publish(i);
   }
 
-  FINROC_LOG_PRINT_STATIC(eLL_USER, "Read contents of queue in fragment...");
+  FINROC_LOG_PRINT_STATIC(USER, "Read contents of queue in fragment...");
   tPortQueueFragment<int> frag;
   input.DequeueAll(frag);
   while (frag.Dequeue(cn))
@@ -102,7 +102,7 @@ void tRealPortQueueTest::Main()
   }
   tThreadLocalCache::Get()->ReleaseAllLocks();
 
-  FINROC_LOG_PRINT_STATIC(eLL_USER, "Read contents of queue in fragment again...");
+  FINROC_LOG_PRINT_STATIC(USER, "Read contents of queue in fragment again...");
   input.DequeueAll(frag);
   while (frag.Dequeue(cn))
   {
@@ -110,13 +110,13 @@ void tRealPortQueueTest::Main()
   }
   tThreadLocalCache::Get()->ReleaseAllLocks();
 
-  FINROC_LOG_PRINT_STATIC(eLL_USER, "Writing 3 entries to queue...");
+  FINROC_LOG_PRINT_STATIC(USER, "Writing 3 entries to queue...");
   for (int i = 0; i < 3; i++)
   {
     output->Publish(i);
   }
 
-  FINROC_LOG_PRINT_STATIC(eLL_USER, "Read contents of queue in fragment...");
+  FINROC_LOG_PRINT_STATIC(USER, "Read contents of queue in fragment...");
   input.DequeueAll(frag);
   while (frag.Dequeue(cn))
   {
@@ -125,7 +125,7 @@ void tRealPortQueueTest::Main()
   tThreadLocalCache::Get()->ReleaseAllLocks();
 
   // now concurrently :-)
-  FINROC_LOG_PRINT_STATIC(eLL_USER, "\nAnd now for Concurrency :-)  ...");
+  FINROC_LOG_PRINT_STATIC(USER, "\nAnd now for Concurrency :-)  ...");
 
   // connect to unlimited input
   output->ConnectToTarget(unlimited_input);
@@ -141,7 +141,7 @@ void tRealPortQueueTest::Main()
   thread1->Start();
   tRealPortQueueTest* thread2 = new tRealPortQueueTest(false);
   thread2->Start();
-  FINROC_LOG_PRINTF_STATIC(eLL_USER, "Created threads %p and %p\n", thread1, thread2);
+  FINROC_LOG_PRINTF_STATIC(USER, "Created threads %p and %p\n", thread1, thread2);
   thread1->SetAutoDelete();
   thread2->SetAutoDelete();
 
@@ -220,12 +220,12 @@ void tRealPortQueueTest::Main()
 
     if ((last_pos_limited == e || last_neg_limited == -e) && last_pos_unlimited == e && last_neg_unlimited == -e && last_pos_unlimited_f == e && last_neg_unlimited_f == -e)
     {
-      FINROC_LOG_PRINT_STATIC(eLL_USER, "Yeah! Check Completed");
+      FINROC_LOG_PRINT_STATIC(USER, "Yeah! Check Completed");
       break;
     }
   }
   time = rrlib::time::Now() - start;
-  FINROC_LOG_PRINT_STATIC(eLL_USER, rrlib::time::ToString(time));
+  FINROC_LOG_PRINT_STATIC(USER, rrlib::time::ToString(time));
   finished.Set(1);
 }
 

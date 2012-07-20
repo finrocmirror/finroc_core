@@ -75,7 +75,7 @@ void tRealPortTest5::Main()
   input->GetWrapped()->ManagedDelete();
   output->GetWrapped()->ManagedDelete();
 
-  FINROC_LOG_PRINT(eLL_USER, "waiting");
+  FINROC_LOG_PRINT(USER, "waiting");
 }
 
 void tRealPortTest5::Run()
@@ -110,7 +110,7 @@ void tRealPortTest5::TestSimpleEdge()
     result = input->Get();
   }
   rrlib::time::tDuration time = rrlib::time::Now() - start;
-  FINROC_LOG_PRINT(eLL_USER, rrlib::time::ToString(time), " ", result);
+  FINROC_LOG_PRINT(USER, rrlib::time::ToString(time), " ", result);
 }
 
 void tRealPortTest5::TestSimpleEdge2()
@@ -131,7 +131,7 @@ void tRealPortTest5::TestSimpleEdge2()
 
   const blackboard::tBlackboardBuffer* cbuf = input.GetAutoLocked();
   rrlib::serialization::tInputStream ci(cbuf);
-  FINROC_LOG_PRINT(eLL_USER, ci.ReadInt());
+  FINROC_LOG_PRINT(USER, ci.ReadInt());
   input.ReleaseAutoLocks();
 
   rrlib::thread::tThread::Sleep(std::chrono::seconds(1), true);
@@ -152,7 +152,7 @@ void tRealPortTest5::TestSimpleEdge2()
     input.ReleaseAutoLocks();
   }
   rrlib::time::tDuration time = rrlib::time::Now() - start;
-  FINROC_LOG_PRINT(eLL_USER, rrlib::time::ToString(time), " ", result);
+  FINROC_LOG_PRINT(USER, rrlib::time::ToString(time), " ", result);
 }
 
 void tRealPortTest5::TestSimpleEdgeBB()
@@ -195,7 +195,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
 
   tPortDataPtr<const std::vector<tMemoryBuffer> > cbuf = client.Read();
   rrlib::serialization::tInputStream ci(&cbuf->at(0));
-  FINROC_LOG_PRINT(eLL_USER, ci.ReadInt());
+  FINROC_LOG_PRINT(USER, ci.ReadInt());
 
   cbuf.reset();
 
@@ -227,7 +227,7 @@ void tRealPortTest5::TestSimpleEdgeBB()
     cbuf.reset();
   }
   rrlib::time::tDuration time = rrlib::time::Now() - start;
-  FINROC_LOG_PRINT(eLL_USER, rrlib::time::ToString(time), " ", result, " ", size);
+  FINROC_LOG_PRINT(USER, rrlib::time::ToString(time), " ", result, " ", size);
   tRuntimeEnvironment::GetInstance()->PrintStructure();
 }
 

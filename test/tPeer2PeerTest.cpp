@@ -81,7 +81,7 @@ void tPeer2PeerTest::Main(int argc, char **argv)
       e.PrintStackTrace();
     }
     re->PrintStructure();
-    FINROC_LOG_PRINT(eLL_USER, "Input connections: ", input.GetConnectionCount());
+    FINROC_LOG_PRINT(USER, "Input connections: ", input.GetConnectionCount());
   }
 }
 

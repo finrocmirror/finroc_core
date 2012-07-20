@@ -109,7 +109,7 @@ public:
     tBounds<T> result;
     if (!BoundsSet())
     {
-      FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG_WARNING, "Bounds were not set");
+      FINROC_LOG_PRINT_STATIC(DEBUG_WARNING, "Bounds were not set");
       return result;
     }
     rrlib::serialization::tInputStream is(&bounds);
@@ -134,7 +134,7 @@ public:
   {
     if (!DefaultValueSet())
     {
-      FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG_WARNING, "Default value was not set");
+      FINROC_LOG_PRINT_STATIC(DEBUG_WARNING, "Default value was not set");
       return;
     }
     rrlib::serialization::tInputStream is(&default_value);
@@ -254,7 +254,7 @@ private:
   {
     if (DefaultValueSet())
     {
-      FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_DEBUG_WARNING, "Default value already set");
+      FINROC_LOG_PRINT_STATIC(DEBUG_WARNING, "Default value already set");
     }
     rrlib::serialization::tOutputStream os(&default_value);
     os << default_val;

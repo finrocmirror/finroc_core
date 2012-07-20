@@ -89,7 +89,7 @@ bool sDynamicLoading::DLOpen(const char* open)
     tDLCloserInstance::Instance().loaded.push_back(handle);
     return true;
   }
-  FINROC_LOG_PRINTF(rrlib::logging::eLL_ERROR, "Error from dlopen: %s", dlerror());
+  FINROC_LOG_PRINTF(ERROR, "Error from dlopen: %s", dlerror());
   return false;
 }
 
@@ -105,14 +105,14 @@ std::set<std::string> sDynamicLoading::GetAvailableFinrocLibraries()
   char* target = getenv("FINROC_TARGET");
   if (finroc_home == NULL || target == NULL)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "FINROC_HOME/FINROC_TARGET not set.");
+    FINROC_LOG_PRINT(WARNING, "FINROC_HOME/FINROC_TARGET not set.");
   }
   else
   {
     std::string local_path = std::string(finroc_home) + "/export/" + std::string(target) + "/lib";
     if (local_path.compare(core_path) != 0)
     {
-      FINROC_LOG_PRINTF(rrlib::logging::eLL_DEBUG, "Searching for finroc modules in %s and %s.\n", core_path.c_str(), local_path.c_str());
+      FINROC_LOG_PRINTF(DEBUG, "Searching for finroc modules in %s and %s.\n", core_path.c_str(), local_path.c_str());
       paths.push_back(local_path);
     }
   }
@@ -170,7 +170,7 @@ std::set<std::string> sDynamicLoading::GetLoadedFinrocLibraries()
       std::string loaded = line.substr(line.find("/libfinroc_") + 1);
       if (result.find(loaded) == result.end())
       {
-        FINROC_LOG_PRINTF(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Found loaded finroc library: %s", loaded.c_str());
+        FINROC_LOG_PRINTF(DEBUG_VERBOSE_1, "Found loaded finroc library: %s", loaded.c_str());
         result.insert(loaded);
       }
     }
@@ -179,7 +179,7 @@ std::set<std::string> sDynamicLoading::GetLoadedFinrocLibraries()
       std::string loaded = line.substr(line.find("/librrlib_") + 1);
       if (result.find(loaded) == result.end())
       {
-        FINROC_LOG_PRINTF(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Found loaded finroc library: %s", loaded.c_str());
+        FINROC_LOG_PRINTF(DEBUG_VERBOSE_1, "Found loaded finroc library: %s", loaded.c_str());
         result.insert(loaded);
       }
     }
@@ -241,7 +241,7 @@ core::tCreateFrameworkElementAction* sDynamicLoading::LoadModuleType(const std::
     }
   }
 
-  FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not find/load module ", name, " in ", group);
+  FINROC_LOG_PRINT(ERROR, "Could not find/load module ", name, " in ", group);
   return NULL;
 }
 

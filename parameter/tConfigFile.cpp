@@ -54,7 +54,7 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
     }
     catch (const std::exception& e)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+      FINROC_LOG_PRINT(ERROR, e);
       wrapped = rrlib::xml::tDocument();
       wrapped.AddRootNode(cXML_BRANCH_NAME);
     }
@@ -92,7 +92,7 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
       }
       catch (const std::exception & e)
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+        FINROC_LOG_PRINT(ERROR, e);
         wrapped = rrlib::xml::tDocument();
         try
         {
@@ -100,7 +100,7 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
         }
         catch (const rrlib::xml::tException& e1)
         {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+          FINROC_LOG_PRINT(ERROR, e);
         }
       }
     }
@@ -119,7 +119,7 @@ void tConfigFile::Deserialize(rrlib::serialization::tInputStream& is)
     }
     catch (const util::tException& e)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+      FINROC_LOG_PRINT(ERROR, e);
     }
   }
 }
@@ -151,7 +151,7 @@ rrlib::xml::tNode& tConfigFile::GetEntry(const util::tString& entry, bool create
   {
     if (nodes[idx].length() == 0)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Entry '", entry, "' is not clean. Skipping empty string now, but please fix this!");
+      FINROC_LOG_PRINT(WARNING, "Entry '", entry, "' is not clean. Skipping empty string now, but please fix this!");
       idx++;
       continue;
     }
@@ -173,7 +173,7 @@ rrlib::xml::tNode& tConfigFile::GetEntry(const util::tString& entry, bool create
         }
         catch (const rrlib::xml::tException& e)
         {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "tree node without name");
+          FINROC_LOG_PRINT(WARNING, "tree node without name");
         }
       }
     }
@@ -263,7 +263,7 @@ void tConfigFile::LoadParameterValues(tFrameworkElement& fe)
         }
         catch (const util::tException& e)
         {
-          FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_ERROR, e);
+          FINROC_LOG_PRINT_STATIC(ERROR, e);
         }
       }
     }
@@ -291,7 +291,7 @@ void tConfigFile::SaveFile()
           }
           catch (const util::tException& e)
           {
-            FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_ERROR, e);
+            FINROC_LOG_PRINT_STATIC(ERROR, e);
           }
         }
       }
@@ -304,7 +304,7 @@ void tConfigFile::SaveFile()
     if (save_to.length() == 0)
     {
       util::tString save_to_alt = util::sFiles::GetFinrocFileToSaveTo(boost::replace_all_copy(filename, "/", "_"));
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "There does not seem to be any suitable location for: '", filename, "' . For now, using '", save_to_alt, "'.");
+      FINROC_LOG_PRINT(ERROR, "There does not seem to be any suitable location for: '", filename, "' . For now, using '", save_to_alt, "'.");
       save_to = save_to_alt;
     }
 
@@ -313,7 +313,7 @@ void tConfigFile::SaveFile()
   }
   catch (std::exception& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+    FINROC_LOG_PRINT(ERROR, e);
   }
 }
 
@@ -328,11 +328,11 @@ void tConfigFile::Serialize(rrlib::serialization::tOutputStream& os) const
   }
   catch (const rrlib::xml::tException& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+    FINROC_LOG_PRINT(ERROR, e);
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+    FINROC_LOG_PRINT(ERROR, e);
   }
 }
 

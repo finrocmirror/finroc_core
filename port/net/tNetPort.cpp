@@ -89,7 +89,7 @@ rrlib::rtti::tGenericObject* tNetPort::CreateGenericObject(const rrlib::rtti::tD
       return tThreadLocalCache::Get()->GetUnusedInterThreadBuffer(dt)->GetObject();
     }
   }
-  FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Cannot create buffer of type ", dt.GetName());
+  FINROC_LOG_PRINT(ERROR, "Cannot create buffer of type ", dt.GetName());
   return NULL;
 }
 
@@ -360,7 +360,7 @@ bool tNetPort::tCCNetPort::PullRequest(tCCPortBase& origin, tCCPortDataManagerTL
   }
   catch (const tMethodCallException& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, "Pulling value via network connection failed: ", e.what());
+    FINROC_LOG_PRINT(DEBUG_WARNING, "Pulling value via network connection failed: ", e.what());
     GetRaw(result_buffer, true);
   }
   return true;
@@ -459,7 +459,7 @@ const tPortDataManager* tNetPort::tStdNetPort::PullRequest(tPortBase& origin, in
   }
   catch (const tMethodCallException& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, "Pulling value via network connection failed: ", e.what());
+    FINROC_LOG_PRINT(DEBUG_WARNING, "Pulling value via network connection failed: ", e.what());
 
     // return local port data
     tPortDataManager* pd = LockCurrentValueForRead();

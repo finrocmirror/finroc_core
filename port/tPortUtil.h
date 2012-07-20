@@ -326,7 +326,7 @@ public:
     util::tString error = port->BrowserPublishRaw(mgr);
     if (error.size() > 0)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not set default value: ", error);
+      FINROC_LOG_PRINT(WARNING, "Could not set default value: ", error);
     }
   }
 
@@ -466,7 +466,7 @@ public:
     util::tString error = port->BrowserPublishRaw(mgr);
     if (error.size() > 0)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not set default value: ", error);
+      FINROC_LOG_PRINT(WARNING, "Could not set default value: ", error);
     }
   }
 
@@ -553,7 +553,7 @@ public:
     tPortDataManager* mgr = port->GetUnusedBufferRaw();
     if (mgr->GetObject()->GetData<std::string>()->capacity() < tRuntimeSettings::GetDefaultPortStringBufferSize())
     {
-      FINROC_LOG_PRINTF(rrlib::logging::eLL_WARNING, "A std::string port buffer (from port %s) has lost its capacity. This certainly breaks RT capabilities for smaller strings. Please fix module (sometimes the assignment operator causes stuff like this... use assign with const char* instead).", port->GetQualifiedName().c_str());
+      FINROC_LOG_PRINTF(WARNING, "A std::string port buffer (from port %s) has lost its capacity. This certainly breaks RT capabilities for smaller strings. Please fix module (sometimes the assignment operator causes stuff like this... use assign with const char* instead).", port->GetQualifiedName().c_str());
     }
     return tDataPtr(mgr, tPortDataPtrBase::eUNUSED);
   }

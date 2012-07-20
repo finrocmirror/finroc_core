@@ -76,7 +76,7 @@ int main(int argc__, char **argv__)
 
   while (true)
   {
-    FINROC_LOG_PRINT(eLL_USER, rt->ToString() + "   " + t->ToString());
+    FINROC_LOG_PRINT(USER, rt->ToString() + "   " + t->ToString());
     rrlib::thread::tThread::Sleep(std::chrono::seconds(1), false);
   }
 }

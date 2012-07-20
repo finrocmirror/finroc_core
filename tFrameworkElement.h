@@ -793,17 +793,7 @@ public:
   /*!
    * Helper for Debugging: Prints structure below this framework element to console
    */
-  inline void PrintStructure()
-  {
-    PrintStructure(rrlib::logging::eLL_USER);
-  }
-
-  /*!
-   * Helper for Debugging: Prints structure below this framework element to log domain
-   *
-   * \param ll Loglevel with which to print
-   */
-  void PrintStructure(rrlib::logging::tLogLevel ll);
+  void PrintStructure();
 
   /*!
    * \param name New Port name

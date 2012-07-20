@@ -59,11 +59,11 @@ void tThreadContainerThread::HandleWatchdogAlert()
   tPeriodicFrameworkElementTask* task = current_task;
   if (!task)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Got stuck without executing any task!? This should not happen.");
+    FINROC_LOG_PRINT(ERROR, "Got stuck without executing any task!? This should not happen.");
   }
   else
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Got stuck executing task associated with '", task->incoming[0]->GetQualifiedName(), "'. Please check your code for infinite loops etc.!");
+    FINROC_LOG_PRINT(ERROR, "Got stuck executing task associated with '", task->incoming[0]->GetQualifiedName(), "'. Please check your code for infinite loops etc.!");
   }
   tWatchDogTask::Deactivate();
 
@@ -148,7 +148,7 @@ void tThreadContainerThread::MainLoopCallback()
         }
 
         // ok, we didn't find module to continue with... (loop)
-        FINROC_LOG_PRINT_TO(thread_containers, rrlib::logging::eLL_WARNING, "Detected loop: doing traceback");
+        FINROC_LOG_PRINT_TO(thread_containers, WARNING, "Detected loop: doing traceback");
         trace_back.Clear();
         tPeriodicFrameworkElementTask* current = tasks.Get(0);
         trace_back.Add(current);
@@ -168,7 +168,7 @@ void tThreadContainerThread::MainLoopCallback()
           }
           if (end)
           {
-            FINROC_LOG_PRINT_TO(thread_containers, rrlib::logging::eLL_WARNING, "Choosing ", current->incoming[0]->GetQualifiedName(), " as next element");
+            FINROC_LOG_PRINT_TO(thread_containers, WARNING, "Choosing ", current->incoming[0]->GetQualifiedName(), " as next element");
             schedule.Add(current);
             tasks.RemoveElem(current);
 
@@ -244,7 +244,7 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask& task, 
     tAggregatedEdge* temp = out_edges->Get(i);
     if (!temp)
     {
-      FINROC_LOG_PRINT_TO(thread_containers, rrlib::logging::eLL_WARNING, "Out Edge ", i , " is NULL ... skipping.\n");
+      FINROC_LOG_PRINT_TO(thread_containers, WARNING, "Out Edge ", i , " is NULL ... skipping.\n");
       continue;
     }
     assert(temp);

@@ -61,7 +61,7 @@ public:
 
   virtual void SetBounds(const rrlib::rtti::tGenericObject& min, const rrlib::rtti::tGenericObject& max)
   {
-    FINROC_LOG_PRINT(eLL_ERROR, "Cannot set bounds for type ", rrlib::rtti::tDataType<T>().GetName());
+    FINROC_LOG_PRINT(ERROR, "Cannot set bounds for type ", rrlib::rtti::tDataType<T>().GetName());
   }
 };
 
@@ -99,7 +99,7 @@ public:
       util::tString error = port->BrowserPublishRaw(mgr);
       if (error.size() > 0)
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not set default value: ", error);
+        FINROC_LOG_PRINT(WARNING, "Could not set default value: ", error);
       }
     }
   }
@@ -125,7 +125,7 @@ public:
 
   virtual void SetBounds(const rrlib::rtti::tGenericObject& min, const rrlib::rtti::tGenericObject& max)
   {
-    FINROC_LOG_PRINT(eLL_ERROR, "Cannot set bounds for type ", port->GetDataType().GetName());
+    FINROC_LOG_PRINT(ERROR, "Cannot set bounds for type ", port->GetDataType().GetName());
   }
 };
 
@@ -169,7 +169,7 @@ public:
 
   virtual void SetBounds(const rrlib::rtti::tGenericObject& min, const rrlib::rtti::tGenericObject& max)
   {
-    FINROC_LOG_PRINT(eLL_ERROR, "Cannot set bounds for type ", port->GetDataType().GetName());
+    FINROC_LOG_PRINT(ERROR, "Cannot set bounds for type ", port->GetDataType().GetName());
   }
 };
 
@@ -242,7 +242,7 @@ tGenericPortImpl* tGenericPortImpl::CreatePortImpl(const tPortCreationInfoBase& 
   {
     return new internal::tGenericPortImplStd(pci);
   }
-  FINROC_LOG_PRINT(eLL_ERROR, "Cannot create port for type ", pci.data_type.GetName());
+  FINROC_LOG_PRINT(ERROR, "Cannot create port for type ", pci.data_type.GetName());
   return NULL;
 }
 

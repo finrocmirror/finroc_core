@@ -57,7 +57,7 @@ void tExternalConnection::Disconnect()
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_PRINT_TO(connections, rrlib::logging::eLL_WARNING, e);
+    FINROC_LOG_PRINT_TO(connections, WARNING, e);
 
   }
   FireConnectionEvent(tConnectionListener::cNOT_CONNECTED);
@@ -78,7 +78,7 @@ void tExternalConnection::EvaluateStaticParameters()
         }
         catch (const util::tException& e)
         {
-          FINROC_LOG_PRINT_TO(connections, rrlib::logging::eLL_ERROR, e);
+          FINROC_LOG_PRINT_TO(connections, ERROR, e);
         }
       }
       last_address = s;
@@ -91,7 +91,7 @@ void tExternalConnection::EvaluateStaticParameters()
       }
       catch (const util::tException& e)
       {
-        FINROC_LOG_PRINT_TO(connections, rrlib::logging::eLL_ERROR, e);
+        FINROC_LOG_PRINT_TO(connections, ERROR, e);
       }
     }
   }
@@ -113,7 +113,7 @@ void tExternalConnection::PrepareDelete()
   }
   catch (const util::tException& e)
   {
-    FINROC_LOG_PRINT_TO(connections, rrlib::logging::eLL_ERROR, e);
+    FINROC_LOG_PRINT_TO(connections, ERROR, e);
   }
   ::finroc::core::tFrameworkElement::PrepareDelete();
 }

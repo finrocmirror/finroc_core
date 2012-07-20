@@ -62,7 +62,7 @@ void tPullCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
     rrlib::thread::tLock lock2(*port);
     if (!port->IsReady())
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "pull call received for port that will soon be deleted");
+      FINROC_LOG_PRINT(DEBUG, "pull call received for port that will soon be deleted");
       return;
     }
     assert(!pulled_buffer);
@@ -85,7 +85,7 @@ void tPullCall::ExecuteTask(tSerializableReusableTask::tPtr& self)
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "pull call received for port with invalid data type");
+      FINROC_LOG_PRINT(WARNING, "pull call received for port with invalid data type");
       return;
     }
   }

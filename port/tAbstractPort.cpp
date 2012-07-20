@@ -131,7 +131,7 @@ void tAbstractPort::ConnectToSource(tFrameworkElement& src_port_parent, const ut
   }
   else if (warn_if_not_available)
   {
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_WARNING, "Cannot find port '", src_port_name, "' in ", src_port_parent.GetQualifiedName(), ".");
+    FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot find port '", src_port_name, "' in ", src_port_parent.GetQualifiedName(), ".");
   }
 }
 
@@ -149,7 +149,7 @@ void tAbstractPort::ConnectToTarget(tAbstractPort& target, bool finstructed)
     target.PropagateStrategy(NULL, this);
     NewConnection(target);
     target.NewConnection(*this);
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "creating Edge from ", GetQualifiedName(), " to ", target.GetQualifiedName());
+    FINROC_LOG_PRINT_TO(edges, DEBUG_VERBOSE_1, "creating Edge from ", GetQualifiedName(), " to ", target.GetQualifiedName());
 
     // check whether we need an initial reverse push
     ConsiderInitialReversePush(target);
@@ -186,7 +186,7 @@ void tAbstractPort::ConnectToTarget(tFrameworkElement& dest_port_parent, const u
   }
   else if (warn_if_not_available)
   {
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_WARNING, "Cannot find port '", dest_port_name, "' in ", dest_port_parent.GetQualifiedName(), ".");
+    FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot find port '", dest_port_name, "' in ", dest_port_parent.GetQualifiedName(), ".");
   }
 }
 
@@ -197,7 +197,7 @@ void tAbstractPort::ConsiderInitialReversePush(tAbstractPort& target)
   {
     if (ReversePushStrategy() && edges_src->CountElements() == 1)
     {
-      FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial reverse push from ", target.GetQualifiedName(), " to ", GetQualifiedName());
+      FINROC_LOG_PRINT_TO(initial_pushes, DEBUG_VERBOSE_1, "Performing initial reverse push from ", target.GetQualifiedName(), " to ", GetQualifiedName());
       target.InitialPushTo(*this, true);
     }
   }
@@ -277,7 +277,7 @@ void tAbstractPort::DisconnectFrom(tAbstractPort& target)
   }
   if (!found)
   {
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_WARNING, "edge not found in AbstractPort::disconnectFrom()");
+    FINROC_LOG_PRINT_TO(edges, DEBUG_WARNING, "edge not found in AbstractPort::disconnectFrom()");
   }
   // not found: throw error message?
 }
@@ -479,23 +479,30 @@ util::tString tAbstractPort::MakeAbsoluteLink(const util::tString& rel_link)
 
 bool tAbstractPort::MayConnectTo(tAbstractPort& target, bool warn_if_impossible)
 {
-  rrlib::logging::tLogLevel loglvl = warn_if_impossible ? rrlib::logging::eLL_WARNING : rrlib::logging::eLL_DEBUG_VERBOSE_1;
   if (!GetFlag(tPortFlags::cEMITS_DATA))
   {
-    FINROC_LOG_PRINT_TO(edges, loglvl, "Cannot connect to target port '", target.GetQualifiedName(), "', because this (source) port does not emit data.");
+    if (warn_if_impossible)
+    {
+      FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because this (source) port does not emit data.");
+    }
     return false;
   }
 
   if (!target.GetFlag(tPortFlags::cACCEPTS_DATA))
   {
-    FINROC_LOG_PRINT_TO(edges, loglvl, "Cannot connect to target port '", target.GetQualifiedName(), "', because it does not accept data.");
+    if (warn_if_impossible)
+    {
+      FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because it does not accept data.");
+    }
     return false;
   }
 
   if (!data_type.IsConvertibleTo(target.data_type))
   {
-    FINROC_LOG_PRINT_TO(edges, loglvl, "Cannot connect to target port '", target.GetQualifiedName(), "', because data types are incompatible ('",
-                        GetDataType().GetName(), "' and '", target.GetDataType().GetName(), "').");
+    if (warn_if_impossible)
+    {
+      FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because data types are incompatible ('", GetDataType().GetName(), "' and '", target.GetDataType().GetName(), "').");
+    }
     return false;
   }
   return true;
@@ -513,11 +520,11 @@ void tAbstractPort::PrintNotReadyMessage(const char* extra_message)
 {
   if (IsDeleted())
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Port is about to be deleted. ", extra_message, " (This may happen occasionally due to non-blocking nature)");
+    FINROC_LOG_PRINT(DEBUG, "Port is about to be deleted. ", extra_message, " (This may happen occasionally due to non-blocking nature)");
   }
   else
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Port has not been initialized yet and thus cannot be used. Fix your application. ", extra_message);
+    FINROC_LOG_PRINT(WARNING, "Port has not been initialized yet and thus cannot be used. Fix your application. ", extra_message);
   }
 }
 
@@ -581,7 +588,7 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
     {
       if (IsReady() && push_wanter->IsReady() && (!GetFlag(tPortFlags::cNO_INITIAL_PUSHING)) && (!push_wanter->GetFlag(tPortFlags::cNO_INITIAL_PUSHING)))
       {
-        FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial push from ", GetQualifiedName(), " to ", push_wanter->GetQualifiedName());
+        FINROC_LOG_PRINT_TO(initial_pushes, DEBUG_VERBOSE_1, "Performing initial push from ", GetQualifiedName(), " to ", push_wanter->GetQualifiedName());
         InitialPushTo(*push_wanter, false);
       }
       push_wanter = NULL;
@@ -718,7 +725,7 @@ void tAbstractPort::SetMaxQueueLength(int queue_length)
 {
   if (!GetFlag(tPortFlags::cHAS_QUEUE))
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "warning: tried to set queue length on port without queue - ignoring");
+    FINROC_LOG_PRINT(WARNING, "warning: tried to set queue length on port without queue - ignoring");
     return;
   }
   {
@@ -777,7 +784,7 @@ void tAbstractPort::SetReversePushStrategy(bool push)
         tAbstractPort* ap = it->Get(i);
         if (ap != NULL && ap->IsReady())
         {
-          FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial reverse push from ", ap->GetQualifiedName(), " to ", GetQualifiedName());
+          FINROC_LOG_PRINT_TO(initial_pushes, DEBUG_VERBOSE_1, "Performing initial reverse push from ", ap->GetQualifiedName(), " to ", GetQualifiedName());
           ap->InitialPushTo(*this, true);
           break;
         }

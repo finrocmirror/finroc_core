@@ -76,7 +76,7 @@ void tThreadContainerElement<BASE>::StartExecution()
   rrlib::thread::tLock l(*this);
   if (thread)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Thread is already executing.");
+    FINROC_LOG_PRINT(WARNING, "Thread is already executing.");
     return;
   }
   tThreadContainerThread* thread_tmp = new tThreadContainerThread(*this, cycle_time.Get(), warn_on_cycle_time_exceed.Get(), last_cycle_execution_time);

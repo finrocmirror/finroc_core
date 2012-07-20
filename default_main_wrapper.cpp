@@ -113,18 +113,18 @@ void HandleSignalSIGINT(int signal)
   call_count++;
   if (call_count == 1)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "\nCaught SIGINT. Exiting...");
+    FINROC_LOG_PRINT(USER, "\nCaught SIGINT. Exiting...");
     run_main_loop = false;
     std::unique_lock<std::mutex> l(main_thread_wait_mutex);
     main_thread_wait_variable.notify_all();
   }
   else if (call_count < 5)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "\nCaught SIGINT again. Unfortunately, the program still hasn't terminated. Program will be aborted at fifth SIGINT.");
+    FINROC_LOG_PRINT(USER, "\nCaught SIGINT again. Unfortunately, the program still hasn't terminated. Program will be aborted at fifth SIGINT.");
   }
   else
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "\nCaught SIGINT for the fifth time. Aborting program.");
+    FINROC_LOG_PRINT(USER, "\nCaught SIGINT for the fifth time. Aborting program.");
     abort();
   }
 }
@@ -173,11 +173,11 @@ bool ParameterConfigHandler(const rrlib::getopt::tNameToOptionMap &name_to_optio
     const char* file = boost::any_cast<const char *>(parameter_config->GetValue());
     if (!finroc::util::sFiles::FinrocFileExists(file))
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not find specified config file ", file);
+      FINROC_LOG_PRINT(ERROR, "Could not find specified config file ", file);
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Loading config file ", file);
+      FINROC_LOG_PRINT(DEBUG, "Loading config file ", file);
     }
     finroc::core::tRuntimeEnvironment::GetInstance()->AddAnnotation(new finroc::core::tConfigFile(file));
   }
@@ -206,11 +206,11 @@ bool PortHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
     int port = atoi(port_string);
     if (port < 1 || port > 65535)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Invalid port '", port_string, "'. Using default: ", network_port);
+      FINROC_LOG_PRINT(ERROR, "Invalid port '", port_string, "'. Using default: ", network_port);
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Listening on user defined port ", port, ".");
+      FINROC_LOG_PRINT(DEBUG, "Listening on user defined port ", port, ".");
       network_port = port;
     }
   }
@@ -237,7 +237,7 @@ bool ConnectHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
   if (connect_option->IsActive())
   {
     connect_to = boost::any_cast<const char *>(connect_option->GetValue());
-    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Connecting to ", connect_to);
+    FINROC_LOG_PRINT(DEBUG, "Connecting to ", connect_to);
   }
 
   return true;
@@ -252,7 +252,7 @@ bool MaxPortsHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
     int m = atoi(max_string);
     if (m < 2 || m > 0xFFFFFF)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Invalid value for maximum number of ports: ", max_string, ". Please provide a value between 2 and 16.7 million");
+      FINROC_LOG_PRINT(ERROR, "Invalid value for maximum number of ports: ", max_string, ". Please provide a value between 2 and 16.7 million");
     }
     else
     {
@@ -271,7 +271,7 @@ bool MaxElementsHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_ma
     int m = atoi(max_string);
     if (m < 2 || m > 0xFFFFFF)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Invalid value for maximum number of framework elements: ", max_string, ". Please provide a value between 2 and 16.7 million");
+      FINROC_LOG_PRINT(ERROR, "Invalid value for maximum number of framework elements: ", max_string, ". Please provide a value between 2 and 16.7 million");
     }
     else
     {
@@ -300,7 +300,7 @@ bool CrashHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Option --crash-handler needs be either 'on' or 'off' (not '", s, "'). Using default.");
+      FINROC_LOG_PRINT(ERROR, "Option --crash-handler needs be either 'on' or 'off' (not '", s, "'). Using default.");
     }
   }
 
@@ -319,7 +319,7 @@ int main(int argc, char **argv)
 
   if (!InstallSignalHandler())
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error installing signal handler. Exiting...");
+    FINROC_LOG_PRINT(ERROR, "Error installing signal handler. Exiting...");
     return EXIT_FAILURE;
   }
 
@@ -346,7 +346,7 @@ int main(int argc, char **argv)
   {
     if (!finroc::util::InstallCrashHandler())
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error installing crash handler. Crashes will simply terminate the program.");
+      FINROC_LOG_PRINT(ERROR, "Error installing crash handler. Crashes will simply terminate the program.");
     }
   }
 
@@ -378,7 +378,7 @@ int main(int argc, char **argv)
   }
   catch (const finroc::util::tException& e1)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Error connecting Peer", e1);
+    FINROC_LOG_PRINT(WARNING, "Error connecting Peer", e1);
   }
 
   if (executables.size() == 0)
@@ -417,7 +417,7 @@ int main(int argc, char **argv)
       main_thread_wait_variable.wait_for(l, std::chrono::seconds(10));
     }
   }
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Left main loop");
+  FINROC_LOG_PRINT(DEBUG, "Left main loop");
 
   // In many cases this is not necessary.
   // However, doing this before static deinitialization can avoid issues with external libraries and thread container threads still running.
