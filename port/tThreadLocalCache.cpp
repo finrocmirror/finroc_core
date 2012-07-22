@@ -79,7 +79,7 @@ tThreadLocalCache::tThreadLocalCache() :
   thread_id(rrlib::thread::tThread::CurrentThreadId()),
   port_register(tRuntimeEnvironment::GetInstance()->GetPorts())
 {
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating ThreadLocalCache for thread ", rrlib::thread::tThread::CurrentThread()->GetName());
+  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating ThreadLocalCache for thread ", rrlib::thread::tThread::CurrentThread().GetName());
 }
 
 tThreadLocalCache::~tThreadLocalCache()
@@ -135,7 +135,7 @@ tThreadLocalCache* tThreadLocalCache::CreateThreadLocalCacheForThisThread()
   info = tli;
   if (infos.Size() > 1)
   {
-    rrlib::thread::tThread::CurrentThreadRaw()->LockObject(std::shared_ptr<tThreadLocalCache>(tli)); // for auto-deleting after thread finishes
+    rrlib::thread::tThread::CurrentThread().LockObject(std::shared_ptr<tThreadLocalCache>(tli)); // for auto-deleting after thread finishes
   }
   return tli;
 }
@@ -164,7 +164,7 @@ void tThreadLocalCache::DeleteInfoForPort(int port_index)
 
 void tThreadLocalCache::FinalDelete()
 {
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Deleting ThreadLocalCache for thread ", rrlib::thread::tThread::CurrentThreadRaw()->GetName());
+  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, "Deleting ThreadLocalCache for thread ", rrlib::thread::tThread::CurrentThread().GetName());
 
   /*! Delete local port data buffer pools */
   for (size_t i = 0u; i < cc_type_pools.length; i++)

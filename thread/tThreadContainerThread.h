@@ -84,6 +84,7 @@ private:
    */
   tPeriodicFrameworkElementTask* current_task;
 
+  virtual void HandleWatchdogAlert();
 
   /*!
    * Trace outgoing connection
@@ -102,11 +103,17 @@ public:
    */
   static tThreadContainerThread* CurrentThread()
   {
-    rrlib::thread::tThread* thread = rrlib::thread::tThread::CurrentThreadRaw();
-    return (typeid(*thread) == typeid(tThreadContainerThread)) ? static_cast<tThreadContainerThread*>(thread) : NULL;
+    rrlib::thread::tThread& thread = rrlib::thread::tThread::CurrentThread();
+    return (typeid(thread) == typeid(tThreadContainerThread)) ? static_cast<tThreadContainerThread*>(&thread) : NULL;
   }
 
-  virtual void HandleWatchdogAlert();
+  /*!
+   * \return Shared Pointer to thread container thread
+   */
+  std::shared_ptr<tThreadContainerThread> GetSharedPtr()
+  {
+    return std::static_pointer_cast<core::tThreadContainerThread>(tThread::GetSharedPtr());
+  }
 
   /*!
    * \param fe Framework element

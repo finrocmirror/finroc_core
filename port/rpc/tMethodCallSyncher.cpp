@@ -60,7 +60,7 @@ tMethodCallSyncher* tMethodCallSyncher::GetFreeInstance(tThreadLocalCache* tc)
     {
       tMethodCallSyncher* mcs = &(slots[i]);
       mcs->Reset();
-      mcs->thread = rrlib::thread::tThread::CurrentThreadRaw();
+      mcs->thread = &rrlib::thread::tThread::CurrentThread();
       mcs->thread_uid = tc->GetThreadUid();
       return mcs;
     }

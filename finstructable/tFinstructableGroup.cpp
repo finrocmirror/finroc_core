@@ -91,7 +91,7 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
 
 void tFinstructableGroup::AddDependency(const util::tString& dependency)
 {
-  if (rrlib::thread::tThread::CurrentThreadRaw() == saving_thread && startup_loaded_finroc_libs.find(dependency.c_str()) == startup_loaded_finroc_libs.end())
+  if (&rrlib::thread::tThread::CurrentThread() == saving_thread && startup_loaded_finroc_libs.find(dependency.c_str()) == startup_loaded_finroc_libs.end())
   {
     dependencies_tmp.insert(dependency);
   }
@@ -394,7 +394,7 @@ void tFinstructableGroup::SaveXml()
 {
   {
     tLock lock2(GetRegistryLock());
-    saving_thread = rrlib::thread::tThread::CurrentThreadRaw();
+    saving_thread = &rrlib::thread::tThread::CurrentThread();
     dependencies_tmp.clear();
     util::tString save_to = util::sFiles::GetFinrocFileToSaveTo(xml_file.Get());
     if (save_to.length() == 0)
