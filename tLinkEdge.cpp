@@ -27,11 +27,18 @@ namespace finroc
 {
 namespace core
 {
+// workaround for gcc 4.5
+static std::array<tLinkEdge::tPortReference, 2> CreatePortReferenceArray(const tLinkEdge::tPortReference& port1, const tLinkEdge::tPortReference& port2)
+{
+  std::array<tLinkEdge::tPortReference, 2> result = {{ port1, port2 }};
+  return result;
+}
+
 tLinkEdge::tLinkEdge(const tPortReference& port1, const tPortReference& port2, bool both_connect_directions, bool finstructed) :
-  ports( {port1, port2}),
-       both_connect_directions(both_connect_directions),
-       next_edge(NULL),
-       finstructed(finstructed)
+  ports(CreatePortReferenceArray(port1, port2)),
+  both_connect_directions(both_connect_directions),
+  next_edge(NULL),
+  finstructed(finstructed)
 {
   if (ports[0].link.length() == 0 && ports[1].link.length() == 0)
   {

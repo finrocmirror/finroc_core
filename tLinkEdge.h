@@ -24,6 +24,7 @@
 #define core__tLinkEdge_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
+#include <array>
 
 namespace finroc
 {
@@ -102,7 +103,7 @@ private:
    * Ports that edge operates on.
    * At least one of the two is linked
    */
-  const tPortReference ports[2];
+  const std::array<tPortReference, 2> ports;
 
   /*!
    * Should the two ports be connected in any direction?
