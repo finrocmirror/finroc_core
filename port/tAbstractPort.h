@@ -58,6 +58,18 @@ class tPortDataManager;
  */
 class tAbstractPort : public tFrameworkElement
 {
+public:
+
+  /*!
+   * Connection direction
+   */
+  enum class tConnectDirection
+  {
+    AUTO,      //!< Automatically determine connection direction. Usually a good choice
+    TO_TARGET, //!< Specified port is target port
+    TO_SOURCE  //!< Specified port is source port
+  };
+
 protected:
 
   /*!
@@ -152,7 +164,7 @@ private:
    * \param rel_link possibly relative link (absolute if it starts with '/')
    * \return absolute link
    */
-  util::tString MakeAbsoluteLink(const util::tString& rel_link);
+  util::tString MakeAbsoluteLink(const util::tString& rel_link) const;
 
   /*!
    * Make some auto-adjustments to flags at construction time
@@ -199,6 +211,14 @@ protected:
    * (Called in runtime-registry synchronized context only)
    */
   virtual int16 GetStrategyRequirement() const;
+
+  /*!
+   * Infers connect direction to specified partner port
+   *
+   * \param other Port to determine connect direction to.
+   * \return Either TO_TARGET or TO_SOURCE depending on whether 'other' should be target or source of a connection with this port.
+   */
+  virtual tConnectDirection InferConnectDirection(const tAbstractPort& other) const;
 
   /*!
    * Push initial value to the specified port
@@ -332,75 +352,47 @@ public:
   virtual tNetPort* AsNetPort();
 
   /*!
-   * Connect port to specified source port
+   * Connect port to specified partner port
    *
-   * \param source Source port
+   * \param to Port to connect this port to
+   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
+   * \param finstructed Was edge created using finstruct (or loaded from XML file)? (Should never be called with true by application developer)
    */
-  inline void ConnectToSource(tAbstractPort& source, bool finstructed = false)
-  {
-    source.ConnectToTarget(*this, finstructed);
-  }
+  void ConnectTo(tAbstractPort& to, tConnectDirection connect_direction = tConnectDirection::AUTO, bool finstructed = false);
 
   /*!
-   * Connect port to specified source port
-   * (connection is (re)established when link is available)
+   * Connect port to specified partner port
+   * The connection is (re)established whenever a port with this link is available.
    *
-   * \param link_name Link name of source port (relative to parent framework element)
-   * \param finstructed Was edge created using finstruct? (Should never be called with true by application developer)
+   * \param link_name Link name of partner port (relative to parent framework element)
+   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
+   * \param finstructed Was edge created using finstruct (or loaded from XML file)? (Should never be called with true by application developer)
    */
-  void ConnectToSource(const util::tString& src_link, bool finstructed = false);
+  void ConnectTo(const util::tString& link_name, tConnectDirection connect_direction = tConnectDirection::AUTO, bool finstructed = false);
 
   /*!
-   * Connect port to specified source port
+   * Connect port to specified partner port
    *
-   * \param src_port_parent Parent of source port
-   * \param src_port_name Name of source port
+   * \param partner_port_parent Parent of port to connect to
+   * \param partner_port_name Name of port to connect to
    * \param warn_if_not_available Print warning message if connection cannot be established
+   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
    */
-  void ConnectToSource(tFrameworkElement& src_port_parent, const util::tString& src_port_name, bool warn_if_not_available = true);
+  void ConnectTo(tFrameworkElement& partner_port_parent, const util::tString& port_name, bool warn_if_not_available = true, tConnectDirection connect_direction = tConnectDirection::AUTO);
 
   /*!
-   * Connect port to specified target port
-   *
-   * \param target Target port
-   * \param finstructed Was edge created using finstruct? (Should never be called with true by application developer)
-   */
-  void ConnectToTarget(tAbstractPort& target, bool finstructed = false);
-
-  /*!
-   * Connect port to specified target port
-   * (connection is (re)established when link is available)
-   *
-   * \param link_name Link name of target port (relative to parent framework element)
-   * \param finstructed Was edge created using finstruct? (Should never be called with true by application developer)
-   */
-  void ConnectToTarget(const util::tString& dest_link, bool finstructed = false);
-
-  /*!
-   * Connect port to specified destination port
-   *
-   * \param dest_port_parent Parent of destination port
-   * \param dest_port_name Name of destination port
-   * \param warn_if_not_available Print warning message if connection cannot be established
-   */
-  void ConnectToTarget(tFrameworkElement& dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available = true);
-
-  /*!
-   * disconnects all edges
-   */
-  inline void DisconnectAll()
-  {
-    DisconnectAll(true, true);
-  }
-
-  /*!
-   * disconnects all edges
+   * Disconnects all edges
    *
    * \param incoming disconnect incoming edges?
    * \param outgoing disconnect outgoing edges?
    */
-  void DisconnectAll(bool incoming, bool outgoing);
+  void DisconnectAll(bool incoming = true, bool outgoing = true);
 
+  /*!
+   * Disconnect from specified port
+   *
+   * \param target Port to disconnect from
+   */
   void DisconnectFrom(tAbstractPort& target);
 
   /*!
@@ -447,7 +439,7 @@ public:
   /*!
    * \return Has port changed since last reset? (Flag for use by custom API - not used/accessed by core port classes.)
    */
-  int8 GetCustomChangedFlag()
+  int8 GetCustomChangedFlag() const
   {
     return custom_changed_flag;
   }
@@ -543,7 +535,7 @@ public:
   /*!
    * \return Does port have any link edges?
    */
-  inline bool HasLinkEdges()
+  inline bool HasLinkEdges() const
   {
     return link_edges != NULL && link_edges->Size() > 0;
   }
@@ -568,7 +560,7 @@ public:
   /*!
    * \return Is port connected to specified other port?
    */
-  bool IsConnectedTo(tAbstractPort& target);
+  bool IsConnectedTo(tAbstractPort& target) const;
 
   /*!
    * \return Is port connected to output ports that request reverse pushes?
@@ -579,7 +571,7 @@ public:
    * \param target Index of target port
    * \return Is edge to specified target port finstructed?
    */
-  bool IsEdgeFinstructed(int idx);
+  bool IsEdgeFinstructed(int idx) const;
 
   inline bool IsInputPort() const
   {
@@ -596,7 +588,7 @@ public:
   /*!
    * \return Is this port volatile (meaning that it's not always there and connections to it should preferably be links)?
    */
-  inline bool IsVolatile()
+  inline bool IsVolatile() const
   {
     return GetFlag(tPortFlags::cIS_VOLATILE);
   }
@@ -627,7 +619,7 @@ public:
    * \param warn_if_impossible Print warning to console if connecting is not possible?
    * \return Answer
    */
-  bool MayConnectTo(tAbstractPort& target, bool warn_if_impossible = false);
+  bool MayConnectTo(tAbstractPort& target, bool warn_if_impossible = false) const;
 
   /*!
    * Notify port of (network) disconnect

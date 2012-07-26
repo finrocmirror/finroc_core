@@ -27,111 +27,56 @@ namespace finroc
 {
 namespace core
 {
-tLinkEdge::tLinkEdge(const util::tString& source_link_, int target_handle, bool finstructed) :
-  source_link(source_link_),
-  target_link(""),
-  port_handle(target_handle),
-  next(NULL),
-  finstructed(finstructed)
+tLinkEdge::tLinkEdge(const tPortReference& port1, const tPortReference& port2, bool both_connect_directions, bool finstructed) :
+  ports( {port1, port2}),
+       both_connect_directions(both_connect_directions),
+       next_edge(NULL),
+       finstructed(finstructed)
 {
-  // this(sourceLink_,"",targetHandle);
-  if (source_link.length() > 0)
+  if (ports[0].link.length() == 0 && ports[1].link.length() == 0)
   {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, *this);
+    FINROC_LOG_PRINT(ERROR, "At least one of two ports needs to be linked. Otherwise, it does not make sense to use this class.");
+    abort();
   }
-  if (target_link.length() > 0)
+  rrlib::thread::tLock lock(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+  for (size_t i = 0; i < 2; i++)
   {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, *this);
-  }
-}
-
-tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& target_link_, bool finstructed) :
-  source_link(source_link_),
-  target_link(target_link_),
-  port_handle(-1),
-  next(NULL),
-  finstructed(finstructed)
-{
-  // this(sourceLink_,targetLink_,-1);
-  if (source_link.length() > 0)
-  {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, *this);
-  }
-  if (target_link.length() > 0)
-  {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, *this);
-  }
-}
-
-tLinkEdge::tLinkEdge(int source_handle, const util::tString& target_link_, bool finstructed) :
-  source_link(""),
-  target_link(target_link_),
-  port_handle(source_handle),
-  next(NULL),
-  finstructed(finstructed)
-{
-  // this("",targetLink_,sourceHandle);
-  if (source_link.length() > 0)
-  {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, *this);
-  }
-  if (target_link.length() > 0)
-  {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, *this);
-  }
-}
-
-tLinkEdge::tLinkEdge(const util::tString& source_link_, const util::tString& target_link_, int port_handle_, bool finstructed) :
-  source_link(source_link_),
-  target_link(target_link_),
-  port_handle(port_handle_),
-  next(NULL),
-  finstructed(finstructed)
-{
-  if (source_link.length() > 0)
-  {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(source_link, *this);
-  }
-  if (target_link.length() > 0)
-  {
-    tRuntimeEnvironment::GetInstance()->AddLinkEdge(target_link, *this);
+    if (ports[i].link.length() > 0)
+    {
+      tRuntimeEnvironment::GetInstance()->AddLinkEdge(ports[i].link, *this);
+    }
   }
 }
 
 tLinkEdge::~tLinkEdge()
 {
+  rrlib::thread::tLock lock(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+  for (size_t i = 0; i < 2; i++)
   {
-    rrlib::thread::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
-    if (source_link.length() > 0)
+    if (ports[i].link.length() > 0)
     {
-      tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(source_link, *this);
-    }
-    if (target_link.length() > 0)
-    {
-      tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(target_link, *this);
+      tRuntimeEnvironment::GetInstance()->RemoveLinkEdge(ports[i].link, *this);
     }
   }
 }
 
-void tLinkEdge::LinkAdded(tRuntimeEnvironment& re, const util::tString& link, tAbstractPort& port)
+void tLinkEdge::LinkAdded(tRuntimeEnvironment& re, const util::tString& link, tAbstractPort& port) const
 {
+  rrlib::thread::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
+  if (link.compare(ports[0].link) == 0)
   {
-    rrlib::thread::tLock lock2(tRuntimeEnvironment::GetInstance()->GetRegistryLock());
-    if (link.compare(source_link) == 0)
+    tAbstractPort* target = ports[1].link.length() > 0 ? re.GetPort(ports[1].link) : ports[1].pointer;
+    if (target)
     {
-      tAbstractPort* target = target_link.length() > 0 ? re.GetPort(target_link) : re.GetPort(port_handle);
-      if (target)
-      {
-        port.ConnectToTarget(*target, finstructed);
-      }
+      port.ConnectTo(*target, both_connect_directions ? tAbstractPort::tConnectDirection::AUTO : tAbstractPort::tConnectDirection::TO_TARGET, finstructed);
     }
-    else
+  }
+  else if (link.compare(ports[1].link) == 0)
+  {
+    tAbstractPort* source = ports[0].link.length() > 0 ? re.GetPort(ports[0].link) : ports[0].pointer;
+    if (source)
     {
-      tAbstractPort* source = source_link.length() > 0 ? re.GetPort(source_link) : re.GetPort(port_handle);
-      if (source)
-      {
-        port.ConnectToSource(*source, finstructed);
-      }
+      port.ConnectTo(*source, both_connect_directions ? tAbstractPort::tConnectDirection::AUTO : tAbstractPort::tConnectDirection::TO_SOURCE, finstructed);
     }
   }
 }

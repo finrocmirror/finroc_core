@@ -55,7 +55,7 @@ void tRealPortQueueTest::Main()
   input_pCI.max_queue_size = 0;
   tPort<int> unlimited_input(input_pCI);
   tPort<int> unlimited_input2(input_pCI);
-  output->ConnectToTarget(input);
+  output->ConnectTo(input);
   tFrameworkElement::InitAll();
   tRuntimeEnvironment::GetInstance()->PrintStructure();
 
@@ -128,8 +128,8 @@ void tRealPortQueueTest::Main()
   FINROC_LOG_PRINT_STATIC(USER, "\nAnd now for Concurrency :-)  ...");
 
   // connect to unlimited input
-  output->ConnectToTarget(unlimited_input);
-  output->ConnectToTarget(unlimited_input2);
+  output->ConnectTo(unlimited_input);
+  output->ConnectTo(unlimited_input2);
 
   // remove values from initial push
   unlimited_input.DequeueAutoLocked();

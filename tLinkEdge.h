@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -39,98 +39,97 @@ class tAbstractPort;
  *
  * (re)Establishes real edges when links are available.
  */
-class tLinkEdge : public util::tUncopyableObject
+class tLinkEdge : boost::noncopyable
 {
-private:
-
-  /*!
-   * Links that edge operates on.
-   * One may be empty ("")
-   * SourceLink is link for source port, targetLink is link for target port
-   */
-  util::tString source_link, target_link;
-
-  /*! If one link is null - this contains handle of partner port */
-  int port_handle;
-
-  /*! Pointer to next edge - for a singly linked list */
-  tLinkEdge* next;
-
-  /*! Is this a finstructed link edge? */
-  bool finstructed;
-
-  /*!
-   * Creates link edge for two links
-   *
-   * \param source_link_ source link
-   * \param target_link_ target link
-   * \param port_handle_ If one link is null - this contains handle of partner port
-   * \param finstructed Is this a finstructed link edge?
-   */
-  tLinkEdge(const util::tString& source_link_, const util::tString& target_link_, int port_handle_, bool finstructed);
-
 public:
 
   /*!
-   * Creates link edge for handle and link
-   *
-   * \param source_link_ source link
-   * \param target_handle handle of target port
-   * \param finstructed Is this a finstructed link edge?
+   * Reference to a port - either link or pointer
    */
-  tLinkEdge(const util::tString& source_link_, int target_handle, bool finstructed);
+  class tPortReference
+  {
+    friend class tLinkEdge;
 
-  /*!
-   * Creates link edge for two links
-   *
-   * \param source_link_ source link
-   * \param target_link_ target link
-   * \param finstructed Is this a finstructed link edge?
-   */
-  tLinkEdge(const util::tString& source_link_, const util::tString& target_link_, bool finstructed);
+    const util::tString link;
+    tAbstractPort* const pointer;
+  public:
+    tPortReference(const util::tString& link) : link(link), pointer(NULL) {}
+    tPortReference(tAbstractPort& port) : link(""), pointer(&port) {}
+  };
 
   /*!
    * Creates link edge for handle and link
    *
-   * \param source_handle handle of source port
-   * \param target_link_ target link
+   * \param port1 Link or pointer to first port
+   * \param port2 Link or pointer to second port
+   * \param both_connect_directions If false, only connections from port1 to port2 will be created
    * \param finstructed Is this a finstructed link edge?
    */
-  tLinkEdge(int source_handle, const util::tString& target_link_, bool finstructed);
+  tLinkEdge(const tPortReference& port1, const tPortReference& port2, bool both_connect_directions, bool finstructed = false);
 
-  virtual ~tLinkEdge();
+  ~tLinkEdge();
 
   /*!
-   * (should only be called by RuntimeEnvironment)
-   *
-   * \return Pointer to next edge - for a singly linked list
+   * \return Link of first port - possibly empty if a port was provided directly instead
    */
-  inline tLinkEdge* GetNext()
+  inline util::tString GetSourceLink() const
   {
-    return next;
+    return ports[0].link;
   }
 
-  inline int GetPortHandle()
+  /*!
+   * \return Link of second port - possibly empty if a port was provided directly instead
+   */
+  inline util::tString GetTargetLink() const
   {
-    return port_handle;
-  }
-
-  inline util::tString GetSourceLink()
-  {
-    return source_link;
-  }
-
-  inline util::tString GetTargetLink()
-  {
-    return target_link;
+    return ports[1].link;
   }
 
   /*!
    * \return Was this link edge finstructed?
    */
-  bool IsFinstructed()
+  bool IsFinstructed() const
   {
     return finstructed;
+  }
+
+
+private:
+
+  friend class tRuntimeEnvironment;
+
+  /*!
+   * Ports that edge operates on.
+   * At least one of the two is linked
+   */
+  const tPortReference ports[2];
+
+  /*!
+   * Should the two ports be connected in any direction?
+   * If false, only connections from ports[0] to ports[1] will be created
+   */
+  const bool both_connect_directions;
+
+  /*! Pointer to next edge - for a singly linked list */
+  tLinkEdge* next_edge;
+
+  /*! Is this a finstructed link edge? */
+  const bool finstructed;
+
+  /*!
+   * \return Pointer to next edge - for a singly linked list
+   */
+  inline tLinkEdge* GetNextEdge() const
+  {
+    return next_edge;
+  }
+
+  /*!
+   * \param next Pointer to next edge - for a singly linked list
+   */
+  inline void SetNextEdge(tLinkEdge* next_edge)
+  {
+    this->next_edge = next_edge;
   }
 
   /*!
@@ -141,17 +140,7 @@ public:
    * \param link Link that has been added
    * \param port port linked to
    */
-  void LinkAdded(tRuntimeEnvironment& re, const util::tString& link, tAbstractPort& port);
-
-  /*!
-   * (should only be called by RuntimeEnvironment)
-   *
-   * \param next Pointer to next edge - for a singly linked list
-   */
-  inline void SetNext(tLinkEdge* next_)
-  {
-    this->next = next_;
-  }
+  void LinkAdded(tRuntimeEnvironment& re, const util::tString& link, tAbstractPort& port) const;
 
 };
 

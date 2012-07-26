@@ -312,15 +312,15 @@ void tFinstructableGroup::LoadXml(const util::tString& xml_file_)
           }
           else if (src_port == NULL || src_port->IsVolatile())    // source volatile
           {
-            dest_port->ConnectToSource(QualifyLink(src), true);
+            dest_port->ConnectTo(QualifyLink(src), tAbstractPort::tConnectDirection::AUTO, true);
           }
           else if (dest_port == NULL || dest_port->IsVolatile())    // destination volatile
           {
-            src_port->ConnectToTarget(QualifyLink(dest), true);
+            src_port->ConnectTo(QualifyLink(dest), tAbstractPort::tConnectDirection::AUTO, true);
           }
           else
           {
-            src_port->ConnectToTarget(*dest_port, true);
+            src_port->ConnectTo(*dest_port, tAbstractPort::tConnectDirection::AUTO, true);
           }
         }
         else if (boost::equals(name, "parameter"))

@@ -107,7 +107,7 @@ tAggregatedEdge* tEdgeAggregator::FindAggregatedEdge(tEdgeAggregator& dest)
   return NULL;
 }
 
-tEdgeAggregator* tEdgeAggregator::GetAggregator(tAbstractPort& source)
+tEdgeAggregator* tEdgeAggregator::GetAggregator(const tAbstractPort& source)
 {
   tFrameworkElement* current = source.GetParent();
   while (current)

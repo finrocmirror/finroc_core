@@ -85,7 +85,7 @@ tInterfacePort* tInterfacePort::GetServer()
   while (true)
   {
     tInterfacePort* last = current;
-    util::tArrayWrapper<tInterfacePort*>* it = current->edges_dest.GetIterable();
+    util::tArrayWrapper<tInterfacePort*>* it = current->edges_src.GetIterable();
     for (size_t i = 0u, n = it->Size(); i < n; i++)
     {
       tInterfacePort* ip = static_cast<tInterfacePort*>(it->Get(i));
@@ -115,19 +115,41 @@ tPortDataManager* tInterfacePort::GetUnusedBufferRaw(const rrlib::rtti::tDataTyp
   return buf_pool->GetUnusedBuffer(dt);
 }
 
+tAbstractPort::tConnectDirection tInterfacePort::InferConnectDirection(const tAbstractPort& other) const
+{
+  // Check whether one of the two ports is connected to a server
+  const tInterfacePort& other_interface_port = static_cast<const tInterfacePort&>(other);
+  const tInterfacePort* server_port_of_this = (GetType() == eServer || GetType() == eNetwork) ? this : GetServer();
+  const tInterfacePort* server_port_of_other = (other_interface_port.GetType() == eServer || other_interface_port.GetType() == eNetwork) ? &other_interface_port : other_interface_port.GetServer();
+  if (server_port_of_this && server_port_of_other)
+  {
+    FINROC_LOG_PRINT(WARNING, "Both ports (this and %s) are connected to a server already.", other.GetQualifiedLink().c_str());
+  }
+  else if (server_port_of_this)
+  {
+    return tConnectDirection::TO_SOURCE;
+  }
+  else if (server_port_of_other)
+  {
+    return tConnectDirection::TO_TARGET;
+  }
+
+  return tAbstractPort::InferConnectDirection(other);
+}
+
 tPortCreationInfoBase tInterfacePort::ProcessPci(tPortCreationInfoBase pci, tInterfacePort::tType type_, int lock_level)
 {
   switch (type_)
   {
   case eServer:
-    pci.flags |= tPortFlags::cEMITS_DATA | tPortFlags::cOUTPUT_PORT;
+    pci.flags |= tPortFlags::cACCEPTS_DATA;
     break;
   case eClient:
-    pci.flags |= tPortFlags::cACCEPTS_DATA;
+    pci.flags |= tPortFlags::cEMITS_DATA | tPortFlags::cOUTPUT_PORT;
     break;
   case eNetwork:
   case eRouting:
-    pci.flags |= tPortFlags::cEMITS_DATA | tPortFlags::cACCEPTS_DATA;
+    pci.flags |= tPortFlags::cEMITS_DATA | tPortFlags::cACCEPTS_DATA | tPortFlags::cPROXY;
     break;
   }
   if (lock_level >= 0)
@@ -139,12 +161,16 @@ tPortCreationInfoBase tInterfacePort::ProcessPci(tPortCreationInfoBase pci, tInt
 
 void tInterfacePort::RawConnectToTarget(tAbstractPort& target, bool finstructed)
 {
-  tInterfacePort& target2 = static_cast<tInterfacePort&>(target);
-
-  // disconnect old port(s) - should always be max. one - however, defensive implementation
-  while (target2.edges_dest.Size() > 0)    // disconnect old port
+  // Disconnect any server ports we might already be connected to.
+  util::tArrayWrapper<tInterfacePort*>* it = edges_src.GetIterable();
+  for (int i = 0, n = it->Size(); i < n; i++)
   {
-    target2.edges_dest.GetIterable()->Get(0)->DisconnectFrom(target2);
+    tAbstractPort* port = it->Get(i);
+    if (port)
+    {
+      FINROC_LOG_PRINT_TO(edges, WARNING, "Port already connected to a server. Removing connection to '", port->GetQualifiedName(), "' and adding the new one to '", target.GetQualifiedName(), "'.");
+      port->DisconnectFrom(*this);
+    }
   }
 
   core::tAbstractPort::RawConnectToTarget(target, finstructed);

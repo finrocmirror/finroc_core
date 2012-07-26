@@ -65,7 +65,6 @@ public:
   /*!
    * Implementation of several Connect... functions (to avoid major code duplication)
    *
-   * \param op Internal Opcode
    * \param group Partner port group
    * \param group_link Partner port group link (if port group is null)
    * \param create_missing_ports Create ports in source, if this group has ports with names that cannot be found in source.
@@ -74,82 +73,44 @@ public:
    * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
    * \param other_port_prefix Prefix of ports in source group to ignore. This is prepended when ports are created.
    */
-  void ConnectImpl(int op, tPortGroup* group, const util::tString& group_link, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const util::tString& port_prefix = "", const util::tString& other_port_prefix = "");
+  void ConnectImpl(tPortGroup* group, const util::tString& group_link, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const util::tString& port_prefix = "", const util::tString& other_port_prefix = "");
 
   /*!
-   * Connects all ports to ports with the same name in source port group.
+   * Connects all ports to ports with the same name in other port group.
    *
-   * \param source source port group
+   * \param group Other port group
    * \param create_missing_ports Create ports in source, if this group has ports with names that cannot be found in source.
    * \param start_with Port to start connecting with (NULL = first port)
    * \param count Number of ports to connect - starting with start port (-1 = all ports)
    * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
    * \param source_port_prefix Prefix of ports in source group to ignore. This is prepended when ports are created.
    */
-  void ConnectToSourceByName(tPortGroup& source, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
+  void ConnectByName(tPortGroup& group, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
   {
-    ConnectImpl(0, &source, "", create_missing_ports, start_with, count, port_prefix, source_port_prefix);
+    ConnectImpl(&group, "", create_missing_ports, start_with, count, port_prefix, source_port_prefix);
   }
-  void ConnectToSourceByName(tPortGroup& source, bool create_missing_ports, tPortWrapperBase start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
+  void ConnectByName(tPortGroup& group, bool create_missing_ports, tPortWrapperBase start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
   {
-    ConnectToSourceByName(source, create_missing_ports, start_with.GetWrapped(), count, port_prefix, source_port_prefix);
+    ConnectByName(group, create_missing_ports, start_with.GetWrapped(), count, port_prefix, source_port_prefix);
   }
 
   /*!
-   * Connects/links all ports to ports with the same name in source port group.
-   * (connection is (re)established when link is available)
+   * Connects/links all ports to ports with the same name in other port group.
+   * (connections are (re)established when links are available)
    *
-   * \param source_link Link name of source port group (relative to this port group)
+   * \param group_link Link name of other port group (relative to this port group)
    * \param start_with Port to start connecting with (NULL = first port)
    * \param count Number of ports to connect - starting with start port (-1 = all ports)
    * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
    * \param source_port_prefix Prefix of ports in source group to ignore. This is prepended when ports are created.
    */
-  void ConnectToSourceByName(const util::tString& source_link, tAbstractPort* start_with = NULL, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
+  void ConnectByName(const util::tString& group_link, tAbstractPort* start_with = NULL, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
   {
-    ConnectImpl(2, NULL, source_link, false, start_with, count, port_prefix, source_port_prefix);
+    ConnectImpl(NULL, group_link, false, start_with, count, port_prefix, source_port_prefix);
   }
-  void ConnectToSourceByName(const util::tString& source_link, tPortWrapperBase start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
+  void ConnectByName(const util::tString& group_link, tPortWrapperBase start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& source_port_prefix = "")
   {
-    ConnectToSourceByName(source_link, start_with.GetWrapped(), count, port_prefix, source_port_prefix);
-  }
-
-  /*!
-   * Connects all ports to ports with the same name in target port group.
-   *
-   * \param target target port group
-   * \param create_missing_ports Create ports in target, if this group has ports with names that cannot be found in target.
-   * \param start_with Port to start connecting with (NULL = first port)
-   * \param count Number of ports to connect - starting with start port (-1 = all ports)
-   * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
-   * \param target_port_prefix Prefix of ports in target group to ignore. This is prepended when ports are created.
-   */
-  void ConnectToTargetByName(tPortGroup& target, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const util::tString& port_prefix = "", const util::tString& target_port_prefix = "")
-  {
-    ConnectImpl(1, &target, "", create_missing_ports, start_with, count, port_prefix, target_port_prefix);
-  }
-  void ConnectToTargetByName(tPortGroup& target, bool create_missing_ports, tPortWrapperBase start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& target_port_prefix = "")
-  {
-    ConnectToTargetByName(target, create_missing_ports, start_with.GetWrapped(), count, port_prefix, target_port_prefix);
-  }
-
-  /*!
-   * Connects/links all ports to ports with the same name in target port group.
-   * (connection is (re)established when link is available)
-   *
-   * \param target_link Link name of target port group (relative to this port group)
-   * \param start_with Port to start connecting with (NULL = first port)
-   * \param count Number of ports to connect - starting with start port (-1 = all ports)
-   * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
-   * \param target_port_prefix Prefix of ports in target group to ignore. This is prepended when ports are created.
-   */
-  void ConnectToTargetByName(const util::tString& target_link, tAbstractPort* start_with = NULL, int count = -1, const util::tString& port_prefix = "", const util::tString& target_port_prefix = "")
-  {
-    ConnectImpl(3, NULL, target_link, false, start_with, count, port_prefix, target_port_prefix);
-  }
-  void ConnectToTargetByName(const util::tString& target_link, tPortWrapperBase start_with, int count = -1, const util::tString& port_prefix = "", const util::tString& target_port_prefix = "")
-  {
-    ConnectToTargetByName(target_link, start_with.GetWrapped(), count, port_prefix, target_port_prefix);
+    ConnectByName(group_link, start_with.GetWrapped(), count, port_prefix, source_port_prefix);
   }
 
   /*!

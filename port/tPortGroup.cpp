@@ -34,7 +34,7 @@ tPortGroup::tPortGroup(tFrameworkElement* parent, const util::tString& name, uin
 {
 }
 
-void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& group_link, bool create_missing_ports, tAbstractPort* start_with, int count, const util::tString& port_prefix, const util::tString& other_port_prefix)
+void tPortGroup::ConnectImpl(tPortGroup* group, const util::tString& group_link, bool create_missing_ports, tAbstractPort* start_with, int count, const util::tString& port_prefix, const util::tString& other_port_prefix)
 {
   int org_count = count;
   tChildIterator ci(*this, false);
@@ -58,40 +58,22 @@ void tPortGroup::ConnectImpl(int op, tPortGroup* group, const util::tString& gro
     name = name.substr(port_prefix.length());
 
     // connect-function specific part
-    if (op <= 1)
+    if (group)
     {
       tFrameworkElement* child = group->GetChild(other_port_prefix + name);
       if (child && child->IsPort())
       {
-        if (op == 0)
-        {
-          p->ConnectToSource(*static_cast<tAbstractPort*>(child));
-        }
-        else
-        {
-          p->ConnectToTarget(*static_cast<tAbstractPort*>(child));
-        }
+        p->ConnectTo(static_cast<tAbstractPort&>(*child));
       }
       else if (create_missing_ports)
       {
         child = group->CreatePort(other_port_prefix + name, p->GetDataType(), 0);
-        if (op == 0)
-        {
-          p->ConnectToSource(*static_cast<tAbstractPort*>(child));
-        }
-        else
-        {
-          p->ConnectToTarget(*static_cast<tAbstractPort*>(child));
-        }
+        p->ConnectTo(static_cast<tAbstractPort&>(*child));
       }
     }
-    else if (op == 2)
+    else if (group_link.length() > 0)
     {
-      p->ConnectToSource(group_link + "/" + other_port_prefix + name);
-    }
-    else if (op == 3)
-    {
-      p->ConnectToTarget(group_link + "/" + other_port_prefix + name);
+      p->ConnectTo(group_link + "/" + other_port_prefix + name);
     }
     // connect-function specific part end
 

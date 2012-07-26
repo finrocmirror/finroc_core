@@ -47,8 +47,8 @@ void tPeer2PeerTest::Main(int argc, char **argv)
   output.GetWrapped()->Link(*link_test, "linkTestPort");
   tPort<int> output2("testOutGlobal", tPortFlags::cSHARED_OUTPUT_PORT | tCoreFlags::cGLOBALLY_UNIQUE_LINK);
   tPort<int> input("testIn", tPortFlags::cINPUT_PORT);
-  input.ConnectToSource("/TCP/localhost:4444/Unrelated/testOut");
-  input.ConnectToSource("/Unrelated/testOutGlobal");
+  input.ConnectTo("/TCP/localhost:4444/Unrelated/testOut");
+  input.ConnectTo("/Unrelated/testOutGlobal");
 
   // Create TCP peer
   util::tString addr = "localhost:4444";

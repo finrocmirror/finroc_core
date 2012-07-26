@@ -85,15 +85,15 @@ void tAdminServer::Connect(tAbstractPort& src, tAbstractPort& dest)
 {
   if (src.IsVolatile() && (!dest.IsVolatile()))
   {
-    dest.ConnectToSource(src.GetQualifiedLink(), true);
+    dest.ConnectTo(src.GetQualifiedLink(), tAbstractPort::tConnectDirection::AUTO, true);
   }
   else if (dest.IsVolatile() && (!src.IsVolatile()))
   {
-    src.ConnectToTarget(dest.GetQualifiedLink(), true);
+    src.ConnectTo(dest.GetQualifiedLink(), tAbstractPort::tConnectDirection::AUTO, true);
   }
   else
   {
-    src.ConnectToTarget(dest, true);
+    src.ConnectTo(dest, tAbstractPort::tConnectDirection::AUTO, true);
   }
 }
 
@@ -389,7 +389,7 @@ tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method
 void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
 {
   tRuntimeEnvironment* re = tRuntimeEnvironment::GetInstance();
-  ::finroc::core::tAbstractPort* src = re->GetPort(p1);
+  tAbstractPort* src = re->GetPort(p1);
 
   if (method == cDISCONNECT_ALL)
   {
@@ -403,7 +403,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
     return;
   }
 
-  ::finroc::core::tAbstractPort* dest = re->GetPort(p2);
+  tAbstractPort* dest = re->GetPort(p2);
   if (src == NULL || dest == NULL)
   {
     FINROC_LOG_PRINT(WARNING, "Can't (dis)connect ports that do not exists");
@@ -415,19 +415,10 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
     {
       FINROC_LOG_PRINT(WARNING, "Cannot really persistently connect two network ports: ", src->GetQualifiedLink(), ", ", dest->GetQualifiedLink());
     }
-    if (src->MayConnectTo(*dest))
-    {
-      Connect(*src, *dest);
-    }
-    else if (dest->MayConnectTo(*src))
-    {
-      Connect(*dest, *src);
-    }
+    Connect(*src, *dest);
     if (!src->IsConnectedTo(*dest))
     {
-      FINROC_LOG_PRINT(WARNING, "Could not connect ports '", src->GetQualifiedName(), "' and '", dest->GetQualifiedName(), "' for the following reasons:");
-      src->MayConnectTo(*dest, true);
-      dest->MayConnectTo(*src, true);
+      FINROC_LOG_PRINT(WARNING, "Could not connect ports '", src->GetQualifiedName(), "' and '", dest->GetQualifiedName(), "'.");
     }
     else
     {

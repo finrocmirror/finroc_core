@@ -56,6 +56,8 @@ protected:
 
 public:
 
+  typedef tAbstractPort::tConnectDirection tConnectDirection;
+
   tPortWrapperBase() :
     wrapped(NULL)
   {}
@@ -71,91 +73,51 @@ public:
   }
 
   /*!
-   * Connect port to specified source port
+   * Connect port to specified partner port
    *
-   * \param source Source port
+   * \param source Partner port
+   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
    */
-  inline void ConnectToSource(tAbstractPort& source)
+  inline void ConnectTo(tAbstractPort& source, tConnectDirection connect_direction = tConnectDirection::AUTO)
   {
-    wrapped->ConnectToSource(source);
+    wrapped->ConnectTo(source, connect_direction);
   }
 
   /*!
-   * Connect port to specified source port
+   * Connect port to specified partner port
    *
-   * \param source Source port
+   * \param source Partner port
+   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
    */
-  inline void ConnectToSource(const tPortWrapperBase& source)
+  inline void ConnectTo(const tPortWrapperBase& source, tConnectDirection connect_direction = tConnectDirection::AUTO)
   {
-    wrapped->ConnectToSource(*source.wrapped);
+    wrapped->ConnectTo(*source.wrapped, connect_direction);
   }
 
   /*!
-   * Connect port to specified source port
+   * Connect port to specified partner port
    * (connection is (re)established when link is available)
    *
-   * \param link_name Link name of source port (relative to parent framework element)
+   * \param link_name Link name of partner port (relative to parent framework element)
+   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
    */
-  inline void ConnectToSource(const util::tString& src_link)
+  inline void ConnectTo(const util::tString& src_link, tConnectDirection connect_direction = tConnectDirection::AUTO)
   {
-    wrapped->ConnectToSource(src_link);
+    wrapped->ConnectTo(src_link, connect_direction);
   }
 
   /*!
-   * Connect port to specified source port
+   * Connect port to specified partner port
    *
-   * \param src_port_parent Parent of source port
-   * \param src_port_name Name of source port
+   * \param partner_port_parent Parent of port to connect to
+   * \param partner_port_name Name of port to connect to
    * \param warn_if_not_available Print warning message if connection cannot be established
+   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
    */
-  void ConnectToSource(tFrameworkElement& src_port_parent, const util::tString& src_port_name, bool warn_if_not_available = true)
+  void ConnectTo(tFrameworkElement& src_port_parent, const util::tString& src_port_name, bool warn_if_not_available = true, tConnectDirection connect_direction = tConnectDirection::AUTO)
   {
-    wrapped->ConnectToSource(src_port_parent, src_port_name, warn_if_not_available);
+    wrapped->ConnectTo(src_port_parent, src_port_name, warn_if_not_available, connect_direction);
   }
-
-  /*!
-   * Connect port to specified target port
-   *
-   * \param target Target port
-   */
-  inline void ConnectToTarget(tAbstractPort& target)
-  {
-    wrapped->ConnectToTarget(target);
-  }
-
-  /*!
-   * Connect port to specified target port
-   *
-   * \param target Target port
-   */
-  inline void ConnectToTarget(const tPortWrapperBase& target)
-  {
-    wrapped->ConnectToTarget(*target.wrapped);
-  }
-
-  /*!
-   * Connect port to specified target port
-   * (connection is (re)established when link is available)
-   *
-   * \param link_name Link name of target port (relative to parent framework element)
-   */
-  inline void ConnectToTarget(const util::tString& dest_link)
-  {
-    wrapped->ConnectToTarget(dest_link);
-  }
-
-  /*!
-   * Connect port to specified destination port
-   *
-   * \param dest_port_parent Parent of destination port
-   * \param dest_port_name Name of destination port
-   * \param warn_if_not_available Print warning message if connection cannot be established
-   */
-  void ConnectToTarget(tFrameworkElement& dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available = true)
-  {
-    wrapped->ConnectToTarget(dest_port_parent, dest_port_name, warn_if_not_available);
-  }
-
 
   virtual ~tPortWrapperBase()
   {

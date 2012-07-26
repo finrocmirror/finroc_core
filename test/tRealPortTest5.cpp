@@ -59,7 +59,7 @@ void tRealPortTest5::Main()
   re = tRuntimeEnvironment::GetInstance();
   output = std::shared_ptr<tPort<int> >(new tPort<int>("test1", tPortFlags::cOUTPUT_PORT));
   input = std::shared_ptr<tPort<int> >(new tPort<int>("test2", tPortFlags::cINPUT_PORT));
-  output->ConnectToTarget(*input);
+  output->ConnectTo(*input);
   p1 = std::shared_ptr<tPort<int> >(new tPort<int>("p1", tPortFlags::cINPUT_PORT));
   p2 = std::shared_ptr<tPort<int> >(new tPort<int>("p2", tPortFlags::cINPUT_PORT));
   p3 = std::shared_ptr<tPort<int> >(new tPort<int>("p3", tPortFlags::cINPUT_PORT));
@@ -120,7 +120,7 @@ void tRealPortTest5::TestSimpleEdge2()
   tPort<finroc::blackboard::tBlackboardBuffer> input("input", tPortFlags::cINPUT_PORT);
   tPort<finroc::blackboard::tBlackboardBuffer> output("output", tPortFlags::cOUTPUT_PORT);
 
-  output.ConnectToTarget(input);
+  output.ConnectTo(input);
   tFrameworkElement::InitAll();
 
   tPortDataPtr<blackboard::tBlackboardBuffer> buf = output.GetUnusedBuffer();

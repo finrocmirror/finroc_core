@@ -175,7 +175,7 @@ public:
         cc_rev_push_out_local = std::shared_ptr<tPort<int> >(new tPort<int>("CCRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT));
         cc_rev_push_in = std::shared_ptr<tPort<int> >(new tPort<int>("CCRevPush Input", tPortFlags::cSHARED_INPUT_PORT));
         cc_rev_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
-        cc_rev_push_out_local->ConnectToTarget(*cc_rev_push_in);
+        cc_rev_push_out_local->ConnectTo(*cc_rev_push_in);
       }
       if (cQ_TESTS)
       {
@@ -205,7 +205,7 @@ public:
         std_rev_push_out_local = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT));
         std_rev_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdRevPush Input", tPortFlags::cSHARED_INPUT_PORT));
         std_rev_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
-        std_rev_push_out_local->ConnectToTarget(*std_rev_push_in);
+        std_rev_push_out_local->ConnectTo(*std_rev_push_in);
       }
       if (cQ_TESTS)
       {
