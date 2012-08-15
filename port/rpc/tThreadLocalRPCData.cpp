@@ -32,7 +32,8 @@ namespace core
 tThreadLocalRPCData::tThreadLocalRPCData() :
   method_syncher(NULL),
   method_calls(new util::tReusablesPool<tMethodCall>()),
-  pull_calls(new util::tReusablesPool<tPullCall>())
+  pull_calls(new util::tReusablesPool<tPullCall>()),
+  is_suitable_thread_for_synchronous_calls(true)
 {
   FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Creating tThreadLocalRPCData for thread ", rrlib::thread::tThread::CurrentThread().GetName());
   tThreadLocalCache::GetFast()->AddAnnotation(this);

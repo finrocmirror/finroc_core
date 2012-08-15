@@ -51,6 +51,13 @@ class tThreadLocalRPCData : public tFinrocAnnotation
   /*! Reusable objects representing a pull call */
   util::tReusablesPool<tPullCall>* pull_calls;
 
+  /*!
+   * Is this a suitable thread for synchronous calls?
+   * If not, performing a synchronous call will print a warning to the console.
+   * An unsuitable thread, for instance, is the thread that would read the call result from a network stream.
+   */
+  bool is_suitable_thread_for_synchronous_calls;
+
 
   tMethodCall* CreateMethodCall();
   tMethodCallSyncher* CreateMethodSyncher();
@@ -105,6 +112,21 @@ public:
     return tPullCall::tPtr(pf);
   }
 
+  /*!
+   * \return Is this a suitable thread for synchronous calls?
+   */
+  inline bool IsSuitableThreadForSynchronousCalls() const
+  {
+    return is_suitable_thread_for_synchronous_calls;
+  }
+
+  /*!
+   * \param value Is this a suitable thread for synchronous calls?
+   */
+  void SetSuitableThreadForSynchronousCalls(bool value)
+  {
+    is_suitable_thread_for_synchronous_calls = value;
+  }
 };
 
 } // namespace finroc

@@ -97,6 +97,11 @@ void tMethod<HANDLER, R, TArgs...>::CallAsync(tInterfaceClientPort port, tAsyncR
   tInterfacePort* ip = port.GetServer();
   if (ip && ip->GetType() == tInterfacePort::eNetwork)
   {
+    if (!tThreadLocalRPCData::Get().IsSuitableThreadForSynchronousCalls())
+    {
+      FINROC_LOG_PRINT(WARNING, "The current thread ('", rrlib::thread::tThread::CurrentThread().GetName(), "') is not suitable for synchronous calls over the network. If your calls time out, this is likely the reason. Performing call anyway.");
+    }
+
     tMethodCall::tPtr mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
     mc->SetParameters(args...);
     mc->PrepareSyncRemoteExecution(this, port.GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > rrlib::time::tDuration::zero() ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
