@@ -158,6 +158,12 @@ void tAbstractPort::ConnectTo(tAbstractPort& to, tConnectDirection connect_direc
 
 void tAbstractPort::ConnectTo(const util::tString& link_name, tConnectDirection connect_direction, bool finstructed)
 {
+  if (link_name.length() == 0)
+  {
+    FINROC_LOG_PRINT_TO(edges, ERROR, "No link name specified for partner port. Not connecting anything.");
+    return;
+  }
+
   tLock lock2(GetRegistryLock());
   if (IsDeleted())
   {
@@ -550,13 +556,13 @@ bool tAbstractPort::IsEdgeFinstructed(int idx) const
 
 util::tString tAbstractPort::MakeAbsoluteLink(const util::tString& rel_link) const
 {
-  if (rel_link[0] == '/')
+  if (rel_link.length() > 0 && rel_link[0] == '/')
   {
     return rel_link;
   }
-  ::finroc::core::tFrameworkElement* relative_to = GetParent();
+  tFrameworkElement* relative_to = GetParent();
   util::tString rel_link2 = rel_link;
-  while (boost::starts_with(rel_link2, "../"));
+  while (boost::starts_with(rel_link2, "../"))
   {
     rel_link2 = rel_link2.substr(3);
     relative_to = relative_to->GetParent();
