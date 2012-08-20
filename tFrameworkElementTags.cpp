@@ -1,8 +1,8 @@
 //
 // You received this file as part of Finroc
-// A framework for integrated robot control
+// A Framework for intelligent robot control
 //
-// Copyright (C) AG Robotersysteme TU Kaiserslautern
+// Copyright (C) Finroc GbR (finroc.org)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,24 +19,24 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    tModuleBase.cpp
+/*!\file    core/tFrameworkElementTags.cpp
  *
  * \author  Max Reichardt
  *
- * \date    2011-04-12
+ * \date    2012-08-20
  *
  */
-//----------------------------------------------------------------------
-#include "core/structure/tModuleBase.h"
-
-//----------------------------------------------------------------------
-// External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include "core/tFrameworkElementTags.h"
 
 //----------------------------------------------------------------------
+// External includes (system with <>, local with "")
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "core/tFrameworkElement.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -46,7 +46,14 @@
 //----------------------------------------------------------------------
 // Namespace usage
 //----------------------------------------------------------------------
-using namespace finroc::core::structure;
+
+//----------------------------------------------------------------------
+// Namespace declaration
+//----------------------------------------------------------------------
+namespace finroc
+{
+namespace core
+{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
@@ -59,57 +66,57 @@ using namespace finroc::core::structure;
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
+tFrameworkElementTags::tFrameworkElementTags() :
+  tFinrocAnnotation(),
+  tags()
+{}
+
+void tFrameworkElementTags::AddTag(tFrameworkElement& fe, const std::string& tag)
+{
+  if (!IsTagged(fe, tag))
+  {
+    tFrameworkElementTags* tags = fe.GetAnnotation<tFrameworkElementTags>();
+    if (!tags)
+    {
+      tags = new tFrameworkElementTags();
+      fe.AddAnnotation(tags);
+    }
+    tags->tags.push_back(tag);
+  }
+}
+
+void tFrameworkElementTags::AddTags(tFrameworkElement& fe, const std::vector<std::string>& tags)
+{
+  for (auto it = tags.begin(); it < tags.end(); it++)
+  {
+    AddTag(fe, *it);
+  }
+}
+
+bool tFrameworkElementTags::IsTagged(const tFrameworkElement& fe, const std::string& tag)
+{
+  tFrameworkElementTags* tags = fe.GetAnnotation<tFrameworkElementTags>();
+  if (!tags)
+  {
+    return false;
+  }
+  return std::find(tags->tags.begin(), tags->tags.end(), tag) != tags->tags.end();
+}
+
+rrlib::serialization::tOutputStream& operator << (rrlib::serialization::tOutputStream& stream, const tFrameworkElementTags& tags)
+{
+  stream << tags.tags;
+  return stream;
+}
+
+rrlib::serialization::tInputStream& operator >> (rrlib::serialization::tInputStream& stream, tFrameworkElementTags& tags)
+{
+  stream >> tags.tags;
+  return stream;
+}
 
 //----------------------------------------------------------------------
-// tModuleBase constructors
+// End of namespace declaration
 //----------------------------------------------------------------------
-tModuleBase::tModuleBase(tFrameworkElement *parent, const util::tString &name)
-  : tFrameworkElement(parent, name),
-    parameters(new tFrameworkElement(this, "Parameters")),
-    parameters_changed(),
-    auto_name_port_count(0),
-    count_for_type(NULL)
-{
-  tStructureElementRegister::AddModule(this);
-  if (!tStructureElementRegister::FindParent(this, false))
-  {
-    FINROC_LOG_PRINT(ERROR, "Module ", GetQualifiedName(), " was not created using new().");
-    abort();
-  }
-  tFrameworkElementTags::AddTag(*this, "module");
 }
-
-tModuleBase::~tModuleBase()
-{
-  tStructureElementRegister::RemoveModule(this);
-}
-
-void tModuleBase::CheckParameters()
-{
-  if (parameters_changed.parameters_changed)
-  {
-    this->ProcessChangedFlags(*parameters);
-    parameters_changed.parameters_changed = false;
-    this->EvaluateParameters();
-  }
-}
-
-void tModuleBase::tParameterChangeDetector::PortChanged(tAbstractPort& origin, const void* const& value, const rrlib::time::tTimestamp&)
-{
-  parameters_changed = true;
-}
-
-bool tModuleBase::ProcessChangedFlags(tFrameworkElement& port_group)
-{
-  bool any_changed = false;
-  tChildIterator ci(port_group);
-  tAbstractPort* ap = NULL;
-  while ((ap = ci.NextPort()) != NULL)
-  {
-    bool changed = ap->HasChanged();
-    ap->ResetChanged();
-    any_changed |= changed;
-    ap->SetCustomChangedFlag(changed);
-  }
-  return any_changed;
 }

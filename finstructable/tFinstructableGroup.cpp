@@ -26,6 +26,7 @@
 #include "rrlib/xml/tDocument.h"
 #include <set>
 
+#include "core/tFrameworkElementTags.h"
 #include "core/finstructable/tFinstructableGroup.h"
 #include "core/tCoreFlags.h"
 #include "core/tAnnotatable.h"
@@ -68,6 +69,7 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
   save_parameter_config_entries(false),
   main_name()
 {
+  tFrameworkElementTags::AddTag(*this, "group");
 }
 
 tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::tString& name, const util::tString& xml_file_, uint flags) :
@@ -78,7 +80,7 @@ tFinstructableGroup::tFinstructableGroup(tFrameworkElement* parent, const util::
   save_parameter_config_entries(false),
   main_name()
 {
-  // this(parent,name);
+  tFrameworkElementTags::AddTag(*this, "group");
   try
   {
     this->xml_file.Set(xml_file_);
