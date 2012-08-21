@@ -161,6 +161,15 @@ public:
     Publish(port, buf);
   }
 
+  static void BrowserPublish(tPortType* port, const T& t, const rrlib::time::tTimestamp& timestamp = rrlib::time::cNO_TIME)
+  {
+    tDataPtr buf = GetUnusedBuffer(port);
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *buf);
+    buf.SetTimestamp(timestamp);
+    port->BrowserPublish(tPortUtilHelper::ResetManager<tManagerTL>(buf));
+    buf.reset();
+  }
+
   static const tBounds<T> GetBounds(tPortType* port)
   {
     assert(false && "Bounds can only be used with CC types");
@@ -358,13 +367,26 @@ public:
     }
   }
 
-  static void CopyAndPublish(tPortType* port, const T& t, const rrlib::time::tTimestamp& timestamp)
+  static void CopyAndPublish(tPortType* port, const T& t, const rrlib::time::tTimestamp& timestamp = rrlib::time::cNO_TIME)
   {
     tThreadLocalCache* tc = tThreadLocalCache::GetFast();
     tManagerTL* mgr = tc->GetUnusedBuffer(port->GetDataTypeCCIndex());
     mgr->GetObject()->GetData<tNumber>()->SetValue(t, port->GetUnit());
     mgr->SetTimestamp(timestamp);
     port->Publish(tc, mgr);
+  }
+
+  static void BrowserPublish(tPortType* port, const T& t, const rrlib::time::tTimestamp& timestamp = rrlib::time::cNO_TIME)
+  {
+    tThreadLocalCache* tc = tThreadLocalCache::GetFast();
+    tManagerTL* mgr = tc->GetUnusedBuffer(port->GetDataTypeCCIndex());
+    mgr->GetObject()->GetData<tNumber>()->SetValue(t, port->GetUnit());
+    mgr->SetTimestamp(timestamp);
+    util::tString error = port->BrowserPublishRaw(mgr);
+    if (error.size() > 0)
+    {
+      FINROC_LOG_PRINT(WARNING, "Could not publish value: ", error);
+    }
   }
 
   static const tBounds<T> GetBounds(const tPortType* port)
@@ -498,12 +520,24 @@ public:
     }
   }
 
-  static void CopyAndPublish(tPortType* port, const T& t, const rrlib::time::tTimestamp& timestamp)
+  static void CopyAndPublish(tPortType* port, const T& t, const rrlib::time::tTimestamp& timestamp = rrlib::time::cNO_TIME)
   {
     tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
     rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *(mgr->GetObject()->GetData<T>()), NULL);
     mgr->SetTimestamp(timestamp);
     port->Publish(mgr);
+  }
+
+  static void BrowserPublish(tPortType* port, const T& t, const rrlib::time::tTimestamp& timestamp = rrlib::time::cNO_TIME)
+  {
+    tManagerTL* mgr = tThreadLocalCache::GetFast()->GetUnusedBuffer(port->GetDataType());
+    rrlib::rtti::sStaticTypeInfo<T>::DeepCopy(t, *(mgr->GetObject()->GetData<T>()), NULL);
+    mgr->SetTimestamp(timestamp);
+    util::tString error = port->BrowserPublishRaw(mgr);
+    if (error.size() > 0)
+    {
+      FINROC_LOG_PRINT(WARNING, "Could not publish value: ", error);
+    }
   }
 
   static const tBounds<T> GetBounds(const tPortType* port)
