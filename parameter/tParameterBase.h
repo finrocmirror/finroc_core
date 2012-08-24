@@ -48,14 +48,22 @@ class tParameterBase : public tPort<T>
 {
   typedef typename tPort<T>::tPortBaseType tPortBaseType;
 
+  template<typename ... ARGS>
+  static tPortCreationInfo<T> CreatePortCreationInfo(const ARGS&... args)
+  {
+    tPortCreationInfo<T> pci(args...);
+    pci.flags = tPortFlags::cINPUT_PORT;
+    return pci;
+  }
+
 public:
 
   template<typename ... ARGS>
   tParameterBase(const ARGS&... args) :
-    tPort<T>(tPortCreationInfo<T>(args..., tPortFlags::cINPUT_PORT))
+    tPort<T>(CreatePortCreationInfo(args...))
   {
     this->wrapped->AddAnnotation(new tParameterInfo());
-    tPortCreationInfo<T> pci(args..., tPortFlags::cINPUT_PORT);
+    tPortCreationInfo<T> pci = CreatePortCreationInfo(args...);
     SetConfigEntry(pci.config_entry);
   }
 

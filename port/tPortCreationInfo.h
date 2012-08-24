@@ -210,7 +210,7 @@ private:
     // numeric type and numeric argument => first numeric argument is default value (or possibly flag)
     if (!DefaultValueSet())
     {
-      if (std::is_same<A, uint>::value && unsigned_int_arg_count <= 1)
+      if (std::is_same<A, uint>::value && (!std::is_same<T, uint>::value) && unsigned_int_arg_count <= 1)
       {
         flags |= (uint)arg;
       }

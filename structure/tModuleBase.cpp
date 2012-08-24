@@ -102,7 +102,7 @@ void tModuleBase::tParameterChangeDetector::PortChanged(tAbstractPort& origin, c
 bool tModuleBase::ProcessChangedFlags(tFrameworkElement& port_group)
 {
   bool any_changed = false;
-  tChildIterator ci(port_group);
+  tChildIterator ci(port_group, this->IsReady());
   tAbstractPort* ap = NULL;
   while ((ap = ci.NextPort()) != NULL)
   {
