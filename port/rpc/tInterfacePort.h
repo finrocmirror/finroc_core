@@ -114,6 +114,8 @@ protected:
     return 0;
   }
 
+  virtual tConnectDirection InferConnectDirection(const tAbstractPort& other) const;
+
   virtual void InitialPushTo(tAbstractPort& target, bool reverse)
   {
     // do nothing in interface port
@@ -149,11 +151,15 @@ public:
    * \return "Server" Port that handles method call - either InterfaceServerPort or InterfaceNetPort (the latter if we have remote server)
    */
   tInterfacePort* GetServer();
+  const tInterfacePort* GetServer() const
+  {
+    return const_cast<tInterfacePort*>(this)->GetServer();
+  }
 
   /*!
    * \return type of interface port
    */
-  inline tInterfacePort::tType GetType()
+  inline tInterfacePort::tType GetType() const
   {
     return type;
   }

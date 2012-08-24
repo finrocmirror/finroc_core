@@ -89,7 +89,7 @@ public:
   R Call(tInterfaceClientPort port, const rrlib::time::tDuration& net_timeout, TArgs... args); // Note: originally, net_timeout was at the end with default. However, gcc 4.5 does not like this.
   inline R Call(tInterfaceClientPort port, TArgs... args)
   {
-    return Call(port, -1, args...);
+    return Call(port, rrlib::time::tDuration(-1), args...);
   }
 
   /*!
@@ -106,7 +106,7 @@ public:
   void CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, const rrlib::time::tDuration& net_timeout, bool force_same_thread, TArgs... args);
   inline void CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, TArgs... args)
   {
-    CallAsync(port, handler, -1, false, args...);
+    CallAsync(port, handler, rrlib::time::tDuration(-1), false, args...);
   }
 
   virtual void ExecuteAsyncNonVoidCallOverTheNet(tMethodCall::tPtr& mc, tInterfaceNetPort& net_port, tAbstractAsyncReturnHandler& ret_handler, const rrlib::time::tDuration& net_timeout);

@@ -99,7 +99,7 @@ void tStaticParameterList::Deserialize(const rrlib::xml::tNode& node, bool finst
   size_t number_of_children = std::distance(node.ChildrenBegin(), node.ChildrenEnd());
   if (number_of_children != Size())
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Parameter list size and number of xml parameters differ. Trying anyway");
+    FINROC_LOG_PRINT(WARNING, "Parameter list size and number of xml parameters differ. Trying anyway");
   }
   int count = std::min(number_of_children, Size());
   rrlib::xml::tNode::const_iterator child = node.ChildrenBegin();

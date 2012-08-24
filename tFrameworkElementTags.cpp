@@ -1,8 +1,8 @@
 //
 // You received this file as part of Finroc
-// A framework for integrated robot control
+// A Framework for intelligent robot control
 //
-// Copyright (C) AG Robotersysteme TU Kaiserslautern
+// Copyright (C) Finroc GbR (finroc.org)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,15 +19,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    mTestModule.cpp
+/*!\file    core/tFrameworkElementTags.cpp
  *
- * \author  Tobias Foehst
+ * \author  Max Reichardt
  *
- * \date    2010-12-09
+ * \date    2012-08-20
  *
  */
 //----------------------------------------------------------------------
-#include "core/test/mTestModule.h"
+#include "core/tFrameworkElementTags.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -36,6 +36,7 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "core/tFrameworkElement.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -45,7 +46,14 @@
 //----------------------------------------------------------------------
 // Namespace usage
 //----------------------------------------------------------------------
-using namespace rrlib::logging;
+
+//----------------------------------------------------------------------
+// Namespace declaration
+//----------------------------------------------------------------------
+namespace finroc
+{
+namespace core
+{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
@@ -54,27 +62,61 @@ using namespace rrlib::logging;
 //----------------------------------------------------------------------
 // Const values
 //----------------------------------------------------------------------
-finroc::core::tStandardCreateModuleAction<mTestModule> mTestModule::cCREATE_ACTION("TestModule");
 
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
-
-//----------------------------------------------------------------------
-// mTestModule constructors
-//----------------------------------------------------------------------
-mTestModule::mTestModule(finroc::core::tFrameworkElement *parent, const finroc::util::tString &name)
-  : tModule(parent, name),
-
-    counter(0)
+tFrameworkElementTags::tFrameworkElementTags() :
+  tFinrocAnnotation(),
+  tags()
 {}
 
-//----------------------------------------------------------------------
-// mTestModule Update
-//----------------------------------------------------------------------
-void mTestModule::Update()
+void tFrameworkElementTags::AddTag(tFrameworkElement& fe, const std::string& tag)
 {
-  this->signal_2.Publish(this->counter);
-  FINROC_LOG_PRINT(DEBUG, this->counter);
-  this->counter++;
+  if (!IsTagged(fe, tag))
+  {
+    tFrameworkElementTags* tags = fe.GetAnnotation<tFrameworkElementTags>();
+    if (!tags)
+    {
+      tags = new tFrameworkElementTags();
+      fe.AddAnnotation(tags);
+    }
+    tags->tags.push_back(tag);
+  }
+}
+
+void tFrameworkElementTags::AddTags(tFrameworkElement& fe, const std::vector<std::string>& tags)
+{
+  for (auto it = tags.begin(); it < tags.end(); it++)
+  {
+    AddTag(fe, *it);
+  }
+}
+
+bool tFrameworkElementTags::IsTagged(const tFrameworkElement& fe, const std::string& tag)
+{
+  tFrameworkElementTags* tags = fe.GetAnnotation<tFrameworkElementTags>();
+  if (!tags)
+  {
+    return false;
+  }
+  return std::find(tags->tags.begin(), tags->tags.end(), tag) != tags->tags.end();
+}
+
+rrlib::serialization::tOutputStream& operator << (rrlib::serialization::tOutputStream& stream, const tFrameworkElementTags& tags)
+{
+  stream << tags.tags;
+  return stream;
+}
+
+rrlib::serialization::tInputStream& operator >> (rrlib::serialization::tInputStream& stream, tFrameworkElementTags& tags)
+{
+  stream >> tags.tags;
+  return stream;
+}
+
+//----------------------------------------------------------------------
+// End of namespace declaration
+//----------------------------------------------------------------------
+}
 }

@@ -72,7 +72,7 @@ protected:
     {
       if (tc->ref->GetContainer()->GetRefCounter() == 0)    // still unused
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, "Attempt to publish value that is out-of-bounds of output (!) port. This is undesirable.");
+        FINROC_LOG_PRINT(DEBUG_WARNING, "Attempt to publish value that is out-of-bounds of output (!) port. This is undesirable.");
         tc->ref->GetContainer()->RecycleUnused();
       }
       if (bounds.Discard())
@@ -167,7 +167,7 @@ public:
     {
       if (bounds.Discard())
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot discard value - applying default");
+        FINROC_LOG_PRINT(WARNING, "Cannot discard value - applying default");
         ApplyDefaultValue();
       }
       else if (bounds.AdjustToRange())

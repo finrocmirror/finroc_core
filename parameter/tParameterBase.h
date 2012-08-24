@@ -46,6 +46,8 @@ class tUnit;
 template<typename T>
 class tParameterBase : public tPort<T>
 {
+  typedef typename tPort<T>::tPortBaseType tPortBaseType;
+
 public:
 
   template<typename ... ARGS>
@@ -69,6 +71,13 @@ public:
     }
   }
 
+  /*!
+   * \param new_value new value
+   */
+  void Set(const T& new_value)
+  {
+    tPortUtil<T>::BrowserPublish(static_cast<tPortBaseType*>(tPortWrapperBase::wrapped), new_value);
+  }
 };
 
 } // namespace finroc

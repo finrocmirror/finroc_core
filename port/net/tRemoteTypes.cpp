@@ -97,7 +97,7 @@ void tRemoteTypes::Deserialize(rrlib::serialization::tInputStream& ci)
     }
     next = ci.ReadShort();
   }
-  FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_VERBOSE_1, ls.str());
+  FINROC_LOG_PRINT(DEBUG_VERBOSE_1, ls.str());
 }
 
 int16 tRemoteTypes::GetTime(const rrlib::rtti::tDataTypeBase& data_type)
@@ -123,7 +123,7 @@ rrlib::rtti::tDataTypeBase tRemoteTypes::ReadType(rrlib::serialization::tInputSt
   int types_size = types.Size();  // to avoid warning
   if (uid < 0 || uid >= types_size)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Corrupt type information from received from connection partner: ", uid);
+    FINROC_LOG_PRINT(ERROR, "Corrupt type information from received from connection partner: ", uid);
     throw util::tRuntimeException("Corrupt type information from received from connection partner", CODE_LOCATION_MACRO);
   }
 
@@ -158,12 +158,11 @@ void tRemoteTypes::SerializeLocalDataTypes(rrlib::serialization::tOutputStream& 
     co.WriteByte(dt.GetTypeTraits() & cTRAITS); // type traits
     if ((dt.GetTypeTraits() & rrlib::rtti::trait_flags::cIS_ENUM) != 0)
     {
-      const std::vector<const char*>* enum_constants = dt.GetEnumConstants();
-      assert(enum_constants && enum_constants->size() <= 0xFFFF && "Something is wrong with the enum");
-      co.WriteShort(enum_constants->size());
-      for (size_t j = 0; j < enum_constants->size(); j++)
+      const make_builder::tEnumStrings &enum_strings = *dt.GetEnumStrings();
+      co.WriteShort(enum_strings.size);
+      for (size_t j = 0; j < enum_strings.size; j++)
       {
-        co.WriteString((*enum_constants)[j]);
+        co.WriteString(enum_strings.strings[j]);
       }
     }
 

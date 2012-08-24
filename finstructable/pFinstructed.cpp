@@ -55,7 +55,7 @@ bool ParseXMLArg(const finroc::util::tString& arg, finroc::util::tString& group_
 {
   if (!boost::ends_with(arg, ".finroc"))
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error parsing argument: ", arg);
+    FINROC_LOG_PRINT(ERROR, "Error parsing argument: ", arg);
     return false;
   }
   if (arg.find(":") != std::string::npos)
@@ -64,7 +64,7 @@ bool ParseXMLArg(const finroc::util::tString& arg, finroc::util::tString& group_
     boost::split(split, arg, boost::is_any_of(":"));
     if (split.size() != 2)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error parsing argument: ", arg);
+      FINROC_LOG_PRINT(ERROR, "Error parsing argument: ", arg);
       return false;
     }
     group_name = split[0];
@@ -86,7 +86,7 @@ bool ParseXMLArg(const finroc::util::tString& arg, finroc::util::tString& group_
       }
       catch (std::exception& e)
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error scanning file: ", xml_name);
+        FINROC_LOG_PRINT(ERROR, "Error scanning file: ", xml_name);
       }
     }
     if (group_name.length() == 0)
@@ -111,11 +111,11 @@ bool CycleTimeHandler(const rrlib::getopt::tNameToOptionMap &name_to_option_map)
     int time = atoi(time_string);
     if (time < 1 || time > 10000)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Invalid cycle time '", time_string, "'. Using default: ", cycle_time, " ms");
+      FINROC_LOG_PRINT(ERROR, "Invalid cycle time '", time_string, "'. Using default: ", cycle_time, " ms");
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Setting main thread cycle time to ", time, " ms.");
+      FINROC_LOG_PRINT(DEBUG, "Setting main thread cycle time to ", time, " ms.");
       cycle_time = time;
     }
   }
@@ -218,9 +218,9 @@ void InitMainGroup(finroc::core::tThreadContainer *main_thread, std::vector<char
 
   if ((main_thread == NULL || main_thread->ChildCount() == 0) && finstructable_thread_container == NULL)
   {
-    FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_USER, "No finstructable groups specified.");
-    FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_USER, "Usage:  finroc [-m <main-xml-file>] <xml-file1> <xml-file2>");
-    FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_USER, "To set group name use <name>:<xml-file>. Otherwise xml-file name is used as group name.");
+    FINROC_LOG_PRINT_STATIC(USER, "No finstructable groups specified.");
+    FINROC_LOG_PRINT_STATIC(USER, "Usage:  finroc [-m <main-xml-file>] <xml-file1> <xml-file2>");
+    FINROC_LOG_PRINT_STATIC(USER, "To set group name use <name>:<xml-file>. Otherwise xml-file name is used as group name.");
     exit(-1);
   }
 

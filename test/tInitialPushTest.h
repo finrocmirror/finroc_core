@@ -39,7 +39,7 @@ class tInitialPushTest : public util::tUncopyableObject
 {
   inline static void Print(tPort<int>& o2, int i)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Port ", o2.GetName(), ": ", o2.Get(), " (expected: ", i, ")");
+    FINROC_LOG_PRINT(USER, "Port ", o2.GetName(), ": ", o2.Get(), " (expected: ", i, ")");
   }
 
 public:

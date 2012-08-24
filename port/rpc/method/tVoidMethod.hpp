@@ -115,7 +115,7 @@ void tVoidMethod<HANDLER, TArgs...>::ExecuteFromMethodCallObject(tMethodCall::tP
   catch (const tMethodCallException& e)
   {
     // don't send anything back
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+    FINROC_LOG_PRINT(ERROR, e);
   }
   call.reset();
 }

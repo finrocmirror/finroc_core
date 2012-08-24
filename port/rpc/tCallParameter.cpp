@@ -50,7 +50,7 @@ void tCallParameter::Deserialize(rrlib::serialization::tInputStream& is)
     rrlib::rtti::tGenericObject* go = rrlib::rtti::ReadObject(is, this);
     if (!go)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Received object that could not be read. Throwing exception.");
+      FINROC_LOG_PRINT(ERROR, "Received object that could not be read. Throwing exception.");
       throw util::tException("Object could not be read.");
     }
     value = Lock(go);

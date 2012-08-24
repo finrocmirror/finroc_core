@@ -55,15 +55,15 @@ void tInitialPushTest::Main()
   out.Publish(bb);
 
   // connect input ports
-  n_in.ConnectToSource(n_out);
-  n_rev_out.ConnectToTarget(n_in);
-  in.ConnectToSource(out);
+  n_in.ConnectTo(n_out);
+  n_rev_out.ConnectTo(n_in);
+  in.ConnectTo(out);
 
   // print output
-  FINROC_LOG_PRINT(eLL_USER, "NumIn (exp 23): ", n_in.Get());
-  FINROC_LOG_PRINT(eLL_USER, "NumRevOut (exp 23): ", n_rev_out.Get());
+  FINROC_LOG_PRINT(USER, "NumIn (exp 23): ", n_in.Get());
+  FINROC_LOG_PRINT(USER, "NumRevOut (exp 23): ", n_rev_out.Get());
   const blackboard::tBlackboardBuffer* bb2 = in.GetAutoLocked();
-  FINROC_LOG_PRINT(eLL_USER, "StdIn (exp 23): ", bb2->GetBuffer()->GetInt(0u));
+  FINROC_LOG_PRINT(USER, "StdIn (exp 23): ", bb2->GetBuffer()->GetInt(0u));
   tThreadLocalCache::GetFast()->ReleaseAllLocks();
 
   // strategy changes...
@@ -71,16 +71,16 @@ void tInitialPushTest::Main()
   n_out.Publish(42);
   //System.out.println("NumIn: " + nIn.getDoubleRaw());
   n_in.SetPushStrategy(true);
-  FINROC_LOG_PRINT(eLL_USER, "NumIn (expected 23 - because we have two sources => no push): ", n_in.Get());
-  FINROC_LOG_PRINT(eLL_USER, "NumRevOut (exp 23): ", n_rev_out.Get());
+  FINROC_LOG_PRINT(USER, "NumIn (expected 23 - because we have two sources => no push): ", n_in.Get());
+  FINROC_LOG_PRINT(USER, "NumRevOut (exp 23): ", n_rev_out.Get());
   n_rev_out.SetReversePushStrategy(false);
   n_out.Publish(12);
-  FINROC_LOG_PRINT(eLL_USER, "NumRevOut (exp 23): ", n_rev_out.Get());
+  FINROC_LOG_PRINT(USER, "NumRevOut (exp 23): ", n_rev_out.Get());
   n_rev_out.SetReversePushStrategy(true);
-  FINROC_LOG_PRINT(eLL_USER, "NumRevOut (exp 12): ", n_rev_out.Get());
+  FINROC_LOG_PRINT(USER, "NumRevOut (exp 12): ", n_rev_out.Get());
 
   // now for a complex net
-  FINROC_LOG_PRINT(eLL_USER, "\nNow for a complex net...");
+  FINROC_LOG_PRINT(USER, "\nNow for a complex net...");
 
   // o1->o2
   tPort<int> o1("o1", tPortFlags::cOUTPUT_PROXY);
@@ -88,12 +88,12 @@ void tInitialPushTest::Main()
   o1.Publish(24);
   tPort<int> o2("o2", tPortFlags::cINPUT_PROXY | tPortFlags::cPUSH_STRATEGY);
   tFrameworkElement::InitAll();
-  o1.ConnectToTarget(o2);
+  o1.ConnectTo(o2);
   Print(o2, 24);
 
   // o1->o2->o3
   tPort<int> o3("o3", tPortFlags::cINPUT_PORT);
-  o2.ConnectToTarget(o3);
+  o2.ConnectTo(o3);
   tFrameworkElement::InitAll();
   o2.SetPushStrategy(false);
   o3.SetPushStrategy(false);
@@ -106,7 +106,7 @@ void tInitialPushTest::Main()
   tPort<int> o0("o0", tPortFlags::cOUTPUT_PROXY);
   tFrameworkElement::InitAll();
   o0.Publish(42);
-  o0.ConnectToTarget(o1);
+  o0.ConnectTo(o1);
   Print(o3, 42);
 
   // o6->o0->o1->o2->o3
@@ -115,13 +115,13 @@ void tInitialPushTest::Main()
   tPort<int> o4("o4", tPortFlags::cINPUT_PROXY);
   tPort<int> o5("o5", tPortFlags::cINPUT_PORT);
   tFrameworkElement::InitAll();
-  o4.ConnectToTarget(o5);
-  o2.ConnectToTarget(o4);
+  o4.ConnectTo(o5);
+  o2.ConnectTo(o4, tAbstractPort::tConnectDirection::TO_TARGET);
   Print(o5, 42);
   tPort<int> o6("o6", tPortFlags::cOUTPUT_PORT);
   tFrameworkElement::InitAll();
   o6.Publish(44);
-  o6.ConnectToTarget(o0);
+  o6.ConnectTo(o0);
   Print(o3, 44);
   Print(o5, 44);
 
@@ -133,9 +133,9 @@ void tInitialPushTest::Main()
   o7.Publish(33);
   tPort<int> o8("o8", tPortFlags::cINPUT_PORT);
   tFrameworkElement::InitAll();
-  o7.ConnectToTarget(o8);
+  o7.ConnectTo(o8);
   Print(o8, 33);
-  o7.ConnectToTarget(o1);
+  o7.ConnectTo(o1, tAbstractPort::tConnectDirection::TO_TARGET);
   Print(o1, 44);
 
   // o6->o0->o1->o2->o3
@@ -144,7 +144,7 @@ void tInitialPushTest::Main()
   tPort<int> o9("o9", tPortFlags::cOUTPUT_PORT);
   tFrameworkElement::InitAll();
   o9.Publish(88);
-  o9.ConnectToTarget(o7);
+  o9.ConnectTo(o7);
   Print(o8, 88);
   Print(o1, 44);
   Print(o3, 44);

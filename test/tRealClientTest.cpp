@@ -42,23 +42,23 @@ void tRealClientTest::Main()
   {
     if (cPUSH_TESTS)
     {
-      this->cc_push_out->ConnectToTarget("/TCP/localhost:4444/Unrelated/CCPush Input");
-      this->cc_push_in->ConnectToSource("/TCP/localhost:4444/Unrelated/CCPush Output");
+      this->cc_push_out->ConnectTo("/TCP/localhost:4444/Unrelated/CCPush Input");
+      this->cc_push_in->ConnectTo("/TCP/localhost:4444/Unrelated/CCPush Output");
     }
     if (cPULL_PUSH_TESTS)
     {
-      this->cc_pull_push_out->ConnectToTarget("/TCP/localhost:4444/Unrelated/CCPullPush Input");
-      this->cc_pull_push_in->ConnectToSource("/TCP/localhost:4444/Unrelated/CCPullPush Output");
+      this->cc_pull_push_out->ConnectTo("/TCP/localhost:4444/Unrelated/CCPullPush Input");
+      this->cc_pull_push_in->ConnectTo("/TCP/localhost:4444/Unrelated/CCPullPush Output");
     }
     if (cREVERSE_PUSH_TESTS)
     {
-      this->cc_rev_push_out->ConnectToTarget("/TCP/localhost:4444/Unrelated/CCRevPush Input");
-      this->cc_rev_push_in->ConnectToSource("/TCP/localhost:4444/Unrelated/CCRevPush Output");
+      this->cc_rev_push_out->ConnectTo("/TCP/localhost:4444/Unrelated/CCRevPush Input");
+      this->cc_rev_push_in->ConnectTo("/TCP/localhost:4444/Unrelated/CCRevPush Output");
     }
     if (cQ_TESTS)
     {
-      this->cc_qOut->ConnectToTarget("/TCP/localhost:4444/Unrelated/CCPush Queue Input");
-      this->cc_qIn->ConnectToSource("/TCP/localhost:4444/Unrelated/CCPush Queue Output");
+      this->cc_qOut->ConnectTo("/TCP/localhost:4444/Unrelated/CCPush Queue Input");
+      this->cc_qIn->ConnectTo("/TCP/localhost:4444/Unrelated/CCPush Queue Output");
     }
   }
 
@@ -67,23 +67,23 @@ void tRealClientTest::Main()
   {
     if (cPUSH_TESTS)
     {
-      this->std_push_out->ConnectToTarget("/TCP/localhost:4444/Unrelated/StdPush Input");
-      this->std_push_in->ConnectToSource("/TCP/localhost:4444/Unrelated/StdPush Output");
+      this->std_push_out->ConnectTo("/TCP/localhost:4444/Unrelated/StdPush Input");
+      this->std_push_in->ConnectTo("/TCP/localhost:4444/Unrelated/StdPush Output");
     }
     if (cPULL_PUSH_TESTS)
     {
-      this->std_pull_push_out->ConnectToTarget("/TCP/localhost:4444/Unrelated/StdPullPush Input");
-      this->std_pull_push_in->ConnectToSource("/TCP/localhost:4444/Unrelated/StdPullPush Output");
+      this->std_pull_push_out->ConnectTo("/TCP/localhost:4444/Unrelated/StdPullPush Input");
+      this->std_pull_push_in->ConnectTo("/TCP/localhost:4444/Unrelated/StdPullPush Output");
     }
     if (cREVERSE_PUSH_TESTS)
     {
-      this->std_rev_push_out->ConnectToTarget("/TCP/localhost:4444/Unrelated/StdRevPush Input");
-      this->std_rev_push_in->ConnectToSource("/TCP/localhost:4444/Unrelated/StdRevPush Output");
+      this->std_rev_push_out->ConnectTo("/TCP/localhost:4444/Unrelated/StdRevPush Input");
+      this->std_rev_push_in->ConnectTo("/TCP/localhost:4444/Unrelated/StdRevPush Output");
     }
     if (cQ_TESTS)
     {
-      this->std_qOut->ConnectToTarget("/TCP/localhost:4444/Unrelated/StdPush Queue Input");
-      this->std_qIn->ConnectToSource("/TCP/localhost:4444/Unrelated/StdPush Queue Output");
+      this->std_qOut->ConnectTo("/TCP/localhost:4444/Unrelated/StdPush Queue Input");
+      this->std_qIn->ConnectTo("/TCP/localhost:4444/Unrelated/StdPush Queue Output");
     }
   }
 

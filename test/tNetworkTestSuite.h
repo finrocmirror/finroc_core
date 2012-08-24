@@ -175,7 +175,7 @@ public:
         cc_rev_push_out_local = std::shared_ptr<tPort<int> >(new tPort<int>("CCRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT));
         cc_rev_push_in = std::shared_ptr<tPort<int> >(new tPort<int>("CCRevPush Input", tPortFlags::cSHARED_INPUT_PORT));
         cc_rev_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
-        cc_rev_push_out_local->ConnectToTarget(*cc_rev_push_in);
+        cc_rev_push_out_local->ConnectTo(*cc_rev_push_in);
       }
       if (cQ_TESTS)
       {
@@ -205,7 +205,7 @@ public:
         std_rev_push_out_local = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdRevPush Output Local", tPortFlags::cSHARED_OUTPUT_PORT));
         std_rev_push_in = std::shared_ptr<tTestStdPort>(new tTestStdPort("StdRevPush Input", tPortFlags::cSHARED_INPUT_PORT));
         std_rev_push_in->SetMinNetUpdateInterval(cRECV_FREQ);
-        std_rev_push_out_local->ConnectToTarget(*std_rev_push_in);
+        std_rev_push_out_local->ConnectTo(*std_rev_push_in);
       }
       if (cQ_TESTS)
       {
@@ -247,7 +247,7 @@ public:
           if (cc_push_in->HasChanged())
           {
             cc_push_in->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "ccPushIn received: ", cc_push_in->Get());
+            FINROC_LOG_PRINT(USER, "ccPushIn received: ", cc_push_in->Get());
           }
         }
 
@@ -259,7 +259,7 @@ public:
           if (cc_pull_push_in->HasChanged())
           {
             cc_pull_push_in->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "ccPullPushIn received: ", cc_pull_push_in->Get());
+            FINROC_LOG_PRINT(USER, "ccPullPushIn received: ", cc_pull_push_in->Get());
           }
 
           // do some stuff with push strategy
@@ -273,7 +273,7 @@ public:
           }
           else if (period_idx < 10 && (period_idx % 3) == 0)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Pulling ccPullPushIn: ", cc_pull_push_in->Get());
+            FINROC_LOG_PRINT(USER, "Pulling ccPullPushIn: ", cc_pull_push_in->Get());
           }
         }
 
@@ -284,7 +284,7 @@ public:
             int val = cc_rev_push_in->Get();
             if (val < 0)
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "ccRevPushIn received: ", val);
+              FINROC_LOG_PRINT(USER, "ccRevPushIn received: ", val);
             }
           }
 
@@ -293,7 +293,7 @@ public:
           if (cc_rev_push_out->HasChanged())
           {
             cc_rev_push_out->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "ccRevPushOut received: ", cc_rev_push_out->Get());
+            FINROC_LOG_PRINT(USER, "ccRevPushOut received: ", cc_rev_push_out->Get());
           }
           if (period_idx == 17)
           {
@@ -317,7 +317,7 @@ public:
               oss << " " << cn;
             }
             tThreadLocalCache::GetFast()->ReleaseAllLocks();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, oss.str());
+            FINROC_LOG_PRINT(USER, oss.str());
           }
           if (period_idx == 9)
           {
@@ -338,7 +338,7 @@ public:
           if (std_push_in->HasChanged())
           {
             std_push_in->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "stdPushIn received: ", std_push_in->GetIntRaw());
+            FINROC_LOG_PRINT(USER, "stdPushIn received: ", std_push_in->GetIntRaw());
           }
         }
 
@@ -350,7 +350,7 @@ public:
           if (std_pull_push_in->HasChanged())
           {
             std_pull_push_in->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "stdPullPushIn received: ", std_pull_push_in->GetIntRaw());
+            FINROC_LOG_PRINT(USER, "stdPullPushIn received: ", std_pull_push_in->GetIntRaw());
           }
 
           // do some stuff with push strategy
@@ -364,7 +364,7 @@ public:
           }
           else if (period_idx < 10 && (period_idx % 3) == 0)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Pulling stdPullPushIn: ", std_pull_push_in->GetIntRaw());
+            FINROC_LOG_PRINT(USER, "Pulling stdPullPushIn: ", std_pull_push_in->GetIntRaw());
           }
         }
 
@@ -375,7 +375,7 @@ public:
             int val = std_rev_push_in->GetIntRaw();
             if (val < 0)
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "stdRevPushIn received: ", val);
+              FINROC_LOG_PRINT(USER, "stdRevPushIn received: ", val);
             }
           }
 
@@ -384,7 +384,7 @@ public:
           if (std_rev_push_out->HasChanged())
           {
             std_rev_push_out->ResetChanged();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "stdRevPushOut received: ", std_rev_push_out->GetIntRaw());
+            FINROC_LOG_PRINT(USER, "stdRevPushOut received: ", std_rev_push_out->GetIntRaw());
           }
           if (period_idx == 17)
           {
@@ -414,7 +414,7 @@ public:
               is.Close();
             }
             tThreadLocalCache::GetFast()->ReleaseAllLocks();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_USER, oss.str());
+            FINROC_LOG_PRINT(USER, oss.str());
           }
           if (period_idx == 9)
           {
@@ -456,7 +456,7 @@ public:
             is.Reset(&(bb.Get(0u)));
             if (is.MoreDataAvailable())
             {
-              FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Reading Blackboard: ", is.ReadInt());
+              FINROC_LOG_PRINT(USER, "Reading Blackboard: ", is.ReadInt());
             }
             is.Close();
           }
@@ -464,7 +464,7 @@ public:
         }
         catch (const blackboard::tBBLockException& ex)
         {
-          FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Read-locking blackboard failed");
+          FINROC_LOG_PRINT(WARNING, "Read-locking blackboard failed");
         }
       }
 

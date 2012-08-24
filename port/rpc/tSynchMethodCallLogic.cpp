@@ -39,7 +39,7 @@ void tSynchMethodCallLogic::HandleMethodReturn(tAbstractCall::tPtr& call)
   }
   else
   {
-    FINROC_LOG_PRINTF(rrlib::logging::eLL_WARNING, "Received method return value with invalid synchronization id %d: '%s'. Ignoring.", call->GetSyncherID(), call->ToString().c_str());
+    FINROC_LOG_PRINTF(WARNING, "Received method return value with invalid synchronization id %d: '%s'. Ignoring.", call->GetSyncherID(), call->ToString().c_str());
   }
 }
 

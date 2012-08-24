@@ -64,7 +64,7 @@ void tRPCThread::ExecuteTask(tSerializableReusableTask::tPtr& t)
 void tRPCThread::HandleWatchdogAlert()
 {
   rrlib::thread::tLock lock2(current_task_string_mutex);
-  FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Watchdoggy detected that execution of the following task got stuck: ", current_task_string);
+  FINROC_LOG_PRINT(WARNING, "Watchdoggy detected that execution of the following task got stuck: ", current_task_string);
   tWatchDogTask::Deactivate();
 }
 

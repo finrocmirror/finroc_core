@@ -49,13 +49,23 @@ struct tPortFlags : public tCoreFlags
   /*! Does the flag ACCEPTS_REVERSE_DATA may change at runtime? */
   static const uint cMAY_ACCEPT_REVERSE_DATA = cFIRST_PORT_FLAG << 2;
 
-  /*! Does port accept incoming data? - fixed */
+  /*!
+   * Does port accept incoming data? - fixed
+   * Also set for server RPC ports, since they accept RPC calls
+   */
   static const uint cACCEPTS_DATA = cFIRST_PORT_FLAG << 3;
 
-  /*! Does port emit data (normal direction)? - fixed */
+  /*!
+   * Does port emit data (normal direction)? - fixed
+   * Also set for client RPC ports, since they "emit" RPC calls
+   */
   static const uint cEMITS_DATA = cFIRST_PORT_FLAG << 4;
 
-  /*! From it's general characteristics... is port input or output port? (for proxies from the outside group view) - fixed */
+  /*!
+   * From it's general characteristics: Is port input or output port? - fixed
+   * (for proxies from the outside group view)
+   * (for RPC ports client ports are output port since they "emit" RPC calls)
+   */
   static const uint cIS_OUTPUT_PORT = cFIRST_PORT_FLAG << 5;
 
   /*! Transport data for this port through the network with low priority */

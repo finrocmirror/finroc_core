@@ -97,7 +97,7 @@ void tPortCreationList::CheckPort(tAbstractPort* ap, tFrameworkElement& io_vecto
   }
   flags_ |= tmp;
 
-  FINROC_LOG_PRINT_TO(port_creation_list, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", io_vector_.GetQualifiedLink());
+  FINROC_LOG_PRINT_TO(port_creation_list, DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", io_vector_.GetQualifiedLink());
   ap = &tFinrocTypeInfo::GetPortFactory(dt).CreatePort(name, io_vector_, dt, flags_);
   if (ap != NULL)
   {

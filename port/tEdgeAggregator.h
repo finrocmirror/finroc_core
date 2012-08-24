@@ -82,12 +82,6 @@ private:
    */
   void EdgeRemoved(tEdgeAggregator& dest);
 
-  /*!
-   * \param source Port
-   * \return EdgeAggregator parent - or null if there's none
-   */
-  static tEdgeAggregator* GetAggregator(tAbstractPort& source);
-
 public:
 
   /*! see FrameworkElement for parameter description */
@@ -116,6 +110,12 @@ public:
    * \return Edge that connects these elements - or null if such an edge does not yet exists
    */
   tAggregatedEdge* FindAggregatedEdge(tEdgeAggregator& dest);
+
+  /*!
+   * \param source Port
+   * \return EdgeAggregator parent - or null if there's none
+   */
+  static tEdgeAggregator* GetAggregator(const tAbstractPort& source);
 
   /*!
    * \return Array with emerging edges. Can be iterated over concurrently.

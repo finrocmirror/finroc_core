@@ -32,6 +32,7 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include "core/tFrameworkElementTags.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -72,9 +73,10 @@ tModuleBase::tModuleBase(tFrameworkElement *parent, const util::tString &name)
   tStructureElementRegister::AddModule(this);
   if (!tStructureElementRegister::FindParent(this, false))
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Module ", GetQualifiedName(), " was not created using new().");
+    FINROC_LOG_PRINT(ERROR, "Module ", GetQualifiedName(), " was not created using new().");
     abort();
   }
+  tFrameworkElementTags::AddTag(*this, "module");
 }
 
 tModuleBase::~tModuleBase()

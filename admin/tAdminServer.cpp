@@ -85,15 +85,15 @@ void tAdminServer::Connect(tAbstractPort& src, tAbstractPort& dest)
 {
   if (src.IsVolatile() && (!dest.IsVolatile()))
   {
-    dest.ConnectToSource(src.GetQualifiedLink(), true);
+    dest.ConnectTo(src.GetQualifiedLink(), tAbstractPort::tConnectDirection::AUTO, true);
   }
   else if (dest.IsVolatile() && (!src.IsVolatile()))
   {
-    src.ConnectToTarget(dest.GetQualifiedLink(), true);
+    src.ConnectTo(dest.GetQualifiedLink(), tAbstractPort::tConnectDirection::AUTO, true);
   }
   else
   {
-    src.ConnectToTarget(dest, true);
+    src.ConnectTo(dest, tAbstractPort::tConnectDirection::AUTO, true);
   }
 }
 
@@ -165,7 +165,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not query element for annotation type ", *type);
+      FINROC_LOG_PRINT(ERROR, "Could not query element for annotation type ", *type);
     }
 
     if (result == NULL)
@@ -184,7 +184,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
   }
   else if (method == cLOAD_MODULE_LIBRARY)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Loading library ", *type);
+    FINROC_LOG_PRINT(USER, "Loading library ", *type);
     sDynamicLoading::DLOpen(type->c_str());
     return HandleCall(method); // return stuff from GET_CREATE_MODULE_ACTIONS
   }
@@ -195,7 +195,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
     core::tFrameworkElement* fe = GetRuntime().GetElement(handle);
     if (fe == NULL || (!fe->IsReady()))
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not get parameter info for framework element ", handle);
+      FINROC_LOG_PRINT(ERROR, "Could not get parameter info for framework element ", handle);
 
       return tPortDataPtr<rrlib::serialization::tMemoryBuffer>();
     }
@@ -297,7 +297,7 @@ tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method
           (*result) = p->BrowserPublishRaw(c);
           if (result->length() > 0)
           {
-            FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Setting value of port '", port->GetQualifiedName(), "' failed: ", *result);
+            FINROC_LOG_PRINT(WARNING, "Setting value of port '", port->GetQualifiedName(), "' failed: ", *result);
           }
         }
         else if (tFinrocTypeInfo::IsStdType(port->GetDataType()) && tFinrocTypeInfo::IsStdType(dt))
@@ -310,14 +310,14 @@ tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method
       }
       catch (const std::exception& e)
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Setting value of port '", port->GetQualifiedName(), "' failed: ", e);
+        FINROC_LOG_PRINT(WARNING, "Setting value of port '", port->GetQualifiedName(), "' failed: ", e);
         (*result) = e.what();
       }
       return result;
     }
   }
   (*result) += "Port with handle " + boost::lexical_cast<std::string>(port_handle) + " is not available.";
-  FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Setting value of port failed: ", *result);
+  FINROC_LOG_PRINT(WARNING, "Setting value of port failed: ", *result);
   return result;
 }
 
@@ -336,16 +336,16 @@ tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method
     if (parent == NULL || (!parent->IsReady()))
     {
       (*result) = "Parent not available. Cancelling remote module creation.";
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, *result);
+      FINROC_LOG_PRINT(ERROR, *result);
     }
     else if ((!tRuntimeSettings::DuplicateQualifiedNamesAllowed()) && parent->GetChild(*name))
     {
       (*result) = std::string("Element with name '") + *name + "' already exists. Creating another module with this name is not allowed.";
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, *result);
+      FINROC_LOG_PRINT(ERROR, *result);
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Creating Module ", parent->GetQualifiedLink(), "/", *name);
+      FINROC_LOG_PRINT(USER, "Creating Module ", parent->GetQualifiedLink(), "/", *name);
 
       if (cma->GetParameterTypes() != NULL && cma->GetParameterTypes()->Size() > 0)
       {
@@ -361,8 +361,8 @@ tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method
           catch (const std::exception& e)
           {
             (*result) = std::string("Error parsing value for parameter ") + param->GetName();
-            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, *result);
-            FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+            FINROC_LOG_PRINT(ERROR, *result);
+            FINROC_LOG_PRINT(ERROR, e);
           }
         }
         ci.Close();
@@ -372,12 +372,12 @@ tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method
       created->Init();
       params = NULL;
 
-      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Creating Module succeeded");
+      FINROC_LOG_PRINT(USER, "Creating Module succeeded");
     }
   }
   catch (const std::exception& e)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+    FINROC_LOG_PRINT(ERROR, e);
     (*result) = e.what();
   }
 
@@ -389,49 +389,40 @@ tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method
 void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
 {
   tRuntimeEnvironment* re = tRuntimeEnvironment::GetInstance();
-  ::finroc::core::tAbstractPort* src = re->GetPort(p1);
+  tAbstractPort* src = re->GetPort(p1);
 
   if (method == cDISCONNECT_ALL)
   {
     if (src == NULL)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Can't disconnect port that doesn't exist");
+      FINROC_LOG_PRINT(WARNING, "Can't disconnect port that doesn't exist");
       return;
     }
     src->DisconnectAll();
-    FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Disconnected port ", src->GetQualifiedName());
+    FINROC_LOG_PRINT(USER, "Disconnected port ", src->GetQualifiedName());
     return;
   }
 
-  ::finroc::core::tAbstractPort* dest = re->GetPort(p2);
+  tAbstractPort* dest = re->GetPort(p2);
   if (src == NULL || dest == NULL)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Can't (dis)connect ports that do not exists");
+    FINROC_LOG_PRINT(WARNING, "Can't (dis)connect ports that do not exists");
     return;
   }
   if (method == cCONNECT)
   {
     if (src->IsVolatile() && dest->IsVolatile())
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Cannot really persistently connect two network ports: ", src->GetQualifiedLink(), ", ", dest->GetQualifiedLink());
+      FINROC_LOG_PRINT(WARNING, "Cannot really persistently connect two network ports: ", src->GetQualifiedLink(), ", ", dest->GetQualifiedLink());
     }
-    if (src->MayConnectTo(*dest))
-    {
-      Connect(*src, *dest);
-    }
-    else if (dest->MayConnectTo(*src))
-    {
-      Connect(*dest, *src);
-    }
+    Connect(*src, *dest);
     if (!src->IsConnectedTo(*dest))
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not connect ports '", src->GetQualifiedName(), "' and '", dest->GetQualifiedName(), "' for the following reasons:");
-      src->MayConnectTo(*dest, true);
-      dest->MayConnectTo(*src, true);
+      FINROC_LOG_PRINT(WARNING, "Could not connect ports '", src->GetQualifiedName(), "' and '", dest->GetQualifiedName(), "'.");
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Connected ports ", src->GetQualifiedName(), " ", dest->GetQualifiedName());
+      FINROC_LOG_PRINT(USER, "Connected ports ", src->GetQualifiedName(), " ", dest->GetQualifiedName());
     }
   }
   else if (method == cDISCONNECT)
@@ -447,11 +438,11 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int p1, int p2)
     src->DisconnectFrom(*dest);
     if (src->IsConnectedTo(*dest))
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not disconnect ports ", src->GetQualifiedName(), " ", dest->GetQualifiedName());
+      FINROC_LOG_PRINT(WARNING, "Could not disconnect ports ", src->GetQualifiedName(), " ", dest->GetQualifiedName());
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Disconnected ports ", src->GetQualifiedName(), " ", dest->GetQualifiedName());
+      FINROC_LOG_PRINT(USER, "Disconnected ports ", src->GetQualifiedName(), " ", dest->GetQualifiedName());
     }
   }
 }
@@ -463,7 +454,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int cma_index, 
   ::finroc::core::tFrameworkElement* elem = tRuntimeEnvironment::GetInstance()->GetElement(cma_index);
   if (elem == NULL || (!elem->IsReady()))
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Parent not available. Cancelling setting of annotation.");
+    FINROC_LOG_PRINT(ERROR, "Parent not available. Cancelling setting of annotation.");
   }
   else
   {
@@ -472,18 +463,18 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int cma_index, 
     ci >> dt;
     if (dt == NULL)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Data type not available. Cancelling setting of annotation.");
+      FINROC_LOG_PRINT(ERROR, "Data type not available. Cancelling setting of annotation.");
     }
     else
     {
       tFinrocAnnotation* ann = elem->GetAnnotation(dt);
       if (ann == NULL)
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Creating new annotations not supported yet. Cancelling setting of annotation.");
+        FINROC_LOG_PRINT(ERROR, "Creating new annotations not supported yet. Cancelling setting of annotation.");
       }
       else if (ann->GetType() != dt)
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Existing annotation has wrong type?!. Cancelling setting of annotation.");
+        FINROC_LOG_PRINT(ERROR, "Existing annotation has wrong type?!. Cancelling setting of annotation.");
       }
       else
       {
@@ -501,12 +492,12 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int handle)
     ::finroc::core::tFrameworkElement* fe = GetRuntime().GetElement(handle);
     if (fe != NULL && (!fe->IsDeleted()))
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_USER, "Deleting element ", fe->GetQualifiedLink());
+      FINROC_LOG_PRINT(USER, "Deleting element ", fe->GetQualifiedLink());
       fe->ManagedDelete();
     }
     else
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not delete Framework element, because it does not appear to be available.");
+      FINROC_LOG_PRINT(ERROR, "Could not delete Framework element, because it does not appear to be available.");
     }
     return;
   }
@@ -517,7 +508,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int handle)
     GetExecutionControls(ecs, handle);
     if (ecs.size() == 0)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Start/Pause command has not effect");
+      FINROC_LOG_PRINT(WARNING, "Start/Pause command has not effect");
     }
     if (method == cSTART_EXECUTION)
     {
@@ -552,13 +543,13 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int handle)
     }
     catch (const util::tException& e)
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Error saving finstructable group ", fe->GetQualifiedLink());
-      FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, e);
+      FINROC_LOG_PRINT(ERROR, "Error saving finstructable group ", fe->GetQualifiedLink());
+      FINROC_LOG_PRINT(ERROR, e);
     }
   }
   else
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Could not save finstructable group, because it does not appear to be available.");
+    FINROC_LOG_PRINT(ERROR, "Could not save finstructable group, because it does not appear to be available.");
   }
 }
 

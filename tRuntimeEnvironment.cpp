@@ -89,7 +89,7 @@ tRuntimeEnvironment::~tRuntimeEnvironment()
 
 void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge& edge)
 {
-  FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Adding link edge connecting to ", link);
+  FINROC_LOG_PRINT_TO(edges, DEBUG_VERBOSE_1, "Adding link edge connecting to ", link);
   {
     tLock lock2(registry.mutex);
     if (registry.link_edges.find(link) == registry.link_edges.end())
@@ -101,9 +101,9 @@ void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge& edge
     {
       // insert edge
       tLinkEdge* interested = registry.link_edges[link];
-      tLinkEdge* next = interested->GetNext();
-      interested->SetNext(&edge);
-      edge.SetNext(next);
+      tLinkEdge* next = interested->GetNextEdge();
+      interested->SetNextEdge(&edge);
+      edge.SetNextEdge(next);
     }
 
     // directly notify link edge?
@@ -248,30 +248,30 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge& e
   tLinkEdge* current = registry.link_edges[link];
   if (current == &edge)
   {
-    if (current->GetNext() == NULL)    // remove entries for this link completely
+    if (current->GetNextEdge() == NULL)    // remove entries for this link completely
     {
       registry.link_edges.erase(link);
     }
     else    // remove first element
     {
-      registry.link_edges[link] = current->GetNext();
+      registry.link_edges[link] = current->GetNextEdge();
     }
   }
   else    // remove element out of linked list
   {
     tLinkEdge* prev = current;
-    current = current->GetNext();
+    current = current->GetNextEdge();
     while (current != NULL)
     {
       if (current == &edge)
       {
-        prev->SetNext(current->GetNext());
+        prev->SetNextEdge(current->GetNextEdge());
         return;
       }
       prev = current;
-      current = current->GetNext();
+      current = current->GetNextEdge();
     }
-    FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_WARNING, "warning: Could not remove link edge for link: ", link);
+    FINROC_LOG_PRINT_TO(framework_elements, DEBUG_WARNING, "warning: Could not remove link edge for link: ", link);
   }
 }
 
@@ -305,7 +305,7 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement& ele
       {
         ap.GetQualifiedLink(registry.temp_buffer, i);
         util::tString s = registry.temp_buffer;
-        FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_2, "Checking link ", s, " with respect to link edges");
+        FINROC_LOG_PRINT_TO(edges, DEBUG_VERBOSE_2, "Checking link ", s, " with respect to link edges");
 
         if (registry.link_edges.find(s) != registry.link_edges.end())
         {
@@ -313,7 +313,7 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement& ele
           while (le != NULL)
           {
             le->LinkAdded(*this, s, ap);
-            le = le->GetNext();
+            le = le->GetNextEdge();
           }
         }
       }

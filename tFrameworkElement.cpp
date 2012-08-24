@@ -55,7 +55,7 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent_, const util::tSt
     parent->AddChild(primary);
   }
 
-  FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Constructing FrameworkElement");
+  FINROC_LOG_PRINT_TO(framework_elements, DEBUG_VERBOSE_1, "Constructing FrameworkElement");
 }
 
 void tFrameworkElement::AddChild(tLink& child)
@@ -100,7 +100,7 @@ void tFrameworkElement::AddChild(tLink& child)
     child.GetChild().SetName(child.GetChild().GetName() + pointer_buffer);
     while (GetChild(child.GetName()))
     {
-      FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG_WARNING, "Spooky framework elements name duplicates: " + child.GetName());
+      FINROC_LOG_PRINT(DEBUG_WARNING, "Spooky framework elements name duplicates: " + child.GetName());
       child.GetChild().SetName(child.GetChild().GetName() + pointer_buffer);
     }
   }
@@ -137,7 +137,7 @@ void tFrameworkElement::CheckPublish()
     if (!GetFlag(tCoreFlags::cPUBLISHED) && AllParentsReady())
     {
       SetFlag(tCoreFlags::cPUBLISHED);
-      FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Publishing");
+      FINROC_LOG_PRINT_TO(framework_elements, DEBUG_VERBOSE_1, "Publishing");
       PublishUpdatedInfo(tRuntimeListener::cADD);
     }
 
@@ -175,7 +175,7 @@ size_t tFrameworkElement::ChildCount() const
 tFrameworkElement::~tFrameworkElement()
 {
   assert(((GetFlag(tCoreFlags::cDELETED) || GetFlag(tCoreFlags::cIS_RUNTIME))) && "Frameworkelement was not deleted with managedDelete()");
-  FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "FrameworkElement destructor");
+  FINROC_LOG_PRINT_TO(framework_elements, DEBUG_VERBOSE_1, "FrameworkElement destructor");
   if (!GetFlag(tCoreFlags::cIS_RUNTIME))
   {
     // synchronizes on runtime - so no elements will be deleted while runtime is locked
@@ -202,7 +202,7 @@ void tFrameworkElement::CheckForNameClash(const tLink& link)
       tLink* child = iterable->Get(i);
       if (child && child->GetChild().IsReady() && child->GetName().compare(primary.GetName()) == 0)
       {
-        FINROC_LOG_PRINT(rrlib::logging::eLL_ERROR, "Framework elements with the same qualified names are not allowed ('", child->GetChild().GetQualifiedName(),
+        FINROC_LOG_PRINT(ERROR, "Framework elements with the same qualified names are not allowed ('", child->GetChild().GetQualifiedName(),
                          "'), since this causes undefined behavior with port connections by qualified names (e.g. in fingui or in finstructable groups). Apart from manually choosing another name, there are two ways to solve this:\n",
                          "  1) Set the tCoreFlags::cAUTO_RENAME flag constructing parent framework element.\n",
                          "  2) Explicitly allow duplicate names by calling tRuntimeSettings::AllowDuplicateQualifiedNames() and be careful.");
@@ -633,7 +633,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
         return;
       }
 
-      FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "FrameworkElement managedDelete");
+      FINROC_LOG_PRINT_TO(framework_elements, DEBUG_VERBOSE_1, "FrameworkElement managedDelete");
 
       // synchronizes on runtime - so no elements will be deleted while runtime is locked
       {
@@ -641,7 +641,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
 
         NotifyAnnotationsDelete();
 
-        FINROC_LOG_PRINT_TO(framework_elements, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Deleting");
+        FINROC_LOG_PRINT_TO(framework_elements, DEBUG_VERBOSE_1, "Deleting");
         //System.out.println("Deleting " + toString() + " (" + hashCode() + ")");
         assert(!GetFlag(tCoreFlags::cDELETED));
         assert(((primary.GetParent() != NULL) | GetFlag(tCoreFlags::cIS_RUNTIME)));
@@ -707,12 +707,12 @@ bool tFrameworkElement::NameEquals(const util::tString& other) const
   }
 }
 
-void tFrameworkElement::PrintStructure(rrlib::logging::tLogLevel ll)
+void tFrameworkElement::PrintStructure()
 {
   std::stringstream ls;
   ls << "" << std::endl;
   PrintStructure(0, ls);
-  FINROC_LOG_PRINT(ll, ls.str());
+  FINROC_LOG_PRINT(USER, ls.str());
 }
 
 void tFrameworkElement::PrintStructure(int indent, std::stringstream& output)

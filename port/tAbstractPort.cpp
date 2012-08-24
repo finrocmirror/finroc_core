@@ -2,7 +2,7 @@
  * You received this file as part of an advanced experimental
  * robotics framework prototype ('finroc')
  *
- * Copyright (C) 2007-2010 Max Reichardt,
+ * Copyright (C) 2007-2012 Max Reichardt,
  *   Robotics Research Lab, University of Kaiserslautern
  *
  * This program is free software; you can redistribute it and/or
@@ -101,66 +101,73 @@ void tAbstractPort::CommitUpdateTimeChange()
   }*/
 }
 
-void tAbstractPort::ConnectToSource(const util::tString& src_link, bool finstructed)
+void tAbstractPort::ConnectTo(tAbstractPort& to, tConnectDirection connect_direction, bool finstructed)
 {
   tLock lock2(GetRegistryLock());
-  if (IsDeleted())
+  if (IsDeleted() || to.IsDeleted())
+  {
+    FINROC_LOG_PRINT_TO(edges, WARNING, "Port already deleted!");
+    return;
+  }
+  if (&to == this)
+  {
+    FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect port to itself.");
+    return;
+  }
+  if (IsConnectedTo(to)) // already connected?
   {
     return;
   }
-  if (link_edges == NULL)    // lazy initialization
+
+  // determine connect direction
+  if (connect_direction == tConnectDirection::AUTO)
   {
-    link_edges = new util::tSimpleList<tLinkEdge*>();
-  }
-  for (size_t i = 0u; i < link_edges->Size(); i++)
-  {
-    if (boost::equals(link_edges->Get(i)->GetSourceLink(), src_link))
+    bool to_target_possible = MayConnectTo(to, false);
+    bool to_source_possible = to.MayConnectTo(*this, false);
+    if (to_target_possible && to_source_possible)
     {
-      return;
+      connect_direction = InferConnectDirection(to);
+    }
+    else if (to_target_possible || to_source_possible)
+    {
+      connect_direction = to_target_possible ? tConnectDirection::TO_TARGET : tConnectDirection::TO_SOURCE;
+    }
+    else
+    {
+      FINROC_LOG_PRINT(WARNING, "Could not connect ports '", GetQualifiedName(), "' and '", to.GetQualifiedName(), "' for the following reasons:");
+      MayConnectTo(to, true);
+      to.MayConnectTo(*this, true);
     }
   }
-  link_edges->Add(new tLinkEdge(MakeAbsoluteLink(src_link), GetHandle(), finstructed));
-}
 
-void tAbstractPort::ConnectToSource(tFrameworkElement& src_port_parent, const util::tString& src_port_name, bool warn_if_not_available)
-{
-  tFrameworkElement* p = src_port_parent.GetChildElement(src_port_name, false);
-  if (p && p->IsPort())
+  // connect
+  tAbstractPort& source = (connect_direction == tConnectDirection::TO_TARGET) ? *this : to;
+  tAbstractPort& target = (connect_direction == tConnectDirection::TO_TARGET) ? to : *this;
+  if (source.MayConnectTo(target, true))
   {
-    ConnectToSource(*static_cast<tAbstractPort*>(p));
-  }
-  else if (warn_if_not_available)
-  {
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_WARNING, "Cannot find port '", src_port_name, "' in ", src_port_parent.GetQualifiedName(), ".");
-  }
-}
-
-
-void tAbstractPort::ConnectToTarget(tAbstractPort& target, bool finstructed)
-{
-  tLock lock2(GetRegistryLock());
-  if (IsDeleted())
-  {
-    return;
-  }
-  if (MayConnectTo(target, true) && (!IsConnectedTo(target)))
-  {
-    RawConnectToTarget(target, finstructed);
-    target.PropagateStrategy(NULL, this);
-    NewConnection(target);
-    target.NewConnection(*this);
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_VERBOSE_1, "creating Edge from ", GetQualifiedName(), " to ", target.GetQualifiedName());
+    source.RawConnectToTarget(target, finstructed);
+    target.PropagateStrategy(NULL, &source);
+    source.NewConnection(target);
+    target.NewConnection(source);
+    FINROC_LOG_PRINT_TO(edges, DEBUG_VERBOSE_1, "Creating Edge from ", source.GetQualifiedName(), " to ", target.GetQualifiedName());
 
     // check whether we need an initial reverse push
-    ConsiderInitialReversePush(target);
+    source.ConsiderInitialReversePush(target);
   }
 }
 
-void tAbstractPort::ConnectToTarget(const util::tString& dest_link, bool finstructed)
+void tAbstractPort::ConnectTo(const util::tString& link_name, tConnectDirection connect_direction, bool finstructed)
 {
+  if (link_name.length() == 0)
+  {
+    FINROC_LOG_PRINT_TO(edges, ERROR, "No link name specified for partner port. Not connecting anything.");
+    return;
+  }
+
   tLock lock2(GetRegistryLock());
   if (IsDeleted())
   {
+    FINROC_LOG_PRINT_TO(edges, WARNING, "Port already deleted!");
     return;
   }
   if (link_edges == NULL)    // lazy initialization
@@ -169,27 +176,35 @@ void tAbstractPort::ConnectToTarget(const util::tString& dest_link, bool finstru
   }
   for (size_t i = 0u; i < link_edges->Size(); i++)
   {
-    if (boost::equals(link_edges->Get(i)->GetTargetLink(), dest_link))
+    if (boost::equals(link_edges->Get(i)->GetTargetLink(), link_name) || boost::equals(link_edges->Get(i)->GetSourceLink(), link_name))
     {
       return;
     }
   }
-  link_edges->Add(new tLinkEdge(GetHandle(), MakeAbsoluteLink(dest_link), finstructed));
+  switch (connect_direction)
+  {
+  case tConnectDirection::AUTO:
+  case tConnectDirection::TO_TARGET:
+    link_edges->Add(new tLinkEdge(*this, MakeAbsoluteLink(link_name), connect_direction == tConnectDirection::AUTO, finstructed));
+    break;
+  case tConnectDirection::TO_SOURCE:
+    link_edges->Add(new tLinkEdge(MakeAbsoluteLink(link_name), *this, false, finstructed));
+    break;
+  }
 }
 
-void tAbstractPort::ConnectToTarget(tFrameworkElement& dest_port_parent, const util::tString& dest_port_name, bool warn_if_not_available)
+void tAbstractPort::ConnectTo(tFrameworkElement& partner_port_parent, const util::tString& port_name, bool warn_if_not_available, tConnectDirection connect_direction)
 {
-  tFrameworkElement* p = dest_port_parent.GetChildElement(dest_port_name, false);
+  tFrameworkElement* p = partner_port_parent.GetChildElement(port_name, false);
   if (p && p->IsPort())
   {
-    ConnectToTarget(*static_cast<tAbstractPort*>(p));
+    ConnectTo(*static_cast<tAbstractPort*>(p), connect_direction);
   }
   else if (warn_if_not_available)
   {
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_WARNING, "Cannot find port '", dest_port_name, "' in ", dest_port_parent.GetQualifiedName(), ".");
+    FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot find port '", port_name, "' in ", partner_port_parent.GetQualifiedName(), ".");
   }
 }
-
 
 void tAbstractPort::ConsiderInitialReversePush(tAbstractPort& target)
 {
@@ -197,7 +212,7 @@ void tAbstractPort::ConsiderInitialReversePush(tAbstractPort& target)
   {
     if (ReversePushStrategy() && edges_src->CountElements() == 1)
     {
-      FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial reverse push from ", target.GetQualifiedName(), " to ", GetQualifiedName());
+      FINROC_LOG_PRINT_TO(initial_pushes, DEBUG_VERBOSE_1, "Performing initial reverse push from ", target.GetQualifiedName(), " to ", GetQualifiedName());
       target.InitialPushTo(*this, true);
     }
   }
@@ -277,7 +292,7 @@ void tAbstractPort::DisconnectFrom(tAbstractPort& target)
   }
   if (!found)
   {
-    FINROC_LOG_PRINT_TO(edges, rrlib::logging::eLL_DEBUG_WARNING, "edge not found in AbstractPort::disconnectFrom()");
+    FINROC_LOG_PRINT_TO(edges, DEBUG_WARNING, "edge not found in AbstractPort::disconnectFrom()");
   }
   // not found: throw error message?
 }
@@ -407,7 +422,85 @@ int16 tAbstractPort::GetStrategyRequirement() const
   }
 }
 
-bool tAbstractPort::IsConnectedTo(tAbstractPort& target)
+tAbstractPort::tConnectDirection tAbstractPort::InferConnectDirection(const tAbstractPort& other) const
+{
+  // If one port is no proxy port (only emits or accepts data), direction is clear
+  if (!GetFlag(tPortFlags::cPROXY))
+  {
+    return GetFlag(tPortFlags::cEMITS_DATA) ? tConnectDirection::TO_TARGET : tConnectDirection::TO_SOURCE;
+  }
+  if (!other.GetFlag(tPortFlags::cPROXY))
+  {
+    return other.GetFlag(tPortFlags::cACCEPTS_DATA) ? tConnectDirection::TO_TARGET : tConnectDirection::TO_SOURCE;
+  }
+
+  // Temporary variable to store result: Return tConnectDirection::TO_TARGET?
+  bool return_to_target = true;
+
+  // Do we have input or output proxy ports?
+  bool this_output_proxy = this->IsOutputPort();
+  bool other_output_proxy = other.IsOutputPort();
+
+  // Do ports belong to the same module or group?
+  tEdgeAggregator* this_aggregator = tEdgeAggregator::GetAggregator(*this);
+  tEdgeAggregator* other_aggregator = tEdgeAggregator::GetAggregator(other);
+  bool ports_have_same_parent = this_aggregator && other_aggregator &&
+                                ((this_aggregator == other_aggregator) || (this_aggregator->GetParent() == other_aggregator->GetParent() && this_aggregator->GetFlag(tEdgeAggregator::cIS_INTERFACE) && other_aggregator->GetFlag(tEdgeAggregator::cIS_INTERFACE)));
+
+  // Ports of network interfaces typically determine connection direction
+  if (this->GetFlag(tCoreFlags::cNETWORK_ELEMENT))
+  {
+    return_to_target = this_output_proxy;
+  }
+  else if (other.GetFlag(tCoreFlags::cNETWORK_ELEMENT))
+  {
+    return_to_target = !other_output_proxy;
+  }
+  else if (this_output_proxy != other_output_proxy)
+  {
+    // If we have an output and an input port, typically, the output port is connected to the input port
+    return_to_target = this_output_proxy;
+
+    // If ports are in interfaces of the same group/module, connect in the reverse of the typical direction
+    if (ports_have_same_parent)
+    {
+      return_to_target = !return_to_target;
+    }
+  }
+  else
+  {
+    // count parents
+    int this_parent_node_count = 1;
+    tFrameworkElement* parent = this->GetParent();
+    while ((parent = parent->GetParent()))
+    {
+      this_parent_node_count++;
+    }
+
+    int other_parent_node_count = 1;
+    parent = other.GetParent();
+    while ((parent = parent->GetParent()))
+    {
+      other_parent_node_count++;
+    }
+
+    // Are ports forwarded to outer interfaces?
+    if (this_parent_node_count != other_parent_node_count)
+    {
+      return_to_target = (this_output_proxy && other_parent_node_count < this_parent_node_count) ||
+                         ((!this_output_proxy) && this_parent_node_count < other_parent_node_count);
+    }
+    else
+    {
+      FINROC_LOG_PRINTF(WARNING, "Two proxy ports ('%s' and '%s') in the same direction and on the same level are to be connected. Cannot infer direction. Guessing TO_TARGET.",
+                        this->GetQualifiedName().c_str(), other.GetQualifiedName().c_str());
+    }
+  }
+
+  return return_to_target ? tConnectDirection::TO_TARGET : tConnectDirection::TO_SOURCE;
+}
+
+bool tAbstractPort::IsConnectedTo(tAbstractPort& target) const
 {
   util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
   for (int i = 0, n = it->Size(); i < n; i++)
@@ -443,7 +536,7 @@ bool tAbstractPort::IsConnectedToReversePushSources() const
   return false;
 }
 
-bool tAbstractPort::IsEdgeFinstructed(int idx)
+bool tAbstractPort::IsEdgeFinstructed(int idx) const
 {
   if (idx < 0)
   {
@@ -461,15 +554,15 @@ bool tAbstractPort::IsEdgeFinstructed(int idx)
   }
 }
 
-util::tString tAbstractPort::MakeAbsoluteLink(const util::tString& rel_link)
+util::tString tAbstractPort::MakeAbsoluteLink(const util::tString& rel_link) const
 {
-  if (rel_link[0] == '/')
+  if (rel_link.length() > 0 && rel_link[0] == '/')
   {
     return rel_link;
   }
-  ::finroc::core::tFrameworkElement* relative_to = GetParent();
+  tFrameworkElement* relative_to = GetParent();
   util::tString rel_link2 = rel_link;
-  while (boost::starts_with(rel_link2, "../"));
+  while (boost::starts_with(rel_link2, "../"))
   {
     rel_link2 = rel_link2.substr(3);
     relative_to = relative_to->GetParent();
@@ -477,25 +570,32 @@ util::tString tAbstractPort::MakeAbsoluteLink(const util::tString& rel_link)
   return relative_to->GetQualifiedLink() + "/" + rel_link2;
 }
 
-bool tAbstractPort::MayConnectTo(tAbstractPort& target, bool warn_if_impossible)
+bool tAbstractPort::MayConnectTo(tAbstractPort& target, bool warn_if_impossible) const
 {
-  rrlib::logging::tLogLevel loglvl = warn_if_impossible ? rrlib::logging::eLL_WARNING : rrlib::logging::eLL_DEBUG_VERBOSE_1;
   if (!GetFlag(tPortFlags::cEMITS_DATA))
   {
-    FINROC_LOG_PRINT_TO(edges, loglvl, "Cannot connect to target port '", target.GetQualifiedName(), "', because this (source) port does not emit data.");
+    if (warn_if_impossible)
+    {
+      FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because this (source) port does not emit data.");
+    }
     return false;
   }
 
   if (!target.GetFlag(tPortFlags::cACCEPTS_DATA))
   {
-    FINROC_LOG_PRINT_TO(edges, loglvl, "Cannot connect to target port '", target.GetQualifiedName(), "', because it does not accept data.");
+    if (warn_if_impossible)
+    {
+      FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because it does not accept data.");
+    }
     return false;
   }
 
   if (!data_type.IsConvertibleTo(target.data_type))
   {
-    FINROC_LOG_PRINT_TO(edges, loglvl, "Cannot connect to target port '", target.GetQualifiedName(), "', because data types are incompatible ('",
-                        GetDataType().GetName(), "' and '", target.GetDataType().GetName(), "').");
+    if (warn_if_impossible)
+    {
+      FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because data types are incompatible ('", GetDataType().GetName(), "' and '", target.GetDataType().GetName(), "').");
+    }
     return false;
   }
   return true;
@@ -513,11 +613,11 @@ void tAbstractPort::PrintNotReadyMessage(const char* extra_message)
 {
   if (IsDeleted())
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_DEBUG, "Port is about to be deleted. ", extra_message, " (This may happen occasionally due to non-blocking nature)");
+    FINROC_LOG_PRINT(DEBUG, "Port is about to be deleted. ", extra_message, " (This may happen occasionally due to non-blocking nature)");
   }
   else
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Port has not been initialized yet and thus cannot be used. Fix your application. ", extra_message);
+    FINROC_LOG_PRINT(WARNING, "Port has not been initialized yet and thus cannot be used. Fix your application. ", extra_message);
   }
 }
 
@@ -581,7 +681,7 @@ bool tAbstractPort::PropagateStrategy(tAbstractPort* push_wanter, tAbstractPort*
     {
       if (IsReady() && push_wanter->IsReady() && (!GetFlag(tPortFlags::cNO_INITIAL_PUSHING)) && (!push_wanter->GetFlag(tPortFlags::cNO_INITIAL_PUSHING)))
       {
-        FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial push from ", GetQualifiedName(), " to ", push_wanter->GetQualifiedName());
+        FINROC_LOG_PRINT_TO(initial_pushes, DEBUG_VERBOSE_1, "Performing initial push from ", GetQualifiedName(), " to ", push_wanter->GetQualifiedName());
         InitialPushTo(*push_wanter, false);
       }
       push_wanter = NULL;
@@ -718,7 +818,7 @@ void tAbstractPort::SetMaxQueueLength(int queue_length)
 {
   if (!GetFlag(tPortFlags::cHAS_QUEUE))
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "warning: tried to set queue length on port without queue - ignoring");
+    FINROC_LOG_PRINT(WARNING, "warning: tried to set queue length on port without queue - ignoring");
     return;
   }
   {
@@ -777,7 +877,7 @@ void tAbstractPort::SetReversePushStrategy(bool push)
         tAbstractPort* ap = it->Get(i);
         if (ap != NULL && ap->IsReady())
         {
-          FINROC_LOG_PRINT_TO(initial_pushes, rrlib::logging::eLL_DEBUG_VERBOSE_1, "Performing initial reverse push from ", ap->GetQualifiedName(), " to ", GetQualifiedName());
+          FINROC_LOG_PRINT_TO(initial_pushes, DEBUG_VERBOSE_1, "Performing initial reverse push from ", ap->GetQualifiedName(), " to ", GetQualifiedName());
           ap->InitialPushTo(*this, true);
           break;
         }

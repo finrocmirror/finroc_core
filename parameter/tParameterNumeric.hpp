@@ -39,7 +39,7 @@ void tParameterNumeric<T>::Set(T v)
   std::string error = (static_cast<tCCPortBase*>(this->wrapped))->BrowserPublishRaw(cb);
   if (error.size() > 0)
   {
-    FINROC_LOG_PRINT(rrlib::logging::eLL_WARNING, "Could not set value: ", error);
+    FINROC_LOG_PRINT(WARNING, "Could not set value: ", error);
   }
   cache->current_value = v;
 }

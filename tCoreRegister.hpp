@@ -64,7 +64,7 @@ int tCoreRegister<T>::Add(const T& elem)
 
   if (elem_count >= cMAX_ELEMENTS)
   {
-    FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_ERROR, "Cannot create any more elements, because the core register is full (", elem_count, " elements limit).");
+    FINROC_LOG_PRINT_STATIC(ERROR, "Cannot create any more elements, because the core register is full (", elem_count, " elements limit).");
     throw util::tRuntimeException("Register full", CODE_LOCATION_MACRO);
   }
 
@@ -150,7 +150,7 @@ void tCoreRegister<T>::SetMaximumNumberOfElements(int max_elements)
 {
   if (register_created)
   {
-    FINROC_LOG_PRINT_STATIC(rrlib::logging::eLL_ERROR, "Cannot change core register capacity after one was created.");
+    FINROC_LOG_PRINT_STATIC(ERROR, "Cannot change core register capacity after one was created.");
     return;
   }
 
@@ -169,7 +169,7 @@ void tCoreRegister<T>::SetMaximumNumberOfElements(int max_elements)
   cELEM_INDEX_MASK = (1 << cUID_SHIFT) - 1;
   cELEM_UID_MASK = 0x7FFFFFFF & (~cELEM_INDEX_MASK);
 
-  FINROC_LOG_PRINTF_STATIC(rrlib::logging::eLL_DEBUG, "Changed maximum number of elements: %d (uid shift: %d, index mask: 0x%X, uid mask: 0x%X, max uid: 0x%X)", cMAX_ELEMENTS, cUID_SHIFT, cELEM_INDEX_MASK, cELEM_UID_MASK, cMAX_UID);
+  FINROC_LOG_PRINTF_STATIC(DEBUG, "Changed maximum number of elements: %d (uid shift: %d, index mask: 0x%X, uid mask: 0x%X, max uid: 0x%X)", cMAX_ELEMENTS, cUID_SHIFT, cELEM_INDEX_MASK, cELEM_UID_MASK, cMAX_UID);
 }
 
 } // namespace finroc

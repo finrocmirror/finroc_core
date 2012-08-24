@@ -37,7 +37,7 @@ class tRPCPortFactory : public tPortFactory
   virtual tAbstractPort& CreatePort(const std::string& port_name, tFrameworkElement& parent, const rrlib::rtti::tDataTypeBase& dt, uint flags)
   {
     assert(tFinrocTypeInfo::IsMethodType(dt));
-    const int keep_flags = 1 & (~tPortFlags::cEMITS_DATA) & (~tPortFlags::cACCEPTS_DATA) & (~tPortFlags::cMAY_ACCEPT_REVERSE_DATA) & (~tPortFlags::cIS_OUTPUT_PORT);
+    const uint keep_flags = 0xFFFFFFFF & (~tPortFlags::cEMITS_DATA) & (~tPortFlags::cACCEPTS_DATA) & (~tPortFlags::cMAY_ACCEPT_REVERSE_DATA);
     return *(new tInterfacePort(port_name, &parent, dt, tInterfacePort::eRouting, flags & keep_flags));
   }
 };
