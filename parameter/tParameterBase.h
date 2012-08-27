@@ -48,6 +48,13 @@ class tParameterBase : public tPort<T>
 {
   typedef typename tPort<T>::tPortBaseType tPortBaseType;
 
+  static tPortCreationInfo<T> CreatePortCreationInfo()
+  {
+    tPortCreationInfo<T> pci;
+    pci.flags = tPortFlags::cINPUT_PORT;
+    return pci;
+  }
+
   template<typename ... ARGS>
   static tPortCreationInfo<T> CreatePortCreationInfo(const ARGS&... args)
   {
