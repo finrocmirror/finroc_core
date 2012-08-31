@@ -102,14 +102,15 @@ void tModuleBase::tParameterChangeDetector::PortChanged(tAbstractPort& origin, c
 bool tModuleBase::ProcessChangedFlags(tFrameworkElement& port_group)
 {
   bool any_changed = false;
-  tChildIterator ci(port_group, this->IsReady());
-  tAbstractPort* ap = NULL;
-  while ((ap = ci.NextPort()) != NULL)
+  for (auto it = port_group.ChildPortsBegin(); it != port_group.ChildPortsEnd(); ++it)
   {
-    bool changed = ap->HasChanged();
-    ap->ResetChanged();
-    any_changed |= changed;
-    ap->SetCustomChangedFlag(changed);
+    if (it->IsReady() || (!this->IsReady()))
+    {
+      bool changed = it->HasChanged();
+      it->ResetChanged();
+      any_changed |= changed;
+      it->SetCustomChangedFlag(changed);
+    }
   }
   return any_changed;
 }

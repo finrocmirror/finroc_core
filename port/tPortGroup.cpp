@@ -34,15 +34,14 @@ tPortGroup::tPortGroup(tFrameworkElement* parent, const util::tString& name, uin
 {
 }
 
-void tPortGroup::ConnectImpl(tPortGroup* group, const util::tString& group_link, bool create_missing_ports, tAbstractPort* start_with, int count, const util::tString& port_prefix, const util::tString& other_port_prefix)
+void tPortGroup::ConnectImpl(tPortGroup* other_group, const util::tString& group_link, bool create_missing_ports, tAbstractPort* start_with, int count, const util::tString& port_prefix, const util::tString& other_port_prefix)
 {
   int org_count = count;
-  tChildIterator ci(*this, false);
-  tAbstractPort* p = NULL;
-  while ((p = ci.NextPort()) != NULL)
+  for (auto it = ChildPortsBegin(); it != ChildPortsEnd(); ++it)
   {
-    util::tString name(p->GetName());
-    if (p == start_with)
+    tAbstractPort& child_port = *it;
+    util::tString name(child_port.GetName());
+    if (&child_port == start_with)
     {
       start_with = NULL;
     }
@@ -58,27 +57,26 @@ void tPortGroup::ConnectImpl(tPortGroup* group, const util::tString& group_link,
     name = name.substr(port_prefix.length());
 
     // connect-function specific part
-    if (group)
+    if (other_group)
     {
-      tFrameworkElement* child = group->GetChild(other_port_prefix + name);
-      if (child && child->IsPort())
+      tFrameworkElement* other_child_port = other_group->GetChild(other_port_prefix + name);
+      if (other_child_port && other_child_port->IsPort())
       {
-        p->ConnectTo(static_cast<tAbstractPort&>(*child));
+        child_port.ConnectTo(static_cast<tAbstractPort&>(*other_child_port));
       }
       else if (create_missing_ports)
       {
-        child = group->CreatePort(other_port_prefix + name, p->GetDataType(), 0);
-        p->ConnectTo(static_cast<tAbstractPort&>(*child));
+        other_child_port = other_group->CreatePort(other_port_prefix + name, child_port.GetDataType(), 0);
+        child_port.ConnectTo(static_cast<tAbstractPort&>(*other_child_port));
       }
     }
     else if (group_link.length() > 0)
     {
-      p->ConnectTo(group_link + "/" + other_port_prefix + name);
+      child_port.ConnectTo(group_link + "/" + other_port_prefix + name);
     }
     // connect-function specific part end
-
   }
-  if (start_with != NULL)
+  if (start_with)
   {
     FINROC_LOG_PRINT(WARNING, "Port ", start_with->GetQualifiedName(), " no child of ", this->GetQualifiedName(), ". Did not connect anything.");
   }
@@ -94,12 +92,7 @@ tAbstractPort* tPortGroup::CreatePort(const util::tString& name, rrlib::rtti::tD
 
   tAbstractPort* ap = NULL;
   ap = &tFinrocTypeInfo::GetPortFactory(type).CreatePort(name, *this, type, default_port_flags | extra_flags);
-  if (ap != NULL)
-  {
-    ap->Init();
-  }
-
-  if (ap != NULL)
+  if (ap)
   {
     ap->Init();
   }
@@ -108,11 +101,9 @@ tAbstractPort* tPortGroup::CreatePort(const util::tString& name, rrlib::rtti::tD
 
 void tPortGroup::DisconnectAll(bool incoming, bool outgoing, tAbstractPort* start_with, int count)
 {
-  tChildIterator ci(*this, false);
-  tAbstractPort* p = NULL;
-  while ((p = ci.NextPort()) != NULL)
+  for (auto it = ChildPortsBegin(); it != ChildPortsEnd(); ++it)
   {
-    if (p == start_with)
+    if (&(*it) == start_with)
     {
       start_with = NULL;
     }
@@ -125,26 +116,22 @@ void tPortGroup::DisconnectAll(bool incoming, bool outgoing, tAbstractPort* star
       return;
     }
     count--;
-    p->DisconnectAll(incoming, outgoing);
+    it->DisconnectAll(incoming, outgoing);
   }
 }
 
 tAbstractPort& tPortGroup::operator[](size_t index)
 {
-  tChildIterator ci(*this, false);
-  if (index)
+  auto it = ChildPortsBegin();
+  for (size_t i = 0; i < index; i++)
   {
-    for (size_t i = 0; i < index; i++)
-    {
-      ci.NextPort();
-    }
+    ++it;
   }
-  tAbstractPort* result = ci.NextPort();
-  if (!result)
+  if (it == ChildPortsEnd())
   {
     throw util::tException("Index out of bounds", CODE_LOCATION_MACRO);
   }
-  return *result;
+  return *it;
 }
 
 } // namespace finroc

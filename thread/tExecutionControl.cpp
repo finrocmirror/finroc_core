@@ -20,7 +20,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "core/tFrameworkElement.h"
-#include "core/tFrameworkElementTreeFilter.h"
 #include "core/thread/tExecutionControl.h"
 
 namespace finroc
@@ -44,15 +43,14 @@ void tExecutionControl::FindAll(std::vector<tExecutionControl*>& result, tFramew
 {
   if (fe.IsReady())
   {
-    tFrameworkElementTreeFilter filter;
-    filter.TraverseElementTree(fe, [&](tFrameworkElement & element)
+    for (auto it = fe.SubElementsBegin(true); it != fe.SubElementsEnd(); ++it)
     {
-      tExecutionControl* ec = element.GetAnnotation<tExecutionControl>();
+      tExecutionControl* ec = it->GetAnnotation<tExecutionControl>();
       if (ec)
       {
         result.push_back(ec);
       }
-    });
+    }
   }
 }
 

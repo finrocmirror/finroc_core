@@ -46,8 +46,6 @@ tThreadContainerThread::tThreadContainerThread(tFrameworkElement& thread_contain
   non_sensor_tasks(),
   trace(),
   trace_back(),
-  filter(),
-  tmp(),
   last_cycle_execution_time(last_cycle_execution_time),
   current_task(NULL)
 {
@@ -82,13 +80,13 @@ void tThreadContainerThread::MainLoopCallback()
       non_sensor_tasks.Clear();
       schedule.Clear();
 
-      filter.TraverseElementTree(this->thread_container, tmp, [&](tFrameworkElement & fe)
+      for (auto it = thread_container.SubElementsBegin(true); it != thread_container.SubElementsEnd(); ++it)
       {
-        if (tExecutionControl::Find(fe)->GetAnnotated() != &thread_container)    // don't handle elements in nested thread containers
+        if ((!it->IsReady()) || tExecutionControl::Find(*it)->GetAnnotated() != &thread_container)    // don't handle elements in nested thread containers
         {
-          return;
+          continue;
         }
-        tFinrocAnnotation* ann = fe.GetAnnotation(tPeriodicFrameworkElementTask::cTYPE);
+        tFinrocAnnotation* ann = it->GetAnnotation(tPeriodicFrameworkElementTask::cTYPE);
         if (ann)
         {
           tPeriodicFrameworkElementTask* task = static_cast<tPeriodicFrameworkElementTask*>(ann);
@@ -103,7 +101,7 @@ void tThreadContainerThread::MainLoopCallback()
             non_sensor_tasks.Add(task);
           }
         }
-      });
+      }
 
       tasks.AddAll(non_sensor_tasks);
 
@@ -287,15 +285,15 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask& task, 
             TraceOutgoing(task, *ea);
           }
         }
-        const uint cFLAGS_TO_CHECK = tCoreFlags::cREADY | tCoreFlags::cEDGE_AGGREGATOR | tEdgeAggregator::cIS_INTERFACE;
-        tFrameworkElement::tChildIterator ci(*parent, cFLAGS_TO_CHECK, cFLAGS_TO_CHECK);
-        tFrameworkElement* other_if = NULL;
-        while ((other_if = ci.Next()) != NULL)
+        for (auto it = parent->ChildrenBegin(); it != parent->ChildrenEnd(); ++it)
         {
-          tEdgeAggregator* ea = static_cast<tEdgeAggregator*>(other_if);
-          if (!trace.Contains(ea))
+          if (it->GetFlag(tCoreFlags::cREADY) && it->GetFlag(tCoreFlags::cEDGE_AGGREGATOR) && it->GetFlag(tEdgeAggregator::cIS_INTERFACE))
           {
-            TraceOutgoing(task, *ea);
+            tEdgeAggregator& ea = static_cast<tEdgeAggregator&>(*it);
+            if (!trace.Contains(&ea))
+            {
+              TraceOutgoing(task, ea);
+            }
           }
         }
       }

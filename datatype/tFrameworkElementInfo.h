@@ -30,7 +30,6 @@
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tEdgeAggregator.h"
-#include "core/tFrameworkElementTreeFilter.h"
 
 namespace finroc
 {
@@ -229,13 +228,16 @@ public:
    *
    * \param fe Framework element to serialize info of
    * \param op_code Typically ADD, CHANGE or DELETE
-   * \param tp Packet to serialize to
-   * \param element_filter Element filter for client
+   * \param stream Stream to serialize to
+   * \param serialize_hierarchy Serialize hierarchy? (parents etc., otherwise elements will be serialized 'flat' with qualified names - typical for port-only filters)
+   * \param serialize_connections Serialize connection info? (outgoing edges for every port)
+   * \param send_tags Send framework element tags?
    * \param tmp Temporary string buffer
+   * \param element_filter Element filtering function (only relevant if hierarchy is serialized)
    *
    * (call in runtime-registry synchronized context only)
    */
-  static void SerializeFrameworkElement(tFrameworkElement& fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, const tFrameworkElementTreeFilter& element_filter, std::string& tmp);
+  static void SerializeFrameworkElement(tFrameworkElement& fe, int8 op_code, rrlib::serialization::tOutputStream& stream, bool serialize_hierarchy, bool serialize_connections, bool send_tags, std::string& tmp, const std::function<bool (const tFrameworkElement&)>& element_filter = tFrameworkElement::tIteratorFilterNone::Accept);
 
   virtual const util::tString ToString() const;
 

@@ -25,6 +25,7 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
+#include <array>
 
 #include "core/tCoreFlags.h"
 #include "core/tAnnotatable.h"
@@ -78,8 +79,6 @@ class tFrameworkElement : public tAnnotatable, public rrlib::thread::tRecursiveM
 public:
 
   /*!
-   * \author Max Reichardt
-   *
    * Framework elements are inserted as children of other framework element using this connector class.
    * Ratio: this allows links in the tree
    *
@@ -110,10 +109,6 @@ public:
       parent(NULL),
       next(NULL)
     {}
-
-    virtual ~tLink()
-    {
-    }
 
     /*!
      * \return Element that this link points to
@@ -149,13 +144,35 @@ public:
 
   };
 
-public:
-  class tChildIterator; // inner class forward declaration
+  /*! Iterator filter that accepts all elements */
+  struct tIteratorFilterNone
+  {
+    static bool Accept(const tFrameworkElement& fe)
+    {
+      return true;
+    }
+  };
+
+  /*! Iterator filter that accepts only ports */
+  struct tIteratorFilterPorts
+  {
+    static bool Accept(const tFrameworkElement& fe)
+    {
+      return fe.IsPort();
+    }
+  };
+
+  // Iterator types
+
+  template <typename ELEMENT, typename FILTER, bool INCLUDE_LINKS = true>
+  class tChildIteratorImpl;
+  class tSubElementIterator;
+  typedef tChildIteratorImpl<tFrameworkElement, tIteratorFilterNone> tChildIterator;
+  typedef tChildIteratorImpl<tAbstractPort, tIteratorFilterPorts> tChildPortIterator;
 
 private:
 
   friend class util::tGarbageDeleter;
-  friend class tChildIterator;
   friend class tRuntimeEnvironment;
   friend class tFinstructableGroup;
 
@@ -446,6 +463,58 @@ public:
   inline size_t ChildEntryCount() const
   {
     return children.Size();
+  }
+
+  /*!
+   * \return An iterator to iterate over this node's child ports. Initially points to the first port.
+   *
+   * Typically used in this way (fe is a tFrameworkElement reference):
+   *
+   *   for (auto it = fe.ChildPortsBegin(); it < fe.ChildPortsEnd(); ++it)
+   *   {
+   *     if (it->IsReady())
+   *     {
+   *       ...
+   *     }
+   *   }
+   */
+  inline tChildPortIterator ChildPortsBegin() const
+  {
+    return tChildPortIterator(*children.GetIterable());
+  }
+
+  /*!
+   * \return An iterator to iterate over this node's child ports pointing to the past-the-end port.
+   */
+  inline tChildPortIterator ChildPortsEnd() const
+  {
+    return tChildPortIterator();
+  }
+
+  /*!
+   * \return An iterator to iterate over this node's children. Initially points to the first element.
+   *
+   * Typically used in this way (fe is a tFrameworkElement reference):
+   *
+   *   for (auto it = fe.ChildrenBegin(); it < fe.ChildrenEnd(); ++it)
+   *   {
+   *     if (it->IsReady())
+   *     {
+   *       ...
+   *     }
+   *   }
+   */
+  inline tChildIterator ChildrenBegin() const
+  {
+    return tChildIterator(*children.GetIterable());
+  }
+
+  /*!
+   * \return An iterator to iterate over this node's children pointing to the past-the-end element.
+   */
+  inline tChildIterator ChildrenEnd() const
+  {
+    return tChildIterator();
   }
 
   /*!
@@ -822,6 +891,33 @@ public:
     }
   }
 
+  /*!
+   * \param include_this Include this element (root of the subtree) in iteration?
+   * \return An iterator to iterate over each element of the complete subtree below this framework element. Initially points to the first direct child.
+   *
+   * Typically used in this way (fe is a tFrameworkElement reference):
+   *
+   *   for (auto it = fe.SubElementsBegin(); it < fe.SubElementsEnd(); ++it)
+   *   {
+   *     if (it->IsReady())
+   *     {
+   *       ...
+   *     }
+   *   }
+   */
+  inline tSubElementIterator SubElementsBegin(bool include_this = false)
+  {
+    return tSubElementIterator(*this, include_this);
+  }
+
+  /*!
+   * \return An iterator to iterate over each element of the complete subtree below this framework element pointing to the past-the-end element.
+   */
+  inline tSubElementIterator SubElementsEnd() const
+  {
+    return tSubElementIterator();
+  }
+
   virtual const util::tString ToString() const
   {
     return GetName();
@@ -835,92 +931,193 @@ public:
    */
   void WriteName(rrlib::serialization::tOutputStream& os, int i) const;
 
-public:
 
   /*!
-   * \author Max Reichardt
-   *
-   * Used to iterate over a framework element's children.
+   * Used to iterate over a framework element's children (Input Operator)
    */
-  class tChildIterator
+  template <typename ELEMENT, typename FILTER, bool INCLUDE_LINKS>
+  class tChildIteratorImpl : public std::iterator<std::forward_iterator_tag, ELEMENT, size_t>
   {
   private:
 
-    // next element to check (in array)
-    tFrameworkElement::tLink* const * next_elem;
+    friend class tFrameworkElement;
+    typedef std::iterator<std::forward_iterator_tag, ELEMENT, size_t> tBase;
 
-    // last element in array
+    /*! current element - NULL if last entry was passed */
+    tFrameworkElement::tLink* const * current_element;
+
+    /*! last element in array */
     tFrameworkElement::tLink* const * last;
 
-    /*! Relevant flags */
-    uint flags;
-
-    /*! Expected result when ANDing with flags */
-    uint result;
-
-  protected:
-
-    /*! FrameworkElement that is currently iterated over */
-    const tFrameworkElement* cur_parent;
+    /*!
+     * \param array Array to iterate over
+     */
+    inline tChildIteratorImpl(util::tArrayWrapper<tLink*>& array) :
+      current_element(array.GetPointer() == NULL ? NULL : array.GetPointer() - 1),
+      last((array.GetPointer() + array.Size()) - 1)
+    {
+      operator++();
+    }
 
   public:
 
     /*!
-     * \param parent Framework element over whose child to iterate
-     * \param only_ready_elements Include only children that are fully initialized?
+     * Constructor for end iterator
      */
-    tChildIterator(const tFrameworkElement& parent, bool only_ready_elements = true);
+    inline tChildIteratorImpl() : current_element(NULL), last(NULL) {}
 
-    /*!
-     * \param parent Framework element over whose child to iterate
-     * \param flags Relevant flags
-     * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
-     * \param only_ready_elements Include only children that are fully initialized?
-     */
-    tChildIterator(const tFrameworkElement& parent, uint flags, uint result, bool only_ready_elements = true);
+    // Operators needed for C++ Input Iterator
 
-    /*!
-     * \return Next child - or null if there are no more children left
-     */
-    tFrameworkElement* Next();
-
-    /*!
-     * \return Next child that is a port - or null if there are no more children left
-     */
-    tAbstractPort* NextPort();
-
-    /*!
-     * Use iterator again on same framework element
-     */
-    inline void Reset()
+    inline typename tBase::reference operator*() const
     {
-      Reset(*cur_parent);
+      assert(current_element);
+      return static_cast<ELEMENT&>((*current_element)->GetChild());
+    }
+    inline typename tBase::pointer operator->() const
+    {
+      return &(operator*());
     }
 
-    /*!
-     * Use Iterator for different framework element
-     * (or same and reset)
-     *
-     * \param parent Framework element over whose child to iterate
-     * \param flags Relevant flags
-     * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
-     * \param only_ready_elements Include only children that are fully initialized?
-     */
-    inline void Reset(const tFrameworkElement& parent, bool only_ready_elements = true)
+    inline tChildIteratorImpl& operator++()
     {
-      Reset(parent, 0, 0, only_ready_elements);
+      if (current_element)
+      {
+        current_element++;
+        while (current_element <= last)
+        {
+          tFrameworkElement::tLink* current_link = *current_element;
+          if (current_link && FILTER::Accept((*current_element)->GetChild()) && (INCLUDE_LINKS || current_link->IsPrimaryLink()))
+          {
+            return *this;
+          }
+          current_element++;
+        }
+
+        current_element = NULL;
+      }
+      return *this;
+    }
+    inline tChildIteratorImpl operator ++ (int)
+    {
+      tChildIteratorImpl temp(*this);
+      operator++();
+      return temp;
     }
 
+    inline const bool operator == (const tChildIteratorImpl &other) const
+    {
+      return current_element == other.current_element;
+    }
+    inline const bool operator != (const tChildIteratorImpl &other) const
+    {
+      return !(*this == other);
+    }
+  };
+
+
+  /*!
+   * Used to iterate over each element of the complete subtree below a framework element (Input Operator)
+   * Ignores links.
+   */
+  class tSubElementIterator : public std::iterator<std::forward_iterator_tag, tFrameworkElement, size_t>
+  {
+  private:
+
+    friend class tFrameworkElement;
+    typedef tChildIteratorImpl<tFrameworkElement, tIteratorFilterNone, false> tNoLinkChildIterator;
+
+    /*! Maximum tree depth the iterator implementation can handle */
+    const static size_t cMAX_TREE_DEPTH = 100;
+
+    /*! Array with current iterator in each tree level */
+    std::array<tNoLinkChildIterator, cMAX_TREE_DEPTH> iterator_stack;
+
+    /*! Current depth in tree */
+    size_t current_depth;
+
+    /*! Set, if currently at root element */
+    tFrameworkElement* at_root;
+
     /*!
-     * Use Iterator for different framework element
-     * (or same and reset)
-     *
-     * \param parent Framework element over whose child to iterate
-     * \param flags Relevant flags
-     * \param result Result that ANDing flags with flags must bring (allows specifying that certain flags should not be considered)
-     * \param only_ready_elements Include only children that are fully initialized?
+     * \param framework_element Framework element over whose subtree to iterate
+     * \param include_root Include root element in iteration
      */
-    void Reset(const tFrameworkElement& parent, uint flags, uint result, bool only_ready_elements = true);
+    inline tSubElementIterator(tFrameworkElement& framework_element, bool include_root) :
+      current_depth(0),
+      at_root(include_root ? &framework_element : NULL)
+    {
+      if (!include_root)
+      {
+        // first element
+        iterator_stack[0] = tNoLinkChildIterator(*framework_element.children.GetIterable());
+        if (iterator_stack[0] != tNoLinkChildIterator())
+        {
+          current_depth = 1;
+        }
+      }
+    }
+
+  public:
+
+    /*!
+     * Constructor for end iterator
+     */
+    inline tSubElementIterator() : current_depth(0), at_root(NULL) {}
+
+    // Operators needed for C++ Input Iterator
+
+    inline reference operator*() const
+    {
+      return at_root ? *at_root : *iterator_stack[current_depth - 1];
+    }
+    inline pointer operator->() const
+    {
+      return &(operator*());
+    }
+
+    inline tSubElementIterator& operator++()
+    {
+      if (current_depth || at_root)
+      {
+        tFrameworkElement& current_element = **this;
+        at_root = NULL;
+        iterator_stack[current_depth] = tNoLinkChildIterator(*current_element.children.GetIterable());
+        if (iterator_stack[current_depth] == tNoLinkChildIterator())
+        {
+          iterator_stack[current_depth - 1]++;
+          while (iterator_stack[current_depth - 1] == tNoLinkChildIterator())
+          {
+            current_depth--;
+            if (current_depth == 0)
+            {
+              return *this; // end
+            }
+            iterator_stack[current_depth - 1]++;
+          }
+        }
+        else
+        {
+          current_depth++;
+        }
+      }
+      return *this;
+    }
+
+    inline tSubElementIterator operator ++ (int)
+    {
+      tSubElementIterator temp(*this);
+      operator++();
+      return temp;
+    }
+
+    inline const bool operator == (const tSubElementIterator &other) const
+    {
+      return current_depth == other.current_depth && at_root == other.at_root && std::equal(other.iterator_stack.begin(), other.iterator_stack.end(), iterator_stack.begin());
+    }
+    inline const bool operator != (const tSubElementIterator &other) const
+    {
+      return !(*this == other);
+    }
   };
 
 };

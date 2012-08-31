@@ -22,6 +22,7 @@
 #include "core/datatype/tFrameworkElementInfo.h"
 #include "rrlib/serialization/serialization.h"
 #include "core/tFrameworkElement.h"
+#include "core/tFrameworkElementTags.h"
 #include "core/port/tAbstractPort.h"
 
 namespace finroc
@@ -103,6 +104,13 @@ void tFrameworkElementInfo::Deserialize(rrlib::serialization::tInputStream& is, 
       }
     }
   }
+
+  // possibly read tags (we do not store them in C++)
+  if (is.ReadBoolean())
+  {
+    tFrameworkElementTags tags;
+    is >> tags;
+  }
 }
 
 uint tFrameworkElementInfo::FilterParentFlags(uint extra_flags)
@@ -142,31 +150,31 @@ void tFrameworkElementInfo::Reset()
   connections.Clear();
 }
 
-void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement& fe, int8 op_code_, rrlib::serialization::tOutputStream& tp, const tFrameworkElementTreeFilter& element_filter, std::string& tmp)
+void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement& fe, int8 op_code, rrlib::serialization::tOutputStream& os, bool serialize_hierarchy, bool serialize_connections, bool send_tags, std::string& tmp, const std::function<bool (const tFrameworkElement&)>& element_filter)
 {
-  tp.WriteByte(op_code_);  // write opcode (see base class)
+  os.WriteByte(op_code);  // write opcode (see base class)
 
   // write common info
-  tp.WriteInt(fe.GetHandle());
-  tp.WriteInt(fe.GetAllFlags());
-  if (op_code_ == tRuntimeListener::cREMOVE)
+  os.WriteInt(fe.GetHandle());
+  os.WriteInt(fe.GetAllFlags());
+  if (op_code == tRuntimeListener::cREMOVE)
   {
     return;
   }
   assert(!fe.IsDeleted());
   int cnt = fe.GetLinkCount();
-  tp.WriteBoolean(element_filter.IsPortOnlyFilter());
+  os.WriteBoolean(!serialize_hierarchy);
 
   // write links (only when creating element)
-  if (op_code_ == tRuntimeListener::cADD)
+  if (op_code == tRuntimeListener::cADD)
   {
-    if (element_filter.IsPortOnlyFilter())
+    if (!serialize_hierarchy)
     {
       for (int i = 0; i < cnt; i++)
       {
         bool unique = fe.GetQualifiedLink(tmp, i);
-        tp.WriteByte(1 | (unique ? tCoreFlags::cGLOBALLY_UNIQUE_LINK : 0));
-        tp.WriteString(tmp.substr(1));
+        os.WriteByte(1 | (unique ? tCoreFlags::cGLOBALLY_UNIQUE_LINK : 0));
+        os.WriteString(tmp.substr(1));
       }
     }
     else
@@ -175,20 +183,20 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement& fe, int
       {
         // we only serialize parents that target is interested in
         tFrameworkElement* parent = fe.GetParent(i);
-        if (element_filter.Accept(*parent, tmp))
+        if (element_filter(*parent))
         {
           // serialize 1 for another link - ORed with CoreFlags for parent LINK_ROOT and GLOBALLY_UNIQUE
-          tp.WriteByte(1 | (parent->GetAllFlags() & cPARENT_FLAGS_TO_STORE));
+          os.WriteByte(1 | (parent->GetAllFlags() & cPARENT_FLAGS_TO_STORE));
           if (parent->GetFlag(tCoreFlags::cEDGE_AGGREGATOR))
           {
-            tp.WriteByte((parent->GetAllFlags() & tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS) >> 8);
+            os.WriteByte((parent->GetAllFlags() & tEdgeAggregator::cALL_EDGE_AGGREGATOR_FLAGS) >> 8);
           }
-          fe.WriteName(tp, i);
-          tp.WriteInt(parent->GetHandle());
+          fe.WriteName(os, i);
+          os.WriteInt(parent->GetHandle());
         }
       }
     }
-    tp.WriteByte(0);
+    os.WriteByte(0);
   }
 
   // possibly write port info
@@ -196,18 +204,33 @@ void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement& fe, int
   {
     tAbstractPort& port = static_cast<tAbstractPort&>(fe);
 
-    tp << port.GetDataType();
-    tp.WriteShort(port.GetStrategy());
-    tp.WriteShort(port.GetMinNetUpdateInterval());
+    os << port.GetDataType();
+    os.WriteShort(port.GetStrategy());
+    os.WriteShort(port.GetMinNetUpdateInterval());
 
-    if (element_filter.IsAcceptAllFilter())
+    if (serialize_connections)
     {
-      port.SerializeOutgoingConnections(tp);
+      port.SerializeOutgoingConnections(os);
     }
-    else if (!element_filter.IsPortOnlyFilter())
+    else if (serialize_hierarchy)
     {
-      tp.WriteByte(0);
+      os.WriteByte(0);
     }
+  }
+
+  // possibly send tags
+  if (send_tags)
+  {
+    tFrameworkElementTags* tags = fe.GetAnnotation<tFrameworkElementTags>();
+    os.WriteBoolean(tags);
+    if (tags)
+    {
+      os << (*tags);
+    }
+  }
+  else
+  {
+    os.WriteBoolean(false);
   }
 }
 

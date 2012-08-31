@@ -355,13 +355,11 @@ int main(int argc, char **argv)
   // Have any top-level framework elements containing threads already been created?
   // In this case, we won't create an extra thread container (finstructed part does not need one for example)
   std::vector<finroc::core::tFrameworkElement*> executables;
-  finroc::core::tFrameworkElement::tChildIterator ci(*runtime_environment, false);
-  finroc::core::tFrameworkElement* next = NULL;
-  while ((next = ci.Next()) != NULL)
+  for (auto it = runtime_environment->ChildrenBegin(); it != runtime_environment->ChildrenEnd(); ++it)
   {
-    if (next->GetAnnotation<finroc::core::tExecutionControl>() != NULL && (next->GetFlag(finroc::core::tCoreFlags::cFINSTRUCTABLE_GROUP) || next->GetFlag(finroc::core::tCoreFlags::cEDGE_AGGREGATOR)))
+    if (it->GetAnnotation<finroc::core::tExecutionControl>() && (it->GetFlag(finroc::core::tCoreFlags::cFINSTRUCTABLE_GROUP) || it->GetFlag(finroc::core::tCoreFlags::cEDGE_AGGREGATOR)))
     {
-      executables.push_back(next);
+      executables.push_back(&(*it));
     }
   }
 

@@ -27,7 +27,6 @@
 
 #include "core/parameter/tConfigFile.h"
 #include "core/tFrameworkElement.h"
-#include "core/tFrameworkElementTreeFilter.h"
 #include "core/tCoreFlags.h"
 #include "core/parameter/tParameterInfo.h"
 
@@ -43,7 +42,6 @@ util::tString tConfigFile::cXML_LEAF_NAME = "value";
 tConfigFile::tConfigFile(const util::tString& filename_) :
   wrapped(),
   filename(filename_),
-  temp_buffer(),
   active(true)
 {
   if (util::sFiles::FinrocFileExists(filename_))
@@ -69,7 +67,6 @@ tConfigFile::tConfigFile(const util::tString& filename_) :
 tConfigFile::tConfigFile() :
   wrapped(),
   filename(),
-  temp_buffer(),
   active(true)
 {
   wrapped.AddRootNode(cXML_BRANCH_NAME);
@@ -249,25 +246,24 @@ void tConfigFile::LoadParameterValues()
 void tConfigFile::LoadParameterValues(tFrameworkElement& fe)
 {
   rrlib::thread::tLock lock2(fe.GetRegistryLock());  // nothing should change while we're doing this
-  tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
-  fet.TraverseElementTree(fe, temp_buffer, [&](tFrameworkElement & fe)
+  for (auto it = fe.SubElementsBegin(true); it != fe.SubElementsEnd(); ++it)
   {
-    if (Find(fe) == this)    // Does element belong to this configuration file?
+    if (it->IsPort() && it->IsReady() && Find(*it) == this)    // Does element belong to this configuration file?
     {
-      tParameterInfo* pi = static_cast<tParameterInfo*>(fe.GetAnnotation(tParameterInfo::cTYPE));
+      tParameterInfo* pi = static_cast<tParameterInfo*>(it->GetAnnotation(tParameterInfo::cTYPE));
       if (pi)
       {
         try
         {
           pi->LoadValue();
         }
-        catch (const util::tException& e)
+        catch (const std::exception& e)
         {
           FINROC_LOG_PRINT_STATIC(ERROR, e);
         }
       }
     }
-  });
+  }
 }
 
 void tConfigFile::SaveFile()
@@ -277,25 +273,24 @@ void tConfigFile::SaveFile()
   assert(ann);
   {
     rrlib::thread::tLock lock2(ann->GetRegistryLock()); // nothing should change while we're doing this
-    tFrameworkElementTreeFilter fet(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
-    fet.TraverseElementTree(*ann, temp_buffer, [&](tFrameworkElement & fe)
+    for (auto it = ann->SubElementsBegin(true); it != ann->SubElementsEnd(); ++it)
     {
-      if (Find(fe) == this)    // Does element belong to this configuration file?
+      if (it->IsPort() && it->IsReady() && Find(*it) == this)    // Does element belong to this configuration file?
       {
-        tParameterInfo* pi = static_cast<tParameterInfo*>(fe.GetAnnotation(tParameterInfo::cTYPE));
+        tParameterInfo* pi = static_cast<tParameterInfo*>(it->GetAnnotation(tParameterInfo::cTYPE));
         if (pi)
         {
           try
           {
             pi->SaveValue();
           }
-          catch (const util::tException& e)
+          catch (const std::exception& e)
           {
             FINROC_LOG_PRINT_STATIC(ERROR, e);
           }
         }
       }
-    });
+    }
   }
 
   try
@@ -311,7 +306,7 @@ void tConfigFile::SaveFile()
     // write new tree to file
     wrapped.WriteToFile(save_to);
   }
-  catch (std::exception& e)
+  catch (const std::exception& e)
   {
     FINROC_LOG_PRINT(ERROR, e);
   }

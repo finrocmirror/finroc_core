@@ -38,7 +38,6 @@
 #include "core/plugin/sDynamicLoading.h"
 #include "core/plugin/runtime_construction_actions.h"
 #include "core/parameter/tConstructorParameters.h"
-#include "core/tFrameworkElementTreeFilter.h"
 #include "core/tLinkEdge.h"
 #include "core/parameter/tParameterInfo.h"
 #include "core/parameter/tConfigFile.h"
@@ -437,11 +436,13 @@ void tFinstructableGroup::SaveXml()
 
       // serialize edges
       link_tmp = GetQualifiedName() + "/";
-      tFrameworkElementTreeFilter filter(tCoreFlags::cSTATUS_FLAGS | tCoreFlags::cIS_PORT, tCoreFlags::cREADY | tCoreFlags::cPUBLISHED | tCoreFlags::cIS_PORT);
-      filter.TraverseElementTree(*this, [&](tFrameworkElement & fe)
+      for (auto it = SubElementsBegin(); it != SubElementsEnd(); ++it)
       {
-        assert(fe.IsPort());
-        tAbstractPort& ap = static_cast<tAbstractPort&>(fe);
+        if ((!it->IsPort()) || (!it->IsReady()))
+        {
+          continue;
+        }
+        tAbstractPort& ap = static_cast<tAbstractPort&>(*it);
 
         // first pass
         ap.GetConnectionPartners(connect_tmp, true, false, true);  // only outgoing edges => we don't get any edges double
@@ -508,13 +509,16 @@ void tFinstructableGroup::SaveXml()
             }
           }
         }
-      });
+      }
 
       // Save parameter config entries
-      filter.TraverseElementTree(*this, [&](tFrameworkElement & fe)
+      for (auto it = SubElementsBegin(); it != SubElementsEnd(); ++it)
       {
-        assert(fe.IsPort());
-        tAbstractPort& ap = static_cast<tAbstractPort&>(fe);
+        if ((!it->IsPort()) || (!it->IsReady()))
+        {
+          continue;
+        }
+        tAbstractPort& ap = static_cast<tAbstractPort&>(*it);
 
         // second pass?
         bool outermostGroup = this->GetParent() == tRuntimeEnvironment::GetInstance();
@@ -539,13 +543,13 @@ void tFinstructableGroup::SaveXml()
           config.SetAttribute("link", GetEdgeLink(ap));
           info->Serialize(config, true, outermostGroup);
         }
-      });
+      }
 
       // add dependencies
       if (dependencies_tmp.size() > 0)
       {
         std::stringstream s;
-        for (std::set<std::string>::iterator it = dependencies_tmp.begin(); it != dependencies_tmp.end(); it++)
+        for (auto it = dependencies_tmp.begin(); it != dependencies_tmp.end(); ++it)
         {
           if (it != dependencies_tmp.begin())
           {
@@ -610,17 +614,15 @@ void tFinstructableGroup::ScanForCommandLineArgsHelper(std::vector<util::tString
 
 void tFinstructableGroup::SerializeChildren(rrlib::xml::tNode& node, tFrameworkElement& current)
 {
-  tFrameworkElement::tChildIterator ci(current);
-  tFrameworkElement* fe = NULL;
-  while ((fe = ci.Next()) != NULL)
+  for (auto child = current.ChildrenBegin(); child != current.ChildrenEnd(); ++child)
   {
-    tStaticParameterList* spl = static_cast<tStaticParameterList*>(fe->GetAnnotation(tStaticParameterList::cTYPE));
-    tConstructorParameters* cps = static_cast<tConstructorParameters*>(fe->GetAnnotation(tConstructorParameters::cTYPE));
-    if (fe->IsReady() && fe->GetFlag(tCoreFlags::cFINSTRUCTED))
+    tStaticParameterList* spl = static_cast<tStaticParameterList*>(child->GetAnnotation(tStaticParameterList::cTYPE));
+    tConstructorParameters* cps = static_cast<tConstructorParameters*>(child->GetAnnotation(tConstructorParameters::cTYPE));
+    if (child->IsReady() && child->GetFlag(tCoreFlags::cFINSTRUCTED))
     {
       // serialize framework element
       rrlib::xml::tNode& n = node.AddChildNode("element");
-      n.SetAttribute("name", fe->GetCName());
+      n.SetAttribute("name", child->GetCName());
       tCreateFrameworkElementAction* cma = runtime_construction::GetConstructibleElements()[spl->GetCreateAction()];
       n.SetAttribute("group", cma->GetModuleGroup());
       if (boost::ends_with(cma->GetModuleGroup(), ".so"))
@@ -640,9 +642,9 @@ void tFinstructableGroup::SerializeChildren(rrlib::xml::tNode& node, tFrameworkE
       }
 
       // serialize its children
-      if (!fe->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP))
+      if (!child->GetFlag(tCoreFlags::cFINSTRUCTABLE_GROUP))
       {
-        SerializeChildren(n, *fe);
+        SerializeChildren(n, *child);
       }
     }
   }

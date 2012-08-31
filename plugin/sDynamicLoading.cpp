@@ -194,7 +194,7 @@ std::vector<std::string> sDynamicLoading::GetLoadableFinrocLibraries()
   std::set<std::string> available = GetAvailableFinrocLibraries();
   std::set<std::string> loaded = GetLoadedFinrocLibraries();
   std::set<std::string>::iterator it;
-  for (it = available.begin(); it != available.end(); it++)
+  for (it = available.begin(); it != available.end(); ++it)
   {
     if (loaded.find(*it) == loaded.end())
     {

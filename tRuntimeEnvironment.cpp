@@ -73,13 +73,11 @@ tRuntimeEnvironment::~tRuntimeEnvironment()
   rrlib::thread::tThread::StopThreads();
 
   // delete all children - (runtime settings last)
-  tFrameworkElement::tChildIterator ci(*this, false);
-  tFrameworkElement* next = NULL;
-  while ((next = ci.Next()) != NULL)
+  for (auto it = this->ChildrenBegin(); it != this->ChildrenEnd(); ++it)
   {
-    if (next != tRuntimeSettings::GetInstance())
+    if (&(*it) != tRuntimeSettings::GetInstance())
     {
-      next->ManagedDelete();
+      it->ManagedDelete();
     }
   }
   tRuntimeSettings::GetInstance()->ManagedDelete();

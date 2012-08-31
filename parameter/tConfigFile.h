@@ -59,9 +59,6 @@ private:
   /*! Leaf name in XML */
   static util::tString cXML_LEAF_NAME;
 
-  /*! Temp buffer - only used in synchronized context */
-  std::string temp_buffer;
-
   /*! Is config file active? (false when config file is deleted via finstruct) */
   bool active;
 

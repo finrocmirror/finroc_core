@@ -28,7 +28,6 @@
 #include "core/port/tAbstractPort.h"
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeEnvironment.h"
-#include "core/tFrameworkElementTreeFilter.h"
 #include "core/thread/tExecutionControl.h"
 #include "core/plugin/tCreateFrameworkElementAction.h"
 #include "core/plugin/tPlugins.h"
@@ -212,28 +211,27 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
       co.WriteBoolean(true);
       co.WriteInt((static_cast<core::tFrameworkElement*>(cf->GetAnnotated()))->GetHandle());
       cf->Serialize(co);
-      tFrameworkElementTreeFilter filter;
-      filter.TraverseElementTree(*fe, [&](tFrameworkElement & fe)
+      for (auto it = fe->SubElementsBegin(true); it != fe->SubElementsEnd(); ++it)
       {
-        tConfigFile* fe_config = static_cast<tConfigFile*>(fe.GetAnnotation(tConfigFile::cTYPE));
+        tConfigFile* fe_config = static_cast<tConfigFile*>(it->GetAnnotation(tConfigFile::cTYPE));
         if (fe_config)
         {
           co.WriteByte(1);
-          co.WriteInt(fe.GetHandle());
+          co.WriteInt(it->GetHandle());
           co.WriteString(fe_config->GetFilename());
           co.WriteBoolean(fe_config->IsActive());
         }
         else
         {
-          tParameterInfo* pi = static_cast<tParameterInfo*>(fe.GetAnnotation(tParameterInfo::cTYPE));
-          if (pi && cf == tConfigFile::Find(fe))
+          tParameterInfo* pi = static_cast<tParameterInfo*>(it->GetAnnotation(tParameterInfo::cTYPE));
+          if (pi && cf == tConfigFile::Find(*it))
           {
             co.WriteByte(2);
-            co.WriteInt(fe.GetHandle());
+            co.WriteInt(it->GetHandle());
             co.WriteString(pi->GetConfigEntry());
           }
         }
-      });
+      }
     }
     co.Close();
     return buf;

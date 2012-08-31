@@ -9,7 +9,6 @@
       tFinrocAnnotation.cpp
       tFrameworkElement.cpp
       tFrameworkElementTags.cpp
-      tFrameworkElementTreeFilter.cpp
       tLinkEdge.cpp
       tLockOrderLevels.cpp
       tRuntimeEnvironment.cpp

@@ -27,7 +27,6 @@
 #include "rrlib/watchdog/tWatchDogTask.h"
 
 #include "rrlib/finroc_core_utils/container/tSimpleList.h"
-#include "core/tFrameworkElementTreeFilter.h"
 #include "core/tFrameworkElement.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tEdgeAggregator.h"
@@ -68,12 +67,6 @@ private:
 
   /*! temporary variable: trace back */
   util::tSimpleList<tPeriodicFrameworkElementTask*> trace_back;
-
-  /*! tree filter to search for tasks */
-  tFrameworkElementTreeFilter filter;
-
-  /*! temp buffer */
-  std::string tmp;
 
   /*! Port to publish time spent in last call to MainLoopCallback() */
   tPort<rrlib::time::tDuration> last_cycle_execution_time;

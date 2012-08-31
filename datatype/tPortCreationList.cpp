@@ -189,11 +189,9 @@ void tPortCreationList::Deserialize(const rrlib::xml::tNode& node)
 void tPortCreationList::GetPorts(const tFrameworkElement& elem, util::tSimpleList<tAbstractPort*>& result)
 {
   result.Clear();
-  tFrameworkElement::tChildIterator ci(elem, false);
-  tAbstractPort* ap = NULL;
-  while ((ap = ci.NextPort()) != NULL)
+  for (auto it = elem.ChildPortsBegin(); it != elem.ChildPortsEnd(); ++it)
   {
-    result.Add(ap);
+    result.Add(&(*it));
   }
 }
 
