@@ -324,6 +324,7 @@ int main(int argc, char **argv)
   }
 
   rrlib::logging::default_log_description = basename(argv[0]);
+  rrlib::logging::SetLogFilenamePrefix(basename(argv[0]));
 
   rrlib::getopt::SetProgramVersion(cPROGRAM_VERSION);
   rrlib::getopt::SetProgramDescription(cPROGRAM_DESCRIPTION);
