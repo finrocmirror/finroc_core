@@ -109,15 +109,6 @@ public:
    */
   virtual const char* Description() const = 0;
 
-  /*!
-   * Called to inquire whether all constraints allow a connection between
-   * the specified ports.
-   *
-   * \param source_port Start port of potential connection
-   * \param destination_port Destination port of potential connection
-   * \return A constraint disallowing this connection - NULL if there is no such constraint
-   */
-  static tPortConnectionConstraint* FindConstraintDisallowingConnection(tAbstractPort& source_port, tAbstractPort& destination_port);
 };
 
 //----------------------------------------------------------------------
