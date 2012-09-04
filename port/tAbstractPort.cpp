@@ -31,6 +31,7 @@
 #include "core/tCoreFlags.h"
 #include "core/port/tEdgeAggregator.h"
 #include "core/tFinrocAnnotation.h"
+#include "core/port/tPortConnectionConstraint.h"
 
 namespace finroc
 {
@@ -329,6 +330,12 @@ void tAbstractPort::ForwardStrategy(int16 strategy2, tAbstractPort* push_wanter)
   }
 }
 
+std::vector<tPortConnectionConstraint*>& tAbstractPort::GetConnectionConstraintList()
+{
+  typedef rrlib::design_patterns::tSingletonHolder<std::vector<tPortConnectionConstraint*>> tConstraintListSingleton;
+  return tConstraintListSingleton::Instance();
+}
+
 void tAbstractPort::GetConnectionPartners(util::tSimpleList<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges, bool finstructed_edges_only)
 {
   result.Clear();
@@ -598,6 +605,20 @@ bool tAbstractPort::MayConnectTo(tAbstractPort& target, bool warn_if_impossible)
     }
     return false;
   }
+
+  auto& constraints = GetConnectionConstraintList();
+  for (auto it = constraints.begin(); it != constraints.end(); ++it)
+  {
+    if (!(*it)->AllowPortConnection(*this, target))
+    {
+      if (warn_if_impossible)
+      {
+        FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because the following constraint disallows this: '", (*it)->Description(), "'");
+      }
+      return false;
+    }
+  }
+
   return true;
 }
 

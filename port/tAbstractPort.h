@@ -41,6 +41,7 @@ namespace core
 class tLinkEdge;
 class tNetPort;
 class tPortDataManager;
+class tPortConnectionConstraint;
 
 /*!
  * \author Max Reichardt
@@ -86,6 +87,8 @@ protected:
   };
 
 private:
+
+  friend class tPortConnectionConstraint;
 
   /*! Has port changed since last reset? (see constants above) */
   volatile int8 changed;
@@ -157,6 +160,12 @@ private:
    * \param push_wanter Port that "wants" an initial push and from whom this call originates - null if there's no port that wants as push
    */
   void ForwardStrategy(int16 strategy2, tAbstractPort* push_wanter);
+
+  /*!
+   * (may throw an exception during static destruction)
+   * \return Global list of constraints regarding connections among ports
+   */
+  static std::vector<tPortConnectionConstraint*>& GetConnectionConstraintList();
 
   /*!
    * Transforms (possibly relative link) to absolute link

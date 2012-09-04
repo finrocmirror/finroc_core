@@ -375,9 +375,9 @@ int main(int argc, char **argv)
   {
     tcp_peer->Connect();
   }
-  catch (const finroc::util::tException& e1)
+  catch (const std::exception& e1)
   {
-    FINROC_LOG_PRINT(WARNING, "Error connecting Peer", e1);
+    FINROC_LOG_PRINT(WARNING, "Error connecting Peer: ", e1);
   }
 
   if (executables.size() == 0)

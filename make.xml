@@ -21,6 +21,7 @@
       port/tAbstractPort.cpp
       port/tAggregatedEdge.h
       port/tEdgeAggregator.cpp
+      port/tPortConnectionConstraint.h
       port/tPortCreationInfoBase.cpp
       port/tPortFlags.cpp
       portdatabase/tFinrocTypeInfo.cpp
