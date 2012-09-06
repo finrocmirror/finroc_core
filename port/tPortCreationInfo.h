@@ -34,13 +34,6 @@ namespace core
 namespace internal
 {
 
-/*! type trait to determine whether a type is numeric */
-template <typename T>
-struct tIsNumeric
-{
-  enum { value = std::is_integral<T>::value || std::is_floating_point<T>::value || std::is_same<T, tNumber>::value };
-};
-
 /*! type trait to determine whether a type is a string */
 template <typename T>
 struct tIsString
@@ -191,7 +184,7 @@ private:
 
   /*! Process single argument */
   template <typename A>
-  void ProcessArg(const typename std::enable_if < !(internal::tIsString<A>::value || (internal::tIsNumeric<T>::value && internal::tIsNumeric<A>::value)), A >::type& arg)
+  void ProcessArg(const typename std::enable_if < !(internal::tIsString<A>::value || (typeutil::tIsNumeric<T>::value && typeutil::tIsNumeric<A>::value)), A >::type& arg)
   {
     // standard case
     Set(arg);
@@ -205,7 +198,7 @@ private:
   }
 
   template <typename A>
-  void ProcessArg(const typename std::enable_if < internal::tIsNumeric<T>::value && internal::tIsNumeric<A>::value, A >::type& arg)
+  void ProcessArg(const typename std::enable_if < typeutil::tIsNumeric<T>::value && typeutil::tIsNumeric<A>::value, A >::type& arg)
   {
     // numeric type and numeric argument => first numeric argument is default value (or possibly flag)
     if (!DefaultValueSet())

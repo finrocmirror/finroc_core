@@ -39,7 +39,7 @@ class tAbstractPort;
  * Can register at port to receive callbacks whenever the port's value changes
  */
 template < typename T = const void* >
-class tPortListener : public tPortListenerAdapter < T, typeutil::tIsCCType<typename tRawType<T>::t>::value, (std::is_integral<typename tRawType<T>::t>::value || std::is_floating_point<typename tRawType<T>::t>::value) && (!std::is_same<bool, T>::value) >
+class tPortListener : public tPortListenerAdapter < T, typeutil::tIsCCType<typename tRawType<T>::t>::value, typeutil::tIsNumeric<T>::value >
 {
 public:
 

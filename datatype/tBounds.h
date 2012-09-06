@@ -167,7 +167,7 @@ public:
    * \param val Value
    * \return Answer
    */
-  inline bool InBounds(T val) const
+  inline bool InBounds(const T& val) const
   {
     return (!(val < min)) && (!(max < val));
   }
@@ -189,7 +189,7 @@ public:
    * \param val Value to adjust to range
    * \return Adjusted value
    */
-  inline T ToBounds(T val) const
+  inline T ToBounds(const T& val) const
   {
     if (val < min)
     {

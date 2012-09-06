@@ -114,27 +114,6 @@ struct tPortTypeMapBase
 {
 };
 
-// Numeric (tNumber)
-template<bool ENUM, bool INT>
-struct tPortTypeMapBase<tNumber, true, ENUM, INT>
-{
-
-  typedef tCCPortBase tPortBaseType;
-  typedef tNumber tPortDataType;
-  typedef tCCPortBoundedNumeric<tNumber> tBoundedPortBaseType;
-  typedef tCCPortDataManager tManagerType;
-  typedef tCCQueueFragmentRaw tQueueFragment;
-  typedef tParameterBase<tNumber> tParameterImpl;
-  typedef tStaticParameterImplNumeric<tNumber> tStaticParameterImpl;
-  enum { boundable = 1 };
-  enum { numeric = 1 };
-
-//  typedef tPortNumeric tPortType;
-//  typedef T tValueVar;
-//  typedef const T tValueVarConst;
-};
-
-
 // Numeric
 template<typename T, bool ENUM>
 struct tPortTypeMapBase<T, true, ENUM, true>
@@ -147,6 +126,26 @@ struct tPortTypeMapBase<T, true, ENUM, true>
   typedef tCCQueueFragmentRaw tQueueFragment;
   typedef tParameterNumeric<T> tParameterImpl;
   typedef tStaticParameterImplNumeric<T> tStaticParameterImpl;
+  enum { boundable = 1 };
+  enum { numeric = 1 };
+
+//  typedef tPortNumeric tPortType;
+//  typedef T tValueVar;
+//  typedef const T tValueVarConst;
+};
+
+// Numeric (tNumber)
+template<>
+struct tPortTypeMapBase<tNumber, true, false, true>
+{
+
+  typedef tCCPortBase tPortBaseType;
+  typedef tNumber tPortDataType;
+  typedef tCCPortBoundedNumeric<tNumber> tBoundedPortBaseType;
+  typedef tCCPortDataManager tManagerType;
+  typedef tCCQueueFragmentRaw tQueueFragment;
+  typedef tParameterBase<tNumber> tParameterImpl;
+  typedef tStaticParameterImplNumeric<tNumber> tStaticParameterImpl;
   enum { boundable = 1 };
   enum { numeric = 1 };
 
@@ -201,7 +200,7 @@ struct tPortTypeMapBase<T, false, false, false> : tStdPortTypeMap<T> {};
 
 // Actual class
 template<typename T>
-struct tPortTypeMap : tPortTypeMapBase < T, typeutil::tIsCCType<T>::value, std::is_enum<T>::value, std::is_integral<T>::value || std::is_floating_point<T>::value >
+struct tPortTypeMap : tPortTypeMapBase < T, typeutil::tIsCCType<T>::value, std::is_enum<T>::value, typeutil::tIsNumeric<T>::value >
 {
   typedef typename typeutil::tGenericChangeType<T>::type tGenericChange;
   typedef std::vector<T> tListType;

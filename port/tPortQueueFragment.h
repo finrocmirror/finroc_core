@@ -206,7 +206,7 @@ public:
 };
 
 template <typename T>
-class tPortQueueFragment : public tPortQueueFragmentBase < T, std::is_integral<T>::value || std::is_floating_point<T>::value > {};
+class tPortQueueFragment : public tPortQueueFragmentBase < T, typeutil::tIsNumeric<T>::value > {};
 
 
 } // namespace finroc

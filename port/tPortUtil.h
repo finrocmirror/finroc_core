@@ -573,7 +573,7 @@ public:
 };
 
 template<typename T>
-class tPortUtil : public tPortUtilBase < T, typeutil::tIsCCType<T>::value, std::is_integral<T>::value || std::is_floating_point<T>::value >
+class tPortUtil : public tPortUtilBase < T, typeutil::tIsCCType<T>::value, typeutil::tIsNumeric<T>::value >
 {
 
 };

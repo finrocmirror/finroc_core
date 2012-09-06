@@ -34,6 +34,7 @@ namespace core
 
 class tMethodCall;
 class tTransaction;
+class tNumber;
 
 /**
  * Contains various (C++ -specific) helper constructs
@@ -66,6 +67,24 @@ inline bool IsCCType(const rrlib::rtti::tDataTypeBase& dt)
 {
   return dt.GetSize() <= 256 && ((dt.GetTypeTraits() & rrlib::rtti::trait_flags::cHAS_TRIVIAL_DESTRUCTOR) != 0);
 }
+
+/*!
+ * Type-trait for numeric types.
+ * This includes all built-in numeric types, as well as all
+ * types that can be implicitly casted to and from a built-in numeric type.
+ * For the latter, this template needs to be specialized.
+ */
+template <typename T>
+struct tIsNumeric
+{
+  enum { value = std::is_integral<T>::value || std::is_floating_point<T>::value || std::is_same<T, tNumber>::value };
+};
+template <>
+struct tIsNumeric<bool>
+{
+  enum { value = 0 };
+};
+static_assert(!tIsNumeric<bool>::value, "Bool should not be handled as numeric type");
 
 /*!
  * This type-trait-like-struct is used to determine whether a type supports operator '<' .

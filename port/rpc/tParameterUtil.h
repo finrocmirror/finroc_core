@@ -113,7 +113,7 @@ public:
 };
 
 template <typename T>
-class tParameterUtil : public tParameterUtilBase < T, std::is_integral<T>::value || std::is_floating_point<T>::value >
+class tParameterUtil : public tParameterUtilBase < T, typeutil::tIsNumeric<T>::value >
 {
 };
 
