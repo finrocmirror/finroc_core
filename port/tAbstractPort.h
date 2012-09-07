@@ -533,7 +533,7 @@ public:
    * \return Data type of class wrapping this port (differs from data_type e.g. with numeric types)
    * If port was not created using a wrapper class, this is empty.
    */
-  rrlib::rtti::tDataTypeBase GetWrapperDataType()
+  rrlib::rtti::tDataTypeBase GetWrapperDataType() const
   {
     return wrapper_data_type;
   }
