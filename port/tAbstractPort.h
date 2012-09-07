@@ -123,6 +123,12 @@ private:
   /*! Bitvector indicating which of the first 16 outgoing edges was finstructed. Further info is stored in annotation if (ever) needed. */
   uint16_t outgoing_edges_finstructed;
 
+  /*!
+   * Data type of class wrapping this port (differs from data_type e.g. with numeric types)
+   * If port was not created using a wrapper class, this is empty.
+   */
+  rrlib::rtti::tDataTypeBase wrapper_data_type;
+
 protected:
 
   /*! Type of port data */
@@ -524,6 +530,15 @@ public:
   }
 
   /*!
+   * \return Data type of class wrapping this port (differs from data_type e.g. with numeric types)
+   * If port was not created using a wrapper class, this is empty.
+   */
+  rrlib::rtti::tDataTypeBase GetWrapperDataType()
+  {
+    return wrapper_data_type;
+  }
+
+  /*!
    * (relevant for input ports only)
    *
    * \return Has port changed since last reset?
@@ -734,6 +749,17 @@ public:
    * \param push Push data?
    */
   void SetReversePushStrategy(bool push);
+
+  /*!
+   * Only intended to be called by classes wrapping port classes derived from tAbstractPort.
+   *
+   * \param Data type of class wrapping this port (differs from data_type e.g. with numeric types)
+   */
+  void SetWrapperDataType(const rrlib::rtti::tDataTypeBase& wrapper_data_type)
+  {
+    assert((this->wrapper_data_type == NULL || wrapper_data_type == this->wrapper_data_type) && "Wrapper data type should not be set twice");
+    this->wrapper_data_type = wrapper_data_type;
+  }
 };
 
 } // namespace finroc

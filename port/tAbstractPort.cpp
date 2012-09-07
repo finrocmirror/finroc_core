@@ -84,6 +84,7 @@ tAbstractPort::tAbstractPort(tPortCreationInfoBase pci) :
   link_edges(NULL),
   strategy(-1),
   outgoing_edges_finstructed(0),
+  wrapper_data_type(),
   data_type(pci.data_type),
   min_net_update_time(pci.min_net_update_interval)
 {

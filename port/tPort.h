@@ -121,6 +121,7 @@ public:
     {
       wrapped = new tPortBaseType(ProcessPci(pci));
     }
+    wrapped->SetWrapperDataType(rrlib::rtti::tDataType<T>());
     if (pci.DefaultValueSet())
     {
       T t = rrlib::rtti::sStaticTypeInfo<T>::CreateByValue();
