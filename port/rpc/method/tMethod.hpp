@@ -65,7 +65,7 @@ template<typename HANDLER, typename R, typename ... TArgs>
 R tMethod<HANDLER, R, TArgs...>::Call(tInterfaceClientPort port, const rrlib::time::tDuration& net_timeout, TArgs... args)
 {
   tInterfacePort* ip = port.GetServer();
-  if (ip && ip->GetType() == tInterfacePort::eNetwork)
+  if (ip && ip->GetType() == tInterfacePort::tType::NETWORK)
   {
     tMethodCall::tPtr mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
     mc->SetParameters(args...);
@@ -76,7 +76,7 @@ R tMethod<HANDLER, R, TArgs...>::Call(tInterfaceClientPort port, const rrlib::ti
     mc->GetParam(0, ret);
     return ret;
   }
-  else if (ip && ip->GetType() == tInterfacePort::eServer)
+  else if (ip && ip->GetType() == tInterfacePort::tType::SERVER)
   {
     HANDLER* handler = static_cast<HANDLER*>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (!handler)
@@ -95,7 +95,7 @@ template<typename HANDLER, typename R, typename ... TArgs>
 void tMethod<HANDLER, R, TArgs...>::CallAsync(tInterfaceClientPort port, tAsyncReturnHandler<R>* handler, const rrlib::time::tDuration& net_timeout, bool force_same_thread, TArgs... args)
 {
   tInterfacePort* ip = port.GetServer();
-  if (ip && ip->GetType() == tInterfacePort::eNetwork)
+  if (ip && ip->GetType() == tInterfacePort::tType::NETWORK)
   {
     if (!tThreadLocalRPCData::Get().IsSuitableThreadForSynchronousCalls())
     {
@@ -107,7 +107,7 @@ void tMethod<HANDLER, R, TArgs...>::CallAsync(tInterfaceClientPort port, tAsyncR
     mc->PrepareSyncRemoteExecution(this, port.GetDataType(), handler, static_cast<tInterfaceNetPort*>(ip), net_timeout > rrlib::time::tDuration::zero() ? net_timeout : GetDefaultNetTimeout());  // always do this in extra thread
     tRPCThreadPool::GetInstance().ExecuteTask(std::move(mc));
   }
-  else if (ip && ip->GetType() == tInterfacePort::eServer)
+  else if (ip && ip->GetType() == tInterfacePort::tType::SERVER)
   {
     HANDLER* mhandler = static_cast<HANDLER*>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (!mhandler)

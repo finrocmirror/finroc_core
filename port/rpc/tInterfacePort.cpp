@@ -32,7 +32,7 @@ tInterfacePort::tInterfacePort(const util::tString& name, tFrameworkElement* par
   type(type_),
   edges_src(),
   edges_dest(),
-  buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+  buf_pool((type_ == tType::ROUTING) ? NULL : new tMultiTypePortDataBufferPool())
 {
   // this(new PortCreationInfo(name,parent,dataType,0),type,-1);
   InitLists(&(edges_src), &(edges_dest));
@@ -43,7 +43,7 @@ tInterfacePort::tInterfacePort(const util::tString& name, tFrameworkElement* par
   type(type_),
   edges_src(),
   edges_dest(),
-  buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+  buf_pool((type_ == tType::ROUTING) ? NULL : new tMultiTypePortDataBufferPool())
 {
   // this(new PortCreationInfo(name,parent,dataType,customFlags),type,-1);
   InitLists(&(edges_src), &(edges_dest));
@@ -54,7 +54,7 @@ tInterfacePort::tInterfacePort(const util::tString& name, tFrameworkElement* par
   type(type_),
   edges_src(),
   edges_dest(),
-  buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+  buf_pool((type_ == tType::ROUTING) ? NULL : new tMultiTypePortDataBufferPool())
 {
   // this(new PortCreationInfo(name,parent,dataType,customFlags),type,lockLevel);
   InitLists(&(edges_src), &(edges_dest));
@@ -65,7 +65,7 @@ tInterfacePort::tInterfacePort(tPortCreationInfoBase pci, tInterfacePort::tType 
   type(type_),
   edges_src(),
   edges_dest(),
-  buf_pool((type_ == eRouting) ? NULL : new tMultiTypePortDataBufferPool())
+  buf_pool((type_ == tType::ROUTING) ? NULL : new tMultiTypePortDataBufferPool())
 {
   InitLists(&(edges_src), &(edges_dest));
 }
@@ -101,7 +101,7 @@ tInterfacePort* tInterfacePort::GetServer()
       return NULL;
     }
 
-    if (current->GetType() == eServer || current->GetType() == eNetwork)
+    if (current->GetType() == tType::SERVER || current->GetType() == tType::NETWORK)
     {
       return current;
     }
@@ -119,8 +119,8 @@ tAbstractPort::tConnectDirection tInterfacePort::InferConnectDirection(const tAb
 {
   // Check whether one of the two ports is connected to a server
   const tInterfacePort& other_interface_port = static_cast<const tInterfacePort&>(other);
-  const tInterfacePort* server_port_of_this = (GetType() == eServer || GetType() == eNetwork) ? this : GetServer();
-  const tInterfacePort* server_port_of_other = (other_interface_port.GetType() == eServer || other_interface_port.GetType() == eNetwork) ? &other_interface_port : other_interface_port.GetServer();
+  const tInterfacePort* server_port_of_this = (GetType() == tType::SERVER || GetType() == tType::NETWORK) ? this : GetServer();
+  const tInterfacePort* server_port_of_other = (other_interface_port.GetType() == tType::SERVER || other_interface_port.GetType() == tType::NETWORK) ? &other_interface_port : other_interface_port.GetServer();
   if (server_port_of_this && server_port_of_other)
   {
     FINROC_LOG_PRINT(WARNING, "Both ports (this and %s) are connected to a server already.", other.GetQualifiedLink().c_str());
@@ -141,14 +141,14 @@ tPortCreationInfoBase tInterfacePort::ProcessPci(tPortCreationInfoBase pci, tInt
 {
   switch (type_)
   {
-  case eServer:
+  case tType::SERVER:
     pci.flags |= tPortFlags::cACCEPTS_DATA;
     break;
-  case eClient:
+  case tType::CLIENT:
     pci.flags |= tPortFlags::cEMITS_DATA | tPortFlags::cOUTPUT_PORT;
     break;
-  case eNetwork:
-  case eRouting:
+  case tType::NETWORK:
+  case tType::ROUTING:
     pci.flags |= tPortFlags::cEMITS_DATA | tPortFlags::cACCEPTS_DATA | tPortFlags::cPROXY;
     break;
   }

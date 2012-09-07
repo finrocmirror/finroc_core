@@ -27,7 +27,7 @@ namespace core
 {
 tInterfaceClientPort::tInterfaceClientPort(const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type)
 {
-  this->wrapped = new tPortImpl(this, name, parent, type, tInterfacePort::eClient);
+  this->wrapped = new tPortImpl(this, name, parent, type, tInterfacePort::tType::CLIENT);
 }
 
 tInterfaceClientPort::tPortImpl::tPortImpl(tInterfaceClientPort* const outer_class_ptr_, const util::tString& name, tFrameworkElement* parent, const rrlib::rtti::tDataTypeBase& type, tInterfacePort::tType client) :

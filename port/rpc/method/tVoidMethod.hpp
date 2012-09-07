@@ -66,14 +66,14 @@ template<typename HANDLER, typename ... TArgs>
 void tVoidMethod<HANDLER, TArgs...>::Call(tInterfaceClientPort port, bool force_same_thread, TArgs... args)
 {
   tInterfacePort* ip = port.GetServer();
-  if (ip && ip->GetType() == tInterfacePort::eNetwork)
+  if (ip && ip->GetType() == tInterfacePort::tType::NETWORK)
   {
     tMethodCall::tPtr mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
     mc->SetParameters(args...);
     mc->SetMethod(this, port.GetDataType());
     (static_cast<tInterfaceNetPort*>(ip))->SendAsyncCall(mc);
   }
-  else if (ip && ip->GetType() == tInterfacePort::eServer)
+  else if (ip && ip->GetType() == tInterfacePort::tType::SERVER)
   {
     HANDLER* handler = static_cast<HANDLER*>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (!handler)

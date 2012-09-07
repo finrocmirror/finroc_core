@@ -55,7 +55,10 @@ class tInterfacePort : public tAbstractPort
 {
 public:
 
-  enum tType { eServer, eClient, eNetwork, eRouting };
+  enum class tType
+  {
+    SERVER, CLIENT, NETWORK, ROUTING
+  };
 
   friend class tInterfaceClientPort;
 private:

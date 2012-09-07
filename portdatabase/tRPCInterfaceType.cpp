@@ -38,7 +38,7 @@ class tRPCPortFactory : public tPortFactory
   {
     assert(tFinrocTypeInfo::IsMethodType(dt));
     const uint keep_flags = 0xFFFFFFFF & (~tPortFlags::cEMITS_DATA) & (~tPortFlags::cACCEPTS_DATA) & (~tPortFlags::cMAY_ACCEPT_REVERSE_DATA);
-    return *(new tInterfacePort(port_name, &parent, dt, tInterfacePort::eRouting, flags & keep_flags));
+    return *(new tInterfacePort(port_name, &parent, dt, tInterfacePort::tType::ROUTING, flags & keep_flags));
   }
 };
 

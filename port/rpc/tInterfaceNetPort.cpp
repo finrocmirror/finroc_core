@@ -32,7 +32,7 @@ namespace finroc
 namespace core
 {
 tInterfaceNetPort::tInterfaceNetPort(tPortCreationInfoBase pci) :
-  tInterfacePort(pci, ::finroc::core::tInterfacePort::eNetwork, -1)
+  tInterfacePort(pci, ::finroc::core::tInterfacePort::tType::NETWORK, -1)
 {
 }
 
@@ -62,7 +62,7 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall::tPtr& mc)
 {
   ::finroc::core::tInterfacePort* ip = GetServer();
   tAbstractMethod* m = mc->GetMethod();
-  if (ip && ip->GetType() == ::finroc::core::tInterfacePort::eNetwork)
+  if (ip && ip->GetType() == ::finroc::core::tInterfacePort::tType::NETWORK)
   {
     tInterfaceNetPort* inp = static_cast<tInterfaceNetPort*>(ip);
     if (m->IsVoidMethod())
@@ -75,7 +75,7 @@ void tInterfaceNetPort::ProcessCallFromNet(tMethodCall::tPtr& mc)
       tRPCThreadPool::GetInstance().ExecuteTask(std::move(mc));
     }
   }
-  else if (ip && ip->GetType() == ::finroc::core::tInterfacePort::eServer)
+  else if (ip && ip->GetType() == ::finroc::core::tInterfacePort::tType::SERVER)
   {
     tAbstractMethodCallHandler* mhandler = static_cast<tAbstractMethodCallHandler*>((static_cast<tInterfaceServerPort*>(ip))->GetHandler());
     if (mhandler == NULL)

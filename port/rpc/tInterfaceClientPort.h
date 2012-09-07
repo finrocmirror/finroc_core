@@ -125,7 +125,7 @@ public:
   inline bool HasRemoteServer()
   {
     tInterfacePort* server = GetServer();
-    return (server != NULL) && (server->GetType() == tInterfacePort::eNetwork);
+    return (server != NULL) && (server->GetType() == tInterfacePort::tType::NETWORK);
   }
 
 };

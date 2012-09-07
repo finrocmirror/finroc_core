@@ -118,7 +118,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
   assert((method == cGET_CREATE_MODULE_ACTIONS) || (method == cLOAD_MODULE_LIBRARY) || (method == cGET_MODULE_LIBRARIES));
 
   tPortDataPtr<rrlib::serialization::tMemoryBuffer> mb = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
-  rrlib::serialization::tOutputStream co(mb.get(), rrlib::serialization::eNames);
+  rrlib::serialization::tOutputStream co(mb.get(), rrlib::serialization::tTypeEncoding::NAMES);
 
   if (method == cGET_MODULE_LIBRARIES)
   {
@@ -174,7 +174,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
     else
     {
       tPortDataPtr<rrlib::serialization::tMemoryBuffer> buf = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
-      rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::eNames);
+      rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::tTypeEncoding::NAMES);
       co << result->GetType();
       result->Serialize(co);
       co.Close();
@@ -201,7 +201,7 @@ tPortDataPtr<rrlib::serialization::tMemoryBuffer> tAdminServer::HandleCall(const
 
     tConfigFile* cf = tConfigFile::Find(*fe);
     tPortDataPtr<rrlib::serialization::tMemoryBuffer> buf = this->GetBufferForReturn<rrlib::serialization::tMemoryBuffer>();
-    rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::eNames);
+    rrlib::serialization::tOutputStream co(buf.get(), rrlib::serialization::tTypeEncoding::NAMES);
     if (cf == NULL)
     {
       co.WriteBoolean(false);
@@ -283,7 +283,7 @@ tPortDataPtr<std::string> tAdminServer::HandleCall(const tAbstractMethod& method
     {
       try
       {
-        rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::eNames);
+        rrlib::serialization::tInputStream ci(buf.get(), rrlib::serialization::tTypeEncoding::NAMES);
         rrlib::serialization::tDataEncoding enc;
         rrlib::rtti::tDataTypeBase dt;
         ci >> enc >> dt;
@@ -456,7 +456,7 @@ void tAdminServer::HandleVoidCall(const tAbstractMethod& method, int cma_index, 
   }
   else
   {
-    rrlib::serialization::tInputStream ci(params_buffer.get(), rrlib::serialization::eNames);
+    rrlib::serialization::tInputStream ci(params_buffer.get(), rrlib::serialization::tTypeEncoding::NAMES);
     rrlib::rtti::tDataTypeBase dt;
     ci >> dt;
     if (dt == NULL)
