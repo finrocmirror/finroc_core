@@ -607,6 +607,11 @@ bool tAbstractPort::MayConnectTo(tAbstractPort& target, bool warn_if_impossible)
     return false;
   }
 
+  if (GetFlag(tPortFlags::cTOOL_PORT) || target.GetFlag(tPortFlags::cTOOL_PORT))
+  {
+    return true; // ignore constraints for ports from tools
+  }
+
   auto& constraints = GetConnectionConstraintList();
   for (auto it = constraints.begin(); it != constraints.end(); ++it)
   {

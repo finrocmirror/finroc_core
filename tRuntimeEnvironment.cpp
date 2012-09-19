@@ -20,7 +20,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "rrlib/finroc_core_utils/tGarbageDeleter.h"
-#include "rrlib/finroc_core_utils/stream/tChunkedBuffer.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "rrlib/design_patterns/singleton.h"
 

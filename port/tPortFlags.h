@@ -91,8 +91,14 @@ struct tPortFlags : public tCoreFlags
   /*! Deactivates initial pushing when this (output) port is connected to another port with push strategy */
   static const uint cNO_INITIAL_PUSHING = cFIRST_PORT_FLAG << 11;
 
+  /**
+   * Port from network connection from tooling (e.g. finstruct/fingui)
+   * Connection constraints are ignored for such ports
+   */
+  static const uint cTOOL_PORT = cFIRST_PORT_FLAG << 12;
+
   /*! First custom flag for special port types */
-  static const uint cFIRST_CUSTOM_PORT_FLAG = cFIRST_PORT_FLAG << 12;
+  static const uint cFIRST_CUSTOM_PORT_FLAG = cFIRST_PORT_FLAG << 13;
 
   // Non-constant flags
 
