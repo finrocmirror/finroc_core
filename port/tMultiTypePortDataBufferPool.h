@@ -25,7 +25,6 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tLockOrderLevels.h"
 #include "rrlib/rtti/tDataTypeBase.h"
 #include "core/port/std/tPortDataBufferPool.h"
@@ -48,7 +47,7 @@ class tMultiTypePortDataBufferPool : rrlib::thread::tOrderedMutex
 private:
 
   /*! list contains pools for different data types... new pools are added when needed */
-  util::tSimpleList<tPortDataBufferPool*> pools;
+  std::vector<tPortDataBufferPool*> pools;
 
   /*!
    * \param data_type DataType of buffer to create
@@ -69,12 +68,11 @@ public:
   inline tPortDataManager* GetUnusedBuffer(const rrlib::rtti::tDataTypeBase& data_type)
   {
     // search for correct pool
-    for (size_t i = 0u, n = pools.Size(); i < n; i++)
+    for (auto it = pools.begin(); it != pools.end(); ++it)
     {
-      tPortDataBufferPool* pbp = pools.Get(i);
-      if (pbp->data_type == data_type)
+      if ((*it)->data_type == data_type)
       {
-        return pbp->GetUnusedBuffer();
+        return (*it)->GetUnusedBuffer();
       }
     }
 

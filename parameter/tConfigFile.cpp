@@ -22,7 +22,6 @@
 #include "rrlib/finroc_core_utils/sFiles.h"
 #include "rrlib/xml/tNode.h"
 #include "rrlib/xml/tException.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/serialization/serialization.h"
 
 #include "core/parameter/tConfigFile.h"

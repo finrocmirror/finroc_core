@@ -25,7 +25,6 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
 #include "rrlib/finroc_core_utils/log/tLogUser.h"
 #include "rrlib/finroc_core_utils/tListenerManager.h"
 #include "rrlib/finroc_core_utils/net/tIPSocketAddress.h"
@@ -50,11 +49,8 @@ private:
   /*! callIDs */
   static const int8 cDISCOVERED = 0, cREMOVED = 1;
 
-  /*! Peer tracker instances that are used - can be multiple */
-  static std::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > instances;
-
-  /*! "Lock" to above - for safe deinitialization */
-  std::shared_ptr<util::tSimpleListWithMutex<tAbstractPeerTracker*> > instances_lock;
+  /*! "Lock" to peer tracker instance list - for safe deinitialization */
+  std::shared_ptr<void> instances_lock;
 
 protected:
 

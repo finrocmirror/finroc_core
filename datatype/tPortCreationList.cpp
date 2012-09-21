@@ -57,20 +57,20 @@ void tPortCreationList::ApplyChanges(tFrameworkElement& io_vector_, uint flags_)
 {
   {
     rrlib::thread::tLock lock2(io_vector_);
-    util::tSimpleList<tAbstractPort*> ports1;
+    std::vector<tAbstractPort*> ports1;
     GetPorts(*this->io_vector, ports1);
-    util::tSimpleList<tAbstractPort*> ports2;
+    std::vector<tAbstractPort*> ports2;
     GetPorts(io_vector_, ports2);
 
-    for (size_t i = 0u; i < ports1.Size(); i++)
+    for (size_t i = 0u; i < ports1.size(); i++)
     {
-      tAbstractPort* ap1 = ports1.Get(i);
-      tAbstractPort* ap2 = i < ports2.Size() ? ports2.Get(i) : NULL;
+      tAbstractPort* ap1 = ports1[i];
+      tAbstractPort* ap2 = i < ports2.size() ? ports2[i] : NULL;
       CheckPort(ap2, io_vector_, flags_, ap1->GetName(), ap1->GetDataType(), ap1->IsOutputPort(), ap1);
     }
-    for (size_t i = ports1.Size(); i < ports2.Size(); i++)
+    for (size_t i = ports1.size(); i < ports2.size(); i++)
     {
-      ports2.Get(i)->ManagedDelete();
+      ports2[i]->ManagedDelete();
     }
   }
 }
@@ -115,12 +115,12 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
   {
     show_output_port_selection = is.ReadBoolean();
     size_t size = is.ReadInt();
-    list.Clear();
+    list.clear();
     for (size_t i = 0u; i < size; i++)
     {
       const util::tString name = is.ReadString();
       const util::tString type = is.ReadString();
-      list.Add(tEntry(name, type, is.ReadBoolean()));
+      list.emplace_back(name, type, is.ReadBoolean());
     }
   }
   else
@@ -129,11 +129,11 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
       rrlib::thread::tLock lock3(io_vector->GetRegistryLock());
       show_output_port_selection = is.ReadBoolean();
       size_t size = is.ReadInt();
-      util::tSimpleList<tAbstractPort*> ports;
+      std::vector<tAbstractPort*> ports;
       GetPorts(*io_vector, ports);
       for (size_t i = 0u; i < size; i++)
       {
-        tAbstractPort* ap = i < ports.Size() ? ports.Get(i) : NULL;
+        tAbstractPort* ap = i < ports.size() ? ports[i] : NULL;
         util::tString name = is.ReadString();
         util::tString dt_name = is.ReadString();
         rrlib::rtti::tDataTypeBase dt = rrlib::rtti::tDataTypeBase::FindType(dt_name);
@@ -144,9 +144,9 @@ void tPortCreationList::Deserialize(rrlib::serialization::tInputStream& is)
         bool output = is.ReadBoolean();
         CheckPort(ap, *io_vector, flags, name, dt, output, NULL);
       }
-      for (size_t i = size; i < ports.Size(); i++)
+      for (size_t i = size; i < ports.size(); i++)
       {
-        ports.Get(i)->ManagedDelete();
+        ports[i]->ManagedDelete();
       }
     }
   }
@@ -158,12 +158,12 @@ void tPortCreationList::Deserialize(const rrlib::xml::tNode& node)
   {
     rrlib::thread::tLock lock2(io_vector->GetRegistryLock());
     show_output_port_selection = node.GetBoolAttribute("showOutputSelection");
-    util::tSimpleList<tAbstractPort*> ports;
+    std::vector<tAbstractPort*> ports;
     GetPorts(*io_vector, ports);
     size_t i = 0u;
     for (rrlib::xml::tNode::const_iterator port = node.ChildrenBegin(); port != node.ChildrenEnd(); ++port, ++i)
     {
-      tAbstractPort* ap = i < ports.Size() ? ports.Get(i) : NULL;
+      tAbstractPort* ap = i < ports.size() ? ports[i] : NULL;
       util::tString port_name = port->Name();
       assert(boost::equals(port_name, "port"));
       bool b = false;
@@ -179,25 +179,25 @@ void tPortCreationList::Deserialize(const rrlib::xml::tNode& node)
       }
       CheckPort(ap, *io_vector, flags, port->GetStringAttribute("name"), dt, b, NULL);
     }
-    for (; i < ports.Size(); i++)
+    for (; i < ports.size(); i++)
     {
-      ports.Get(i)->ManagedDelete();
+      ports[i]->ManagedDelete();
     }
   }
 }
 
-void tPortCreationList::GetPorts(const tFrameworkElement& elem, util::tSimpleList<tAbstractPort*>& result)
+void tPortCreationList::GetPorts(const tFrameworkElement& elem, std::vector<tAbstractPort*>& result)
 {
-  result.Clear();
+  result.clear();
   for (auto it = elem.ChildPortsBegin(); it != elem.ChildPortsEnd(); ++it)
   {
-    result.Add(&(*it));
+    result.push_back(&(*it));
   }
 }
 
 void tPortCreationList::InitialSetup(tFrameworkElement& managed_io_vector, uint port_creation_flags, bool show_output_port_selection)
 {
-  assert((io_vector == NULL || io_vector == &managed_io_vector) && list.IsEmpty());
+  assert((io_vector == NULL || io_vector == &managed_io_vector) && list.empty());
   io_vector = &managed_io_vector;
   flags = port_creation_flags;
   this->show_output_port_selection = show_output_port_selection;
@@ -208,11 +208,11 @@ void tPortCreationList::Serialize(rrlib::serialization::tOutputStream& os) const
   os.WriteBoolean(show_output_port_selection);
   if (io_vector == NULL)
   {
-    int size = list.Size();
+    int size = list.size();
     os.WriteInt(size);
     for (int i = 0; i < size; i++)
     {
-      const tEntry& e = list.Get(i);
+      const tEntry& e = list[i];
       os.WriteString(e.name);
       os.WriteString(e.type.Get().GetName());
       os.WriteBoolean(e.output_port);
@@ -222,13 +222,13 @@ void tPortCreationList::Serialize(rrlib::serialization::tOutputStream& os) const
   {
     {
       rrlib::thread::tLock lock3(io_vector->GetRegistryLock());
-      util::tSimpleList<tAbstractPort*> ports;
+      std::vector<tAbstractPort*> ports;
       GetPorts(*io_vector, ports);
-      int size = ports.Size();
+      int size = ports.size();
       os.WriteInt(size);
       for (int i = 0; i < size; i++)
       {
-        tAbstractPort* p = ports.Get(i);
+        tAbstractPort* p = ports[i];
         os.WriteString(p->GetCName());
         os.WriteString(p->GetDataType().GetName());
         os.WriteBoolean(p->IsOutputPort());
@@ -243,12 +243,12 @@ void tPortCreationList::Serialize(rrlib::xml::tNode& node) const
   {
     rrlib::thread::tLock lock2(io_vector->GetRegistryLock());
     node.SetAttribute("showOutputSelection", show_output_port_selection);
-    util::tSimpleList<tAbstractPort*> ports;
+    std::vector<tAbstractPort*> ports;
     GetPorts(*io_vector, ports);
-    int size = ports.Size();
+    int size = ports.size();
     for (int i = 0; i < size; i++)
     {
-      tAbstractPort* p = ports.Get(i);
+      tAbstractPort* p = ports[i];
       rrlib::xml::tNode& child = node.AddChildNode("port");
       child.SetAttribute("name", p->GetCName());
       child.SetAttribute("type", p->GetDataType().GetName());

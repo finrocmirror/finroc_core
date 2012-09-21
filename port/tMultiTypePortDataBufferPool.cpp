@@ -27,17 +27,17 @@ namespace core
 {
 tMultiTypePortDataBufferPool::tMultiTypePortDataBufferPool() :
   tOrderedMutex("tMultiTypePortDataBufferPool", tLockOrderLevels::cINNER_MOST - 20),
-  pools(2u)
+  pools()
 {}
 
 tMultiTypePortDataBufferPool::~tMultiTypePortDataBufferPool()
 {
   // now there shouldn't be the hazard that a new pool is/will be created
-  for (size_t i = 0, n = pools.Size(); i < n; i++)
+  for (auto it = pools.begin(); it != pools.end(); ++it)
   {
-    pools.Get(i)->ControlledDelete();
+    (*it)->ControlledDelete();
   }
-  pools.Clear();
+  pools.clear();
 }
 
 tPortDataManager* tMultiTypePortDataBufferPool::PossiblyCreatePool(const rrlib::rtti::tDataTypeBase& data_type)
@@ -45,18 +45,17 @@ tPortDataManager* tMultiTypePortDataBufferPool::PossiblyCreatePool(const rrlib::
   rrlib::thread::tLock lock1(*this);
 
   // search for correct pool
-  for (size_t i = 0u, n = pools.Size(); i < n; i++)
+  for (auto it = pools.begin(); it != pools.end(); ++it)
   {
-    tPortDataBufferPool* pbp = pools.Get(i);
-    if (pbp->data_type == data_type)
+    if ((*it)->data_type == data_type)
     {
-      return pbp->GetUnusedBuffer();
+      return (*it)->GetUnusedBuffer();
     }
   }
 
   // create new pool
   tPortDataBufferPool* new_pool = new tPortDataBufferPool(data_type, 2);
-  pools.Add(new_pool);
+  pools.push_back(new_pool);
   return new_pool->GetUnusedBuffer();
 }
 
@@ -67,9 +66,9 @@ void tMultiTypePortDataBufferPool::PrintStructure(int indent, std::stringstream&
     output << " ";
   }
   output << "MultiTypePortDataBufferPool:" << std::endl;
-  for (size_t i = 0u, n = pools.Size(); i < n; i++)
+  for (auto it = pools.begin(); it != pools.end(); ++it)
   {
-    pools.Get(i)->PrintStructure(indent + 2, output);
+    (*it)->PrintStructure(indent + 2, output);
   }
 }
 

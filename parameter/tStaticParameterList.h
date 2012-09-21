@@ -26,7 +26,6 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 
 #include "rrlib/rtti/rtti.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tPlugins.h"
 #include "core/tFinrocAnnotation.h"
 
@@ -50,7 +49,7 @@ class tStaticParameterList : public tFinrocAnnotation
 private:
 
   /*! List of parameters */
-  util::tSimpleList<tStaticParameterBase*> parameters;
+  std::vector<tStaticParameterBase*> parameters;
 
   /*!
    * Index of CreateModuleAction that was used to create framework element
@@ -141,7 +140,7 @@ public:
    */
   inline tStaticParameterBase* Get(int i) const
   {
-    return parameters.Get(i);
+    return parameters[i];
   }
 
   tFrameworkElement* GetAnnotated();
@@ -191,7 +190,7 @@ public:
    */
   inline size_t Size() const
   {
-    return parameters.Size();
+    return parameters.size();
   }
 
 };

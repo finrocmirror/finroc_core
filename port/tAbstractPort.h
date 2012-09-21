@@ -25,7 +25,6 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/rtti/tDataTypeBase.h"
 #include "rrlib/rtti/tFactory.h"
 
@@ -107,7 +106,7 @@ private:
   tEdgeList<>* edges_dest;
 
   /*! Contains any link edges created by this port */
-  util::tSimpleList<tLinkEdge*>* link_edges;
+  std::vector<tLinkEdge*>* link_edges;
 
   /*!
    * Strategy to use, when this port is target
@@ -449,7 +448,7 @@ public:
    * \param incoming_edges Consider incoming edges
    * \param finstructed_edges_only Consider only outgoing finstructed edges?
    */
-  void GetConnectionPartners(util::tSimpleList<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges, bool finstructed_edges_only = false);
+  void GetConnectionPartners(std::vector<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges, bool finstructed_edges_only = false);
 
   /*!
    * \return Has port changed since last reset? (Flag for use by custom API - not used/accessed by core port classes.)
@@ -478,7 +477,7 @@ public:
   /*!
    * \return List with all link edges (must not be modified)
    */
-  inline util::tSimpleList<tLinkEdge*>* GetLinkEdges()
+  inline std::vector<tLinkEdge*>* GetLinkEdges()
   {
     return link_edges;
   }
@@ -561,7 +560,7 @@ public:
    */
   inline bool HasLinkEdges() const
   {
-    return link_edges != NULL && link_edges->Size() > 0;
+    return link_edges != NULL && link_edges->size() > 0;
   }
 
   /*!

@@ -47,28 +47,28 @@ tConstructorCreateModuleActionBase<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11,
   static const util::tString cPARAMETER = "Parameter ";
   std::vector<util::tString> names_temp;
   boost::split(names_temp, param_names, boost::is_any_of(","));
-  util::tSimpleList<util::tString> names;
+  std::vector<util::tString> names;
   for (size_t i = 0; i < names_temp.size(); i++)
   {
-    names.Add(boost::trim_copy(names_temp[i]));
+    names.push_back(boost::trim_copy(names_temp[i]));
   }
-  while (names.Size() < 12)
+  while (names.size() < 12)
   {
-    names.Add(cPARAMETER + boost::lexical_cast<std::string>(names.Size()));
+    names.push_back(cPARAMETER + boost::lexical_cast<std::string>(names.size()));
   }
 
-  p1 = SP1::Create(names.Get(0));
-  p2 = SP2::Create(names.Get(1));
-  p3 = SP3::Create(names.Get(2));
-  p4 = SP4::Create(names.Get(3));
-  p5 = SP5::Create(names.Get(4));
-  p6 = SP6::Create(names.Get(5));
-  p7 = SP7::Create(names.Get(6));
-  p8 = SP8::Create(names.Get(7));
-  p9 = SP9::Create(names.Get(8));
-  p10 = SP10::Create(names.Get(9));
-  p11 = SP11::Create(names.Get(10));
-  p12 = SP12::Create(names.Get(11));
+  p1 = SP1::Create(names[0]);
+  p2 = SP2::Create(names[1]);
+  p3 = SP3::Create(names[2]);
+  p4 = SP4::Create(names[3]);
+  p5 = SP5::Create(names[4]);
+  p6 = SP6::Create(names[5]);
+  p7 = SP7::Create(names[6]);
+  p8 = SP8::Create(names[7]);
+  p9 = SP9::Create(names[8]);
+  p10 = SP10::Create(names[9]);
+  p11 = SP11::Create(names[10]);
+  p12 = SP12::Create(names[11]);
 
   CheckStaticParameterList();
 

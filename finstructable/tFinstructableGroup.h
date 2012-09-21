@@ -25,7 +25,6 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/plugin/tStandardCreateModuleAction.h"
 #include "core/tFrameworkElement.h"
 #include "core/parameter/tStaticParameter.h"
@@ -64,7 +63,7 @@ public:
 private:
 
   /*! Temporary variable for save operation: List to store connected ports in */
-  util::tSimpleList<tAbstractPort*> connect_tmp;
+  std::vector<tAbstractPort*> connect_tmp;
 
   /*! Temporary variable for save operation: Qualified link to this group */
   util::tString link_tmp;

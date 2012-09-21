@@ -24,7 +24,6 @@
 #define core__admin__tAdminServer_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/serialization/tMemoryBuffer.h"
 
 #include "core/port/rpc/method/tPortInterface.h"

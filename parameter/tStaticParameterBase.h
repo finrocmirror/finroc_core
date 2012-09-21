@@ -123,7 +123,7 @@ private:
   bool structure_parameter_proxy;
 
   /*! List of attached parameters */
-  util::tSimpleList<tStaticParameterBase*> attached_parameters;
+  std::vector<tStaticParameterBase*> attached_parameters;
 
 private:
 
@@ -217,7 +217,7 @@ public:
   /*!
    * \param result Result buffer for all attached parameters (including those from parameters this parameter is possibly (indirectly) attached to)
    */
-  void GetAllAttachedParameters(util::tSimpleList<tStaticParameterBase*>& result);
+  void GetAllAttachedParameters(std::vector<tStaticParameterBase*>& result);
 
   /*!
    * \return Place in Configuration tree, this parameter is configured from

@@ -28,10 +28,10 @@ namespace finroc
 namespace core
 {
 int8 tUnit::uid_counter = 0;
-util::tSimpleList<tUnit*> tUnit::uid_lookup_table_temp;
-util::tSimpleList<tUnit*> tUnit::unknown;
+std::vector<tUnit*> tUnit::uid_lookup_table_temp;
+std::vector<tUnit*> tUnit::unknown;
 tUnit tUnit::cNO_UNIT(tUnit::unknown, "", 1);
-util::tSimpleList<tUnit*> tUnit::length;
+std::vector<tUnit*> tUnit::length;
 tUnit tUnit::nm(tUnit::length, "nm", 0.000000001);
 tUnit tUnit::um(tUnit::length, "um", 0.000001);
 tUnit tUnit::mm(tUnit::length, "mm", 0.001);
@@ -39,16 +39,16 @@ tUnit tUnit::cm(tUnit::length, "cm", 0.01);
 tUnit tUnit::dm(tUnit::length, "dm", 0.1);
 tUnit tUnit::m(tUnit::length, "m", 1);
 tUnit tUnit::km(tUnit::length, "km", 1000);
-util::tSimpleList<tUnit*> tUnit::speed;
+std::vector<tUnit*> tUnit::speed;
 tUnit tUnit::km_h(tUnit::speed, "km/h", 3.6);
 tUnit tUnit::m_s(tUnit::speed, "m/s", 1);
-util::tSimpleList<tUnit*> tUnit::weight;
+std::vector<tUnit*> tUnit::weight;
 tUnit tUnit::mg(tUnit::weight, "mg", 0.001);
 tUnit tUnit::g(tUnit::weight, "g", 1);
 tUnit tUnit::kg(tUnit::weight, "kg", 1000);
 tUnit tUnit::t(tUnit::weight, "t", 1000000);
 tUnit tUnit::mt(tUnit::weight, "mt", 1000000000000.0);
-util::tSimpleList<tUnit*> tUnit::time;
+std::vector<tUnit*> tUnit::time;
 tUnit tUnit::ns(tUnit::time, "ns", 0.000000001);
 tUnit tUnit::us(tUnit::time, "us", 0.000001);
 tUnit tUnit::ms(tUnit::time, "ms", 0.001);
@@ -56,25 +56,25 @@ tUnit tUnit::s(tUnit::time, "s", 1);
 tUnit tUnit::min(tUnit::time, "min", 60);
 tUnit tUnit::h(tUnit::time, "h", 3600);
 tUnit tUnit::day(tUnit::time, "day", 86400);
-util::tSimpleList<tUnit*> tUnit::angle;
+std::vector<tUnit*> tUnit::angle;
 tUnit tUnit::deg(tUnit::angle, "deg", 0.017453292);
 tUnit tUnit::rad(tUnit::angle, "rad", 1);
-util::tSimpleList<tUnit*> tUnit::frequency;
+std::vector<tUnit*> tUnit::frequency;
 tUnit tUnit::Hz(tUnit::frequency, "Hz", 1);
-util::tSimpleList<tUnit*> tUnit::screen;
+std::vector<tUnit*> tUnit::screen;
 tUnit tUnit::Pixel(tUnit::screen, "Pixel", 1);
 
-tUnit::tUnit(util::tSimpleList<tUnit*>& group_, const util::tString& description_, double factor_) :
+tUnit::tUnit(std::vector<tUnit*>& group_, const util::tString& description_, double factor_) :
   factor(factor_),
   group(group_),
   description(description_),
-  index(group_.Size()),
+  index(group_.size()),
   uid(uid_counter),
   factors(),
   is_aConstant(false)
 {
-  group_.Add(this);
-  uid_lookup_table_temp.Add(this);
+  group_.push_back(this);
+  uid_lookup_table_temp.push_back(this);
   uid_counter++;
 }
 
@@ -89,15 +89,15 @@ tUnit::tUnit(const util::tString& description_, tUnit* u) :
 {
 }
 
-void tUnit::CalculateFactors(util::tSimpleList<tUnit*>& units)
+void tUnit::CalculateFactors(std::vector<tUnit*>& units)
 {
-  for (size_t j = 0u; j < units.Size(); j++)
+  for (size_t j = 0u; j < units.size(); j++)
   {
-    tUnit* unit = units.Get(j);
-    unit->factors = std::shared_ptr< ::finroc::util::tArrayWrapper<double> >(new ::finroc::util::tArrayWrapper<double>(units.Size()));
-    for (size_t i = 0u; i < units.Size(); i++)
+    tUnit* unit = units[j];
+    unit->factors.reset(new util::tArrayWrapper<double>(units.size()));
+    for (size_t i = 0u; i < units.size(); i++)
     {
-      (*(unit->factors))[i] = unit->GetConversionFactor(units.Get(i));
+      (*(unit->factors))[i] = unit->GetConversionFactor(units[i]);
     }
   }
 }
@@ -122,12 +122,11 @@ double tUnit::GetConversionFactor(tUnit* u) const
 
 tUnit* tUnit::GetUnit(const util::tString& unit_string)
 {
-  for (size_t i = 0u; i < uid_lookup_table_temp.Size(); i++)
+  for (auto it = uid_lookup_table_temp.begin(); it != uid_lookup_table_temp.end(); ++it)
   {
-    tUnit* u = uid_lookup_table_temp.Get(i);
-    if (boost::equals(u->description, unit_string))
+    if (boost::equals((*it)->description, unit_string))
     {
-      return u;
+      return (*it);
     }
   }
   return &(cNO_UNIT);

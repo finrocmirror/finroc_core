@@ -24,7 +24,6 @@
 #define core__plugin__tPlugins_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 
 namespace finroc
 {
@@ -43,7 +42,7 @@ class tPlugins : public util::tUncopyableObject
 private:
 
   /*! All Plugins that are currently available */
-  util::tSimpleList<tPlugin*> plugins;
+  std::vector<tPlugin*> plugins;
 
   /*! Instantly initialize plugins when they are added? True after StaticInit() has been called */
   bool instantly_initialize_plugins;

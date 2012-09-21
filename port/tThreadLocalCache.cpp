@@ -43,7 +43,7 @@ struct ThreadLocalCacheInfosCreator
 {
   static T* Create()
   {
-    return new T(tLockOrderLevels::cINNER_MOST - 100);
+    return new T();
   }
   static void Destroy(T* object)
   {
@@ -52,16 +52,25 @@ struct ThreadLocalCacheInfosCreator
   }
 };
 
-}
+struct tCacheInfo
+{
+  std::vector<tThreadLocalCache*> list;
+  rrlib::thread::tRecursiveMutex mutex;
 
-typedef rrlib::design_patterns::tSingletonHolder<util::tSimpleListWithMutex<tThreadLocalCache*>, rrlib::design_patterns::singleton::Longevity, internal::ThreadLocalCacheInfosCreator> tThreadLocalCacheInfos;
-static inline unsigned int GetLongevity(util::tSimpleListWithMutex<tThreadLocalCache*>*)
+  tCacheInfo() : list(), mutex("Cache Info Lock", tLockOrderLevels::cINNER_MOST - 100) {}
+};
+
+static inline unsigned int GetLongevity(tCacheInfo*)
 {
   return 0xEFFFFFFE; // delete after thread cleanup
 }
 
+}
+
+typedef rrlib::design_patterns::tSingletonHolder<internal::tCacheInfo, rrlib::design_patterns::singleton::Longevity, internal::ThreadLocalCacheInfosCreator> tThreadLocalCacheInfos;
+
 __thread tThreadLocalCache* tThreadLocalCache::info = NULL;
-rrlib::thread::tRecursiveMutex* tThreadLocalCache::infos_mutex = &tThreadLocalCacheInfos::Instance();
+rrlib::thread::tRecursiveMutex* tThreadLocalCache::infos_mutex = &tThreadLocalCacheInfos::Instance().mutex;
 util::tAtomicInt tThreadLocalCache::thread_uid_counter(1);
 
 tThreadLocalCache::tThreadLocalCache() :
@@ -84,10 +93,9 @@ tThreadLocalCache::tThreadLocalCache() :
 
 tThreadLocalCache::~tThreadLocalCache()
 {
-  util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
-  rrlib::thread::tLock l(infos);
-  tThreadLocalCache* tmp = this; // to cleanly remove const modifier
-  infos.RemoveElem(tmp);
+  internal::tCacheInfo& infos = tThreadLocalCacheInfos::Instance();
+  rrlib::thread::tLock l(infos.mutex);
+  infos.list.erase(std::remove(infos.list.begin(), infos.list.end(), this), infos.list.end());
 
   FinalDelete();
 }
@@ -116,7 +124,7 @@ void tThreadLocalCache::AddAutoLock(tCCPortDataManagerTL* obj)
 {
   assert((obj != NULL));
   assert((obj->GetOwnerThread() == rrlib::thread::tThread::CurrentThreadId()));
-  cc_auto_locks.Add(obj);
+  cc_auto_locks.push_back(obj);
 }
 
 tCCPortDataBufferPool* tThreadLocalCache::CreateCCPool(const rrlib::rtti::tDataTypeBase& data_type, int16 uid)
@@ -128,12 +136,12 @@ tCCPortDataBufferPool* tThreadLocalCache::CreateCCPool(const rrlib::rtti::tDataT
 
 tThreadLocalCache* tThreadLocalCache::CreateThreadLocalCacheForThisThread()
 {
-  util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
-  rrlib::thread::tLock lock4(infos);
+  internal::tCacheInfo& infos = tThreadLocalCacheInfos::Instance();
+  rrlib::thread::tLock lock4(infos.mutex);
   tThreadLocalCache* tli = new tThreadLocalCache();
-  infos.Add(tli);
+  infos.list.push_back(tli);
   info = tli;
-  if (infos.Size() > 1)
+  if (infos.list.size() > 1)
   {
     rrlib::thread::tThread::CurrentThread().LockObject(std::shared_ptr<tThreadLocalCache>(tli)); // for auto-deleting after thread finishes
   }
@@ -144,11 +152,11 @@ void tThreadLocalCache::DeleteInfoForPort(int port_index)
 {
   assert((port_index >= 0 && port_index <= tCoreRegister<tAbstractPort*>::GetMaximumNumberOfElements()));
   {
-    util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
-    rrlib::thread::tLock lock2(infos);
-    for (int i = 0, n = infos.Size(); i < n; i++)
+    internal::tCacheInfo& infos = tThreadLocalCacheInfos::Instance();
+    rrlib::thread::tLock lock2(infos.mutex);
+    for (int i = 0, n = infos.list.size(); i < n; i++)
     {
-      tThreadLocalCache* tli = infos.Get(i);
+      tThreadLocalCache* tli = infos.list[i];
 
       // Release port data lock
       tCCPortDataManagerTL* pd = tli->last_written_to_port[port_index];
@@ -180,8 +188,8 @@ void tThreadLocalCache::FinalDelete()
 
   /*! Transfer ownership of remaining port data to ports */
   {
-    util::tSimpleListWithMutex<tThreadLocalCache*>& infos = tThreadLocalCacheInfos::Instance();
-    rrlib::thread::tLock lock2(infos);  // big lock - to make sure no ports are deleted at the same time which would result in a mess (note that CCPortBase desctructor has synchronized operation on infos)
+    internal::tCacheInfo& infos = tThreadLocalCacheInfos::Instance();
+    rrlib::thread::tLock lock2(infos.mutex);  // big lock - to make sure no ports are deleted at the same time which would result in a mess (note that CCPortBase desctructor has synchronized operation on infos)
     for (size_t i = 0u; i < last_written_to_port.length; i++)
     {
       if (last_written_to_port[i] != NULL)
@@ -202,21 +210,21 @@ tCCPortDataManager* tThreadLocalCache::GetUnusedInterThreadBuffer(const rrlib::r
 
 void tThreadLocalCache::ReleaseAllLocks()
 {
-  for (size_t i = 0u, n = auto_locks.Size(); i < n; i++)
+  for (auto it = auto_locks.begin(); it != auto_locks.end(); ++it)
   {
-    auto_locks.Get(i)->GetCurReference()->GetRefCounter()->ReleaseLock();
+    (*it)->GetCurReference()->GetRefCounter()->ReleaseLock();
   }
-  auto_locks.Clear();
-  for (size_t i = 0u, n = cc_auto_locks.Size(); i < n; i++)
+  auto_locks.clear();
+  for (auto it = cc_auto_locks.begin(); it != cc_auto_locks.end(); ++it)
   {
-    cc_auto_locks.Get(i)->ReleaseLock();
+    (*it)->ReleaseLock();
   }
-  cc_auto_locks.Clear();
-  for (size_t i = 0u, n = cc_inter_auto_locks.Size(); i < n; i++)
+  cc_auto_locks.clear();
+  for (auto it = cc_inter_auto_locks.begin(); it != cc_inter_auto_locks.end(); ++it)
   {
-    cc_inter_auto_locks.Get(i)->Recycle2();
+    (*it)->Recycle2();
   }
-  cc_inter_auto_locks.Clear();
+  cc_inter_auto_locks.clear();
 }
 
 namespace internal

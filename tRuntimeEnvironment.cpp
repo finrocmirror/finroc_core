@@ -167,10 +167,9 @@ tAbstractPort* tRuntimeEnvironment::GetPort(const util::tString& link_name)
   tFrameworkElement* fe = GetChildElement(link_name, false);
   if (fe == NULL)
   {
-    for (size_t i = 0u; i < registry.alternative_link_roots.Size(); i++)
+    for (auto it = registry.alternative_link_roots.begin(); it != registry.alternative_link_roots.end(); ++it)
     {
-      tFrameworkElement* alt_root = registry.alternative_link_roots.Get(i);
-      fe = alt_root->GetChildElement(link_name, 0, true, *alt_root);
+      fe = (*it)->GetChildElement(link_name, 0, true, **it);
       if (fe != NULL && !fe->IsDeleted())
       {
         assert(fe->IsPort());
@@ -287,11 +286,11 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement& ele
     {
       if (change_type == tRuntimeListener::cADD)
       {
-        registry.alternative_link_roots.Add(&element);
+        registry.alternative_link_roots.push_back(&element);
       }
       else if (change_type == tRuntimeListener::cREMOVE)
       {
-        registry.alternative_link_roots.RemoveElem(&element);
+        registry.alternative_link_roots.erase(std::remove(registry.alternative_link_roots.begin(), registry.alternative_link_roots.end(), &element), registry.alternative_link_roots.end());
       }
     }
 
@@ -314,9 +313,9 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement& ele
           }
         }
       }
-      for (size_t i = 0; ap.GetLinkEdges() && i < ap.GetLinkEdges()->Size(); i++)
+      for (size_t i = 0; ap.GetLinkEdges() && i < ap.GetLinkEdges()->size(); i++)
       {
-        tLinkEdge& e = *ap.GetLinkEdges()->Get(i);
+        tLinkEdge& e = *(*ap.GetLinkEdges())[i];
         if (e.GetSourceLink().length() > 0)
         {
           tAbstractPort* source = GetPort(e.GetSourceLink());

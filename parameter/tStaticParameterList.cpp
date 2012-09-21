@@ -45,11 +45,11 @@ tStaticParameterList::~tStaticParameterList()
 
 void tStaticParameterList::Add(tStaticParameterBase* param)
 {
-  if (param != NULL)
+  if (param)
   {
-    param->list_index = parameters.Size();
+    param->list_index = parameters.size();
     param->parent_list = this;
-    parameters.Add(param);
+    parameters.push_back(param);
   }
 }
 
@@ -60,10 +60,11 @@ void tStaticParameterList::AnnotatedObjectInitialized()
 
 void tStaticParameterList::Clear()
 {
-  for (int i = parameters.Size() - 1; i >= 0; i--)
+  for (int i = parameters.size() - 1; i >= 0; i--)
   {
-    delete parameters.Remove(i);
+    delete parameters[i];
   }
+  parameters.clear();
 }
 
 void tStaticParameterList::Deserialize(rrlib::serialization::tInputStream& is)
@@ -75,14 +76,15 @@ void tStaticParameterList::Deserialize(rrlib::serialization::tInputStream& is)
   }
   else    // attached to module - only update parameter values
   {
-    if (create_action != is.ReadInt() || (static_cast<int>(parameters.Size())) != is.ReadInt())
+    int read_action = is.ReadInt();
+    if (create_action != read_action || (static_cast<int>(parameters.size())) != is.ReadInt())
     {
       throw util::tRuntimeException("Invalid action id or parameter number", CODE_LOCATION_MACRO);
     }
     tFrameworkElement* ann = static_cast<tFrameworkElement*>(GetAnnotated());
-    for (size_t i = 0u; i < parameters.Size(); i++)
+    for (size_t i = 0u; i < parameters.size(); i++)
     {
-      tStaticParameterBase* param = parameters.Get(i);
+      tStaticParameterBase* param = parameters[i];
       param->Deserialize(is);
     }
     DoStaticParameterEvaluation(*ann);
@@ -116,8 +118,8 @@ void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement& fe)
   rrlib::thread::tLock lock2(fe.GetRegistryLock());
 
   // all parameters attached to any of the module's parameters
-  util::tSimpleList<tStaticParameterBase*> attached_parameters;
-  util::tSimpleList<tStaticParameterBase*> attached_parameters_tmp;
+  std::vector<tStaticParameterBase*> attached_parameters;
+  std::vector<tStaticParameterBase*> attached_parameters_tmp;
 
   tStaticParameterList* spl = fe.GetAnnotation<tStaticParameterList>();
   if (spl)
@@ -130,7 +132,7 @@ void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement& fe)
       spl->Get(i)->LoadValue();
       changed |= spl->Get(i)->HasChanged();
       spl->Get(i)->GetAllAttachedParameters(attached_parameters_tmp);
-      attached_parameters.AddAll(attached_parameters_tmp);
+      attached_parameters.insert(attached_parameters.end(), attached_parameters_tmp.begin(), attached_parameters_tmp.end());
     }
 
     if (changed)
@@ -163,11 +165,11 @@ void tStaticParameterList::DoStaticParameterEvaluation(tFrameworkElement& fe)
   }
 
   // evaluate any attached parameters that have changed, too
-  for (size_t i = 0; i < attached_parameters.Size(); i++)
+  for (size_t i = 0; i < attached_parameters.size(); i++)
   {
-    if (attached_parameters.Get(i)->HasChanged())
+    if (attached_parameters[i]->HasChanged())
     {
-      DoStaticParameterEvaluation(*attached_parameters.Get(i)->GetParentList()->GetAnnotated());
+      DoStaticParameterEvaluation(*attached_parameters[i]->GetParentList()->GetAnnotated());
     }
   }
 }
@@ -193,9 +195,9 @@ tConstructorParameters* tStaticParameterList::Instantiate() const
   tConstructorParameters* cp = new tConstructorParameters();
   tStaticParameterList* c = cp;
   c->create_action = create_action;
-  for (size_t i = 0u; i < parameters.Size(); i++)
+  for (size_t i = 0u; i < parameters.size(); i++)
   {
-    tStaticParameterBase* p = parameters.Get(i);
+    tStaticParameterBase* p = parameters[i];
     c->Add(p->DeepCopy());
   }
   return cp;
@@ -204,10 +206,10 @@ tConstructorParameters* tStaticParameterList::Instantiate() const
 void tStaticParameterList::Serialize(rrlib::serialization::tOutputStream& os) const
 {
   os.WriteInt(create_action);
-  os.WriteInt(parameters.Size());
-  for (size_t i = 0u; i < parameters.Size(); i++)
+  os.WriteInt(static_cast<int>(parameters.size()));
+  for (size_t i = 0u; i < parameters.size(); i++)
   {
-    parameters.Get(i)->Serialize(os);
+    parameters[i]->Serialize(os);
   }
 }
 

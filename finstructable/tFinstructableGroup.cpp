@@ -447,9 +447,9 @@ void tFinstructableGroup::SaveXml()
         // first pass
         ap.GetConnectionPartners(connect_tmp, true, false, true);  // only outgoing edges => we don't get any edges double
 
-        for (size_t i = 0u; i < connect_tmp.Size(); i++)
+        for (size_t i = 0u; i < connect_tmp.size(); i++)
         {
-          tAbstractPort* ap2 = connect_tmp.Get(i);
+          tAbstractPort* ap2 = connect_tmp[i];
 
           // save edge?
           // check1: different finstructed elements as parent?
@@ -486,9 +486,9 @@ void tFinstructableGroup::SaveXml()
         // serialize link edges
         if (ap.GetLinkEdges() != NULL)
         {
-          for (size_t i = 0u; i < ap.GetLinkEdges()->Size(); i++)
+          for (size_t i = 0u; i < ap.GetLinkEdges()->size(); i++)
           {
-            tLinkEdge* le = ap.GetLinkEdges()->Get(i);
+            tLinkEdge* le = (*ap.GetLinkEdges())[i];
             if (!le->IsFinstructed())
             {
               continue;

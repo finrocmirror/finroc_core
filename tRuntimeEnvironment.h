@@ -24,8 +24,6 @@
 #define core__tRuntimeEnvironment_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
-#include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/design_patterns/singleton/policies/creation/CreateUsingNew.h"
 
 #include "core/tCoreRegister.h"
@@ -78,7 +76,7 @@ public:
     std::string temp_buffer;
 
     /*! Alternative roots for links (usually remote runtime environments mapped into this one) */
-    util::tSimpleList<tFrameworkElement*> alternative_link_roots;
+    std::vector<tFrameworkElement*> alternative_link_roots;
 
     /*! Mutex */
     rrlib::thread::tRecursiveMutex mutex;

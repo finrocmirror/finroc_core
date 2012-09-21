@@ -99,11 +99,11 @@ tNetPort* tNetPort::FindNetPort(tAbstractPort& port, util::tObject* belongs_to)
   {
     return NULL;
   }
-  util::tSimpleList<tAbstractPort*> result;
+  std::vector<tAbstractPort*> result;
   port.GetConnectionPartners(result, port.IsOutputPort(), !port.IsOutputPort());
-  for (int i = 0, n = result.Size(); i < n; i++)
+  for (int i = 0, n = result.size(); i < n; i++)
   {
-    tAbstractPort* port2 = result.Get(i);
+    tAbstractPort* port2 = result[i];
     if (port2 && port2->GetFlag(tCoreFlags::cNETWORK_ELEMENT))
     {
       tNetPort* np = port2->AsNetPort();

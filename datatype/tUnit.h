@@ -25,8 +25,6 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
-
 namespace finroc
 {
 namespace core
@@ -49,7 +47,7 @@ private:
   double factor;
 
   /*! Group of units that unit is in */
-  const util::tSimpleList<tUnit*>& group;
+  const std::vector<tUnit*>& group;
 
   /*! Unit description */
   util::tString description;
@@ -70,31 +68,31 @@ private:
   bool is_aConstant;
 
   /*! temp list for uidLookupTable (see below) */
-  static util::tSimpleList<tUnit*> uid_lookup_table_temp;
+  static std::vector<tUnit*> uid_lookup_table_temp;
 
   /*! No Unit - has Uid 0 */
-  static util::tSimpleList<tUnit*> unknown;
+  static std::vector<tUnit*> unknown;
 
   /*! Length Units */
-  static util::tSimpleList<tUnit*> length;
+  static std::vector<tUnit*> length;
 
   /*! Speed Units */
-  static util::tSimpleList<tUnit*> speed;
+  static std::vector<tUnit*> speed;
 
   /*! Weight Units */
-  static util::tSimpleList<tUnit*> weight;
+  static std::vector<tUnit*> weight;
 
   /*! Time Units */
-  static util::tSimpleList<tUnit*> time;
+  static std::vector<tUnit*> time;
 
   /*! Angular Units */
-  static util::tSimpleList<tUnit*> angle;
+  static std::vector<tUnit*> angle;
 
   /*! Frequency */
-  static util::tSimpleList<tUnit*> frequency;
+  static std::vector<tUnit*> frequency;
 
   /*! Screen Units */
-  static util::tSimpleList<tUnit*> screen;
+  static std::vector<tUnit*> screen;
 
 public:
 
@@ -159,14 +157,14 @@ private:
    * \param description Unit description
    * \param factor Factor regarding base unit
    */
-  tUnit(util::tSimpleList<tUnit*>& group_, const util::tString& description_, double factor_);
+  tUnit(std::vector<tUnit*>& group_, const util::tString& description_, double factor_);
 
   /*!
    * Precalculate conversion factors
    *
    * \param units Group of Units
    */
-  static void CalculateFactors(util::tSimpleList<tUnit*>& units);
+  static void CalculateFactors(std::vector<tUnit*>& units);
 
 protected:
 
@@ -197,7 +195,7 @@ public:
    */
   inline bool ConvertibleTo(tUnit* u) const
   {
-    return group.Contains(u);
+    return std::find(group.begin(), group.end(), u) != group.end();
   }
 
   /*!
@@ -232,10 +230,9 @@ public:
    * \param uid Unit's uid
    * \return Unit with this Uid
    */
-  inline static tUnit* GetUnit(int8 uid_)
+  inline static tUnit* GetUnit(int8 uid)
   {
-    //return uidLookupTable[uid];
-    return uid_lookup_table_temp.Get(uid_);
+    return uid_lookup_table_temp[uid];
   }
 
   /*!

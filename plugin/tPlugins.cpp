@@ -35,7 +35,7 @@ tPlugins::tPlugins() :
 
 void tPlugins::AddPlugin(tPlugin* p)
 {
-  plugins.Add(p);
+  plugins.push_back(p);
 
   // TODO: This does not work - because plugin is not fully constructed yet
   /*if (instantly_initialize_plugins)
@@ -59,9 +59,9 @@ void tPlugins::StaticInit()
 {
   tPlugins* p = GetInstance();
   p->FindAndLoadPlugins();
-  for (size_t i = 0; i < p->plugins.Size(); i++)
+  for (size_t i = 0; i < p->plugins.size(); i++)
   {
-    p->plugins.Get(i)->Init();
+    p->plugins[i]->Init();
   }
   p->instantly_initialize_plugins = true;
 }

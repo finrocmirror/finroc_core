@@ -26,7 +26,6 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/watchdog/tWatchDogTask.h"
 
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tFrameworkElement.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tEdgeAggregator.h"
@@ -54,19 +53,19 @@ private:
   std::atomic<bool> reschedule;
 
   /*! simple schedule: Tasks will be executed in specified order */
-  util::tSimpleList<tPeriodicFrameworkElementTask*> schedule;
+  std::vector<tPeriodicFrameworkElementTask*> schedule;
 
   /*! temporary list of tasks that need to be scheduled */
-  util::tSimpleList<tPeriodicFrameworkElementTask*> tasks;
+  std::vector<tPeriodicFrameworkElementTask*> tasks;
 
   /*! temporary list of tasks that need to be scheduled - which are not sensor tasks */
-  util::tSimpleList<tPeriodicFrameworkElementTask*> non_sensor_tasks;
+  std::vector<tPeriodicFrameworkElementTask*> non_sensor_tasks;
 
   /*! temporary variable for scheduling algorithm: trace we're currently following */
-  util::tSimpleList<tEdgeAggregator*> trace;
+  std::vector<tEdgeAggregator*> trace;
 
   /*! temporary variable: trace back */
-  util::tSimpleList<tPeriodicFrameworkElementTask*> trace_back;
+  std::vector<tPeriodicFrameworkElementTask*> trace_back;
 
   /*! Port to publish time spent in last call to MainLoopCallback() */
   tPort<rrlib::time::tDuration> last_cycle_execution_time;

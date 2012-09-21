@@ -24,10 +24,9 @@
 #define core__datatype__tFrameworkElementInfo_h__
 
 #include "rrlib/finroc_core_utils/definitions.h"
+#include "rrlib/rtti/rtti.h"
 
 #include "core/tRuntimeListener.h"
-#include "rrlib/rtti/rtti.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "core/tCoreFlags.h"
 #include "core/port/tEdgeAggregator.h"
 
@@ -103,7 +102,7 @@ private:
   int16 min_net_update_time;
 
   /*! Stores outgoing connection destination ports - if this is a port */
-  util::tSimpleList<tConnectionInfo> connections;
+  std::vector<tConnectionInfo> connections;
 
   /*! mask for non-ports and non-edge-aggregators */
   static const uint cPARENT_FLAGS_TO_STORE = tCoreFlags::cGLOBALLY_UNIQUE_LINK | tCoreFlags::cALTERNATE_LINK_ROOT | tCoreFlags::cEDGE_AGGREGATOR;
@@ -152,10 +151,9 @@ public:
    *
    * \param copy_to List to copy result of get operation to
    */
-  inline void GetConnections(util::tSimpleList<tConnectionInfo>& copy_to) const
+  inline void GetConnections(std::vector<tConnectionInfo>& copy_to) const
   {
-    copy_to.Clear();
-    copy_to.AddAll(connections);
+    copy_to = connections;
   }
 
   /*!

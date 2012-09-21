@@ -197,7 +197,7 @@ const util::tString tMethodCall::ToString() const
 
 bool tMethodCall::TypeCheck()
 {
-  return method != NULL && port_interface_type != NULL && tFinrocTypeInfo::Get(port_interface_type).GetPortInterface() != NULL && tFinrocTypeInfo::Get(port_interface_type).GetPortInterface()->ContainsMethod(method);
+  return method != NULL && port_interface_type != NULL && tFinrocTypeInfo::Get(port_interface_type).GetPortInterface() != NULL && tFinrocTypeInfo::Get(port_interface_type).GetPortInterface()->ContainsMethod(*method);
 }
 
 } // namespace finroc

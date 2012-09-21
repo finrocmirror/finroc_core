@@ -26,8 +26,6 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/finroc_core_utils/container/tReusablesPool.h"
 #include "rrlib/finroc_core_utils/container/tBoundedQElementContainer.h"
-#include "rrlib/finroc_core_utils/container/tSimpleListWithMutex.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/serialization/tInputStream.h"
 
 #include "core/tAnnotatable.h"
@@ -87,11 +85,11 @@ private:
   static util::tAtomicInt thread_uid_counter;
 
   /*! Automatic locks - are released/recycled with releaseAllLocks() */
-  util::tSimpleList<tPortDataManager*> auto_locks;
+  std::vector<tPortDataManager*> auto_locks;
 
-  util::tSimpleList<tCCPortDataManagerTL*> cc_auto_locks;
+  std::vector<tCCPortDataManagerTL*> cc_auto_locks;
 
-  util::tSimpleList<tCCPortDataManager*> cc_inter_auto_locks;
+  std::vector<tCCPortDataManager*> cc_inter_auto_locks;
 
 public:
 
@@ -176,7 +174,7 @@ public:
   inline void AddAutoLock(tPortDataManager* obj)
   {
     assert((obj != NULL));
-    auto_locks.Add(obj);
+    auto_locks.push_back(obj);
   }
 
   /*!
@@ -196,7 +194,7 @@ public:
   inline void AddAutoLock(tCCPortDataManager* obj)
   {
     assert(obj);
-    cc_inter_auto_locks.Add(obj);
+    cc_inter_auto_locks.push_back(obj);
   }
 
   /*!

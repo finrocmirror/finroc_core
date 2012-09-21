@@ -25,7 +25,6 @@
 
 #include "rrlib/rtti/tDataTypeBase.h"
 #include "rrlib/serialization/serialization.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 
 #include "core/tCoreFlags.h"
 #include "core/port/tPortFlags.h"
@@ -98,7 +97,7 @@ private:
   bool show_output_port_selection;
 
   /*! List backend (for remote Runtimes) */
-  util::tSimpleList<tEntry> list;
+  std::vector<tEntry> list;
 
   /*! FrameworkElement that list is wrapping (for local Runtimes) */
   tFrameworkElement* io_vector;
@@ -135,7 +134,7 @@ private:
    * \param elem Framework Element
    * \param result List containing result
    */
-  static void GetPorts(const tFrameworkElement& elem, util::tSimpleList<tAbstractPort*>& result);
+  static void GetPorts(const tFrameworkElement& elem, std::vector<tAbstractPort*>& result);
 
 public:
 
@@ -188,7 +187,7 @@ public:
    */
   inline int GetSize() const
   {
-    return io_vector == NULL ? list.Size() : io_vector->ChildCount();
+    return io_vector == NULL ? list.size() : io_vector->ChildCount();
   }
 
   /*!

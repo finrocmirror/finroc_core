@@ -76,9 +76,9 @@ void tThreadContainerThread::MainLoopCallback()
       tLock lock3(this->thread_container.GetRegistryLock());
 
       // find tasks
-      tasks.Clear();
-      non_sensor_tasks.Clear();
-      schedule.Clear();
+      tasks.clear();
+      non_sensor_tasks.clear();
+      schedule.clear();
 
       for (auto it = thread_container.SubElementsBegin(true); it != thread_container.SubElementsEnd(); ++it)
       {
@@ -90,52 +90,48 @@ void tThreadContainerThread::MainLoopCallback()
         if (ann)
         {
           tPeriodicFrameworkElementTask* task = static_cast<tPeriodicFrameworkElementTask*>(ann);
-          task->previous_tasks.Clear();
-          task->next_tasks.Clear();
+          task->previous_tasks.clear();
+          task->next_tasks.clear();
           if (task->IsSenseTask())
           {
-            tasks.Add(task);
+            tasks.push_back(task);
           }
           else
           {
-            non_sensor_tasks.Add(task);
+            non_sensor_tasks.push_back(task);
           }
         }
       }
 
-      tasks.AddAll(non_sensor_tasks);
+      tasks.insert(tasks.end(), non_sensor_tasks.begin(), non_sensor_tasks.end());
 
       // create task graph
-      for (size_t i = 0u; i < tasks.Size(); i++)
+      for (auto task = tasks.begin(); task != tasks.end(); ++task)
       {
-        tPeriodicFrameworkElementTask* task = tasks.Get(i);
-
         // trace outgoing connections
-        for (auto it = task->outgoing.begin(); it < task->outgoing.end(); it++)
+        for (auto it = (*task)->outgoing.begin(); it < (*task)->outgoing.end(); ++it)
         {
-          TraceOutgoing(*task, **it);
+          TraceOutgoing(**task, **it);
         }
       }
 
       // now create schedule
-      while (tasks.Size() > 0)
+      while (tasks.size() > 0)
       {
         // do we have task without previous tasks?
         bool found = false;
-        for (size_t i = 0u; i < tasks.Size(); i++)
+        for (auto task = tasks.begin(); task != tasks.end(); ++task)
         {
-          tPeriodicFrameworkElementTask* task = tasks.Get(i);
-          if (task->previous_tasks.Size() == 0)
+          if ((*task)->previous_tasks.size() == 0)
           {
-            schedule.Add(task);
-            tasks.RemoveElem(task);
+            schedule.push_back(*task);
+            tasks.erase(std::remove(tasks.begin(), tasks.end(), *task), tasks.end());
             found = true;
 
             // delete from next tasks' previous task list
-            for (size_t j = 0u; j < task->next_tasks.Size(); j++)
+            for (auto next = (*task)->next_tasks.begin(); next != (*task)->next_tasks.end(); ++next)
             {
-              tPeriodicFrameworkElementTask* next = task->next_tasks.Get(j);
-              next->previous_tasks.RemoveElem(task);
+              (*next)->previous_tasks.erase(std::remove((*next)->previous_tasks.begin(), (*next)->previous_tasks.end(), *task), (*next)->previous_tasks.end());
             }
             break;
           }
@@ -147,34 +143,33 @@ void tThreadContainerThread::MainLoopCallback()
 
         // ok, we didn't find module to continue with... (loop)
         FINROC_LOG_PRINT_TO(thread_containers, WARNING, "Detected loop: doing traceback");
-        trace_back.Clear();
-        tPeriodicFrameworkElementTask* current = tasks.Get(0);
-        trace_back.Add(current);
+        trace_back.clear();
+        tPeriodicFrameworkElementTask* current = tasks[0];
+        trace_back.push_back(current);
         while (true)
         {
           bool end = true;
-          for (size_t i = 0u; i < current->previous_tasks.Size(); i++)
+          for (size_t i = 0u; i < current->previous_tasks.size(); i++)
           {
-            tPeriodicFrameworkElementTask* prev = current->previous_tasks.Get(i);
-            if (!trace_back.Contains(prev))
+            tPeriodicFrameworkElementTask* prev = current->previous_tasks[i];
+            if (std::find(trace_back.begin(), trace_back.end(), prev) != trace_back.end())
             {
               end = false;
               current = prev;
-              trace_back.Add(current);
+              trace_back.push_back(current);
               break;
             }
           }
           if (end)
           {
             FINROC_LOG_PRINT_TO(thread_containers, WARNING, "Choosing ", current->incoming[0]->GetQualifiedName(), " as next element");
-            schedule.Add(current);
-            tasks.RemoveElem(current);
+            schedule.push_back(current);
+            tasks.erase(std::remove(tasks.begin(), tasks.end(), current), tasks.end());
 
             // delete from next tasks' previous task list
-            for (size_t j = 0u; j < current->next_tasks.Size(); j++)
+            for (auto next = current->next_tasks.begin(); next != current->next_tasks.end(); ++next)
             {
-              tPeriodicFrameworkElementTask* next = current->next_tasks.Get(j);
-              next->previous_tasks.RemoveElem(current);
+              (*next)->previous_tasks.erase(std::remove((*next)->previous_tasks.begin(), (*next)->previous_tasks.end(), current), (*next)->previous_tasks.end());
             }
             break;
           }
@@ -190,9 +185,9 @@ void tThreadContainerThread::MainLoopCallback()
   SetDeadLine(rrlib::time::Now() + GetCycleTime() * 4 + std::chrono::seconds(1));
 #endif
 
-  for (size_t i = 0u; i < schedule.Size(); i++)
+  for (size_t i = 0u; i < schedule.size(); i++)
   {
-    current_task = schedule.Get(i);
+    current_task = schedule[i];
     current_task->task.ExecuteTask();
   }
 
@@ -233,7 +228,7 @@ void tThreadContainerThread::StopThread()
 void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask& task, tEdgeAggregator& outgoing)
 {
   // add to trace stack
-  trace.Add(&outgoing);
+  trace.push_back(&outgoing);
 
   util::tArrayWrapper<tAggregatedEdge*>* out_edges = outgoing.GetEmergingEdges();
   assert(out_edges != NULL);
@@ -250,7 +245,7 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask& task, 
     tEdgeAggregator* dest = &temp->destination;
 
     assert(dest);
-    if (!trace.Contains(dest))
+    if (std::find(trace.begin(), trace.end(), dest) == trace.end())
     {
       // ok, have we reached another task?
       tFinrocAnnotation* ann = dest->GetAnnotation(tPeriodicFrameworkElementTask::cTYPE);
@@ -261,10 +256,10 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask& task, 
       if (ann)
       {
         tPeriodicFrameworkElementTask* task2 = static_cast<tPeriodicFrameworkElementTask*>(ann);
-        if (!task.next_tasks.Contains(task2))
+        if (std::find(task.next_tasks.begin(), task.next_tasks.end(), task2) == task.next_tasks.end())
         {
-          task.next_tasks.Add(task2);
-          task2->previous_tasks.Add(&task);
+          task.next_tasks.push_back(task2);
+          task2->previous_tasks.push_back(&task);
         }
         continue;
       }
@@ -280,7 +275,7 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask& task, 
         if (parent->GetFlag(tCoreFlags::cEDGE_AGGREGATOR))
         {
           tEdgeAggregator* ea = static_cast<tEdgeAggregator*>(parent);
-          if (!trace.Contains(ea))
+          if (std::find(trace.begin(), trace.end(), ea) == trace.end())
           {
             TraceOutgoing(task, *ea);
           }
@@ -290,7 +285,7 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask& task, 
           if (it->GetFlag(tCoreFlags::cREADY) && it->GetFlag(tCoreFlags::cEDGE_AGGREGATOR) && it->GetFlag(tEdgeAggregator::cIS_INTERFACE))
           {
             tEdgeAggregator& ea = static_cast<tEdgeAggregator&>(*it);
-            if (!trace.Contains(&ea))
+            if (std::find(trace.begin(), trace.end(), &ea) == trace.end())
             {
               TraceOutgoing(task, ea);
             }
@@ -301,8 +296,8 @@ void tThreadContainerThread::TraceOutgoing(tPeriodicFrameworkElementTask& task, 
   }
 
   // remove from trace stack
-  assert(trace.Get(trace.Size() - 1) == &outgoing);
-  trace.Remove(trace.Size() - 1);
+  assert(trace[trace.size() - 1] == &outgoing);
+  trace.pop_back();
 }
 
 } // namespace finroc

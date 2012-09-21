@@ -25,7 +25,6 @@
 
 #include "rrlib/finroc_core_utils/definitions.h"
 
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 #include "rrlib/rtti/tDataTypeBase.h"
 #include "core/portdatabase/tFinrocTypeInfo.h"
 
@@ -46,7 +45,7 @@ class tPortInterface : public util::tUncopyableObject
 private:
 
   /*! List of methods in interface */
-  util::tSimpleList<tAbstractMethod*> methods;
+  std::vector<tAbstractMethod*> methods;
 
 public:
 
@@ -73,16 +72,16 @@ public:
    */
   inline void Clear()
   {
-    methods.Clear();
+    methods.clear();
   }
 
   /*!
    * \param method Method
    * \return Does port interface contain method?
    */
-  inline bool ContainsMethod(tAbstractMethod* method)
+  inline bool ContainsMethod(tAbstractMethod& method)
   {
-    return methods.Contains(method);
+    return std::find(methods.begin(), methods.end(), &method) != methods.end();
   }
 
   virtual ~tPortInterface();
@@ -102,8 +101,8 @@ public:
    */
   inline tAbstractMethod* GetMethod(size_t id)
   {
-    assert((id < methods.Size()));
-    return methods.Get(id);
+    assert((id < methods.size()));
+    return methods[id];
   }
 
   /*!

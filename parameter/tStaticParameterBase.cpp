@@ -66,12 +66,13 @@ void tStaticParameterBase::AttachTo(tStaticParameterBase* other)
 {
   if (use_value_of != this)
   {
-    use_value_of->attached_parameters.RemoveElem(this);
+    auto& vec = use_value_of->attached_parameters;
+    vec.erase(std::remove(vec.begin(), vec.end(), this), vec.end());
   }
   use_value_of = other == NULL ? this : other;
   if (use_value_of != this)
   {
-    use_value_of->attached_parameters.Add(this);
+    use_value_of->attached_parameters.push_back(this);
   }
 
   tStaticParameterBase* sp = GetParameterWithBuffer();
@@ -190,24 +191,24 @@ void tStaticParameterBase::DeserializeValue(rrlib::serialization::tInputStream& 
   }
 }
 
-void tStaticParameterBase::GetAllAttachedParameters(util::tSimpleList<tStaticParameterBase*>& result)
+void tStaticParameterBase::GetAllAttachedParameters(std::vector<tStaticParameterBase*>& result)
 {
-  result.Clear();
-  result.Add(this);
+  result.clear();
+  result.push_back(this);
 
-  for (size_t i = 0; i < result.Size(); i++)
+  for (size_t i = 0; i < result.size(); i++)
   {
-    tStaticParameterBase* param = result.Get(i);
-    if (param->use_value_of != NULL && param->use_value_of != this && (!result.Contains(param)))
+    tStaticParameterBase* param = result[i];
+    if (param->use_value_of != NULL && param->use_value_of != this && (/* result does not contain param */std::find(result.begin(), result.end(), param) == result.end()))
     {
-      result.Add(param->use_value_of);
+      result.push_back(param->use_value_of);
     }
-    for (size_t j = 0; j < param->attached_parameters.Size(); j++)
+    for (size_t j = 0; j < param->attached_parameters.size(); j++)
     {
-      tStaticParameterBase* at = param->attached_parameters.Get(j);
-      if (at != this && (!result.Contains(at)))
+      tStaticParameterBase* at = param->attached_parameters[j];
+      if (at != this && (/* result does not contain param */std::find(result.begin(), result.end(), at) == result.end()))
       {
-        result.Add(at);
+        result.push_back(at);
       }
     }
   }

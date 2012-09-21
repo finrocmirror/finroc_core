@@ -174,11 +174,11 @@ void tAbstractPort::ConnectTo(const util::tString& link_name, tConnectDirection 
   }
   if (link_edges == NULL)    // lazy initialization
   {
-    link_edges = new util::tSimpleList<tLinkEdge*>();
+    link_edges = new std::vector<tLinkEdge*>();
   }
-  for (size_t i = 0u; i < link_edges->Size(); i++)
+  for (size_t i = 0u; i < link_edges->size(); i++)
   {
-    if (boost::equals(link_edges->Get(i)->GetTargetLink(), link_name) || boost::equals(link_edges->Get(i)->GetSourceLink(), link_name))
+    if (boost::equals((*link_edges)[i]->GetTargetLink(), link_name) || boost::equals((*link_edges)[i]->GetSourceLink(), link_name))
     {
       return;
     }
@@ -187,10 +187,10 @@ void tAbstractPort::ConnectTo(const util::tString& link_name, tConnectDirection 
   {
   case tConnectDirection::AUTO:
   case tConnectDirection::TO_TARGET:
-    link_edges->Add(new tLinkEdge(*this, MakeAbsoluteLink(link_name), connect_direction == tConnectDirection::AUTO, finstructed));
+    link_edges->push_back(new tLinkEdge(*this, MakeAbsoluteLink(link_name), connect_direction == tConnectDirection::AUTO, finstructed));
     break;
   case tConnectDirection::TO_SOURCE:
-    link_edges->Add(new tLinkEdge(MakeAbsoluteLink(link_name), *this, false, finstructed));
+    link_edges->push_back(new tLinkEdge(MakeAbsoluteLink(link_name), *this, false, finstructed));
     break;
   }
 }
@@ -227,18 +227,18 @@ void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
   // remove link edges
   if (link_edges != NULL)
   {
-    for (size_t i = 0u; i < link_edges->Size(); i++)
+    for (size_t i = 0u; i < link_edges->size(); i++)
     {
-      tLinkEdge* le = link_edges->Get(i);
+      tLinkEdge* le = (*link_edges)[i];
       if ((incoming && le->GetSourceLink().length() > 0) || (outgoing && le->GetTargetLink().length() > 0))
       {
-        link_edges->Remove(i);
+        link_edges->erase(link_edges->begin() + i);
         delete le;
         i--;
       }
     }
   }
-  assert(((!incoming) || (!outgoing) || (link_edges == NULL) || (link_edges->Size() == 0)));
+  assert(((!incoming) || (!outgoing) || (link_edges == NULL) || (link_edges->size() == 0)));
 
   util::tArrayWrapper<tAbstractPort*>* it = edges_src->GetIterable();
   if (outgoing)
@@ -302,9 +302,9 @@ void tAbstractPort::DisconnectFrom(tAbstractPort& target)
 void tAbstractPort::DisconnectFrom(const util::tString& link)
 {
   tLock lock2(GetRegistryLock());
-  for (size_t i = 0u; i < link_edges->Size(); i++)
+  for (size_t i = 0u; i < link_edges->size(); i++)
   {
-    tLinkEdge* le = link_edges->Get(i);
+    tLinkEdge* le = (*link_edges)[i];
     if (boost::equals(le->GetSourceLink(), link) || boost::equals(le->GetTargetLink(), link))
     {
       delete le;
@@ -337,9 +337,9 @@ std::vector<tPortConnectionConstraint*>& tAbstractPort::GetConnectionConstraintL
   return tConstraintListSingleton::Instance();
 }
 
-void tAbstractPort::GetConnectionPartners(util::tSimpleList<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges, bool finstructed_edges_only)
+void tAbstractPort::GetConnectionPartners(std::vector<tAbstractPort*>& result, bool outgoing_edges, bool incoming_edges, bool finstructed_edges_only)
 {
-  result.Clear();
+  result.clear();
   util::tArrayWrapper<tAbstractPort*>* it = NULL;
 
   if (outgoing_edges)
@@ -352,7 +352,7 @@ void tAbstractPort::GetConnectionPartners(util::tSimpleList<tAbstractPort*>& res
       {
         continue;
       }
-      result.Add(target);
+      result.push_back(target);
     }
   }
 
@@ -366,7 +366,7 @@ void tAbstractPort::GetConnectionPartners(util::tSimpleList<tAbstractPort*>& res
       {
         continue;
       }
-      result.Add(target);
+      result.push_back(target);
     }
   }
 }

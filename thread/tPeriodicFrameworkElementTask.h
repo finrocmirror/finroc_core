@@ -26,7 +26,6 @@
 #include "rrlib/finroc_core_utils/definitions.h"
 #include "rrlib/thread/tTask.h"
 #include "rrlib/rtti/tDataTypeBase.h"
-#include "rrlib/finroc_core_utils/container/tSimpleList.h"
 
 #include "core/port/tEdgeAggregator.h"
 #include "core/tFinrocAnnotation.h"
@@ -60,10 +59,10 @@ public:
   std::vector<tEdgeAggregator*> outgoing;
 
   /*! Tasks to execute before this one (updated during scheduling) */
-  util::tSimpleList<tPeriodicFrameworkElementTask*> previous_tasks;
+  std::vector<tPeriodicFrameworkElementTask*> previous_tasks;
 
   /*! Tasks to execute after this one (updated during scheduling) */
-  util::tSimpleList<tPeriodicFrameworkElementTask*> next_tasks;
+  std::vector<tPeriodicFrameworkElementTask*> next_tasks;
 
   /*!
    * \param incoming_ports Element containing incoming ports (relevant for execution order)

@@ -100,7 +100,7 @@ void tFrameworkElementInfo::Deserialize(rrlib::serialization::tInputStream& is, 
       for (int i = 0; i < cnt; i++)
       {
         int handle = is.ReadInt();
-        connections.Add(tConnectionInfo(handle, is.ReadBoolean()));
+        connections.emplace_back(handle, is.ReadBoolean());
       }
     }
   }
@@ -147,7 +147,7 @@ void tFrameworkElementInfo::Reset()
   strategy = 0;
   min_net_update_time = 0;
   link_count = 0;
-  connections.Clear();
+  connections.clear();
 }
 
 void tFrameworkElementInfo::SerializeFrameworkElement(tFrameworkElement& fe, int8 op_code, rrlib::serialization::tOutputStream& os, bool serialize_hierarchy, bool serialize_connections, bool send_tags, std::string& tmp, const std::function<bool (const tFrameworkElement&)>& element_filter)
