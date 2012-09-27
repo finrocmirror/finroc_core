@@ -120,18 +120,19 @@ void tThreadContainerThread::MainLoopCallback()
       {
         // do we have task without previous tasks?
         bool found = false;
-        for (auto task = tasks.begin(); task != tasks.end(); ++task)
+        for (auto it = tasks.begin(); it != tasks.end(); ++it)
         {
-          if ((*task)->previous_tasks.size() == 0)
+          tPeriodicFrameworkElementTask* task = *it;
+          if (task->previous_tasks.size() == 0)
           {
-            schedule.push_back(*task);
-            tasks.erase(std::remove(tasks.begin(), tasks.end(), *task), tasks.end());
+            schedule.push_back(task);
+            tasks.erase(std::remove(tasks.begin(), tasks.end(), task), tasks.end());
             found = true;
 
             // delete from next tasks' previous task list
-            for (auto next = (*task)->next_tasks.begin(); next != (*task)->next_tasks.end(); ++next)
+            for (auto next = task->next_tasks.begin(); next != task->next_tasks.end(); ++next)
             {
-              (*next)->previous_tasks.erase(std::remove((*next)->previous_tasks.begin(), (*next)->previous_tasks.end(), *task), (*next)->previous_tasks.end());
+              (*next)->previous_tasks.erase(std::remove((*next)->previous_tasks.begin(), (*next)->previous_tasks.end(), task), (*next)->previous_tasks.end());
             }
             break;
           }
