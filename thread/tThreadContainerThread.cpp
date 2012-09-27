@@ -152,7 +152,7 @@ void tThreadContainerThread::MainLoopCallback()
           for (size_t i = 0u; i < current->previous_tasks.size(); i++)
           {
             tPeriodicFrameworkElementTask* prev = current->previous_tasks[i];
-            if (std::find(trace_back.begin(), trace_back.end(), prev) != trace_back.end())
+            if (std::find(trace_back.begin(), trace_back.end(), prev) == trace_back.end())
             {
               end = false;
               current = prev;
