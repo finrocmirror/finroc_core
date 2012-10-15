@@ -470,7 +470,7 @@ public:
    *
    * Typically used in this way (fe is a tFrameworkElement reference):
    *
-   *   for (auto it = fe.ChildPortsBegin(); it < fe.ChildPortsEnd(); ++it)
+   *   for (auto it = fe.ChildPortsBegin(); it != fe.ChildPortsEnd(); ++it)
    *   {
    *     if (it->IsReady())
    *     {
@@ -496,7 +496,7 @@ public:
    *
    * Typically used in this way (fe is a tFrameworkElement reference):
    *
-   *   for (auto it = fe.ChildrenBegin(); it < fe.ChildrenEnd(); ++it)
+   *   for (auto it = fe.ChildrenBegin(); it != fe.ChildrenEnd(); ++it)
    *   {
    *     if (it->IsReady())
    *     {
@@ -897,7 +897,7 @@ public:
    *
    * Typically used in this way (fe is a tFrameworkElement reference):
    *
-   *   for (auto it = fe.SubElementsBegin(); it < fe.SubElementsEnd(); ++it)
+   *   for (auto it = fe.SubElementsBegin(); it != fe.SubElementsEnd(); ++it)
    *   {
    *     if (it->IsReady())
    *     {
