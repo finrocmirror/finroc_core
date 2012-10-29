@@ -1,102 +1,163 @@
-/**
- * You received this file as part of an advanced experimental
- * robotics framework prototype ('finroc')
+//
+// You received this file as part of Finroc
+// A Framework for intelligent robot control
+//
+// Copyright (C) Finroc GbR (finroc.org)
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+//----------------------------------------------------------------------
+/*!\file    core/tAnnotatable.h
  *
- * Copyright (C) 2007-2010 Max Reichardt,
- *   Robotics Research Lab, University of Kaiserslautern
+ * \author  Max Reichardt
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * \date    2012-10-26
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * \brief   Contains tAnnotatable
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * \b tAnnotatable
+ *
+ * Abstract base class for classes that can be annotated with Finroc annotations
+ * (classes derived from tAnnotation)
+ *
  */
+//----------------------------------------------------------------------
+#ifndef __core__tAnnotatable_h__
+#define __core__tAnnotatable_h__
 
-#ifndef core__tAnnotatable_h__
-#define core__tAnnotatable_h__
+//----------------------------------------------------------------------
+// External includes (system with <>, local with "")
+//----------------------------------------------------------------------
 
-#include "rrlib/finroc_core_utils/definitions.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "rrlib/rtti/rtti.h"
+//----------------------------------------------------------------------
+// Internal includes with ""
+//----------------------------------------------------------------------
+#include "core/internal/tAnnotatableImplementation.h"
 
+//----------------------------------------------------------------------
+// Namespace declaration
+//----------------------------------------------------------------------
 namespace finroc
 {
 namespace core
 {
-class tFinrocAnnotation;
 
+//----------------------------------------------------------------------
+// Forward declarations / typedefs / enums
+//----------------------------------------------------------------------
+class tAnnotatableBase {};
+
+//----------------------------------------------------------------------
+// Class declaration
+//----------------------------------------------------------------------
+//! Annotatable class
 /*!
- * \author Max Reichardt
+ * Abstract base class for classes that can be annotated with Finroc annotations
+ * (classes derived from tAnnotation).
  *
- * Abstract base class for classes that can be annotated with
- * an arbitrary number of FinrocAnnotations.
+ * The C++ data type is used to lookup annotations.
+ * => max. one annotation of a specific C++ data type may be added.
+ *
+ * \tparam TMutex Mutex class to use to synchronize calls to AddAnnotation(...)
+ *                Use rrlib::thread::tNoMutex if concurrent calls cannot occur
+ *                Mutex class will be parent class, so the subclass can share the mutex.
  */
-class tAnnotatable : public util::tLogUser
+template <typename TMutex>
+class tAnnotatable : public TMutex, public internal::tAnnotatableImplementation
 {
-private:
+
+//----------------------------------------------------------------------
+// Public methods and typedefs
+//----------------------------------------------------------------------
+public:
+
+  tAnnotatable()
+  {}
 
   /*!
-   * First element of framework element annotation linked list
-   * Annotations may be changed - but not deleted.
+   * \param args Argument will be forwarded to TMutex constructor
    */
-  tFinrocAnnotation* first_annotation;
+  template <typename ... TMutexArgs>
+  tAnnotatable(TMutexArgs... args) :
+    TMutex(args...)
+  {}
 
+  /*!
+   * Attach annotation to this object
+   *
+   * \tparam TAnnotation Annotation type to add annotation with (used for lookup later; may also be base class)
+   * \param ann Annotation to add
+   */
+  template <typename TAnnotation>
+  void AddAnnotation(TAnnotation& ann)
+  {
+    rrlib::thread::tLock lock(*this);
+    internal::tAnnotatableImplementation::AddAnnotation(ann, typeid(TAnnotation).name());
+  }
+
+  /*!
+   * Obtain annotation of specified type attached to this object
+   *
+   * \tparam TAnnotation Annotation type (with which annotation was added)
+   * \return Annotation. Null if this object has no annotation of specified type attached.
+   */
+  template <typename TAnnotation>
+  TAnnotation* GetAnnotation() const
+  {
+    return static_cast<TAnnotation*>(internal::tAnnotatableImplementation::GetAnnotation(typeid(TAnnotation).name()));
+  }
+
+  /*!
+   * Obtain annotation of specified type attached to this object
+   *
+   * \param rtti_name Annotation type name as obtained from C++ RTTI (typeid(...).name())
+   * \return Annotation. Null if this object has no annotation of specified type attached.
+   */
+  tAnnotation* GetAnnotation(const char* rtti_name) const
+  {
+    return internal::tAnnotatableImplementation::GetAnnotation(rtti_name);
+  }
+
+//----------------------------------------------------------------------
+// Protected methods
+//----------------------------------------------------------------------
 protected:
-
-  // for synchronization on an object of this class
-  rrlib::thread::tMutex simple_mutex;
 
   /*!
    * Notify annotations that object is to be deleted
    */
-  void NotifyAnnotationsDelete();
+  void NotifyAnnotationsDelete()
+  {
+    internal::tAnnotatableImplementation::NotifyAnnotationsDelete();
+  }
 
   /*!
    * Notify annotations that object has been initialized
    */
-  void NotifyAnnotationsInitialized();
-
-public:
-
-  tAnnotatable() :
-    first_annotation(NULL)
-  {}
-
-  /*!
-   * Add annotation to this framework element
-   *
-   * \param ann Annotation
-   */
-  void AddAnnotation(tFinrocAnnotation* ann);
-
-  virtual ~tAnnotatable();
-
-  //! Convenience method for below
-  template <typename A>
-  A* GetAnnotation() const
+  void NotifyAnnotationsInitialized()
   {
-    return static_cast<A*>(GetAnnotation(rrlib::rtti::tDataType<A>()));
+    internal::tAnnotatableImplementation::NotifyAnnotationsInitialized();
   }
-
-  /*!
-   * Get annotation of specified type
-   *
-   * \param type Data type of annotation we're looking for
-   * \return Annotation. Null if framework element has no annotation of this type.
-   */
-  tFinrocAnnotation* GetAnnotation(const rrlib::rtti::tDataTypeBase& dt) const;
 
 };
 
-} // namespace finroc
-} // namespace core
+//----------------------------------------------------------------------
+// End of namespace declaration
+//----------------------------------------------------------------------
+}
+}
 
-#endif // core__tAnnotatable_h__
+
+#endif

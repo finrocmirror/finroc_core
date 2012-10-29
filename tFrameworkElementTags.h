@@ -40,11 +40,12 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include "rrlib/rtti/rtti.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
-#include "core/tFinrocAnnotation.h"
+#include "core/tAnnotation.h"
 
 //----------------------------------------------------------------------
 // Namespace declaration
@@ -68,7 +69,7 @@ class tFrameworkElement;
  * These tags are mainly used for optimized visualization/representation in finstruct.
  * Common tags include "module", "group" and "behavior".
  */
-class tFrameworkElementTags : public tFinrocAnnotation
+class tFrameworkElementTags : public tAnnotation
 {
 
 //----------------------------------------------------------------------

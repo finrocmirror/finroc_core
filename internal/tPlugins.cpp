@@ -19,23 +19,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/tRuntimeListener.h
+/*!\file    core/internal/tPlugins.cpp
  *
  * \author  Max Reichardt
  *
  * \date    2012-10-28
  *
- * \brief   Contains tRuntimeListener
- *
- * \b tRuntimeListener
- *
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
- *
  */
 //----------------------------------------------------------------------
-#ifndef __core__tRuntimeListener_h__
-#define __core__tRuntimeListener_h__
+#include "core/internal/tPlugins.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -43,6 +35,16 @@
 
 //----------------------------------------------------------------------
 // Internal includes with ""
+//----------------------------------------------------------------------
+#include "core/tPlugin.h"
+
+//----------------------------------------------------------------------
+// Debugging
+//----------------------------------------------------------------------
+#include <cassert>
+
+//----------------------------------------------------------------------
+// Namespace usage
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
@@ -52,73 +54,61 @@ namespace finroc
 {
 namespace core
 {
+namespace internal
+{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-class tFrameworkElement;
-class tAbstractPort;
 
 //----------------------------------------------------------------------
-// Class declaration
+// Const values
 //----------------------------------------------------------------------
-//! Runtime Listener
-/*!
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
- */
-class tRuntimeListener
+
+//----------------------------------------------------------------------
+// Implementation
+//----------------------------------------------------------------------
+tPlugins::tPlugins() :
+  plugins(),
+  instantly_initialize_plugins(false)
+{}
+
+void tPlugins::AddPlugin(tPlugin& p)
 {
+  plugins.push_back(&p);
 
-//----------------------------------------------------------------------
-// Public methods and typedefs
-//----------------------------------------------------------------------
-public:
-
-  /*! Constants for Change type */
-  enum tEvent
+  // TODO: This does not work - because plugin is not fully constructed yet
+  /*if (instantly_initialize_plugins)
   {
-    ADD,     //!< element added
-    CHANGE,  //!< element changed
-    REMOVE,  //!< element removed
-    PRE_INIT //!< called with this constant before framework element is initialized
-  };
+    p->Init();
+  }*/
+}
 
-//----------------------------------------------------------------------
-// Private fields and methods
-//----------------------------------------------------------------------
-private:
+void tPlugins::FindAndLoadPlugins()
+{
+  //TODO implement: dynamic loading of all available finroc plugin .so files
+}
 
-  friend class tRuntimeEnvironment;
+tPlugins& tPlugins::GetInstance()
+{
+  static tPlugins instance;
+  return instance;
+}
 
-  /*!
-   * Called whenever a framework element was added/removed or changed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param element FrameworkElement that changed
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeChange(tEvent change_type, tFrameworkElement& element) = 0;
-
-  /*!
-   * Called whenever an edge was added/removed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param source Source of edge
-   * \param target Target of edge
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
-
-};
+void tPlugins::StaticInit()
+{
+  tPlugins& p = GetInstance();
+  p.FindAndLoadPlugins();
+  for (size_t i = 0; i < p.plugins.size(); i++)
+  {
+    p.plugins[i]->Init();
+  }
+  p.instantly_initialize_plugins = true;
+}
 
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------
 }
 }
-
-
-#endif
+}

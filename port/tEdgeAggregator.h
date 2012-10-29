@@ -1,91 +1,88 @@
-/**
- * You received this file as part of an advanced experimental
- * robotics framework prototype ('finroc')
+//
+// You received this file as part of Finroc
+// A Framework for intelligent robot control
+//
+// Copyright (C) Finroc GbR (finroc.org)
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+//----------------------------------------------------------------------
+/*!\file    core/port/tEdgeAggregator.h
  *
- * Copyright (C) 2007-2010 Max Reichardt,
- *   Robotics Research Lab, University of Kaiserslautern
+ * \author  Max Reichardt
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * \date    2012-10-28
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * \brief   Contains tEdgeAggregator
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * \b tEdgeAggregator
+ *
+ * Framework element that aggregates edges to determine data dependencies
+ * between higher level entities (and to collect usage data).
+ * Module and group interfaces, for instance, typically do this.
+ *
+ * This information is valuable for efficient scheduling.
  */
+//----------------------------------------------------------------------
+#ifndef __core__port__tEdgeAggregator_h__
+#define __core__port__tEdgeAggregator_h__
 
-#ifndef core__port__tEdgeAggregator_h__
-#define core__port__tEdgeAggregator_h__
+//----------------------------------------------------------------------
+// External includes (system with <>, local with "")
+//----------------------------------------------------------------------
+#include "rrlib/rtti/rtti.h"
 
-#include "rrlib/finroc_core_utils/definitions.h"
-
-#include "rrlib/finroc_core_utils/container/tSafeConcurrentlyIterableList.h"
-#include "core/port/tAggregatedEdge.h"
-#include "core/tCoreFlags.h"
+//----------------------------------------------------------------------
+// Internal includes with ""
+//----------------------------------------------------------------------
 #include "core/tFrameworkElement.h"
 
+//----------------------------------------------------------------------
+// Namespace declaration
+//----------------------------------------------------------------------
 namespace finroc
 {
 namespace core
 {
-class tAbstractPort;
 
+//----------------------------------------------------------------------
+// Forward declarations / typedefs / enums
+//----------------------------------------------------------------------
+class tAggregatedEdge;
+
+//----------------------------------------------------------------------
+// Class declaration
+//----------------------------------------------------------------------
+//! Edge aggregating framework element
 /*!
- * \author Max Reichardt
- *
  * Framework element that aggregates edges to determine data dependencies
  * between higher level entities (and to collect usage data).
- * Modules, for instance, typically do this.
+ * Module and group interfaces, for instance, typically do this.
  *
- * This information will be valuable for efficient scheduling
+ * This information is valuable for efficient scheduling.
  */
 class tEdgeAggregator : public tFrameworkElement
 {
-private:
 
-  /*! List of emerging aggregated edges */
-  util::tSafeConcurrentlyIterableList<tAggregatedEdge*, rrlib::thread::tNoMutex, 5, true> emerging_edges;
-
-public:
-
-  /*! Is this edge aggregator an interface of its parent (one of possibly many) */
-  static const uint cIS_INTERFACE = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG;
-
-  /*! Hint for displaying in finstruct: Is this sensor data only? */
-  static const uint cSENSOR_DATA = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG << 1;
-
-  /*! Hint for displaying in finstruct: Is this controller data only? */
-  static const uint cCONTROLLER_DATA = tCoreFlags::cFIRST_CUSTOM_CONST_FLAG << 2;
-
-  /*! All flags introduced by edge aggregator class */
-  static const uint cALL_EDGE_AGGREGATOR_FLAGS = cIS_INTERFACE | cSENSOR_DATA | cCONTROLLER_DATA;
-
-private:
-
-  /*!
-   * Called when edge has been added that is relevant for this element
-   *
-   * \param dest Destination aggregating element
-   */
-  void EdgeAdded(tEdgeAggregator& dest);
-
-  /*!
-   * Called when edge has been added that is relevant for this element
-   *
-   * \param dest Destination aggregating element
-   */
-  void EdgeRemoved(tEdgeAggregator& dest);
-
+//----------------------------------------------------------------------
+// Public methods and typedefs
+//----------------------------------------------------------------------
 public:
 
   /*! see FrameworkElement for parameter description */
-  tEdgeAggregator(tFrameworkElement* parent_ = NULL, const util::tString& name_ = "", uint flags_ = 0);
+  explicit tEdgeAggregator(tFrameworkElement* parent = NULL, const tString& name = "", tFlags flags = 0);
 
   /*!
    * (Should be called by abstract port only - with runtime registry locked)
@@ -107,7 +104,7 @@ public:
 
   /*!
    * \param dest Destination aggregating element
-   * \return Edge that connects these elements - or null if such an edge does not yet exists
+   * \return Edge that connects these elements - or NULL if such an edge does not yet exists
    */
   tAggregatedEdge* FindAggregatedEdge(tEdgeAggregator& dest);
 
@@ -118,13 +115,11 @@ public:
   static tEdgeAggregator* GetAggregator(const tAbstractPort& source);
 
   /*!
-   * \return Array with emerging edges. Can be iterated over concurrently.
+   * \return True, if the provided type is a data flow type
    */
-  inline util::tArrayWrapper<tAggregatedEdge*>* GetEmergingEdges()
+  inline static bool IsDataFlowType(const rrlib::rtti::tDataTypeBase& type)
   {
-    util::tArrayWrapper<tAggregatedEdge*>* iter = emerging_edges.GetIterable();
-    assert(iter != NULL);
-    return iter;
+    return type.GetSize() > 0;
   }
 
   /*!
@@ -136,9 +131,38 @@ public:
    */
   static void UpdateEdgeStatistics(tAbstractPort& source, tAbstractPort& target, size_t estimated_data_size);
 
+//----------------------------------------------------------------------
+// Private fields and methods
+//----------------------------------------------------------------------
+private:
+
+  /*! Set of emerging aggregated edges */
+  rrlib::concurrent_containers::tSet < tAggregatedEdge*, rrlib::concurrent_containers::tAllowDuplicates::NO, rrlib::thread::tNoMutex,
+        rrlib::concurrent_containers::set::storage::ArrayChunkBased<5, 15, definitions::cSINGLE_THREADED >> emerging_edges;
+
+  /*!
+   * Called when edge has been added that is relevant for this element
+   *
+   * \param dest Destination aggregating element
+   * \param data_flow_type Was a data flow edge added?
+   */
+  void EdgeAdded(tEdgeAggregator& dest, bool data_flow_type);
+
+  /*!
+   * Called when edge has been added that is relevant for this element
+   *
+   * \param dest Destination aggregating element
+   * \param data_flow_type Was a data flow edge added?
+   */
+  void EdgeRemoved(tEdgeAggregator& dest, bool data_flow_type);
+
 };
 
-} // namespace finroc
-} // namespace core
+//----------------------------------------------------------------------
+// End of namespace declaration
+//----------------------------------------------------------------------
+}
+}
 
-#endif // core__port__tEdgeAggregator_h__
+
+#endif

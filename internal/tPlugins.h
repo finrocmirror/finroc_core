@@ -19,27 +19,28 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/tRuntimeListener.h
+/*!\file    core/internal/tPlugins.h
  *
  * \author  Max Reichardt
  *
  * \date    2012-10-28
  *
- * \brief   Contains tRuntimeListener
+ * \brief   Contains tPlugins
  *
- * \b tRuntimeListener
+ * \b tPlugins
  *
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * This class is used for managing the Finroc Runtime's plugins
  *
  */
 //----------------------------------------------------------------------
-#ifndef __core__tRuntimeListener_h__
-#define __core__tRuntimeListener_h__
+#ifndef __core__internal__tPlugins_h__
+#define __core__internal__tPlugins_h__
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include <vector>
+#include <boost/noncopyable.hpp>
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -56,18 +57,19 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-class tFrameworkElement;
-class tAbstractPort;
+class tPlugin;
+
+namespace internal
+{
 
 //----------------------------------------------------------------------
 // Class declaration
 //----------------------------------------------------------------------
-//! Runtime Listener
+//! Plugin management
 /*!
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * This class is used for managing the Finroc Runtime's plugins
  */
-class tRuntimeListener
+class tPlugins : boost::noncopyable
 {
 
 //----------------------------------------------------------------------
@@ -75,48 +77,50 @@ class tRuntimeListener
 //----------------------------------------------------------------------
 public:
 
-  /*! Constants for Change type */
-  enum tEvent
-  {
-    ADD,     //!< element added
-    CHANGE,  //!< element changed
-    REMOVE,  //!< element removed
-    PRE_INIT //!< called with this constant before framework element is initialized
-  };
+  /*!
+   * (possibly manually) add plugin
+   *
+   * \param p Plugin to add
+   */
+  void AddPlugin(tPlugin& p);
+
+  /*!
+   * \return Plugins singleton instance
+   */
+  static tPlugins& GetInstance();
+
+  /*!
+   * Loads plugins
+   */
+  static void StaticInit();
 
 //----------------------------------------------------------------------
 // Private fields and methods
 //----------------------------------------------------------------------
 private:
 
-  friend class tRuntimeEnvironment;
+  /*! All Plugins that are currently available */
+  std::vector<tPlugin*> plugins;
 
-  /*!
-   * Called whenever a framework element was added/removed or changed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param element FrameworkElement that changed
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeChange(tEvent change_type, tFrameworkElement& element) = 0;
+  /*! Instantly initialize plugins when they are added? True after StaticInit() has been called */
+  bool instantly_initialize_plugins;
 
-  /*!
-   * Called whenever an edge was added/removed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param source Source of edge
-   * \param target Target of edge
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
+
+  tPlugins();
+
+  void FindAndLoadPlugins();
+
+  inline static const char* GetLogDescription()
+  {
+    return "Plugins";
+  }
 
 };
 
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------
+}
 }
 }
 

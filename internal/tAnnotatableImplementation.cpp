@@ -19,30 +19,33 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/tRuntimeListener.h
+/*!\file    core/internal/tAnnotatableImplementation.cpp
  *
  * \author  Max Reichardt
  *
- * \date    2012-10-28
- *
- * \brief   Contains tRuntimeListener
- *
- * \b tRuntimeListener
- *
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * \date    2012-10-26
  *
  */
 //----------------------------------------------------------------------
-#ifndef __core__tRuntimeListener_h__
-#define __core__tRuntimeListener_h__
+#include "core/internal/tAnnotatableImplementation.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include "rrlib/rtti/rtti.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
+//----------------------------------------------------------------------
+#include "core/log_messages.h"
+
+//----------------------------------------------------------------------
+// Debugging
+//----------------------------------------------------------------------
+#include <cassert>
+
+//----------------------------------------------------------------------
+// Namespace usage
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
@@ -52,73 +55,77 @@ namespace finroc
 {
 namespace core
 {
+namespace internal
+{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-class tFrameworkElement;
-class tAbstractPort;
 
 //----------------------------------------------------------------------
-// Class declaration
+// Const values
 //----------------------------------------------------------------------
-//! Runtime Listener
-/*!
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
- */
-class tRuntimeListener
+
+//----------------------------------------------------------------------
+// Implementation
+//----------------------------------------------------------------------
+tAnnotatableImplementation::tAnnotatableImplementation() :
+  first_annotation(NULL)
+{}
+
+tAnnotatableImplementation::~tAnnotatableImplementation()
 {
+  delete first_annotation;
+}
 
-//----------------------------------------------------------------------
-// Public methods and typedefs
-//----------------------------------------------------------------------
-public:
-
-  /*! Constants for Change type */
-  enum tEvent
+void tAnnotatableImplementation::AddAnnotation(tAnnotation& ann, const char* rtti_name)
+{
+  if (!first_annotation)
   {
-    ADD,     //!< element added
-    CHANGE,  //!< element changed
-    REMOVE,  //!< element removed
-    PRE_INIT //!< called with this constant before framework element is initialized
-  };
+    first_annotation = &ann;
+  }
+  tAnnotation* current_annotation = first_annotation;
+  while (current_annotation)
+  {
+    if (typeid(*current_annotation).name() == rtti_name)
+    {
+      FINROC_LOG_PRINT(ERROR, "An annotation of type ", rrlib::rtti::Demangle(rtti_name), " was already added. Not adding another one.");
+      return;
+    }
+    if (!current_annotation->next_annotation)
+    {
+      current_annotation->next_annotation = &ann;
+      ann.annotated = this;
+      return;
+    }
+    current_annotation = current_annotation->next_annotation;
+  }
+}
 
-//----------------------------------------------------------------------
-// Private fields and methods
-//----------------------------------------------------------------------
-private:
+void tAnnotatableImplementation::NotifyAnnotationsDelete()
+{
+  tAnnotation* ann = first_annotation;
+  while (ann)
+  {
+    ann->AnnotatedObjectToBeDeleted();
+    ann = ann->next_annotation;
+  }
+}
 
-  friend class tRuntimeEnvironment;
+void tAnnotatableImplementation::NotifyAnnotationsInitialized()
+{
+  tAnnotation* ann = first_annotation;
+  while (ann)
+  {
+    ann->AnnotatedObjectInitialized();
+    ann = ann->next_annotation;
+  }
+}
 
-  /*!
-   * Called whenever a framework element was added/removed or changed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param element FrameworkElement that changed
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeChange(tEvent change_type, tFrameworkElement& element) = 0;
-
-  /*!
-   * Called whenever an edge was added/removed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param source Source of edge
-   * \param target Target of edge
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
-
-};
 
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------
 }
 }
-
-
-#endif
+}

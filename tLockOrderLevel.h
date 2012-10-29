@@ -19,23 +19,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/tRuntimeListener.h
+/*!\file    core/tLockOrderLevel.h
  *
  * \author  Max Reichardt
  *
  * \date    2012-10-28
  *
- * \brief   Contains tRuntimeListener
+ * \brief   Contains tLockOrderLevel
  *
- * \b tRuntimeListener
+ * \b tLockOrderLevel
  *
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * Lock order level constants for different types of classes
  *
  */
 //----------------------------------------------------------------------
-#ifndef __core__tRuntimeListener_h__
-#define __core__tRuntimeListener_h__
+#ifndef __core__tLockOrderLevel_h__
+#define __core__tLockOrderLevel_h__
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -56,62 +55,45 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-class tFrameworkElement;
-class tAbstractPort;
 
 //----------------------------------------------------------------------
 // Class declaration
 //----------------------------------------------------------------------
-//! Runtime Listener
+//! Lock order level constants
 /*!
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * Lock order level constants for different types of classes
  */
-class tRuntimeListener
+enum class tLockOrderLevel : int
 {
+  /*! Group that won't contain any other (unknown) groups anymore */
+  RUNTIME_ROOT = 100000,
 
-//----------------------------------------------------------------------
-// Public methods and typedefs
-//----------------------------------------------------------------------
-public:
+  /*! Group that won't contain any other (unknown) groups anymore */
+  LEAF_GROUP = 200000,
 
-  /*! Constants for Change type */
-  enum tEvent
-  {
-    ADD,     //!< element added
-    CHANGE,  //!< element changed
-    REMOVE,  //!< element removed
-    PRE_INIT //!< called with this constant before framework element is initialized
-  };
+  /*! Port Group that won't contain any other framework elements except of ports */
+  LEAF_PORT_GROUP = 300000,
 
-//----------------------------------------------------------------------
-// Private fields and methods
-//----------------------------------------------------------------------
-private:
+  /*! Ports */
+  PORT = 400000,
 
-  friend class tRuntimeEnvironment;
+  /*! Runtime Register */
+  RUNTIME_REGISTER = 800000,
 
-  /*!
-   * Called whenever a framework element was added/removed or changed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param element FrameworkElement that changed
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeChange(tEvent change_type, tFrameworkElement& element) = 0;
+  /*! Stuff in remote runtime environment */
+  REMOTE = 500000,
 
-  /*!
-   * Called whenever an edge was added/removed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param source Source of edge
-   * \param target Target of edge
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
+  /*! Stuff in remote runtime environment */
+  REMOTE_PORT = 600000,
 
+  /*! Links to stuff in remote runtime environment */
+  REMOTE_LINKING = 500000,
+
+  /*! Stuff to lock before everything else */
+  FIRST = 0,
+
+  /*! Innermost locks */
+  INNER_MOST = std::numeric_limits<int>::max() - 10
 };
 
 //----------------------------------------------------------------------

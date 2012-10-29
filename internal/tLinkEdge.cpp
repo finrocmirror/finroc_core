@@ -19,7 +19,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/port/tEdgeAggregator.cpp
+/*!\file    core/internal/tLinkEdge.cpp
  *
  * \author  Max Reichardt
  *
@@ -27,7 +27,7 @@
  *
  */
 //----------------------------------------------------------------------
-#include "core/port/tEdgeAggregator.h"
+#include "core/internal/tLinkEdge.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -36,9 +36,8 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
-#include "core/tLockOrderLevel.h"
+#include "core/tRuntimeEnvironment.h"
 #include "core/port/tAbstractPort.h"
-#include "core/port/tAggregatedEdge.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -56,6 +55,8 @@ namespace finroc
 {
 namespace core
 {
+namespace internal
+{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
@@ -68,102 +69,70 @@ namespace core
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
-tEdgeAggregator::tEdgeAggregator(tFrameworkElement* parent, const tString& name, tFlags flags) :
-  tFrameworkElement(parent, name, flags | tFlag::EDGE_AGGREGATOR, parent == NULL ? static_cast<int>(tLockOrderLevel::LEAF_GROUP) : -1),
-  emerging_edges()
+// workaround for gcc 4.5
+static std::array<tLinkEdge::tPortReference, 2> CreatePortReferenceArray(const tLinkEdge::tPortReference& port1, const tLinkEdge::tPortReference& port2)
 {
+  std::array<tLinkEdge::tPortReference, 2> result = {{ port1, port2 }};
+  return result;
 }
 
-void tEdgeAggregator::EdgeAdded(tAbstractPort& source, tAbstractPort& target)
+tLinkEdge::tLinkEdge(const tPortReference& port1, const tPortReference& port2, bool both_connect_directions, bool finstructed) :
+  ports(CreatePortReferenceArray(port1, port2)),
+  both_connect_directions(both_connect_directions),
+  next_edge(NULL),
+  finstructed(finstructed)
 {
-  tEdgeAggregator* src = GetAggregator(source);
-  tEdgeAggregator* dest = GetAggregator(target);
-  if (src && dest)
+  if (ports[0].link.length() == 0 && ports[1].link.length() == 0)
   {
-    src->EdgeAdded(*dest, IsDataFlowType(source.GetDataType()));
+    FINROC_LOG_PRINT(ERROR, "At least one of two ports needs to be linked. Otherwise, it does not make sense to use this class.");
+    abort();
   }
-}
-
-void tEdgeAggregator::EdgeAdded(tEdgeAggregator& dest, bool data_flow_type)
-{
-  tAggregatedEdge* ae = FindAggregatedEdge(dest);
-  if (ae != NULL)
+  rrlib::thread::tLock lock(tRuntimeEnvironment::GetInstance().GetStructureMutex());
+  for (size_t i = 0; i < 2; i++)
   {
-    ae->GetCountVariable(data_flow_type)++;
-    return;
-  }
-
-  // not found
-  ae = new tAggregatedEdge(*this, dest);
-  ae->GetCountVariable(data_flow_type) = 1;
-  emerging_edges.Add(ae);
-}
-
-void tEdgeAggregator::EdgeRemoved(tAbstractPort& source, tAbstractPort& target)
-{
-  tEdgeAggregator* src = GetAggregator(source);
-  tEdgeAggregator* dest = GetAggregator(target);
-  if (src && dest)
-  {
-    src->EdgeRemoved(*dest, IsDataFlowType(source.GetDataType()));
-  }
-}
-
-void tEdgeAggregator::EdgeRemoved(tEdgeAggregator& dest, bool data_flow_type)
-{
-  tAggregatedEdge* ae = FindAggregatedEdge(dest);
-  if (ae)
-  {
-    ae->GetCountVariable(data_flow_type)--;
-    if (ae->control_flow_edge_count + ae->data_flow_edge_count == 0)
+    if (ports[i].link.length() > 0)
     {
-      emerging_edges.Remove(ae);
-      //ae.delete(); // obsolete: already deleted by command above
-    }
-    return;
-  }
-  FINROC_LOG_PRINT(ERROR, "Edge not found - this is inconsistent and likely programming error");
-}
-
-tAggregatedEdge* tEdgeAggregator::FindAggregatedEdge(tEdgeAggregator& dest)
-{
-  for (auto it = emerging_edges.Begin(); it != emerging_edges.End(); ++it)
-  {
-    if (&((*it)->destination) == &dest)
-    {
-      return &(**it);
+      tRuntimeEnvironment::GetInstance().AddLinkEdge(ports[i].link, *this);
     }
   }
-  return NULL;
 }
 
-tEdgeAggregator* tEdgeAggregator::GetAggregator(const tAbstractPort& source)
+tLinkEdge::~tLinkEdge()
 {
-  tFrameworkElement* current = source.GetParent();
-  while (current)
+  rrlib::thread::tLock lock(tRuntimeEnvironment::GetInstance().GetStructureMutex());
+  for (size_t i = 0; i < 2; i++)
   {
-    if (current->GetFlag(tFlag::EDGE_AGGREGATOR) && (!current->GetFlag(tFlag::NETWORK_ELEMENT)))
+    if (ports[i].link.length() > 0)
     {
-      return static_cast<tEdgeAggregator*>(current);
+      tRuntimeEnvironment::GetInstance().RemoveLinkEdge(ports[i].link, *this);
     }
-    current = current->GetParent();
   }
-  return NULL;
 }
 
-void tEdgeAggregator::UpdateEdgeStatistics(tAbstractPort& source, tAbstractPort& target, size_t estimated_data_size)
+void tLinkEdge::LinkAdded(tRuntimeEnvironment& re, const tString& link, tAbstractPort& port) const
 {
-  tEdgeAggregator* src = GetAggregator(source);
-  tEdgeAggregator* dest = GetAggregator(target);
-  assert(src && dest);
-  tAggregatedEdge* ar = src->FindAggregatedEdge(*dest);
-  assert(ar);
-  ar->publish_count += 1;
-  ar->publish_size += estimated_data_size;
+  rrlib::thread::tLock lock(tRuntimeEnvironment::GetInstance().GetStructureMutex());
+  if (link.compare(ports[0].link) == 0)
+  {
+    tAbstractPort* target = ports[1].link.length() > 0 ? re.GetPort(ports[1].link) : ports[1].pointer;
+    if (target)
+    {
+      port.ConnectTo(*target, both_connect_directions ? tAbstractPort::tConnectDirection::AUTO : tAbstractPort::tConnectDirection::TO_TARGET, finstructed);
+    }
+  }
+  else if (link.compare(ports[1].link) == 0)
+  {
+    tAbstractPort* source = ports[0].link.length() > 0 ? re.GetPort(ports[0].link) : ports[0].pointer;
+    if (source)
+    {
+      port.ConnectTo(*source, both_connect_directions ? tAbstractPort::tConnectDirection::AUTO : tAbstractPort::tConnectDirection::TO_SOURCE, finstructed);
+    }
+  }
 }
 
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------
+}
 }
 }

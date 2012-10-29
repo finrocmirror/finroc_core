@@ -19,27 +19,31 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/tRuntimeListener.h
+/*!\file    core/tAnnotation.h
  *
  * \author  Max Reichardt
  *
- * \date    2012-10-28
+ * \date    2012-10-26
  *
- * \brief   Contains tRuntimeListener
+ * \brief   Contains tAnnotation
  *
- * \b tRuntimeListener
+ * \b tAnnotation
  *
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * Base class for all finroc element annotations.
+ *
+ * If annotation should be available over the net (e.g. in finstruct),
+ * serialization operators need to be implemented.
  *
  */
 //----------------------------------------------------------------------
-#ifndef __core__tRuntimeListener_h__
-#define __core__tRuntimeListener_h__
+#ifndef __core__tAnnotation_h__
+#define __core__tAnnotation_h__
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include <boost/noncopyable.hpp>
+#include "rrlib/rtti/tIsListType.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -56,18 +60,23 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-class tFrameworkElement;
-class tAbstractPort;
+namespace internal
+{
+class tAnnotatableImplementation;
+}
 
 //----------------------------------------------------------------------
 // Class declaration
 //----------------------------------------------------------------------
-//! Runtime Listener
+//! Finroc element annotation base class
 /*!
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * Base class for all finroc element annotations.
+ *
+ * If annotation should be available over the net (e.g. in finstruct),
+ * serialization operators need to be implemented and
+ * tDataType<...> object initialized.
  */
-class tRuntimeListener
+class tAnnotation : public rrlib::rtti::tIsListType<false, false>, boost::noncopyable
 {
 
 //----------------------------------------------------------------------
@@ -75,43 +84,47 @@ class tRuntimeListener
 //----------------------------------------------------------------------
 public:
 
-  /*! Constants for Change type */
-  enum tEvent
+  tAnnotation();
+
+  virtual ~tAnnotation();
+
+  /*!
+   * \return Object that is annotated - null if annotation is not attached to an object yet
+   */
+  template <typename T>
+  inline T* GetAnnotated()
   {
-    ADD,     //!< element added
-    CHANGE,  //!< element changed
-    REMOVE,  //!< element removed
-    PRE_INIT //!< called with this constant before framework element is initialized
-  };
+    return static_cast<T*>(annotated);
+  }
 
 //----------------------------------------------------------------------
 // Private fields and methods
 //----------------------------------------------------------------------
 private:
 
-  friend class tRuntimeEnvironment;
+  friend class internal::tAnnotatableImplementation;
+
+  /*! Next framework element annotation - used to build linked list - null if no more annotations */
+  tAnnotation* next_annotation;
+
+  /*! Object that is annotated - null if annotation is not attached to an object yet */
+  internal::tAnnotatableImplementation* annotated;
 
   /*!
-   * Called whenever a framework element was added/removed or changed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param element FrameworkElement that changed
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
+   * Called when annotated object is initialized
+   * (supposed to be overridden)
    */
-  virtual void RuntimeChange(tEvent change_type, tFrameworkElement& element) = 0;
+  virtual void AnnotatedObjectInitialized()
+  {
+  }
 
   /*!
-   * Called whenever an edge was added/removed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param source Source of edge
-   * \param target Target of edge
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
+   * Called when annotated object is about to be deleted
+   * (supposed to be overridden)
    */
-  virtual void RuntimeEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
-
+  virtual void AnnotatedObjectToBeDeleted()
+  {
+  }
 };
 
 //----------------------------------------------------------------------

@@ -1,41 +1,77 @@
-/**
- * You received this file as part of an advanced experimental
- * robotics framework prototype ('finroc')
+//
+// You received this file as part of Finroc
+// A Framework for intelligent robot control
+//
+// Copyright (C) Finroc GbR (finroc.org)
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+//----------------------------------------------------------------------
+/*!\file    core/tRuntimeEnvironment.cpp
  *
- * Copyright (C) 2007-2010 Max Reichardt,
- *   Robotics Research Lab, University of Kaiserslautern
+ * \author  Max Reichardt
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * \date    2012-10-28
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "rrlib/finroc_core_utils/tGarbageDeleter.h"
-#include "rrlib/finroc_core_utils/log/tLogUser.h"
-#include "rrlib/design_patterns/singleton.h"
-
+//----------------------------------------------------------------------
 #include "core/tRuntimeEnvironment.h"
-#include "core/tCoreFlags.h"
-#include "core/tLinkEdge.h"
-#include "core/port/tAbstractPort.h"
-#include "core/tRuntimeSettings.h"
-#include "core/datatype/tUnit.h"
-#include "core/datatype/tNumber.h"
-#include "core/plugin/tPlugins.h"
 
+//----------------------------------------------------------------------
+// External includes (system with <>, local with "")
+//----------------------------------------------------------------------
+#include "rrlib/thread/tThread.h"
+
+//----------------------------------------------------------------------
+// Internal includes with ""
+//----------------------------------------------------------------------
+#include "core/tLockOrderLevel.h"
+#include "core/tRuntimeSettings.h"
+#include "core/internal/tGarbageDeleter.h"
+#include "core/internal/tLinkEdge.h"
+#include "core/internal/tPlugins.h"
+#include "core/port/tAbstractPort.h"
+
+//----------------------------------------------------------------------
+// Debugging
+//----------------------------------------------------------------------
+#include <cassert>
+
+//----------------------------------------------------------------------
+// Namespace usage
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Namespace declaration
+//----------------------------------------------------------------------
 namespace finroc
 {
 namespace core
 {
+
+//----------------------------------------------------------------------
+// Forward declarations / typedefs / enums
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Const values
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Implementation
+//----------------------------------------------------------------------
 typedef rrlib::design_patterns::tSingletonHolder<tRuntimeEnvironment, rrlib::design_patterns::singleton::Longevity> tRuntimeEnvironmentInstance;
 static inline unsigned int GetLongevity(tRuntimeEnvironment*)
 {
@@ -44,21 +80,19 @@ static inline unsigned int GetLongevity(tRuntimeEnvironment*)
 
 tRuntimeEnvironment* tRuntimeEnvironment::instance_raw_ptr = NULL;
 bool tRuntimeEnvironment::active = false;
-rrlib::thread::tOrderedMutex tRuntimeEnvironment::static_class_mutex("Runtime", tLockOrderLevels::cFIRST);
 
-tRuntimeEnvironment::tRegistry::tRegistry() :
-  ports(new tCoreRegister<tAbstractPort*>(true)),
+//----------------------------------------------------------------------
+// tRuntimeEnvironment constructors
+//----------------------------------------------------------------------
+tRuntimeEnvironment::tRuntimeEnvironment() :
+  tFrameworkElement(NULL, "Runtime", tFlag::RUNTIME, static_cast<int>(tLockOrderLevel::RUNTIME_ROOT)),
+  ports(new internal::tFrameworkElementRegister<tAbstractPort*>(true)),
   elements(false),
   link_edges(),
-  listeners(),
+  runtime_listeners(),
   temp_buffer(),
   alternative_link_roots(),
-  mutex("Runtime Registry", tLockOrderLevels::cRUNTIME_REGISTER)
-{}
-
-tRuntimeEnvironment::tRuntimeEnvironment() :
-  tFrameworkElement(NULL, "Runtime", tCoreFlags::cALLOWS_CHILDREN | tCoreFlags::cIS_RUNTIME, tLockOrderLevels::cRUNTIME_ROOT),
-  registry(),
+  structure_mutex("Runtime Registry", static_cast<int>(tLockOrderLevel::RUNTIME_REGISTER)),
   creation_time(rrlib::time::Now()),
   command_line_args(),
   unrelated(NULL)
@@ -66,6 +100,9 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
   active = true;
 }
 
+//----------------------------------------------------------------------
+// tRuntimeEnvironment destructor
+//----------------------------------------------------------------------
 tRuntimeEnvironment::~tRuntimeEnvironment()
 {
   active = false;
@@ -74,31 +111,30 @@ tRuntimeEnvironment::~tRuntimeEnvironment()
   // delete all children - (runtime settings last)
   for (auto it = this->ChildrenBegin(); it != this->ChildrenEnd(); ++it)
   {
-    if (&(*it) != tRuntimeSettings::GetInstance())
+    if (&(*it) != &tRuntimeSettings::GetInstance())
     {
       it->ManagedDelete();
     }
   }
-  tRuntimeSettings::GetInstance()->ManagedDelete();
+  tRuntimeSettings::GetInstance().ManagedDelete();
   instance_raw_ptr = NULL;
 }
 
-
-void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge& edge)
+void tRuntimeEnvironment::AddLinkEdge(const tString& link, internal::tLinkEdge& edge)
 {
-  FINROC_LOG_PRINT_TO(edges, DEBUG_VERBOSE_1, "Adding link edge connecting to ", link);
+  FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Adding link edge connecting to ", link);
   {
-    tLock lock2(registry.mutex);
-    if (registry.link_edges.find(link) == registry.link_edges.end())
+    tLock lock(structure_mutex);
+    if (link_edges.find(link) == link_edges.end())
     {
       // add first edge
-      registry.link_edges[link] = &edge;
+      link_edges[link] = &edge;
     }
     else
     {
       // insert edge
-      tLinkEdge* interested = registry.link_edges[link];
-      tLinkEdge* next = interested->GetNextEdge();
+      internal::tLinkEdge* interested = link_edges[link];
+      internal::tLinkEdge* next = interested->GetNextEdge();
       interested->SetNextEdge(&edge);
       edge.SetNextEdge(next);
     }
@@ -114,11 +150,11 @@ void tRuntimeEnvironment::AddLinkEdge(const util::tString& link, tLinkEdge& edge
 
 void tRuntimeEnvironment::AddListener(tRuntimeListener& listener)
 {
-  tLock lock2(registry.mutex);
-  registry.listeners.AddListener(listener);
+  tLock lock(structure_mutex);
+  runtime_listeners.Add(&listener);
 }
 
-util::tString tRuntimeEnvironment::GetCommandLineArgument(const util::tString& name)
+tString tRuntimeEnvironment::GetCommandLineArgument(const tString& name)
 {
   if (command_line_args.find(name) != command_line_args.end())
   {
@@ -127,13 +163,13 @@ util::tString tRuntimeEnvironment::GetCommandLineArgument(const util::tString& n
   return "";
 }
 
-::finroc::core::tFrameworkElement* tRuntimeEnvironment::GetElement(int handle)
+tFrameworkElement* tRuntimeEnvironment::GetElement(int handle)
 {
   if (handle == this->GetHandle())
   {
     return this;
   }
-  tFrameworkElement* fe = handle >= 0 ? registry.ports->Get(handle) : registry.elements.Get(handle);
+  tFrameworkElement* fe = handle >= 0 ? ports->Get(handle) : elements.Get(handle);
   if (fe == NULL)
   {
     return NULL;
@@ -141,18 +177,19 @@ util::tString tRuntimeEnvironment::GetCommandLineArgument(const util::tString& n
   return fe->IsReady() ? fe : NULL;
 }
 
-tRuntimeEnvironment* tRuntimeEnvironment::GetInstance()
+tRuntimeEnvironment& tRuntimeEnvironment::GetInstance()
 {
   if (instance_raw_ptr == NULL)
   {
     InitialInit();
   }
-  return instance_raw_ptr;
+  assert(instance_raw_ptr);
+  return *instance_raw_ptr;
 }
 
 tAbstractPort* tRuntimeEnvironment::GetPort(int port_handle)
 {
-  tAbstractPort* p = registry.ports->Get(port_handle);
+  tAbstractPort* p = ports->Get(port_handle);
   if (p == NULL)
   {
     return NULL;
@@ -160,14 +197,14 @@ tAbstractPort* tRuntimeEnvironment::GetPort(int port_handle)
   return p->IsReady() ? p : NULL;
 }
 
-tAbstractPort* tRuntimeEnvironment::GetPort(const util::tString& link_name)
+tAbstractPort* tRuntimeEnvironment::GetPort(const tString& link_name)
 {
-  tLock lock2(registry.mutex);
+  tLock lock(structure_mutex);
 
   tFrameworkElement* fe = GetChildElement(link_name, false);
-  if (fe == NULL)
+  if (fe)
   {
-    for (auto it = registry.alternative_link_roots.begin(); it != registry.alternative_link_roots.end(); ++it)
+    for (auto it = alternative_link_roots.begin(); it != alternative_link_roots.end(); ++it)
     {
       fe = (*it)->GetChildElement(link_name, 0, true, **it);
       if (fe != NULL && !fe->IsDeleted())
@@ -184,78 +221,78 @@ tAbstractPort* tRuntimeEnvironment::GetPort(const util::tString& link_name)
 
 void tRuntimeEnvironment::InitialInit()
 {
-  tLock lock1(static_class_mutex);
+  static rrlib::thread::tMutex init_mutex;
+  tLock lock1(init_mutex);
   assert((!ShuttingDown()));
   rrlib::rtti::tDataType<std::string>("String"); // Make sure std::string data type has name "String" - as in Java
 
   // Finish initializing static members of classes
-  tUnit::StaticInit();  // can safely be done first
-  tConstant::StaticInit();  // needs to be done after unit
-  util::tGarbageDeleter::CreateAndStartInstance();
+  //tUnit::StaticInit();  // can safely be done first
+  //tConstant::StaticInit();  // needs to be done after unit
+  internal::tGarbageDeleter::CreateAndStartInstance();
 
   instance_raw_ptr = &tRuntimeEnvironmentInstance::Instance(); // should be done before any ports/elements are added
 
   // add uninitialized child
-  instance_raw_ptr->unrelated = new ::finroc::core::tFrameworkElement(instance_raw_ptr, "Unrelated");
+  instance_raw_ptr->unrelated = new tFrameworkElement(instance_raw_ptr, "Unrelated");
 
   //ConfigFile.init(conffile);
   tRuntimeSettings::StaticInit();  // can be done now... or last
-  ::finroc::core::tFrameworkElement::InitAll();
+  tFrameworkElement::InitAll();
 
   //Load plugins
-  tPlugins::StaticInit();
-  ::finroc::core::tFrameworkElement::InitAll();
-  //deleteLast(RuntimeSettings.getInstance());
+  internal::tPlugins::StaticInit();
+  tFrameworkElement::InitAll();
 
-  instance_raw_ptr->SetFlag(tCoreFlags::cREADY);
+  instance_raw_ptr->SetFlag(tFlag::READY);
 }
 
 void tRuntimeEnvironment::MarkElementDeleted(tFrameworkElement& fe)
 {
-  tLock lock2(registry.mutex);
+  tLock lock(structure_mutex);
   if (fe.IsPort())
   {
-    registry.ports->MarkDeleted(fe.GetHandle());
+    ports->MarkDeleted(fe.GetHandle());
   }
   else
   {
-    registry.elements.MarkDeleted(fe.GetHandle());
+    elements.MarkDeleted(fe.GetHandle());
   }
 }
 
 void tRuntimeEnvironment::PreElementInit(tFrameworkElement& element)
 {
-  tLock lock2(registry.mutex);
-  registry.listeners.Notify([&](tRuntimeListener & l)
+  tLock lock(structure_mutex);
+  for (auto it = runtime_listeners.Begin(); it != runtime_listeners.End(); ++it)
   {
-    l.RuntimeChange(tRuntimeListener::cPRE_INIT, element);
-  });
+    (*it)->RuntimeChange(tRuntimeListener::tEvent::PRE_INIT, element);
+  }
 }
 
 int tRuntimeEnvironment::RegisterElement(tFrameworkElement& fe, bool port)
 {
-  tLock lock2(registry.mutex);
-  return port ? registry.ports->Add(static_cast<tAbstractPort*>(&fe)) : registry.elements.Add(&fe);
+  tLock lock(structure_mutex);
+  return port ? ports->Add(static_cast<tAbstractPort*>(&fe)) : elements.Add(&fe);
 }
 
-void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge& edge)
+void tRuntimeEnvironment::RemoveLinkEdge(const tString& link, internal::tLinkEdge& edge)
 {
-  tLock lock2(registry.mutex);
-  tLinkEdge* current = registry.link_edges[link];
+  tLock lock(structure_mutex);
+  internal::tLinkEdge* current = link_edges[link];
   if (current == &edge)
   {
     if (current->GetNextEdge() == NULL)    // remove entries for this link completely
     {
-      registry.link_edges.erase(link);
+      link_edges.erase(link);
     }
     else    // remove first element
     {
-      registry.link_edges[link] = current->GetNextEdge();
+      link_edges[link] = current->GetNextEdge();
     }
   }
   else    // remove element out of linked list
   {
-    tLinkEdge* prev = current;
+    internal::tLinkEdge* prev = current;
     current = current->GetNextEdge();
     while (current != NULL)
     {
@@ -267,69 +304,71 @@ void tRuntimeEnvironment::RemoveLinkEdge(const util::tString& link, tLinkEdge& e
       prev = current;
       current = current->GetNextEdge();
     }
-    FINROC_LOG_PRINT_TO(framework_elements, DEBUG_WARNING, "warning: Could not remove link edge for link: ", link);
+    FINROC_LOG_PRINT(DEBUG_WARNING, "Could not remove link edge for link: ", link);
   }
 }
 
 void tRuntimeEnvironment::RemoveListener(tRuntimeListener& listener)
 {
-  tLock lock2(registry.mutex);
-  registry.listeners.RemoveListener(listener);
+  tLock lock(structure_mutex);
+  runtime_listeners.Remove(&listener);
 }
 
-void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement& element, tAbstractPort* edge_target)
+void tRuntimeEnvironment::RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element, tAbstractPort* edge_target)
 {
-  tLock lock2(registry.mutex);
+  tLock lock(structure_mutex);
   if (!ShuttingDown())
   {
-    if (element.GetFlag(tCoreFlags::cALTERNATE_LINK_ROOT))
+    if (element.GetFlag(tFlag::ALTERNATIVE_LINK_ROOT))
     {
-      if (change_type == tRuntimeListener::cADD)
+      if (change_type == tRuntimeListener::tEvent::ADD)
       {
-        registry.alternative_link_roots.push_back(&element);
+        alternative_link_roots.push_back(&element);
       }
-      else if (change_type == tRuntimeListener::cREMOVE)
+      else if (change_type == tRuntimeListener::tEvent::REMOVE)
       {
-        registry.alternative_link_roots.erase(std::remove(registry.alternative_link_roots.begin(), registry.alternative_link_roots.end(), &element), registry.alternative_link_roots.end());
+        alternative_link_roots.erase(std::remove(alternative_link_roots.begin(), alternative_link_roots.end(), &element), alternative_link_roots.end());
       }
     }
 
-    if (change_type == tRuntimeListener::cADD && element.IsPort())    // check links
+    if (change_type == tRuntimeListener::tEvent::ADD && element.IsPort())    // check links
     {
       tAbstractPort& ap = static_cast<tAbstractPort&>(element);
       for (size_t i = 0u; i < ap.GetLinkCount(); i++)
       {
-        ap.GetQualifiedLink(registry.temp_buffer, i);
-        util::tString s = registry.temp_buffer;
-        FINROC_LOG_PRINT_TO(edges, DEBUG_VERBOSE_2, "Checking link ", s, " with respect to link edges");
+        ap.GetQualifiedLink(temp_buffer, i);
+        tString s = temp_buffer;
+        FINROC_LOG_PRINT(DEBUG_VERBOSE_2, "Checking link ", s, " with respect to link edges");
 
-        if (registry.link_edges.find(s) != registry.link_edges.end())
+        if (link_edges.find(s) != link_edges.end())
         {
-          tLinkEdge* le = registry.link_edges[s];
-          while (le != NULL)
+          internal::tLinkEdge* le = link_edges[s];
+          while (le)
           {
             le->LinkAdded(*this, s, ap);
             le = le->GetNextEdge();
           }
         }
       }
-      for (size_t i = 0; ap.GetLinkEdges() && i < ap.GetLinkEdges()->size(); i++)
+      if (ap.link_edges)
       {
-        tLinkEdge& e = *(*ap.GetLinkEdges())[i];
-        if (e.GetSourceLink().length() > 0)
+        for (auto it = ap.link_edges->begin(); it != ap.link_edges->end(); ++it)
         {
-          tAbstractPort* source = GetPort(e.GetSourceLink());
-          if (source)
+          if ((*it)->GetSourceLink().length() > 0)
           {
-            e.LinkAdded(*this, e.GetSourceLink(), *source);
+            tAbstractPort* source = GetPort((*it)->GetSourceLink());
+            if (source)
+            {
+              (*it)->LinkAdded(*this, (*it)->GetSourceLink(), *source);
+            }
           }
-        }
-        if (e.GetTargetLink().length() > 0)
-        {
-          tAbstractPort* target = GetPort(e.GetTargetLink());
-          if (target)
+          if ((*it)->GetTargetLink().length() > 0)
           {
-            e.LinkAdded(*this, e.GetTargetLink(), *target);
+            tAbstractPort* target = GetPort((*it)->GetTargetLink());
+            if (target)
+            {
+              (*it)->LinkAdded(*this, (*it)->GetTargetLink(), *target);
+            }
           }
         }
       }
@@ -338,17 +377,17 @@ void tRuntimeEnvironment::RuntimeChange(int8 change_type, tFrameworkElement& ele
     if (edge_target)
     {
       assert(element.IsPort());
-      registry.listeners.Notify([&](tRuntimeListener & l)
+      for (auto it = runtime_listeners.Begin(); it != runtime_listeners.End(); ++it)
       {
-        l.RuntimeEdgeChange(change_type, static_cast<tAbstractPort&>(element), *edge_target);
-      });
+        (*it)->RuntimeEdgeChange(change_type, static_cast<tAbstractPort&>(element), *edge_target);
+      }
     }
     else
     {
-      registry.listeners.Notify([&](tRuntimeListener & l)
+      for (auto it = runtime_listeners.Begin(); it != runtime_listeners.End(); ++it)
       {
-        l.RuntimeChange(change_type, element);
-      });
+        (*it)->RuntimeChange(change_type, element);
+      }
     }
   }
 }
@@ -362,19 +401,26 @@ void tRuntimeEnvironment::Shutdown()
   }
 }
 
+bool tRuntimeEnvironment::ShuttingDown()
+{
+  return rrlib::thread::tThread::StoppingThreads();
+}
+
 void tRuntimeEnvironment::UnregisterElement(tFrameworkElement& fe)
 {
-  tLock lock2(registry.mutex);
+  tLock lock(structure_mutex);
   if (fe.IsPort())
   {
-    registry.ports->Remove(fe.GetHandle());
+    ports->Remove(fe.GetHandle());
   }
   else
   {
-    registry.elements.Remove(fe.GetHandle());
+    elements.Remove(fe.GetHandle());
   }
 }
 
-} // namespace finroc
-} // namespace core
-
+//----------------------------------------------------------------------
+// End of namespace declaration
+//----------------------------------------------------------------------
+}
+}

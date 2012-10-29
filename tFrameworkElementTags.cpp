@@ -67,7 +67,7 @@ namespace core
 // Implementation
 //----------------------------------------------------------------------
 tFrameworkElementTags::tFrameworkElementTags() :
-  tFinrocAnnotation(),
+  tAnnotation(),
   tags()
 {}
 
@@ -79,7 +79,7 @@ void tFrameworkElementTags::AddTag(tFrameworkElement& fe, const std::string& tag
     if (!tags)
     {
       tags = new tFrameworkElementTags();
-      fe.AddAnnotation(tags);
+      fe.AddAnnotation(*tags);
     }
     tags->tags.push_back(tag);
   }

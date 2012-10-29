@@ -1,53 +1,84 @@
-/**
- * You received this file as part of an advanced experimental
- * robotics framework prototype ('finroc')
+//
+// You received this file as part of Finroc
+// A Framework for intelligent robot control
+//
+// Copyright (C) Finroc GbR (finroc.org)
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+//----------------------------------------------------------------------
+/*!\file    core/port/tAggregatedEdge.h
  *
- * Copyright (C) 2007-2010 Max Reichardt,
- *   Robotics Research Lab, University of Kaiserslautern
+ * \author  Max Reichardt
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * \date    2012-10-28
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * \brief   Contains tAggregatedEdge
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
-
-#ifndef core__port__tAggregatedEdge_h__
-#define core__port__tAggregatedEdge_h__
-
-#include "rrlib/finroc_core_utils/definitions.h"
-#include "rrlib/time/time.h"
-
-#include "core/tAnnotatable.h"
-
-namespace finroc
-{
-namespace core
-{
-class tEdgeAggregator;
-
-/*!
- * \author Max Reichardt
+ * \b tAggregatedEdge
  *
  * Collection of edges between ports that have the same EdgeAggregator
  * framework element parents as start and destination.
  *
  * The start EdgeAggregator owns objects of this type.
+ *
  */
-class tAggregatedEdge : public tAnnotatable
-{
-public:
+//----------------------------------------------------------------------
+#ifndef __core__port__tAggregatedEdge_h__
+#define __core__port__tAggregatedEdge_h__
 
-  /*! Number of aggregated edges */
-  size_t edge_count;
+//----------------------------------------------------------------------
+// External includes (system with <>, local with "")
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Internal includes with ""
+//----------------------------------------------------------------------
+#include "core/tAnnotatable.h"
+
+//----------------------------------------------------------------------
+// Namespace declaration
+//----------------------------------------------------------------------
+namespace finroc
+{
+namespace core
+{
+
+//----------------------------------------------------------------------
+// Forward declarations / typedefs / enums
+//----------------------------------------------------------------------
+class tEdgeAggregator;
+
+//----------------------------------------------------------------------
+// Class declaration
+//----------------------------------------------------------------------
+//! Edge aggregating multiple single edges
+/*!
+ * Collection of edges between ports that have the same EdgeAggregator
+ * framework element parents as start and destination.
+ *
+ * The start EdgeAggregator owns objects of this type.
+ */
+struct tAggregatedEdge : public tAnnotatable<rrlib::thread::tMutex>
+{
+
+  /*! Number of aggregated data flow edges */
+  int data_flow_edge_count;
+
+  /*! Number of aggregated control flow edges */
+  int control_flow_edge_count;
 
   /*! Pointer to source and destination element */
   tEdgeAggregator& source, & destination;
@@ -56,17 +87,18 @@ public:
   rrlib::time::tTimestamp creation_time;
 
   /*! Usage statistics: Number of published elements */
-  util::tAtomicInt64 publish_count;
+  std::atomic<int64_t> publish_count;
 
   /*! Usage statistics: Size of published elements */
-  util::tAtomicInt64 publish_size;
+  std::atomic<int64_t> publish_size;
 
   /*!
    * \param src Source aggregator
    * \param dest Destination aggregator
    */
   tAggregatedEdge(tEdgeAggregator& src, tEdgeAggregator& dest) :
-    edge_count(0),
+    data_flow_edge_count(0),
+    control_flow_edge_count(0),
     source(src),
     destination(dest),
     creation_time(rrlib::time::Now()),
@@ -76,12 +108,20 @@ public:
   }
 
   /*!
+   * \return Variable for counting edge with such type
+   */
+  int& GetCountVariable(bool data_flow_type)
+  {
+    return data_flow_type ? data_flow_edge_count : control_flow_edge_count;
+  }
+
+  /*!
    * \return How much data (in bytes) is transferred over this edge per second (average)?
    */
   inline int GetDataRate()
   {
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(rrlib::time::Now(false) - creation_time);
-    return ms.count() == 0 ? 0 : static_cast<int>((publish_size.Get() * 1000) / ms.count());
+    return ms.count() == 0 ? 0 : static_cast<int>((publish_size.load() * 1000) / ms.count());
   }
 
   /*!
@@ -90,12 +130,16 @@ public:
   inline float GetPublishRate()
   {
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(rrlib::time::Now(false) - creation_time);
-    return ms.count() == 0 ? 0.f : (static_cast<float>(publish_count.Get()) * 1000.0f) / (static_cast<float>(ms.count()));
+    return ms.count() == 0 ? 0.f : (static_cast<float>(publish_count.load()) * 1000.0f) / (static_cast<float>(ms.count()));
   }
 
 };
 
-} // namespace finroc
-} // namespace core
+//----------------------------------------------------------------------
+// End of namespace declaration
+//----------------------------------------------------------------------
+}
+}
 
-#endif // core__port__tAggregatedEdge_h__
+
+#endif

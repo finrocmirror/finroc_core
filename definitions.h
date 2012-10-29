@@ -19,27 +19,24 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/tRuntimeListener.h
+/*!\file    core/definitions.h
  *
  * \author  Max Reichardt
  *
- * \date    2012-10-28
+ * \date    2012-10-26
  *
- * \brief   Contains tRuntimeListener
- *
- * \b tRuntimeListener
- *
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * Global finroc definitions.
+ * Therefore, placed in finroc namespace.
  *
  */
 //----------------------------------------------------------------------
-#ifndef __core__tRuntimeListener_h__
-#define __core__tRuntimeListener_h__
+#ifndef __core__definitions_h__
+#define __core__definitions_h__
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include <string>
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -50,74 +47,33 @@
 //----------------------------------------------------------------------
 namespace finroc
 {
-namespace core
-{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-class tFrameworkElement;
-class tAbstractPort;
+typedef std::string tString; // could be replaced with RT-String type later
 
-//----------------------------------------------------------------------
-// Class declaration
-//----------------------------------------------------------------------
-//! Runtime Listener
-/*!
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
- */
-class tRuntimeListener
+namespace definitions
 {
 
-//----------------------------------------------------------------------
-// Public methods and typedefs
-//----------------------------------------------------------------------
-public:
+#ifdef RRLIB_SINGLE_THREADED
+enum { cSINGLE_THREADED = 1 };  //!< Compile Finroc in single-threaded mode
+#else
+enum { cSINGLE_THREADED = 0 };  //!< Compile Finroc in multi-threaded mode
+#endif
 
-  /*! Constants for Change type */
-  enum tEvent
-  {
-    ADD,     //!< element added
-    CHANGE,  //!< element changed
-    REMOVE,  //!< element removed
-    PRE_INIT //!< called with this constant before framework element is initialized
-  };
+/*! Collect edge statistics (for profiling) ? */
+enum { cCOLLECT_EDGE_STATISTICS = 0 };
+
+}
 
 //----------------------------------------------------------------------
-// Private fields and methods
+// Function declarations
 //----------------------------------------------------------------------
-private:
-
-  friend class tRuntimeEnvironment;
-
-  /*!
-   * Called whenever a framework element was added/removed or changed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param element FrameworkElement that changed
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeChange(tEvent change_type, tFrameworkElement& element) = 0;
-
-  /*!
-   * Called whenever an edge was added/removed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param source Source of edge
-   * \param target Target of edge
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
-
-};
 
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------
-}
 }
 
 

@@ -19,23 +19,23 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/tRuntimeListener.h
+/*!\file    core/tPlugin.h
  *
  * \author  Max Reichardt
  *
  * \date    2012-10-28
  *
- * \brief   Contains tRuntimeListener
+ * \brief   Contains tPlugin
  *
- * \b tRuntimeListener
+ * \b tPlugin
  *
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * One class in a Plugin must implement this interface.
+ * It should be instantiated in a .cpp file.
  *
  */
 //----------------------------------------------------------------------
-#ifndef __core__tRuntimeListener_h__
-#define __core__tRuntimeListener_h__
+#ifndef __core__tPlugin_h__
+#define __core__tPlugin_h__
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -44,6 +44,7 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "core/internal/tPlugins.h"
 
 //----------------------------------------------------------------------
 // Namespace declaration
@@ -56,18 +57,16 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-class tFrameworkElement;
-class tAbstractPort;
 
 //----------------------------------------------------------------------
 // Class declaration
 //----------------------------------------------------------------------
-//! Runtime Listener
+//! Plugin (initialization) base class
 /*!
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * One class in a Plugin must implement this interface.
+ * It should be instantiated in a .cpp file.
  */
-class tRuntimeListener
+class tPlugin : public boost::noncopyable
 {
 
 //----------------------------------------------------------------------
@@ -75,42 +74,26 @@ class tRuntimeListener
 //----------------------------------------------------------------------
 public:
 
-  /*! Constants for Change type */
-  enum tEvent
+  /*!
+   * Constructor registers plugin at tPlugins
+   */
+  tPlugin()
   {
-    ADD,     //!< element added
-    CHANGE,  //!< element changed
-    REMOVE,  //!< element removed
-    PRE_INIT //!< called with this constant before framework element is initialized
-  };
+    internal::tPlugins::GetInstance().AddPlugin(*this);
+  }
 
 //----------------------------------------------------------------------
 // Private fields and methods
 //----------------------------------------------------------------------
 private:
 
-  friend class tRuntimeEnvironment;
+  friend class internal::tPlugins;
 
   /*!
-   * Called whenever a framework element was added/removed or changed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param element FrameworkElement that changed
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
+   * This method is called once at initialization.
+   * Global parameters, data types, module types etc. may be added here.
    */
-  virtual void RuntimeChange(tEvent change_type, tFrameworkElement& element) = 0;
-
-  /*!
-   * Called whenever an edge was added/removed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param source Source of edge
-   * \param target Target of edge
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
+  virtual void Init() = 0;
 
 };
 

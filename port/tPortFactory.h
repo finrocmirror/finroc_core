@@ -19,23 +19,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/tRuntimeListener.h
+/*!\file    core/port/tPortFactory.h
  *
  * \author  Max Reichardt
  *
  * \date    2012-10-28
  *
- * \brief   Contains tRuntimeListener
+ * \brief   Contains tPortFactory
  *
- * \b tRuntimeListener
+ * \b tPortFactory
  *
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * Factory for ports when only the desired port data type is available.
  *
  */
 //----------------------------------------------------------------------
-#ifndef __core__tRuntimeListener_h__
-#define __core__tRuntimeListener_h__
+#ifndef __core__port__tPortFactory_h__
+#define __core__port__tPortFactory_h__
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -44,6 +43,7 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "core/port/tAbstractPort.h"
 
 //----------------------------------------------------------------------
 // Namespace declaration
@@ -56,18 +56,21 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-class tFrameworkElement;
-class tAbstractPort;
 
 //----------------------------------------------------------------------
 // Class declaration
 //----------------------------------------------------------------------
-//! Runtime Listener
+//! Port factory interface
 /*!
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * Factory for ports when only the desired port data type is available.
+ *
+ * To create a factory for specific data types, derive from this class
+ * and instantiate one object of this factory in a .cpp file.
+ * Constructor registers factory at global port factory registry.
+ *
+ * To create a port, call static function CreatePort
  */
-class tRuntimeListener
+class tPortFactory : boost::noncopyable
 {
 
 //----------------------------------------------------------------------
@@ -75,43 +78,50 @@ class tRuntimeListener
 //----------------------------------------------------------------------
 public:
 
-  /*! Constants for Change type */
-  enum tEvent
-  {
-    ADD,     //!< element added
-    CHANGE,  //!< element changed
-    REMOVE,  //!< element removed
-    PRE_INIT //!< called with this constant before framework element is initialized
-  };
+  /*!
+   * Constructor registers plugin at tPlugins
+   */
+  tPortFactory();
+
+  /*!
+   * External interface for anyone who wants to create a port of specified type.
+   * For RPC types this will create routing ports only.
+   *
+   * Looks for a suitable factory among all available ones..
+   * Returns NULL if there's no suitable factory.
+   *
+   * \param port_name Name of port
+   * \param parent Parent of port
+   * \param dt Data type of port (should be the same as annotation comes from)
+   * \param flags Port's flags
+   * \return Created port or NULL if there's no suitable factory
+   */
+  static tAbstractPort* CreatePort(const std::string& port_name, tFrameworkElement& parent,
+                                   const rrlib::rtti::tDataTypeBase& dt, tFrameworkElement::tFlags flags);
 
 //----------------------------------------------------------------------
 // Private fields and methods
 //----------------------------------------------------------------------
 private:
 
-  friend class tRuntimeEnvironment;
+  /*!
+   * Create port of specified type.
+   * For RPC types this will create routing ports only.
+   *
+   * \param port_name Name of port
+   * \param parent Parent of port
+   * \param dt Data type of port (should be the same as annotation comes from)
+   * \param flags Port's flags
+   * \return Created port
+   */
+  virtual tAbstractPort& CreatePortImplementation(const std::string& port_name, tFrameworkElement& parent,
+      const rrlib::rtti::tDataTypeBase& dt, tFrameworkElement::tFlags flags) = 0;
 
   /*!
-   * Called whenever a framework element was added/removed or changed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param element FrameworkElement that changed
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
+   * \param dt Data type for which a factory is needed
+   * \return True, if this factory can create a port for the specified data type
    */
-  virtual void RuntimeChange(tEvent change_type, tFrameworkElement& element) = 0;
-
-  /*!
-   * Called whenever an edge was added/removed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param source Source of edge
-   * \param target Target of edge
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
-
+  virtual bool HandlesDataType(const rrlib::rtti::tDataTypeBase& dt) = 0;
 };
 
 //----------------------------------------------------------------------

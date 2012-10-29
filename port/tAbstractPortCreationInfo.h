@@ -19,27 +19,30 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/tRuntimeListener.h
+/*!\file    core/port/tAbstractPortCreationInfo.h
  *
  * \author  Max Reichardt
  *
  * \date    2012-10-28
  *
- * \brief   Contains tRuntimeListener
+ * \brief   Contains tAbstractPortCreationInfo
  *
- * \b tRuntimeListener
+ * \b tAbstractPortCreationInfo
  *
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * This class bundles various parameters for the creation of ports.
  *
+ * Instead of providing suitable constructors for all types of sensible
+ * combinations of the numerous (often optional) construction parameters,
+ * there is only one constructor taking a single argument of this class.
  */
 //----------------------------------------------------------------------
-#ifndef __core__tRuntimeListener_h__
-#define __core__tRuntimeListener_h__
+#ifndef __core__port__tAbstractPortCreationInfo_h__
+#define __core__port__tAbstractPortCreationInfo_h__
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include "rrlib/rtti/rtti.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -56,62 +59,54 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-class tFrameworkElement;
-class tAbstractPort;
+/*! Can be used to wrap lock order for tAbstractPortCreationInfo variadic template constructor */
+struct tLockOrder
+{
+  int wrapped;
+
+  tLockOrder(int i) : wrapped(i) {}
+};
 
 //----------------------------------------------------------------------
 // Class declaration
 //----------------------------------------------------------------------
-//! Runtime Listener
+//! Bundle of port creation parameters
 /*!
- * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * This class bundles various parameters for the creation of ports.
+ *
+ * Instead of providing suitable constructors for all types of sensible
+ * combinations of the numerous (often optional) construction parameters,
+ * there is only one constructor taking a single argument of this class.
+ *
+ * This is a struct, as this is merely a collection of parameters -
+ * and it does not really seem sensible to hide anything from the user of
+ * this class.
  */
-class tRuntimeListener
+struct tAbstractPortCreationInfo
 {
+  /*! Port flags */
+  tFrameworkElement::tFlags flags;
 
-//----------------------------------------------------------------------
-// Public methods and typedefs
-//----------------------------------------------------------------------
-public:
+  /*! Data type of port */
+  rrlib::rtti::tDataTypeBase data_type;
 
-  /*! Constants for Change type */
-  enum tEvent
-  {
-    ADD,     //!< element added
-    CHANGE,  //!< element changed
-    REMOVE,  //!< element removed
-    PRE_INIT //!< called with this constant before framework element is initialized
-  };
+  /*! Parent of port */
+  tFrameworkElement* parent;
 
-//----------------------------------------------------------------------
-// Private fields and methods
-//----------------------------------------------------------------------
-private:
+  /*! Port name */
+  tString name;
 
-  friend class tRuntimeEnvironment;
+  /*! Lock order level */
+  int lock_order;
 
-  /*!
-   * Called whenever a framework element was added/removed or changed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param element FrameworkElement that changed
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeChange(tEvent change_type, tFrameworkElement& element) = 0;
 
-  /*!
-   * Called whenever an edge was added/removed
-   *
-   * \param change_type Type of change (see Constants)
-   * \param source Source of edge
-   * \param target Target of edge
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   */
-  virtual void RuntimeEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
-
+  tAbstractPortCreationInfo() :
+    flags(),
+    data_type(),
+    parent(NULL),
+    name(),
+    lock_order(-1)
+  {}
 };
 
 //----------------------------------------------------------------------

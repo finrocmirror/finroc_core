@@ -1,162 +1,92 @@
-/**
- * You received this file as part of an advanced experimental
- * robotics framework prototype ('finroc')
+//
+// You received this file as part of Finroc
+// A Framework for intelligent robot control
+//
+// Copyright (C) Finroc GbR (finroc.org)
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+//----------------------------------------------------------------------
+/*!\file    core/tRuntimeEnvironment.h
  *
- * Copyright (C) 2007-2010 Max Reichardt,
- *   Robotics Research Lab, University of Kaiserslautern
+ * \author  Max Reichardt
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * \date    2012-10-28
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * \brief   Contains tRuntimeEnvironment
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * \b tRuntimeEnvironment
+ *
+ * This is an application's main central class (root object). It contains groups and modules.
+ *
  */
+//----------------------------------------------------------------------
+#ifndef __core__tRuntimeEnvironment_h__
+#define __core__tRuntimeEnvironment_h__
 
-#ifndef core__tRuntimeEnvironment_h__
-#define core__tRuntimeEnvironment_h__
+//----------------------------------------------------------------------
+// External includes (system with <>, local with "")
+//----------------------------------------------------------------------
+#include <map>
 
-#include "rrlib/finroc_core_utils/definitions.h"
-#include "rrlib/design_patterns/singleton/policies/creation/CreateUsingNew.h"
-
-#include "core/tCoreRegister.h"
+//----------------------------------------------------------------------
+// Internal includes with ""
+//----------------------------------------------------------------------
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeListener.h"
-#include "core/tLockOrderLevels.h"
+#include "core/internal/tFrameworkElementRegister.h"
 
+//----------------------------------------------------------------------
+// Namespace declaration
+//----------------------------------------------------------------------
 namespace finroc
 {
 namespace core
 {
-class tThreadLocalCache;
-class tLinkEdge;
-class tAbstractPort;
 
+//----------------------------------------------------------------------
+// Forward declarations / typedefs / enums
+//----------------------------------------------------------------------
+namespace internal
+{
+class tLinkEdge;
+}
+
+//----------------------------------------------------------------------
+// Class declaration
+//----------------------------------------------------------------------
+//! Finroc runtime environment
 /*!
- * \author Max Reichardt
+ * This is Finroc's so-called runtime environment.
+ * It is the root of the framework element hierarchy and performs various
+ * management tasks.
  *
- * This is an application's main central class (root object). It contains groups and modules.
+ * In order to modify the framework element hierarchy, a framework element
+ * hierarchy lock must be acquired.
  */
 class tRuntimeEnvironment : public tFrameworkElement
 {
+
+//----------------------------------------------------------------------
+// Public methods and typedefs
+//----------------------------------------------------------------------
 public:
-
-  /*!
-   * Contains diverse registers/lookup tables of runtime.
-   * They are moved to extra class in order to be separately lockable
-   * (necessary for systematic dead-lock avoidance)
-   */
-  class tRegistry : public boost::noncopyable
-  {
-    friend class tRuntimeEnvironment;
-    friend class tFrameworkElement;
-
-  private:
-
-    /*! Global register of all ports. Allows accessing ports with simple handle. */
-    std::shared_ptr<tCoreRegister<tAbstractPort*>> ports;
-
-    /*! Global register of all framework elements (except of ports) */
-    tCoreRegister<tFrameworkElement*> elements;
-
-    /*! Edges dealing with linked ports */
-    std::map<std::string, tLinkEdge*> link_edges;
-
-    /*! List with runtime listeners */
-    util::tListenerManager<tRuntimeListener, rrlib::thread::tOrderedMutex> listeners;
-
-    /*! Temporary buffer - may be used in synchronized context */
-    std::string temp_buffer;
-
-    /*! Alternative roots for links (usually remote runtime environments mapped into this one) */
-    std::vector<tFrameworkElement*> alternative_link_roots;
-
-    /*! Mutex */
-    rrlib::thread::tRecursiveMutex mutex;
-
-    tRegistry();
-  };
-
-  friend class tFrameworkElement;
-  friend class tLinkEdge;
-  friend class rrlib::design_patterns::singleton::CreateUsingNew<tRuntimeEnvironment>;
-private:
-
-  /*! Single final instance of above */
-  tRegistry registry;
-
-  /*! Raw pointer to above - that also exists during destruction */
-  static tRuntimeEnvironment* instance_raw_ptr;
-
-  /*! Timestamp when runtime environment was created */
-  rrlib::time::tTimestamp creation_time;
-
-  /*! Is RuntimeEnvironment currently active (and needs to be deleted?) */
-  static bool active;
-
-  /*! Mutex for static methods */
-  static rrlib::thread::tOrderedMutex static_class_mutex;
-
-  /*! Command line arguments (used by parameters, for instance). Needs to be manually filled (usually in main()). */
-  std::map<std::string, std::string> command_line_args;
-
-  /*! Framework element that contains all framework elements that have no parent specified */
-  tFrameworkElement* unrelated;
 
   tRuntimeEnvironment();
 
   virtual ~tRuntimeEnvironment();
-
-  /*!
-   * Initializes the runtime environment. Needs to be called before any
-   * other operation (especially getInstance()) is called.
-   */
-  static void InitialInit();
-
-  /*!
-   * (usually only called by LinkEdge)
-   * Add link edge that is interested in specific link
-   *
-   * \param link link that edge is interested in
-   * \param edge Edge to add
-   */
-  void AddLinkEdge(const util::tString& link, tLinkEdge& edge);
-
-  /*!
-   * Register framework element at RuntimeEnvironment.
-   * This is done automatically and should not be called by a user.
-   *
-   * \param framework_element Element to register
-   * \param port Is framework element a port?
-   * \return Handle of Framework element
-   */
-  int RegisterElement(tFrameworkElement& fe, bool port);
-
-  /*!
-   * (usually only called by LinkEdge)
-   * Remove link edge that is interested in specific link
-   *
-   * \param link link that edge is interested in
-   * \param edge Edge to add
-   */
-  void RemoveLinkEdge(const util::tString& link, tLinkEdge& edge);
-
-  /*!
-   * Unregister framework element at RuntimeEnvironment.
-   * This is done automatically and should not be called by a user.
-   *
-   * \param framework_element Element to remove
-   */
-  void UnregisterElement(tFrameworkElement& fe);
-
-public:
 
   /*!
    * (usually called from main())
@@ -166,7 +96,7 @@ public:
    * \param option Name of command line option.
    * \param value Value of option.
    */
-  void AddCommandLineArgument(const util::tString& option, const util::tString& value)
+  void AddCommandLineArgument(const tString& option, const tString& value)
   {
     command_line_args.insert(std::pair<std::string, std::string>(option, value));
   }
@@ -190,7 +120,7 @@ public:
    * \param name Name of command line argument
    * \return Value of argument - or "" if not set.
    */
-  util::tString GetCommandLineArgument(const util::tString& name);
+  tString GetCommandLineArgument(const tString& name);
 
   /*!
    * Get Framework element from handle
@@ -198,14 +128,14 @@ public:
    * \param handle Handle of framework element
    * \return Pointer to framework element - or null if it has been deleted
    */
-  ::finroc::core::tFrameworkElement* GetElement(int handle);
+  tFrameworkElement* GetElement(int handle);
 
   /*!
    * (IMPORTANT: This should not be called during static initialization)
    *
    * \return Singleton instance of Runtime environment
    */
-  static tRuntimeEnvironment* GetInstance();
+  static tRuntimeEnvironment& GetInstance();
 
   /*!
    * get Port by handle
@@ -219,23 +149,25 @@ public:
    * \param link_name (relative) Fully qualified name of port
    * \return Port with this name - or null if it does not exist
    */
-  tAbstractPort* GetPort(const util::tString& link_name);
+  tAbstractPort* GetPort(const tString& link_name);
 
   /*!
-   * (Should only be called by ThreadLocalCache class - needed for clean cleanup - port register needs to exists longer than runtime environment)
+   * (Should only be called by ThreadLocalCache class - needed for clean cleanup -
+   *  port register needs to exists longer than runtime environment)
    * \return Port register
    */
-  inline std::shared_ptr<const tCoreRegister<tAbstractPort*>> GetPorts()
+  inline std::shared_ptr<const internal::tFrameworkElementRegister<tAbstractPort*>> GetPorts()
   {
-    return registry.ports;
+    return ports;
   }
 
   /*!
-   * \return Lock order of registry
+   * \return Framework element hierarchy changing operations need to acquire a lock on this mutex
+   * (Only lock runtime for minimal periods of time!)
    */
-  inline const tRegistry& GetRegistryHelper()
+  rrlib::thread::tRecursiveMutex& GetStructureMutex()
   {
-    return registry;
+    return structure_mutex;
   }
 
   /*!
@@ -263,18 +195,17 @@ public:
   /*!
    * Called whenever a framework element was added/removed or changed
    *
-   * \param change_type Type of change (see Constants in Transaction class)
+   * \param change_type Type of change
    * \param element FrameworkElement that changed
    * \param edge_target Target of edge, in case of EDGE_CHANGE
    *
    * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
    * (should only be called by FrameworkElement class)
    */
-  void RuntimeChange(int8 change_type, tFrameworkElement& element, tAbstractPort* edge_target = NULL);
+  void RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element, tAbstractPort* edge_target = NULL);
 
   /*!
-   * Using only the basic constructs from this framework - things should shutdown
-   * cleanly without calling anything.
+   * Using only the basic constructs from Finroc - things should shutdown cleanly automatically.
    *
    * However, if things like the TCP server are used, this method should be called
    * at the end of the program in order to shut everything down cleanly.
@@ -282,18 +213,104 @@ public:
   static void Shutdown();
 
   /*!
-   * (irrelevant for Java - we need no memory cleanup there)
-   *
    * \return Is runtime environment currently shutting down?
    */
-  inline static bool ShuttingDown()
-  {
-    return rrlib::thread::tThread::StoppingThreads();
-  }
+  static bool ShuttingDown();
 
+//----------------------------------------------------------------------
+// Private fields and methods
+//----------------------------------------------------------------------
+private:
+
+  friend class tFrameworkElement;
+  friend class internal::tLinkEdge;
+
+  /*! Global register of all ports. Allows accessing ports with simple handle. */
+  std::shared_ptr<internal::tFrameworkElementRegister<tAbstractPort*>> ports;
+
+  /*! Global register of all framework elements (except of ports) */
+  internal::tFrameworkElementRegister<tFrameworkElement*> elements;
+
+  /*! Edges dealing with linked ports */
+  std::map<std::string, internal::tLinkEdge*> link_edges;
+
+  /*! List with runtime listeners */
+  rrlib::concurrent_containers::tSet < tRuntimeListener*, rrlib::concurrent_containers::tAllowDuplicates::NO, rrlib::thread::tNoMutex,
+        rrlib::concurrent_containers::set::storage::ArrayChunkBased<8, 31, definitions::cSINGLE_THREADED >> runtime_listeners;
+
+  /*! Temporary buffer - may be used in synchronized context */
+  std::string temp_buffer;
+
+  /*! Alternative roots for links (usually remote runtime environments mapped into this one) */
+  std::vector<tFrameworkElement*> alternative_link_roots;
+
+  /*! Mutex for framework element hierarchy */
+  rrlib::thread::tRecursiveMutex structure_mutex;
+
+  /*! Raw pointer to runtime - that also exists during destruction */
+  static tRuntimeEnvironment* instance_raw_ptr;
+
+  /*! Timestamp when runtime environment was created */
+  rrlib::time::tTimestamp creation_time;
+
+  /*! Is RuntimeEnvironment currently active (and needs to be deleted?) */
+  static bool active;
+
+  /*! Command line arguments (used by parameters, for instance). Needs to be manually filled (usually in main()). */
+  std::map<std::string, std::string> command_line_args;
+
+  /*! Framework element that contains all framework elements that have no parent specified */
+  tFrameworkElement* unrelated;
+
+
+  /*!
+   * Initializes the runtime environment. Needs to be called before any
+   * other operation (especially getInstance()) is called.
+   */
+  static void InitialInit();
+
+  /*!
+   * (usually only called by LinkEdge)
+   * Add link edge that is interested in specific link
+   *
+   * \param link link that edge is interested in
+   * \param edge Edge to add
+   */
+  void AddLinkEdge(const tString& link, internal::tLinkEdge& edge);
+
+  /*!
+   * Register framework element at RuntimeEnvironment.
+   * This is done automatically and should not be called by a user.
+   *
+   * \param framework_element Element to register
+   * \param port Is framework element a port?
+   * \return Handle of Framework element
+   */
+  int RegisterElement(tFrameworkElement& fe, bool port);
+
+  /*!
+   * (usually only called by LinkEdge)
+   * Remove link edge that is interested in specific link
+   *
+   * \param link link that edge is interested in
+   * \param edge Edge to add
+   */
+  void RemoveLinkEdge(const tString& link, internal::tLinkEdge& edge);
+
+  /*!
+   * Unregister framework element at RuntimeEnvironment.
+   * This is done automatically and should not be called by a user.
+   *
+   * \param framework_element Element to remove
+   */
+  void UnregisterElement(tFrameworkElement& fe);
 };
 
-} // namespace finroc
-} // namespace core
+//----------------------------------------------------------------------
+// End of namespace declaration
+//----------------------------------------------------------------------
+}
+}
 
-#endif // core__tRuntimeEnvironment_h__
+
+#endif
