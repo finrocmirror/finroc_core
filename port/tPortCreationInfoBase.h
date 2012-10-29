@@ -72,12 +72,12 @@ protected: // Used by derived class tPortCreationInfo also
 
     tStorage(const tStorage& o)
     {
-      CopyFrom(o);
+      this->CopyFrom(o);
     }
 
     tStorage& operator=(const tStorage& o)
     {
-      CopyFrom(o);
+      this->CopyFrom(o);
       return *this;
     }
   };

@@ -195,11 +195,11 @@ protected:
       {
         if (result.parent == NULL)
         {
-          UpdateCurrentPortNameIndex(this->FindParent());
+          this->UpdateCurrentPortNameIndex(this->FindParent());
         }
         else
         {
-          UpdateCurrentPortNameIndex(static_cast<BASE*>(result.parent));
+          this->UpdateCurrentPortNameIndex(static_cast<BASE*>(result.parent));
         }
       }
     }
