@@ -131,7 +131,7 @@ void tMethod<HANDLER, R, TArgs...>::CallAsync(tInterfaceClientPort port, tAsyncR
       tMethodCall::tPtr mc = tThreadLocalRPCData::Get().GetUnusedMethodCall();
       mc->SetParameters(args...);
       mc->PrepareExecution(this, port.GetDataType(), mhandler, handler);
-      tRPCThreadPool::GetInstance().ExecuteTask(mc);
+      tRPCThreadPool::GetInstance().ExecuteTask(std::move(mc));
     }
   }
   else
