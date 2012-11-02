@@ -536,7 +536,7 @@ void tFinstructableGroup::SaveXml()
               config.SetAttribute("cmdline", info->GetCommandLineOption());
             }
 
-            return;
+            continue;
           }
 
           rrlib::xml::tNode& config = root.AddChildNode("parameter");
