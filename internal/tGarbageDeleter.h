@@ -94,18 +94,33 @@ class tGarbageDeleter : public rrlib::thread::tLoopThread
 //----------------------------------------------------------------------
 public:
 
+  typedef void (*tRegularTask)();
+
+  /*!
+   * Adds regular task for garbage deleter
+   * (will be called in every cycle of garbage deleter)
+   */
+  static void AddRegularTask(tRegularTask task);
+
   /*!
    * Creates and starts single instance of GarbageCollector thread
    */
   static void CreateAndStartInstance();
 
   /*!
-   * Delete framework element deferred
-   * (call blocks => not RT-capable)
+   * Delete object deferred
+   * (call blocks to this method blocks => not suitable for RT code)
    *
-   * \param element_to_delete Framework element to delete (after safety period)
+   * \param object_to_delete Framework element to delete (after safety period)
    */
-  static void DeleteDeferred(tFrameworkElement& element_to_delete);
+  template <typename T>
+  static void DeleteDeferred(T* object_to_delete)
+  {
+    if (object_to_delete)
+    {
+      DeleteDeferredImplementation(object_to_delete, &DeleterFunction<T>);
+    }
+  }
 
   static const char* GetLogDescription()
   {
@@ -124,21 +139,35 @@ private:
   {
     friend class tGarbageDeleter;
 
-    /*! Element to delete */
-    tFrameworkElement* element_to_delete;
+    /*! Object to delete */
+    void* object_to_delete;
+
+    /*! Pointer to delete function */
+    void (*deleter_function)(void*);
 
     /*! Cycle in which to delete element */
     int64_t cycle_when;
 
-    tDeferredDeleteTask(tFrameworkElement* element_to_delete, int64_t cycle_when) :
-      element_to_delete(element_to_delete),
+    tDeferredDeleteTask(void* object_to_delete, void (*deleter_function)(void*), int64_t cycle_when) :
+      object_to_delete(object_to_delete),
+      deleter_function(deleter_function),
       cycle_when(cycle_when)
     {}
 
     tDeferredDeleteTask() :
-      element_to_delete(),
+      object_to_delete(),
+      deleter_function(NULL),
       cycle_when(0)
     {}
+
+    void Execute()
+    {
+      if (deleter_function && object_to_delete)
+      {
+        deleter_function(object_to_delete);
+        object_to_delete = NULL;
+      }
+    }
   };
 
   /*! Current tasks of Garbage Collector */
@@ -153,10 +182,21 @@ private:
   /*! Number of cycles garbage collector has been executed */
   std::atomic<int64_t> cycle_count;
 
+  /*! Regular tasks */
+  std::vector<tRegularTask> regular_tasks;
+
 
   tGarbageDeleter();
 
   virtual ~tGarbageDeleter();
+
+  static void DeleteDeferredImplementation(void* object_to_delete, void (*deleter_function)(void*));
+
+  template <typename T>
+  static void DeleterFunction(void* pointer)
+  {
+    delete static_cast<T*>(pointer);
+  }
 
   virtual void MainLoopCallback();
 

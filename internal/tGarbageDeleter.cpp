@@ -82,20 +82,24 @@ static const int cYES = 0x37347377, cNO = 0x1946357;
 //----------------------------------------------------------------------
 
 /*! Singleton instance - non-null while thread is running */
-static tGarbageDeleter* volatile instance = NULL;
+static tGarbageDeleter* instance = NULL;
 
 /*! True after garbage collector has been started */
 static std::atomic<int> started(cNO);
 
-/*! Thread id of thread that is deleting garbage collector at program shutdown using Thread::stopThreads() */
-static std::atomic<int64_t> deleter_thread_id(0);
+/*!
+ * Thread that is deleting garbage collector at program shutdown using Thread::StopThreads()
+ * We use the pointer to the thread instead of thread id, because it is still valid after thread has been deleted
+ */
+static std::atomic<rrlib::thread::tThread*> deleter_thread(0);
 
 
 tGarbageDeleter::tGarbageDeleter() :
   tLoopThread(cCYCLE_TIME, false),
   tasks(),
   next(),
-  cycle_count(0)
+  cycle_count(0),
+  regular_tasks()
 {
   assert((started == cNO) && "May only create single instance");
   instance = this;
@@ -107,7 +111,16 @@ tGarbageDeleter::tGarbageDeleter() :
 tGarbageDeleter::~tGarbageDeleter()
 {
   assert(tasks.empty());
-  assert(rt_tasks.Dequeue() == NULL);
+  instance = NULL;
+  //assert(rt_tasks.Dequeue() == NULL);
+}
+
+void tGarbageDeleter::AddRegularTask(tRegularTask task)
+{
+  tGarbageDeleter* garbage_deleter = instance;
+  assert(garbage_deleter);
+  rrlib::thread::tLock lock(*garbage_deleter);
+  garbage_deleter->regular_tasks.push_back(task);
 }
 
 void tGarbageDeleter::CreateAndStartInstance()
@@ -131,19 +144,19 @@ void tGarbageDeleter::CreateAndStartInstance()
   }
 }
 
-void tGarbageDeleter::DeleteDeferred(tFrameworkElement& element_to_delete)
+void tGarbageDeleter::DeleteDeferredImplementation(void* object_to_delete, void (*deleter_function)(void*))
 {
-  FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Delete requested for: ", element_to_delete.GetQualifiedName());
+  //FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Delete requested for: ", object_to_delete->GetQualifiedName());
   tGarbageDeleter* gc = instance;
   if (gc == NULL)
   {
-    assert(started == cNO || rrlib::thread::tThread::CurrentThreadId() == deleter_thread_id);
+    assert(started == cNO || &rrlib::thread::tThread::CurrentThread() == deleter_thread);
     // safe to delete object now
-    delete &element_to_delete;
+    deleter_function(object_to_delete);
     return;
   }
 
-  tDeferredDeleteTask t(&element_to_delete, gc->cycle_count + cSAFE_DELETE_CYCLES);
+  tDeferredDeleteTask t(object_to_delete, deleter_function, gc->cycle_count + cSAFE_DELETE_CYCLES);
   tLock lock(*gc);
   gc->tasks.push(t);
 }
@@ -163,7 +176,6 @@ void tGarbageDeleter::DeleteDeferred(tFrameworkElement& element_to_delete)
   gc->rt_tasks.Enqueue(element_to_delete);
 }*/
 
-
 void tGarbageDeleter::MainLoopCallback()
 {
   int64_t current_cycle = cycle_count;
@@ -171,7 +183,7 @@ void tGarbageDeleter::MainLoopCallback()
   // check waiting deletion tasks
   while (true)
   {
-    if (!next.element_to_delete)
+    if (!next.object_to_delete)
     {
       tLock lock(*this);
       if (tasks.empty())
@@ -186,11 +198,15 @@ void tGarbageDeleter::MainLoopCallback()
     {
       break;
     }
-    delete next.element_to_delete;
-    next.element_to_delete = NULL;
+    next.Execute();
   }
 
   rrlib::buffer_pools::tGarbageFromDeletedBufferPools::DeleteGarbage();
+
+  for (auto it = regular_tasks.begin(); it != regular_tasks.end(); ++it)
+  {
+    (**it)();
+  }
 
   // process waiting deletion tasks from RT thread
   //rt_tasks.DeleteEnqueued();
@@ -200,28 +216,31 @@ void tGarbageDeleter::MainLoopCallback()
 
 void tGarbageDeleter::Run()
 {
+  SetPriority(16); // Garbage deleter should only run if other threads do not need CPU
+
   tLoopThread::Run();
 
   assert(tThread::StoppingThreads());
 
   // delete everything - other threads should have been stopped before
-  if (next.element_to_delete != NULL)
-  {
-    delete next.element_to_delete;
-    next.element_to_delete = NULL;
-  }
+  next.Execute();
 
   while (!tasks.empty())
   {
-    delete tasks.front().element_to_delete;
+    tasks.front().Execute();
     tasks.pop();
+  }
+
+  for (auto it = regular_tasks.begin(); it != regular_tasks.end(); ++it)
+  {
+    (**it)();
   }
 }
 
 void tGarbageDeleter::StopThread()
 {
   assert(tThread::StoppingThreads() && "may only be called by Thread::stopThreads()");
-  deleter_thread_id = rrlib::thread::tThread::CurrentThreadId();
+  deleter_thread = &rrlib::thread::tThread::CurrentThread();
 
   tLoopThread::StopThread();
   try
@@ -236,7 +255,7 @@ void tGarbageDeleter::StopThread()
   // possibly some thread-local objects of Garbage Collector thread
   while (!tasks.empty())
   {
-    delete tasks.front().element_to_delete;
+    tasks.front().Execute();
     tasks.pop();
   }
   //rt_tasks.DeleteEnqueued();

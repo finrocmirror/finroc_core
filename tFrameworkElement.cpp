@@ -68,6 +68,7 @@ namespace core
 //----------------------------------------------------------------------
 // Const values
 //----------------------------------------------------------------------
+constexpr tFrameworkElementFlags tFrameworkElement::cSTATUS_FLAGS;
 
 //----------------------------------------------------------------------
 // Implementation
@@ -714,7 +715,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
   }
 
   // add garbage collector task
-  internal::tGarbageDeleter::DeleteDeferred(*this);
+  internal::tGarbageDeleter::DeleteDeferred(this);
 }
 
 bool tFrameworkElement::NameEquals(const tString& other) const
@@ -879,18 +880,22 @@ tFrameworkElement::tSubElementIterator tFrameworkElement::tSubElementIterator::o
   return temp;
 }
 
-static void StreamQualifiedName(std::ostream& output, const tFrameworkElement& fe)
+static void StreamQualifiedName(std::ostream& output, const tFrameworkElement& fe, bool first)
 {
   if (!fe.GetFlag(tFrameworkElement::tFlag::RUNTIME))
   {
-    StreamQualifiedName(output, *fe.GetParent());
+    StreamQualifiedName(output, *fe.GetParent(), false);
     output << fe.GetCName();
+    if (!first)
+    {
+      output << '/';
+    }
   }
 }
 
 std::ostream& operator << (std::ostream& output, const tFrameworkElement& fe)
 {
-  StreamQualifiedName(output, fe);
+  StreamQualifiedName(output, fe, true);
   output << " (" << ((void*)&fe) << ")";
   return output;
 }

@@ -92,12 +92,12 @@ public:
    *
    * \param port_name Name of port
    * \param parent Parent of port
-   * \param dt Data type of port (should be the same as annotation comes from)
+   * \param type Data type of port (should be the same as annotation comes from)
    * \param flags Port's flags
    * \return Created port or NULL if there's no suitable factory
    */
   static tAbstractPort* CreatePort(const std::string& port_name, tFrameworkElement& parent,
-                                   const rrlib::rtti::tDataTypeBase& dt, tFrameworkElement::tFlags flags);
+                                   const rrlib::rtti::tType& type, tFrameworkElement::tFlags flags);
 
 //----------------------------------------------------------------------
 // Private fields and methods
@@ -110,18 +110,18 @@ private:
    *
    * \param port_name Name of port
    * \param parent Parent of port
-   * \param dt Data type of port (should be the same as annotation comes from)
+   * \param type Data type of port (should be the same as annotation comes from)
    * \param flags Port's flags
    * \return Created port
    */
   virtual tAbstractPort& CreatePortImplementation(const std::string& port_name, tFrameworkElement& parent,
-      const rrlib::rtti::tDataTypeBase& dt, tFrameworkElement::tFlags flags) = 0;
+      const rrlib::rtti::tType& type, tFrameworkElement::tFlags flags) = 0;
 
   /*!
-   * \param dt Data type for which a factory is needed
+   * \param type Data type for which a factory is needed
    * \return True, if this factory can create a port for the specified data type
    */
-  virtual bool HandlesDataType(const rrlib::rtti::tDataTypeBase& dt) = 0;
+  virtual bool HandlesDataType(const rrlib::rtti::tType& type) = 0;
 };
 
 //----------------------------------------------------------------------

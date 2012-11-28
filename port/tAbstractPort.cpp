@@ -224,6 +224,26 @@ void tAbstractPort::ConnectTo(tFrameworkElement& partner_port_parent, const tStr
   }
 }
 
+size_t tAbstractPort::CountIncomingConnections() const
+{
+  size_t result = 0;
+  for (auto it = IncomingConnectionsBegin(); it != IncomingConnectionsEnd(); ++it)
+  {
+    result++;
+  }
+  return result;
+}
+
+size_t tAbstractPort::CountOutgoingConnections() const
+{
+  size_t result = 0;
+  for (auto it = OutgoingConnectionsBegin(); it != OutgoingConnectionsEnd(); ++it)
+  {
+    result++;
+  }
+  return result;
+}
+
 void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
 {
   tLock lock(GetStructureMutex());
@@ -500,7 +520,7 @@ void tAbstractPort::PrepareDelete()
   DisconnectAll();
 }
 
-void tAbstractPort::SetWrapperDataType(const rrlib::rtti::tDataTypeBase& wrapper_data_type)
+void tAbstractPort::SetWrapperDataType(const rrlib::rtti::tType& wrapper_data_type)
 {
   if (this->wrapper_data_type != NULL && wrapper_data_type != this->wrapper_data_type)
   {

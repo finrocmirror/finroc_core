@@ -79,7 +79,7 @@ tPortFactory::tPortFactory()
   FactoryList().push_back(this);
 }
 
-tAbstractPort* tPortFactory::CreatePort(const std::string& port_name, tFrameworkElement& parent, const rrlib::rtti::tDataTypeBase& dt, tFrameworkElement::tFlags flags)
+tAbstractPort* tPortFactory::CreatePort(const std::string& port_name, tFrameworkElement& parent, const rrlib::rtti::tType& dt, tFrameworkElement::tFlags flags)
 {
   std::vector<tPortFactory*>& list = FactoryList();
   for (auto it = list.begin(); it != list.end(); ++it)

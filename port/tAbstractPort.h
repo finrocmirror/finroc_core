@@ -143,6 +143,16 @@ public:
   void ConnectTo(tFrameworkElement& partner_port_parent, const tString& port_name, bool warn_if_not_available = true, tConnectDirection connect_direction = tConnectDirection::AUTO);
 
   /*!
+   * \return Number of incoming connections (slightly expensive operation - O(n))
+   */
+  size_t CountIncomingConnections() const;
+
+  /*!
+   * \return Number of incoming connections (slightly expensive operation - O(n))
+   */
+  size_t CountOutgoingConnections() const;
+
+  /*!
    * Disconnects all edges
    *
    * \param incoming disconnect incoming edges?
@@ -167,7 +177,7 @@ public:
   /*!
    * \return Data type of port
    */
-  inline const rrlib::rtti::tDataTypeBase GetDataType() const
+  inline const rrlib::rtti::tType GetDataType() const
   {
     return data_type;
   }
@@ -176,9 +186,25 @@ public:
    * \return Data type of class wrapping this port (differs from data_type e.g. with numeric types)
    * If port was not created using a wrapper class, this is empty.
    */
-  rrlib::rtti::tDataTypeBase GetWrapperDataType() const
+  rrlib::rtti::tType GetWrapperDataType() const
   {
     return wrapper_data_type;
+  }
+
+  /*!
+   * \return Does port have any incoming connections?
+   */
+  bool HasIncomingConnections()
+  {
+    return !incoming_connections.Empty();
+  }
+
+  /*!
+   * \return Does port have any outgoing connections?
+   */
+  bool HasOutgoingConnections()
+  {
+    return !outgoing_connections.Empty();
   }
 
   /*!
@@ -220,6 +246,14 @@ public:
    * \return Is port connected to specified other port?
    */
   bool IsConnectedTo(tAbstractPort& target) const;
+
+  /*!
+   * \return Is this an input port?
+   */
+  inline bool IsInputPort() const
+  {
+    return !IsOutputPort();
+  }
 
   /*!
    * \return Is this an output port?
@@ -270,7 +304,7 @@ public:
    *
    * \param Data type of class wrapping this port (differs from data_type e.g. with numeric types)
    */
-  void SetWrapperDataType(const rrlib::rtti::tDataTypeBase& wrapper_data_type);
+  void SetWrapperDataType(const rrlib::rtti::tType& wrapper_data_type);
 
 //----------------------------------------------------------------------
 // Protected methods
@@ -300,10 +334,10 @@ private:
    * Data type of class wrapping this port (differs from data_type e.g. with numeric types)
    * If port was not created using a wrapper class, this is empty.
    */
-  rrlib::rtti::tDataTypeBase wrapper_data_type;
+  rrlib::rtti::tType wrapper_data_type;
 
   /*! Data type of port */
-  const rrlib::rtti::tDataTypeBase data_type;
+  const rrlib::rtti::tType data_type;
 
 
   /*!

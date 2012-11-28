@@ -595,7 +595,7 @@ public:
   public:
 
     tLink(tFrameworkElement& pointed_to) :
-      points_to(points_to),
+      points_to(pointed_to),
       name(),
       parent(NULL),
       next(NULL)
@@ -824,6 +824,12 @@ protected:
   void Link(tFrameworkElement& parent, const tString& link_name);
 
   /*!
+   * \param indent Current indentation level
+   * \param output Only used in C++ for streaming
+   */
+  virtual void PrintStructure(int indent, std::stringstream& output) const;
+
+  /*!
    * Publish updated edge information
    *
    * \param change_type Type of change (see Constants in RuntimeListener class)
@@ -1048,12 +1054,6 @@ private:
   }
 
   /*!
-   * \param indent Current indentation level
-   * \param output Only used in C++ for streaming
-   */
-  virtual void PrintStructure(int indent, std::stringstream& output) const;
-
-  /*!
    * Helper method for deleting.
    * For some elements we need to lock runtime registry before locking this element.
    *
@@ -1069,6 +1069,5 @@ std::ostream& operator << (std::ostream& output, const tFrameworkElement& fe);
 //----------------------------------------------------------------------
 }
 }
-
 
 #endif

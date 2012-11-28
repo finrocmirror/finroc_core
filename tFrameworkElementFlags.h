@@ -81,7 +81,8 @@ enum class tFrameworkElementFlag
 
   // Constant port-only flags
   HAS_QUEUE,               //!< Does Port have a queue for storing incoming data?
-  MAY_ACCEPT_REVERSE_DATA, //!< Does the flag ACCEPTS_REVERSE_DATA may change at runtime?
+  HAS_DEQUEUE_ALL_QUEUE,   //!< Does Port have a queue with tDequeueMode::ALL instead of tDequeueMode::FIFO?
+  //MAY_ACCEPT_REVERSE_DATA, //!< Does the flag ACCEPTS_REVERSE_DATA may change at runtime?
   ACCEPTS_DATA,            //!< Does port accept incoming data? Also set for server RPC ports, since they accept RPC calls
   EMITS_DATA,              //!< Does port emit data (normal direction)? Also set for client RPC ports, since they "emit" RPC calls
   MULTI_TYPE_BUFFER_POOL,  //!< Does port have buffer pool with multiple data types?
@@ -122,7 +123,7 @@ enum class tFrameworkElementFlag
   CUSTOM_FLAG            //!< Subclass may use this
 
   // possibly obsolete, if more flags are needed: RUNTIME
-  // possibly construction only: HAS_QUEUE, MAY_ACCEPT_REVERSE_DATA
+  // possibly construction only: HAS_QUEUE, MAY_ACCEPT_REVERSE_DATA, NON_STANDARD_ASSIGN, MULTI_TYPE_BUFFER_POOL
 };
 
 static_assert(static_cast<uint>(tFrameworkElementFlag::CUSTOM_FLAG) < 32, "Too many flags");

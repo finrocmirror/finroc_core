@@ -158,8 +158,8 @@ void tFrameworkElementRegister<T>::MarkDeleted(int handle)
   rrlib::thread::tLock lock1(obj_mutex);
   int index = handle & cELEM_INDEX_MASK;
   int uid = (handle & cELEM_UID_MASK) >> cUID_SHIFT;
-  assert((elements.Get(index) != NULL));
-  assert((element_uid.Get(index) == uid));
+  assert(elements[index].element);
+  assert(elements[index].uid == uid);
   elements[index].uid = uid | cDELETE_MARK;
 }
 

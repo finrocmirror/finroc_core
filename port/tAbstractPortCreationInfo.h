@@ -43,6 +43,7 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include "rrlib/rtti/rtti.h"
+#include "core/tFrameworkElement.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -59,13 +60,6 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-/*! Can be used to wrap lock order for tAbstractPortCreationInfo variadic template constructor */
-struct tLockOrder
-{
-  int wrapped;
-
-  tLockOrder(int i) : wrapped(i) {}
-};
 
 //----------------------------------------------------------------------
 // Class declaration
@@ -85,13 +79,13 @@ struct tLockOrder
 struct tAbstractPortCreationInfo
 {
   /*! Port flags */
-  tFrameworkElement::tFlags flags;
+  core::tFrameworkElement::tFlags flags;
 
   /*! Data type of port */
-  rrlib::rtti::tDataTypeBase data_type;
+  rrlib::rtti::tType data_type;
 
   /*! Parent of port */
-  tFrameworkElement* parent;
+  core::tFrameworkElement* parent;
 
   /*! Port name */
   tString name;

@@ -117,7 +117,7 @@ public:
   /*!
    * \return True, if the provided type is a data flow type
    */
-  inline static bool IsDataFlowType(const rrlib::rtti::tDataTypeBase& type)
+  inline static bool IsDataFlowType(const rrlib::rtti::tType& type)
   {
     return type.GetSize() > 0;
   }
