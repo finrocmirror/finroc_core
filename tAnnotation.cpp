@@ -36,6 +36,7 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "core/tFrameworkElement.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -73,6 +74,21 @@ tAnnotation::tAnnotation() :
 tAnnotation::~tAnnotation()
 {
   delete next_annotation;
+}
+
+tAnnotation* tAnnotation::FindParentWithAnnotation(tFrameworkElement& framework_element, const char* rtti_name)
+{
+  tAnnotation* ann = framework_element.GetAnnotation(rtti_name);
+  if (ann)
+  {
+    return ann;
+  }
+  tFrameworkElement* parent = framework_element.GetParent();
+  if (parent)
+  {
+    return FindParentWithAnnotation(*parent, rtti_name);
+  }
+  return NULL;
 }
 
 //----------------------------------------------------------------------

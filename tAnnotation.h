@@ -65,6 +65,8 @@ namespace internal
 class tAnnotatableImplementation;
 }
 
+class tFrameworkElement;
+
 //----------------------------------------------------------------------
 // Class declaration
 //----------------------------------------------------------------------
@@ -87,6 +89,20 @@ public:
   tAnnotation();
 
   virtual ~tAnnotation();
+
+  /*!
+   * Searches for framework element annotation of specified type
+   * The search includes the annotated framework element as well as all of its parent
+   *
+   * \param framework_element Framework element to start searching at
+   * \param type Data Type
+   * \return Annotation of first parent that has one - otherwise NULL
+   */
+  template <typename T>
+  static T* FindParentWithAnnotation(core::tFrameworkElement& framework_element)
+  {
+    return static_cast<T*>(FindParentWithAnnotation(framework_element, typeid(T).name()));
+  }
 
   /*!
    * \return Object that is annotated - null if annotation is not attached to an object yet
@@ -125,6 +141,11 @@ private:
   virtual void AnnotatedObjectToBeDeleted()
   {
   }
+
+  /*!
+   * Implementation of above
+   */
+  static tAnnotation* FindParentWithAnnotation(tFrameworkElement& framework_element, const char* rtti_name);
 };
 
 //----------------------------------------------------------------------

@@ -54,16 +54,22 @@
 //----------------------------------------------------------------------
 namespace finroc
 {
-namespace core
-{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
+namespace runtime_construction
+{
+class tFinstructableGroup;
+}
+
+namespace core
+{
 namespace internal
 {
 class tLinkEdge;
 }
+
 class tPortConnectionConstraint;
 
 //----------------------------------------------------------------------
@@ -190,6 +196,11 @@ public:
   {
     return wrapper_data_type;
   }
+
+  /*!
+   * \return Was edge from this port to specified destination created using finstruct?
+   */
+  bool IsEdgeFinstructed(tAbstractPort& destination) const;
 
   /*!
    * \return Does port have any incoming connections?
@@ -328,6 +339,7 @@ private:
 
   friend class tPortConnectionConstraint;
   friend class tRuntimeEnvironment;
+  friend class runtime_construction::tFinstructableGroup; // for link edge access
 
   /*! Edges emerging from this port */
   tOutgoingConnectionSet outgoing_connections;

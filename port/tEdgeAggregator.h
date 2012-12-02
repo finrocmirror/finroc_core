@@ -75,6 +75,9 @@ class tAggregatedEdge;
  */
 class tEdgeAggregator : public tFrameworkElement
 {
+  typedef rrlib::concurrent_containers::tSet < tAggregatedEdge*, rrlib::concurrent_containers::tAllowDuplicates::NO, rrlib::thread::tNoMutex,
+          rrlib::concurrent_containers::set::storage::ArrayChunkBased<5, 15, definitions::cSINGLE_THREADED >> tOutgoingConnectionSet;
+  typedef tOutgoingConnectionSet::tConstIterator tOutgoingConnectionIterator;
 
 //----------------------------------------------------------------------
 // Public methods and typedefs
@@ -123,6 +126,22 @@ public:
   }
 
   /*!
+   * \return An iterator to iterate over all edge aggregators that this edge aggregators has outgoing connections to.
+   */
+  tOutgoingConnectionIterator OutgoingConnectionsBegin() const
+  {
+    return emerging_edges.Begin();
+  }
+
+  /*!
+   * \return An iterator to iterate over all ports that this port has outgoing connections to pointing to the past-the-end element.
+   */
+  tOutgoingConnectionIterator OutgoingConnectionsEnd() const
+  {
+    return emerging_edges.End();
+  }
+
+  /*!
    * Update Edge Statistics: Called every time when data has been published
    *
    * \param source Source port
@@ -137,8 +156,7 @@ public:
 private:
 
   /*! Set of emerging aggregated edges */
-  rrlib::concurrent_containers::tSet < tAggregatedEdge*, rrlib::concurrent_containers::tAllowDuplicates::NO, rrlib::thread::tNoMutex,
-        rrlib::concurrent_containers::set::storage::ArrayChunkBased<5, 15, definitions::cSINGLE_THREADED >> emerging_edges;
+  tOutgoingConnectionSet emerging_edges;
 
   /*!
    * Called when edge has been added that is relevant for this element

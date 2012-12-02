@@ -83,6 +83,8 @@ void tAnnotatableImplementation::AddAnnotation(tAnnotation& ann, const char* rtt
   if (!first_annotation)
   {
     first_annotation = &ann;
+    ann.annotated = this;
+    return;
   }
   tAnnotation* current_annotation = first_annotation;
   while (current_annotation)

@@ -337,6 +337,13 @@ void tAbstractPort::DisconnectImplementation(tAbstractPort& source, tAbstractPor
   destination.incoming_connections.Remove(&source);
   source.outgoing_connections.Remove(&destination);
 
+  internal::tFinstructedEdgeInfo* info = source.GetAnnotation<internal::tFinstructedEdgeInfo>();
+  if (info)
+  {
+    auto& vec = info->outgoing_edges_finstructed;
+    vec.erase(std::remove(vec.begin(), vec.end(), &destination), vec.end());
+  }
+
   destination.ConnectionRemoved(source, false);
   source.ConnectionRemoved(destination, true);
 
@@ -442,6 +449,17 @@ bool tAbstractPort::IsConnectedTo(tAbstractPort& target) const
     {
       return true;
     }
+  }
+  return false;
+}
+
+bool tAbstractPort::IsEdgeFinstructed(tAbstractPort& destination) const
+{
+  internal::tFinstructedEdgeInfo* info = this->GetAnnotation<internal::tFinstructedEdgeInfo>();
+  if (info)
+  {
+    auto& vec = info->outgoing_edges_finstructed;
+    return std::find(vec.begin(), vec.end(), &destination) != vec.end();
   }
   return false;
 }

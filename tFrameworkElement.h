@@ -536,6 +536,25 @@ public:
   void PrintStructure() const;
 
   /*!
+   * (acquires lock because change operation is not atomic).
+   * \param flag Flag to remove
+   */
+  void RemoveFlag(tFlag flag);
+
+  /*!
+   * (acquires lock because change operation is not atomic).
+   * \param flag Flag to set
+   * \param value Value to set value to
+   */
+  void SetFlag(tFlag flag, bool value);
+
+  /*!
+   * (acquires lock because change operation is not atomic).
+   * \param flag Flag to set
+   */
+  void SetFlag(tFlag flag);
+
+  /*!
    * \param name New Port name
    * (only valid/possible before, element is initialized)
    */
@@ -847,25 +866,6 @@ protected:
    * (should only be called by FrameworkElement class)
    */
   void PublishUpdatedInfo(tRuntimeListener::tEvent change_type);
-
-  /*!
-   * (acquires lock because change operation is not atomic).
-   * \param flag Flag to remove
-   */
-  void RemoveFlag(tFlag flag);
-
-  /*!
-   * (acquires lock because change operation is not atomic).
-   * \param flag Flag to set
-   * \param value Value to set value to
-   */
-  void SetFlag(tFlag flag, bool value);
-
-  /*!
-   * (acquires lock because change operation is not atomic).
-   * \param flag Flag to set
-   */
-  void SetFlag(tFlag flag);
 
 //----------------------------------------------------------------------
 // Private fields and methods
