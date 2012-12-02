@@ -76,7 +76,7 @@ class tAnnotatableImplementation;
  * serialization operators need to be implemented and
  * tDataType<...> object initialized.
  */
-class tAnnotation : public rrlib::rtti::tIsListType<false, false>, boost::noncopyable
+class tAnnotation : public rrlib::rtti::tIsListType<false, false>, public boost::noncopyable
 {
 
 //----------------------------------------------------------------------

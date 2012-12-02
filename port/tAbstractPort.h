@@ -313,6 +313,14 @@ protected:
 
   virtual ~tAbstractPort();
 
+  /*!
+   * Infers connect direction to specified partner port
+   *
+   * \param other Port to determine connect direction to.
+   * \return Either TO_TARGET or TO_SOURCE depending on whether 'other' should be target or source of a connection with this port.
+   */
+  virtual tConnectDirection InferConnectDirection(const tAbstractPort& other) const;
+
 //----------------------------------------------------------------------
 // Private fields and methods
 //----------------------------------------------------------------------
@@ -386,14 +394,6 @@ private:
    * \return Global list of constraints regarding connections among ports
    */
   static std::vector<tPortConnectionConstraint*>& GetConnectionConstraintList();
-
-  /*!
-   * Infers connect direction to specified partner port
-   *
-   * \param other Port to determine connect direction to.
-   * \return Either TO_TARGET or TO_SOURCE depending on whether 'other' should be target or source of a connection with this port.
-   */
-  virtual tConnectDirection InferConnectDirection(const tAbstractPort& other) const;
 
   /*!
    * Transforms (possibly relative link) to absolute link
