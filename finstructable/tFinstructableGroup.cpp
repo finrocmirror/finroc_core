@@ -536,10 +536,7 @@ void tFinstructableGroup::SaveXml()
               config.SetAttribute("cmdline", info->GetCommandLineOption());
             }
 
-            fprintf(stderr, "!IsResponsibleForConfigFileConnections(%s)\n", ap.GetName().c_str());
             continue;
-            //@todo: ask Max wether this is ok like that, what does IsResponsibleForConfigFileConnections exactly mean
-            //return;
           }
 
           rrlib::xml::tNode& config = root.AddChildNode("parameter");

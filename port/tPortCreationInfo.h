@@ -136,7 +136,7 @@ public:
 
   using tPortCreationInfoBase::Set;
 
-  template < bool DISABLE = (std::is_integral<T>::value && sizeof(T) <= 4) || internal::tIsString<T>::value >
+  template < bool DISABLE = (std::is_integral<T>::value && (!std::is_same<T, bool>::value) && sizeof(T) <= 4) || internal::tIsString<T>::value >
   void Set(const typename std::enable_if < !DISABLE, T >::type& default_value)
   {
     SetDefault(default_value);
