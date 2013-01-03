@@ -416,7 +416,7 @@ int tFrameworkElement::GetLockOrder(tFlags flags, tFrameworkElement*& parent, in
   return lock_order;
 }
 
-const tString tFrameworkElement::GetName() const
+tString tFrameworkElement::GetName() const
 {
   if (IsReady() || GetFlag(tFlag::RUNTIME))
   {

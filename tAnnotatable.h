@@ -103,6 +103,7 @@ public:
   template <typename TAnnotation>
   void AddAnnotation(TAnnotation& ann)
   {
+    static_assert(static_cast<void*>(&ann) == &static_cast<tAnnotation&>(ann), "tAnnotation must be first parent class when using multiple inheritance");
     rrlib::thread::tLock lock(*this);
     internal::tAnnotatableImplementation::AddAnnotation(ann, typeid(TAnnotation).name());
   }

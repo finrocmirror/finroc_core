@@ -90,6 +90,7 @@ enum class tFrameworkElementFlag
   VOLATILE,                //!< Is this port volatile (meaning that it's not always there and connections to it should preferably be links) */
   NO_INITIAL_PUSHING,      //!< Deactivates initial pushing when this (output) port is connected to another port with push strategy */
   TOOL_PORT,               //!< Port from network connection from tooling (e.g. finstruct/fingui). Connection constraints are ignored for such ports
+  FINSTRUCT_READ_ONLY,     //!< Port value cannot be set from finstruct
 
   /*!
    * From it's general characteristics: Is port input or output port?
@@ -120,13 +121,13 @@ enum class tFrameworkElementFlag
   PUSH_STRATEGY_REVERSE, //!< Use push strategy rather than pull strategy in reverse direction?
 
   // Custom flag
-  CUSTOM_FLAG            //!< Subclass may use this
+  //CUSTOM_FLAG            //!< Subclass may use this
 
   // possibly obsolete, if more flags are needed: RUNTIME
   // possibly construction only: HAS_QUEUE, MAY_ACCEPT_REVERSE_DATA, NON_STANDARD_ASSIGN, MULTI_TYPE_BUFFER_POOL
 };
 
-static_assert(static_cast<uint>(tFrameworkElementFlag::CUSTOM_FLAG) < 32, "Too many flags");
+static_assert(static_cast<uint>(tFrameworkElementFlag::PUSH_STRATEGY_REVERSE) < 32, "Too many flags");
 
 //----------------------------------------------------------------------
 // Class declaration

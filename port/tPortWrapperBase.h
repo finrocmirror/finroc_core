@@ -83,9 +83,16 @@ public:
 
   typedef tAbstractPort::tConnectDirection tConnectDirection;
 
+  class InvalidPortType {};
+
   tPortWrapperBase() :
     wrapped(NULL)
   {}
+
+  tPortWrapperBase(core::tAbstractPort* wrap) :
+    wrapped(wrap)
+  {}
+
 
   //TODO: Smarter port deletion
 
@@ -181,9 +188,18 @@ public:
   /*!
    * \return Type of port data
    */
-  inline const rrlib::rtti::tType GetDataType() const
+  inline rrlib::rtti::tType GetDataType() const
   {
     return wrapped->GetDataType();
+  }
+
+  /*!
+   * \param flag Flag to check
+   * \return Is specified flag set?
+   */
+  inline bool GetFlag(tFrameworkElement::tFlag flag) const
+  {
+    return wrapped->GetFlag(flag);
   }
 
   /*!
@@ -197,7 +213,7 @@ public:
   /*!
    * \return Name of this framework element
    */
-  inline const tString GetName() const
+  inline tString GetName() const
   {
     return wrapped->GetName();
   }
@@ -272,11 +288,47 @@ public:
   {
     return wrapped == p;
   }
+  bool operator !=(const tAbstractPort* p) const
+  {
+    return wrapped != p;
+  }
+  bool operator ==(const tPortWrapperBase& p) const
+  {
+    return wrapped == p.wrapped;
+  }
+  bool operator !=(const tPortWrapperBase& p) const
+  {
+    return wrapped != p.wrapped;
+  }
 
 //----------------------------------------------------------------------
 // Protected methods
 //----------------------------------------------------------------------
 protected:
+
+  /*!
+   * Helper method to allow copy construction in subclasses with vararg constructors -
+   * as variadic template constructor catches some copy construction calls.
+   *
+   * \param arg1 First argument of constructor call
+   * \return True, if first argument is of type TPort or a subclass
+   */
+  template <typename TPort>
+  bool CopyConstruction(const TPort* arg1)
+  {
+    wrapped = arg1->GetWrapped();
+    return true;
+  }
+  template <typename TPort>
+  bool CopyConstruction(const void* arg1)
+  {
+    return false;
+  }
+  template <typename TPort>
+  InvalidPortType CopyConstruction(tPortWrapperBase* arg1)
+  {
+    return false;
+  }
 
   /*!
    * \param wrapped Wrapped port

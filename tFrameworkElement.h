@@ -311,7 +311,7 @@ public:
   /*!
    * \return Name of this framework element
    */
-  const tString GetName() const;
+  tString GetName() const;
 
   /*!
    * \return Primary parent framework element
