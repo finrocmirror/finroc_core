@@ -134,7 +134,7 @@ public:
 
   // Standard constructor
   template < bool CC = typeutil::tIsCCType<T>::value >
-  explicit tPortDataPtr(typename std::enable_if<CC, tManagerTL*>::type manager_) : data(GetData(manager)), manager_tl(manager_), mode(eUNUSED)
+  explicit tPortDataPtr(typename std::enable_if<CC, tManagerTL*>::type manager_) : data(GetData(manager_)), manager_tl(manager_), mode(eUNUSED)
   {}
 
   // Move constructor
