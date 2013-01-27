@@ -77,7 +77,7 @@ tFrameworkElement::tChildSet tFrameworkElement::empty_child_set;
 
 tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& name, tFlags flags, int lock_order) :
   tAnnotatable<rrlib::thread::tRecursiveMutex>("Framework Element", GetLockOrder(flags, parent, lock_order),
-      flags.Get(tFlag::RUNTIME) ? std::numeric_limits<int>::min() : tRuntimeEnvironment::GetInstance().RegisterElement(*this, flags.Get(tFlag::PORT))),
+      flags.Get(tFlag::RUNTIME) ? 0 : tRuntimeEnvironment::GetInstance().RegisterElement(*this, flags.Get(tFlag::PORT))),
   primary(*this),
 #ifndef RRLIB_SINGLE_THREADED
   creater_thread_uid(rrlib::thread::tThread::CurrentThreadId()),
@@ -107,7 +107,8 @@ tFrameworkElement::~tFrameworkElement()
   if (!GetFlag(tFlag::RUNTIME))
   {
     // synchronizes on runtime - so no elements will be deleted while runtime is locked
-    GetRuntime().UnregisterElement(*this);
+    rrlib::thread::tLock lock(GetStructureMutex());
+    //GetRuntime().UnregisterElement(*this);
   }
 
   // delete links
@@ -641,6 +642,10 @@ void tFrameworkElement::Link(tFrameworkElement& parent, const tString& link_name
   {
     throw util::tRuntimeException("Element and/or parent has been deleted. Thread exit is probably the safest behaviour.", CODE_LOCATION_MACRO);
   }
+  if (GetLinkCount() >= 127)
+  {
+    throw util::tRuntimeException("Maximum number of links exceeded.", CODE_LOCATION_MACRO);
+  }
 
   tLink* l = new tLink(*this);
   l->name = link_name;
@@ -682,7 +687,8 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
 
         if (!GetFlag(tFlag::RUNTIME))
         {
-          GetRuntime().MarkElementDeleted(*this);
+          GetRuntime().UnregisterElement(*this);
+          //GetRuntime().MarkElementDeleted(*this);
         }
       }
 

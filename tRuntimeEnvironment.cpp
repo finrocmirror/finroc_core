@@ -86,8 +86,7 @@ bool tRuntimeEnvironment::active = false;
 //----------------------------------------------------------------------
 tRuntimeEnvironment::tRuntimeEnvironment() :
   tFrameworkElement(NULL, "Runtime", tFlag::RUNTIME, static_cast<int>(tLockOrderLevel::RUNTIME_ROOT)),
-  ports(new internal::tFrameworkElementRegister<tAbstractPort*>(true)),
-  elements(false),
+  elements(),
   link_edges(),
   runtime_listeners(),
   temp_buffer(),
@@ -154,6 +153,21 @@ void tRuntimeEnvironment::AddListener(tRuntimeListener& listener)
   runtime_listeners.Add(&listener);
 }
 
+size_t tRuntimeEnvironment::GetAllElements(tFrameworkElement** result_buffer, size_t max_elements, tHandle start_from_handle)
+{
+  tLock lock(structure_mutex);
+  return elements.GetAllElements(result_buffer, max_elements, start_from_handle);
+}
+
+size_t tRuntimeEnvironment::GetAllPorts(tAbstractPort** result_buffer, size_t max_ports, tHandle start_from_handle)
+{
+  if (start_from_handle < internal::tFrameworkElementRegister::cFIRST_PORT_INDEX)
+  {
+    start_from_handle = internal::tFrameworkElementRegister::cFIRST_PORT_INDEX;
+  }
+  return GetAllElements(reinterpret_cast<tFrameworkElement**>(result_buffer), max_ports, start_from_handle);
+}
+
 tString tRuntimeEnvironment::GetCommandLineArgument(const tString& name)
 {
   if (command_line_args.find(name) != command_line_args.end())
@@ -163,13 +177,13 @@ tString tRuntimeEnvironment::GetCommandLineArgument(const tString& name)
   return "";
 }
 
-tFrameworkElement* tRuntimeEnvironment::GetElement(int handle)
+tFrameworkElement* tRuntimeEnvironment::GetElement(tHandle handle)
 {
   if (handle == this->GetHandle())
   {
     return this;
   }
-  tFrameworkElement* fe = handle >= 0 ? ports->Get(handle) : elements.Get(handle);
+  tFrameworkElement* fe = elements.Get(handle);
   if (fe == NULL)
   {
     return NULL;
@@ -187,14 +201,18 @@ tRuntimeEnvironment& tRuntimeEnvironment::GetInstance()
   return *instance_raw_ptr;
 }
 
-tAbstractPort* tRuntimeEnvironment::GetPort(int port_handle)
+tAbstractPort* tRuntimeEnvironment::GetPort(tHandle port_handle)
 {
-  tAbstractPort* p = ports->Get(port_handle);
+  if (port_handle < 0x80000000)
+  {
+    throw std::runtime_error("No port handle");
+  }
+  tFrameworkElement* p = elements.Get(port_handle);
   if (p == NULL)
   {
     return NULL;
   }
-  return p->IsReady() ? p : NULL;
+  return p->IsReady() ? static_cast<tAbstractPort*>(p) : NULL;
 }
 
 tAbstractPort* tRuntimeEnvironment::GetPort(const tString& link_name)
@@ -247,19 +265,6 @@ void tRuntimeEnvironment::InitialInit()
   instance_raw_ptr->SetFlag(tFlag::READY);
 }
 
-void tRuntimeEnvironment::MarkElementDeleted(tFrameworkElement& fe)
-{
-  tLock lock(structure_mutex);
-  if (fe.IsPort())
-  {
-    ports->MarkDeleted(fe.GetHandle());
-  }
-  else
-  {
-    elements.MarkDeleted(fe.GetHandle());
-  }
-}
-
 void tRuntimeEnvironment::PreElementInit(tFrameworkElement& element)
 {
   tLock lock(structure_mutex);
@@ -269,10 +274,10 @@ void tRuntimeEnvironment::PreElementInit(tFrameworkElement& element)
   }
 }
 
-int tRuntimeEnvironment::RegisterElement(tFrameworkElement& fe, bool port)
+tRuntimeEnvironment::tHandle tRuntimeEnvironment::RegisterElement(tFrameworkElement& fe, bool port)
 {
   tLock lock(structure_mutex);
-  return port ? ports->Add(static_cast<tAbstractPort*>(&fe)) : elements.Add(&fe);
+  return elements.Add(fe, port);
 }
 
 void tRuntimeEnvironment::RemoveLinkEdge(const tString& link, internal::tLinkEdge& edge)
@@ -409,14 +414,7 @@ bool tRuntimeEnvironment::ShuttingDown()
 void tRuntimeEnvironment::UnregisterElement(tFrameworkElement& fe)
 {
   tLock lock(structure_mutex);
-  if (fe.IsPort())
-  {
-    ports->Remove(fe.GetHandle());
-  }
-  else
-  {
-    elements.Remove(fe.GetHandle());
-  }
+  elements.Remove(fe.GetHandle());
 }
 
 //----------------------------------------------------------------------

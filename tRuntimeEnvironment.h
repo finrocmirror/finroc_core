@@ -109,6 +109,28 @@ public:
   void AddListener(tRuntimeListener& listener);
 
   /*!
+   * Copies all framework elements that currently exist (including ports) to the specified buffer
+   * (no support for output iterators, since typically only using arrays and vector makes sense)
+   *
+   * \param result_buffer Pointer to the first element of the result buffer
+   * \param max_elements Maximum number of elements to copy (size of result buffer)
+   * \param start_from_handle Handle to start from. Together with 'max_elements', can be used to get all elements with multiple calls to this function - using a small result buffer.
+   * \return Number of elements that were copied
+   */
+  size_t GetAllElements(tFrameworkElement** result_buffer, size_t max_elements, tHandle start_from_handle = 0);
+
+  /*!
+   * Copies all ports that currently exist to the specified buffer
+   * (no support for output iterators, since typically only using arrays and vector makes sense)
+   *
+   * \param result_buffer Pointer to the first element of the result buffer
+   * \param max_ports Maximum number of ports to copy (size of result buffer)
+   * \param start_from_handle Handle to start from. Together with 'max_elements', can be used to get all ports with multiple calls to this function - using a small result buffer.
+   * \return Number of ports that were copied
+   */
+  size_t GetAllPorts(tAbstractPort** result_buffer, size_t max_ports, tHandle start_from_handle = internal::tFrameworkElementRegister::cFIRST_PORT_INDEX);
+
+  /*!
    * \return Timestamp when runtime environment was created
    */
   inline rrlib::time::tTimestamp GetCreationTime()
@@ -128,7 +150,7 @@ public:
    * \param handle Handle of framework element
    * \return Pointer to framework element - or null if it has been deleted
    */
-  tFrameworkElement* GetElement(int handle);
+  tFrameworkElement* GetElement(tHandle handle);
 
   /*!
    * (IMPORTANT: This should not be called during static initialization)
@@ -143,23 +165,13 @@ public:
    * \param port_handle port handle
    * \return Port - if port with such handle exists - otherwise null
    */
-  tAbstractPort* GetPort(int port_handle);
+  tAbstractPort* GetPort(tHandle port_handle);
 
   /*!
    * \param link_name (relative) Fully qualified name of port
    * \return Port with this name - or null if it does not exist
    */
   tAbstractPort* GetPort(const tString& link_name);
-
-  /*!
-   * (Should only be called by ThreadLocalCache class - needed for clean cleanup -
-   *  port register needs to exists longer than runtime environment)
-   * \return Port register
-   */
-  inline std::shared_ptr<const internal::tFrameworkElementRegister<tAbstractPort*>> GetPorts()
-  {
-    return ports;
-  }
 
   /*!
    * \return Framework element hierarchy changing operations need to acquire a lock on this mutex
@@ -169,14 +181,6 @@ public:
   {
     return structure_mutex;
   }
-
-  /*!
-   * Mark element as (soon completely) deleted at RuntimeEnvironment
-   * This is done automatically and should not be called by a user.
-   *
-   * \param framework_element Element to mark deleted
-   */
-  void MarkElementDeleted(tFrameworkElement& fe);
 
   /*!
    * Called before a framework element is initialized - can be used to create links etc. to this element etc.
@@ -225,11 +229,8 @@ private:
   friend class tFrameworkElement;
   friend class internal::tLinkEdge;
 
-  /*! Global register of all ports. Allows accessing ports with simple handle. */
-  std::shared_ptr<internal::tFrameworkElementRegister<tAbstractPort*>> ports;
-
-  /*! Global register of all framework elements (except of ports) */
-  internal::tFrameworkElementRegister<tFrameworkElement*> elements;
+  /*! Global register of all framework elements */
+  internal::tFrameworkElementRegister elements;
 
   /*! Edges dealing with linked ports */
   std::map<std::string, internal::tLinkEdge*> link_edges;
@@ -286,7 +287,7 @@ private:
    * \param port Is framework element a port?
    * \return Handle of Framework element
    */
-  int RegisterElement(tFrameworkElement& fe, bool port);
+  tHandle RegisterElement(tFrameworkElement& fe, bool port);
 
   /*!
    * (usually only called by LinkEdge)

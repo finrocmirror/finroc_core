@@ -29,17 +29,18 @@
  *
  * \b tFrameworkElementRegister
  *
- * This is a very efficient lookup table.
- * It manages handles for Framework elements.
+ * Efficient lookup table that maps framework element handles to framework
+ * elements - using nested arrays.
+ * Furthermore assigns and manages handles.
  *
- * Its size is constant and it guarantees that handles are
- * unique... (strictly speaking only for a very long time)
- * so client requests with outdated handles simply
- * fail and do not operate on wrong ports.
+ * For its implementation, this class uses nested arrays:
+ * The primary array has 2^cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH entries
+ * and is created immediately.
+ * Its entries point to secondary arrays, which have
+ * 2^cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH entries - which contain the actual values.
+ * Secondary are created when they are needed. This way, the register can "grow".
  *
- * The class is completely thread safe.
- *
- * Current default format of handle is <1 bit sign><15 bit uid at index><16 bit index>
+ * For documentation on framework element handle format - see definitions.h
  */
 //----------------------------------------------------------------------
 #ifndef __core__internal__tFrameworkElementRegister_h__
@@ -48,10 +49,12 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include <queue>
 
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "core/tFrameworkElement.h"
 
 //----------------------------------------------------------------------
 // Namespace declaration
@@ -72,19 +75,19 @@ namespace internal
 //----------------------------------------------------------------------
 //! Framework element register
 /*!
- * This is a very efficient lookup table.
- * It manages handles for Framework elements.
+ * Efficient lookup table that maps framework element handles to framework
+ * elements - using nested arrays.
+ * Furthermore assigns and manages handles.
  *
- * Its size is constant and it guarantees that handles are
- * unique... (strictly speaking only for a very long time)
- * so client requests with outdated handles simply
- * fail and do not operate on wrong ports.
+ * For its implementation, this class uses nested arrays:
+ * The primary array has 2^cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH entries
+ * and is created immediately.
+ * Its entries point to secondary arrays, which have
+ * 2^cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH entries - which contain the actual values.
+ * Secondary are created when they are needed. This way, the register can "grow".
  *
- * The class is completely thread safe.
- *
- * Current default format of handle is <1 bit sign><15 bit uid at index><16 bit index>
+ * For documentation on framework element handle format - see definitions.h
  */
-template <typename T>
 class tFrameworkElementRegister : public boost::noncopyable
 {
 
@@ -93,136 +96,125 @@ class tFrameworkElementRegister : public boost::noncopyable
 //----------------------------------------------------------------------
 public:
 
+  typedef uint32_t tHandle;
+
+  /*! Number of elements in primary array */
+  enum { cPRIMARY_ARRAY_SIZE = 1 << definitions::cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH };
+
+  /*! Number of elements in secondary array */
+  enum { cSECONDARY_ARRAY_SIZE = 1 << definitions::cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH };
+
+  /*! Mask to extract secondary index */
+  enum { cSECONDARY_INDEX_MASK = cSECONDARY_ARRAY_SIZE - 1 };
+
+  /*! Bit width of stamp */
+  enum { cSTAMP_BIT_WIDTH = (sizeof(tHandle) * 8) - (definitions::cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH + definitions::cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH) };
+
+  /*! Number of possible stamp values */
+  enum { cSTAMP_VALUES = 1 << cSTAMP_BIT_WIDTH };
+
+  /*! Mask to extract stamp from handle */
+  enum { cSTAMP_MASK = cSTAMP_VALUES - 1 };
+
+  /*! First port index */
+  enum { cFIRST_PORT_INDEX = 1 << (definitions::cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH + definitions::cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH - 1) };
+
+  /*! First port index */
+  enum { cMAX_PORT_INDEX = (1 << (definitions::cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH + definitions::cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH)) - 1 };
+
+
   /*!
    * \param positive_indices Positive handles? (or rather negative??)
    */
-  tFrameworkElementRegister(bool positive_indices);
+  tFrameworkElementRegister();
 
-  ~tFrameworkElementRegister()
-  {
-    delete[] elements;
-  }
+  ~tFrameworkElementRegister();
 
   /*!
    * Add element to this register
    *
-   * \param elem Element to add
+   * \param framework_element Element to add
+   * \param is_port Is this framework element a port?
    * \return Handle of element. This handle can be used to retrieve it later.
    */
-  int Add(const T& elem);
+  tHandle Add(tFrameworkElement& framework_element, bool is_port);
 
   /*!
    * \param handle Handle of element
-   * \return Element
+   * \return Element (NULL if no element with this handle exists)
    */
-  T Get(int handle);
-
-  /*!
-   * Get element by raw index.
-   * Shouldn't be used - normally.
-   * Some framework-internal mechanism (ThreadLocalCache cleanup) needs it.
-   *
-   * \param index Raw Index of element
-   * \return Element
-   */
-  inline T GetByRawIndex(int index) const
+  tFrameworkElement* Get(tHandle handle)
   {
-    return elements.Get(index);
+    uint32_t index = handle >> cSTAMP_BIT_WIDTH;
+    uint32_t primary_index = index >> definitions::cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH;
+    if (array_chunks[primary_index])
+    {
+      tFrameworkElement* result = array_chunks[primary_index]->array[index & cSECONDARY_INDEX_MASK];
+      return (result->GetHandle() == handle) ? result : NULL;
+    }
+    return NULL;
   }
 
   /*!
-   * \return Element index mask
-   */
-  static int GetElementIndexMask()
-  {
-    return cELEM_INDEX_MASK;
-  }
-
-  /*!
-   * \return Maximum number of elements
-   */
-  static int GetMaximumNumberOfElements()
-  {
-    return cMAX_ELEMENTS;
-  }
-
-  /*!
-   * Mark specified framework element as (soon completely) deleted
+   * Copies all framework elements that currently exist (including ports) to the specified buffer
+   * (no support for output iterators, since typically only using arrays and vector makes sense)
    *
-   * get() won't return it anymore.
-   * getByRawIndex() , however, will.
-   *
-   * \param handle Handle of element
+   * \param result_buffer Pointer to the first element of the result buffer
+   * \param max_elements Maximum number of elements to copy (size of result buffer)
+   * \param start_from_handle Handle to start from. Together with 'max_elements', can be used to get all elements with multiple calls to this function - using a small result buffer.
+   * \return Number of elements that were copied
    */
-  void MarkDeleted(int handle);
+  size_t GetAllElements(tFrameworkElement** result_buffer, size_t max_elements, tHandle start_from_handle);
 
   /*!
-   * Remove element with specified handle
+   * Remove element with specified handle from register
    *
    * \param handle Handle
    */
-  void Remove(int handle);
-
-  /*!
-   * Sets the maximum number of elements in core register.
-   * This may only be called before a core register was created.
-   */
-  static void SetMaximumNumberOfElements(int max_elements);
+  void Remove(tHandle handle);
 
 //----------------------------------------------------------------------
 // Private fields and methods
 //----------------------------------------------------------------------
 private:
 
-  struct tSlot
+  /*! Secondary array chunk */
+  struct tSecondaryArray
   {
-    T element; // Element
-    int uid;   // Uid for this array index (the second bit from the front is used to mark deleted elements)
+    std::array<tFrameworkElement*, cSECONDARY_ARRAY_SIZE> array;
 
-    tSlot() : element(NULL), uid(0) {}
+    tSecondaryArray();
   };
 
-  /*! Sign of handles... either 0 or 0x80000000 */
-  const int sign;
+  /*! Information on unused slot */
+  struct tUnusedSlot
+  {
+    /*! Time when element in this slot was deleted */
+    rrlib::time::tTimestamp delete_time;
 
-  /*! Element handle that is used next */
-  int current_element_index;
+    /*! Handle of deleted element */
+    tHandle ex_handle;
 
-  /*! Array with elements and current uid for every element index  */
-  tSlot* elements;
+    explicit tUnusedSlot(tHandle ex_handle) :
+      delete_time(rrlib::time::Now()),
+      ex_handle(ex_handle)
+    {}
+  };
 
-  /*! Marks deleted elements in array below */
-  static const int cDELETE_MARK = 0x40000000;
+  /*! Pointers to any secondary arrays */
+  std::array < tSecondaryArray*, cPRIMARY_ARRAY_SIZE + 1 > array_chunks;
 
-  /*! number of elements in register */
-  int elem_count;
+  /*! Next index for non-ports */
+  uint32_t next_index;
 
-  // for synchronization on an object of this class
-  mutable rrlib::thread::tMutex obj_mutex;
+  /*! Next index for ports */
+  uint32_t next_port_index;
 
-  /*! Maximum number of elements */
-  static int cMAX_ELEMENTS;
+  /*! Stores unused slots */
+  std::queue<tUnusedSlot> unused_slot_queue;
 
-  /*! Maximum UID index */
-  static int cMAX_UID;
-
-  /*! Element index mask */
-  static int cELEM_INDEX_MASK;
-
-  /*! Element UID mask */
-  static int cELEM_UID_MASK;
-
-  /*! Amount of bits the UID needs to be shifted */
-  static int cUID_SHIFT;
-
-  /*! Has any core register been created? In this case the static variables cannot be changed anymore */
-  static bool register_created;
-
-  /*!
-   * Increment currentElementIndex taking MAX_ELEMENTS into account
-   */
-  void IncrementCurElementIndex();
-
+  /*! Stores unused slots */
+  std::queue<tUnusedSlot> unused_port_slot_queue;
 };
 
 //----------------------------------------------------------------------
@@ -231,7 +223,5 @@ private:
 }
 }
 }
-
-#include "core/internal/tFrameworkElementRegister.hpp"
 
 #endif

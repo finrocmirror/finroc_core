@@ -36,7 +36,7 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
-#include <string>
+#include "rrlib/time/time.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -64,6 +64,36 @@ enum { cSINGLE_THREADED = 0 };  //!< Compile Finroc in multi-threaded mode
 
 /*! Collect edge statistics (for profiling) ? */
 enum { cCOLLECT_EDGE_STATISTICS = 0 };
+
+/*!
+ * Definitions for framework element handles:
+ * A handle is assigned to each framework element that is created.
+ * It is guaranteed that such handles are unique for the amount of time
+ * specified below (after deleting an element with the same handle).
+ * This way, e.g. client requests with outdated handles simply
+ * fail and do not operate on wrong ports.
+ *
+ * In order to save memory, the lookup handle=>element is stored in a
+ * nested array structure.
+ *
+ * Handles have the following format (bit widths are defined below):
+ * [primary array index][secondary array index][stamp]
+ *
+ * The maximum number of framework elements is
+ * 2^(cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH + cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH)
+ * , which is currently ~1 million.
+ *
+ * This is divided into two:
+ * Handles >= 0x80000000 are ports.
+ * Handles < 0x80000000 are non-ports.
+ *
+ * Handle 0 is runtime environment.
+ *
+ * This means, we currently have max. 512K ports and max. 512K non-ports.
+ */
+enum { cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH = 10 };
+enum { cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH = 10 };
+constexpr rrlib::time::tDuration cHANDLE_UNIQUENESS_GUARANTEE_DURATION(std::chrono::minutes(1));
 
 }
 

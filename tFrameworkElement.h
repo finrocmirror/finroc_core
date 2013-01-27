@@ -142,6 +142,7 @@ public:
 
   typedef tFrameworkElementFlag tFlag;
   typedef tFrameworkElementFlags tFlags;
+  typedef uint32_t tHandle;
 
   // Iterator types
   class tChildIterator;
@@ -277,7 +278,7 @@ public:
    * \return Element's handle in local runtime environment
    * ("normal" elements have negative handle, while ports have positive ones)
    */
-  inline int GetHandle() const
+  inline tHandle GetHandle() const
   {
     return GetSecondary();
   }

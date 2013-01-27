@@ -153,6 +153,11 @@ public:
     wrapped(0)
   {}
 
+  /*! It should only be necessary to call this for deserialization */
+  explicit constexpr tFrameworkElementFlags(uint flags) :
+    wrapped(flags)
+  {}
+
   /*!
    * \flag Flag to check
    * \return Is specified flag currently set?
@@ -189,9 +194,6 @@ private:
 
   friend constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlags& flag1, const tFrameworkElementFlags& flag2);
 
-  constexpr tFrameworkElementFlags(uint flags) :
-    wrapped(flags)
-  {}
 
   /*! Wrapped integer containing flag set */
   uint wrapped;
