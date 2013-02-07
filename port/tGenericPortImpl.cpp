@@ -222,7 +222,7 @@ tGenericPortImpl* tGenericPortImpl::CreatePortImpl(const tPortCreationInfoBase& 
       return new internal::tGenericPortImplNumeric<double>(pci);
     }
   }
-  else if (pci.data_type.GetRttiName() == typeid(std::string).name())
+  if (pci.data_type.GetRttiName() == typeid(std::string).name())
   {
     return new internal::tGenericPortImplTyped<std::string>(pci);
   }
