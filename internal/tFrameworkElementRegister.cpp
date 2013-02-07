@@ -19,7 +19,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/internal/tFrameworkElementRegister2.cpp
+/*!\file    core/internal/tFrameworkElementRegister.cpp
  *
  * \author  Max Reichardt
  *
