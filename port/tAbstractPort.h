@@ -274,6 +274,11 @@ public:
     return GetFlag(tFlag::OUTPUT_PORT);
   }
 
+  void Link(tFrameworkElement& parent, const tString& link_name)
+  {
+    tFrameworkElement::Link(parent, link_name); // TODO: Remove this from tFrameworkElement?
+  }
+
   /*!
    * Can this port be connected to specified target port? (additional non-standard checks)
    * (may be overridden by subclass - should usually call superclass method, too)

@@ -86,7 +86,7 @@ enum class tFrameworkElementFlag
   ACCEPTS_DATA,            //!< Does port accept incoming data? Also set for server RPC ports, since they accept RPC calls
   EMITS_DATA,              //!< Does port emit data (normal direction)? Also set for client RPC ports, since they "emit" RPC calls
   MULTI_TYPE_BUFFER_POOL,  //!< Does port have buffer pool with multiple data types?
-  EXPRESS_PORT,            //!< Transport data for this port through the network with high priority */
+  EXPRESS_PORT,            //!< Transport data for this port through the network with high priority? */
   VOLATILE,                //!< Is this port volatile (meaning that it's not always there and connections to it should preferably be links) */
   NO_INITIAL_PUSHING,      //!< Deactivates initial pushing when this (output) port is connected to another port with push strategy */
   TOOL_PORT,               //!< Port from network connection from tooling (e.g. finstruct/fingui). Connection constraints are ignored for such ports

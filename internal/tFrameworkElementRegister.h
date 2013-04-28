@@ -119,7 +119,10 @@ public:
   /*! First port index */
   enum { cFIRST_PORT_INDEX = 1 << (definitions::cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH + definitions::cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH - 1) };
 
-  /*! First port index */
+  /*! First port handle */
+  static constexpr tHandle cFIRST_PORT_HANDLE = cFIRST_PORT_INDEX << cSTAMP_BIT_WIDTH;
+
+  /*! Maximum port index */
   enum { cMAX_PORT_INDEX = (1 << (definitions::cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH + definitions::cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH)) - 1 };
 
 
@@ -168,7 +171,7 @@ public:
 
   /*!
    * Remove element with specified handle from register
-   *
+  *
    * \param handle Handle
    */
   void Remove(tHandle handle);

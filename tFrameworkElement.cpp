@@ -890,7 +890,10 @@ static void StreamQualifiedName(std::ostream& output, const tFrameworkElement& f
 {
   if (!fe.GetFlag(tFrameworkElement::tFlag::RUNTIME))
   {
-    StreamQualifiedName(output, *fe.GetParent(), false);
+    if (fe.GetParent())
+    {
+      StreamQualifiedName(output, *fe.GetParent(), false);
+    }
     output << fe.GetCName();
     if (!first)
     {

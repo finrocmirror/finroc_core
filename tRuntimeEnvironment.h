@@ -128,7 +128,7 @@ public:
    * \param start_from_handle Handle to start from. Together with 'max_elements', can be used to get all ports with multiple calls to this function - using a small result buffer.
    * \return Number of ports that were copied
    */
-  size_t GetAllPorts(tAbstractPort** result_buffer, size_t max_ports, tHandle start_from_handle = internal::tFrameworkElementRegister::cFIRST_PORT_INDEX);
+  size_t GetAllPorts(tAbstractPort** result_buffer, size_t max_ports, tHandle start_from_handle = internal::tFrameworkElementRegister::cFIRST_PORT_HANDLE);
 
   /*!
    * \return Timestamp when runtime environment was created

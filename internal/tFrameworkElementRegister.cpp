@@ -151,7 +151,7 @@ size_t tFrameworkElementRegister::GetAllElements(tFrameworkElement** result_buff
 
   size_t result = 0;
   uint32_t start_index = start_from_handle >> cSTAMP_BIT_WIDTH;
-  uint32_t last_index = (start_from_handle >= cFIRST_PORT_INDEX) ? (next_port_index - 1) : (next_index - 1);
+  uint32_t last_index = (start_from_handle >= cFIRST_PORT_HANDLE) ? (next_port_index - 1) : (next_index - 1);
   uint32_t primary_start_index = start_index >> definitions::cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH;
   uint32_t primary_end_index = last_index >> definitions::cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH;
 
@@ -173,7 +173,7 @@ size_t tFrameworkElementRegister::GetAllElements(tFrameworkElement** result_buff
       for (size_t secondary_index = secondary_start_index; secondary_index <= secondary_end_index; secondary_index++)
       {
         tFrameworkElement* framework_element = array_chunks[primary_index]->array[secondary_index];
-        if (framework_element);
+        if (framework_element)
         {
           *result_buffer = framework_element;
           result_buffer++;
@@ -188,9 +188,9 @@ size_t tFrameworkElementRegister::GetAllElements(tFrameworkElement** result_buff
   }
 
   // If we have place left in result buffer, also return ports
-  if (start_from_handle < cFIRST_PORT_INDEX)
+  if (start_from_handle < cFIRST_PORT_HANDLE)
   {
-    return GetAllElements(result_buffer, max_elements - result, cFIRST_PORT_INDEX) + result;
+    return GetAllElements(result_buffer, max_elements - result, cFIRST_PORT_HANDLE) + result;
   }
 
   return result;

@@ -161,9 +161,9 @@ size_t tRuntimeEnvironment::GetAllElements(tFrameworkElement** result_buffer, si
 
 size_t tRuntimeEnvironment::GetAllPorts(tAbstractPort** result_buffer, size_t max_ports, tHandle start_from_handle)
 {
-  if (start_from_handle < internal::tFrameworkElementRegister::cFIRST_PORT_INDEX)
+  if (start_from_handle < internal::tFrameworkElementRegister::cFIRST_PORT_HANDLE)
   {
-    start_from_handle = internal::tFrameworkElementRegister::cFIRST_PORT_INDEX;
+    start_from_handle = internal::tFrameworkElementRegister::cFIRST_PORT_HANDLE;
   }
   return GetAllElements(reinterpret_cast<tFrameworkElement**>(result_buffer), max_ports, start_from_handle);
 }
@@ -220,20 +220,22 @@ tAbstractPort* tRuntimeEnvironment::GetPort(const tString& link_name)
   tLock lock(structure_mutex);
 
   tFrameworkElement* fe = GetChildElement(link_name, false);
-  if (fe)
+  if (fe == NULL)
   {
     for (auto it = alternative_link_roots.begin(); it != alternative_link_roots.end(); ++it)
     {
       fe = (*it)->GetChildElement(link_name, 0, true, **it);
-      if (fe != NULL && !fe->IsDeleted())
+      if (fe != NULL && !fe->IsDeleted() && fe->IsPort())
       {
-        assert(fe->IsPort());
         return static_cast<tAbstractPort*>(fe);
       }
     }
     return NULL;
   }
-  assert(fe->IsPort());
+  if (!fe->IsPort())
+  {
+    return NULL;
+  }
   return static_cast<tAbstractPort*>(fe);
 }
 
