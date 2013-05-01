@@ -227,16 +227,6 @@ public:
   }
 
   /*!
-   * Called whenever static parameters of this framework element need to be (re)evaluated.
-   * (can be overridden to handle this event)
-   *
-   * This typically happens at initialization and when user changes them via finstruct.
-   * (This is never called when thread in surrounding thread container is running.)
-   * (This must only be called with lock on runtime registry.)
-   */
-  virtual void EvaluateStaticParameters() {}
-
-  /*!
    * \return Returns constant and non-constant flags
    */
   inline tFlags GetAllFlags() const
@@ -530,6 +520,17 @@ public:
    * \return Result
    */
   bool NameEquals(const tString& other) const;
+
+  /*!
+   * Called whenever static parameters of this framework element need to be (re)evaluated.
+   * (can be overridden to handle this event).
+   * This may also be called directly to trigger static parameter evaluation.
+   *
+   * This typically happens at initialization and when user changes them via finstruct.
+   * (This is never called when thread in surrounding thread container is running.)
+   * (This must only be called with lock on runtime registry.)
+   */
+  virtual void OnStaticParameterChange() {}
 
   /*!
    * Helper for Debugging: Prints structure below this framework element to console

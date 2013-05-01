@@ -272,7 +272,7 @@ void tRuntimeEnvironment::PreElementInit(tFrameworkElement& element)
   tLock lock(structure_mutex);
   for (auto it = runtime_listeners.Begin(); it != runtime_listeners.End(); ++it)
   {
-    (*it)->RuntimeChange(tRuntimeListener::tEvent::PRE_INIT, element);
+    (*it)->OnFrameworkElementChange(tRuntimeListener::tEvent::PRE_INIT, element);
   }
 }
 
@@ -386,14 +386,14 @@ void tRuntimeEnvironment::RuntimeChange(tRuntimeListener::tEvent change_type, tF
       assert(element.IsPort());
       for (auto it = runtime_listeners.Begin(); it != runtime_listeners.End(); ++it)
       {
-        (*it)->RuntimeEdgeChange(change_type, static_cast<tAbstractPort&>(element), *edge_target);
+        (*it)->OnEdgeChange(change_type, static_cast<tAbstractPort&>(element), *edge_target);
       }
     }
     else
     {
       for (auto it = runtime_listeners.Begin(); it != runtime_listeners.End(); ++it)
       {
-        (*it)->RuntimeChange(change_type, element);
+        (*it)->OnFrameworkElementChange(change_type, element);
       }
     }
   }

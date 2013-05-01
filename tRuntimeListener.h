@@ -92,25 +92,25 @@ private:
   friend class tRuntimeEnvironment;
 
   /*!
-   * Called whenever a framework element was added/removed or changed
+   * Called whenever a framework element was added, removed or changed
    *
-   * \param change_type Type of change (see Constants)
+   * \param change_type Type of change
    * \param element FrameworkElement that changed
    *
    * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
    */
-  virtual void RuntimeChange(tEvent change_type, tFrameworkElement& element) = 0;
+  virtual void OnFrameworkElementChange(tEvent change_type, tFrameworkElement& element) = 0;
 
   /*!
-   * Called whenever an edge was added/removed
+   * Called whenever an edge was added or removed
    *
-   * \param change_type Type of change (see Constants)
+   * \param change_type Type of change
    * \param source Source of edge
    * \param target Target of edge
    *
    * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
    */
-  virtual void RuntimeEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
+  virtual void OnEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
 
 };
 
