@@ -32,7 +32,6 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
-#include "rrlib/finroc_core_utils/tException.h"
 #include "rrlib/thread/tThread.h"
 #include <boost/algorithm/string/predicate.hpp>
 #include <sstream>
@@ -149,7 +148,7 @@ void tFrameworkElement::AddChild(tLink& child)
   assert(child.GetChild().IsCreator() && "may only be called by child creator thread");
   if (IsDeleted() || (child.parent && child.parent->IsDeleted()) || child.GetChild().IsDeleted())
   {
-    throw util::tRuntimeException("Child has been deleted or has deleted parent. Thread exit is probably the safest behaviour.", CODE_LOCATION_MACRO);
+    throw std::runtime_error("Child to add has been deleted or has deleted parent.");
   }
   if (child.parent != NULL)
   {
@@ -539,7 +538,7 @@ void tFrameworkElement::Init()
   // assert(getFlag(CoreFlags.IS_RUNTIME) || getParent().isReady());
   if (IsDeleted())
   {
-    throw util::tRuntimeException("Cannot initialize deleted element", CODE_LOCATION_MACRO);
+    throw std::runtime_error("Cannot initialize deleted element");
   }
 
   InitImplementation();
@@ -640,11 +639,12 @@ void tFrameworkElement::Link(tFrameworkElement& parent, const tString& link_name
   tLock lock(GetStructureMutex());
   if (IsDeleted() || parent.IsDeleted())
   {
-    throw util::tRuntimeException("Element and/or parent has been deleted. Thread exit is probably the safest behaviour.", CODE_LOCATION_MACRO);
+    throw std::runtime_error("Element and/or parent has been deleted.");
   }
   if (GetLinkCount() >= 127)
   {
-    throw util::tRuntimeException("Maximum number of links exceeded.", CODE_LOCATION_MACRO);
+    FINROC_LOG_PRINT(ERROR, "Maximum number of links exceeded.");
+    throw std::runtime_error("Maximum number of links exceeded.");
   }
 
   tLink* l = new tLink(*this);
