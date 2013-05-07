@@ -33,6 +33,7 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include <sys/stat.h> // for IsDirectory()
+#include <unistd.h>
 
 //----------------------------------------------------------------------
 // Internal includes with ""
