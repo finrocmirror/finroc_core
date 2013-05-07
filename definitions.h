@@ -25,6 +25,8 @@
  *
  * \date    2012-10-26
  *
+ * \brief
+ *
  * Global finroc definitions.
  * Therefore, placed in finroc namespace.
  *

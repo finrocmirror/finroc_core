@@ -25,6 +25,8 @@
  *
  * \date    2012-10-26
  *
+ * \brief
+ *
  * rrlib_logging log messages customized for Finroc.
  * In any Finroc-dependent code, these messages should be used instead of the RRLIB_LOG_PRINT* messages.
  *
