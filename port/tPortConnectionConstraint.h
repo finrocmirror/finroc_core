@@ -40,7 +40,7 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
-#include <boost/noncopyable.hpp>
+#include "rrlib/util/tNoncopyable.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -72,7 +72,7 @@ class tAbstractPort;
  * The constructor will add the constraint to the global list of constraints.
  * The destructor will remove it.
  */
-class tPortConnectionConstraint : boost::noncopyable
+class tPortConnectionConstraint : private rrlib::util::tNoncopyable
 {
 
 //----------------------------------------------------------------------

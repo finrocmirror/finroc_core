@@ -42,7 +42,7 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
-#include <boost/noncopyable.hpp>
+#include "rrlib/util/tNoncopyable.h"
 #include "rrlib/rtti/tIsListType.h"
 
 //----------------------------------------------------------------------
@@ -78,7 +78,7 @@ class tFrameworkElement;
  * serialization operators need to be implemented and
  * tDataType<...> object initialized.
  */
-class tAnnotation : public rrlib::rtti::tIsListType<false, false>, public boost::noncopyable
+class tAnnotation : public rrlib::rtti::tIsListType<false, false>, private rrlib::util::tNoncopyable
 {
 
 //----------------------------------------------------------------------

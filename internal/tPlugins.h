@@ -40,7 +40,7 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include <vector>
-#include <boost/noncopyable.hpp>
+#include "rrlib/util/tNoncopyable.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -69,7 +69,7 @@ namespace internal
 /*!
  * This class is used for managing the Finroc Runtime's plugins
  */
-class tPlugins : boost::noncopyable
+class tPlugins : private rrlib::util::tNoncopyable
 {
 
 //----------------------------------------------------------------------

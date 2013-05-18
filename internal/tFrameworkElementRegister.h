@@ -88,7 +88,7 @@ namespace internal
  *
  * For documentation on framework element handle format - see definitions.h
  */
-class tFrameworkElementRegister : public boost::noncopyable
+class tFrameworkElementRegister : private rrlib::util::tNoncopyable
 {
 
 //----------------------------------------------------------------------

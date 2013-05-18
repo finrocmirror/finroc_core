@@ -40,8 +40,8 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
-#include <boost/noncopyable.hpp>
 #include <array>
+#include "rrlib/util/tNoncopyable.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -73,7 +73,7 @@ namespace internal
  * Edge that operates on links.
  * (Re)Establishes real edges when ports with specified links are available.
  */
-class tLinkEdge : boost::noncopyable
+class tLinkEdge : private rrlib::util::tNoncopyable
 {
 
 //----------------------------------------------------------------------

@@ -70,7 +70,7 @@ namespace core
  *
  * To create a port, call static function CreatePort
  */
-class tPortFactory : boost::noncopyable
+class tPortFactory : private rrlib::util::tNoncopyable
 {
 
 //----------------------------------------------------------------------

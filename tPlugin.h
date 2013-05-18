@@ -66,7 +66,7 @@ namespace core
  * One class in a Plugin must implement this interface.
  * It should be instantiated in a .cpp file.
  */
-class tPlugin : public boost::noncopyable
+class tPlugin : private rrlib::util::tNoncopyable
 {
 
 //----------------------------------------------------------------------
