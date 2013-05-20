@@ -109,23 +109,23 @@ public:
   /*!
    * Connect port to specified partner port
    *
-   * \param source Partner port
+   * \param partner_port Partner port
    * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
    */
-  inline void ConnectTo(tAbstractPort& source, tConnectDirection connect_direction = tConnectDirection::AUTO)
+  inline void ConnectTo(tAbstractPort& partner_port, tConnectDirection connect_direction = tConnectDirection::AUTO)
   {
-    wrapped->ConnectTo(source, connect_direction);
+    wrapped->ConnectTo(partner_port, connect_direction);
   }
 
   /*!
    * Connect port to specified partner port
    *
-   * \param source Partner port
+   * \param partner_port Partner port
    * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
    */
-  inline void ConnectTo(const tPortWrapperBase& source, tConnectDirection connect_direction = tConnectDirection::AUTO)
+  inline void ConnectTo(const tPortWrapperBase& partner_port, tConnectDirection connect_direction = tConnectDirection::AUTO)
   {
-    wrapped->ConnectTo(*source.wrapped, connect_direction);
+    wrapped->ConnectTo(*partner_port.wrapped, connect_direction);
   }
 
   /*!
@@ -135,9 +135,9 @@ public:
    * \param link_name Link name of partner port (relative to parent framework element)
    * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
    */
-  inline void ConnectTo(const tString& src_link, tConnectDirection connect_direction = tConnectDirection::AUTO)
+  inline void ConnectTo(const tString& link_name, tConnectDirection connect_direction = tConnectDirection::AUTO)
   {
-    wrapped->ConnectTo(src_link, connect_direction);
+    wrapped->ConnectTo(link_name, connect_direction);
   }
 
   /*!
@@ -148,9 +148,9 @@ public:
    * \param warn_if_not_available Print warning message if connection cannot be established
    * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
    */
-  void ConnectTo(tFrameworkElement& src_port_parent, const tString& src_port_name, bool warn_if_not_available = true, tConnectDirection connect_direction = tConnectDirection::AUTO)
+  void ConnectTo(tFrameworkElement& partner_port_parent, const tString& partner_port_name, bool warn_if_not_available = true, tConnectDirection connect_direction = tConnectDirection::AUTO)
   {
-    wrapped->ConnectTo(src_port_parent, src_port_name, warn_if_not_available, connect_direction);
+    wrapped->ConnectTo(partner_port_parent, partner_port_name, warn_if_not_available, connect_direction);
   }
 
   /*!
@@ -268,6 +268,16 @@ public:
   inline bool IsReady() const
   {
     return wrapped->IsReady();
+  }
+
+  /*!
+   * Deletes port wrapped by this port wrapper class.
+   * Port may not be used after calling this
+   */
+  void ManagedDelete()
+  {
+    wrapped->ManagedDelete();
+    wrapped = NULL;
   }
 
   /*!
