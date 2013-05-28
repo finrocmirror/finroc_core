@@ -69,13 +69,8 @@ class tAnnotatableBase {};
  *
  * The C++ data type is used to lookup annotations.
  * => max. one annotation of a specific C++ data type may be added.
- *
- * \tparam TMutex Mutex class to use to synchronize calls to AddAnnotation(...)
- *                Use rrlib::thread::tNoMutex if concurrent calls cannot occur
- *                Mutex class will be parent class, so the subclass can share the mutex.
  */
-template <typename TMutex>
-class tAnnotatable : public TMutex, public internal::tAnnotatableImplementation
+class tAnnotatable : public internal::tAnnotatableImplementation
 {
 
 //----------------------------------------------------------------------
@@ -84,14 +79,6 @@ class tAnnotatable : public TMutex, public internal::tAnnotatableImplementation
 public:
 
   tAnnotatable()
-  {}
-
-  /*!
-   * \param args Argument will be forwarded to TMutex constructor
-   */
-  template <typename ... TMutexArgs>
-  tAnnotatable(TMutexArgs... args) :
-    TMutex(args...)
   {}
 
   /*!
@@ -104,7 +91,6 @@ public:
   void AddAnnotation(TAnnotation& ann)
   {
     static_assert(static_cast<void*>(&ann) == &static_cast<tAnnotation&>(ann), "tAnnotation must be first parent class when using multiple inheritance");
-    rrlib::thread::tLock lock(*this);
     internal::tAnnotatableImplementation::AddAnnotation(ann, typeid(TAnnotation).name());
   }
 

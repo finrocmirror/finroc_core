@@ -33,6 +33,7 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include "rrlib/rtti/rtti.h"
+#include "rrlib/thread/tThread.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -80,6 +81,11 @@ tAnnotatableImplementation::~tAnnotatableImplementation()
 
 void tAnnotatableImplementation::AddAnnotation(tAnnotation& ann, const char* rtti_name)
 {
+  // For the current use cases a global mutex is enough - as new annotations require memory allocations and do not occur often
+  // Not having an extra mutex in every framework element saves memory
+  static rrlib::thread::tMutex add_annotation_mutex;
+  rrlib::thread::tLock lock(add_annotation_mutex);
+
   if (!first_annotation)
   {
     first_annotation = &ann;

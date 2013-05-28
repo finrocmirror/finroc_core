@@ -71,7 +71,7 @@ class tEdgeAggregator;
  *
  * The start EdgeAggregator owns objects of this type.
  */
-struct tAggregatedEdge : public tAnnotatable<rrlib::thread::tMutex>
+struct tAggregatedEdge : public tAnnotatable
 {
 
   /*! Number of aggregated data flow edges */

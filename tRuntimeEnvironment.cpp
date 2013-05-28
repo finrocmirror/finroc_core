@@ -64,6 +64,7 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
+typedef rrlib::thread::tLock tLock;
 
 //----------------------------------------------------------------------
 // Const values
@@ -263,8 +264,6 @@ void tRuntimeEnvironment::InitialInit()
   //Load plugins
   internal::tPlugins::StaticInit();
   tFrameworkElement::InitAll();
-
-  instance_raw_ptr->SetFlag(tFlag::READY);
 }
 
 void tRuntimeEnvironment::PreElementInit(tFrameworkElement& element)

@@ -126,7 +126,7 @@ void tAbstractPort::ConnectImplementation(tAbstractPort& target, bool finstructe
 
 void tAbstractPort::ConnectTo(tAbstractPort& to, tConnectDirection connect_direction, bool finstructed)
 {
-  tLock lock(GetStructureMutex());
+  rrlib::thread::tLock lock(GetStructureMutex());
   if (IsDeleted() || to.IsDeleted())
   {
     FINROC_LOG_PRINT(WARNING, "Port already deleted!");
@@ -183,7 +183,7 @@ void tAbstractPort::ConnectTo(const tString& link_name, tConnectDirection connec
     return;
   }
 
-  tLock lock2(GetStructureMutex());
+  rrlib::thread::tLock lock2(GetStructureMutex());
   if (IsDeleted())
   {
     FINROC_LOG_PRINT_TO(edges, WARNING, "Port already deleted!");
@@ -247,7 +247,7 @@ size_t tAbstractPort::CountOutgoingConnections() const
 
 void tAbstractPort::DisconnectAll(bool incoming, bool outgoing)
 {
-  tLock lock(GetStructureMutex());
+  rrlib::thread::tLock lock(GetStructureMutex());
 
   // remove link edges
   if (link_edges != NULL)
@@ -286,7 +286,7 @@ void tAbstractPort::DisconnectFrom(tAbstractPort& target)
 {
   bool found = false;
   {
-    tLock lock(GetStructureMutex());
+    rrlib::thread::tLock lock(GetStructureMutex());
     for (auto it = OutgoingConnectionsBegin(); it != OutgoingConnectionsEnd(); ++it)
     {
       if (&(*it) == &target)
@@ -314,7 +314,7 @@ void tAbstractPort::DisconnectFrom(tAbstractPort& target)
 
 void tAbstractPort::DisconnectFrom(const tString& link)
 {
-  tLock lock(GetStructureMutex());
+  rrlib::thread::tLock lock(GetStructureMutex());
   for (auto it = link_edges->begin(); it != link_edges->end(); ++it)
   {
     if (boost::equals((*it)->GetSourceLink(), link) || boost::equals((*it)->GetTargetLink(), link))
@@ -533,7 +533,7 @@ bool tAbstractPort::MayConnectTo(tAbstractPort& target, bool warn_if_impossible)
 
 void tAbstractPort::PrepareDelete()
 {
-  tLock lock1(*this);
+  rrlib::thread::tLock lock1(GetStructureMutex());
 
   // disconnect all edges
   DisconnectAll();

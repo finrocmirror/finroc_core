@@ -63,6 +63,7 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
+typedef rrlib::thread::tLock tLock;
 
 //----------------------------------------------------------------------
 // Const values
@@ -75,8 +76,7 @@ constexpr tFrameworkElementFlags tFrameworkElement::cSTATUS_FLAGS;
 tFrameworkElement::tChildSet tFrameworkElement::empty_child_set;
 
 tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& name, tFlags flags, int lock_order) :
-  tAnnotatable<rrlib::thread::tRecursiveMutex>("Framework Element", GetLockOrder(flags, parent, lock_order),
-      flags.Get(tFlag::RUNTIME) ? 0 : tRuntimeEnvironment::GetInstance().RegisterElement(*this, flags.Get(tFlag::PORT))),
+  handle(flags.Get(tFlag::RUNTIME) ? 0 : tRuntimeEnvironment::GetInstance().RegisterElement(*this, flags.Get(tFlag::PORT))),
   primary(*this),
 #ifndef RRLIB_SINGLE_THREADED
   creater_thread_uid(rrlib::thread::tThread::CurrentThreadId()),
@@ -93,6 +93,10 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& n
 
   if (!GetFlag(tFlag::RUNTIME))
   {
+    if (!parent)
+    {
+      parent = tRuntimeEnvironment::GetInstance().unrelated;
+    }
     parent->AddChild(primary);
   }
 
@@ -150,11 +154,7 @@ void tFrameworkElement::AddChild(tLink& child)
   {
     throw std::runtime_error("Child to add has been deleted or has deleted parent.");
   }
-  if (child.parent != NULL)
-  {
-    assert(child.GetChild().LockAfter(*child.parent) && "lockOrder level of child needs to be higher than of former parent");
-  }
-  assert(child.GetChild().LockAfter(*this) && "lockOrder level of child needs to be higher than of parent");
+
   // avoid cycles
   assert(&child.GetChild() != this);
   assert(!this->IsChildOf(child.GetChild()));
@@ -211,7 +211,7 @@ void tFrameworkElement::CheckPublish()
   {
     if (!GetFlag(tFlag::PUBLISHED) && AllParentsReady())
     {
-      SetFlag(tFlag::PUBLISHED);
+      SetFlag(tFlag::PUBLISHED); // structure mutex acquired
       FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Publishing");
       PublishUpdatedInfo(tRuntimeListener::tEvent::ADD);
     }
@@ -403,19 +403,6 @@ tFrameworkElement::tLink* tFrameworkElement::GetLinkInternal(size_t link_index)
   return l;
 }
 
-int tFrameworkElement::GetLockOrder(tFlags flags, tFrameworkElement*& parent, int lock_order)
-{
-  if (!flags.Get(tFlag::RUNTIME))
-  {
-    parent = parent ? parent : GetRuntime().unrelated;
-    if (lock_order < 0)
-    {
-      return parent->GetLockOrder() + 1;
-    }
-  }
-  return lock_order;
-}
-
 tString tFrameworkElement::GetName() const
 {
   if (IsReady() || GetFlag(tFlag::RUNTIME))
@@ -585,7 +572,7 @@ void tFrameworkElement::InitImplementation()
   {
     PostChildInit();
     {
-      tLock lock(*this);
+      //tLock lock(*this); // we have structure lock
       flags |= tFlag::READY;
     }
 
@@ -633,7 +620,6 @@ bool tFrameworkElement::IsCreator() const
 void tFrameworkElement::Link(tFrameworkElement& parent, const tString& link_name)
 {
   assert(IsCreator() && "May only be called by creator thread");
-  assert(LockAfter(parent));
 
   // lock runtime (required to perform structural changes)
   tLock lock(GetStructureMutex());
@@ -660,64 +646,53 @@ void tFrameworkElement::Link(tFrameworkElement& parent, const tString& link_name
 
 void tFrameworkElement::ManagedDelete(tLink* dont_detach)
 {
+  // synchronizes on runtime - so no elements will be deleted while runtime is locked
   {
-    tLock lock2(RuntimeLockHelper());
+    tLock lock4(GetStructureMutex());
+
+    if (IsDeleted())    // can happen if two threads delete concurrently - no problem, since this is - if at all - called when GarbageCollector-safety period has just started
     {
-      tLock lock3(*this);
-
-      if (IsDeleted())    // can happen if two threads delete concurrently - no problem, since this is - if at all - called when GarbageCollector-safety period has just started
-      {
-        return;
-      }
-
-      FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "FrameworkElement ManagedDelete");
-
-      // synchronizes on runtime - so no elements will be deleted while runtime is locked
-      {
-        tLock lock4(GetStructureMutex());
-
-        NotifyAnnotationsDelete();
-
-        FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Deleting");
-        assert(!GetFlag(tFlag::DELETED));
-        assert(((primary.GetParent() != NULL) | GetFlag(tFlag::RUNTIME)));
-        tFlags new_flags = flags | tFlag::DELETED;
-        new_flags.RemoveFlag(tFlag::READY);
-        flags = new_flags;
-
-        if (!GetFlag(tFlag::RUNTIME))
-        {
-          GetRuntime().UnregisterElement(*this);
-          //GetRuntime().MarkElementDeleted(*this);
-        }
-      }
-
-      // perform custom cleanup (stopping/deleting threads can be done here)
-      PrepareDelete();
-
-      // remove children (thread-safe, because delete flag is set - and addChild etc. checks that)
-      DeleteChildren();
-
-      // synchronized on runtime for removement from hierarchy
-      {
-        tLock lock4(GetStructureMutex());
-
-        // remove element itself
-        PublishUpdatedInfo(tRuntimeListener::tEvent::REMOVE);
-
-        // remove from hierarchy
-        for (tLink* l = &(primary); l != NULL;)
-        {
-          if (l != dont_detach && l->parent != NULL)
-          {
-            l->parent->children->Remove(l);
-          }
-          l = l->next;
-        }
-
-        primary.parent = NULL;
-      }
+      return;
     }
+
+    FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "FrameworkElement ManagedDelete");
+
+
+    NotifyAnnotationsDelete();
+
+    FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Deleting");
+    assert(!GetFlag(tFlag::DELETED));
+    assert(((primary.GetParent() != NULL) | GetFlag(tFlag::RUNTIME)));
+    tFlags new_flags = flags | tFlag::DELETED;
+    new_flags.RemoveFlag(tFlag::READY);
+    flags = new_flags;
+
+    if (!GetFlag(tFlag::RUNTIME))
+    {
+      GetRuntime().UnregisterElement(*this);
+      //GetRuntime().MarkElementDeleted(*this);
+    }
+
+    // perform custom cleanup (stopping/deleting threads can be done here)
+    PrepareDelete();
+
+    // remove children (thread-safe, because delete flag is set - and addChild etc. checks that)
+    DeleteChildren();
+
+    // remove element itself
+    PublishUpdatedInfo(tRuntimeListener::tEvent::REMOVE);
+
+    // remove from hierarchy
+    for (tLink* l = &(primary); l != NULL;)
+    {
+      if (l != dont_detach && l->parent != NULL)
+      {
+        l->parent->children->Remove(l);
+      }
+      l = l->next;
+    }
+
+    primary.parent = NULL;
   }
 
   // add garbage collector task
@@ -790,40 +765,17 @@ void tFrameworkElement::PublishUpdatedInfo(tRuntimeListener::tEvent change_type)
   }
 }
 
-void tFrameworkElement::RemoveFlag(tFlag flag)
-{
-  tLock lock2(*this);
-  assert(flag >= tFlag::READY);
-  flags.RemoveFlag(flag);
-}
-
-const rrlib::thread::tRecursiveMutex& tFrameworkElement::RuntimeLockHelper() const
-{
-  if (ValidAfter(GetStructureMutex()))
-  {
-    return GetStructureMutex();
-  }
-
-  return *this;
-}
-
 void tFrameworkElement::SetFlag(tFlag flag, bool value)
 {
+  assert(flag >= tFlag::READY);
   if (value)
   {
-    SetFlag(flag);
+    flags |= flag;
   }
   else
   {
-    RemoveFlag(flag);
+    flags.RemoveFlag(flag);
   }
-}
-
-void tFrameworkElement::SetFlag(tFlag flag)
-{
-  tLock lock2(*this);
-  assert(flag >= tFlag::READY);
-  flags |= flag;
 }
 
 void tFrameworkElement::SetName(const tString& name)

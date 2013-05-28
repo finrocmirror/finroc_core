@@ -42,7 +42,7 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include "rrlib/concurrent_containers/tSet.h"
-#include "rrlib/thread/tRecursiveMutex.h"
+#include "rrlib/thread/tLock.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -58,12 +58,17 @@
 //----------------------------------------------------------------------
 namespace finroc
 {
-namespace core
-{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
+namespace runtime_construction
+{
+class tFinstructableGroup;
+}
+
+namespace core
+{
 class tAbstractPort;
 class tRuntimeEnvironment;
 namespace internal
@@ -105,7 +110,7 @@ class tGarbageDeleter;
  * ("normal" elements have negative handle, while ports have positive ones)
  *
  */
-class tFrameworkElement : public tAnnotatable<rrlib::thread::tRecursiveMutex>
+class tFrameworkElement : public tAnnotatable
 {
 public:
   class tLink;
@@ -266,11 +271,10 @@ public:
 
   /*!
    * \return Element's handle in local runtime environment
-   * ("normal" elements have negative handle, while ports have positive ones)
    */
   inline tHandle GetHandle() const
   {
-    return GetSecondary();
+    return handle;
   }
 
   /*!
@@ -285,14 +289,6 @@ public:
    * (should be called in synchronized context)
    */
   size_t GetLinkCount() const;
-
-  /*!
-   * \return Order value in which element needs to be locked (higher means later/after)
-   */
-  inline int GetLockOrder() const
-  {
-    return GetPrimary();
-  }
 
   inline const tFrameworkElement& GetLogDescription() const
   {
@@ -494,17 +490,6 @@ public:
   }
 
   /*!
-   * Can this framework element be locked after the specified one has been locked?
-   *
-   * \param fe Specified other framework element
-   * \return Answer
-   */
-  inline bool LockAfter(const tFrameworkElement& fe) const
-  {
-    return ValidAfter(fe);
-  }
-
-  /*!
    * Deletes element and all child elements
    */
   inline void ManagedDelete()
@@ -536,25 +521,6 @@ public:
    * Helper for Debugging: Prints structure below this framework element to console
    */
   void PrintStructure() const;
-
-  /*!
-   * (acquires lock because change operation is not atomic).
-   * \param flag Flag to remove
-   */
-  void RemoveFlag(tFlag flag);
-
-  /*!
-   * (acquires lock because change operation is not atomic).
-   * \param flag Flag to set
-   * \param value Value to set value to
-   */
-  void SetFlag(tFlag flag, bool value);
-
-  /*!
-   * (acquires lock because change operation is not atomic).
-   * \param flag Flag to set
-   */
-  void SetFlag(tFlag flag);
 
   /*!
    * \param name New Port name
@@ -869,6 +835,14 @@ protected:
    */
   void PublishUpdatedInfo(tRuntimeListener::tEvent change_type);
 
+  /*!
+   * (may only be called before element is initialized or with structure lock)
+   *
+   * \param flag Flag to set
+   * \param value Value to set value to
+   */
+  void SetFlag(tFlag flag, bool value = true);
+
 //----------------------------------------------------------------------
 // Private fields and methods
 //----------------------------------------------------------------------
@@ -876,6 +850,10 @@ private:
 
   friend class tRuntimeEnvironment;
   friend class internal::tGarbageDeleter;
+  friend class runtime_construction::tFinstructableGroup;
+
+  /*! Element's handle in local runtime environment */
+  const tHandle handle;
 
   /*! Primary link to framework element - the place at which it actually is in FrameworkElement tree - contains name etc. */
   tLink primary;
@@ -885,7 +863,10 @@ private:
   const int64_t creater_thread_uid;
 #endif
 
-  /*! Flags of framework element; Functions modifying this must acquire lock */
+  /*!
+   * Flags of framework element
+   * (may only be modified before element is initialized or with structure lock)
+   */
   tFlags flags;  // TODO: Check whether splitting flags up in const and non-const might allow compiler optimizations?
 
   /*! Children (concurrent set for efficient, thread-safe iteration) - points to empty_child_set for ports - never NULL */
@@ -956,12 +937,6 @@ private:
    * (should be called in synchronized context)
    */
   tLink* GetLinkInternal(size_t link_index);
-
-  /*!
-   * Helper for constructor (required for initializer-list in C++)
-   * \return Primary lock order
-   */
-  static int GetLockOrder(tFlags flags, tFrameworkElement*& parent, int lock_order);
 
   /*!
    * Recursive Helper function for above
@@ -1054,14 +1029,6 @@ private:
   virtual void PrepareDelete()
   {
   }
-
-  /*!
-   * Helper method for deleting.
-   * For some elements we need to lock runtime registry before locking this element.
-   *
-   * \return Returns runtime registry if this is the case - otherwise this-pointer.
-   */
-  const rrlib::thread::tRecursiveMutex& RuntimeLockHelper() const;
 };
 
 std::ostream& operator << (std::ostream& output, const tFrameworkElement& fe);

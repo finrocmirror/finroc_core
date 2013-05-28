@@ -55,7 +55,6 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-template <typename T>
 class tAnnotatable;
 
 namespace internal
@@ -76,7 +75,6 @@ class tAnnotatableImplementation
 //----------------------------------------------------------------------
 private:
 
-  template <typename T>
   friend class finroc::core::tAnnotatable;
 
   tAnnotatableImplementation();
