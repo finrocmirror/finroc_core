@@ -153,7 +153,7 @@ public:
     if (array_chunks[primary_index])
     {
       tFrameworkElement* result = array_chunks[primary_index]->array[index & cSECONDARY_INDEX_MASK];
-      return (result->GetHandle() == handle) ? result : NULL;
+      return (result && result->GetHandle() == handle) ? result : NULL;
     }
     return NULL;
   }
