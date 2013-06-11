@@ -85,13 +85,28 @@ public:
    * Attach annotation to this object
    *
    * \tparam TAnnotation Annotation type to add annotation with (used for lookup later; may also be base class)
-   * \param ann Annotation to add
+   * \param ann Annotation to add. It will be automatically deleted when this tAnnotatable object is.
    */
   template <typename TAnnotation>
   void AddAnnotation(TAnnotation& ann)
   {
     static_assert(static_cast<void*>(&ann) == &static_cast<tAnnotation&>(ann), "tAnnotation must be first parent class when using multiple inheritance");
     internal::tAnnotatableImplementation::AddAnnotation(ann, typeid(TAnnotation).name());
+  }
+
+  /*!
+   * Create annotation of specified type and attach it to this object.
+   *
+   * \tparam TAnnotation Annotation type to create and attach (type is used for lookup later)
+   * \param constructor_arguments Constructor arguments that are forwarded to TAnnotation constructor
+   * \return Annotation that was created. It will be automatically deleted when this tAnnotatable object is.
+   */
+  template <typename TAnnotation, typename... TArguments>
+  TAnnotation& EmplaceAnnotation(TArguments && ... constructor_arguments)
+  {
+    TAnnotation* created_annotation = new TAnnotation(constructor_arguments...);
+    AddAnnotation(*created_annotation);
+    return *created_annotation;
   }
 
   /*!

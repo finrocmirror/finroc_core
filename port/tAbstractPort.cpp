@@ -157,8 +157,9 @@ void tAbstractPort::ConnectTo(tAbstractPort& to, tConnectDirection connect_direc
     }
     else
     {
-      FINROC_LOG_PRINT(WARNING, "Could not connect ports '", GetQualifiedName(), "' and '", to.GetQualifiedName(), "' for the following reasons:");
+      FINROC_LOG_PRINT(WARNING, "Could not connect ports '", GetQualifiedName(), "' and '", to.GetQualifiedName(), "' for the following reason:");
       MayConnectTo(to, true);
+      FINROC_LOG_PRINT(WARNING, "Connecting in the reverse direction did not work either - for the following reason:");
       to.MayConnectTo(*this, true);
     }
   }
