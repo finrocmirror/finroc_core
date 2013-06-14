@@ -141,7 +141,7 @@ void tRuntimeEnvironment::AddLinkEdge(const tString& link, internal::tLinkEdge& 
 
     // directly notify link edge?
     tAbstractPort* p = GetPort(link);
-    if (p)
+    if (p && p->IsReady())
     {
       edge.LinkAdded(*this, link, *p);
     }

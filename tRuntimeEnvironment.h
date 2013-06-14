@@ -163,13 +163,13 @@ public:
    * get Port by handle
    *
    * \param port_handle port handle
-   * \return Port - if port with such handle exists - otherwise null
+   * \return Port - if initialized port with such handle exists - otherwise null.
    */
   tAbstractPort* GetPort(tHandle port_handle);
 
   /*!
    * \param link_name (relative) Fully qualified name of port
-   * \return Port with this name - or null if it does not exist
+   * \return Port with this name - or null if it does not exist. Port may not be initialized yet.
    */
   tAbstractPort* GetPort(const tString& link_name);
 
@@ -183,30 +183,11 @@ public:
   }
 
   /*!
-   * Called before a framework element is initialized - can be used to create links etc. to this element etc.
-   *
-   * \param element Framework element that will be initialized soon
-   */
-  void PreElementInit(tFrameworkElement& element);
-
-  /*!
    * Remove runtime listener
    *
    * \param listener Listener to remove
    */
   void RemoveListener(tRuntimeListener& listener);
-
-  /*!
-   * Called whenever a framework element was added/removed or changed
-   *
-   * \param change_type Type of change
-   * \param element FrameworkElement that changed
-   * \param edge_target Target of edge, in case of EDGE_CHANGE
-   *
-   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
-   * (should only be called by FrameworkElement class)
-   */
-  void RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element, tAbstractPort* edge_target = NULL);
 
   /*!
    * Using only the basic constructs from Finroc - things should shutdown cleanly automatically.
@@ -280,6 +261,13 @@ private:
   void AddLinkEdge(const tString& link, internal::tLinkEdge& edge);
 
   /*!
+   * Called before a framework element is initialized - can be used to create links etc. to this element etc.
+   *
+   * \param element Framework element that will be initialized soon
+   */
+  void PreElementInit(tFrameworkElement& element);
+
+  /*!
    * Register framework element at RuntimeEnvironment.
    * This is done automatically and should not be called by a user.
    *
@@ -297,6 +285,18 @@ private:
    * \param edge Edge to add
    */
   void RemoveLinkEdge(const tString& link, internal::tLinkEdge& edge);
+
+  /*!
+   * Called whenever a framework element was added/removed or changed
+   *
+   * \param change_type Type of change
+   * \param element FrameworkElement that changed
+   * \param edge_target Target of edge, in case of EDGE_CHANGE
+   *
+   * (Is called with structure mutex obtained... so method should not block)
+   * (should only be called by FrameworkElement class)
+   */
+  void RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element, tAbstractPort* edge_target = NULL);
 
   /*!
    * Unregister framework element at RuntimeEnvironment.
