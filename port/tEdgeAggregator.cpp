@@ -118,7 +118,7 @@ void tEdgeAggregator::EdgeRemoved(tEdgeAggregator& dest, bool data_flow_type)
     if (ae->control_flow_edge_count + ae->data_flow_edge_count == 0)
     {
       emerging_edges.Remove(ae);
-      //ae.delete(); // obsolete: already deleted by command above
+      delete ae;
     }
     return;
   }
