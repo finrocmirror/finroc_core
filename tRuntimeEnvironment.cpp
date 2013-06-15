@@ -89,6 +89,7 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
   tFrameworkElement(NULL, "Runtime", tFlag::RUNTIME, static_cast<int>(tLockOrderLevel::RUNTIME_ROOT)),
   elements(),
   link_edges(),
+  global_link_edges(),
   runtime_listeners(),
   temp_buffer(),
   alternative_link_roots(),
@@ -105,6 +106,7 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
 //----------------------------------------------------------------------
 tRuntimeEnvironment::~tRuntimeEnvironment()
 {
+  global_link_edges.clear();
   active = false;
   rrlib::thread::tThread::StopThreads();
 

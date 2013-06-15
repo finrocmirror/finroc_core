@@ -104,6 +104,37 @@ tAbstractPort::~tAbstractPort()
 {
 }
 
+void tAbstractPort::Connect(const std::string& port1_link, const std::string& port2_link, tConnectDirection connect_direction)
+{
+  if (port1_link.length() == 0 || port2_link.length() == 0)
+  {
+    FINROC_LOG_PRINT_STATIC_TO(edges, ERROR, "No link name specified for partner port. Not connecting anything.");
+    return;
+  }
+
+  rrlib::thread::tLock lock2(tRuntimeEnvironment::GetInstance().GetStructureMutex());
+  std::vector<std::unique_ptr<internal::tLinkEdge>>& global_link_edges = tRuntimeEnvironment::GetInstance().global_link_edges;
+
+  for (auto it = global_link_edges.begin(); it != global_link_edges.end(); ++it)
+  {
+    if (((*it)->GetTargetLink().compare(port1_link) == 0 && (*it)->GetSourceLink().compare(port2_link) == 0) ||
+        ((*it)->GetTargetLink().compare(port2_link) == 0 && (*it)->GetSourceLink().compare(port1_link) == 0))
+    {
+      return;
+    }
+  }
+  switch (connect_direction)
+  {
+  case tConnectDirection::AUTO:
+  case tConnectDirection::TO_TARGET:
+    global_link_edges.emplace_back(new internal::tLinkEdge(port1_link, port2_link, connect_direction == tConnectDirection::AUTO));
+    break;
+  case tConnectDirection::TO_SOURCE:
+    global_link_edges.emplace_back(new internal::tLinkEdge(port2_link, port1_link, false));
+    break;
+  }
+}
+
 void tAbstractPort::ConnectImplementation(tAbstractPort& target, bool finstructed)
 {
   tEdgeAggregator::EdgeAdded(*this, target);

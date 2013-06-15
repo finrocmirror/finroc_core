@@ -120,6 +120,17 @@ public:
   tAbstractPort(const tAbstractPortCreationInfo& creation_info);
 
   /*!
+   * Connects ports with the two specified links.
+   * The connection is (re)established whenever ports with these links are available.
+   *
+   * \param port1_link Link name of first port to connect
+   * \param port2_link Link name of second port to connect
+   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
+   *                          (TO_TARGET means that the second port is the target port)
+   */
+  static void Connect(const std::string& port1_link, const std::string& port2_link, tConnectDirection connect_direction = tConnectDirection::AUTO);
+
+  /*!
    * Connect port to specified partner port
    *
    * \param to Port to connect this port to

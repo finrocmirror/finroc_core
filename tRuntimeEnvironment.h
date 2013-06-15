@@ -208,6 +208,7 @@ public:
 private:
 
   friend class tFrameworkElement;
+  friend class tAbstractPort;
   friend class internal::tLinkEdge;
 
   /*! Global register of all framework elements */
@@ -215,6 +216,9 @@ private:
 
   /*! Edges dealing with linked ports */
   std::map<std::string, internal::tLinkEdge*> link_edges;
+
+  /*! List of global link edges (link edges with two links are added to this list by tAbstractPort) */
+  std::vector<std::unique_ptr<internal::tLinkEdge>> global_link_edges;
 
   /*! List with runtime listeners */
   rrlib::concurrent_containers::tSet < tRuntimeListener*, rrlib::concurrent_containers::tAllowDuplicates::NO, rrlib::thread::tNoMutex,
