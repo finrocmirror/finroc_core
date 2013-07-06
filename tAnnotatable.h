@@ -90,7 +90,9 @@ public:
   template <typename TAnnotation>
   void AddAnnotation(TAnnotation& ann)
   {
+#ifndef __clang__ // clang does not like this assert: static_assert expression is not an integral constant expression
     static_assert(static_cast<void*>(&ann) == &static_cast<tAnnotation&>(ann), "tAnnotation must be first parent class when using multiple inheritance");
+#endif
     internal::tAnnotatableImplementation::AddAnnotation(ann, typeid(TAnnotation).name());
   }
 

@@ -60,7 +60,7 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-class tAggregatedEdge;
+struct tAggregatedEdge;
 
 //----------------------------------------------------------------------
 // Class declaration
@@ -85,7 +85,7 @@ class tEdgeAggregator : public tFrameworkElement
 public:
 
   /*! see FrameworkElement for parameter description */
-  explicit tEdgeAggregator(tFrameworkElement* parent = NULL, const tString& name = "", tFlags flags = 0);
+  explicit tEdgeAggregator(tFrameworkElement* parent = NULL, const tString& name = "", tFlags flags = tFlags());
 
   /*!
    * (Should be called by abstract port only - with runtime registry locked)

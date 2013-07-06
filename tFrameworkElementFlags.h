@@ -204,6 +204,11 @@ constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlags& flag1
   return tFrameworkElementFlags(flag1.wrapped | flag2.wrapped);
 }
 
+constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlag& flag1, const tFrameworkElementFlag& flag2)
+{
+  return tFrameworkElementFlags(static_cast<uint>(flag1) | static_cast<uint>(flag2));
+}
+
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------

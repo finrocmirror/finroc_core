@@ -337,7 +337,7 @@ protected:
   template <typename TPort>
   InvalidPortType CopyConstruction(tPortWrapperBase* arg1)
   {
-    return false;
+    return InvalidPortType();
   }
 
   /*!
