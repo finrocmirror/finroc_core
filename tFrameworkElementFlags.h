@@ -206,7 +206,7 @@ constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlags& flag1
 
 constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlag& flag1, const tFrameworkElementFlag& flag2)
 {
-  return tFrameworkElementFlags(static_cast<uint>(flag1) | static_cast<uint>(flag2));
+  return tFrameworkElementFlags(tFrameworkElementFlags(flag1) | tFrameworkElementFlags(flag2));
 }
 
 //----------------------------------------------------------------------
