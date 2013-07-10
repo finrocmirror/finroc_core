@@ -180,6 +180,40 @@ namespace core
     FINROC_LOG_PRINTF_TO(domain, level, args) \
   } \
    
+/*! Macro to throw and log exceptions in one line
+ *
+ * \param exception   The exception to be thrown
+ */
+#define FINROC_LOG_THROW(exception) \
+  FINROC_LOG_PRINT(ERROR, exception); \
+  throw exception \
+   
+/*! Macro to throw and log exceptions to explicitly specified domain in one line
+ *
+ * \param domain      The domain the message should be printed to
+ * \param exception   The exception to be thrown
+ */
+#define FINROC_LOG_THROW_TO(domain, exception) \
+  FINROC_LOG_PRINT_TO(domain, ERROR, exception); \
+  throw exception \
+   
+/*! Macro to throw and log exceptions in one line from static context
+ *
+ * \param exception   The exception to be thrown
+ */
+#define FINROC_LOG_THROW_STATIC(exception) \
+  FINROC_LOG_PRINT_STATIC(ERROR, exception); \
+  throw exception \
+   
+/*! Macro to throw and log exceptions to explicitly specified domain in one line from static context
+ *
+ * \param domain      The domain the message should be printed to
+ * \param exception   The exception to be thrown
+ */
+#define FINROC_LOG_THROW_STATIC_TO(domain, exception) \
+  FINROC_LOG_PRINT_STATIC_TO(domain, ERROR, exception); \
+  throw exception \
+   
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------
