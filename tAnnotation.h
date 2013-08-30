@@ -108,7 +108,7 @@ public:
    * \return Object that is annotated - null if annotation is not attached to an object yet
    */
   template <typename T>
-  inline T* GetAnnotated()
+  inline T* GetAnnotated() const
   {
     return static_cast<T*>(annotated);
   }
