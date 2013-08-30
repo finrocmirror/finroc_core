@@ -70,10 +70,30 @@ typedef rrlib::thread::tLock tLock;
 //----------------------------------------------------------------------
 constexpr tFrameworkElementFlags tFrameworkElement::cSTATUS_FLAGS;
 
+const std::string cUNNAMED_ELEMENT_STRING("(Unnamed Framework Element)");
+const std::string cDELETED_ELEMENT_STRING("(Deleted Framework Element)");
+
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
 tFrameworkElement::tChildSet tFrameworkElement::empty_child_set;
+
+namespace internal
+{
+
+/*!
+ * Annotation that is created if additional string buffers are needed to
+ * store a framework element's name in a thread-safe way.
+ */
+class tStringBufferAnnotation : public tAnnotation
+{
+public:
+
+  /*! Additional string buffer */
+  tString string_buffer;
+};
+
+}
 
 tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& name, tFlags flags, int lock_order) :
   handle(flags.Get(tFlag::RUNTIME) ? 0 : tRuntimeEnvironment::GetInstance().RegisterElement(*this, flags.Get(tFlag::PORT))),
@@ -89,7 +109,11 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& n
     FINROC_LOG_PRINT(ERROR, "No status flags may be set in constructor");
     abort();
   }
-  primary.name = name;
+  if (name.length() > 0)
+  {
+    primary.name_buffer = name;
+    primary.name = &primary.name_buffer;
+  }
 
   if (!GetFlag(tFlag::RUNTIME))
   {
@@ -315,18 +339,18 @@ tFrameworkElement* tFrameworkElement::GetChildElement(const tString& name, int n
   for (auto it = children->Begin(); it != children->End(); ++it)
   {
     tLink* child = &(**it);
-    if (name.compare(name_index, child->name.length(), child->name) == 0 && (!child->GetChild().IsDeleted()))
+    if (name.compare(name_index, child->name->length(), *(child->name)) == 0 && (!child->GetChild().IsDeleted()))
     {
-      if (name.length() == name_index + child->name.length())
+      if (name.length() == name_index + child->name->length())
       {
         if (!only_globally_unique_children || child->GetChild().GetFlag(tFlag::GLOBALLY_UNIQUE_LINK))
         {
           return &child->GetChild();
         }
       }
-      if (name[name_index + child->name.length()] == '/')
+      if (name[name_index + child->name->length()] == '/')
       {
-        tFrameworkElement* result = child->GetChild().GetChildElement(name, name_index + child->name.length() + 1, only_globally_unique_children, root);
+        tFrameworkElement* result = child->GetChild().GetChildElement(name, name_index + child->name->length() + 1, only_globally_unique_children, root);
         if (result)
         {
           return result;
@@ -336,11 +360,6 @@ tFrameworkElement* tFrameworkElement::GetChildElement(const tString& name, int n
     }
   }
   return NULL;
-}
-
-const char* tFrameworkElement::GetCName() const
-{
-  return primary.name.length() == 0 ? "(anonymous)" : primary.name.c_str();
 }
 
 const tFrameworkElement::tLink* tFrameworkElement::GetLink(size_t link_index) const
@@ -403,23 +422,6 @@ tFrameworkElement::tLink* tFrameworkElement::GetLinkInternal(size_t link_index)
   return l;
 }
 
-tString tFrameworkElement::GetName() const
-{
-  if (IsReady() || GetFlag(tFlag::RUNTIME))
-  {
-    return primary.name.length() == 0 ? "(anonymous)" : primary.name;
-  }
-  else
-  {
-    tLock lock(GetStructureMutex());  // synchronize, while name can be changed (C++ strings may not be thread safe...)
-    if (IsDeleted())
-    {
-      return "(deleted element)";
-    }
-    return primary.name.length() == 0 ? "(anonymous)" : primary.name;
-  }
-}
-
 void tFrameworkElement::GetNameHelper(tString& sb, const tLink& l, bool abort_at_link_root)
 {
   if (l.parent == NULL || (abort_at_link_root && l.GetChild().GetFlag(tFlag::ALTERNATIVE_LINK_ROOT)))    // runtime?
@@ -428,7 +430,7 @@ void tFrameworkElement::GetNameHelper(tString& sb, const tLink& l, bool abort_at
   }
   GetNameHelper(sb, l.parent->primary, abort_at_link_root);
   sb.append("/");
-  sb.append(l.name);
+  sb.append(*(l.name));
 }
 
 tFrameworkElement* tFrameworkElement::GetParent(int link_index) const
@@ -489,7 +491,7 @@ bool tFrameworkElement::GetQualifiedNameImpl(tString& sb, const tLink& start, bo
     {
       break;
     }
-    length += l->name.length() + 1u;
+    length += l->name->length() + 1u;
   }
   sb.clear();
   if (sb.capacity() < length)
@@ -634,7 +636,8 @@ void tFrameworkElement::Link(tFrameworkElement& parent, const tString& link_name
   }
 
   tLink* l = new tLink(*this);
-  l->name = link_name;
+  l->name_buffer = link_name;
+  l->name = &(l->name_buffer);
   l->parent = NULL;  // will be set in addChild
   tLink* lprev = GetLinkInternal(GetLinkCount() - 1u);
   assert(lprev->next == NULL);
@@ -665,6 +668,10 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
     assert(((primary.GetParent() != NULL) | GetFlag(tFlag::RUNTIME)));
     tFlags new_flags = flags | tFlag::DELETED;
     new_flags.RemoveFlag(tFlag::READY);
+    for (size_t i = 0; i < this->GetLinkCount(); i++)
+    {
+      this->GetLinkInternal(i)->name = &cDELETED_ELEMENT_STRING;
+    }
     flags = new_flags;
 
     if (!GetFlag(tFlag::RUNTIME))
@@ -703,7 +710,7 @@ bool tFrameworkElement::NameEquals(const tString& other) const
 {
   if (IsReady())
   {
-    return primary.name.compare(other) == 0;
+    return primary.name->compare(other) == 0;
   }
   else
   {
@@ -712,7 +719,7 @@ bool tFrameworkElement::NameEquals(const tString& other) const
     {
       return false;
     }
-    return primary.name.compare(other) == 0;
+    return primary.name->compare(other) == 0;
   }
 }
 
@@ -740,7 +747,7 @@ void tFrameworkElement::PrintStructure(int indent, std::stringstream& output) co
     return;
   }
 
-  output << GetCName() << " (" << (IsReady() ? (GetFlag(tFlag::PUBLISHED) ? "published" : "ready") : IsDeleted() ? "deleted" : "constructing") << ")" << std::endl;
+  output << GetName() << " (" << (IsReady() ? (GetFlag(tFlag::PUBLISHED) ? "published" : "ready") : IsDeleted() ? "deleted" : "constructing") << ")" << std::endl;
 
   // print child element info
   for (auto it = ChildrenBegin(); it != ChildrenEnd(); ++it)
@@ -780,13 +787,52 @@ void tFrameworkElement::SetFlag(tFlag flag, bool value)
 
 void tFrameworkElement::SetName(const tString& name)
 {
-  assert(!GetFlag(tFlag::RUNTIME));
+  if (!IsCreator())
+  {
+    FINROC_LOG_PRINT(ERROR, "May only be called by creator thread. Ignoring.");
+    return;
+  }
+  if (GetFlag(tFlag::RUNTIME))
+  {
+    FINROC_LOG_PRINT(ERROR, "May not be called on Finroc Runtime Root Element. Ignoring.");
+    return;
+  }
+  if (!IsConstructing())
+  {
+    FINROC_LOG_PRINT(ERROR, "May not be called after element has been initialized. Ignoring.");
+    return;
+  }
 
-  tLock lock(GetStructureMutex());  // synchronize, C++ strings may not be thread safe...
-  assert(IsConstructing());
-  assert(IsCreator());
-  primary.name = name;
+  internal::tStringBufferAnnotation* string_buffer_annotation = this->GetAnnotation<internal::tStringBufferAnnotation>();
+  if (string_buffer_annotation)
+  {
+    FINROC_LOG_PRINT(ERROR, "Name may only be changed once. Ignoring.");
+    return;
+  }
+
+  tLock lock(GetStructureMutex());  // synchronize, C++ strings may not be thread safe (e.g. for GetQualifiedName())
+  if (primary.name != &(primary.name_buffer))
+  {
+    primary.name_buffer = name;
+    primary.name = &(primary.name_buffer);
+  }
+  else
+  {
+    FINROC_LOG_PRINT(DEBUG, "Creating another string buffer for name change to '", name, "'.");
+    string_buffer_annotation = &EmplaceAnnotation<internal::tStringBufferAnnotation>();
+    string_buffer_annotation->string_buffer = name;
+    primary.name = &(string_buffer_annotation->string_buffer);
+  }
+
 }
+
+tFrameworkElement::tLink::tLink(tFrameworkElement& pointed_to) :
+  points_to(pointed_to),
+  name(&cUNNAMED_ELEMENT_STRING),
+  name_buffer(),
+  parent(NULL),
+  next(NULL)
+{}
 
 tFrameworkElement::tSubElementIterator::tSubElementIterator(tFrameworkElement& framework_element, bool include_root) :
   current_depth(0),
@@ -846,7 +892,7 @@ static void StreamQualifiedName(std::ostream& output, const tFrameworkElement& f
     {
       StreamQualifiedName(output, *fe.GetParent(), false);
     }
-    output << fe.GetCName();
+    output << fe.GetName();
     if (!first)
     {
       output << '/';

@@ -177,15 +177,6 @@ public:
   }
 
   /*!
-   * Same as getName()
-   * (except that we return a const char*)
-   */
-  inline const char* GetCName() const
-  {
-    return wrapped->GetCName();
-  }
-
-  /*!
    * \return Type of port data
    */
   inline rrlib::rtti::tType GetDataType() const
@@ -211,9 +202,9 @@ public:
   }
 
   /*!
-   * \return Name of this framework element
+   * \return Name of wrapped framework element (see tFrameworkElement::GetName())
    */
-  inline tString GetName() const
+  inline const tString& GetName() const
   {
     return wrapped->GetName();
   }

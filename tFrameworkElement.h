@@ -246,12 +246,6 @@ public:
   tFrameworkElement* GetChild(const tString& name) const;
 
   /*!
-   * Same as GetName()
-   * (except that we return a const char*)
-   */
-  const char* GetCName() const;
-
-  /*!
    * \param name (relative) Qualified name
    * \param only_globally_unique_children Only return child with globally unique link?
    * \return Framework element - or null if non-existent
@@ -297,8 +291,15 @@ public:
 
   /*!
    * \return Name of this framework element
+   *
+   * (Calling this function is non-blocking and thread-safe.
+   *  Working with the returned string reference is thread-safe as well - until framework element is completely deleted.
+   *  The referenced string will not change when the name of the framework element is changed.)
    */
-  tString GetName() const;
+  const tString& GetName() const
+  {
+    return *(primary.name);
+  }
 
   /*!
    * \return Primary parent framework element
@@ -524,7 +525,10 @@ public:
 
   /*!
    * \param name New Port name
-   * (only valid/possible before, element is initialized)
+   *
+   * (Name may only be changed once.
+   *  May only be called by creator thread before element is initialized.
+   *  Prints an error message otherwise and does not modify name.)
    */
   void SetName(const tString& name);
 
@@ -571,7 +575,10 @@ public:
     tFrameworkElement& points_to;
 
     /*! Name of Framework Element - in link context */
-    tString name;
+    const tString* name;
+
+    /*! Buffer used for storing (initial) name of framework element */
+    tString name_buffer;
 
     /*! Parent - Element in which this link was inserted */
     tFrameworkElement* parent;
@@ -581,12 +588,7 @@ public:
 
   public:
 
-    tLink(tFrameworkElement& pointed_to) :
-      points_to(pointed_to),
-      name(),
-      parent(NULL),
-      next(NULL)
-    {}
+    tLink(tFrameworkElement& pointed_to);
 
     /*!
      * \return Element that this link points to
@@ -599,9 +601,9 @@ public:
     /*!
      * \return Name of Framework Element - in link context
      */
-    inline tString GetName() const
+    inline const tString& GetName() const
     {
-      return name;
+      return *name;
     }
 
     /*!
