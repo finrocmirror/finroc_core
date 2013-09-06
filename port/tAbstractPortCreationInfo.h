@@ -70,14 +70,15 @@ namespace core
  *
  * Instead of providing suitable constructors for all types of sensible
  * combinations of the numerous (often optional) construction parameters,
- * there is only one constructor taking a single argument of this class.
+ * there is only one port constructor utilizing this class as well as derived
+ * classes to process the provided arguments.
  *
- * This is a struct, as this is merely a collection of parameters -
- * and it does not really seem sensible to hide anything from the user of
- * this class.
+ * This is a struct, because this is merely a collection of parameters
+ * (more or less).
  */
 struct tAbstractPortCreationInfo
 {
+
   /*! Port flags */
   core::tFrameworkElement::tFlags flags;
 
@@ -90,17 +91,49 @@ struct tAbstractPortCreationInfo
   /*! Port name */
   tString name;
 
-  /*! Lock order level */
-  int lock_order;
-
 
   tAbstractPortCreationInfo() :
     flags(),
     data_type(),
     parent(NULL),
-    name(),
-    lock_order(-1)
+    name()
   {}
+
+
+  /*! Various Set methods for different port properties */
+  void Set(core::tFrameworkElement* parent)
+  {
+    this->parent = parent;
+  }
+
+  void Set(const tString& name)
+  {
+    this->name = name;
+  }
+
+  void Set(core::tFrameworkElement::tFlags flags)
+  {
+    this->flags |= flags;
+  }
+
+  void Set(const rrlib::rtti::tType& type)
+  {
+    this->data_type = type;
+  }
+
+  void Set(const tAbstractPortCreationInfo& creation_info)
+  {
+    *this = creation_info;
+  }
+
+  /*!
+   * Catches all invalid constructor arguments that were not handled by this
+   * or any derived class
+   */
+  struct tBase
+  {
+    static void Set(...) {}
+  };
 };
 
 //----------------------------------------------------------------------

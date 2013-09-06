@@ -44,6 +44,7 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include "core/port/tAbstractPort.h"
+#include "core/port/tAbstractPortCreationInfo.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -75,6 +76,11 @@ namespace core
  */
 class tPortWrapperBase
 {
+  template <typename T, typename A>
+  class HasSet;
+
+  template <typename T, typename A>
+  class SetBaseClass;
 
 //----------------------------------------------------------------------
 // Public methods and typedefs
@@ -82,8 +88,8 @@ class tPortWrapperBase
 public:
 
   typedef tAbstractPort::tConnectDirection tConnectDirection;
-
-  class InvalidPortType {};
+  typedef tFrameworkElement::tFlag tFlag;
+  typedef tFrameworkElement::tFlags tFlags;
 
   tPortWrapperBase() :
     wrapped(NULL)
@@ -302,34 +308,85 @@ public:
     return wrapped != p.wrapped;
   }
 
+
+  /*!
+   * Many port constructors have a variadic argument list.
+   *
+   * Instead of providing suitable constructors for all types of sensible
+   * combinations of the numerous (often optional) construction parameters,
+   * there is only one constructor with a variadic argument list.
+   *
+   * This utility class is used to process this list and store the parameters
+   * in its base class T which bundles various parameters for the creation of
+   * ports.
+   * Parameters that are not specified have a default value (which might
+   * explicitly indicate that they have not been set).
+   *
+   * \tparam TParameterSet Base class that handles constructor arguments.
+   *                       For each constructor argument TParameterSet::Set(argument) is called.
+   */
+  template <typename TParameterSet>
+  class tConstructorArguments : public TParameterSet
+  {
+    //----------------------------------------------------------------------
+    // Public methods and typedefs
+    //----------------------------------------------------------------------
+  public:
+
+    tConstructorArguments();
+
+    /*!
+     * Constructor takes variadic argument list... just any properties to be
+     * assigned to port.
+     *
+     * It calls Set(argument) for every argument.
+     * A static assertion is thrown if an argument of an invalid type is provided.
+     */
+    template <typename ARG1, typename ... TArgs>
+    explicit tConstructorArguments(const ARG1& argument1, const TArgs&... rest) :
+      TParameterSet()
+    {
+      static_assert(!std::is_base_of<tPortWrapperBase, ARG1>::value, "Invalid port type for copy construction");
+      this->Set(argument1);
+      this->ProcessArguments(rest...);
+    }
+
+    /*!
+     * This Set() method will set a suitable parameter in the base class
+     * depending on the type of the argument passed to it.
+     *
+     * A static assertion is thrown if an argument of an invalid type is provided.
+     */
+    template <typename TArgument>
+    void Set(const TArgument& argument)
+    {
+      typedef typename SetBaseClass<TParameterSet, TArgument>::type tBase;
+      tBase::Set(argument);
+    }
+
+    //----------------------------------------------------------------------
+    // Private fields and methods
+    //----------------------------------------------------------------------
+  private:
+
+    /*! Process constructor arguments */
+    void ProcessArguments() {}
+
+    template <typename A, typename ... ARest>
+    void ProcessArguments(const A& argument1, const ARest&... rest)
+    {
+      this->Set(argument1);
+      this->ProcessArguments(rest...);
+    }
+  };
+
+  /*! used in enable_if expressions of constructors in derived classes */
+  class tNoArgument {};
+
 //----------------------------------------------------------------------
 // Protected methods
 //----------------------------------------------------------------------
 protected:
-
-  /*!
-   * Helper method to allow copy construction in subclasses with vararg constructors -
-   * as variadic template constructor catches some copy construction calls.
-   *
-   * \param arg1 First argument of constructor call
-   * \return True, if first argument is of type TPort or a subclass
-   */
-  template <typename TPort>
-  bool CopyConstruction(const TPort* arg1)
-  {
-    wrapped = arg1->GetWrapped();
-    return true;
-  }
-  template <typename TPort>
-  bool CopyConstruction(const void* arg1)
-  {
-    return false;
-  }
-  template <typename TPort>
-  InvalidPortType CopyConstruction(tPortWrapperBase* arg1)
-  {
-    return InvalidPortType();
-  }
 
   /*!
    * \param wrapped Wrapped port
@@ -346,6 +403,45 @@ private:
 
   /*! Wrapped port */
   tAbstractPort* wrapped;
+
+
+  /*!
+   * Type trait that determines whether type T has a Set() method suitable
+   * for an argument of type A.
+   * Used by tConstructorArguments.
+   */
+  template <typename T, typename A>
+  class HasSet
+  {
+    template <typename U>
+    static U &Make();
+
+    template <typename U = T, typename V = A>
+    static int16_t Test(decltype(Make<U>().Set(Make<A>()))*);
+    static int32_t Test(...);
+
+  public:
+
+    enum { value = sizeof(Test(Make<void*>())) == sizeof(int16_t) };
+  };
+
+  /*!
+   * Type trait to determine base class of T that has as suitable Set() method
+   * for an argument of type A.
+   * Result may be T itself.
+   */
+  template <typename T, typename A>
+  struct SetBaseClass
+  {
+    static_assert(!std::is_same<T, core::tAbstractPortCreationInfo::tBase>::value, "An argument of type A is not supported by the port constructor");
+
+    struct TypeReplicator
+    {
+      typedef T type;
+    };
+
+    typedef typename std::conditional<HasSet<T, A>::value, TypeReplicator, SetBaseClass<typename T::tBase, A>>::type::type type;
+  };
 };
 
 //----------------------------------------------------------------------

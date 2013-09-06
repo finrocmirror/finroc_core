@@ -91,7 +91,7 @@ public:
 } // namespace internal
 
 tAbstractPort::tAbstractPort(const tAbstractPortCreationInfo& info) :
-  tFrameworkElement(info.parent, info.name, info.flags | tFlag::PORT, info.lock_order < 0 ? static_cast<int>(tLockOrderLevel::PORT) : info.lock_order),
+  tFrameworkElement(info.parent, info.name, info.flags | tFlag::PORT),
   outgoing_connections(),
   incoming_connections(),
   link_edges(),
