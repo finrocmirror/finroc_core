@@ -38,6 +38,7 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "core/log_messages.h"
 
 //----------------------------------------------------------------------
 // Debugging
@@ -94,8 +95,16 @@ std::vector<std::string> GetPathsToCheck()
     paths.push_back(std::string(finroc_home) + "/");
     paths.push_back(std::string(finroc_home) + "/sources/cpp/");
   }
-  cwd = std::string(getcwd(buffer, 1024)) + "/";
-  paths.push_back(cwd);
+  char *cwd_cstring = getcwd(buffer, sizeof(buffer));
+  if (cwd_cstring == NULL)
+  {
+    FINROC_LOG_PRINT(WARNING, "Could not look up the current working directory using getcwd(). Something seems to be wrong, but for now it just will not be included in the search path.");
+  }
+  else
+  {
+    cwd = std::string(cwd_cstring) + "/";
+    paths.push_back(cwd);
+  }
   return paths;
 }
 
