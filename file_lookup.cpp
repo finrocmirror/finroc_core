@@ -34,6 +34,7 @@
 //----------------------------------------------------------------------
 #include <sys/stat.h> // for IsDirectory()
 #include <unistd.h>
+#include <limits.h>
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -84,7 +85,7 @@ std::vector<std::string> GetPathsToCheck()
   std::vector<std::string> paths;
   const char* finroc_home = getenv("FINROC_HOME");
   const char* project_home = getenv("FINROC_PROJECT_HOME");
-  char buffer[1024];
+  char buffer[PATH_MAX];
   if (project_home != NULL)
   {
     project_home_string = std::string(project_home) + "/";
