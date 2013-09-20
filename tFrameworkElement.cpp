@@ -601,7 +601,7 @@ bool tFrameworkElement::IsChildOf(const tFrameworkElement& re, bool ignore_delet
     }
     else
     {
-      if (l->parent->IsChildOf(re))
+      if (l->parent->IsChildOf(re, ignore_delete_flag))
       {
         return true;
       }
