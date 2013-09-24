@@ -858,6 +858,11 @@ tFrameworkElement::tSubElementIterator& tFrameworkElement::tSubElementIterator::
     iterator_stack[current_depth] = tNoLinkChildIterator(current_element.children->Begin(), current_element.children->End());
     if (iterator_stack[current_depth] == tNoLinkChildIterator())
     {
+      if (current_depth == 0)
+      {
+        return *this; // end
+      }
+
       ++iterator_stack[current_depth - 1];
       while (iterator_stack[current_depth - 1] == tNoLinkChildIterator())
       {
