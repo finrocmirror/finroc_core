@@ -33,7 +33,6 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include "rrlib/thread/tThread.h"
-#include <boost/algorithm/string/predicate.hpp>
 #include <sstream>
 
 //----------------------------------------------------------------------
@@ -290,7 +289,7 @@ tFrameworkElement* tFrameworkElement::GetChild(const tString& name) const
   {
     if (it->IsReady())
     {
-      if (boost::equals(it->GetName(), name))
+      if (it->GetName() == name)
       {
         return &(*it);
       }
@@ -306,7 +305,7 @@ tFrameworkElement* tFrameworkElement::GetChild(const tString& name) const
       {
         continue;
       }
-      if (boost::equals(it->GetName(), name))
+      if (it->GetName() == name)
       {
         return &(*it);
       }

@@ -32,7 +32,6 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
-#include <boost/algorithm/string.hpp>
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -227,7 +226,7 @@ void tAbstractPort::ConnectTo(const tString& link_name, tConnectDirection connec
   }
   for (auto it = link_edges->begin(); it != link_edges->end(); ++it)
   {
-    if (boost::equals((*it)->GetTargetLink(), link_name) || boost::equals((*it)->GetSourceLink(), link_name))
+    if ((*it)->GetTargetLink() == link_name || (*it)->GetSourceLink() == link_name)
     {
       return;
     }
@@ -349,7 +348,7 @@ void tAbstractPort::DisconnectFrom(const tString& link)
   rrlib::thread::tLock lock(GetStructureMutex());
   for (auto it = link_edges->begin(); it != link_edges->end(); ++it)
   {
-    if (boost::equals((*it)->GetSourceLink(), link) || boost::equals((*it)->GetTargetLink(), link))
+    if ((*it)->GetSourceLink() == link || (*it)->GetTargetLink() == link)
     {
       delete &(*it);
       it = link_edges->erase(it);
@@ -505,7 +504,7 @@ tString tAbstractPort::MakeAbsoluteLink(const tString& rel_link) const
   }
   tFrameworkElement* relative_to = GetParent();
   tString rel_link2 = rel_link;
-  while (boost::starts_with(rel_link2, "../"))
+  while (rel_link2.compare(0, 3, "../") == 0) // starts with '../'?
   {
     rel_link2 = rel_link2.substr(3);
     relative_to = relative_to->GetParent();

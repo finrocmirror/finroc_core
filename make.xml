@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <targets>
 
-  <finroclibrary name="core" libs="boost">
+  <finroclibrary name="core">
     <sources>
       **
     </sources>

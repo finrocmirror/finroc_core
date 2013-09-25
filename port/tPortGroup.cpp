@@ -85,7 +85,7 @@ void tPortGroup::ConnectImpl(tPortGroup* other_group, const std::string& group_l
     {
       start_with = NULL;
     }
-    if (start_with || (!boost::starts_with(name, port_prefix)))
+    if (start_with || (name.compare(0, port_prefix.length(), port_prefix)) != 0) // skip if we have not reached start port or port does not start with 'port_prefix'?
     {
       continue;
     }
