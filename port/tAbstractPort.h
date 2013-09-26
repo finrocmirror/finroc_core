@@ -295,10 +295,10 @@ public:
    * (may be overridden by subclass - should usually call superclass method, too)
    *
    * \param target Target port?
-   * \param warn_if_impossible Print warning to console if connecting is not possible?
+   * \param reason_string If connecting is not possible, appends reason to this string (if not NULL)
    * \return Answer
    */
-  bool MayConnectTo(tAbstractPort& target, bool warn_if_impossible = false) const;
+  bool MayConnectTo(tAbstractPort& target, std::string* reason_string = NULL) const;
 
   /*!
    * \return An iterator to iterate over all ports that this port has outgoing connections to

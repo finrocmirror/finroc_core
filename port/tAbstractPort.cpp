@@ -175,8 +175,8 @@ void tAbstractPort::ConnectTo(tAbstractPort& to, tConnectDirection connect_direc
   // determine connect direction
   if (connect_direction == tConnectDirection::AUTO)
   {
-    bool to_target_possible = MayConnectTo(to, false);
-    bool to_source_possible = to.MayConnectTo(*this, false);
+    bool to_target_possible = MayConnectTo(to);
+    bool to_source_possible = to.MayConnectTo(*this);
     if (to_target_possible && to_source_possible)
     {
       connect_direction = InferConnectDirection(to);
@@ -187,22 +187,29 @@ void tAbstractPort::ConnectTo(tAbstractPort& to, tConnectDirection connect_direc
     }
     else
     {
-      FINROC_LOG_PRINT(WARNING, "Could not connect ports '", GetQualifiedName(), "' and '", to.GetQualifiedName(), "' for the following reason:");
-      MayConnectTo(to, true);
-      FINROC_LOG_PRINT(WARNING, "Connecting in the reverse direction did not work either - for the following reason:");
-      to.MayConnectTo(*this, true);
+      std::string reason_string = "Could not connect ports '" + GetQualifiedName() + "' and '" + to.GetQualifiedName() + "' for the following reason: ";
+      MayConnectTo(to, &reason_string);
+      reason_string += "\nConnecting in the reverse direction did not work either: ";
+      to.MayConnectTo(*this, &reason_string);
+      FINROC_LOG_PRINT(WARNING, reason_string);
+      return;
     }
   }
 
   // connect
   tAbstractPort& source = (connect_direction == tConnectDirection::TO_TARGET) ? *this : to;
   tAbstractPort& target = (connect_direction == tConnectDirection::TO_TARGET) ? to : *this;
-  if (source.MayConnectTo(target, true))
+  std::string reason_string;
+  if (source.MayConnectTo(target, &reason_string))
   {
     FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Creating Edge from ", source.GetQualifiedName(), " to ", target.GetQualifiedName());
     source.ConnectImplementation(target, finstructed);
     source.ConnectionAdded(target, true);
     target.ConnectionAdded(source, false);
+  }
+  else
+  {
+    FINROC_LOG_PRINT(WARNING, "Could not connect ports '" + GetQualifiedName() + "' and '" + to.GetQualifiedName() + "' for the following reason:\n- ", reason_string);
   }
 }
 
@@ -512,31 +519,31 @@ tString tAbstractPort::MakeAbsoluteLink(const tString& rel_link) const
   return relative_to->GetQualifiedLink() + "/" + rel_link2;
 }
 
-bool tAbstractPort::MayConnectTo(tAbstractPort& target, bool warn_if_impossible) const
+bool tAbstractPort::MayConnectTo(tAbstractPort& target, std::string* reason_string) const
 {
+  if (!data_type.IsConvertibleTo(target.data_type))
+  {
+    if (reason_string)
+    {
+      (*reason_string) += "Data types are incompatible (source: '" + GetDataType().GetName() + "' and target: '" + target.GetDataType().GetName() + "').";
+    }
+    return false;
+  }
+
   if (!GetFlag(tFlag::EMITS_DATA))
   {
-    if (warn_if_impossible)
+    if (reason_string)
     {
-      FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because this (source) port does not emit data.");
+      (*reason_string) += "Port '" + this->GetQualifiedName() + "' does not emit data.";
     }
     return false;
   }
 
   if (!target.GetFlag(tFlag::ACCEPTS_DATA))
   {
-    if (warn_if_impossible)
+    if (reason_string)
     {
-      FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because it does not accept data.");
-    }
-    return false;
-  }
-
-  if (!data_type.IsConvertibleTo(target.data_type))
-  {
-    if (warn_if_impossible)
-    {
-      FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because data types are incompatible ('", GetDataType().GetName(), "' and '", target.GetDataType().GetName(), "').");
+      (*reason_string) += "Port '" + target.GetQualifiedName() + "' does not accept data.";
     }
     return false;
   }
@@ -551,9 +558,9 @@ bool tAbstractPort::MayConnectTo(tAbstractPort& target, bool warn_if_impossible)
   {
     if (!(*it)->AllowPortConnection(*this, target))
     {
-      if (warn_if_impossible)
+      if (reason_string)
       {
-        FINROC_LOG_PRINT_TO(edges, WARNING, "Cannot connect to target port '", target.GetQualifiedName(), "', because the following constraint disallows this: '", (*it)->Description(), "'");
+        (*reason_string) += std::string("The following constraint disallows connection: '") + (*it)->Description() + "'";
       }
       return false;
     }
