@@ -70,7 +70,7 @@ tRuntimeSettings* tRuntimeSettings::instance = NULL;
 bool tRuntimeSettings::duplicate_qualified_names_allowed = false;
 
 tRuntimeSettings::tRuntimeSettings() :
-  tFrameworkElement(&tRuntimeEnvironment::GetInstance(), "Settings")
+  tFrameworkElement(&tRuntimeEnvironment::GetInstance().GetElement(tSpecialRuntimeElement::RUNTIME_NODE), "Settings")
 {
 }
 

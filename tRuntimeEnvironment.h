@@ -40,6 +40,7 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include <map>
+#include <array>
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -63,6 +64,18 @@ namespace internal
 {
 class tLinkEdge;
 }
+
+/*!
+ * Enum to identify special runtime elements
+ */
+enum class tSpecialRuntimeElement : size_t
+{
+  RUNTIME_NODE,  //<! Subnode "/Runtime" for runtime ports (contains Services, Settings etc.)
+  SERVICES,      //<! Contains ports for services provided for the whole runtime ("/Runtime/Services")
+  SETTINGS,      //<! Contains ports for settings for the whole runtime ("/Runtime/Settings")
+  UNRELATED,     //<! Contains framework elements which do not have a parent specified ("/Unrelated")
+  DIMENSION      //<! End marker
+};
 
 //----------------------------------------------------------------------
 // Class declaration
@@ -151,6 +164,17 @@ public:
    * \return Pointer to framework element - or null if it has been deleted
    */
   tFrameworkElement* GetElement(tHandle handle);
+
+  /*!
+   * Get special framework elements (see enum)
+   *
+   * \param element Element to be obtained
+   * \return Framework element
+   */
+  tFrameworkElement& GetElement(tSpecialRuntimeElement element)
+  {
+    return *special_runtime_elements[static_cast<size_t>(element)];
+  }
 
   /*!
    * (IMPORTANT: This should not be called during static initialization)
@@ -245,8 +269,8 @@ private:
   /*! Command line arguments (used by parameters, for instance). Needs to be manually filled (usually in main()). */
   std::map<std::string, std::string> command_line_args;
 
-  /*! Framework element that contains all framework elements that have no parent specified */
-  tFrameworkElement* unrelated;
+  /*! Contains pointers to special framework elements (see tSpecialRuntimeElement enum) */
+  std::array<tFrameworkElement*, static_cast<size_t>(tSpecialRuntimeElement::DIMENSION)> special_runtime_elements;
 
 
   /*!

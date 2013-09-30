@@ -118,7 +118,7 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& n
   {
     if (!parent)
     {
-      parent = tRuntimeEnvironment::GetInstance().unrelated;
+      parent = &(tRuntimeEnvironment::GetInstance().GetElement(tSpecialRuntimeElement::UNRELATED));
     }
     parent->AddChild(primary);
   }
@@ -561,9 +561,25 @@ void tFrameworkElement::InitImplementation()
   {
     for (auto it = children->Begin(); it != children->End(); ++it)
     {
-      if ((*it)->IsPrimaryLink() && (!(*it)->GetChild().IsDeleted()))
+      tFrameworkElement& child = (*it)->GetChild();
+
+      // We only initialize the 'unrelated' element if it has children that are ready
+      if (&tRuntimeEnvironment::GetInstance().GetElement(tSpecialRuntimeElement::UNRELATED) == &child)
       {
-        (*it)->GetChild().InitImplementation();
+        bool any_ready = false;
+        for (auto unrelated_it = child.children->Begin(); unrelated_it != child.children->End(); ++unrelated_it)
+        {
+          any_ready |= (*unrelated_it)->GetChild().IsReady();
+        }
+        if (!any_ready)
+        {
+          continue;
+        }
+      }
+
+      if ((*it)->IsPrimaryLink() && (!child.IsDeleted()))
+      {
+        child.InitImplementation();
       }
     }
   }

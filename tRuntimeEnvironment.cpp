@@ -96,8 +96,9 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
   structure_mutex("Runtime Registry", static_cast<int>(tLockOrderLevel::RUNTIME_REGISTER)),
   creation_time(rrlib::time::Now()),
   command_line_args(),
-  unrelated(NULL)
+  special_runtime_elements()
 {
+  special_runtime_elements.fill(NULL);
   active = true;
 }
 
@@ -256,11 +257,12 @@ void tRuntimeEnvironment::InitialInit()
 
   instance_raw_ptr = &tRuntimeEnvironmentInstance::Instance(); // should be done before any ports/elements are added
 
-  // add uninitialized child
-  instance_raw_ptr->unrelated = new tFrameworkElement(instance_raw_ptr, "Unrelated");
-
-  //ConfigFile.init(conffile);
+  // add special runtime elements
+  instance_raw_ptr->special_runtime_elements[(size_t)tSpecialRuntimeElement::UNRELATED] = new tFrameworkElement(instance_raw_ptr, "Unrelated");
+  instance_raw_ptr->special_runtime_elements[(size_t)tSpecialRuntimeElement::RUNTIME_NODE] = new tFrameworkElement(instance_raw_ptr, "Runtime");
+  instance_raw_ptr->special_runtime_elements[(size_t)tSpecialRuntimeElement::SERVICES] = new tFrameworkElement(&instance_raw_ptr->GetElement(tSpecialRuntimeElement::RUNTIME_NODE), "Services");
   tRuntimeSettings::StaticInit();  // can be done now... or last
+  instance_raw_ptr->special_runtime_elements[(size_t)tSpecialRuntimeElement::SETTINGS] = &tRuntimeSettings::GetInstance();
   tFrameworkElement::InitAll();
 
   //Load plugins
