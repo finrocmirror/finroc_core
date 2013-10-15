@@ -248,7 +248,6 @@ void tRuntimeEnvironment::InitialInit()
   static rrlib::thread::tOrderedMutex init_mutex("tRuntimeEnvironment::InitialInit()", 0);
   tLock lock1(init_mutex);
   assert((!ShuttingDown()));
-  rrlib::rtti::tDataType<std::string>("String"); // Make sure std::string data type has name "String" - as in Java
 
   // Finish initializing static members of classes
   //tUnit::StaticInit();  // can safely be done first
