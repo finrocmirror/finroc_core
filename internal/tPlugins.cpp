@@ -70,7 +70,8 @@ namespace internal
 //----------------------------------------------------------------------
 tPlugins::tPlugins() :
   plugins(),
-  instantly_initialize_plugins(false)
+  instantly_initialize_plugins(false),
+  initialized_plugin_count(0)
 {}
 
 void tPlugins::AddPlugin(tPlugin& p)
@@ -95,6 +96,18 @@ tPlugins& tPlugins::GetInstance()
   return instance;
 }
 
+void tPlugins::InitializeNewPlugins()
+{
+  if (instantly_initialize_plugins)
+  {
+    for (size_t i = initialized_plugin_count; i < plugins.size(); i++)
+    {
+      plugins[i]->Init();
+    }
+    initialized_plugin_count = plugins.size();
+  }
+}
+
 void tPlugins::StaticInit()
 {
   tPlugins& p = GetInstance();
@@ -104,6 +117,7 @@ void tPlugins::StaticInit()
     p.plugins[i]->Init();
   }
   p.instantly_initialize_plugins = true;
+  p.initialized_plugin_count = p.plugins.size();
 }
 
 //----------------------------------------------------------------------

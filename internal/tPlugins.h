@@ -90,6 +90,11 @@ public:
   static tPlugins& GetInstance();
 
   /*!
+   * Initializes any plugins that have been registered since last initialization
+   */
+  void InitializeNewPlugins();
+
+  /*!
    * Loads plugins
    */
   static void StaticInit();
@@ -104,6 +109,9 @@ private:
 
   /*! Instantly initialize plugins when they are added? True after StaticInit() has been called */
   bool instantly_initialize_plugins;
+
+  /*! Number of plugins that were initialized */
+  size_t initialized_plugin_count;
 
 
   tPlugins();
