@@ -682,7 +682,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
     assert(!GetFlag(tFlag::DELETED));
     assert(((primary.GetParent() != NULL) | GetFlag(tFlag::RUNTIME)));
     tFlags new_flags = flags | tFlag::DELETED;
-    new_flags.RemoveFlag(tFlag::READY);
+    new_flags.Set(tFlag::READY, false);
     for (size_t i = 0; i < this->GetLinkCount(); i++)
     {
       this->GetLinkInternal(i)->name = &cDELETED_ELEMENT_STRING;
@@ -790,14 +790,7 @@ void tFrameworkElement::PublishUpdatedInfo(tRuntimeListener::tEvent change_type)
 void tFrameworkElement::SetFlag(tFlag flag, bool value)
 {
   assert(flag >= tFlag::READY);
-  if (value)
-  {
-    flags |= flag;
-  }
-  else
-  {
-    flags.RemoveFlag(flag);
-  }
+  flags.Set(flag, value);
 }
 
 void tFrameworkElement::SetName(const tString& name)

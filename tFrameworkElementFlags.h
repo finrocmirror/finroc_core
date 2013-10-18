@@ -39,6 +39,7 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include "rrlib/util/tEnumBasedFlags.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -129,84 +130,16 @@ enum class tFrameworkElementFlag
 
 static_assert(static_cast<uint>(tFrameworkElementFlag::PUSH_STRATEGY_REVERSE) < 32, "Too many flags");
 
-//----------------------------------------------------------------------
-// Class declaration
-//----------------------------------------------------------------------
-//! Set of 'tFrameworkElementFlag's
+
 /*!
  * Set of framework element flags.
- * As enums do not support OR operations, this type is used to handle combining of flags.
  */
-class tFrameworkElementFlags
+typedef rrlib::util::tEnumBasedFlags<tFrameworkElementFlag> tFrameworkElementFlags;
+
+
+constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlags& flags1, const tFrameworkElementFlags& flags2)
 {
-
-//----------------------------------------------------------------------
-// Public methods and typedefs
-//----------------------------------------------------------------------
-public:
-
-  constexpr tFrameworkElementFlags(tFrameworkElementFlag flag) :
-    wrapped(1 << static_cast<uint>(flag))
-  {}
-
-  constexpr tFrameworkElementFlags() :
-    wrapped(0)
-  {}
-
-  /*! It should only be necessary to call this for deserialization */
-  explicit constexpr tFrameworkElementFlags(uint flags) :
-    wrapped(flags)
-  {}
-
-  /*!
-   * \flag Flag to check
-   * \return Is specified flag currently set?
-   */
-  bool Get(tFrameworkElementFlag flag) const
-  {
-    return wrapped & (1 << static_cast<uint>(flag));
-  }
-
-  /*!
-   * \return Flags as raw integer value
-   */
-  uint Raw() const
-  {
-    return wrapped;
-  }
-
-  void RemoveFlag(tFrameworkElementFlag flag)
-  {
-    wrapped &= (~(1 << static_cast<uint>(flag)));
-  }
-
-
-  tFrameworkElementFlags& operator |= (const tFrameworkElementFlags& other)
-  {
-    wrapped |= other.wrapped;
-    return *this;
-  }
-
-//----------------------------------------------------------------------
-// Private fields and methods
-//----------------------------------------------------------------------
-private:
-
-  friend constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlags& flag1, const tFrameworkElementFlags& flag2);
-
-
-  /*! Wrapped integer containing flag set */
-  uint wrapped;
-};
-
-constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlags& flag1, const tFrameworkElementFlags& flag2)
-{
-  return tFrameworkElementFlags(flag1.wrapped | flag2.wrapped);
-}
-
-constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlag& flag1, const tFrameworkElementFlag& flag2)
-{
-  return tFrameworkElementFlags(tFrameworkElementFlags(flag1) | tFrameworkElementFlags(flag2));
+  return tFrameworkElementFlags(flags1.Raw() | flags2.Raw());
 }
 
 //----------------------------------------------------------------------
