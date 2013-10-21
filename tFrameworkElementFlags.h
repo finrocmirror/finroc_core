@@ -142,7 +142,7 @@ constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlags& flags
   return tFrameworkElementFlags(flags1.Raw() | flags2.Raw());
 }
 
-constexpr tFrameworkElementFlags operator | (tFrameworkElementFlag& flag1, tFrameworkElementFlag flag2)
+constexpr tFrameworkElementFlags operator | (tFrameworkElementFlag flag1, tFrameworkElementFlag flag2)
 {
   return tFrameworkElementFlags(flag1) | tFrameworkElementFlags(flag2);
 }
