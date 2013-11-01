@@ -449,6 +449,18 @@ public:
   static void InitAll();
 
   /*!
+   * Calling this method will cause this framework element to be initially shown/opened in tools such as
+   * finstruct and fingui. Their parents will be expanded in the tree view.
+   * In finstruct, the main view will be set to the element with the highest priority.
+   * If multiple elements have the same priority, the first one will be shown.
+   *
+   * The method may only be called prior to this framework element's initialization.
+   *
+   * @param priority Priority. Higher values mean higher priority. The main thread container of an application typically has "1"
+   */
+  void InitiallyShowInTools(int32_t priority = 1);
+
+  /*!
    * Is Runtime element a child of the specified Runtime element?
    * (also considers links)
    *

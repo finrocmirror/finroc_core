@@ -38,6 +38,7 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
+#include "core/tFrameworkElementTags.h"
 #include "core/tRuntimeEnvironment.h"
 #include "core/tRuntimeSettings.h"
 #include "core/internal/tGarbageDeleter.h"
@@ -541,6 +542,16 @@ void tFrameworkElement::Init()
 void tFrameworkElement::InitAll()
 {
   GetRuntime().Init();
+}
+
+void tFrameworkElement::InitiallyShowInTools(int32_t priority)
+{
+  if (IsReady())
+  {
+    FINROC_LOG_PRINT(ERROR, "Element already initialized. Ignoring.");
+    return;
+  }
+  tFrameworkElementTags::AddTag(*this, "initially show in tools:" + std::to_string(priority));
 }
 
 void tFrameworkElement::InitImplementation()
