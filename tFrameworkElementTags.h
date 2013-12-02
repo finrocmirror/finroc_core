@@ -76,7 +76,7 @@ class tFrameworkElement;
  * - "group"   Displayed and handled as composite component in finstruct
  * - "initially show in tools:<priority>"  This will cause framework element to be initially shown/opened in tools such as
  *                                         finstruct and fingui. Use tFrameworkElement::InitiallyShowInTools() to set this
- * - "hidden in tools"  Marks element that should not be hidden in tools by default, because they are not of interest to
+ * - "hidden in tools"  Marks element that should not be visible in tools by default, because they are not of interest to
  *                      application developers (e.g. TCP helper elements)
  * - "finstructable structure file: <file>"  Provides name of structure file for any finstructable groups
  */
@@ -117,7 +117,7 @@ public:
   static bool IsTagged(const tFrameworkElement& fe, const std::string& tag);
 
 
-  /*! "hidden in tools" - Tag that marks element that should not be hidden in tools by default */
+  /*! "hidden in tools" - Tag that marks element that should not be visible in tools by default */
   static const char* cHIDDEN_IN_TOOLS;
 
 //----------------------------------------------------------------------
