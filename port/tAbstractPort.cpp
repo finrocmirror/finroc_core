@@ -353,19 +353,24 @@ void tAbstractPort::DisconnectFrom(tAbstractPort& target)
 void tAbstractPort::DisconnectFrom(const tString& link)
 {
   rrlib::thread::tLock lock(GetStructureMutex());
-  for (auto it = link_edges->begin(); it != link_edges->end(); ++it)
+  if (link_edges)
   {
-    if ((*it)->GetSourceLink() == link || (*it)->GetTargetLink() == link)
+    for (size_t i = 0; i < link_edges->size(); i++)
     {
-      delete &(*it);
-      it = link_edges->erase(it);
+      internal::tLinkEdge& link_edge = *(*link_edges)[i];
+      if (link_edge.GetSourceLink() == link || link_edge.GetTargetLink() == link)
+      {
+        delete &link_edge;
+        link_edges->erase(link_edges->begin() + i);
+        i--;
+      }
     }
   }
 
   tAbstractPort* ap = GetRuntime().GetPort(link);
   if (ap)
   {
-    DisconnectFrom(*this);
+    DisconnectFrom(*ap);
   }
 }
 
