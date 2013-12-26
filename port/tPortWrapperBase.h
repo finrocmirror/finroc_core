@@ -80,7 +80,7 @@ class tPortWrapperBase
   class HasSet;
 
   template <typename T, typename A>
-  class SetBaseClass;
+  struct SetBaseClass;
 
 //----------------------------------------------------------------------
 // Public methods and typedefs
