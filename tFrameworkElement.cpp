@@ -286,13 +286,13 @@ void tFrameworkElement::DeleteChildren()
 
 tFrameworkElement* tFrameworkElement::GetChild(const tString& name) const
 {
-  for (auto it = ChildrenBegin(); it != ChildrenEnd(); ++it)
+  for (auto it = children->Begin(); it != children->End(); ++it)
   {
-    if (it->IsReady())
+    if ((*it)->GetChild().IsReady())
     {
-      if (it->GetName() == name)
+      if ((*it)->GetName() == name)
       {
-        return &(*it);
+        return &(*it)->GetChild();
       }
     }
     else
@@ -302,13 +302,13 @@ tFrameworkElement* tFrameworkElement::GetChild(const tString& name) const
       {
         return NULL;
       }
-      if (it->IsDeleted())
+      if ((*it)->GetChild().IsDeleted())
       {
         continue;
       }
-      if (it->GetName() == name)
+      if ((*it)->GetChild().GetName() == name)
       {
-        return &(*it);
+        return &(*it)->GetChild();
       }
     }
   }
