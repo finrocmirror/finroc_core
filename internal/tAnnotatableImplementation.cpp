@@ -32,8 +32,8 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
-#include "rrlib/rtti/rtti.h"
 #include "rrlib/thread/tThread.h"
+#include "rrlib/util/demangle.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -97,7 +97,7 @@ void tAnnotatableImplementation::AddAnnotation(tAnnotation& ann, const char* rtt
   {
     if (typeid(*current_annotation).name() == rtti_name)
     {
-      FINROC_LOG_PRINT(ERROR, "An annotation of type ", rrlib::rtti::Demangle(rtti_name), " was already added. Not adding another one.");
+      FINROC_LOG_PRINT(ERROR, "An annotation of type ", rrlib::util::Demangle(rtti_name), " was already added. Not adding another one.");
       return;
     }
     if (!current_annotation->next_annotation)
