@@ -198,11 +198,11 @@ private:
     delete static_cast<T*>(pointer);
   }
 
-  virtual void MainLoopCallback();
+  virtual void MainLoopCallback() override;
 
-  virtual void Run();
+  virtual void Run() override;
 
-  virtual void StopThread();
+  virtual void StopThread() override;
 };
 
 //----------------------------------------------------------------------

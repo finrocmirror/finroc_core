@@ -431,7 +431,7 @@ private:
    */
   tString MakeAbsoluteLink(const tString& rel_link) const;
 
-  virtual void PrepareDelete(); // TODO: add "override" when we use gcc 4.7
+  virtual void PrepareDelete() override;
 
 };
 
