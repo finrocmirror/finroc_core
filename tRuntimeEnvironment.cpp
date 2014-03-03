@@ -114,12 +114,12 @@ tRuntimeEnvironment::~tRuntimeEnvironment()
   // delete all children - (runtime settings last)
   for (auto it = this->ChildrenBegin(); it != this->ChildrenEnd(); ++it)
   {
-    if (&(*it) != &tRuntimeSettings::GetInstance())
+    if (&(*it) != &GetElement(tSpecialRuntimeElement::RUNTIME_NODE))
     {
       it->ManagedDelete();
     }
   }
-  tRuntimeSettings::GetInstance().ManagedDelete();
+  GetElement(tSpecialRuntimeElement::RUNTIME_NODE).ManagedDelete();
   instance_raw_ptr = NULL;
 }
 
