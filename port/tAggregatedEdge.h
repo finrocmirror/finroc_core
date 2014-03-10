@@ -86,11 +86,19 @@ struct tAggregatedEdge : public tAnnotatable
   /*! Usage statistics: Time when edge was created */
   rrlib::time::tTimestamp creation_time;
 
+#ifndef __clang__ // TODO: remove when 32-bit clang supports 64-bit atomic arithmetic 
+
   /*! Usage statistics: Number of published elements */
-  std::atomic<int64_t> publish_count;
+  std::atomic<uint64_t> publish_count;
 
   /*! Usage statistics: Size of published elements */
-  std::atomic<int64_t> publish_size;
+  std::atomic<uint64_t> publish_size;
+
+#else
+  std::atomic<size_t> publish_count;
+  std::atomic<size_t> publish_size;
+#endif
+
 
   /*!
    * \param src Source aggregator
