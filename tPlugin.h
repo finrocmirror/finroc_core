@@ -82,6 +82,8 @@ public:
     internal::tPlugins::GetInstance().AddPlugin(*this);
   }
 
+  virtual ~tPlugin() {}
+
 //----------------------------------------------------------------------
 // Private fields and methods
 //----------------------------------------------------------------------
