@@ -86,7 +86,7 @@ bool tRuntimeEnvironment::active = false;
 // tRuntimeEnvironment constructors
 //----------------------------------------------------------------------
 tRuntimeEnvironment::tRuntimeEnvironment() :
-  tFrameworkElement(NULL, "Runtime", tFlag::RUNTIME, static_cast<int>(tLockOrderLevel::RUNTIME_ROOT)),
+  tFrameworkElement(NULL, "Runtime", tFlag::RUNTIME),
   elements(),
   link_edges(),
   global_link_edges(),

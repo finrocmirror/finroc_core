@@ -60,7 +60,7 @@ namespace finroc
 //----------------------------------------------------------------------
 namespace runtime_construction
 {
-class tFinstructableGroup;
+class tFinstructable;
 }
 
 namespace core
@@ -355,7 +355,7 @@ private:
 
   friend class tPortConnectionConstraint;
   friend class tRuntimeEnvironment;
-  friend class runtime_construction::tFinstructableGroup; // for link edge access
+  friend class runtime_construction::tFinstructable; // for link edge access
 
   /*! Edges emerging from this port */
   tOutgoingConnectionSet outgoing_connections;

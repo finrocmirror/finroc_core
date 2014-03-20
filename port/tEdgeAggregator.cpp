@@ -69,7 +69,7 @@ namespace core
 // Implementation
 //----------------------------------------------------------------------
 tEdgeAggregator::tEdgeAggregator(tFrameworkElement* parent, const tString& name, tFlags flags) :
-  tFrameworkElement(parent, name, flags | tFlag::EDGE_AGGREGATOR, parent == NULL ? static_cast<int>(tLockOrderLevel::LEAF_GROUP) : -1),
+  tFrameworkElement(parent, name, flags | tFlag::EDGE_AGGREGATOR),
   emerging_edges()
 {
 }

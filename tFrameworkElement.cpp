@@ -95,7 +95,7 @@ public:
 
 }
 
-tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& name, tFlags flags, int lock_order) :
+tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& name, tFlags flags) :
   handle(flags.Get(tFlag::RUNTIME) ? 0 : tRuntimeEnvironment::GetInstance().RegisterElement(*this, flags.Get(tFlag::PORT))),
   primary(*this),
 #ifndef RRLIB_SINGLE_THREADED

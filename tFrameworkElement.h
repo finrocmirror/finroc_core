@@ -64,7 +64,7 @@ namespace finroc
 //----------------------------------------------------------------------
 namespace runtime_construction
 {
-class tFinstructableGroup;
+class tFinstructable;
 }
 
 namespace core
@@ -164,9 +164,8 @@ public:
    * \param parent Parent of framework element (can be NULL here and added to its parent via AddChild() before initialization)
    * \param name Name of framework element (will be shown in browser etc.). May be empty here and changed via SetName() before initialization.
    * \param flags Any flags for framework element. Constant flags can only be set in constructor.
-   * \param lock_order Custom value for lock order (needs to be larger than parent's) - will be auto-generated (one larger than parent's) if value is negative
    */
-  explicit tFrameworkElement(tFrameworkElement* parent = NULL, const tString& name = "", tFlags flags = tFlags(), int lock_order = -1);
+  explicit tFrameworkElement(tFrameworkElement* parent = NULL, const tString& name = "", tFlags flags = tFlags());
 
   /*!
    * Add Child to framework element
@@ -864,7 +863,7 @@ private:
 
   friend class tRuntimeEnvironment;
   friend class internal::tGarbageDeleter;
-  friend class runtime_construction::tFinstructableGroup;
+  friend class runtime_construction::tFinstructable;
 
   /*! Element's handle in local runtime environment */
   const tHandle handle;
