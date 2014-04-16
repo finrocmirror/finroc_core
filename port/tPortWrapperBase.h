@@ -343,12 +343,12 @@ public:
      * A static assertion is thrown if an argument of an invalid type is provided.
      */
     template <typename ARG1, typename ... TArgs>
-    explicit tConstructorArguments(const ARG1& argument1, const TArgs&... rest) :
+    explicit tConstructorArguments(ARG1&& argument1, TArgs&&... rest) :
       TParameterSet()
     {
       static_assert(!std::is_base_of<tPortWrapperBase, ARG1>::value, "Invalid port type for copy construction");
-      this->Set(argument1);
-      this->ProcessArguments(rest...);
+      this->Set(std::forward<ARG1>(argument1));
+      this->ProcessArguments(std::forward<TArgs>(rest)...);
     }
 
     /*!
@@ -358,10 +358,10 @@ public:
      * A static assertion is thrown if an argument of an invalid type is provided.
      */
     template <typename TArgument>
-    void Set(const TArgument& argument)
+    void Set(TArgument&& argument)
     {
       typedef typename SetBaseClass<TParameterSet, TArgument>::type tBase;
-      tBase::Set(argument);
+      tBase::Set(std::forward<TArgument>(argument));
     }
 
     //----------------------------------------------------------------------
@@ -373,10 +373,10 @@ public:
     void ProcessArguments() {}
 
     template <typename A, typename ... ARest>
-    void ProcessArguments(const A& argument1, const ARest&... rest)
+    void ProcessArguments(A&& argument1, ARest&&... rest)
     {
-      this->Set(argument1);
-      this->ProcessArguments(rest...);
+      this->Set(std::forward<A>(argument1));
+      this->ProcessArguments(std::forward<ARest>(rest)...);
     }
   };
 
