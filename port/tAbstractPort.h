@@ -269,6 +269,38 @@ public:
    */
   bool IsConnectedTo(tAbstractPort& target) const;
 
+  /*! Check if output ports have a data sink
+   *
+   * \return Is \a this port currently connected to an input port?
+   */
+  inline bool IsConnectedToInputPort() const
+  {
+    for (auto it = this->OutgoingConnectionsBegin(); it != this->OutgoingConnectionsEnd(); ++it)
+    {
+      if (it->IsInputPort() || it->IsConnectedToInputPort())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /*! Check if input ports have a data source
+   *
+   * \return Is \a this port currently connected to an output port?
+   */
+  inline bool IsConnectedToOutputPort() const
+  {
+    for (auto it = this->IncomingConnectionsBegin(); it != this->IncomingConnectionsEnd(); ++it)
+    {
+      if (it->IsOutputPort() || it->IsConnectedToOutputPort())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /*!
    * \return Is this an input port?
    */
