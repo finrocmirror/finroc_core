@@ -70,7 +70,8 @@ namespace core
 //----------------------------------------------------------------------
 tEdgeAggregator::tEdgeAggregator(tFrameworkElement* parent, const tString& name, tFlags flags) :
   tFrameworkElement(parent, name, flags | tFlag::EDGE_AGGREGATOR),
-  emerging_edges()
+  emerging_edges(),
+  incoming_edges()
 {
 }
 
@@ -97,6 +98,7 @@ void tEdgeAggregator::EdgeAdded(tEdgeAggregator& dest, bool data_flow_type)
   ae = new tAggregatedEdge(*this, dest);
   ae->GetCountVariable(data_flow_type) = 1;
   emerging_edges.Add(ae);
+  dest.incoming_edges.Add(ae);
 }
 
 void tEdgeAggregator::EdgeRemoved(tAbstractPort& source, tAbstractPort& target)
@@ -118,6 +120,7 @@ void tEdgeAggregator::EdgeRemoved(tEdgeAggregator& dest, bool data_flow_type)
     if (ae->control_flow_edge_count + ae->data_flow_edge_count == 0)
     {
       emerging_edges.Remove(ae);
+      dest.incoming_edges.Remove(ae);
       delete ae;
     }
     return;
