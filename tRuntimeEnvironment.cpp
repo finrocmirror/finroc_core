@@ -252,7 +252,9 @@ void tRuntimeEnvironment::InitialInit()
   // Finish initializing static members of classes
   //tUnit::StaticInit();  // can safely be done first
   //tConstant::StaticInit();  // needs to be done after unit
+#ifndef RRLIB_SINGLE_THREADED
   internal::tGarbageDeleter::CreateAndStartInstance();
+#endif
 
   instance_raw_ptr = &tRuntimeEnvironmentInstance::Instance(); // should be done before any ports/elements are added
 

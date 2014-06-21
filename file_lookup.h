@@ -37,7 +37,9 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#ifdef _LIB_RRLIB_XML_PRESENT_
 #include "rrlib/xml/tDocument.h"
+#endif
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -85,6 +87,7 @@ bool FinrocFileExists(const std::string& raw_filename);
  */
 std::string GetFinrocFile(const std::string& raw_filename);
 
+#ifdef _LIB_RRLIB_XML_PRESENT_
 /*!
  * Open XML document in finroc repository.
  * (when dealing with archives, this can be more efficient than getFinrocFile which might create a temp file)
@@ -97,6 +100,7 @@ std::string GetFinrocFile(const std::string& raw_filename);
  * \throws std::runtime_error If file cannot be founde
  */
 rrlib::xml::tDocument GetFinrocXMLDocument(const std::string& raw_filename, bool validate);
+#endif
 
 /*!
  * Determine where to save file to.

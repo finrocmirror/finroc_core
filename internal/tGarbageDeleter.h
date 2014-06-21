@@ -94,6 +94,8 @@ class tGarbageDeleter : public rrlib::thread::tLoopThread
 //----------------------------------------------------------------------
 public:
 
+#ifndef RRLIB_SINGLE_THREADED
+
   typedef void (*tRegularTask)();
 
   /*!
@@ -107,6 +109,8 @@ public:
    */
   static void CreateAndStartInstance();
 
+#endif
+
   /*!
    * Delete object deferred
    * (call blocks to this method blocks => not suitable for RT code)
@@ -116,10 +120,14 @@ public:
   template <typename T>
   static void DeleteDeferred(T* object_to_delete)
   {
+#ifndef RRLIB_SINGLE_THREADED
     if (object_to_delete)
     {
       DeleteDeferredImplementation(object_to_delete, &DeleterFunction<T>);
     }
+#else
+    delete object_to_delete;
+#endif
   }
 
   static const char* GetLogDescription()
@@ -131,6 +139,8 @@ public:
 // Private fields and methods
 //----------------------------------------------------------------------
 private:
+
+#ifndef RRLIB_SINGLE_THREADED
 
   /*!
    * Garbage Collector task
@@ -203,6 +213,7 @@ private:
   virtual void Run() override;
 
   virtual void StopThread() override;
+#endif
 };
 
 //----------------------------------------------------------------------

@@ -62,6 +62,8 @@ namespace internal
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
 
+#ifndef RRLIB_SINGLE_THREADED
+
 //----------------------------------------------------------------------
 // Const values
 //----------------------------------------------------------------------
@@ -92,7 +94,6 @@ static std::atomic<int> started(cNO);
  * We use the pointer to the thread instead of thread id, because it is still valid after thread has been deleted
  */
 static std::atomic<rrlib::thread::tThread*> deleter_thread(0);
-
 
 tGarbageDeleter::tGarbageDeleter() :
   tLoopThread(cCYCLE_TIME, false),
@@ -263,6 +264,8 @@ void tGarbageDeleter::StopThread()
   instance = NULL;
   rrlib::buffer_pools::tGarbageFromDeletedBufferPools::DeleteGarbage();
 }
+
+#endif
 
 //----------------------------------------------------------------------
 // End of namespace declaration

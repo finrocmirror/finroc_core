@@ -181,6 +181,7 @@ std::string GetFinrocFileToSaveTo(const std::string& raw_filename)
   return "";
 }
 
+#ifdef _LIB_RRLIB_XML_PRESENT_
 rrlib::xml::tDocument GetFinrocXMLDocument(const std::string& raw_filename, bool validate)
 {
   std::string file = GetFinrocFile(raw_filename);
@@ -190,6 +191,7 @@ rrlib::xml::tDocument GetFinrocXMLDocument(const std::string& raw_filename, bool
   }
   return rrlib::xml::tDocument(file, validate);
 }
+#endif
 
 //----------------------------------------------------------------------
 // End of namespace declaration
