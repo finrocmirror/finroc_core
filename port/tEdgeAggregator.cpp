@@ -161,8 +161,8 @@ void tEdgeAggregator::UpdateEdgeStatistics(tAbstractPort& source, tAbstractPort&
   assert(src && dest);
   tAggregatedEdge* ar = src->FindAggregatedEdge(*dest);
   assert(ar);
-  ar->publish_count += 1;
-  ar->publish_size += estimated_data_size;
+  ar->publish_count.fetch_add(1);
+  ar->publish_size.fetch_add(estimated_data_size);
 }
 
 //----------------------------------------------------------------------
