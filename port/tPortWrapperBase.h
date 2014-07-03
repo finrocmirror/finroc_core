@@ -333,7 +333,8 @@ public:
     //----------------------------------------------------------------------
   public:
 
-    tConstructorArguments();
+    tConstructorArguments()
+    {}
 
     /*!
      * Constructor takes variadic argument list... just any properties to be
