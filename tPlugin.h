@@ -76,13 +76,24 @@ public:
 
   /*!
    * Constructor registers plugin at tPlugins
+   *
+   * \param name Unique name of plugin. On Linux platforms, it should be identical with repository and .so file names (e.g. "tcp" for finroc_plugins_tcp and libfinroc_plugins_tcp.so).
    */
-  tPlugin()
+  tPlugin(const char* name) :
+    name(name)
   {
     internal::tPlugins::GetInstance().AddPlugin(*this);
   }
 
   virtual ~tPlugin() {}
+
+  /*!
+   * \return Unique name of plugin
+   */
+  inline const char* GetName()
+  {
+    return name;
+  }
 
 //----------------------------------------------------------------------
 // Private fields and methods
@@ -90,6 +101,13 @@ public:
 private:
 
   friend class internal::tPlugins;
+
+  /*!
+   * Unique name of plugin.
+   * On Linux platforms, it should be identical with repository and .so file names
+   * (e.g. "tcp" for finroc_plugins_tcp and libfinroc_plugins_tcp.so).
+   */
+  const char* name;
 
   /*!
    * This method is called once at initialization.

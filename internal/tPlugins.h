@@ -78,13 +78,6 @@ class tPlugins : private rrlib::util::tNoncopyable
 public:
 
   /*!
-   * (possibly manually) add plugin
-   *
-   * \param p Plugin to add
-   */
-  void AddPlugin(tPlugin& p);
-
-  /*!
    * \return Plugins singleton instance
    */
   static tPlugins& GetInstance();
@@ -95,6 +88,11 @@ public:
   void InitializeNewPlugins();
 
   /*!
+   * Has a plugin with the specified name been loaded (== constructed)?
+   */
+  bool IsPluginLoaded(const std::string& plugin_name);
+
+  /*!
    * Loads plugins
    */
   static void StaticInit();
@@ -103,6 +101,8 @@ public:
 // Private fields and methods
 //----------------------------------------------------------------------
 private:
+
+  friend class finroc::core::tPlugin;
 
   /*! All Plugins that are currently available */
   std::vector<tPlugin*> plugins;
@@ -116,7 +116,12 @@ private:
 
   tPlugins();
 
-  void FindAndLoadPlugins();
+  /*!
+   * Add plugin
+   *
+   * \param p Plugin to add
+   */
+  void AddPlugin(tPlugin& p);
 
   inline static const char* GetLogDescription()
   {

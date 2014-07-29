@@ -78,16 +78,11 @@ void tPlugins::AddPlugin(tPlugin& p)
 {
   plugins.push_back(&p);
 
-  // TODO: This does not work - because plugin is not fully constructed yet
+  // This does not work - because plugin is not fully constructed yet
   /*if (instantly_initialize_plugins)
   {
     p->Init();
   }*/
-}
-
-void tPlugins::FindAndLoadPlugins()
-{
-  //TODO implement: dynamic loading of all available finroc plugin .so files
 }
 
 tPlugins& tPlugins::GetInstance()
@@ -108,10 +103,21 @@ void tPlugins::InitializeNewPlugins()
   }
 }
 
+bool tPlugins::IsPluginLoaded(const std::string& plugin_name)
+{
+  for (tPlugin * plugin : plugins)
+  {
+    if (plugin_name == plugin->GetName())
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 void tPlugins::StaticInit()
 {
   tPlugins& p = GetInstance();
-  p.FindAndLoadPlugins();
   for (size_t i = 0; i < p.plugins.size(); i++)
   {
     p.plugins[i]->Init();
