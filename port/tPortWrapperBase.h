@@ -303,13 +303,13 @@ public:
 
   // using this operator, it can be checked conveniently in PortListener's PortChanged()
   // whether origin port is the same port as this object wraps
-  bool operator ==(const tAbstractPort* p) const
+  bool operator ==(const tAbstractPort& p) const
   {
-    return wrapped == p;
+    return wrapped == &p;
   }
-  bool operator !=(const tAbstractPort* p) const
+  bool operator !=(const tAbstractPort& p) const
   {
-    return wrapped != p;
+    return wrapped != &p;
   }
   bool operator ==(const tPortWrapperBase& p) const
   {
