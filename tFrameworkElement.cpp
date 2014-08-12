@@ -73,6 +73,9 @@ constexpr tFrameworkElementFlags tFrameworkElement::cSTATUS_FLAGS;
 const std::string cUNNAMED_ELEMENT_STRING("(Unnamed Framework Element)");
 const std::string cDELETED_ELEMENT_STRING("(Deleted Framework Element)");
 
+/*! Maximum depth of framework element hierarchy (introduced so that accidental recursive instantiation does not lead to infinite loops and application hangups) */
+const size_t MAX_HIERARCHY_DEPTH = 100;
+
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
@@ -166,6 +169,20 @@ void tFrameworkElement::AddChild(tLink& child)
   {
     FINROC_LOG_PRINT(ERROR, "Attempt to add element as a child of itself");
     return;
+  }
+
+  // Basic check for hierarchy depth (sufficient to detect common programming errors)
+  size_t parent_count = 0;
+  tFrameworkElement* parent = this;
+  while (parent)
+  {
+    parent_count++;
+    parent = parent->GetParent();
+  }
+  if (parent_count > MAX_HIERARCHY_DEPTH)
+  {
+    FINROC_LOG_PRINT(ERROR, "Maximum framework element hierarchy depth (", MAX_HIERARCHY_DEPTH, ") exceeded. This is typically a programming error (e.g. infinite recursive instantiation).");
+    abort();
   }
 
   // lock runtime (required to perform structural changes)
