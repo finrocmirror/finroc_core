@@ -137,12 +137,12 @@ static_assert(static_cast<uint>(tFrameworkElementFlag::PUSH_STRATEGY_REVERSE) < 
 typedef rrlib::util::tEnumBasedFlags<tFrameworkElementFlag> tFrameworkElementFlags;
 
 
-constexpr tFrameworkElementFlags operator | (const tFrameworkElementFlags& flags1, const tFrameworkElementFlags& flags2)
+constexpr inline tFrameworkElementFlags operator | (const tFrameworkElementFlags& flags1, const tFrameworkElementFlags& flags2)
 {
   return tFrameworkElementFlags(flags1.Raw() | flags2.Raw());
 }
 
-constexpr tFrameworkElementFlags operator | (tFrameworkElementFlag flag1, tFrameworkElementFlag flag2)
+constexpr inline tFrameworkElementFlags operator | (tFrameworkElementFlag flag1, tFrameworkElementFlag flag2)
 {
   return tFrameworkElementFlags(flag1) | tFrameworkElementFlags(flag2);
 }

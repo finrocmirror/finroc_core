@@ -56,26 +56,38 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
+enum class tFileType
+{
+  ANY,
+  REGULAR,
+  DIRECTORY,
+  CHARACTER_DEVICE,
+  BLOCK_DEVICE,
+  FIFO_PIPE,
+  SOCKET
+};
 
 //----------------------------------------------------------------------
 // Function declarations
 //----------------------------------------------------------------------
 
 /*!
- * Does a file with the specified name exist?
+ * Does a file with the specified name and type exist?
  *
  * \param filename File name
+ * \param type File type (for symbolic links, checks their destination)
  * \return Answer
  */
-bool FileExists(const std::string& filename);
+bool FileExists(const std::string& filename, tFileType type = tFileType::ANY);
 
 /*!
- * Does file with specified name exist in finroc repository?
+ * Does file with specified name and type exist in finroc repository?
  *
  * \param raw_filename Raw file name
+ * \param type File type (for symbolic links, checks their destination)
  * \return Answer (true, when GetFinrocFile(raw_filename).Length() > 0 - but possibly more efficient)
  */
-bool FinrocFileExists(const std::string& raw_filename);
+bool FinrocFileExists(const std::string& raw_filename, tFileType type = tFileType::ANY);
 
 /*!
  * Lookup file in finroc repository.
@@ -83,9 +95,10 @@ bool FinrocFileExists(const std::string& raw_filename);
  * Searches in $FINROC_PROJECT_HOME, $FINROC_HOME, $FINROC_HOME/sources/cpp, current path, system installation (in this order).
  *
  * \param raw_filename Raw file name
+ * \param type File type (for symbolic links, checks their destination)
  * \return Filename to open (can possibly be temp file somewhere). "" if no file was found.
  */
-std::string GetFinrocFile(const std::string& raw_filename);
+std::string GetFinrocFile(const std::string& raw_filename, tFileType type = tFileType::ANY);
 
 #ifdef _LIB_RRLIB_XML_PRESENT_
 /*!
@@ -103,9 +116,9 @@ rrlib::xml::tDocument GetFinrocXMLDocument(const std::string& raw_filename, bool
 #endif
 
 /*!
- * Determine where to save file to.
+ * Determine where to save (regular) file to.
  * If a suitable file already exists, it is returned (and typically overwritten).
- * Otherwise the most suitable location is returned (paths should alredy exist).
+ * Otherwise the most suitable location is returned (paths should already exist).
  * Locations are considered in this order: $FINROC_PROJECT_HOME, $FINROC_HOME, $FINROC_HOME/sources/cpp, current path.
  * If rawFilename has no path, either $FINROC_PROJECT_HOME is returned if set - otherwise the current path.
  *
