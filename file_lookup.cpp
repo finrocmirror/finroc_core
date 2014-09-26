@@ -159,6 +159,10 @@ std::string GetFinrocFile(const std::string& raw_filename)
 
 std::string GetFinrocFileToSaveTo(const std::string& raw_filename)
 {
+  if (raw_filename.length() == 0)
+  {
+    return "";
+  }
   std::string file = GetFinrocFile(raw_filename);
   if (file.length() > 0)
   {
@@ -169,6 +173,10 @@ std::string GetFinrocFileToSaveTo(const std::string& raw_filename)
     return (internal::project_home_string.length() > 0 ? (internal::project_home_string + raw_filename) : (internal::cwd + raw_filename));
   }
   std::string rawpath = raw_filename.substr(0, raw_filename.rfind('/'));
+  if (raw_filename[0] == '/' && FileExists(rawpath) && internal::IsDirectory(rawpath))
+  {
+    return raw_filename;
+  }
   for (size_t i = 0; i < internal::paths_to_check.size(); i++)
   {
     std::string name = internal::paths_to_check[i] + rawpath;
