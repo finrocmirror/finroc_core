@@ -32,7 +32,7 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
-#include <sys/stat.h> // for IsDirectory()
+#include <sys/stat.h> // for stat() function
 #include <unistd.h>
 #include <limits.h>
 
@@ -109,34 +109,45 @@ std::vector<std::string> GetPathsToCheck()
   return paths;
 }
 
-bool IsDirectory(std::string directory_name)
-{
-  struct stat directory_stat;
-  if (stat(directory_name.c_str(), &directory_stat))
-  {
-    return false;
-  }
-  return S_ISDIR(directory_stat.st_mode);
-}
-
 /*! Paths in which to search for finroc files */
 static std::vector<std::string> paths_to_check = GetPathsToCheck();
 
 } // namespace
 
 
-bool FileExists(const std::string& filename)
+bool FileExists(const std::string& filename, tFileType type)
 {
-  std::ifstream file_stream(filename);
-  return file_stream.good();
+  struct stat file_stat;
+  if (stat(filename.c_str(), &file_stat))
+  {
+    return false;
+  }
+  switch (type)
+  {
+  case tFileType::ANY:
+    return true;
+  case tFileType::REGULAR:
+    return S_ISREG(file_stat.st_mode);
+  case tFileType::DIRECTORY:
+    return S_ISDIR(file_stat.st_mode);
+  case tFileType::CHARACTER_DEVICE:
+    return S_ISCHR(file_stat.st_mode);
+  case tFileType::BLOCK_DEVICE:
+    return S_ISBLK(file_stat.st_mode);
+  case tFileType::FIFO_PIPE:
+    return S_ISFIFO(file_stat.st_mode);
+  case tFileType::SOCKET:
+    return S_ISSOCK(file_stat.st_mode);
+  }
+  return false;
 }
 
-bool FinrocFileExists(const std::string& raw_filename)
+bool FinrocFileExists(const std::string& raw_filename, tFileType type)
 {
-  return GetFinrocFile(raw_filename).length() > 0;
+  return GetFinrocFile(raw_filename, type).length() > 0;
 }
 
-std::string GetFinrocFile(const std::string& raw_filename)
+std::string GetFinrocFile(const std::string& raw_filename, tFileType type)
 {
   if (raw_filename.length() == 0)
   {
@@ -144,12 +155,12 @@ std::string GetFinrocFile(const std::string& raw_filename)
   }
   if (raw_filename[0] == '/')
   {
-    return FileExists(raw_filename) ? raw_filename : std::string();
+    return FileExists(raw_filename, type) ? raw_filename : std::string();
   }
   for (size_t i = 0; i < internal::paths_to_check.size(); i++)
   {
     std::string name = internal::paths_to_check[i] + raw_filename;
-    if (FileExists(name))
+    if (FileExists(name, type))
     {
       return name;
     }
@@ -159,7 +170,11 @@ std::string GetFinrocFile(const std::string& raw_filename)
 
 std::string GetFinrocFileToSaveTo(const std::string& raw_filename)
 {
-  std::string file = GetFinrocFile(raw_filename);
+  if (raw_filename.length() == 0)
+  {
+    return "";
+  }
+  std::string file = GetFinrocFile(raw_filename, tFileType::REGULAR);
   if (file.length() > 0)
   {
     return file;
@@ -169,10 +184,14 @@ std::string GetFinrocFileToSaveTo(const std::string& raw_filename)
     return (internal::project_home_string.length() > 0 ? (internal::project_home_string + raw_filename) : (internal::cwd + raw_filename));
   }
   std::string rawpath = raw_filename.substr(0, raw_filename.rfind('/'));
+  if (raw_filename[0] == '/' && (rawpath.length() == 0 || FileExists(rawpath, tFileType::DIRECTORY)))
+  {
+    return raw_filename;
+  }
   for (size_t i = 0; i < internal::paths_to_check.size(); i++)
   {
     std::string name = internal::paths_to_check[i] + rawpath;
-    if (FileExists(name) && internal::IsDirectory(name))
+    if (FileExists(name, tFileType::DIRECTORY))
     {
       return internal::paths_to_check[i] + raw_filename;
     }
@@ -184,7 +203,7 @@ std::string GetFinrocFileToSaveTo(const std::string& raw_filename)
 #ifdef _LIB_RRLIB_XML_PRESENT_
 rrlib::xml::tDocument GetFinrocXMLDocument(const std::string& raw_filename, bool validate)
 {
-  std::string file = GetFinrocFile(raw_filename);
+  std::string file = GetFinrocFile(raw_filename, tFileType::REGULAR);
   if (file.length() == 0)
   {
     throw rrlib::xml::tException("File not found");
