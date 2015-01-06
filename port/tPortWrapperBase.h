@@ -172,6 +172,46 @@ public:
   }
 
   /*!
+   * Disconnects all edges
+   *
+   * \param incoming disconnect incoming edges?
+   * \param outgoing disconnect outgoing edges?
+   */
+  void DisconnectAll(bool incoming = true, bool outgoing = true)
+  {
+    if (wrapped)
+    {
+      wrapped->DisconnectAll(incoming, outgoing);
+    }
+  }
+
+  /*!
+   * Disconnect from specified port
+   *
+   * \param partner_port Port to disconnect from
+   */
+  void DisconnectFrom(const tPortWrapperBase& partner_port)
+  {
+    if (wrapped)
+    {
+      wrapped->DisconnectFrom(*partner_port.GetWrapped());
+    }
+  }
+
+  /*!
+   * Disconnect from port with specified link (removes link edges
+   *
+   * \param link Qualified link of connection partner
+   */
+  void DisconnectFrom(const tString& link)
+  {
+    if (wrapped)
+    {
+      wrapped->DisconnectFrom(link);
+    }
+  }
+
+  /*!
    * Obtain annotation of specified type attached to this object
    *
    * \tparam TAnnotation Annotation type (with which annotation was added)
