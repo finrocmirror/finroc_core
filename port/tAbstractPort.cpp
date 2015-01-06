@@ -204,8 +204,8 @@ void tAbstractPort::ConnectTo(tAbstractPort& to, tConnectDirection connect_direc
   {
     FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Creating Edge from ", source.GetQualifiedName(), " to ", target.GetQualifiedName());
     source.ConnectImplementation(target, finstructed);
-    source.ConnectionAdded(target, true);
-    target.ConnectionAdded(source, false);
+    source.OnConnect(target, true);
+    target.OnConnect(source, false);
   }
   else
   {
@@ -388,8 +388,8 @@ void tAbstractPort::DisconnectImplementation(tAbstractPort& source, tAbstractPor
     vec.erase(std::remove(vec.begin(), vec.end(), &destination), vec.end());
   }
 
-  destination.ConnectionRemoved(source, false);
-  source.ConnectionRemoved(destination, true);
+  destination.OnDisconnect(source, false);
+  source.OnDisconnect(destination, true);
 
   source.PublishUpdatedEdgeInfo(tRuntimeListener::tEvent::REMOVE, destination);
 }

@@ -95,7 +95,7 @@ void tPortGroup::ConnectImpl(tPortGroup* other_group, const std::string& group_l
     count--;
     name = name.substr(port_prefix.length());
 
-    // connect-function specific part
+    // connect-function-specific part
     if (other_group)
     {
       tFrameworkElement* other_child_port = other_group->GetChild(other_port_prefix + name);
@@ -113,7 +113,7 @@ void tPortGroup::ConnectImpl(tPortGroup* other_group, const std::string& group_l
     {
       child_port.ConnectTo(group_link + "/" + other_port_prefix + name);
     }
-    // connect-function specific part end
+    // connect-function-specific part end
   }
   if (start_with)
   {

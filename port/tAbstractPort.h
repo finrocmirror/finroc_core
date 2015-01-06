@@ -333,6 +333,16 @@ public:
   bool MayConnectTo(tAbstractPort& target, std::string* reason_string = NULL) const;
 
   /*!
+   * Notify port of possibly temporary network connection loss.
+   * If port's DEFAULT_ON_DISCONNECT flag is set, the port value is set to its default (typically safe state).
+   * This method is typically called by network transport plugins (only).
+   */
+  void NotifyOfNetworkConnectionLoss()
+  {
+    OnNetworkConnectionLoss();
+  }
+
+  /*!
    * \return An iterator to iterate over all ports that this port has outgoing connections to
    *
    * Typically used in this way (port is a tAbstractPort reference):
@@ -418,30 +428,6 @@ private:
   void ConnectImplementation(tAbstractPort& target, bool finstructed);
 
   /*!
-   * Called whenever a new connection to or from this port is established
-   * (meant to be overridden by subclasses)
-   * (called with runtime-registry lock)
-   *
-   * \param partner Port at other end of connection
-   * \param partner_is_destination Is partner port destination port? (otherwise it's the source port)
-   */
-  virtual void ConnectionAdded(tAbstractPort& partner, bool partner_is_destination)
-  {
-  }
-
-  /*!
-   * Called whenever a new connection to or from this port is removed
-   * (meant to be overridden by subclasses)
-   * (called with runtime-registry lock)
-   *
-   * \param partner Port at other end of connection
-   * \param partner_is_destination Is partner port destination port? (otherwise it's the source port)
-   */
-  virtual void ConnectionRemoved(tAbstractPort& partner, bool partner_is_destination)
-  {
-  }
-
-  /*!
    * Implementation of actual removement of edge (updates internal variables etc.)
    *
    * \param source Source Port
@@ -462,6 +448,39 @@ private:
    * \return absolute link
    */
   tString MakeAbsoluteLink(const tString& rel_link) const;
+
+  /*!
+   * Called whenever a new connection to or from this port is established.
+   * (meant to be overridden by subclasses)
+   * (called with runtime-registry lock)
+   *
+   * \param partner Port at other end of connection
+   * \param partner_is_destination Is partner port destination port? (otherwise it's the source port)
+   */
+  virtual void OnConnect(tAbstractPort& partner, bool partner_is_destination)
+  {
+  }
+
+  /*!
+   * Called whenever a connection to or from this port is removed or lost.
+   * (meant to be overridden by subclasses)
+   * (called with runtime-registry lock)
+   *
+   * \param partner Port at other end of connection
+   * \param partner_is_destination Is partner port destination port? (otherwise it's the source port)
+   */
+  virtual void OnDisconnect(tAbstractPort& partner, bool partner_is_destination)
+  {
+  }
+
+  /*!
+   * Called whenever port is notified of possibly temporary network connection loss.
+   * (meant to be overridden by subclasses)
+   * (see NotifyOfNetworkConnectionLoss())
+   */
+  virtual void OnNetworkConnectionLoss()
+  {
+  }
 
   virtual void PrepareDelete() override;
 
