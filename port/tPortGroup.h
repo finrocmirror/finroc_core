@@ -105,9 +105,9 @@ public:
    * \param start_with Port to start connecting with (NULL = first port)
    * \param count Number of ports to connect - starting with start port (-1 = all ports)
    * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
-   * \param other_port_prefix Prefix of ports in other group to ignore. This is prepended when ports are created.
+   * \param destination_port_prefix Prefix of ports in destination group to ignore. This is prepended when ports are created.
    */
-  void ConnectImpl(tPortGroup* other_group, const std::string& group_link, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const std::string& port_prefix = "", const std::string& other_port_prefix = "");
+  void ConnectImpl(tPortGroup* other_group, const std::string& group_link, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const std::string& port_prefix = "", const std::string& destination_port_prefix = "");
 
   /*!
    * Connects all ports to ports with the same name in other port group.
@@ -117,15 +117,15 @@ public:
    * \param start_with Port to start connecting with (NULL = first port)
    * \param count Number of ports to connect - starting with start port (-1 = all ports)
    * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
-   * \param source_port_prefix Prefix of ports in other group to ignore. This is prepended when ports are created.
+   * \param destination_port_prefix Prefix of ports in destination group to ignore. This is prepended when ports are created.
    */
-  void ConnectByName(tPortGroup& other_group, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const std::string& port_prefix = "", const std::string& source_port_prefix = "")
+  void ConnectByName(tPortGroup& other_group, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const std::string& port_prefix = "", const std::string& destination_port_prefix = "")
   {
-    ConnectImpl(&other_group, "", create_missing_ports, start_with, count, port_prefix, source_port_prefix);
+    ConnectImpl(&other_group, "", create_missing_ports, start_with, count, port_prefix, destination_port_prefix);
   }
-  void ConnectByName(tPortGroup& other_group, bool create_missing_ports, tPortWrapperBase start_with, int count = -1, const std::string& port_prefix = "", const std::string& source_port_prefix = "")
+  void ConnectByName(tPortGroup& other_group, bool create_missing_ports, tPortWrapperBase start_with, int count = -1, const std::string& port_prefix = "", const std::string& destination_port_prefix = "")
   {
-    ConnectByName(other_group, create_missing_ports, start_with.GetWrapped(), count, port_prefix, source_port_prefix);
+    ConnectByName(other_group, create_missing_ports, start_with.GetWrapped(), count, port_prefix, destination_port_prefix);
   }
 
   /*!
@@ -136,15 +136,15 @@ public:
    * \param start_with Port to start connecting with (NULL = first port)
    * \param count Number of ports to connect - starting with start port (-1 = all ports)
    * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
-   * \param source_port_prefix Prefix of ports in other group to ignore. This is prepended when ports are created.
+   * \param destination_port_prefix Prefix of ports in destination group to ignore. This is prepended when ports are created.
    */
-  void ConnectByName(const std::string& group_link, tAbstractPort* start_with = NULL, int count = -1, const std::string& port_prefix = "", const std::string& source_port_prefix = "")
+  void ConnectByName(const std::string& group_link, tAbstractPort* start_with = NULL, int count = -1, const std::string& port_prefix = "", const std::string& destination_port_prefix = "")
   {
-    ConnectImpl(NULL, group_link, false, start_with, count, port_prefix, source_port_prefix);
+    ConnectImpl(NULL, group_link, false, start_with, count, port_prefix, destination_port_prefix);
   }
-  void ConnectByName(const std::string& group_link, tPortWrapperBase start_with, int count = -1, const std::string& port_prefix = "", const std::string& source_port_prefix = "")
+  void ConnectByName(const std::string& group_link, tPortWrapperBase start_with, int count = -1, const std::string& port_prefix = "", const std::string& destination_port_prefix = "")
   {
-    ConnectByName(group_link, start_with.GetWrapped(), count, port_prefix, source_port_prefix);
+    ConnectByName(group_link, start_with.GetWrapped(), count, port_prefix, destination_port_prefix);
   }
 
   /*!
