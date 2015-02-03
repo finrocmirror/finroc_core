@@ -105,7 +105,7 @@ public:
    * \param start_with Port to start connecting with (NULL = first port)
    * \param count Number of ports to connect - starting with start port (-1 = all ports)
    * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
-   * \param other_port_prefix Prefix of ports in source group to ignore. This is prepended when ports are created.
+   * \param other_port_prefix Prefix of ports in other group to ignore. This is prepended when ports are created.
    */
   void ConnectImpl(tPortGroup* other_group, const std::string& group_link, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const std::string& port_prefix = "", const std::string& other_port_prefix = "");
 
@@ -117,7 +117,7 @@ public:
    * \param start_with Port to start connecting with (NULL = first port)
    * \param count Number of ports to connect - starting with start port (-1 = all ports)
    * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
-   * \param source_port_prefix Prefix of ports in source group to ignore. This is prepended when ports are created.
+   * \param source_port_prefix Prefix of ports in other group to ignore. This is prepended when ports are created.
    */
   void ConnectByName(tPortGroup& other_group, bool create_missing_ports, tAbstractPort* start_with = NULL, int count = -1, const std::string& port_prefix = "", const std::string& source_port_prefix = "")
   {
@@ -136,7 +136,7 @@ public:
    * \param start_with Port to start connecting with (NULL = first port)
    * \param count Number of ports to connect - starting with start port (-1 = all ports)
    * \param port_prefix Prefix of ports in this group. Prefix is cut off when comparing names. Ports without this prefix are skipped.
-   * \param source_port_prefix Prefix of ports in source group to ignore. This is prepended when ports are created.
+   * \param source_port_prefix Prefix of ports in other group to ignore. This is prepended when ports are created.
    */
   void ConnectByName(const std::string& group_link, tAbstractPort* start_with = NULL, int count = -1, const std::string& port_prefix = "", const std::string& source_port_prefix = "")
   {
