@@ -132,7 +132,10 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& n
 
 tFrameworkElement::~tFrameworkElement()
 {
-  assert((GetFlag(tFlag::DELETED) || GetFlag(tFlag::RUNTIME)) && "Framework element was not deleted with ManagedDelete()");
+  if (!(GetFlag(tFlag::DELETED) || GetFlag(tFlag::RUNTIME)))
+  {
+    throw rrlib::util::tTraceableException<std::runtime_error>("Framework element '" + GetName() + "' was not deleted with ManagedDelete()");
+  }
   FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "FrameworkElement destructor (" , this, ")");
   if (!GetFlag(tFlag::RUNTIME))
   {
