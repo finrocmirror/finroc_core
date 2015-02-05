@@ -77,7 +77,7 @@ enum class tFrameworkElementFlag
   ALTERNATIVE_LINK_ROOT, //!< Is this an alternative root for links to globally unique objects (such as a remote runtime environments mapped into this one)
 
   RUNTIME,               //!< Is this the one and only Runtime environment (in this process)?
-  SHARED,                //!< Should framework element be visible/accessible from other runtime environments? (TreeFilter specified by other runtime may override this)
+  SHARED,                //!< Should framework element be visible/accessible from other runtime environments?
   AUTO_RENAME,           //!< Automatically rename children with duplicate names?
 
   // Constant port-only flags
@@ -95,16 +95,15 @@ enum class tFrameworkElementFlag
 
   /*!
    * From it's general characteristics: Is port input or output port?
-   * (for proxies from the outside group view)
+   * (for ports in interfaces of composite components: from the outside component view)
    * (for RPC ports client ports are output port since they "emit" RPC calls)
    */
   OUTPUT_PORT,
 
   /*!
-   * Are port value assigned to ports in a non-standard way?... In this case
-   * the virtual method nonStandardAssign is called in several port methods
-   * instead of standardAssign.
-   * Fixed, set automatically by port classes
+   * Are port values assigned to port in a non-standard way?
+   * In this case, a port's virtual method NonStandardAssign() is used instead of plain Assign() in order to change the data buffer of a port.
+   * Constant flag automatically set by data port classes.
    */
   NON_STANDARD_ASSIGN,
 
