@@ -284,7 +284,7 @@ void tFrameworkElement::CheckForNameClash(const tLink& link) const
       {
         FINROC_LOG_PRINT(ERROR, "Framework elements with the same qualified names are not allowed ('", it->GetQualifiedName(),
                          "'), since this causes undefined behavior with port connections by qualified names (e.g. in fingui or in finstructable groups). Apart from manually choosing another name, there are two ways to solve this:\n",
-                         "  1) Set the tCoreFlags::cAUTO_RENAME flag constructing parent framework element.\n",
+                         "  1) Set the tFrameworkElementFlags::AUTO_RENAME flag when constructing parent framework element.\n",
                          "  2) Explicitly allow duplicate names by calling tRuntimeSettings::AllowDuplicateQualifiedNames() and be careful.");
         abort();
       }
