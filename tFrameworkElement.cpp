@@ -99,7 +99,7 @@ public:
 }
 
 tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& name, tFlags flags) :
-  handle(flags.Get(tFlag::RUNTIME) ? 0 : tRuntimeEnvironment::GetInstance().RegisterElement(*this, flags.Get(tFlag::PORT))),
+  handle(flags.Get(tFlag::RUNTIME) && (!flags.Get(tFlag::PORT)) ? 0 : tRuntimeEnvironment::GetInstance().RegisterElement(*this, flags.Get(tFlag::PORT))),
   primary(*this),
 #ifndef RRLIB_SINGLE_THREADED
   creater_thread_uid(rrlib::thread::tThread::CurrentThreadId()),
@@ -118,7 +118,7 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& n
     primary.name = &primary.name_buffer;
   }
 
-  if (!GetFlag(tFlag::RUNTIME))
+  if (!IsRuntime())
   {
     if (!parent)
     {
@@ -132,14 +132,14 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& n
 
 tFrameworkElement::~tFrameworkElement()
 {
-  if (!(GetFlag(tFlag::DELETED) || GetFlag(tFlag::RUNTIME)))
+  if (!(GetFlag(tFlag::DELETED) || IsRuntime()))
   {
     throw rrlib::util::tTraceableException<std::runtime_error>("Framework element '" + GetName() + "' was not deleted with ManagedDelete()");
   }
   FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "FrameworkElement destructor (" , this, ")");
-  if (!GetFlag(tFlag::RUNTIME))
+  if (!IsRuntime())
   {
-    // synchronizes on runtime - so no elements will be deleted while runtime is locked
+    // synchronizes on runtime - to ensure that no elements (e.g. this one) are deleted while possibly someone else has runtime locked
     rrlib::thread::tLock lock(GetStructureMutex());
     //GetRuntime().UnregisterElement(*this);
   }
@@ -231,7 +231,7 @@ void tFrameworkElement::AddChild(tLink& child)
 
 bool tFrameworkElement::AllParentsReady() const
 {
-  if (GetFlag(tFlag::RUNTIME))
+  if (IsRuntime())
   {
     return true;
   }
@@ -711,7 +711,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
 
     FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Deleting");
     assert(!GetFlag(tFlag::DELETED));
-    assert(((primary.GetParent() != NULL) | GetFlag(tFlag::RUNTIME)));
+    assert(((primary.GetParent() != NULL) || IsRuntime()));
     tFlags new_flags = flags | tFlag::DELETED;
     new_flags.Set(tFlag::READY, false);
     for (size_t i = 0; i < this->GetLinkCount(); i++)
@@ -720,10 +720,9 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
     }
     flags = new_flags;
 
-    if (!GetFlag(tFlag::RUNTIME))
+    if (!IsRuntime())
     {
       GetRuntime().UnregisterElement(*this);
-      //GetRuntime().MarkElementDeleted(*this);
     }
 
     // perform custom cleanup (stopping/deleting threads can be done here)
@@ -820,7 +819,7 @@ void tFrameworkElement::PublishUpdatedInfo(tRuntimeListener::tEvent change_type)
 
 void tFrameworkElement::SetFlag(tFlag flag, bool value)
 {
-  assert(flag >= tFlag::READY);
+  assert(flag >= tFlag::READY || (IsPort() && flag == tFlag::HIJACKED_PORT));
   flags.Set(flag, value);
 }
 
@@ -831,7 +830,7 @@ void tFrameworkElement::SetName(const tString& name)
     FINROC_LOG_PRINT(ERROR, "May only be called by creator thread. Ignoring.");
     return;
   }
-  if (GetFlag(tFlag::RUNTIME))
+  if (IsRuntime())
   {
     FINROC_LOG_PRINT(ERROR, "May not be called on Finroc Runtime Root Element. Ignoring.");
     return;
@@ -930,7 +929,7 @@ tFrameworkElement::tSubElementIterator tFrameworkElement::tSubElementIterator::o
 
 static void StreamQualifiedName(std::ostream& output, const tFrameworkElement& fe, bool first)
 {
-  if (!fe.GetFlag(tFrameworkElement::tFlag::RUNTIME))
+  if (!fe.IsRuntime())
   {
     if (fe.GetParent())
     {

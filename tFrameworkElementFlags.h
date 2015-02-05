@@ -63,6 +63,10 @@ namespace core
  * at runtime whereas the upper 10 may change
  * (we omit the last bit in Java, because the sign may have ugly side effects).
  * The custom flag may be used by a framework element subclass.
+ *
+ * Note for future development: If more flags are needed (all 32 bits are used),
+ * the following are required for construction only:
+ * HAS_QUEUE, MAY_ACCEPT_REVERSE_DATA, NON_STANDARD_ASSIGN, MULTI_TYPE_BUFFER_POOL
  */
 enum class tFrameworkElementFlag
 {
@@ -76,7 +80,7 @@ enum class tFrameworkElementFlag
   GLOBALLY_UNIQUE_LINK,  //!< Has this framework element a globally unique qualified name? (reachable from any runtime environment using this name)
   ALTERNATIVE_LINK_ROOT, //!< Is this an alternative root for links to globally unique objects (such as a remote runtime environments mapped into this one)
 
-  RUNTIME,               //!< Is this the one and only Runtime environment (in this process)?
+  RUNTIME,               //!< Non-port use: Is this the one and only runtime environment (in this process)? Port use: flag hijacked ports (see below).
   SHARED,                //!< Should framework element be visible/accessible from other runtime environments?
   AUTO_RENAME,           //!< Automatically rename children with duplicate names?
 
@@ -119,12 +123,7 @@ enum class tFrameworkElementFlag
   DEFAULT_ON_DISCONNECT, //!< Restore default value, if port is disconnected?
   PUSH_STRATEGY,         //!< Use push strategy rather than pull strategy?
   PUSH_STRATEGY_REVERSE, //!< Use push strategy rather than pull strategy in reverse direction?
-
-  // Custom flag
-  //CUSTOM_FLAG            //!< Subclass may use this
-
-  // possibly obsolete, if more flags are needed: RUNTIME
-  // possibly construction only: HAS_QUEUE, MAY_ACCEPT_REVERSE_DATA, NON_STANDARD_ASSIGN, MULTI_TYPE_BUFFER_POOL
+  HIJACKED_PORT = RUNTIME //!< Is this a port hijacked e.g. by the data_playback plugin? If set, values set/received by components are discarded.
 };
 
 static_assert(static_cast<uint>(tFrameworkElementFlag::PUSH_STRATEGY_REVERSE) < 32, "Too many flags");

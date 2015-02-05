@@ -265,6 +265,7 @@ void tRuntimeEnvironment::InitialInit()
   tRuntimeSettings::StaticInit();  // can be done now... or last
   instance_raw_ptr->special_runtime_elements[(size_t)tSpecialRuntimeElement::SETTINGS] = &tRuntimeSettings::GetInstance();
   tFrameworkElement::InitAll();
+  assert(instance_raw_ptr->GetHandle() == 0);
 
   //Load plugins
   internal::tPlugins::StaticInit();

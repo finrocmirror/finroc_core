@@ -502,6 +502,14 @@ public:
   }
 
   /*!
+   * \return Is this the one and only tRuntimeEnvironment object in this process?
+   */
+  inline bool IsRuntime() const
+  {
+    return handle == 0;
+  }
+
+  /*!
    * Deletes element and all child elements
    */
   inline void ManagedDelete()
