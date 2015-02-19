@@ -180,8 +180,9 @@ public:
   }
 
   /*!
-   * \param index of port in this group (throws util::tException if index is out of bounds; use ChildCount() to check for size)
+   * \param index of port in this group
    * \return nth Port in this port group
+   * \exception Throws std::runtime_error if index is out of bounds (use ChildCount() to check for number of children)
    */
   tAbstractPort& operator[](size_t index);
 

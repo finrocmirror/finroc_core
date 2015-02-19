@@ -179,6 +179,13 @@ public:
   }
 
   /*!
+   * (implementation note: uses tChildIterator to determine the number of children)
+   *
+   * \return Number of child elements of this framework element.
+   */
+  size_t ChildCount() const;
+
+  /*!
    * \return An iterator to iterate over this node's child ports. Initially points to the first port.
    *
    * Typically used in this way (fe is a tFrameworkElement reference):

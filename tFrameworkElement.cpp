@@ -292,6 +292,16 @@ void tFrameworkElement::CheckForNameClash(const tLink& link) const
   }
 }
 
+size_t tFrameworkElement::ChildCount() const
+{
+  size_t count = 0;
+  for (auto it = ChildrenBegin(); it != ChildrenEnd(); ++it)
+  {
+    count++;
+  }
+  return count;
+}
+
 void tFrameworkElement::DeleteChildren()
 {
   for (auto it = children->Begin(); it != children->End(); ++it)
