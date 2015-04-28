@@ -801,10 +801,7 @@ void tFrameworkElement::PrintStructure(int indent, std::stringstream& output) co
 
 void tFrameworkElement::PublishUpdatedEdgeInfo(tRuntimeListener::tEvent change_type, tAbstractPort& target)
 {
-  if (GetFlag(tFlag::PUBLISHED))
-  {
-    GetRuntime().RuntimeChange(change_type, *this, &target);
-  }
+  GetRuntime().RuntimeChange(change_type, *this, &target, !GetFlag(tFlag::PUBLISHED));
 }
 
 void tFrameworkElement::PublishUpdatedInfo(tRuntimeListener::tEvent change_type)
