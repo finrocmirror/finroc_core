@@ -320,11 +320,12 @@ private:
    * \param change_type Type of change
    * \param element FrameworkElement that changed
    * \param edge_target Target of edge, in case of EDGE_CHANGE
+   * \param notify_listeners_only Only notify runtime listeners and do not perform any further processing
    *
    * (Is called with structure mutex obtained... so method should not block)
    * (should only be called by FrameworkElement class)
    */
-  void RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element, tAbstractPort* edge_target = NULL);
+  void RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element, tAbstractPort* edge_target = NULL, bool notify_listeners_only = false);
 
   /*!
    * Unregister framework element at RuntimeEnvironment.

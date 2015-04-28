@@ -323,60 +323,64 @@ void tRuntimeEnvironment::RemoveListener(tRuntimeListener& listener)
   runtime_listeners.Remove(&listener);
 }
 
-void tRuntimeEnvironment::RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element, tAbstractPort* edge_target)
+void tRuntimeEnvironment::RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element, tAbstractPort* edge_target, bool notify_listeners_only)
 {
   tLock lock(structure_mutex);
   if (!ShuttingDown())
   {
-    if (element.GetFlag(tFlag::ALTERNATIVE_LINK_ROOT))
+    if (!notify_listeners_only)
     {
-      if (change_type == tRuntimeListener::tEvent::ADD)
-      {
-        alternative_link_roots.push_back(&element);
-      }
-      else if (change_type == tRuntimeListener::tEvent::REMOVE)
-      {
-        alternative_link_roots.erase(std::remove(alternative_link_roots.begin(), alternative_link_roots.end(), &element), alternative_link_roots.end());
-      }
-    }
 
-    if (change_type == tRuntimeListener::tEvent::ADD && element.IsPort())    // check links
-    {
-      tAbstractPort& ap = static_cast<tAbstractPort&>(element);
-      for (size_t i = 0u; i < ap.GetLinkCount(); i++)
+      if (element.GetFlag(tFlag::ALTERNATIVE_LINK_ROOT))
       {
-        ap.GetQualifiedLink(temp_buffer, i);
-        tString s = temp_buffer;
-        FINROC_LOG_PRINT(DEBUG_VERBOSE_2, "Checking link ", s, " with respect to link edges");
-
-        if (link_edges.find(s) != link_edges.end())
+        if (change_type == tRuntimeListener::tEvent::ADD)
         {
-          internal::tLinkEdge* le = link_edges[s];
-          while (le)
-          {
-            le->LinkAdded(*this, s, ap);
-            le = le->GetNextEdge();
-          }
+          alternative_link_roots.push_back(&element);
+        }
+        else if (change_type == tRuntimeListener::tEvent::REMOVE)
+        {
+          alternative_link_roots.erase(std::remove(alternative_link_roots.begin(), alternative_link_roots.end(), &element), alternative_link_roots.end());
         }
       }
-      if (ap.link_edges)
+
+      if (change_type == tRuntimeListener::tEvent::ADD && element.IsPort())    // check links
       {
-        for (auto it = ap.link_edges->begin(); it != ap.link_edges->end(); ++it)
+        tAbstractPort& ap = static_cast<tAbstractPort&>(element);
+        for (size_t i = 0u; i < ap.GetLinkCount(); i++)
         {
-          if ((*it)->GetSourceLink().length() > 0)
+          ap.GetQualifiedLink(temp_buffer, i);
+          tString s = temp_buffer;
+          FINROC_LOG_PRINT(DEBUG_VERBOSE_2, "Checking link ", s, " with respect to link edges");
+
+          if (link_edges.find(s) != link_edges.end())
           {
-            tAbstractPort* source = GetPort((*it)->GetSourceLink());
-            if (source)
+            internal::tLinkEdge* le = link_edges[s];
+            while (le)
             {
-              (*it)->LinkAdded(*this, (*it)->GetSourceLink(), *source);
+              le->LinkAdded(*this, s, ap);
+              le = le->GetNextEdge();
             }
           }
-          if ((*it)->GetTargetLink().length() > 0)
+        }
+        if (ap.link_edges)
+        {
+          for (auto it = ap.link_edges->begin(); it != ap.link_edges->end(); ++it)
           {
-            tAbstractPort* target = GetPort((*it)->GetTargetLink());
-            if (target)
+            if ((*it)->GetSourceLink().length() > 0)
             {
-              (*it)->LinkAdded(*this, (*it)->GetTargetLink(), *target);
+              tAbstractPort* source = GetPort((*it)->GetSourceLink());
+              if (source)
+              {
+                (*it)->LinkAdded(*this, (*it)->GetSourceLink(), *source);
+              }
+            }
+            if ((*it)->GetTargetLink().length() > 0)
+            {
+              tAbstractPort* target = GetPort((*it)->GetTargetLink());
+              if (target)
+              {
+                (*it)->LinkAdded(*this, (*it)->GetTargetLink(), *target);
+              }
             }
           }
         }
