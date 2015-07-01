@@ -99,7 +99,7 @@ std::vector<std::string> GetPathsToCheck()
   char *cwd_cstring = getcwd(buffer, sizeof(buffer));
   if (cwd_cstring == NULL)
   {
-    FINROC_LOG_PRINT(WARNING, "Could not look up the current working directory using getcwd(). Something seems to be wrong, but for now it just will not be included in the search path.");
+    FINROC_LOG_PRINT_STATIC(WARNING, "Could not look up the current working directory using getcwd(). Something seems to be wrong, but for now it just will not be included in the search path.");
   }
   else
   {

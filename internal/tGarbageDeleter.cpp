@@ -128,7 +128,7 @@ void tGarbageDeleter::CreateAndStartInstance()
 {
   if (tThread::StoppingThreads())
   {
-    FINROC_LOG_PRINT(WARNING, "Starting gc in this phase is not allowed");
+    FINROC_LOG_PRINT_STATIC(WARNING, "Starting gc in this phase is not allowed");
     return;
   }
 
@@ -141,7 +141,7 @@ void tGarbageDeleter::CreateAndStartInstance()
   }
   else
   {
-    FINROC_LOG_PRINT(WARNING, "Cannot start gc thread twice. This attempt is possibly dangerous, since this method is not thread-safe");
+    FINROC_LOG_PRINT_STATIC(WARNING, "Cannot start gc thread twice. This attempt is possibly dangerous, since this method is not thread-safe");
   }
 }
 
