@@ -29,10 +29,10 @@
  *
  * \b tPortWrapperBase
  *
- * Port classes are not directly used by an application developer.
- * Rather a wrapped class based on this class is used.
+ * Port implementation classes (derived from tAbstractPort) are typically not used directly by an application developer.
+ * Rather a wrapper class based on this class is used.
  * This has the following advantages:
- * - Wrapped wraps and manages pointer to actual port. No pointers are needed to work with these classes
+ * - Wrapper class wraps and manages pointer to actual port. No pointers are needed to work with these classes - they are passed by value.
  * - Only parts of the API meant to be used by the application developer are exposed.
  * - Connect() methods can be hidden/reimplemented (via name hiding). This can be used to enforce that only certain connections can be created at compile time.
  */
@@ -67,10 +67,10 @@ namespace core
 //----------------------------------------------------------------------
 //! Base class for port wrapper classes
 /*!
- * Port classes are not directly used by an application developer.
- * Rather a wrapped class based on this class is used.
+ * Port implementation classes (derived from tAbstractPort) are typically not used directly by an application developer.
+ * Rather a wrapper class based on this class is used.
  * This has the following advantages:
- * - Wrapped wraps and manages pointer to actual port. No pointers are needed to work with these classes
+ * - Wrapper class wraps and manages pointer to actual port. No pointers are needed to work with these classes - they are passed by value.
  * - Only parts of the API meant to be used by the application developer are exposed.
  * - Connect() methods can be hidden/reimplemented (via name hiding). This can be used to enforce that only certain connections can be created at compile time.
  */
@@ -92,7 +92,7 @@ public:
   typedef tFrameworkElement::tFlags tFlags;
 
   tPortWrapperBase() :
-    wrapped(NULL)
+    wrapped(nullptr)
   {}
 
   tPortWrapperBase(core::tAbstractPort* wrap) :
@@ -106,11 +106,9 @@ public:
    * Add annotation to this port
    *
    * \param ann Annotation
+   * \throw Throws std::runtime_error if port wrapper is empty
    */
-  inline void AddAnnotation(tAnnotation& ann)
-  {
-    wrapped->AddAnnotation(ann);
-  }
+  void AddAnnotation(tAnnotation& ann);
 
   /*!
    * Connect port to specified partner port
@@ -220,7 +218,7 @@ public:
   template <typename TAnnotation>
   TAnnotation* GetAnnotation() const
   {
-    return wrapped->GetAnnotation<TAnnotation>();
+    return wrapped ? wrapped->GetAnnotation<TAnnotation>() : nullptr;
   }
 
   /*!
@@ -231,7 +229,7 @@ public:
    */
   tAnnotation* GetAnnotation(const char* rtti_name) const
   {
-    return wrapped->GetAnnotation(rtti_name);
+    return wrapped ? wrapped->GetAnnotation(rtti_name) : nullptr;
   }
 
   /*!
@@ -239,7 +237,7 @@ public:
    */
   inline rrlib::rtti::tType GetDataType() const
   {
-    return wrapped->GetDataType();
+    return wrapped ? wrapped->GetDataType() : rrlib::rtti::tType();
   }
 
   /*!
@@ -248,23 +246,20 @@ public:
    */
   inline bool GetFlag(tFrameworkElement::tFlag flag) const
   {
-    return wrapped->GetFlag(flag);
+    return wrapped ? wrapped->GetFlag(flag) : false;
   }
 
   /*!
-   * \return Log description
+   * \return Log description (tRuntimeEnvironment if port wrapper is empty)
    */
-  inline const tFrameworkElement& GetLogDescription() const
-  {
-    return wrapped->GetLogDescription();
-  }
+  const tFrameworkElement& GetLogDescription() const;
 
   /*!
    * \return Name of wrapped framework element (see tFrameworkElement::GetName())
    */
   inline const tString& GetName() const
   {
-    return wrapped->GetName();
+    return wrapped ? wrapped->GetName() : cEMPTY_PORT_WRAPPER;
   }
 
   /*!
@@ -272,7 +267,7 @@ public:
    */
   inline tFrameworkElement* GetParent()
   {
-    return wrapped->GetParent();
+    return wrapped ? wrapped->GetParent() : nullptr;
   }
 
   /*!
@@ -291,7 +286,10 @@ public:
    */
   inline void Init()
   {
-    wrapped->Init();
+    if (wrapped)
+    {
+      wrapped->Init();
+    }
   }
 
   /*!
@@ -300,15 +298,15 @@ public:
    */
   inline bool IsConnected() const
   {
-    return wrapped->IsConnected();
+    return wrapped && wrapped->IsConnected();
   }
 
   /*!
-   * \return Has port been deleted? (you should not encounter this)
+   * \return Has port been deleted? (also true, if port wrapper is empty)
    */
   inline bool IsDeleted() const
   {
-    return wrapped->IsDeleted();
+    return (!wrapped) || wrapped->IsDeleted();
   }
 
   /*!
@@ -316,17 +314,20 @@ public:
    */
   inline bool IsReady() const
   {
-    return wrapped->IsReady();
+    return wrapped && wrapped->IsReady();
   }
 
   /*!
    * Deletes port wrapped by this port wrapper class.
-   * Port may not be used after calling this
+   * Port wrapper is empty after calling this.
    */
   void ManagedDelete()
   {
-    wrapped->ManagedDelete();
-    wrapped = NULL;
+    if (wrapped)
+    {
+      wrapped->ManagedDelete();
+    }
+    wrapped = nullptr;
   }
 
   /*!
@@ -338,7 +339,7 @@ public:
    */
   inline bool NameEquals(const tString& other) const
   {
-    return wrapped->NameEquals(other);
+    return wrapped && wrapped->NameEquals(other);
   }
 
   // using this operator, it can be checked conveniently in PortListener's PortChanged()
@@ -457,6 +458,8 @@ private:
   /*! Wrapped port */
   tAbstractPort* wrapped;
 
+  /*! Name returned by empty port wrappers */
+  static const std::string cEMPTY_PORT_WRAPPER;
 
   /*!
    * Type trait that determines whether type T has a Set() method suitable
