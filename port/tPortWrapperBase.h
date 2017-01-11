@@ -281,12 +281,16 @@ public:
 
   /*!
    * Deletes port wrapped by this port wrapper class.
-   * Port may not be used after calling this
+   * If no port is wrapped, does nothing.
+   * Port may not be used after calling this.
    */
   void ManagedDelete()
   {
-    wrapped->ManagedDelete();
-    wrapped = NULL;
+    if (wrapped)
+    {
+      wrapped->ManagedDelete();
+      wrapped = nullptr;
+    }
   }
 
   /*!
