@@ -19,15 +19,15 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/internal/tLinkEdge.cpp
+/*!\file    core/port/tConnector.cpp
  *
  * \author  Max Reichardt
  *
- * \date    2012-10-28
+ * \date    2015-12-15
  *
  */
 //----------------------------------------------------------------------
-#include "core/internal/tLinkEdge.h"
+#include "core/port/tConnector.h"
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -55,8 +55,6 @@ namespace finroc
 {
 namespace core
 {
-namespace internal
-{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
@@ -69,70 +67,92 @@ namespace internal
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
-// workaround for gcc 4.5
-static std::array<tLinkEdge::tPortReference, 2> CreatePortReferenceArray(const tLinkEdge::tPortReference& port1, const tLinkEdge::tPortReference& port2)
+
+namespace internal
 {
-  std::array<tLinkEdge::tPortReference, 2> result = {{ port1, port2 }};
-  return result;
+
+//! Annotation to link tConnector and tUriConnector classes
+/*!
+ * Annotation for tConnector objects to attach tUriConnector objects.
+ * They are notified if tConnector is removed.
+ *
+ * This class was introduced as it saves memory not to have an additional pointer
+ * in every tConnector that is rarely used.
+ */
+class tUriConnectorOwnerAnnotation : public tAnnotation
+{
+
+//----------------------------------------------------------------------
+// Public methods and typedefs
+//----------------------------------------------------------------------
+public:
+
+  /*!
+   * \param connector Reference to tUriConnector
+   */
+  tUriConnectorOwnerAnnotation(tUriConnector& connector) :
+    connector(connector)
+  {}
+
+  /*!
+   * \return Reference to tUriConnector
+   */
+  tUriConnector& Get()
+  {
+    return connector;
+  }
+
+//----------------------------------------------------------------------
+// Private fields and methods
+//----------------------------------------------------------------------
+private:
+
+  /*! Reference to tUriConnector */
+  tUriConnector& connector;
+
+};
 }
 
-tLinkEdge::tLinkEdge(const tPortReference& port1, const tPortReference& port2, bool both_connect_directions, bool finstructed) :
-  ports(CreatePortReferenceArray(port1, port2)),
-  both_connect_directions(both_connect_directions),
-  next_edge(NULL),
-  finstructed(finstructed)
+tConnector::tConnector(tAbstractPort& source_port, tAbstractPort& destination_port, const tConnectOptions& connect_options, const rrlib::rtti::conversion::tConversionOperationSequence& conversion_sequence_storage) :
+  source_port(source_port),
+  destination_port(destination_port),
+  flags(connect_options.flags | (&conversion_sequence_storage != &rrlib::rtti::conversion::tConversionOperationSequence::cNONE ? tFlags(tFlag::CONVERSION) : tFlags()))
 {
-  if (ports[0].link.length() == 0 && ports[1].link.length() == 0)
+  if (flags.Get(tFlag::CONVERSION))
   {
-    FINROC_LOG_PRINT(ERROR, "At least one of two ports needs to be linked. Otherwise, it does not make sense to use this class.");
-    abort();
-  }
-  rrlib::thread::tLock lock(tRuntimeEnvironment::GetInstance().GetStructureMutex());
-  for (size_t i = 0; i < 2; i++)
-  {
-    if (ports[i].link.length() > 0)
-    {
-      tRuntimeEnvironment::GetInstance().AddLinkEdge(ports[i].link, *this);
-    }
+    assert(&conversion_sequence_storage == &ConversionOperations() && "Conversion operations must be first member in subclass");
   }
 }
 
-tLinkEdge::~tLinkEdge()
+tConnector::~tConnector()
+{
+}
+
+void tConnector::Disconnect()
 {
   rrlib::thread::tLock lock(tRuntimeEnvironment::GetInstance().GetStructureMutex());
-  for (size_t i = 0; i < 2; i++)
+  tAbstractPort::DisconnectImplementation(*this, true);
+}
+
+void tConnector::NotifyOnDisconnect(tUriConnector& owner)
+{
+  this->EmplaceAnnotation<internal::tUriConnectorOwnerAnnotation>(owner);
+}
+
+void tConnector::OnDisconnect(bool stop_any_reconnecting)
+{
+  flags.Set(tConnectionFlag::DISCONNECTED, true);
+
+  internal::tUriConnectorOwnerAnnotation* annotation = this->GetAnnotation<internal::tUriConnectorOwnerAnnotation>();
+  if (annotation)
   {
-    if (ports[i].link.length() > 0)
-    {
-      tRuntimeEnvironment::GetInstance().RemoveLinkEdge(ports[i].link, *this);
-    }
+    annotation->Get().OnConnectorDisconnect(stop_any_reconnecting);
   }
 }
 
-void tLinkEdge::LinkAdded(tRuntimeEnvironment& re, const tString& link, tAbstractPort& port) const
-{
-  rrlib::thread::tLock lock(tRuntimeEnvironment::GetInstance().GetStructureMutex());
-  if (link.compare(ports[0].link) == 0)
-  {
-    tAbstractPort* target = ports[1].link.length() > 0 ? re.GetPort(ports[1].link) : ports[1].pointer;
-    if (target)
-    {
-      port.ConnectTo(*target, both_connect_directions ? tAbstractPort::tConnectDirection::AUTO : tAbstractPort::tConnectDirection::TO_TARGET, finstructed);
-    }
-  }
-  else if (link.compare(ports[1].link) == 0)
-  {
-    tAbstractPort* source = ports[0].link.length() > 0 ? re.GetPort(ports[0].link) : ports[0].pointer;
-    if (source)
-    {
-      port.ConnectTo(*source, both_connect_directions ? tAbstractPort::tConnectDirection::AUTO : tAbstractPort::tConnectDirection::TO_SOURCE, finstructed);
-    }
-  }
-}
 
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------
-}
 }
 }

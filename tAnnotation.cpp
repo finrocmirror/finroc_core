@@ -67,8 +67,8 @@ namespace core
 // Implementation
 //----------------------------------------------------------------------
 tAnnotation::tAnnotation() :
-  next_annotation(NULL),
-  annotated(NULL)
+  next_annotation(nullptr),
+  annotated(nullptr)
 {}
 
 tAnnotation::~tAnnotation()
@@ -88,7 +88,7 @@ tAnnotation* tAnnotation::FindParentWithAnnotation(tFrameworkElement& framework_
   {
     return FindParentWithAnnotation(*parent, rtti_name);
   }
-  return NULL;
+  return nullptr;
 }
 
 //----------------------------------------------------------------------

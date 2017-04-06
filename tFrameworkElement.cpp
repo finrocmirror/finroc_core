@@ -76,6 +76,8 @@ const std::string cDELETED_ELEMENT_STRING("(Deleted Framework Element)");
 /*! Maximum depth of framework element hierarchy (introduced so that accidental recursive instantiation does not lead to infinite loops and application hangups) */
 const size_t MAX_HIERARCHY_DEPTH = 100;
 
+std::unique_ptr<const tFrameworkElement::tLink> tFrameworkElement::cINVALID_LINK;
+
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
@@ -95,6 +97,19 @@ public:
   /*! Additional string buffer */
   tString string_buffer;
 };
+
+/*! Obtain number of ancestors of link */
+static size_t CountNumberOfAncestors(const tFrameworkElement::tLink& link, bool include_runtime = false)
+{
+  core::tFrameworkElement* parent = link.GetParent();
+  size_t count = 0;
+  while (parent && ((!parent->IsRuntime()) || include_runtime))
+  {
+    count++;
+    parent = parent->GetParent();
+  }
+  return count;
+}
 
 }
 
@@ -125,6 +140,10 @@ tFrameworkElement::tFrameworkElement(tFrameworkElement* parent, const tString& n
       parent = &(tRuntimeEnvironment::GetInstance().GetElement(tSpecialRuntimeElement::UNRELATED));
     }
     parent->AddChild(primary);
+  }
+  else
+  {
+    cINVALID_LINK.reset(new tLink(*this));
   }
 
   FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Constructing tFrameworkElement (" , this, ")");
@@ -276,16 +295,14 @@ void tFrameworkElement::CheckPublish()
 
 void tFrameworkElement::CheckForNameClash(const tLink& link) const
 {
-  if (!tRuntimeSettings::DuplicateQualifiedNamesAllowed() && link.parent && (!link.GetChild().GetFlag(tFlag::NETWORK_ELEMENT))) // we cannot influence naming of elements in other runtime environments
+  if (link.parent && (!link.GetChild().GetFlag(tFlag::NETWORK_ELEMENT))) // we cannot influence naming of elements in other runtime environments
   {
     for (auto it = link.parent->ChildrenBegin(); it != link.parent->ChildrenEnd(); ++it)
     {
       if (it->IsReady() && it->GetName().compare(primary.GetName()) == 0)
       {
-        FINROC_LOG_PRINT(ERROR, "Framework elements with the same qualified names are not allowed ('", it->GetQualifiedName(),
-                         "'), since this causes undefined behavior with port connections by qualified names (e.g. in fingui or in finstructable groups). Apart from manually choosing another name, there are two ways to solve this:\n",
-                         "  1) Set the tFrameworkElementFlags::AUTO_RENAME flag when constructing parent framework element.\n",
-                         "  2) Explicitly allow duplicate names by calling tRuntimeSettings::AllowDuplicateQualifiedNames() and be careful.");
+        FINROC_LOG_PRINT(ERROR, "Framework elements with the same qualified names are not allowed ('", (*it),
+                         "'), since this causes undefined behavior with port connections by URIs (e.g. in fingui or in finstructable groups). Apart from manually choosing another name, you can also set the tFrameworkElementFlags::AUTO_RENAME flag when constructing the parent framework element.");
         abort();
       }
     }
@@ -330,7 +347,7 @@ tFrameworkElement* tFrameworkElement::GetChild(const tString& name) const
       tLock lock(GetStructureMutex());
       if (IsDeleted())
       {
-        return NULL;
+        return nullptr;
       }
       if ((*it)->GetChild().IsDeleted())
       {
@@ -342,73 +359,71 @@ tFrameworkElement* tFrameworkElement::GetChild(const tString& name) const
       }
     }
   }
-  return NULL;
+  return nullptr;
 }
 
-tFrameworkElement* tFrameworkElement::GetChildElement(const tString& name, bool only_globally_unique_children)
+tFrameworkElement* tFrameworkElement::GetChild(const tPath& path)
 {
-  return GetChildElement(name, 0, only_globally_unique_children, GetRuntime());
+  return GetChild(path, 0, GetRuntime());
 }
 
-tFrameworkElement* tFrameworkElement::GetChildElement(const tString& name, int name_index, bool only_globally_unique_children, tFrameworkElement& root)
+tFrameworkElement* tFrameworkElement::GetChild(const tPath& path, uint path_index, tFrameworkElement& root)
 {
-  // lock runtime (might not be absolutely necessary... ensures, however, that result is valid)
-  tLock lock(GetStructureMutex());
-
   if (IsDeleted())
   {
-    return NULL;
+    return nullptr;
   }
-
-  if (name[name_index] == '/')
+  core::tFrameworkElement* current = path.IsAbsolute() ? &root : this;
+  while (current && path_index < path.Size())
   {
-    return root.GetChildElement(name, name_index + 1, only_globally_unique_children, root);
-  }
-
-  only_globally_unique_children &= (!GetFlag(tFlag::GLOBALLY_UNIQUE_LINK));
-  for (auto it = children->Begin(); it != children->End(); ++it)
-  {
-    tLink* child = &(**it);
-    if (name.compare(name_index, child->name->length(), *(child->name)) == 0 && (!child->GetChild().IsDeleted()))
+    if (path[path_index] == ".")
     {
-      if (name.length() == name_index + child->name->length())
+    }
+    else if (path[path_index] == "..")
+    {
+      current = current->GetParent();
+    }
+    else
+    {
+      tFrameworkElement* temp = current;
+      current = nullptr;
+      for (auto it = temp->children->Begin(); it != temp->children->End(); ++it)
       {
-        if (!only_globally_unique_children || child->GetChild().GetFlag(tFlag::GLOBALLY_UNIQUE_LINK))
+        tLink* child = &(**it);
+        if (path[path_index] == (*child->name) && (!child->GetChild().IsDeleted()))
         {
-          return &child->GetChild();
+          current = &child->GetChild();
+          break;
         }
-      }
-      if (name[name_index + child->name->length()] == '/')
-      {
-        tFrameworkElement* result = child->GetChild().GetChildElement(name, name_index + child->name->length() + 1, only_globally_unique_children, root);
-        if (result)
-        {
-          return result;
-        }
-        // continue, because links may contain '/'... (this is slightly ugly... better solution? TODO)
       }
     }
+    path_index++;
   }
-  return NULL;
+  return current;
 }
 
-const tFrameworkElement::tLink* tFrameworkElement::GetLink(size_t link_index) const
+const tFrameworkElement::tLink& tFrameworkElement::GetLink(size_t link_index) const
 {
+  if (link_index == 0)
+  {
+    return primary;
+  }
+
   tLock lock(GetStructureMutex());  // absolutely safe this way
   if (IsDeleted())
   {
-    return NULL;
+    return *cINVALID_LINK;
   }
   const tLink* l = &(primary);
   for (size_t i = 0u; i < link_index; i++)
   {
     l = l->next;
-    if (l == NULL)
+    if (!l)
     {
-      return NULL;
+      return *cINVALID_LINK;
     }
   }
-  return l;
+  return *l;
 }
 
 size_t tFrameworkElement::GetLinkCount() const
@@ -428,10 +443,10 @@ size_t tFrameworkElement::GetLinkCountHelper() const
 {
   if (IsDeleted())
   {
-    return 0u;
+    return 0;
   }
-  size_t i = 0u;
-  for (const tLink* l = &(primary); l != NULL; l = l->next)
+  size_t i = 0;
+  for (const tLink* l = &(primary); l != nullptr; l = l->next)
   {
     i++;
   }
@@ -444,23 +459,12 @@ tFrameworkElement::tLink* tFrameworkElement::GetLinkInternal(size_t link_index)
   for (size_t i = 0u; i < link_index; i++)
   {
     l = l->next;
-    if (l == NULL)
+    if (l == nullptr)
     {
-      return NULL;
+      return nullptr;
     }
   }
   return l;
-}
-
-void tFrameworkElement::GetNameHelper(tString& sb, const tLink& l, bool abort_at_link_root)
-{
-  if (l.parent == NULL || (abort_at_link_root && l.GetChild().GetFlag(tFlag::ALTERNATIVE_LINK_ROOT)))    // runtime?
-  {
-    return;
-  }
-  GetNameHelper(sb, l.parent->primary, abort_at_link_root);
-  sb.append("/");
-  sb.append(*(l.name));
 }
 
 tFrameworkElement* tFrameworkElement::GetParent(int link_index) const
@@ -468,28 +472,28 @@ tFrameworkElement* tFrameworkElement::GetParent(int link_index) const
   tLock lock(GetStructureMutex());  // absolutely safe this way
   if (IsDeleted())
   {
-    return NULL;
+    return nullptr;
   }
-  return GetLink(link_index)->parent;
+  return GetLink(link_index).parent;
 }
 
 tFrameworkElement* tFrameworkElement::GetParentWithFlags(tFlags parent_flags) const
 {
-  if (primary.parent == NULL)
+  if (!primary.parent)
   {
-    return NULL;
+    return nullptr;
   }
   tLock lock(GetStructureMutex());  // not really necessary after element has been initialized
   if (IsDeleted())
   {
-    return NULL;
+    return nullptr;
   }
 
   tFrameworkElement* result = primary.parent;
   while (!((result->GetAllFlags().Raw() & parent_flags.Raw()) == parent_flags.Raw()))
   {
     result = result->primary.parent;
-    if (result == NULL || result->IsDeleted())
+    if (result == nullptr || result->IsDeleted())
     {
       break;
     }
@@ -497,51 +501,47 @@ tFrameworkElement* tFrameworkElement::GetParentWithFlags(tFlags parent_flags) co
   return result;
 }
 
-bool tFrameworkElement::GetQualifiedName(tString& sb, const tLink& start, bool force_full_link) const
+bool tFrameworkElement::GetPath(tPath& result, const tLink& link) const
 {
+  if (link.IsInvalid())
+  {
+    result.Clear();
+    return false;
+  }
   if (IsReady())
   {
-    return GetQualifiedNameImpl(sb, start, force_full_link);
+    return GetPathImplementation(result, link);
   }
   else
   {
     tLock lock(GetStructureMutex());  // synchronize while element is under construction
-    return GetQualifiedNameImpl(sb, start, force_full_link);
+    return GetPathImplementation(result, link);
   }
 }
 
-bool tFrameworkElement::GetQualifiedNameImpl(tString& sb, const tLink& start, bool force_full_link) const
+bool tFrameworkElement::GetPathImplementation(tPath& result, const tLink& link) const
 {
-  size_t length = 0u;
-  bool abort_at_link_root = false;
-  for (const tLink* l = &start; l->parent != NULL && !(abort_at_link_root && l->GetChild().GetFlag(tFlag::ALTERNATIVE_LINK_ROOT)); l = &(l->parent->primary))
+  bool unique_result = link.GetChild().GetFlag(tFlag::GLOBALLY_UNIQUE_LINK);
+  size_t parent_count = internal::CountNumberOfAncestors(link);
+  rrlib::uri::tStringRange path_elements[parent_count + 1];  // +1 for this
+  rrlib::uri::tStringRange* path_element = &path_elements[parent_count];
+  (*path_element) = link.GetName();
+  path_element--;
+  core::tFrameworkElement* parent = link.GetParent();
+  while (parent && (!parent->IsRuntime()))
   {
-    abort_at_link_root |= (!force_full_link) && l->GetChild().GetFlag(tFlag::GLOBALLY_UNIQUE_LINK);
-    if (abort_at_link_root && l->GetChild().GetFlag(tFlag::ALTERNATIVE_LINK_ROOT))    // if unique_link element is at the same time a link root
-    {
-      break;
-    }
-    length += l->name->length() + 1u;
+    (*path_element) = parent->GetName();
+    unique_result |= parent->GetFlag(tFlag::GLOBALLY_UNIQUE_LINK);
+    path_element--;
+    parent = parent->GetParent();
   }
-  sb.clear();
-  if (sb.capacity() < length)
-  {
-    sb.reserve(length);
-  }
-
-  GetNameHelper(sb, start, abort_at_link_root);
-  assert(sb.length() == length);
-
-  // remove any characters if buffer is too long
-  //      if (len2 < sb.length()) {
-  //          sb.delete(len2, sb.length());
-  //      }
-  return abort_at_link_root;
+  assert(path_element == path_elements - 1);
+  result.Set(true, path_elements, &path_elements[parent_count + 1]);
+  return unique_result;
 }
 
 tRuntimeEnvironment& tFrameworkElement::GetRuntime()
 {
-  //return getParent(RuntimeEnvironment.class);
   return tRuntimeEnvironment::GetInstance();
 }
 
@@ -563,10 +563,6 @@ void tFrameworkElement::Init()
   InitImplementation();
 
   CheckPublish();
-
-  /*for (@SizeT int i = 0, n = publishThese.size(); i < n; i++) {
-      publishThese.get(i).publishUpdatedInfo(RuntimeListener.ADD);
-  }*/
 }
 
 void tFrameworkElement::InitAll()
@@ -592,7 +588,6 @@ void tFrameworkElement::InitImplementation()
   // Call pre-child-init callbacks and check for name clash
   if (init_this)
   {
-    PreChildInit();
     GetRuntime().PreElementInit(*this);
     CheckForNameClash(primary);
   }
@@ -628,7 +623,7 @@ void tFrameworkElement::InitImplementation()
   // Call post-child-init callbacks and set READY flag
   if (init_this)
   {
-    PostChildInit();
+    OnInitialization();
     {
       //tLock lock(*this); // we have structure lock
       flags |= tFlag::READY;
@@ -736,7 +731,7 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
     }
 
     // perform custom cleanup (stopping/deleting threads can be done here)
-    PrepareDelete();
+    OnManagedDelete();
 
     // remove children (thread-safe, because delete flag is set - and addChild etc. checks that)
     DeleteChildren();
@@ -745,82 +740,27 @@ void tFrameworkElement::ManagedDelete(tLink* dont_detach)
     PublishUpdatedInfo(tRuntimeListener::tEvent::REMOVE);
 
     // remove from hierarchy
-    for (tLink* l = &(primary); l != NULL;)
+    for (tLink* l = &(primary); l != nullptr;)
     {
-      if (l != dont_detach && l->parent != NULL)
+      if (l != dont_detach && l->parent != nullptr)
       {
         l->parent->children->Remove(l);
       }
       l = l->next;
     }
 
-    primary.parent = NULL;
+    primary.parent = nullptr;
   }
 
   // add garbage collector task
   internal::tGarbageDeleter::DeleteDeferred(this);
 }
 
-bool tFrameworkElement::NameEquals(const tString& other) const
-{
-  if (IsReady())
-  {
-    return primary.name->compare(other) == 0;
-  }
-  else
-  {
-    tLock lock(GetStructureMutex());
-    if (IsDeleted())
-    {
-      return false;
-    }
-    return primary.name->compare(other) == 0;
-  }
-}
-
-void tFrameworkElement::PrintStructure() const
-{
-  std::stringstream ls;
-  ls << "" << std::endl;
-  PrintStructure(0, ls);
-  FINROC_LOG_PRINT(USER, ls.str());
-}
-
-void tFrameworkElement::PrintStructure(int indent, std::stringstream& output) const
-{
-  tLock lock(GetStructureMutex());
-
-  // print element info
-  for (int i = 0; i < indent; i++)
-  {
-    output << " ";
-  }
-
-  if (IsDeleted())
-  {
-    output << "deleted FrameworkElement" << std::endl;
-    return;
-  }
-
-  output << GetName() << " (" << (IsReady() ? (GetFlag(tFlag::PUBLISHED) ? "published" : "ready") : IsDeleted() ? "deleted" : "constructing") << ")" << std::endl;
-
-  // print child element info
-  for (auto it = ChildrenBegin(); it != ChildrenEnd(); ++it)
-  {
-    it->PrintStructure(indent + 2, output);
-  }
-}
-
-void tFrameworkElement::PublishUpdatedEdgeInfo(tRuntimeListener::tEvent change_type, tAbstractPort& target)
-{
-  GetRuntime().RuntimeChange(change_type, *this, &target, !GetFlag(tFlag::PUBLISHED));
-}
-
 void tFrameworkElement::PublishUpdatedInfo(tRuntimeListener::tEvent change_type)
 {
   if (change_type == tRuntimeListener::tEvent::ADD || GetFlag(tFlag::PUBLISHED))
   {
-    GetRuntime().RuntimeChange(change_type, *this, NULL);
+    GetRuntime().RuntimeChange(change_type, *this);
   }
 }
 
@@ -868,15 +808,14 @@ void tFrameworkElement::SetName(const tString& name)
     string_buffer_annotation->string_buffer = name;
     primary.name = &(string_buffer_annotation->string_buffer);
   }
-
 }
 
 tFrameworkElement::tLink::tLink(tFrameworkElement& pointed_to) :
   points_to(pointed_to),
   name(&cUNNAMED_ELEMENT_STRING),
   name_buffer(),
-  parent(NULL),
-  next(NULL)
+  parent(nullptr),
+  next(nullptr)
 {}
 
 tFrameworkElement::tSubElementIterator::tSubElementIterator(tFrameworkElement& framework_element, bool include_root) :

@@ -106,7 +106,7 @@ private:
       }
       ann = ann->next_annotation;
     }
-    return NULL;
+    return nullptr;
   }
 
   /*!

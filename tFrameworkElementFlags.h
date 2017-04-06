@@ -77,8 +77,8 @@ enum class tFrameworkElementFlag
   SENSOR_DATA,           //!< Is the data processed in this framework element and all framework elements below only sensor data? (hint for visualization; relevant for interface especially)
   CONTROLLER_DATA,       //!< Is the data processed in this framework element and all framework elements below only controller data? (hint for visualization; relevant for interface especially)
   NETWORK_ELEMENT,       //!< Is this a network port or framework element?
-  GLOBALLY_UNIQUE_LINK,  //!< Has this framework element a globally unique qualified name? (reachable from any runtime environment using this name)
-  ALTERNATIVE_LINK_ROOT, //!< Is this an alternative root for links to globally unique objects (such as a remote runtime environments mapped into this one)
+  GLOBALLY_UNIQUE_LINK,  //!< Has this framework element a globally unique qualified name? (used by tools such as fingui to decide whether to store host name with connection)
+  ALTERNATIVE_LOCAL_URI_ROOT, //!< Is this an alternative root for local URIs (such as a remote runtime environments mapped into this one)
 
   RUNTIME,               //!< Non-port use: Is this the one and only runtime environment (in this process)? Port use: flag hijacked ports (see below).
   SHARED,                //!< Should framework element be visible/accessible from other runtime environments?

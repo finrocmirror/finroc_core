@@ -57,7 +57,8 @@ namespace core
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
 class tFrameworkElement;
-class tAbstractPort;
+class tConnector;
+class tUriConnector;
 
 //----------------------------------------------------------------------
 // Class declaration
@@ -65,7 +66,7 @@ class tAbstractPort;
 //! Runtime Listener
 /*!
  * Classes implementing this interface can register at the runtime and will
- * be informed whenever an port is added or removed
+ * be informed whenever ports and connectors are added, changed, or removed
  */
 class tRuntimeListener
 {
@@ -84,12 +85,16 @@ public:
     PRE_INIT //!< called with this constant before framework element is initialized
   };
 
+  virtual ~tRuntimeListener() = default;
+
 //----------------------------------------------------------------------
 // Private fields and methods
 //----------------------------------------------------------------------
 private:
 
   friend class tRuntimeEnvironment;
+  friend class tAbstractPort;
+  friend class tUriConnector;
 
   /*!
    * Called whenever a framework element was added, removed or changed
@@ -102,15 +107,24 @@ private:
   virtual void OnFrameworkElementChange(tEvent change_type, tFrameworkElement& element) = 0;
 
   /*!
-   * Called whenever an edge was added or removed
+   * Called whenever a connector was added or removed
    *
    * \param change_type Type of change
-   * \param source Source of edge
-   * \param target Target of edge
+   * \param connector Connector that was added or removed
    *
    * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
    */
-  virtual void OnEdgeChange(tEvent change_type, tAbstractPort& source, tAbstractPort& target) = 0;
+  virtual void OnConnectorChange(tEvent change_type, tConnector& connector) = 0;
+
+  /*!
+   * Called whenever a URI connector was added, removed or changed
+   *
+   * \param change_type Type of change
+   * \param connector URI connector that was added, removed or changed
+   *
+   * (Is called in synchronized (Runtime & Element) context in local runtime... so method should not block)
+   */
+  virtual void OnUriConnectorChange(tEvent change_type, tUriConnector& connector) = 0;
 
 };
 

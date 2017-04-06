@@ -82,6 +82,19 @@ const tFrameworkElement& tPortWrapperBase::GetLogDescription() const
   return wrapped ? wrapped->GetLogDescription() : tRuntimeEnvironment::GetInstance();
 }
 
+std::ostream& operator << (std::ostream& output, const tPortWrapperBase& port)
+{
+  if (port.GetWrapped())
+  {
+    output << *port.GetWrapped();
+  }
+  else
+  {
+    output << "<empty port wrapper>";
+  }
+  return output;
+}
+
 //----------------------------------------------------------------------
 // End of namespace declaration
 //----------------------------------------------------------------------

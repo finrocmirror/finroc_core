@@ -138,7 +138,7 @@ public:
    */
   inline static bool IsDataFlowType(const rrlib::rtti::tType& type)
   {
-    return type.GetSize() > 0;
+    return type.GetTypeTraits() & rrlib::rtti::trait_flags::cIS_DATA_TYPE;
   }
 
   /*!

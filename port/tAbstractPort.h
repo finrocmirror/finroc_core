@@ -48,28 +48,20 @@
 //----------------------------------------------------------------------
 #include "core/tFrameworkElement.h"
 #include "core/port/tAbstractPortCreationInfo.h"
+#include "core/port/tConnector.h"
+#include "core/internal/tLocalUriConnector.h"
 
 //----------------------------------------------------------------------
 // Namespace declaration
 //----------------------------------------------------------------------
 namespace finroc
 {
+namespace core
+{
 
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-namespace runtime_construction
-{
-class tFinstructable;
-}
-
-namespace core
-{
-namespace internal
-{
-class tLinkEdge;
-}
-
 class tPortConnectionConstraint;
 
 //----------------------------------------------------------------------
@@ -90,12 +82,12 @@ class tPortConnectionConstraint;
  * In many cases this (non-blocking) behaviour is intended.
  * However, to avoid that, acquire runtime structure lock before calling.
  */
-class tAbstractPort : public tFrameworkElement
+class tAbstractPort : public tUriConnector::tOwner
 {
   // connection list types
-  typedef rrlib::concurrent_containers::tSet < tAbstractPort*, rrlib::concurrent_containers::tAllowDuplicates::NO, rrlib::thread::tNoMutex,
+  typedef rrlib::concurrent_containers::tSet < tConnector*, rrlib::concurrent_containers::tAllowDuplicates::NO, rrlib::thread::tNoMutex,
           rrlib::concurrent_containers::set::storage::ArrayChunkBased<2, 9, definitions::cSINGLE_THREADED>, true > tOutgoingConnectionSet;
-  typedef rrlib::concurrent_containers::tSet < tAbstractPort*, rrlib::concurrent_containers::tAllowDuplicates::NO, rrlib::thread::tNoMutex,
+  typedef rrlib::concurrent_containers::tSet < tConnector*, rrlib::concurrent_containers::tAllowDuplicates::NO, rrlib::thread::tNoMutex,
           rrlib::concurrent_containers::set::storage::ArrayChunkBased<1, 9, definitions::cSINGLE_THREADED>, true > tIncomingConnectionSet;
 
   // iterator type
@@ -107,57 +99,50 @@ class tAbstractPort : public tFrameworkElement
 //----------------------------------------------------------------------
 public:
 
-  /*!
-   * Connection direction
-   */
-  enum class tConnectDirection
-  {
-    AUTO,      //!< Automatically determine connection direction. Usually a good choice
-    TO_TARGET, //!< Specified port is target port
-    TO_SOURCE  //!< Specified port is source port
-  };
-
   tAbstractPort(const tAbstractPortCreationInfo& creation_info);
 
   /*!
-   * Connects ports with the two specified links.
-   * The connection is (re)established whenever ports with these links are available.
+   * Connects ports with the two specified paths.
+   * The connection is established when ports with these paths are available.
    *
-   * \param port1_link Link name of first port to connect
-   * \param port2_link Link name of second port to connect
-   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
-   *                          (TO_TARGET means that the second port is the target port)
+   * \param port1_path Path to first port to connect
+   * \param port2_path Path to second port to connect
+   * \param connect_options Any connect options to apply
+   * \throw Throws std::invalid_argument on invalid connect options
    */
-  static void Connect(const std::string& port1_link, const std::string& port2_link, tConnectDirection connect_direction = tConnectDirection::AUTO);
+  static void Connect(const tPath& port1_path, const tPath& port2_path, const tConnectOptions& connect_options = tConnectOptions());
 
   /*!
    * Connect port to specified partner port
    *
    * \param to Port to connect this port to
-   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
-   * \param finstructed Was edge created using finstruct (or loaded from XML file)? (Should never be called with true by application developer)
+   * \param connect_options Any connect options to apply
+   * \return Pointer to connector object if connecting succeeded. nullptr otherwise.
+   * \throw Throws std::invalid_argument on invalid connect options
    */
-  void ConnectTo(tAbstractPort& to, tConnectDirection connect_direction = tConnectDirection::AUTO, bool finstructed = false);
+  tConnector* ConnectTo(tAbstractPort& to, const tConnectOptions& connect_options = tConnectOptions());
 
   /*!
-   * Connect port to specified partner port
-   * The connection is (re)established whenever a port with this link is available.
+   * Connect port to partner port with specified URI.
+   * The connection is established when a port with the URI is available.
    *
-   * \param link_name Link name of partner port (relative to parent framework element)
-   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
-   * \param finstructed Was edge created using finstruct (or loaded from XML file)? (Should never be called with true by application developer)
+   * \param uri Absolute URI of partner port
+   * \param connect_options Any connect options to apply
+   * \throw Throws std::invalid_argument on invalid connect options
    */
-  void ConnectTo(const tString& link_name, tConnectDirection connect_direction = tConnectDirection::AUTO, bool finstructed = false);
+  void ConnectTo(const tURI& uri, const tUriConnectOptions& connect_options = tUriConnectOptions());
 
   /*!
-   * Connect port to specified partner port
+   * Connect port to specified partner port.
+   * The connection is established when a port with the specified name/link is available.
    *
    * \param partner_port_parent Parent of port to connect to
-   * \param partner_port_name Name of port to connect to
+   * \param partner_port_path Path to port to connect to (relative to partner_port_parent)
    * \param warn_if_not_available Print warning message if connection cannot be established
-   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
+   * \param connect_options Any connect options to apply
+   * \throw Throws std::invalid_argument on invalid connect options
    */
-  void ConnectTo(tFrameworkElement& partner_port_parent, const tString& port_name, bool warn_if_not_available = true, tConnectDirection connect_direction = tConnectDirection::AUTO);
+  void ConnectTo(tFrameworkElement& partner_port_parent, const tPath& partner_port_path, bool warn_if_not_available = true, const tConnectOptions& connect_options = tConnectOptions());
 
   /*!
    * \return Number of incoming connections (slightly expensive operation - O(n))
@@ -170,26 +155,39 @@ public:
   size_t CountOutgoingConnections() const;
 
   /*!
-   * Disconnects all edges
+   * Disconnects ports with the two specified paths and no longer tries to connect them
+   * (reverse operation to Connect())
    *
-   * \param incoming disconnect incoming edges?
-   * \param outgoing disconnect outgoing edges?
+   * \param port1_path Path of first port to disconnect
+   * \param port2_path Path of second port to disconnect
+   * \return True if ports were disconnected or pending reconnect was stopped.
+   */
+  static bool Disconnect(const tPath& port1_path, const tPath& port2_path);
+
+  /*!
+   * Disconnects all connections (except of connections from tools).
+   * Also stops any reconnecting to this port.
+   *
+   * \param incoming Disconnect incoming connections?
+   * \param outgoing Disconnect outgoing connections?
    */
   void DisconnectAll(bool incoming = true, bool outgoing = true);
 
   /*!
    * Disconnect from specified port
    *
-   * \param target Port to disconnect from
+   * \param port Port to disconnect from
+   * \return True if ports were disconnected or pending reconnect was stopped.
    */
-  void DisconnectFrom(tAbstractPort& target);
+  bool DisconnectFrom(tAbstractPort& port);
 
   /*!
-   * Disconnect from port with specified link (removes link edges
+   * Disconnect from port with specified URI
    *
-   * \param link Qualified link of connection partner
+   * \param uri Absolute URI of connection partner
+   * \return True if URI connector was removed
    */
-  void DisconnectFrom(const tString& link);
+  bool DisconnectFrom(const tURI& uri);
 
   /*!
    * \return Data type of port
@@ -209,11 +207,6 @@ public:
   }
 
   /*!
-   * \return Was edge from this port to specified destination created using finstruct?
-   */
-  bool IsEdgeFinstructed(tAbstractPort& destination) const;
-
-  /*!
    * \return Does port have any incoming connections?
    */
   bool HasIncomingConnections()
@@ -230,13 +223,13 @@ public:
   }
 
   /*!
-   * \return An iterator to iterate over all ports that this port has incoming connections from
+   * \return An iterator to iterate over all incoming connections
    *
    * Typically used in this way (port is a tAbstractPort reference):
    *
-   *   for (auto it = port.OutgoingConnectionsBegin(); it != port.OutgoingConnectionsEnd(); ++it)
+   *   for (auto it = port.IncomingConnectionsBegin(); it != port.IncomingConnectionsEnd(); ++it)
    *   {
-   *     if (it->IsReady())
+   *     if (it->Source().IsReady())
    *     {
    *       ...
    *     }
@@ -265,11 +258,13 @@ public:
   }
 
   /*!
+   * \param port Other port
    * \return Is port connected to specified other port?
    */
-  bool IsConnectedTo(tAbstractPort& target) const;
+  bool IsConnectedTo(tAbstractPort& port) const;
 
-  /*! Check if output ports have a data sink
+  /*!
+   * Check whether this (output) port has a data sink
    *
    * \return Is \a this port currently connected to an input port?
    */
@@ -277,7 +272,7 @@ public:
   {
     for (auto it = this->OutgoingConnectionsBegin(); it != this->OutgoingConnectionsEnd(); ++it)
     {
-      if (it->IsInputPort() || it->IsConnectedToInputPort())
+      if (it->Destination().IsInputPort() || it->Destination().IsConnectedToInputPort())
       {
         return true;
       }
@@ -285,7 +280,8 @@ public:
     return false;
   }
 
-  /*! Check if input ports have a data source
+  /*!
+   * Check whether this (input) port has a data sink
    *
    * \return Is \a this port currently connected to an output port?
    */
@@ -293,7 +289,7 @@ public:
   {
     for (auto it = this->IncomingConnectionsBegin(); it != this->IncomingConnectionsEnd(); ++it)
     {
-      if (it->IsOutputPort() || it->IsConnectedToOutputPort())
+      if (it->Source().IsOutputPort() || it->Source().IsConnectedToOutputPort())
       {
         return true;
       }
@@ -323,18 +319,17 @@ public:
   }
 
   /*!
-   * Can this port be connected to specified target port? (additional non-standard checks)
-   * (may be overridden by subclass - should usually call superclass method, too)
+   * Checks whether this port can be connected to specified destination port.
    *
-   * \param target Target port?
-   * \param reason_string If connecting is not possible, appends reason to this string (if not NULL)
+   * \param destination Destination port to check connectability to.
+   * \param reason_string If connecting is not possible, appends reason to this stream (unless it is nullptr)
    * \return Answer
    */
-  bool MayConnectTo(tAbstractPort& target, std::string* reason_string = NULL) const;
+  bool MayConnectTo(tAbstractPort& destination, std::stringstream* reason_stream = nullptr) const;
 
   /*!
    * Notify port of possibly temporary network connection loss.
-   * If port's DEFAULT_ON_DISCONNECT flag is set, the port value is set to its default (typically safe state).
+   * If port's DEFAULT_ON_DISCONNECT flag is set, the port value is set to its default (typically a safe state).
    * This method is typically called by network transport plugins (only).
    */
   void NotifyOfNetworkConnectionLoss()
@@ -343,13 +338,13 @@ public:
   }
 
   /*!
-   * \return An iterator to iterate over all ports that this port has outgoing connections to
+   * \return An iterator to iterate over outgoing connections
    *
    * Typically used in this way (port is a tAbstractPort reference):
    *
    *   for (auto it = port.OutgoingConnectionsBegin(); it != port.OutgoingConnectionsEnd(); ++it)
    *   {
-   *     if (it->IsReady())
+   *     if (it->Destination().IsReady())
    *     {
    *       ...
    *     }
@@ -382,13 +377,41 @@ protected:
 
   virtual ~tAbstractPort();
 
+  /*! Result of InferConnectDirection */
+  enum tConnectDirection
+  {
+    TO_DESTINATION,
+    TO_SOURCE
+  };
+
+  /*!
+   * Create connector for specified connection
+   * (may be overridden to create specialized connectors)
+   *
+   * \param destination Destination port to connect to
+   * \param connect_options Connect options to apply
+   * \return Reference to created connector
+   */
+  virtual tConnector* CreateConnector(tAbstractPort& destination, const tConnectOptions& connect_options);
+
   /*!
    * Infers connect direction to specified partner port
+   * (must be called with structure mutex lock)
    *
    * \param other Port to determine connect direction to.
-   * \return Either TO_TARGET or TO_SOURCE depending on whether 'other' should be target or source of a connection with this port.
+   * \return Either TO_DESTINATION or TO_SOURCE depending on whether 'other' should be destination or source of a connection with this port.
    */
   virtual tConnectDirection InferConnectDirection(const tAbstractPort& other) const;
+
+  /*!
+   * Infers connect direction to partner port with specified path.
+   * Partner port does not need to exist (if it does, the other overload should be called, as it needs less heuristics).
+   * (must be called with structure mutex lock)
+   *
+   * \param path Path of port to determine connect direction to.
+   * \return Either TO_DESTINATION or TO_SOURCE depending on whether 'other' should be destination or source of a connection with this port.
+   */
+  virtual tConnectDirection InferConnectDirection(const tPath& path) const;
 
 //----------------------------------------------------------------------
 // Private fields and methods
@@ -397,16 +420,15 @@ private:
 
   friend class tPortConnectionConstraint;
   friend class tRuntimeEnvironment;
-  friend class runtime_construction::tFinstructable; // for link edge access
+  friend class tConnector;
+  friend class tUriConnector;
+  friend class internal::tLocalUriConnector;
 
   /*! Edges emerging from this port */
   tOutgoingConnectionSet outgoing_connections;
 
   /*! Edges ending at this port */
   tIncomingConnectionSet incoming_connections;
-
-  /*! Contains any link edges created by this port */
-  std::unique_ptr<std::vector<internal::tLinkEdge*>> link_edges;
 
   /*!
    * Data type of class wrapping this port (differs from data_type e.g. with numeric types)
@@ -419,35 +441,28 @@ private:
 
 
   /*!
-   * Connect port to specified target port - called after all tests succeeded
+   * Connect port to specified destination port - called after all tests succeeded
    * (updates internal variables etc.)
    *
-   * \param target Target to connect to
-   * \param finstructed Was edge created using finstruct?
+   * \param destination Destination port to connect to
+   * \param connect_options Connect options to apply
+   * \return Reference to created connector
    */
-  void ConnectImplementation(tAbstractPort& target, bool finstructed);
+  tConnector& ConnectImplementation(tAbstractPort& destination, const tConnectOptions& connect_options);
 
   /*!
-   * Implementation of actual removement of edge (updates internal variables etc.)
+   * Implementation of actual removement of connector (updates internal variables etc.)
    *
-   * \param source Source Port
-   * \param destination Destination Port
+   * \param connector Connector to disconnect and remove
+   * \param stop_any_reconnecting Stop any reconnecting of connection? (Usually done if disconnect is explicitly called - usually not done when port is deleted)
    */
-  void DisconnectImplementation(tAbstractPort& source, tAbstractPort& destination);
+  static void DisconnectImplementation(tConnector& connector, bool stop_any_reconnecting);
 
   /*!
-   * (may throw an exception during static destruction)
    * \return Global list of constraints regarding connections among ports
+   * \throws May throw an exception during static destruction phase
    */
   static std::vector<tPortConnectionConstraint*>& GetConnectionConstraintList();
-
-  /*!
-   * Transforms (possibly relative link) to absolute link
-   *
-   * \param rel_link possibly relative link (absolute if it starts with '/')
-   * \return absolute link
-   */
-  tString MakeAbsoluteLink(const tString& rel_link) const;
 
   /*!
    * Called whenever a new connection to or from this port is established.
@@ -482,7 +497,7 @@ private:
   {
   }
 
-  virtual void PrepareDelete() override;
+  virtual void OnManagedDelete() override;
 
 };
 

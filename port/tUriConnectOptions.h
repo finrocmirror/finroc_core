@@ -19,24 +19,24 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 //
 //----------------------------------------------------------------------
-/*!\file    core/tRuntimeSettings.h
+/*!\file    core/port/tUriConnectOptions.h
  *
  * \author  Max Reichardt
  *
- * \date    2012-10-28
+ * \date    2017-01-28
  *
- * \brief   Contains tRuntimeSettings
+ * \brief   Contains tUriConnectOptions
  *
- * \b tRuntimeSettings
+ * \b tUriConnectOptions
  *
- * Contains modifiable global settings of runtime environment.
- * Plugins should add global parameters accessible via ports to this tRuntimeSettings framework element.
+ * Connect options for URI connectors.
+ * They allow to specify additional parameters as key/value pairs.
+ * These parameter are scheme-specific - and could be e.g. QoS parameters.
  *
- * StaticInit() should be called after runtime and data types have been initialized.
  */
 //----------------------------------------------------------------------
-#ifndef __core__tRuntimeSettings_h__
-#define __core__tRuntimeSettings_h__
+#ifndef __core__port__tUriConnectOptions_h__
+#define __core__port__tUriConnectOptions_h__
 
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
@@ -45,7 +45,7 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
-#include "core/tFrameworkElement.h"
+#include "core/port/tConnectOptions.h"
 
 //----------------------------------------------------------------------
 // Namespace declaration
@@ -62,41 +62,33 @@ namespace core
 //----------------------------------------------------------------------
 // Class declaration
 //----------------------------------------------------------------------
-//! Modifiable runtime settings
+//! Connect options for URI connectors
 /*!
- * Contains modifiable global settings of runtime environment.
- * Plugins should add global parameters accessible via ports to this tRuntimeSettings framework element.
- *
- * StaticInit() should be called after runtime and data types have been initialized.
+ * Connect options for URI connectors.
+ * They allow to specify additional parameters as key/value pairs.
+ * These parameter are scheme-specific - and could be e.g. QoS parameters.
  */
-class tRuntimeSettings : public tFrameworkElement
+struct tUriConnectOptions : public tConnectOptions
 {
+  using tConnectOptions::tConnectOptions;
 
-//----------------------------------------------------------------------
-// Public methods and typedefs
-//----------------------------------------------------------------------
-public:
-
-  /*!
-   * \return Singleton instance
-   */
-  static tRuntimeSettings& GetInstance();
-
-//----------------------------------------------------------------------
-// Private fields and methods
-//----------------------------------------------------------------------
-private:
-
-  friend class tRuntimeEnvironment;
-
-  tRuntimeSettings();
-
-  /*! Singleton Instance */
-  static tRuntimeSettings* instance;
-
-  /*! Completes initialization */
-  static void StaticInit();
+  /*! Additional parameters as key/value pairs */
+  std::map<std::string, std::string> parameters;
 };
+
+inline rrlib::serialization::tOutputStream& operator << (rrlib::serialization::tOutputStream& stream, const tUriConnectOptions& options)
+{
+  stream << static_cast<const tConnectOptions&>(options);
+  stream << options.parameters;
+  return stream;
+}
+
+inline rrlib::serialization::tInputStream& operator >> (rrlib::serialization::tInputStream& stream, tUriConnectOptions& options)
+{
+  stream >> static_cast<tConnectOptions&>(options);
+  stream >> options.parameters;
+  return stream;
+}
 
 //----------------------------------------------------------------------
 // End of namespace declaration

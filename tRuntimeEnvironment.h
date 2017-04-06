@@ -48,6 +48,7 @@
 #include "core/tFrameworkElement.h"
 #include "core/tRuntimeListener.h"
 #include "core/internal/tFrameworkElementRegister.h"
+#include "core/internal/tLocalUriConnector.h"
 
 //----------------------------------------------------------------------
 // Namespace declaration
@@ -60,10 +61,6 @@ namespace core
 //----------------------------------------------------------------------
 // Forward declarations / typedefs / enums
 //----------------------------------------------------------------------
-namespace internal
-{
-class tLinkEdge;
-}
 
 /*!
  * Enum to identify special runtime elements
@@ -89,7 +86,7 @@ enum class tSpecialRuntimeElement : size_t
  * In order to modify the framework element hierarchy, a framework element
  * hierarchy lock must be acquired.
  */
-class tRuntimeEnvironment : public tFrameworkElement
+class tRuntimeEnvironment : public tUriConnector::tOwner
 {
 
 //----------------------------------------------------------------------
@@ -192,10 +189,10 @@ public:
   tAbstractPort* GetPort(tHandle port_handle);
 
   /*!
-   * \param link_name (relative) Fully qualified name of port
-   * \return Port with this name - or null if it does not exist. Port may not be initialized yet.
+   * \param path Path of port
+   * \return Port with this path - or nullptr if it no port with path exists. Note that returned port may not be initialized yet.
    */
-  tAbstractPort* GetPort(const tString& link_name);
+  tAbstractPort* GetPort(const tPath& path);
 
   /*!
    * \return Framework element hierarchy changing operations need to acquire a lock on this mutex
@@ -233,26 +230,24 @@ private:
 
   friend class tFrameworkElement;
   friend class tAbstractPort;
-  friend class internal::tLinkEdge;
+  friend class internal::tLocalUriConnector;
+  friend class tUriConnector;
 
   /*! Global register of all framework elements */
   internal::tFrameworkElementRegister elements;
 
-  /*! Edges dealing with linked ports */
-  std::map<std::string, internal::tLinkEdge*> link_edges;
-
-  /*! List of global link edges (link edges with two links are added to this list by tAbstractPort) */
-  std::vector<std::unique_ptr<internal::tLinkEdge>> global_link_edges;
+  /*! Maps local URIs to registered tLocalUriConnectors */
+  std::map<tPath, std::vector<internal::tLocalUriConnector*>> registered_connectors;
 
   /*! List with runtime listeners */
   rrlib::concurrent_containers::tSet < tRuntimeListener*, rrlib::concurrent_containers::tAllowDuplicates::NO, rrlib::thread::tNoMutex,
         rrlib::concurrent_containers::set::storage::ArrayChunkBased<8, 31, definitions::cSINGLE_THREADED >> runtime_listeners;
 
-  /*! Temporary buffer - may be used in synchronized context */
-  std::string temp_buffer;
+  /*! Temporary buffer for paths - may be used in synchronized context */
+  tPath temp_path;
 
-  /*! Alternative roots for links (usually remote runtime environments mapped into this one) */
-  std::vector<tFrameworkElement*> alternative_link_roots;
+  /*! Alternative roots for local URIs (usually remote runtime environments mapped into this one) */
+  std::vector<tFrameworkElement*> alternative_uri_roots;
 
   /*! Mutex for framework element hierarchy */
   rrlib::thread::tRecursiveMutex structure_mutex;
@@ -280,20 +275,21 @@ private:
   static void InitialInit();
 
   /*!
-   * (usually only called by LinkEdge)
-   * Add link edge that is interested in specific link
-   *
-   * \param link link that edge is interested in
-   * \param edge Edge to add
-   */
-  void AddLinkEdge(const tString& link, internal::tLinkEdge& edge);
-
-  /*!
    * Called before a framework element is initialized - can be used to create links etc. to this element etc.
    *
    * \param element Framework element that will be initialized soon
    */
   void PreElementInit(tFrameworkElement& element);
+
+  /*!
+   * (only called by tLocalUriConnector)
+   * Register tLocalUriConnector that is interested in specific URI.
+   * Called once per URI.
+   *
+   * \param path Path that that tLocalUriConnector is interested in
+   * \param connector Connector to register
+   */
+  void RegisterConnector(const tPath& path, internal::tLocalUriConnector& connector);
 
   /*!
    * Register framework element at RuntimeEnvironment.
@@ -306,26 +302,25 @@ private:
   tHandle RegisterElement(tFrameworkElement& fe, bool port);
 
   /*!
-   * (usually only called by LinkEdge)
-   * Remove link edge that is interested in specific link
-   *
-   * \param link link that edge is interested in
-   * \param edge Edge to add
-   */
-  void RemoveLinkEdge(const tString& link, internal::tLinkEdge& edge);
-
-  /*!
    * Called whenever a framework element was added/removed or changed
    *
    * \param change_type Type of change
    * \param element FrameworkElement that changed
-   * \param edge_target Target of edge, in case of EDGE_CHANGE
-   * \param notify_listeners_only Only notify runtime listeners and do not perform any further processing
    *
    * (Is called with structure mutex obtained... so method should not block)
-   * (should only be called by FrameworkElement class)
+   * (only to be called by tFrameworkElement class)
    */
-  void RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element, tAbstractPort* edge_target = NULL, bool notify_listeners_only = false);
+  void RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element);
+
+  /*!
+   * (only called by tLocalUriConnector)
+   * Unregister tLocalUriConnector that was interested in specific URI.
+   * Called once per URI.
+   *
+   * \param path Path that tLocalUriConnector was interested in
+   * \param connector Connector to unregister
+   */
+  void UnregisterConnector(const tPath& path, internal::tLocalUriConnector& connector);
 
   /*!
    * Unregister framework element at RuntimeEnvironment.

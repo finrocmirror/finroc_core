@@ -67,6 +67,7 @@ class tFrameworkElement;
 /*!
  * This annotation can be used to assign arbitrary classification tags (strings) to framework elements.
  * These tags are mainly used for optimized visualization/representation in finstruct.
+ * Tags may only be added until an element is initialized (for thread-safety and no need to send updates to finstruct).
  *
  * Libraries and plugins that define their own tags, should prepend their namespace in order to avoid
  * name collisions (e.g. "ib2c" or "ib2c.whatever" or "ib2c_whatever")
@@ -109,6 +110,12 @@ public:
   static void AddTags(tFrameworkElement& fe, const std::vector<std::string>& tags);
 
   /*!
+   * \param Framework element to get tags of
+   * \return Tags attached to framework element
+   */
+  static const std::vector<std::string>& GetTags(const tFrameworkElement& fe);
+
+  /*!
    * \param fe Framework element to check
    * \param tag Tag to check
    *
@@ -116,6 +123,13 @@ public:
    */
   static bool IsTagged(const tFrameworkElement& fe, const std::string& tag);
 
+  /*!
+   * \return Classification tags (strings) assigned to framework element
+   */
+  const std::vector<std::string>& Tags() const
+  {
+    return tags;
+  }
 
   /*! "hidden in tools" - Tag that marks element that should not be visible in tools by default */
   static const char* cHIDDEN_IN_TOOLS;
@@ -125,7 +139,6 @@ public:
 //----------------------------------------------------------------------
 private:
 
-  friend rrlib::serialization::tOutputStream& operator << (rrlib::serialization::tOutputStream& stream, const tFrameworkElementTags& tags);
   friend rrlib::serialization::tInputStream& operator >> (rrlib::serialization::tInputStream& stream, tFrameworkElementTags& tags);
 
   /*! Classification tags (strings) assigned to framework element */

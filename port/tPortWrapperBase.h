@@ -87,7 +87,6 @@ class tPortWrapperBase
 //----------------------------------------------------------------------
 public:
 
-  typedef tAbstractPort::tConnectDirection tConnectDirection;
   typedef tFrameworkElement::tFlag tFlag;
   typedef tFrameworkElement::tFlags tFlags;
 
@@ -113,59 +112,66 @@ public:
   /*!
    * Connect port to specified partner port
    *
-   * \param partner_port Partner port
-   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
+   * \param to Port to connect this port to
+   * \param connect_options Any connect options to apply
+   * \throw Throws std::invalid_argument on invalid connect options
    */
-  inline void ConnectTo(tAbstractPort& partner_port, tConnectDirection connect_direction = tConnectDirection::AUTO)
+  inline void ConnectTo(tAbstractPort& partner_port, const tConnectOptions& connect_options = tConnectOptions())
   {
     if (wrapped)
     {
-      wrapped->ConnectTo(partner_port, connect_direction);
+      wrapped->ConnectTo(partner_port, connect_options);
     }
   }
 
   /*!
    * Connect port to specified partner port
    *
-   * \param partner_port Partner port
-   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
+   * \param to Port to connect this port to
+   * \param connect_options Any connect options to apply
+   * \return Pointer to connector object if connecting succeeded. nullptr otherwise.
+   * \throw Throws std::invalid_argument on invalid connect options
    */
-  inline void ConnectTo(const tPortWrapperBase& partner_port, tConnectDirection connect_direction = tConnectDirection::AUTO)
+  inline tConnector* ConnectTo(const tPortWrapperBase& partner_port, const tConnectOptions& connect_options = tConnectOptions())
   {
     if (wrapped && partner_port.GetWrapped())
     {
-      wrapped->ConnectTo(*partner_port.wrapped, connect_direction);
+      return wrapped->ConnectTo(*partner_port.wrapped, connect_options);
     }
+    return nullptr;
   }
 
   /*!
-   * Connect port to specified partner port
-   * (connection is (re)established when link is available)
+   * Connect port to partner port with specified URI.
+   * The connection is established when a port with the URI is available.
    *
-   * \param link_name Link name of partner port (relative to parent framework element)
-   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
+   * \param uri Absolute URI of partner port
+   * \param connect_options Any connect options to apply
+   * \throw Throws std::invalid_argument on invalid connect options
    */
-  inline void ConnectTo(const tString& link_name, tConnectDirection connect_direction = tConnectDirection::AUTO)
+  inline void ConnectTo(const tURI& uri, const tUriConnectOptions& connect_options = tUriConnectOptions())
   {
     if (wrapped)
     {
-      wrapped->ConnectTo(link_name, connect_direction);
+      wrapped->ConnectTo(uri, connect_options);
     }
   }
 
   /*!
-   * Connect port to specified partner port
+   * Connect port to specified partner port.
+   * The connection is established when a port with the specified name/link is available.
    *
    * \param partner_port_parent Parent of port to connect to
-   * \param partner_port_name Name of port to connect to
+   * \param partner_port_path Path to port to connect to (relative to partner_port_parent)
    * \param warn_if_not_available Print warning message if connection cannot be established
-   * \param connect_direction Direction for connection. "AUTO" should be appropriate for almost any situation. However, another direction may be enforced.
+   * \param connect_options Any connect options to apply
+   * \throw Throws std::invalid_argument on invalid connect options
    */
-  inline void ConnectTo(tFrameworkElement& partner_port_parent, const tString& partner_port_name, bool warn_if_not_available = true, tConnectDirection connect_direction = tConnectDirection::AUTO)
+  inline void ConnectTo(tFrameworkElement& partner_port_parent, const tPath& partner_port_path, bool warn_if_not_available = true, const tConnectOptions& connect_options = tConnectOptions())
   {
     if (wrapped)
     {
-      wrapped->ConnectTo(partner_port_parent, partner_port_name, warn_if_not_available, connect_direction);
+      wrapped->ConnectTo(partner_port_parent, partner_port_path, warn_if_not_available, connect_options);
     }
   }
 
@@ -197,15 +203,16 @@ public:
   }
 
   /*!
-   * Disconnect from port with specified link (removes link edges
+   * Disconnect from port with specified URI
    *
-   * \param link Qualified link of connection partner
+   * \param uri Absolute URI of connection partner
+   * \return True if URI connector was removed
    */
-  void DisconnectFrom(const tString& link)
+  void DisconnectFrom(const tURI& uri)
   {
     if (wrapped)
     {
-      wrapped->DisconnectFrom(link);
+      wrapped->DisconnectFrom(uri);
     }
   }
 
@@ -247,6 +254,14 @@ public:
   inline bool GetFlag(tFrameworkElement::tFlag flag) const
   {
     return wrapped ? wrapped->GetFlag(flag) : false;
+  }
+
+  /*!
+   * \return Handle of wrapped port (0 if no element is wrapped)
+   */
+  tFrameworkElement::tHandle GetHandle() const
+  {
+    return wrapped ? wrapped->GetHandle() : 0;
   }
 
   /*!
@@ -331,18 +346,6 @@ public:
     }
   }
 
-  /*!
-   * Are name of this element and String 'other' identical?
-   * (result is identical to getName().equals(other); but more efficient in C++)
-   *
-   * \param other Other String
-   * \return Result
-   */
-  inline bool NameEquals(const tString& other) const
-  {
-    return wrapped && wrapped->NameEquals(other);
-  }
-
   // using this operator, it can be checked conveniently in PortListener's PortChanged()
   // whether origin port is the same port as this object wraps
   bool operator ==(const tAbstractPort& p) const
@@ -362,6 +365,20 @@ public:
     return wrapped != p.wrapped;
   }
 
+  /*!
+   * When storing port wrappers in smart pointers, can be used to to auto-delete wrapped ports using safe tPortWrapperBase::ManagedDelete()
+   */
+  struct tDeleter
+  {
+    void operator()(tPortWrapperBase* ptr) const
+    {
+      if (ptr)
+      {
+        ptr->ManagedDelete();
+        delete ptr;
+      }
+    }
+  };
 
   /*!
    * Many port constructors have a variadic argument list.
@@ -500,6 +517,8 @@ private:
     typedef typename std::conditional<HasSet<T, A>::value, TypeReplicator, SetBaseClass<typename T::tBase, A>>::type::type type;
   };
 };
+
+std::ostream& operator << (std::ostream& output, const tPortWrapperBase& port);
 
 //----------------------------------------------------------------------
 // End of namespace declaration

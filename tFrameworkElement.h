@@ -165,7 +165,7 @@ public:
    * \param name Name of framework element (will be shown in browser etc.). May be empty here and changed via SetName() before initialization.
    * \param flags Any flags for framework element. Constant flags can only be set in constructor.
    */
-  explicit tFrameworkElement(tFrameworkElement* parent = NULL, const tString& name = "", tFlags flags = tFlags());
+  explicit tFrameworkElement(tFrameworkElement* parent = nullptr, const tString& name = "", tFlags flags = tFlags());
 
   /*!
    * Add Child to framework element
@@ -247,16 +247,15 @@ public:
 
   /*!
    * \param name Name
-   * \return Returns first child with specified name - null if none exists
+   * \return Returns first child with specified name. Returns nullptr if no child with name exists.
    */
   tFrameworkElement* GetChild(const tString& name) const;
 
   /*!
-   * \param name (relative) Qualified name
-   * \param only_globally_unique_children Only return child with globally unique link?
-   * \return Framework element - or null if non-existent
+   * \param path Relative path
+   * \return Returns framework element with specified relative path. Returns nullptr if no element can be found with specified path.
    */
-  tFrameworkElement* GetChildElement(const tString& name, bool only_globally_unique_children);
+  tFrameworkElement* GetChild(const tPath& path);
 
   /*!
    * Is specified flag set?
@@ -279,14 +278,12 @@ public:
 
   /*!
    * \param link_index Index of link (0 = primary)
-   * \return Link with specified index
-   * (should be called in synchronized context)
+   * \return Link with specified index. Returns invalid link if no index with specified index exists.
    */
-  const tLink* GetLink(size_t link_index) const;
+  const tLink& GetLink(size_t link_index) const;
 
   /*!
-   * \return Number of links to this port
-   * (should be called in synchronized context)
+   * \return Number of links to this element (only ports have more than one)
    */
   size_t GetLinkCount() const;
 
@@ -330,103 +327,35 @@ public:
   tFrameworkElement* GetParentWithFlags(tFlags parent_flags) const;
 
   /*!
-   * (Use StringBuilder version if efficiency or real-time is an issue)
-   * \return Qualified link to this element (may be shorter than qualified name, if object has a globally unique link)
+   * \return Path to this framework element (including this framework element)
    */
-  inline tString GetQualifiedLink() const
+  inline tPath GetPath() const
   {
-    tString sb;
-    GetQualifiedLink(sb);
-    return sb;
+    tPath result;
+    GetPath(result, primary);
+    return result;
   }
 
   /*!
-   * Efficient variant of above.
-   * (StringBuilder may be reused)
+   * Obtains path to this framework element (including this framework element)
    *
-   * \param sb Buffer that will store result
-   * \return Is this link globally unique?
+   * \param result Object to store result in. If reused and sufficiently large, does not require memory allocation.
+   * \param link_index Index of link to this object to use
+   * \return Whether the result is a globally unique path
    */
-  inline bool GetQualifiedLink(tString& sb) const
+  inline bool GetPath(tPath& result, size_t link_index = 0) const
   {
-    return GetQualifiedLink(sb, primary);
+    return GetPath(result, link_index == 0 ? primary : GetLink(link_index));
   }
 
   /*!
-   * Efficient variant of above.
-   * (StringBuilder may be reused)
+   * Obtains path to this framework element (including this framework element)
    *
-   * \param sb Buffer that will store result
-   * \param link_index Index of link to start with
-   * \return Is this link globally unique?
+   * \param result Object to store result in. If reused and sufficiently large, does not require memory allocation.
+   * \param link Link to this object to use
+   * \return Whether the result is a globally unique path
    */
-  inline bool GetQualifiedLink(tString& sb, size_t link_index) const
-  {
-    const tLink* link = GetLink(link_index);
-    assert(link);
-    return GetQualifiedLink(sb, *link);
-  }
-
-  /*!
-   * Efficient variant of above.
-   * (StringBuilder may be reused)
-   *
-   * \param sb Buffer that will store result
-   * \param start Link to start with
-   * \return Is this link globally unique?
-   */
-  inline bool GetQualifiedLink(tString& sb, const tLink& start) const
-  {
-    return GetQualifiedName(sb, start, false);
-  }
-
-  /*!
-   * (Use StringBuilder version if efficiency or real-time is an issue)
-   * \return Concatenation of parent names and this element's name
-   */
-  inline tString GetQualifiedName() const
-  {
-    tString sb;
-    GetQualifiedName(sb);
-    return sb;
-  }
-
-  /*!
-   * Efficient variant of above.
-   * (StringBuilder may be reused)
-   *
-   * \param sb Buffer that will store result
-   */
-  inline void GetQualifiedName(tString& sb) const
-  {
-    GetQualifiedName(sb, primary);
-  }
-
-  /*!
-   * Efficient variant of above.
-   * (StringBuilder may be reused)
-   *
-   * \param sb Buffer that will store result
-   * \param link_index Index of link to start with
-   */
-  inline void GetQualifiedName(tString& sb, size_t link_index) const
-  {
-    const tLink* link = GetLink(link_index);
-    assert(link);
-    GetQualifiedName(sb, *link);
-  }
-
-  /*!
-   * Efficient variant of above.
-   * (StringBuilder may be reused)
-   *
-   * \param sb Buffer that will store result
-   * \param start Link to start with
-   */
-  inline void GetQualifiedName(tString& sb, const tLink& start) const
-  {
-    GetQualifiedName(sb, start, true);
-  }
+  bool GetPath(tPath& result, const tLink& link) const;
 
   /*!
    * (for convenience)
@@ -521,17 +450,8 @@ public:
    */
   inline void ManagedDelete()
   {
-    ManagedDelete(NULL);
+    ManagedDelete(nullptr);
   }
-
-  /*!
-   * Are name of this element and String 'other' identical?
-   * (result is identical to getName().equals(other); but more efficient in C++)
-   *
-   * \param other Other String
-   * \return Result
-   */
-  bool NameEquals(const tString& other) const;
 
   /*!
    * Called whenever static parameters of this framework element need to be (re)evaluated.
@@ -543,11 +463,6 @@ public:
    * (This must only be called with lock on runtime registry.)
    */
   virtual void OnStaticParameterChange() {}
-
-  /*!
-   * Helper for Debugging: Prints structure below this framework element to console
-   */
-  void PrintStructure() const;
 
   /*!
    * \param name New Port name
@@ -584,6 +499,20 @@ public:
   {
     return tSubElementIterator();
   }
+
+  /*!
+   * This allows to store framework elements in smart pointers - and auto-delete them using safe tPortWrapperBase::ManagedDelete()
+   */
+  struct tDeleter
+  {
+    void operator()(tFrameworkElement* ptr) const
+    {
+      if (ptr)
+      {
+        ptr->ManagedDelete();
+      }
+    }
+  };
 
   /*!
    * Framework elements are inserted as children of other framework element
@@ -638,6 +567,14 @@ public:
     inline tFrameworkElement* GetParent() const
     {
       return parent;
+    }
+
+    /*!
+     * \return Whether this link is invalid (does not exist)
+     */
+    inline bool IsInvalid() const
+    {
+      return this == cINVALID_LINK.get();
     }
 
     /*!
@@ -839,27 +776,9 @@ protected:
   void Link(tFrameworkElement& parent, const tString& link_name);
 
   /*!
-   * \param indent Current indentation level
-   * \param output Only used in C++ for streaming
-   */
-  virtual void PrintStructure(int indent, std::stringstream& output) const;
-
-  /*!
-   * Publish updated edge information
+   * Publish updated framework element information
    *
    * \param change_type Type of change (see Constants in RuntimeListener class)
-   * \param target Target of edge (this is source)
-   *
-   * (should only be called by AbstractPort class)
-   */
-  void PublishUpdatedEdgeInfo(tRuntimeListener::tEvent change_type, tAbstractPort& target);
-
-  /*!
-   * Publish updated port information
-   *
-   * \param change_type Type of change (see Constants in RuntimeListener class)
-   *
-   * (should only be called by FrameworkElement class)
    */
   void PublishUpdatedInfo(tRuntimeListener::tEvent change_type);
 
@@ -903,6 +822,9 @@ private:
   /*! Empty child set for ports */
   static tChildSet empty_child_set;
 
+  /*! Pointer to invalid link object */
+  static std::unique_ptr<const tLink> cINVALID_LINK;
+
   /*!
    * Adds child to parent (automatically called by constructor - may be called again though)
    * using specified link
@@ -944,15 +866,14 @@ private:
   void DeleteChildren();
 
   /*!
-   * Helper for above
+   * Helper for GetChild(const tPath&)
    *
-   * \param name (relative) Qualified name
-   * \param name_index Current index in string
-   * \param only_globally_unique_children Only return child with globally unique link?
-   * \param cLink root
-   * \return Framework element - or null if non-existent
+   * \param path Relative_path (may contain '.' and '..' elements)
+   * \param path_index Current index in path
+   * \param root Root Element
+   * \return Returns framework element with specified relative path. Returns nullptr if no element can be found with specified path.
    */
-  tFrameworkElement* GetChildElement(const tString& name, int name_index, bool only_globally_unique_children, tFrameworkElement& root);
+  tFrameworkElement* GetChild(const tPath& path, uint path_index, tFrameworkElement& root);
 
   /*!
    * \return Number of links to this port
@@ -967,35 +888,14 @@ private:
   tLink* GetLinkInternal(size_t link_index);
 
   /*!
-   * Recursive Helper function for above
+   * Obtains path to this framework element (including this framework element)
+   * (may only be called with structure-lock)
    *
-   * \param sb Buffer storing result
-   * \param l Link to continue with
-   * \param abort_at_link_root Abort when an alternative link root is reached?
+   * \param result Object to store result in. If reused and sufficiently large, does not require memory allocation.
+   * \param link Link to this object to use
+   * \return Whether the result is a globally unique path
    */
-  static void GetNameHelper(tString& sb, const tLink& l, bool abort_at_link_root);
-
-  /*!
-   * Very efficient implementation of above.
-   * (StringBuilder may be reused)
-   *
-   * \param sb Buffer that will store result
-   * \param start Link to start with
-   * \param force_full_link Return full link from root (even if object has shorter globally unique link?)
-   * \return Is this a globally unique link?
-   */
-  bool GetQualifiedName(tString& sb, const tLink& start, bool force_full_link) const;
-
-  /*!
-   * Very efficient implementation of above.
-   * (StringBuilder may be reused)
-   *
-   * \param sb Buffer that will store result
-   * \param start Link to start with
-   * \param force_full_link Return full link from root (even if object has shorter globally unique link?)
-   * \return Is this a globally unique link?
-   */
-  bool GetQualifiedNameImpl(tString& sb, const tLink& start, bool force_full_link) const;
+  bool GetPathImplementation(tPath& result, const tLink& link) const;
 
   /*!
    * Initializes element and all child elements that were created by this thread
@@ -1017,44 +917,33 @@ private:
   void ManagedDelete(tLink* dont_detach);
 
   /*!
-   * Initializes this runtime element.
-   * The tree structure should be established by now (Uid is valid)
-   * so final initialization can be made.
+   * Callback on initialization of element.
+   * Called after OnInitialization() of all children has been called.
+   * The tree structure should be established by now (handle is valid)
    *
-   * Called before children are initialized
-   * (called in runtime-registry-synchronized context)
+   * (called with lock on runtime structure mutex)
+   * (method was called PostChildInit() in former Finroc versions).
    */
-  virtual void PostChildInit()
+  virtual void OnInitialization()
   {
   }
 
   /*!
-   * Initializes this runtime element.
-   * The tree structure should be established by now (Uid is valid)
-   * so final initialization can be made.
+   * Callback on managed deletion of element (when ManagedDelete() is called)
    *
-   * Called before children are initialized
-   * (called in runtime-registry-synchronized context)
-   */
-  virtual void PreChildInit()
-  {
-  }
-
-  /*!
    * Prepares element for deletion.
-   * Port, for instance, are removed from edge lists etc.
-   * The final deletion will be done by the GarbageCollector thread after
-   * a few seconds (to ensure no other thread is working on this object
-   * any more).
+   * Ports, for instance, are removed from edge lists etc.
+   * The final deletion will be done by the GarbageCollector thread after a few seconds
+   * (to ensure no other thread is working on this object anymore).
    *
-   * Is called _BEFORE_ prepareDelete of children
+   * Is called before OnManagedDelete() of children.
    *
-   * (is called with lock on this framework element and possibly all of its parent,
-   *  but not runtime-registry. Keep this in mind when cleaning up & joining threads.
+   * (is called with lock on this framework element and possibly all of its parents,
+   *  but not runtime structure mutex. Keep this in mind when cleaning up & joining threads.
    *  This is btw the place to do that.)
-   *
+   * (method was called PrepareDelete() in former Finroc versions)
    */
-  virtual void PrepareDelete()
+  virtual void OnManagedDelete()
   {
   }
 };

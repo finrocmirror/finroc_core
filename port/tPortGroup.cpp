@@ -117,7 +117,7 @@ void tPortGroup::ConnectImpl(tPortGroup* other_group, const std::string& group_l
   }
   if (start_with)
   {
-    FINROC_LOG_PRINT(WARNING, "Port ", start_with->GetQualifiedName(), " no child of ", this->GetQualifiedName(), ". Did not connect anything.");
+    FINROC_LOG_PRINT(WARNING, "Port ", (*start_with), " no child of ", (*this), ". Did not connect anything.");
   }
   if (count > 0)
   {
@@ -127,7 +127,7 @@ void tPortGroup::ConnectImpl(tPortGroup* other_group, const std::string& group_l
 
 tAbstractPort* tPortGroup::CreatePort(const std::string& name, rrlib::rtti::tType type, tFlags extra_flags)
 {
-  FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", this->GetQualifiedLink());
+  FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Creating port ", name, " in IOVector ", (*this));
 
   tAbstractPort* ap = NULL;
   ap = tPortFactory::CreatePort(name, *this, type, default_port_flags | extra_flags);

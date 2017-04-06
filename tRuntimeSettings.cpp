@@ -66,8 +66,7 @@ namespace core
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
-tRuntimeSettings* tRuntimeSettings::instance = NULL;
-bool tRuntimeSettings::duplicate_qualified_names_allowed = false;
+tRuntimeSettings* tRuntimeSettings::instance = nullptr;
 
 tRuntimeSettings::tRuntimeSettings() :
   tFrameworkElement(&tRuntimeEnvironment::GetInstance().GetElement(tSpecialRuntimeElement::RUNTIME_NODE), "Settings")
@@ -76,7 +75,7 @@ tRuntimeSettings::tRuntimeSettings() :
 
 tRuntimeSettings& tRuntimeSettings::GetInstance()
 {
-  if (instance == NULL)
+  if (instance == nullptr)
   {
     instance = new tRuntimeSettings();
   }

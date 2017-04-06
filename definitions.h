@@ -39,6 +39,7 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include "rrlib/time/time.h"
+#include "rrlib/uri/tURI.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -98,6 +99,12 @@ enum { cHANDLE_PRIMARY_ARRAY_INDEX_BIT_WIDTH = 10 };
 enum { cHANDLE_SECONDARY_ARRAY_INDEX_BIT_WIDTH = 10 };
 constexpr rrlib::time::tDuration cHANDLE_UNIQUENESS_GUARANTEE_DURATION(std::chrono::minutes(1));
 
+}
+
+namespace core
+{
+typedef rrlib::uri::tURI tURI;
+typedef rrlib::uri::tPath tPath;
 }
 
 //----------------------------------------------------------------------

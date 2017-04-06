@@ -115,7 +115,7 @@ void tAnnotatableImplementation::NotifyAnnotationsDelete()
   tAnnotation* ann = first_annotation;
   while (ann)
   {
-    ann->AnnotatedObjectToBeDeleted();
+    ann->OnManagedDelete();
     ann = ann->next_annotation;
   }
 }
@@ -125,7 +125,7 @@ void tAnnotatableImplementation::NotifyAnnotationsInitialized()
   tAnnotation* ann = first_annotation;
   while (ann)
   {
-    ann->AnnotatedObjectInitialized();
+    ann->OnInitialization();
     ann = ann->next_annotation;
   }
 }

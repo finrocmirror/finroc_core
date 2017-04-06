@@ -40,7 +40,7 @@
 #include "core/tLockOrderLevel.h"
 #include "core/tRuntimeSettings.h"
 #include "core/internal/tGarbageDeleter.h"
-#include "core/internal/tLinkEdge.h"
+#include "core/internal/tLocalUriConnector.h"
 #include "core/internal/tPlugins.h"
 #include "core/port/tAbstractPort.h"
 
@@ -79,26 +79,25 @@ static inline unsigned int GetLongevity(tRuntimeEnvironment*)
   return 1; // delete before (almost) any other singleton
 }
 
-tRuntimeEnvironment* tRuntimeEnvironment::instance_raw_ptr = NULL;
+tRuntimeEnvironment* tRuntimeEnvironment::instance_raw_ptr = nullptr;
 bool tRuntimeEnvironment::active = false;
 
 //----------------------------------------------------------------------
 // tRuntimeEnvironment constructors
 //----------------------------------------------------------------------
 tRuntimeEnvironment::tRuntimeEnvironment() :
-  tFrameworkElement(NULL, "Runtime", tFlag::RUNTIME),
+  tOwner(nullptr, "Runtime", tFlag::RUNTIME),
   elements(),
-  link_edges(),
-  global_link_edges(),
+  registered_connectors(),
   runtime_listeners(),
-  temp_buffer(),
-  alternative_link_roots(),
+  temp_path(),
+  alternative_uri_roots(),
   structure_mutex("Runtime Registry", static_cast<int>(tLockOrderLevel::RUNTIME_REGISTER)),
   creation_time(rrlib::time::Now()),
   command_line_args(),
   special_runtime_elements()
 {
-  special_runtime_elements.fill(NULL);
+  special_runtime_elements.fill(nullptr);
   active = true;
 }
 
@@ -107,7 +106,7 @@ tRuntimeEnvironment::tRuntimeEnvironment() :
 //----------------------------------------------------------------------
 tRuntimeEnvironment::~tRuntimeEnvironment()
 {
-  global_link_edges.clear();
+  ClearUriConnectors();
   active = false;
   rrlib::thread::tThread::StopThreads();
 
@@ -120,35 +119,7 @@ tRuntimeEnvironment::~tRuntimeEnvironment()
     }
   }
   GetElement(tSpecialRuntimeElement::RUNTIME_NODE).ManagedDelete();
-  instance_raw_ptr = NULL;
-}
-
-void tRuntimeEnvironment::AddLinkEdge(const tString& link, internal::tLinkEdge& edge)
-{
-  FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Adding link edge connecting to ", link);
-  {
-    tLock lock(structure_mutex);
-    if (link_edges.find(link) == link_edges.end())
-    {
-      // add first edge
-      link_edges[link] = &edge;
-    }
-    else
-    {
-      // insert edge
-      internal::tLinkEdge* interested = link_edges[link];
-      internal::tLinkEdge* next = interested->GetNextEdge();
-      interested->SetNextEdge(&edge);
-      edge.SetNextEdge(next);
-    }
-
-    // directly notify link edge?
-    tAbstractPort* p = GetPort(link);
-    if (p && p->IsReady())
-    {
-      edge.LinkAdded(*this, link, *p);
-    }
-  }
+  instance_raw_ptr = nullptr;
 }
 
 void tRuntimeEnvironment::AddListener(tRuntimeListener& listener)
@@ -192,12 +163,12 @@ tFrameworkElement* tRuntimeEnvironment::GetElement(tHandle handle)
   {
     return NULL;
   }
-  return fe->IsReady() ? fe : NULL;
+  return fe->IsReady() ? fe : nullptr;
 }
 
 tRuntimeEnvironment& tRuntimeEnvironment::GetInstance()
 {
-  if (instance_raw_ptr == NULL)
+  if (instance_raw_ptr == nullptr)
   {
     InitialInit();
   }
@@ -212,33 +183,33 @@ tAbstractPort* tRuntimeEnvironment::GetPort(tHandle port_handle)
     throw std::runtime_error("No port handle");
   }
   tFrameworkElement* p = elements.Get(port_handle);
-  if (p == NULL)
+  if (!p)
   {
-    return NULL;
+    return nullptr;
   }
-  return p->IsReady() ? static_cast<tAbstractPort*>(p) : NULL;
+  return p->IsReady() ? static_cast<tAbstractPort*>(p) : nullptr;
 }
 
-tAbstractPort* tRuntimeEnvironment::GetPort(const tString& link_name)
+tAbstractPort* tRuntimeEnvironment::GetPort(const tPath& path)
 {
   tLock lock(structure_mutex);
 
-  tFrameworkElement* fe = GetChildElement(link_name, false);
-  if (fe == NULL)
+  tFrameworkElement* fe = GetChild(path);
+  if (!fe)
   {
-    for (auto it = alternative_link_roots.begin(); it != alternative_link_roots.end(); ++it)
+    for (auto it = alternative_uri_roots.begin(); it != alternative_uri_roots.end(); ++it)
     {
-      fe = (*it)->GetChildElement(link_name, 0, true, **it);
-      if (fe != NULL && !fe->IsDeleted() && fe->IsPort())
+      fe = (*it)->GetChild(path, 0, **it);
+      if (fe && !fe->IsDeleted() && fe->IsPort())
       {
         return static_cast<tAbstractPort*>(fe);
       }
     }
-    return NULL;
+    return nullptr;
   }
   if (!fe->IsPort())
   {
-    return NULL;
+    return nullptr;
   }
   return static_cast<tAbstractPort*>(fe);
 }
@@ -281,43 +252,24 @@ void tRuntimeEnvironment::PreElementInit(tFrameworkElement& element)
   }
 }
 
+void tRuntimeEnvironment::RegisterConnector(const tPath& path, internal::tLocalUriConnector& connector)
+{
+  tLock lock(structure_mutex);
+  registered_connectors[path].push_back(&connector);
+
+  // directly notify link edge?
+  tAbstractPort* p = GetPort(path);
+  if (p && p->IsReady())
+  {
+    connector.OnPortAdded(*this, path, *p);
+  }
+}
+
+
 tRuntimeEnvironment::tHandle tRuntimeEnvironment::RegisterElement(tFrameworkElement& fe, bool port)
 {
   tLock lock(structure_mutex);
   return elements.Add(fe, port);
-}
-
-void tRuntimeEnvironment::RemoveLinkEdge(const tString& link, internal::tLinkEdge& edge)
-{
-  tLock lock(structure_mutex);
-  internal::tLinkEdge* current = link_edges[link];
-  if (current == &edge)
-  {
-    if (current->GetNextEdge() == NULL)    // remove entries for this link completely
-    {
-      link_edges.erase(link);
-    }
-    else    // remove first element
-    {
-      link_edges[link] = current->GetNextEdge();
-    }
-  }
-  else    // remove element out of linked list
-  {
-    internal::tLinkEdge* prev = current;
-    current = current->GetNextEdge();
-    while (current != NULL)
-    {
-      if (current == &edge)
-      {
-        prev->SetNextEdge(current->GetNextEdge());
-        return;
-      }
-      prev = current;
-      current = current->GetNextEdge();
-    }
-    FINROC_LOG_PRINT(DEBUG_WARNING, "Could not remove link edge for link: ", link);
-  }
 }
 
 void tRuntimeEnvironment::RemoveListener(tRuntimeListener& listener)
@@ -326,63 +278,63 @@ void tRuntimeEnvironment::RemoveListener(tRuntimeListener& listener)
   runtime_listeners.Remove(&listener);
 }
 
-void tRuntimeEnvironment::RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element, tAbstractPort* edge_target, bool notify_listeners_only)
+void tRuntimeEnvironment::RuntimeChange(tRuntimeListener::tEvent change_type, tFrameworkElement& element)
 {
   tLock lock(structure_mutex);
   if (!ShuttingDown())
   {
-    if (!notify_listeners_only)
+    if (element.GetFlag(tFlag::ALTERNATIVE_LOCAL_URI_ROOT))
     {
-
-      if (element.GetFlag(tFlag::ALTERNATIVE_LINK_ROOT))
+      if (change_type == tRuntimeListener::tEvent::ADD)
       {
-        if (change_type == tRuntimeListener::tEvent::ADD)
-        {
-          alternative_link_roots.push_back(&element);
-        }
-        else if (change_type == tRuntimeListener::tEvent::REMOVE)
-        {
-          alternative_link_roots.erase(std::remove(alternative_link_roots.begin(), alternative_link_roots.end(), &element), alternative_link_roots.end());
-        }
+        alternative_uri_roots.push_back(&element);
       }
-
-      if (change_type == tRuntimeListener::tEvent::ADD && element.IsPort())    // check links
+      else if (change_type == tRuntimeListener::tEvent::REMOVE)
       {
-        tAbstractPort& ap = static_cast<tAbstractPort&>(element);
-        for (size_t i = 0u; i < ap.GetLinkCount(); i++)
-        {
-          ap.GetQualifiedLink(temp_buffer, i);
-          tString s = temp_buffer;
-          FINROC_LOG_PRINT(DEBUG_VERBOSE_2, "Checking link ", s, " with respect to link edges");
+        alternative_uri_roots.erase(std::remove(alternative_uri_roots.begin(), alternative_uri_roots.end(), &element), alternative_uri_roots.end());
+      }
+    }
 
-          if (link_edges.find(s) != link_edges.end())
+    if (change_type == tRuntimeListener::tEvent::ADD && element.IsPort())    // check links
+    {
+      tAbstractPort& port = static_cast<tAbstractPort&>(element);
+      for (size_t i = 0u; i < port.GetLinkCount(); i++)
+      {
+        port.GetPath(temp_path, i);
+        auto connector_list = registered_connectors.find(temp_path);
+        if (connector_list != registered_connectors.end())
+        {
+          std::vector<internal::tLocalUriConnector*> connector_list_copy = connector_list->second;  // important: a copy is made here, since vector may be changed by tByStringConnector::OnLinkAdded()
+          for (internal::tLocalUriConnector * connector : connector_list_copy)
           {
-            internal::tLinkEdge* le = link_edges[s];
-            while (le)
-            {
-              le->LinkAdded(*this, s, ap);
-              le = le->GetNextEdge();
-            }
+            connector->OnPortAdded(*this, temp_path, port);
           }
         }
-        if (ap.link_edges)
+      }
+      if (port.UriConnectors().size())
+      {
+        size_t size = port.UriConnectors().size();
+        tUriConnector* list_copy[size]; // important: a copy is made here, since vector may be changed by tHighLevelConnector::Disconnect()
+        for (size_t i = 0; i < size; i++)
         {
-          for (auto it = ap.link_edges->begin(); it != ap.link_edges->end(); ++it)
+          list_copy[i] = port.UriConnectors()[i].get();
+        }
+
+        for (size_t i = 0; i < size; i++)
+        {
+          if (list_copy[i] && typeid(*list_copy[i]) == typeid(internal::tLocalUriConnector))
           {
-            if ((*it)->GetSourceLink().length() > 0)
+            internal::tLocalUriConnector& connector = static_cast<internal::tLocalUriConnector&>(*list_copy[i]);
+            for (size_t i = 0; i < 2 && (!connector.GetConnection()); i++)
             {
-              tAbstractPort* source = GetPort((*it)->GetSourceLink());
-              if (source)
+              const tPath& path = connector.GetPortReferences()[i].path;
+              if (path.Size())
               {
-                (*it)->LinkAdded(*this, (*it)->GetSourceLink(), *source);
-              }
-            }
-            if ((*it)->GetTargetLink().length() > 0)
-            {
-              tAbstractPort* target = GetPort((*it)->GetTargetLink());
-              if (target)
-              {
-                (*it)->LinkAdded(*this, (*it)->GetTargetLink(), *target);
+                tAbstractPort* port2 = GetPort(path);
+                if (port2)
+                {
+                  connector.OnPortAdded(*this, path, *port2);
+                }
               }
             }
           }
@@ -390,20 +342,9 @@ void tRuntimeEnvironment::RuntimeChange(tRuntimeListener::tEvent change_type, tF
       }
     }
 
-    if (edge_target)
+    for (auto it = runtime_listeners.Begin(); it != runtime_listeners.End(); ++it)
     {
-      assert(element.IsPort());
-      for (auto it = runtime_listeners.Begin(); it != runtime_listeners.End(); ++it)
-      {
-        (*it)->OnEdgeChange(change_type, static_cast<tAbstractPort&>(element), *edge_target);
-      }
-    }
-    else
-    {
-      for (auto it = runtime_listeners.Begin(); it != runtime_listeners.End(); ++it)
-      {
-        (*it)->OnFrameworkElementChange(change_type, element);
-      }
+      (*it)->OnFrameworkElementChange(change_type, element);
     }
   }
 }
@@ -420,6 +361,32 @@ void tRuntimeEnvironment::Shutdown()
 bool tRuntimeEnvironment::ShuttingDown()
 {
   return rrlib::thread::tThread::StoppingThreads();
+}
+
+void tRuntimeEnvironment::UnregisterConnector(const tPath& path, internal::tLocalUriConnector& connector)
+{
+  tLock lock(structure_mutex);
+  bool removed = false;
+  auto vector = registered_connectors[path];
+  for (auto it = vector.begin(); it != vector.end(); ++it)
+  {
+    if ((*it) == &connector)
+    {
+      vector.erase(it);
+      removed = true;
+      break;
+    }
+  }
+
+  if (vector.size() == 0)
+  {
+    registered_connectors.erase(path);
+  }
+
+  if (!removed)
+  {
+    FINROC_LOG_PRINT(ERROR, "Could not remove local URI connection for path: ", path);
+  }
 }
 
 void tRuntimeEnvironment::UnregisterElement(tFrameworkElement& fe)

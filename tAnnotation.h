@@ -43,7 +43,6 @@
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
 #include "rrlib/util/tNoncopyable.h"
-#include "rrlib/rtti/tIsListType.h"
 
 //----------------------------------------------------------------------
 // Internal includes with ""
@@ -78,7 +77,7 @@ class tFrameworkElement;
  * serialization operators need to be implemented and
  * tDataType<...> object initialized.
  */
-class tAnnotation : public rrlib::rtti::tIsListType<false, false>, private rrlib::util::tNoncopyable
+class tAnnotation : private rrlib::util::tNoncopyable
 {
 
 //----------------------------------------------------------------------
@@ -87,6 +86,8 @@ class tAnnotation : public rrlib::rtti::tIsListType<false, false>, private rrlib
 public:
 
   tAnnotation();
+  tAnnotation(tAnnotation &&) = delete;
+  tAnnotation& operator=(tAnnotation &&) = delete;
 
   virtual ~tAnnotation();
 
@@ -130,7 +131,7 @@ private:
    * Called when annotated object is initialized
    * (supposed to be overridden)
    */
-  virtual void AnnotatedObjectInitialized()
+  virtual void OnInitialization()
   {
   }
 
@@ -138,7 +139,7 @@ private:
    * Called when annotated object is about to be deleted
    * (supposed to be overridden)
    */
-  virtual void AnnotatedObjectToBeDeleted()
+  virtual void OnManagedDelete()
   {
   }
 
@@ -153,6 +154,5 @@ private:
 //----------------------------------------------------------------------
 }
 }
-
 
 #endif

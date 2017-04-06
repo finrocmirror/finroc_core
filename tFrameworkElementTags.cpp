@@ -64,6 +64,8 @@ namespace core
 //----------------------------------------------------------------------
 const char* tFrameworkElementTags::cHIDDEN_IN_TOOLS = "hidden in tools";
 
+static const std::vector<std::string> cEMPTY_TAGS;
+
 //----------------------------------------------------------------------
 // Implementation
 //----------------------------------------------------------------------
@@ -74,6 +76,11 @@ tFrameworkElementTags::tFrameworkElementTags() :
 
 void tFrameworkElementTags::AddTag(tFrameworkElement& fe, const std::string& tag)
 {
+  if (fe.IsReady())
+  {
+    throw rrlib::util::tTraceableException<std::runtime_error>("Tags may only be added before framework element initialization");
+  }
+
   if (!IsTagged(fe, tag))
   {
     tFrameworkElementTags* tags = fe.GetAnnotation<tFrameworkElementTags>();
@@ -94,6 +101,16 @@ void tFrameworkElementTags::AddTags(tFrameworkElement& fe, const std::vector<std
   }
 }
 
+const std::vector<std::string>& tFrameworkElementTags::GetTags(const tFrameworkElement& fe)
+{
+  tFrameworkElementTags* tags = fe.GetAnnotation<tFrameworkElementTags>();
+  if (!tags)
+  {
+    return cEMPTY_TAGS;
+  }
+  return tags->Tags();
+}
+
 bool tFrameworkElementTags::IsTagged(const tFrameworkElement& fe, const std::string& tag)
 {
   tFrameworkElementTags* tags = fe.GetAnnotation<tFrameworkElementTags>();
@@ -106,7 +123,7 @@ bool tFrameworkElementTags::IsTagged(const tFrameworkElement& fe, const std::str
 
 rrlib::serialization::tOutputStream& operator << (rrlib::serialization::tOutputStream& stream, const tFrameworkElementTags& tags)
 {
-  stream << tags.tags;
+  stream << tags.Tags();
   return stream;
 }
 
