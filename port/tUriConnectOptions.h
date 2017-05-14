@@ -74,21 +74,12 @@ struct tUriConnectOptions : public tConnectOptions
 
   /*! Additional parameters as key/value pairs */
   std::map<std::string, std::string> parameters;
+
 };
 
-inline rrlib::serialization::tOutputStream& operator << (rrlib::serialization::tOutputStream& stream, const tUriConnectOptions& options)
-{
-  stream << static_cast<const tConnectOptions&>(options);
-  stream << options.parameters;
-  return stream;
-}
-
-inline rrlib::serialization::tInputStream& operator >> (rrlib::serialization::tInputStream& stream, tUriConnectOptions& options)
-{
-  stream >> static_cast<tConnectOptions&>(options);
-  stream >> options.parameters;
-  return stream;
-}
+// implemented in tConnectOptions.cpp (for locality of change - serialization of both classes is compatible)
+rrlib::serialization::tOutputStream& operator << (rrlib::serialization::tOutputStream& stream, const tUriConnectOptions& options);
+rrlib::serialization::tInputStream& operator >> (rrlib::serialization::tInputStream& stream, tUriConnectOptions& options);
 
 //----------------------------------------------------------------------
 // End of namespace declaration

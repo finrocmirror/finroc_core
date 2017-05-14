@@ -116,7 +116,7 @@ private:
 tConnector::tConnector(tAbstractPort& source_port, tAbstractPort& destination_port, const tConnectOptions& connect_options, const rrlib::rtti::conversion::tConversionOperationSequence& conversion_sequence_storage) :
   source_port(source_port),
   destination_port(destination_port),
-  flags(connect_options.flags | (&conversion_sequence_storage != &rrlib::rtti::conversion::tConversionOperationSequence::cNONE ? tFlags(tFlag::CONVERSION) : tFlags()))
+  flags(tConnectOptions::UnsetAutoFlags(connect_options.flags) | (&conversion_sequence_storage != &rrlib::rtti::conversion::tConversionOperationSequence::cNONE ? tFlags(tFlag::CONVERSION) : tFlags()))
 {
   if (flags.Get(tFlag::CONVERSION))
   {

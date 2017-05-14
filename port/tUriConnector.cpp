@@ -83,7 +83,7 @@ static tUriConnector::tSchemeHandlerRegister& SchemeHandlers()
 }
 
 tUriConnector::tUriConnector(tOwner& owner, const tURI& uri, const tConnectOptions& connect_options, const tSchemeHandler& scheme_handler) :
-  flags(connect_options.flags),
+  flags(tConnectOptions::UnsetAutoFlags(connect_options.flags) | (connect_options.conversion_operations.Size() ? tFlags(tFlag::CONVERSION) : tFlags())),
   owner(owner),
   conversion_operations(connect_options.conversion_operations),
   uri(uri),
