@@ -322,10 +322,11 @@ public:
    * Checks whether this port can be connected to specified destination port.
    *
    * \param destination Destination port to check connectability to.
+   * \param connect_options Any connect options to apply
    * \param reason_string If connecting is not possible, appends reason to this stream (unless it is nullptr)
    * \return Answer
    */
-  bool MayConnectTo(tAbstractPort& destination, std::stringstream* reason_stream = nullptr) const;
+  bool MayConnectTo(tAbstractPort& destination, const tConnectOptions& connect_options = tConnectOptions(), std::stringstream* reason_stream = nullptr) const;
 
   /*!
    * Notify port of possibly temporary network connection loss.

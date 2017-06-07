@@ -147,8 +147,8 @@ tConnector* tAbstractPort::ConnectTo(tAbstractPort& to, const tConnectOptions& c
   tConnectionFlags connect_direction_flags = connect_options.flags & (tConnectionFlag::DIRECTION_TO_DESTINATION | tConnectionFlag::DIRECTION_TO_SOURCE);
   if (connect_direction_flags.Raw() == 0) // auto mode?
   {
-    bool to_target_possible = MayConnectTo(to);
-    bool to_source_possible = to.MayConnectTo(*this);
+    bool to_target_possible = MayConnectTo(to, connect_options);
+    bool to_source_possible = to.MayConnectTo(*this, connect_options);
     if (to_target_possible && to_source_possible)
     {
       connect_direction = InferConnectDirection(to);
@@ -161,19 +161,23 @@ tConnector* tAbstractPort::ConnectTo(tAbstractPort& to, const tConnectOptions& c
     {
       std::stringstream reason_stream;
       reason_stream << "Could not connect ports '" << (*this) << "' and '" << to << "' for the following reason: ";
-      MayConnectTo(to, &reason_stream);
+      MayConnectTo(to, connect_options, &reason_stream);
       reason_stream << "\nConnecting in the reverse direction did not work either: ";
-      to.MayConnectTo(*this, &reason_stream);
+      to.MayConnectTo(*this, connect_options, &reason_stream);
       FINROC_LOG_PRINT(WARNING, reason_stream.str());
       return nullptr;
     }
+  }
+  else
+  {
+    connect_direction = connect_options.flags.Get(tConnectionFlag::DIRECTION_TO_DESTINATION) ? tConnectDirection::TO_DESTINATION : tConnectDirection::TO_SOURCE;
   }
 
   // connect
   tAbstractPort& source = (connect_direction == tConnectDirection::TO_DESTINATION) ? *this : to;
   tAbstractPort& destination = (connect_direction == tConnectDirection::TO_DESTINATION) ? to : *this;
   std::stringstream reason_stream;
-  if (source.MayConnectTo(destination, &reason_stream))
+  if (source.MayConnectTo(destination, connect_options, &reason_stream))
   {
     FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Creating Edge from ", source, " to ", destination);
     bool connection_to_reconnect = (!connect_options.flags.Get(tConnectionFlag::NON_PRIMARY_CONNECTOR)) &&
@@ -567,15 +571,21 @@ bool tAbstractPort::IsConnectedTo(tAbstractPort& port) const
   return false;
 }
 
-bool tAbstractPort::MayConnectTo(tAbstractPort& destination, std::stringstream* reason_stream) const
+bool tAbstractPort::MayConnectTo(tAbstractPort& destination, const tConnectOptions& connect_options, std::stringstream* reason_stream) const
 {
-  if (!rrlib::rtti::conversion::tStaticCastOperation::IsImplicitlyConvertibleTo(data_type, destination.data_type))
+  if (connect_options.conversion_operations.Size() == 0 && (!rrlib::rtti::conversion::tStaticCastOperation::IsImplicitlyConvertibleTo(data_type, destination.data_type)))
   {
     if (reason_stream)
     {
       (*reason_stream) << "Data types require explicit conversion (source: '" << GetDataType().GetName() << "' and target: '" << destination.GetDataType().GetName() << "').";
     }
     return false;
+  }
+  // TODO: should conversion operation be checked here already? (con: simpler if not and it will be checked anyway when creating the connector)
+
+  if (GetFlag(tFlag::TOOL_PORT) || destination.GetFlag(tFlag::TOOL_PORT))
+  {
+    return true; // ignore flags and constraints for ports from tools
   }
 
   if (!GetFlag(tFlag::EMITS_DATA))
@@ -594,11 +604,6 @@ bool tAbstractPort::MayConnectTo(tAbstractPort& destination, std::stringstream* 
       (*reason_stream) << "Port '" << destination << "' does not accept data.";
     }
     return false;
-  }
-
-  if (GetFlag(tFlag::TOOL_PORT) || destination.GetFlag(tFlag::TOOL_PORT))
-  {
-    return true; // ignore constraints for ports from tools
   }
 
   auto& constraints = GetConnectionConstraintList();
