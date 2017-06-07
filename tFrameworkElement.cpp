@@ -892,7 +892,7 @@ static void StreamQualifiedName(std::ostream& output, const tFrameworkElement& f
 std::ostream& operator << (std::ostream& output, const tFrameworkElement& fe)
 {
   StreamQualifiedName(output, fe, true);
-  output << " (" << ((void*)&fe) << ")";
+  //output << " (" << ((void*)&fe) << ")";
   return output;
 }
 
