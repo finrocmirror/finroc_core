@@ -122,11 +122,11 @@ enum class tFrameworkElementFlag
   USES_QUEUE,            //!< Does Port currently store incoming data in queue? - requires HAS_QUEUE
   DEFAULT_ON_DISCONNECT, //!< Restore default value, if port is disconnected?
   PUSH_STRATEGY,         //!< Use push strategy rather than pull strategy?
-  PUSH_STRATEGY_REVERSE, //!< Use push strategy rather than pull strategy in reverse direction?
+  LEGACY_PUSH_STRATEGY_REVERSE, //!< Unused legacy flag: use push strategy in reverse direction?
   HIJACKED_PORT = RUNTIME //!< Is this a port hijacked e.g. by the data_playback plugin? If set, values set/received by components are discarded.
 };
 
-static_assert(static_cast<uint>(tFrameworkElementFlag::PUSH_STRATEGY_REVERSE) < 32, "Too many flags");
+static_assert(static_cast<uint>(tFrameworkElementFlag::LEGACY_PUSH_STRATEGY_REVERSE) < 32, "Too many flags");
 
 
 /*!
