@@ -255,7 +255,7 @@ public:
    * \param path Relative path
    * \return Returns framework element with specified relative path. Returns nullptr if no element can be found with specified path.
    */
-  tFrameworkElement* GetChild(const tPath& path);
+  tFrameworkElement* GetDescendant(const tPath& path);
 
   /*!
    * Is specified flag set?
@@ -866,14 +866,14 @@ private:
   void DeleteChildren();
 
   /*!
-   * Helper for GetChild(const tPath&)
+   * Helper for GetDescendant(const tPath&)
    *
    * \param path Relative_path (may contain '.' and '..' elements)
    * \param path_index Current index in path
    * \param root Root Element
    * \return Returns framework element with specified relative path. Returns nullptr if no element can be found with specified path.
    */
-  tFrameworkElement* GetChild(const tPath& path, uint path_index, tFrameworkElement& root);
+  tFrameworkElement* GetDescendant(const tPath& path, uint path_index, tFrameworkElement& root);
 
   /*!
    * \return Number of links to this port

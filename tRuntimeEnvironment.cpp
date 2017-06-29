@@ -194,12 +194,12 @@ tAbstractPort* tRuntimeEnvironment::GetPort(const tPath& path)
 {
   tLock lock(structure_mutex);
 
-  tFrameworkElement* fe = GetChild(path);
+  tFrameworkElement* fe = GetDescendant(path);
   if (!fe)
   {
     for (auto it = alternative_uri_roots.begin(); it != alternative_uri_roots.end(); ++it)
     {
-      fe = (*it)->GetChild(path, 0, **it);
+      fe = (*it)->GetDescendant(path, 0, **it);
       if (fe && !fe->IsDeleted() && fe->IsPort())
       {
         return static_cast<tAbstractPort*>(fe);

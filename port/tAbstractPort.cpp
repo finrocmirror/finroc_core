@@ -243,7 +243,7 @@ void tAbstractPort::ConnectTo(const tURI& uri, const tUriConnectOptions& connect
 void tAbstractPort::ConnectTo(tFrameworkElement& partner_port_parent, const tPath& partner_port_path, bool warn_if_not_available, const tConnectOptions& connect_options)
 {
   rrlib::thread::tLock lock2(GetStructureMutex());
-  tFrameworkElement* p = partner_port_parent.GetChild(partner_port_path);
+  tFrameworkElement* p = partner_port_parent.GetDescendant(partner_port_path);
   if (p && p->IsPort())
   {
     ConnectTo(*static_cast<tAbstractPort*>(p), connect_options);

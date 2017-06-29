@@ -362,12 +362,12 @@ tFrameworkElement* tFrameworkElement::GetChild(const tString& name) const
   return nullptr;
 }
 
-tFrameworkElement* tFrameworkElement::GetChild(const tPath& path)
+tFrameworkElement* tFrameworkElement::GetDescendant(const tPath& path)
 {
-  return GetChild(path, 0, GetRuntime());
+  return GetDescendant(path, 0, GetRuntime());
 }
 
-tFrameworkElement* tFrameworkElement::GetChild(const tPath& path, uint path_index, tFrameworkElement& root)
+tFrameworkElement* tFrameworkElement::GetDescendant(const tPath& path, uint path_index, tFrameworkElement& root)
 {
   if (IsDeleted())
   {
