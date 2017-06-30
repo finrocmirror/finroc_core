@@ -253,17 +253,19 @@ void tUriConnector::tOwner::Disconnect(tUriConnector& connector)
     {
       if (connector_entry.get() == &connector)
       {
+        if (connector.Flags().Get(tUriConnector::tFlag::PUBLISHED))
+        {
+          auto& runtime = tRuntimeEnvironment::GetInstance();
+          for (auto it = runtime.runtime_listeners.Begin(); it != runtime.runtime_listeners.End(); ++it)
+          {
+            (*it)->OnUriConnectorChange(tRuntimeListener::tEvent::REMOVE, connector);
+          }
+        }
+
         connector_entry.reset();
         return;
       }
     }
-  }
-
-  assert(connector.Flags().Get(tUriConnector::tFlag::PUBLISHED));
-  auto& runtime = tRuntimeEnvironment::GetInstance();
-  for (auto it = runtime.runtime_listeners.Begin(); it != runtime.runtime_listeners.End(); ++it)
-  {
-    (*it)->OnUriConnectorChange(tRuntimeListener::tEvent::REMOVE, connector);
   }
 }
 
