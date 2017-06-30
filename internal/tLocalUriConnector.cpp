@@ -218,6 +218,14 @@ void tLocalUriConnector::OnPortAdded(tRuntimeEnvironment& runtime, const tPath& 
         bool reconnect = flags.Get(tConnectionFlag::RECONNECT) || port.GetFlag(tFrameworkElementFlag::VOLATILE) || (other.path.Size() && other_port->GetFlag(tFrameworkElementFlag::VOLATILE));
         const tConnectionFlags cKEEP_FLAGS = tConnectionFlag::FINSTRUCTED | tConnectionFlag::OPTIONAL | tConnectionFlag::SCHEDULING_NEUTRAL;
         tConnectionFlags connection_flags = tConnectionFlags(cKEEP_FLAGS.Raw() & flags.Raw());
+        if (flags.Get(tConnectionFlag::DIRECTION_TO_DESTINATION))
+        {
+          connection_flags |= (i == 0 ? tConnectionFlag::DIRECTION_TO_DESTINATION : tConnectionFlag::DIRECTION_TO_SOURCE);
+        }
+        else if (flags.Get(tConnectionFlag::DIRECTION_TO_SOURCE))
+        {
+          connection_flags |= (i == 0 ? tConnectionFlag::DIRECTION_TO_SOURCE : tConnectionFlag::DIRECTION_TO_DESTINATION);
+        }
 
         if (reconnect)
         {
