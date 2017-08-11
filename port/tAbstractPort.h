@@ -198,12 +198,11 @@ public:
   }
 
   /*!
-   * \return Data type of class wrapping this port (differs from data_type e.g. with numeric types)
-   * If port was not created using a wrapper class, this is empty.
+   * \return Data type of class wrapping this port. This is now always identical with GetDataType()
    */
-  rrlib::rtti::tType GetWrapperDataType() const
+  rrlib::rtti::tType GetWrapperDataType() const __attribute__((deprecated))
   {
-    return wrapper_data_type;
+    return data_type;
   }
 
   /*!
@@ -364,13 +363,6 @@ public:
     return outgoing_connections.End();
   }
 
-  /*!
-   * Only intended to be called by classes wrapping port classes derived from tAbstractPort.
-   *
-   * \param Data type of class wrapping this port (differs from data_type e.g. with numeric types)
-   */
-  void SetWrapperDataType(const rrlib::rtti::tType& wrapper_data_type);
-
 //----------------------------------------------------------------------
 // Protected methods
 //----------------------------------------------------------------------
@@ -430,12 +422,6 @@ private:
 
   /*! Edges ending at this port */
   tIncomingConnectionSet incoming_connections;
-
-  /*!
-   * Data type of class wrapping this port (differs from data_type e.g. with numeric types)
-   * If port was not created using a wrapper class, this is empty.
-   */
-  rrlib::rtti::tType wrapper_data_type;
 
   /*! Data type of port */
   const rrlib::rtti::tType data_type;

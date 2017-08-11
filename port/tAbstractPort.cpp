@@ -78,7 +78,6 @@ tAbstractPort::tAbstractPort(const tAbstractPortCreationInfo& info) :
   tOwner(info.parent, info.name, info.flags | tFlag::PORT),
   outgoing_connections(),
   incoming_connections(),
-  wrapper_data_type(),
   data_type(info.data_type)
 {
 }
@@ -637,17 +636,6 @@ void tAbstractPort::OnManagedDelete()
   }
   ClearUriConnectors();
 }
-
-void tAbstractPort::SetWrapperDataType(const rrlib::rtti::tType& wrapper_data_type)
-{
-  if (this->wrapper_data_type && wrapper_data_type != this->wrapper_data_type)
-  {
-    FINROC_LOG_PRINT(ERROR, "Wrapper data type should not be set twice. Ignoring");
-    return;
-  }
-  this->wrapper_data_type = wrapper_data_type;
-}
-
 
 //----------------------------------------------------------------------
 // End of namespace declaration
