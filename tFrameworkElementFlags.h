@@ -62,32 +62,65 @@ namespace core
  * The lower 22 bit are constant flags which may not change
  * at runtime whereas the upper 10 may change
  * (we omit the last bit in Java, because the sign may have ugly side effects).
- * The custom flag may be used by a framework element subclass.
- *
- * Note for future development: If more flags are needed (all 32 bits are used),
- * the following are required for construction only:
- * HAS_QUEUE, MAY_ACCEPT_REVERSE_DATA, NON_STANDARD_ASSIGN, MULTI_TYPE_BUFFER_POOL
  */
 enum class tFrameworkElementFlag
 {
-  // Constant flags (both ports and non-ports - first 8 are tranferred to finstruct)
-  PORT,                  //!< Is this framework element a port?
-  EDGE_AGGREGATOR,       //!< Is this an edge aggregating framework element? (edges connect ports)
-  INTERFACE,             //!< Is this framework element (usually also edge aggregator) an interface of its parent? (one of possibly many)
-  SENSOR_DATA,           //!< Is the data processed in this framework element and all framework elements below only sensor data? (hint for visualization; relevant for interface especially)
-  CONTROLLER_DATA,       //!< Is the data processed in this framework element and all framework elements below only controller data? (hint for visualization; relevant for interface especially)
-  NETWORK_ELEMENT,       //!< Is this a network port or framework element?
-  GLOBALLY_UNIQUE_LINK,  //!< Has this framework element a globally unique qualified name? (used by tools such as fingui to decide whether to store host name with connection)
+  PORT,                    //!< Is this framework element a port?
+
+  // Non-Port flags
+  EDGE_AGGREGATOR,         //!< Is this an edge aggregating framework element? (edges connect ports)
+  INTERFACE,               //!< Is this framework element (usually also edge aggregator) an interface of its parent? (one of possibly many)
+  SENSOR_DATA,             //!< Is the data processed in this framework element and all framework elements below only sensor data? (hint for visualization; relevant for interface especially)
+  CONTROLLER_DATA,         //!< Is the data processed in this framework element and all framework elements below only controller data? (hint for visualization; relevant for interface especially)
+  NETWORK_ELEMENT,         //!< Is this a network port or framework element?
+  GLOBALLY_UNIQUE_LINK,    //!< Has this framework element a globally unique path? (may be used by tools such as fingui to decide whether to store host name with connection)
   ALTERNATIVE_LOCAL_URI_ROOT, //!< Is this an alternative root for local URIs (such as a remote runtime environments mapped into this one)
 
-  RUNTIME,               //!< Non-port use: Is this the one and only runtime environment (in this process)? Port use: flag hijacked ports (see below).
-  SHARED,                //!< Should framework element be visible/accessible from other runtime environments?
-  AUTO_RENAME,           //!< Automatically rename children with duplicate names?
+  RUNTIME,                 //!< Non-port use: Is this the one and only runtime environment (in this process)? Port use: flag hijacked ports (see below).
+  SHARED,                  //!< Should ports below this framework element be visible/accessible from other runtime environments?
+  AUTO_RENAME,             //!< Automatically rename children with duplicate names?
 
-  // Constant port-only flags
+  UNUSED_CONSTANT_NON_PORT_FLAG_12,
+  UNUSED_CONSTANT_NON_PORT_FLAG_11,
+  UNUSED_CONSTANT_NON_PORT_FLAG_10,
+  UNUSED_CONSTANT_NON_PORT_FLAG_9,
+  UNUSED_CONSTANT_NON_PORT_FLAG_8,
+  UNUSED_CONSTANT_NON_PORT_FLAG_7,
+  UNUSED_CONSTANT_NON_PORT_FLAG_6,
+  UNUSED_CONSTANT_NON_PORT_FLAG_5,
+  UNUSED_CONSTANT_NON_PORT_FLAG_4,
+  UNUSED_CONSTANT_NON_PORT_FLAG_3,
+  UNUSED_CONSTANT_NON_PORT_FLAG_2,
+  UNUSED_CONSTANT_NON_PORT_FLAG_1,
+
+  // Non-constant flags - need to be changed synchronously
+  READY,                   //!< Is framework element ready?
+  PUBLISHED,               //!< Has framework element been published?
+  DELETED,                 //!< Has framework element been deleted? - dangerous if you actually encounter this in C++...
+  FINSTRUCTED,             //!< Is this an element created by finstruct?
+  FINSTRUCTABLE_GROUP,     //!< Is this a finstructable group?
+
+  MANAGES_PARAMETER_CONFIGURATION,  //!< Whether this (finstructable group) component stores and loads configuration of parameters below (config file links in particular)
+  UNUSED_DYNAMIC_NON_PORT_FLAG_3,
+  UNUSED_DYNAMIC_NON_PORT_FLAG_2,
+  UNUSED_DYNAMIC_NON_PORT_FLAG_1,
+
+  // Port flags
+  // Constant flags
+  UNUSED_CONSTANT_PORT_FLAG_4 = EDGE_AGGREGATOR,
+  UNUSED_CONSTANT_PORT_FLAG_3,
+  SENSOR_DATA_PORT,        //!< Is the data processed in this port sensor data? (hint for visualization; relevant for interface especially)
+  CONTROLLER_DATA_PORT,    //!< Is the data processed in this port controller data? (hint for visualization; relevant for interface especially)
+  NETWORK_PORT,            //!< Is this a network port?
+  GLOBALLY_UNIQUE_PATH,    //!< Has this port a globally unique path? (may be used by tools such as fingui to decide whether to store host name with connection)
+  UNUSED_CONSTANT_PORT_FLAG_2,
+
+  HIJACKED_PORT,           //!< Is this a port hijacked e.g. by the data_playback plugin? If set, values set/received by components are discarded.
+  SHARED_PORT = SHARED,    //!< Should port be visible/accessible from other runtime environments?
+  UNUSED_CONSTANT_PORT_FLAG_1,
+
   HAS_QUEUE,               //!< Does Port have a queue for storing incoming data?
   HAS_DEQUEUE_ALL_QUEUE,   //!< Does Port have a queue with tDequeueMode::ALL instead of tDequeueMode::FIFO?
-  //MAY_ACCEPT_REVERSE_DATA, //!< Does the flag ACCEPTS_REVERSE_DATA may change at runtime?
   ACCEPTS_DATA,            //!< Does port accept incoming data? Also set for server RPC ports, since they accept RPC calls
   EMITS_DATA,              //!< Does port emit data (normal direction)? Also set for client RPC ports, since they "emit" RPC calls
   MULTI_TYPE_BUFFER_POOL,  //!< Does port have buffer pool with multiple data types?
@@ -112,21 +145,20 @@ enum class tFrameworkElementFlag
   NON_STANDARD_ASSIGN,
 
   // Non-constant flags - need to be changed synchronously
-  READY,                 //!< Is framework element ready?
-  PUBLISHED,             //!< Has framework element been published?
-  DELETED,               //!< Has framework element been deleted? - dangerous if you actually encounter this in C++...
-  FINSTRUCTED,           //!< Is this an element created by finstruct?
-  FINSTRUCTABLE_GROUP,   //!< Is this a finstructable group?
+  READY_PORT = READY,             //!< Is framework element ready?
+  PUBLISHED_PORT = PUBLISHED,     //!< Has framework element been published?
+  DELETED_PORT = DELETED,         //!< Has framework element been deleted? - dangerous if you actually encounter this in C++...
+  FINSTRUCTED_PORT = FINSTRUCTED, //!< Is this a port created by finstruct?
+  UNUSED_DYNAMIC_PORT_FLAG_1,
 
-  // Non-constant port-only flags
-  USES_QUEUE,            //!< Does Port currently store incoming data in queue? - requires HAS_QUEUE
-  DEFAULT_ON_DISCONNECT, //!< Restore default value, if port is disconnected?
-  PUSH_STRATEGY,         //!< Use push strategy rather than pull strategy?
-  LEGACY_PUSH_STRATEGY_REVERSE, //!< Unused legacy flag: use push strategy in reverse direction?
-  HIJACKED_PORT = RUNTIME //!< Is this a port hijacked e.g. by the data_playback plugin? If set, values set/received by components are discarded.
+  USES_QUEUE,                     //!< Does Port currently store incoming data in queue? - requires HAS_QUEUE
+  DEFAULT_ON_DISCONNECT,          //!< Restore default value, if port is disconnected?
+  PUSH_STRATEGY,                  //!< Use push strategy rather than pull strategy?
+  LEGACY_PUSH_STRATEGY_REVERSE    //!< Unused legacy flag: use push strategy in reverse direction?
 };
 
 static_assert(static_cast<uint>(tFrameworkElementFlag::LEGACY_PUSH_STRATEGY_REVERSE) < 32, "Too many flags");
+static_assert(static_cast<uint>(tFrameworkElementFlag::LEGACY_PUSH_STRATEGY_REVERSE) == static_cast<uint>(tFrameworkElementFlag::UNUSED_DYNAMIC_NON_PORT_FLAG_1), "The same number of flags should be defined for ports and non-ports");
 
 
 /*!
