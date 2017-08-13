@@ -32,6 +32,7 @@
 //----------------------------------------------------------------------
 // External includes (system with <>, local with "")
 //----------------------------------------------------------------------
+#include <set>
 #include "rrlib/util/string.h"
 #include "rrlib/rtti_conversion/tStaticCastOperation.h"
 
@@ -74,6 +75,46 @@ namespace core
 // Implementation
 //----------------------------------------------------------------------
 
+namespace
+{
+std::set<rrlib::rtti::tType>& AlwaysImplicitlyConvertibleNumericTypes()
+{
+  static std::set<rrlib::rtti::tType> instance;
+  return instance;
+}
+
+rrlib::rtti::conversion::tConversionOperationSequence GetLegacyAutoConversion(const rrlib::rtti::tType& source_type, const rrlib::rtti::tType& destination_type)
+{
+  typedef rrlib::rtti::conversion::tConversionOperationSequence tResult;
+  if (AlwaysImplicitlyConvertibleNumericTypes().count(source_type) + AlwaysImplicitlyConvertibleNumericTypes().count(destination_type) < 2)
+  {
+    return tResult();
+  }
+
+  // Try explicit conversions
+  auto& static_cast_operation = rrlib::rtti::conversion::tStaticCastOperation::GetInstance();
+  rrlib::rtti::conversion::tConversionOperationSequence possibilities[3] =
+  {
+    tResult(static_cast_operation),
+    tResult(static_cast_operation, rrlib::rtti::tDataType<double>()),
+    tResult(static_cast_operation, static_cast_operation, rrlib::rtti::tDataType<double>())
+  };
+  for (int i = 0; i < 3; i++)
+  {
+    try
+    {
+      possibilities[i].Compile(false, source_type, destination_type);
+      return possibilities[i];
+    }
+    catch (const std::exception&)
+    {}
+  }
+
+  return tResult();
+}
+
+}
+
 tAbstractPort::tAbstractPort(const tAbstractPortCreationInfo& info) :
   tOwner(info.parent, info.name, info.flags | tFlag::PORT),
   outgoing_connections(),
@@ -84,6 +125,11 @@ tAbstractPort::tAbstractPort(const tAbstractPortCreationInfo& info) :
 
 tAbstractPort::~tAbstractPort()
 {
+}
+
+void tAbstractPort::AddNumericTypeToLegacyImplicitConversion(const rrlib::rtti::tType& type)
+{
+  AlwaysImplicitlyConvertibleNumericTypes().insert(type);
 }
 
 void tAbstractPort::Connect(const tPath& port1_path, const tPath& port2_path, const tConnectOptions& connect_options)
@@ -179,18 +225,25 @@ tConnector* tAbstractPort::ConnectTo(tAbstractPort& to, const tConnectOptions& c
   if (source.MayConnectTo(destination, connect_options, &reason_stream))
   {
     FINROC_LOG_PRINT(DEBUG_VERBOSE_1, "Creating Edge from ", source, " to ", destination);
-    bool connection_to_reconnect = (!connect_options.flags.Get(tConnectionFlag::NON_PRIMARY_CONNECTOR)) &&
-                                   (connect_options.flags.Get(tConnectionFlag::RECONNECT) || (source.GetFlag(tFlag::VOLATILE) || destination.GetFlag(tFlag::VOLATILE)));
-    tConnectOptions non_primary_options = connect_options;
+    tConnectOptions options = connect_options;
+    if (options.conversion_operations.Size() == 0 && this->GetDataType() != destination.GetDataType() && (!rrlib::rtti::conversion::tStaticCastOperation::IsImplicitlyConvertibleTo(this->GetDataType(), destination.GetDataType())))
+    {
+      FINROC_LOG_PRINT(DEBUG_WARNING, "Connecting ports '", *this, "' and '", destination, "' requires explicit conversion (from '", this->GetDataType().GetName(), "' to '", destination.GetDataType().GetName(), "'). To retain backward-compatibility connector is created nevertheless - but should be changed (e.g. add explicit conversion or change port type).");
+      options.conversion_operations = GetLegacyAutoConversion(this->GetDataType(), destination.GetDataType());
+    }
+
+    bool connection_to_reconnect = (!options.flags.Get(tConnectionFlag::NON_PRIMARY_CONNECTOR)) &&
+                                   (options.flags.Get(tConnectionFlag::RECONNECT) || (source.GetFlag(tFlag::VOLATILE) || destination.GetFlag(tFlag::VOLATILE)));
+    tConnectOptions non_primary_options = options;
     non_primary_options.flags |= tConnectionFlag::NON_PRIMARY_CONNECTOR;
-    tConnector& connector = source.ConnectImplementation(destination, connection_to_reconnect ? non_primary_options : connect_options);
+
+    tConnector& connector = source.ConnectImplementation(destination, connection_to_reconnect ? non_primary_options : options);
     source.OnConnect(destination, true);
     destination.OnConnect(source, false);
 
     // Connection to reconnect?
     if (connection_to_reconnect)
     {
-      tConnectOptions options = connect_options;
       options.flags |= tConnectionFlag::RECONNECT;
       if (source.GetFlag(tFlag::VOLATILE) && destination.GetFlag(tFlag::VOLATILE))
       {
@@ -572,7 +625,7 @@ bool tAbstractPort::IsConnectedTo(tAbstractPort& port) const
 
 bool tAbstractPort::MayConnectTo(tAbstractPort& destination, const tConnectOptions& connect_options, std::stringstream* reason_stream) const
 {
-  if (connect_options.conversion_operations.Size() == 0 && (!rrlib::rtti::conversion::tStaticCastOperation::IsImplicitlyConvertibleTo(data_type, destination.data_type)))
+  if (connect_options.conversion_operations.Size() == 0 && (!rrlib::rtti::conversion::tStaticCastOperation::IsImplicitlyConvertibleTo(data_type, destination.data_type)) && (GetLegacyAutoConversion(data_type, destination.data_type).Size() == 0))
   {
     if (reason_stream)
     {

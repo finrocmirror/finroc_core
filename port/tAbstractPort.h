@@ -378,6 +378,15 @@ protected:
   };
 
   /*!
+   * Adds type to group of numeric types that can always be converted implicitly when connecting ports of such types.
+   * This temporary mechanism is introduced to retain backward-compatibility with Finroc 14.08 - where all these types used tNumber type in port backend and could be connected.
+   * It is planned to remove this mechanism in future Finroc releases - and a respective warning is displayed for connections that need to be changed.
+   *
+   * \param type Data type to add
+   */
+  static void AddNumericTypeToLegacyImplicitConversion(const rrlib::rtti::tType& type);
+
+  /*!
    * Create connector for specified connection
    * (may be overridden to create specialized connectors)
    *
