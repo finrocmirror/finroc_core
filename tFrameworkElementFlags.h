@@ -80,13 +80,15 @@ enum class tFrameworkElementFlag
   SHARED,                  //!< Should ports below this framework element be visible/accessible from other runtime environments?
   AUTO_RENAME,             //!< Automatically rename children with duplicate names?
 
-  UNUSED_CONSTANT_NON_PORT_FLAG_12,
-  UNUSED_CONSTANT_NON_PORT_FLAG_11,
-  UNUSED_CONSTANT_NON_PORT_FLAG_10,
-  UNUSED_CONSTANT_NON_PORT_FLAG_9,
-  UNUSED_CONSTANT_NON_PORT_FLAG_8,
-  UNUSED_CONSTANT_NON_PORT_FLAG_7,
-  UNUSED_CONSTANT_NON_PORT_FLAG_6,
+  // Interface classification flags (note that SENSOR_DATA and CONTROLLER_DATA also classify interfaces)
+  INTERFACE_FOR_RPC_PORTS,        //!< Can interface contain RPC ports?
+  INTERFACE_FOR_DATA_PORTS,       //!< Can interface contain data ports?
+  INTERFACE_FOR_INPUTS,           //!< Can interface contain input ports?
+  INTERFACE_FOR_OUTPUTS,          //!< Can interface contain output ports?
+  PROXY_INTERFACE,                //!< Is this an interface of a composite component? (-> will contain proxy ports intead of pure output and input ports)
+  PARAMETER_INTERFACE,            //!< Is this an interface for parameters?
+
+  UNUSED_CONSTANT_NON_PORT_FLAG_6_USED_IN_JAVA,
   UNUSED_CONSTANT_NON_PORT_FLAG_5,
   UNUSED_CONSTANT_NON_PORT_FLAG_4,
   UNUSED_CONSTANT_NON_PORT_FLAG_3,
