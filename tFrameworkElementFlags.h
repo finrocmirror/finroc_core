@@ -61,7 +61,6 @@ namespace core
  * This enum contains flags for framework elements.
  * The lower 22 bit are constant flags which may not change
  * at runtime whereas the upper 10 may change
- * (we omit the last bit in Java, because the sign may have ugly side effects).
  */
 enum class tFrameworkElementFlag
 {
