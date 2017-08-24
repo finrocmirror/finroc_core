@@ -36,7 +36,6 @@
 //----------------------------------------------------------------------
 // Internal includes with ""
 //----------------------------------------------------------------------
-#include "core/tLockOrderLevel.h"
 #include "core/port/tAbstractPort.h"
 #include "core/port/tAggregatedEdge.h"
 

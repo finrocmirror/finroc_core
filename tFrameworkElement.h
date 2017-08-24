@@ -32,7 +32,7 @@
  * This is the central class in the finroc core.
  * It is the base class of Ports, Modules, Groups and the Runtime environment.
  * Framework elements are arranged in a tree.
- * They may be linked/referenced from other parts of the tree.
+ * Ports may be linked from other parts of the tree.
  */
 //----------------------------------------------------------------------
 #ifndef __core__tFrameworkElement_h__
@@ -84,31 +84,16 @@ class tGarbageDeleter;
  * This is the central class in the finroc core.
  * It is the base class of Ports, Modules, Groups and the Runtime environment.
  * Framework elements are arranged in a tree.
- * They may be linked/referenced from other parts of the tree.
+ * Ports may be linked from other parts of the tree.
  *
  * Everything is thread-safe as long as methods are used.
  * Framework elements have their own memory management due to concurrency.
- * Thus, ManagedDelete() should be called instead of deleting them directly.
+ * Thus, ManagedDelete() must be called instead of deleting them directly.
  *
- * When dealing with unknown framework elements - check isReady() to make sure
+ * When dealing with unknown framework elements - check IsReady() to make sure
  * they are fully initialized and not already deleted.
- * Init needs to be called before framework elements can be used, as well as being visible
+ * Init() needs to be called before framework elements can be used, as well as being visible
  * to remote runtime environments/clients.
- *
- * To prevent deleting of framework element while using it over a longer period of time,
- * lock it - or the complete runtime environment.
- *
- * A framework element can be locked with
- *   rrlib::thread::tLock lock(<framework_element>)
- *
- * That's why it inherits from tMutexLockOrder.
- * This also defines the lock order in which framework elements can be locked.
- * Generally, the framework element tree is locked from root to leaves.
- * So children's lock level needs to be larger than their parent's.
- *
- * tMutexLockOrder's secondary component is the element's unique handle in local runtime environment.
- * ("normal" elements have negative handle, while ports have positive ones)
- *
  */
 class tFrameworkElement : public tAnnotatable
 {

@@ -60,7 +60,7 @@ namespace core
 /*!
  * This enum contains flags for framework elements.
  * The lower 22 bit are constant flags which may not change
- * at runtime whereas the upper 10 may change
+ * at runtime whereas the upper 10 may change.
  */
 enum class tFrameworkElementFlag
 {
