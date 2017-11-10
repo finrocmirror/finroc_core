@@ -38,14 +38,27 @@
 #ifndef __core__version_h__
 #define __core__version_h__
 
-
 #define CONCATx(a, b) a##b
 #define CONCAT(a, b) CONCATx(a, b)
 
 #define FINROC_VERSION_YEAR 17
-#define FINROC_VERSION_MONTH 03
+#define FINROC_VERSION_MONTH 3
 
-#define FINROC_VERSION CONCAT(VERSION_YEAR, VERSION_MONTH)
+#if FINROC_VERSION_MONTH < 10
+#define FINROC_VERSION CONCAT(FINROC_VERSION_YEAR, CONCAT(0, FINROC_VERSION_MONTH))
+#elif
+#define FINROC_VERSION CONCAT(FINROC_VERSION_YEAR, FINROC_VERSION_MONTH)
+#endif
+
+#include <string>
+
+namespace finroc
+{
+inline std::string VersionString()
+{
+  return std::to_string(FINROC_VERSION_YEAR) + "." + (FINROC_VERSION_MONTH < 10 ? "0" : "") + std::to_string(FINROC_VERSION_MONTH);
+}
+}
 
 
 #endif
